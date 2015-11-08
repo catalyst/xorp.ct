@@ -186,35 +186,6 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
 	break;			// XXX: data link type recognized
 
-#if 0
-	//
-	// XXX: List of some of the data link types that might be supported
-	// in the future.
-	//
-    case DLT_NULL:		// BSD loopback encapsulation
-    case DLT_IEEE802:		// IEEE 802.5 Token Ring
-    case DLT_ARCNET:		// ARCNET
-    case DLT_SLIP:		// SLIP
-    case DLT_PPP:		// PPP
-    case DLT_FDDI:		// FDDI
-    case DLT_ATM_RFC1483:	// RFC 1483 LLC/SNAP-encapsulated ATM
-    case DLT_RAW:		// Raw IP
-    case DLT_PPP_SERIAL:	// PPP in HDLC-like framing
-    case DLT_PPP_ETHER:		// PPPoE
-    case DLT_C_HDLC:		// Cisco PPP with HDLC framing
-    case DLT_IEEE802_11:	// IEEE 802.11 wireless LAN
-    case DLT_FRELAY:		// Frame Relay
-    case DLT_LOOP:		// OpenBSD loopback encapsulation
-    case DLT_LINUX_SLL:		// Linux "cooked" capture encapsulation
-    case DLT_LTALK:		// Apple LocalTalk
-    case DLT_PFLOG:		// OpenBSD pflog
-    case DLT_PRISM_HEADER:	// Prism monitor mode info + 802.11 header
-    case DLT_IP_OVER_FC:	// RFC 2625 IP-over-Fibre Channel
-    case DLT_SUNATM:		// SunATM devices
-    case DLT_IEEE802_11_RADIO:	// Link-layer information + 802.11 header
-    case DLT_ARCNET_LINUX:	// Linux ARCNET
-    case DLT_LINUX_IRDA:	// Linux IrDA
-#endif // 0
     default:
 	error_msg = c_format("Data link type %d (%s) on interface %s vif %s "
 			     "is not supported",
@@ -377,18 +348,6 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 	return (XORP_ERROR);
     }
 
-#if 0	// TODO: enable or disable the enabled() check?
-    if (! vifp->enabled()) {
-	error_msg = c_format("Cannot %s group %s on interface %s vif %s: "
-			     "interface/vif is DOWN",
-			     (is_join)? "join" : "leave",
-			     cstring(group),
-			     if_name().c_str(),
-			     vif_name().c_str());
-	return (XORP_ERROR);
-    }
-#endif // 0/1
-
 
     //
     // Use ioctl(SIOCADDMULTI, struct ifreq) to add L2 multicast membership.
@@ -397,10 +356,6 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     //
     // On Linux we need to use ifreq.ifr_hwaddr with sa_family of AF_UNSPEC.
     //
-    // On FreeBSD and DragonFlyBSD we need to use ifreq.ifr_addr with sa_family
-    // of AF_LINK and sockaddr_dl aligned address storage.
-    // On NetBSD and OpenBSD we need to use ifreq.ifr_addr with sa_family
-    // of AF_UNSPEC.
     //
     struct {
 	struct ifreq r;
@@ -410,7 +365,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     struct sockaddr* sa = NULL;
 
     memset(&buffer, 0, sizeof(buffer));
-    strlcpy(ifreq_p->ifr_name, vif_name().c_str(), sizeof(ifreq_p->ifr_name));
+    strncpy(ifreq_p->ifr_name, vif_name().c_str(), sizeof(ifreq_p->ifr_name));
 #ifdef HAVE_STRUCT_IFREQ_IFR_HWADDR
     sa = &ifreq_p->ifr_hwaddr;
 #else
@@ -423,21 +378,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     switch (_datalink_type) {
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
     {
-#if defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD)
-	{
-	    struct sockaddr_dl* sdl;
-	    struct ether_addr ether_addr;
-
-	    group.copy_out(ether_addr);
-	    sdl = reinterpret_cast<struct sockaddr_dl *>(sa);
-	    sdl->sdl_len = sizeof(*sdl);
-	    sdl->sdl_family = AF_LINK;
-	    sdl->sdl_alen = sizeof(ether_addr);
-	    memcpy(LLADDR(sdl), &ether_addr, sizeof(ether_addr));
-	}
-#else
 	group.copy_out(*sa);
-#endif
 	break;
     }
 
@@ -452,15 +393,6 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 			     pcap_datalink_val_to_name(_datalink_type));
 	return (XORP_ERROR);
     }
-
-    //
-    // XXX: NetBSD and OpenBSD have AF_LINK defined, but they insist
-    // on the sockaddr's sa_family being set to AF_UNSPEC.
-    // Verified on NetBSD-3.1 and OpenBSD-4.1.
-    //
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-    sa->sa_family = AF_UNSPEC;
-#endif
 
     int request = (is_join)? SIOCADDMULTI : SIOCDELMULTI;
     if (ioctl(_multicast_sock, request, ifreq_p) < 0) {

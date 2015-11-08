@@ -187,7 +187,7 @@ XrlParserFileInput::path_open_input(const char* filename)
     } else {
 	// A relative path has been specified, therefore try to locate
 	// the file under one of our search paths.
-	string filename_s = unix_path_to_native(filename);
+	string filename_s = filename;
 
 	for (list<string>::const_iterator pi = _path.begin();
 	     pi != _path.end(); pi++) {

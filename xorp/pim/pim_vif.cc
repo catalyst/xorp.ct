@@ -814,7 +814,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	// but for simplicity we do it for Null Registers as well.
 	//
 	switch (family()) {
-#ifndef HOST_OS_WINDOWS
 	case AF_INET:
 	{
 	    struct ip ip4_header;
@@ -824,7 +823,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	    ip_tos = ip4_header.ip_tos;
 	    break;
 	}
-#endif
 	
 #ifdef HAVE_IPV6
 	case AF_INET6:
@@ -1220,18 +1218,6 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	    ret_value = XORP_ERROR;
 	    goto ret_label;
 	}
-#if 0
-	// TODO: this check has to be fixed in case we use GRE tunnels
-	if (! src.is_linklocal_unicast()) {
-	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "source is not a link-local address",
-			 PIMTYPE2ASCII(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str());
-	    ret_value = XORP_ERROR;
-	    goto ret_label;
-	}
-#endif // 0/1
 	break;
     case PIM_REGISTER:
     case PIM_REGISTER_STOP:

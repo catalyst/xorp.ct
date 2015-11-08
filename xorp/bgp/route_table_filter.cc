@@ -31,33 +31,6 @@
 
 /*************************************************************************/
 
-#if 0
-template<class A>
-void
-BGPRouteFilter<A>::propagate_flags(const InternalMessage<A> *rtmsg,
-				   InternalMessage<A> *new_rtmsg) const
-{
-    if (rtmsg->push())
-	new_rtmsg->set_push();
-    if (rtmsg->from_previous_peering())
-	new_rtmsg->set_from_previous_peering();
-}
-
-
-template<class A>
-void
-BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
-				   SubnetRoute<A>& new_route) const {
-    new_route.set_filtered(route.is_filtered());
-    new_route.set_policytags(route.policytags());
-    new_route.set_aggr_prefix_len(route.aggr_prefix_len());
-    for (int i = 0; i < 3; i++)
-	new_route.set_policyfilter(i, route.policyfilter(i));
-    if(route.is_winner())
-	new_route.set_is_winner(route.igp_metric());
-    new_route.set_nexthop_resolved(route.nexthop_resolved());
-}	
-#endif			   
 
 /*************************************************************************/
 
@@ -1183,13 +1156,6 @@ FilterTable<A>::drop_message(const InternalMessage<A> *rtmsg) const
 	//copied route to store it or free it.
 	rtmsg->route()->unref();
     }
-#if 0
-    if (modified) {
-	//This filterbank created this message.  We need to delete
-	//it because no-one else can.
-	delete rtmsg;
-    }
-#endif
 }
 
 

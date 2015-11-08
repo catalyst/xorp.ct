@@ -19,7 +19,7 @@
 
 
 #include <xorp_config.h>
-#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
+#if defined(HAVE_ROUTING_SOCKETS) 
 
 #include "fea/fea_module.h"
 
@@ -29,9 +29,6 @@
 
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
-#endif
-#ifdef HOST_OS_WINDOWS
-#include "fea/data_plane/control_socket/windows_routing_socket.h"
 #endif
 
 #include "fea/fibconfig.hh"
@@ -72,16 +69,6 @@ FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
 
 	rtm = (const struct rt_msghdr*)(&(buffer[offset]));
 	if (rtm->rtm_version != RTM_VERSION) {
-#if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
-	    //
-	    // XXX: Silently ignore old messages.
-	    // The OpenBSD kernel sends each message twice, once as
-	    // RTM_VERSION and once as RTM_OVERSION, hence we need to ignore
-	    // the RTM_OVERSION duplicates.
-	    //
-	    if (rtm->rtm_version == RTM_OVERSION)
-		continue;
-#endif // RTM_OVERSION && HOST_OS_OPENBSD
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
 		       rtm->rtm_version);
@@ -151,4 +138,4 @@ FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
     return (XORP_OK);
 }
 
-#endif // HAVE_ROUTING_SOCKETS || HOST_OS_WINDOWS
+#endif // HAVE_ROUTING_SOCKETS 

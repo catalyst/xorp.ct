@@ -482,16 +482,6 @@ public:
 	: ASPath(as_path)
     {};
 
-#if 0
-    /**
-     * Construct from received data from 2-byte peer.  This needs to
-     * take the regular ASPath in addition to the AS4_PATH data,
-     * because it needs to cross-validate the two.
-     */
-    AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
-	throw(CorruptMessage);
-
-#endif
 
     /**
      * Convert from internal to external representation, with the

@@ -120,13 +120,6 @@ BGPUpdateAttribList::encode(size_t &l, uint8_t *d) const
     return d;
 }
 
-#if 0
-void
-BGPUpdateAttribList::add(const BGPUpdateAttrib &x)
-{
-	// XXX fill it up
-}
-#endif
 
 void
 BGPUpdateAttribList::decode(const uint8_t *d, size_t len)

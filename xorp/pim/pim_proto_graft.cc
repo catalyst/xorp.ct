@@ -101,23 +101,3 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     return (XORP_ERROR);
 }
 
-#if 0		// TODO: XXX: implement/use it
-int
-PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
-{
-    int ret_value;
-    IPvX src = dst.is_unicast()? domain_wide_addr() : primary_addr();
-    
-    ret_value = pim_send(src, dst, PIM_GRAFT, buffer);
-    
-    return (ret_value);
-
-    // Various error processing
- buflen_error:
-    XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_GRAFT),
-	       cstring(src), cstring(dst));
-}
-#endif /* 0 */

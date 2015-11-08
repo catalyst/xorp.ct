@@ -110,10 +110,6 @@ VifManager::start()
 int
 VifManager::final_start()
 {
-#if 0	// TODO: XXX: PAVPAVPAV
-    if (! is_pending_up())
-	return (XORP_ERROR);
-#endif
 
     if (ProtoState::start() != XORP_OK) {
 	ProtoState::stop();

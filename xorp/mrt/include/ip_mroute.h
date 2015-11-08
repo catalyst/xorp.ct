@@ -32,60 +32,10 @@
 #include <net/route.h>
 #endif
 
-/*
- * FreeBSD (all versions)
- */
-#if defined(HOST_OS_FREEBSD)
-# include <netinet/ip_mroute.h>
-#endif
-
-/*
- * NetBSD (all versions)
- * OpenBSD (all versions)
- *
- * Prologue.
- *
- * XXX: On these platforms the definition of 'struct igmpmsg'
- * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
- * to define _KERNEL before including <netinet/ip_mroute.h>.
- */
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-#define	_KERNEL
-#endif
-
-/*
- * Non-Linux platforms with the <netinet/ip_mroute.h>
- * header available.
- */
-#if defined(HAVE_NETINET_IP_MROUTE_H) && !defined(HOST_OS_LINUX)
-# include <netinet/ip_mroute.h>
-#endif
-
-/*
- * NetBSD (all versions)
- * OpenBSD (all versions)
- *
- * Epilogue.
- */
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-#undef _KERNEL
-#endif
-
-/*
- * DragonFlyBSD
- *
- * DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
- * <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
- * to its appropriate location.
- */
-#ifdef HAVE_NET_IP_MROUTE_IP_MROUTE_H
-# include <net/ip_mroute/ip_mroute.h>
-#endif
 
 /*
  * Linux hacks because of broken Linux header files
  */
-#if defined(HOST_OS_LINUX)
 #  include <linux/types.h>
 #  ifndef _LINUX_IN_H
 #    define _LINUX_IN_H		/*  XXX: a hack to exclude <linux/in.h> */
@@ -117,7 +67,6 @@
 #  ifndef IGMPMSG_WHOLEPKT
 #    define IGMPMSG_WHOLEPKT 3
 #  endif
-#endif /* HOST_OS_LINUX */
 
 #ifdef HAVE_LINUX_MROUTE6_H
 #include <linux/mroute6.h>

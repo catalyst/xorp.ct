@@ -503,11 +503,6 @@ conv_num(const unsigned char *buf, int *dest, unsigned int llim,
  * XXX: The Windows' equivalent of strncasecmp(3) is called _strnicmp()
  * hence we need to do some renaming here.
  */
-#ifdef HOST_OS_WINDOWS
-#define STRNCASECMP(s1, s2, len) _strnicmp(s1, s2, len)
-#else
-#define STRNCASECMP(s1, s2, len) strncasecmp(s1, s2, len)
-#endif
 
 static const unsigned char *
 find_string(const unsigned char *bp, int *tgt, const char * const *n1,
@@ -520,7 +515,7 @@ find_string(const unsigned char *bp, int *tgt, const char * const *n1,
 	for (; n1 != NULL; n1 = n2, n2 = NULL) {
 		for (i = 0; i < c; i++, n1++) {
 			len = strlen(*n1);
-			if (STRNCASECMP(*n1, (const char *)bp, len) == 0) {
+			if (strncasecmp(*n1, (const char *)bp, len) == 0) {
 				*tgt = i;
 				return bp + len;
 			}

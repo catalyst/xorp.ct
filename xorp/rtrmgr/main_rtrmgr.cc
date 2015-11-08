@@ -330,10 +330,6 @@ Rtrmgr::run()
 
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
-#if 0
-	// Let the module manager know how to send XRLs to xorpsh
-	mmgr.set_xrl_interface(_xrt);
-#endif
 
 	_mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
 				    _verbose);

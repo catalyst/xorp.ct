@@ -273,17 +273,6 @@ FirewallManager::start(string& error_msg)
     // XXX: The firewall mechanisms are optional hence we don't check
     // whether they are available.
     //
-#if 0
-    if (_firewall_gets.empty()) {
-	error_msg = c_format("No mechanism to get firewall table entries");
-	return (XORP_ERROR);
-    }
-    if (_firewall_sets.empty()) {
-	error_msg = c_format("No mechanism to set firewall table entries");
-	return (XORP_ERROR);
-    }
-#endif
-
     //
     // Start the FirewallGet methods
     //

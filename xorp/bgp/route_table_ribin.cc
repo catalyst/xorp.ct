@@ -140,13 +140,6 @@ RibInTable<A>::add_route(const IPNet<A>& net,
     if (iter != _route_table->end()) {
 	existing_route = &(iter.payload());
 	XLOG_ASSERT(existing_route->net() == net);
-#if 0
-	if (rtmsg.route()->attributes() == existing_route->attributes()) {
-	    // this route is the same as before.
-	    // no need to do anything.
-	    return ADD_UNUSED;
-	}
-#endif
 	// Preserve the route.  Taking a reference will prevent the
 	// route being deleted when it's erased from the Trie.
 	// Deletion will occur when the reference goes out of scope.

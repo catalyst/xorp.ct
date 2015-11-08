@@ -24,9 +24,6 @@
 #include "timeval.hh"
 #include "clock.hh"
 
-#ifdef __WIN32__
-#include "mmsystem.h"
-#endif
 
 ClockBase::~ClockBase()
 {
@@ -34,32 +31,17 @@ ClockBase::~ClockBase()
 
 SystemClock::SystemClock()
 {
-#ifdef __WIN32__
-    ms_time_res = -1;
-    for (int i = 1; i<16; i++) {
-	if (timeBeginPeriod(i) == TIMERR_NOERROR) {
-	    ms_time_res = i;
-	    break;
-	}
-    }
-#endif
     _tv = new TimeVal();
     SystemClock::advance_time();
 }
 
 SystemClock::~SystemClock()
 {
-#ifdef __WIN32__
-    if (ms_time_res >= 0) {
-	timeEndPeriod(ms_time_res);
-    }
-#endif
     delete _tv;
 }
 
 void
 SystemClock::advance_time()
-#if defined(HAVE_CLOCK_GETTIME) && defined(HAVE_CLOCK_MONOTONIC)
 {
     int error;
     struct timespec ts;
@@ -68,21 +50,7 @@ SystemClock::advance_time()
     assert(error == 0);
     _tv->copy_in(ts);
 }
-#elif defined(HOST_OS_WINDOWS)
-{
-    FILETIME ft;
 
-    ::GetSystemTimeAsFileTime(&ft);
-    _tv->copy_in(ft);
-}
-#else
-{
-    struct timeval t;
-
-    ::gettimeofday(&t, 0);
-    _tv->copy_in(t);
-}
-#endif
 
 void
 SystemClock::current_time(TimeVal& tv)

@@ -60,15 +60,6 @@
 #include <arpa/inet.h>
 #endif
 
-#ifdef HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
 
 #include "comm_api.h"
 #include "comm_private.h"
@@ -80,29 +71,20 @@ char addr_str_255[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;
 
-#if defined(HOST_OS_WINDOWS) && defined(HAVE_IPV6)
-/*
- * Windows declares these in <ws2tcpip.h> as externs, but does not
- * supply symbols for them in the -lws2_32 import library or DLL.
- */
-const struct in6_addr in6addr_any = { { IN6ADDR_ANY_INIT } };
-const struct in6_addr in6addr_loopback = { { IN6ADDR_LOOPBACK_INIT } };
-#endif
 
-xsock_t
-comm_sock_open(int domain, int type, int protocol, int is_blocking)
+int comm_sock_open(int domain, int type, int protocol, int is_blocking)
 {
-    xsock_t sock;
+    int sock;
 
     /* Create the kernel socket */
     sock = socket(domain, type, protocol);
-    if (sock == XORP_BAD_SOCKET) {
+    if (sock == -1 ) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error opening socket (domain = %d, type = %d, "
 		   "protocol = %d): %s",
 		   domain, type, protocol,
 		   comm_get_error_str(comm_get_last_error()));
-	return (XORP_BAD_SOCKET);
+	return -1;
     }
 
     /* Set the receiving and sending socket buffer size in the kernel */
@@ -110,13 +92,13 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
 	< SO_RCV_BUF_SIZE_MIN) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
+	return (-1);
     }
     if (comm_sock_set_sndbuf(sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
+	return (-1);
     }
 
     /* Enable TCP_NODELAY */
@@ -124,165 +106,30 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
         && comm_set_nodelay(sock, 1) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
+	return (-1);
     }
 
     /* Set blocking mode */
     if (comm_sock_set_blocking(sock, is_blocking) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
+	return (-1);
     }
 
     return (sock);
 }
 
-int
-comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
+int comm_sock_pair(int domain, int type, int protocol, int sv[2])
 {
-#ifndef HOST_OS_WINDOWS
     if (socketpair(domain, type, protocol, sv) == -1) {
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
     return (XORP_OK);
 
-#else /* HOST_OS_WINDOWS */
-    struct sockaddr_storage ss;
-    struct sockaddr_in	*psin;
-    socklen_t		sslen;
-    SOCKET		st[3];
-    u_long		optval;
-    int			numtries, error, intdomain;
-    unsigned short	port;
-    static const int	CSP_LOWPORT = 40000;
-    static const int	CSP_HIGHPORT = 65536;
-#ifdef HAVE_IPV6
-    struct sockaddr_in6 *psin6;
-#endif
-
-    UNUSED(protocol);
-
-    if (domain != AF_UNIX && domain != AF_INET
-#ifdef HAVE_IPV6
-	&& domain != AF_INET6
-#endif
-	) {
-	_comm_serrno = WSAEAFNOSUPPORT;
-	return (XORP_ERROR);
-    }
-
-    intdomain = domain;
-    if (intdomain == AF_UNIX)
-	intdomain = AF_INET;
-
-    st[0] = st[1] = st[2] = INVALID_SOCKET;
-
-    st[2] = socket(intdomain, type, 0);
-    if (st[2] == INVALID_SOCKET)
-	goto error;
-
-    memset(&ss, 0, sizeof(ss));
-    psin = (struct sockaddr_in *)&ss;
-#ifdef HAVE_IPV6
-    psin6 = (struct sockaddr_in6 *)&ss;
-    if (intdomain == AF_INET6) {
-	sslen = sizeof(struct sockaddr_in6);
-	ss.ss_family = AF_INET6;
-	psin6->sin6_addr = in6addr_loopback;
-    } else
-#endif /* HAVE_IPV6 */
-    {
-	sslen = sizeof(struct sockaddr_in);
-	ss.ss_family = AF_INET;
-	psin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    }
-
-    numtries = 3;
-    do {
-	port = htons((xorp_random() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
-#ifdef HAVE_IPV6
-	if (intdomain == AF_INET6)
-	    psin6->sin6_port = port;
-	else
-#endif
-	    psin->sin_port = port;
-	error = bind(st[2], (struct sockaddr *)&ss, sslen);
-	if (error == 0)
-	    break;
-	if ((error != 0) &&
-	    ((WSAGetLastError() != WSAEADDRNOTAVAIL) ||
-	     (WSAGetLastError() != WSAEADDRINUSE)))
-	    break;
-    } while (--numtries > 0);
-
-    if (error != 0)
-	goto error;
-
-    error = listen(st[2], 5);
-    if (error != 0)
-	goto error;
-
-    st[0] = socket(intdomain, type, 0);
-    if (st[0] == INVALID_SOCKET)
-	goto error;
-
-    optval = 1L;
-    error = ioctlsocket(st[0], FIONBIO, &optval);
-    if (error != 0)
-	goto error;
-
-    error = connect(st[0], (struct sockaddr *)&ss, sslen);
-    if (error != 0 && WSAGetLastError() != WSAEWOULDBLOCK)
-	goto error;
-
-    numtries = 3;
-    do {
-	st[1] = accept(st[2], NULL, NULL);
-	if (st[1] != INVALID_SOCKET) {
-	    break;
-	} else {
-	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
-		SleepEx(100, TRUE);
-	    } else {
-		break;
-	    }
-	}
-    } while (--numtries > 0);
-
-    if (st[1] == INVALID_SOCKET)
-	goto error;
-
-    /* Squelch inherited socket event mask. */
-    (void)WSAEventSelect(st[1], NULL, 0);
-
-    /*
-     * XXX: Should use getsockname() here to verify that the client socket
-     * is connected.
-     */
-    optval = 0L;
-    error = ioctlsocket(st[0], FIONBIO, &optval);
-    if (error != 0)
-	goto error;
-
-    closesocket(st[2]);
-    sv[0] = st[0];
-    sv[1] = st[1];
-    return (XORP_OK);
-
-error:
-    if (st[0] != INVALID_SOCKET)
-	closesocket(st[0]);
-    if (st[1] != INVALID_SOCKET)
-	closesocket(st[1]);
-    if (st[2] != INVALID_SOCKET)
-	closesocket(st[2]);
-    return (XORP_ERROR);
-#endif /* HOST_OS_WINDOWS */
 }
 
-int
-comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
+int comm_sock_bind4(int sock, const struct in_addr *my_addr,
 		unsigned short my_port)
 {
     int family;
@@ -324,8 +171,7 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
     return XORP_OK;
 }
 
-int
-comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
+int comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 		unsigned int my_ifindex, unsigned short my_port)
 {
 #ifdef HAVE_IPV6
@@ -379,8 +225,7 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-int
-comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
+int comm_sock_bind(int sock, const struct sockaddr *sin)
 {
     switch (sin->sa_family) {
     case AF_INET:
@@ -408,8 +253,7 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
     return XORP_ERROR;
 }
 
-int
-comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
+int comm_sock_join4(int sock, const struct in_addr *mcast_addr,
 		const struct in_addr *my_addr)
 {
     int family;
@@ -429,7 +273,7 @@ comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
     else
 	imr.imr_interface.s_addr = INADDR_ANY;
     if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		   XORP_SOCKOPT_CAST(&imr), sizeof(imr)) < 0) {
+		   (const void*)&imr, sizeof(imr)) < 0) {
 	char mcast_addr_str[32], my_addr_str[32];
 	_comm_set_serrno();
 	strncpy(mcast_addr_str, inet_ntoa(*mcast_addr),
@@ -451,8 +295,7 @@ comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-int
-comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
+int comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
 {
 #ifdef HAVE_IPV6
@@ -470,7 +313,7 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
     memcpy(&imr6.ipv6mr_multiaddr, mcast_addr, sizeof(*mcast_addr));
     imr6.ipv6mr_interface = my_ifindex;
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-		   XORP_SOCKOPT_CAST(&imr6), sizeof(imr6)) < 0) {
+		   (const void*)(&imr6), sizeof(imr6)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error joining mcast group (family = %d, "
 		   "mcast_addr = %s my_ifindex = %d): %s",
@@ -488,8 +331,7 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-int
-comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
+int comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
 		const struct in_addr *my_addr)
 {
     int family;
@@ -509,7 +351,7 @@ comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
     else
 	imr.imr_interface.s_addr = INADDR_ANY;
     if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-		   XORP_SOCKOPT_CAST(&imr), sizeof(imr)) < 0) {
+		   (const void*)(&imr), sizeof(imr)) < 0) {
 	char mcast_addr_str[32], my_addr_str[32];
 	_comm_set_serrno();
 	strncpy(mcast_addr_str, inet_ntoa(*mcast_addr),
@@ -531,8 +373,7 @@ comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-int
-comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
+int comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
 {
 #ifdef HAVE_IPV6
@@ -550,7 +391,7 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
     memcpy(&imr6.ipv6mr_multiaddr, mcast_addr, sizeof(*mcast_addr));
     imr6.ipv6mr_interface = my_ifindex;
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
-		   XORP_SOCKOPT_CAST(&imr6), sizeof(imr6)) < 0) {
+		   (const void*)(&imr6), sizeof(imr6)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error leaving mcast group (family = %d, "
 		   "mcast_addr = %s my_ifindex = %d): %s",
@@ -568,8 +409,7 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-int
-comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
+int comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 		   unsigned short remote_port, int is_blocking,
 		   int *in_progress)
 {
@@ -597,11 +437,7 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
     if (connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
 	_comm_set_serrno();
 	if (! is_blocking) {
-#ifdef HOST_OS_WINDOWS
-	    if (comm_get_last_error() == WSAEWOULDBLOCK) {
-#else
 	    if (comm_get_last_error() == EINPROGRESS) {
-#endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
 		 * cannot be completed immediately, therefore set the
@@ -623,8 +459,7 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
     return (XORP_OK);
 }
 
-int
-comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
+int comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 		   unsigned short remote_port, int is_blocking,
 		   int *in_progress)
 {
@@ -655,11 +490,7 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
     if (connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	_comm_set_serrno();
 	if (! is_blocking) {
-#ifdef HOST_OS_WINDOWS
-	    if (comm_get_last_error() == WSAEWOULDBLOCK) {
-#else
 	    if (comm_get_last_error() == EINPROGRESS) {
-#endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
 		 * cannot be completed immediately, therefore set the
@@ -694,8 +525,7 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-int
-comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
+int comm_sock_connect(int sock, const struct sockaddr *sin, int is_blocking,
 		  int *in_progress)
 {
     switch (sin->sa_family) {
@@ -726,41 +556,32 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
     return XORP_ERROR;
 }
 
-xsock_t
-comm_sock_accept(xsock_t sock)
+int comm_sock_accept(int sock)
 {
-    xsock_t sock_accept;
+    int sock_accept;
     struct sockaddr addr;
     socklen_t socklen = sizeof(addr);
 
     sock_accept = accept(sock, &addr, &socklen);
-    if (sock_accept == XORP_BAD_SOCKET) {
+    if (sock_accept == -1 ) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error accepting socket %d: %s",
 		   sock, comm_get_error_str(comm_get_last_error()));
-	return (XORP_BAD_SOCKET);
+	return -1;
     }
 
-#ifdef HOST_OS_WINDOWS
-    /*
-     * Squelch Winsock event notifications on the new socket which may
-     * have been inherited from the parent listening socket.
-     */
-    (void)WSAEventSelect(sock_accept, NULL, 0);
-#endif
 
     /* Enable TCP_NODELAY */
     if ((addr.sa_family == AF_INET || addr.sa_family == AF_INET6)
         && comm_set_nodelay(sock_accept, 1) != XORP_OK) {
 	comm_sock_close(sock_accept);
-	return (XORP_BAD_SOCKET);
+	return -1;
     }
 
     return (sock_accept);
 }
 
-int
-comm_sock_listen(xsock_t sock, int backlog)
+int comm_sock_listen(int sock, int backlog)
 {
     int ret;
     ret = listen(sock, backlog);
@@ -775,17 +596,11 @@ comm_sock_listen(xsock_t sock, int backlog)
     return (XORP_OK);
 }
 
-int
-comm_sock_close(xsock_t sock)
+int comm_sock_close(int sock)
 {
     int ret;
 
-#ifndef HOST_OS_WINDOWS
     ret = close(sock);
-#else
-    (void)WSAEventSelect(sock, NULL, 0);
-    ret = closesocket(sock);
-#endif
 
     if (ret < 0) {
 	_comm_set_serrno();
@@ -797,11 +612,10 @@ comm_sock_close(xsock_t sock)
     return (XORP_OK);
 }
 
-int
-comm_set_send_broadcast(xsock_t sock, int val)
+int comm_set_send_broadcast(int sock, int val)
 {
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_BROADCAST on socket %d: %s",
 		   (val)? "set": "reset",  sock,
@@ -812,39 +626,17 @@ comm_set_send_broadcast(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-int
-comm_set_receive_broadcast(xsock_t sock, int val)
+int comm_set_receive_broadcast(int sock, int val)
 {
-#if defined(HOST_OS_WINDOWS) && defined(IP_RECEIVE_BROADCAST)
-    /*
-     * With Windows Server 2003 and later, you have to explicitly
-     * ask to receive broadcast packets.
-     */
-    DWORD ip_rx_bcast = (DWORD)val;
-
-    if (setsockopt(sock, IPPROTO_IP, IP_RECEIVE_BROADCAST,
-		   XORP_SOCKOPT_CAST(&ip_rx_bcast),
-		   sizeof(ip_rx_bcast)) < 0) {
-	_comm_set_serrno();
-	XLOG_ERROR("Error %s IP_RECEIVE_BROADCAST on socket %d: %s",
-		   (val)? "set": "reset",  sock,
-		   comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-#else
     UNUSED(sock);
     UNUSED(val);
     return (XORP_OK);
-#endif
 }
 
-int
-comm_set_nodelay(xsock_t sock, int val)
+int comm_set_nodelay(int sock, int val)
 {
     if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s TCP_NODELAY on socket %d: %s",
 		   (val)? "set": "reset",  sock,
@@ -855,8 +647,7 @@ comm_set_nodelay(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-int
-comm_set_linger(xsock_t sock, int enabled, int secs)
+int comm_set_linger(int sock, int enabled, int secs)
 {
 #ifdef SO_LINGER
     struct linger l;
@@ -864,7 +655,7 @@ comm_set_linger(xsock_t sock, int enabled, int secs)
     l.l_onoff = enabled;
     l.l_linger = secs;
     if (setsockopt(sock, SOL_SOCKET, SO_LINGER, 
-		   XORP_SOCKOPT_CAST(&l), sizeof(l)) < 0) {
+		   (const void*)(&l), sizeof(l)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_LINGER %ds on socket %d: %s",
 		   (enabled)? "set": "reset", secs, sock,
@@ -884,12 +675,11 @@ comm_set_linger(xsock_t sock, int enabled, int secs)
 #endif /* ! SO_LINGER */
 }
 
-int
-comm_set_keepalive(xsock_t sock, int val)
+int comm_set_keepalive(int sock, int val)
 {
 #ifdef SO_KEEPALIVE
     if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_KEEPALIVE on socket %d: %s",
 		   (val)? "set": "reset", sock,
@@ -908,12 +698,11 @@ comm_set_keepalive(xsock_t sock, int val)
 #endif /* ! SO_KEEPALIVE */
 }
 
-int
-comm_set_nosigpipe(xsock_t sock, int val)
+int comm_set_nosigpipe(int sock, int val)
 {
 #ifdef SO_NOSIGPIPE
     if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_NOSIGPIPE on socket %d: %s",
 		   (val)? "set": "reset",  sock,
@@ -931,12 +720,11 @@ comm_set_nosigpipe(xsock_t sock, int val)
 #endif /* ! SO_NOSIGPIPE */
 }
 
-int
-comm_set_reuseaddr(xsock_t sock, int val)
+int comm_set_reuseaddr(int sock, int val)
 {
 #ifdef SO_REUSEADDR
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_REUSEADDR on socket %d: %s",
 		   (val)? "set": "reset", sock,
@@ -955,12 +743,11 @@ comm_set_reuseaddr(xsock_t sock, int val)
 #endif /* ! SO_REUSEADDR */
 }
 
-int
-comm_set_reuseport(xsock_t sock, int val)
+int comm_set_reuseport(int sock, int val)
 {
 #ifdef SO_REUSEPORT
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT,
-	XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+	(const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_REUSEPORT on socket %d: %s",
 		   (val)? "set": "reset", sock,
@@ -979,8 +766,7 @@ comm_set_reuseport(xsock_t sock, int val)
 #endif /* ! SO_REUSEPORT */
 }
 
-int
-comm_set_loopback(xsock_t sock, int val)
+int comm_set_loopback(int sock, int val)
 {
     int family = comm_sock_get_family(sock);
 
@@ -990,7 +776,7 @@ comm_set_loopback(xsock_t sock, int val)
 	u_char loop = val;
 
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
+		       (const void*)(&loop), sizeof(loop)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IP_MULTICAST_LOOP %u: %s",
 		       loop,
@@ -1005,7 +791,7 @@ comm_set_loopback(xsock_t sock, int val)
 	unsigned int loop6 = val;
 
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
+		       (const void*)(&loop6), sizeof(loop6)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IPV6_MULTICAST_LOOP %u: %s",
 		       loop6, comm_get_error_str(comm_get_last_error()));
@@ -1024,12 +810,11 @@ comm_set_loopback(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-int
-comm_set_tcpmd5(xsock_t sock, int val)
+int comm_set_tcpmd5(int sock, int val)
 {
 #ifdef TCP_MD5SIG /* XXX: Defined in <netinet/tcp.h> across Free/Net/OpenBSD */
     if (setsockopt(sock, IPPROTO_TCP, TCP_MD5SIG,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s TCP_MD5SIG on socket %d: %s",
 		   (val)? "set": "reset",  sock,
@@ -1048,12 +833,11 @@ comm_set_tcpmd5(xsock_t sock, int val)
 #endif /* ! TCP_MD5SIG */
 }
 
-int
-comm_set_nopush(xsock_t sock, int val)
+int comm_set_nopush(int sock, int val)
 {
 #ifdef TCP_NOPUSH /* XXX: Defined in <netinet/tcp.h> across Free/Net/OpenBSD */
     if (setsockopt(sock, IPPROTO_TCP, TCP_NOPUSH,
-		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+		   (const void*)(&val), sizeof(val)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s TCP_NOPUSH on socket %d: %s",
 		   (val)? "set": "reset",  sock,
@@ -1072,8 +856,7 @@ comm_set_nopush(xsock_t sock, int val)
 #endif /* ! TCP_NOPUSH */
 }
 
-int
-comm_set_tos(xsock_t sock, int val)
+int comm_set_tos(int sock, int val)
 {
 #ifdef IP_TOS
     /*
@@ -1098,7 +881,7 @@ comm_set_tos(xsock_t sock, int val)
      */
     ip_tos = val;
     if (setsockopt(sock, IPPROTO_IP, IP_TOS,
-		   XORP_SOCKOPT_CAST(&ip_tos), sizeof(ip_tos)) < 0) {
+		   (const void*)(&ip_tos), sizeof(ip_tos)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("setsockopt IP_TOS 0x%x: %s",
 	       ip_tos, comm_get_error_str(comm_get_last_error()));
@@ -1115,8 +898,7 @@ comm_set_tos(xsock_t sock, int val)
 #endif /* ! IP_TOS */
 }
 
-int
-comm_set_unicast_ttl(xsock_t sock, int val)
+int comm_set_unicast_ttl(int sock, int val)
 {
     int family = comm_sock_get_family(sock);
 
@@ -1129,7 +911,7 @@ comm_set_unicast_ttl(xsock_t sock, int val)
 	int ip_ttl = val;
 
 	if (setsockopt(sock, IPPROTO_IP, IP_TTL,
-		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
+		       (const void*)(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IP_TTL %u: %s",
 		       ip_ttl, comm_get_error_str(comm_get_last_error()));
@@ -1143,7 +925,7 @@ comm_set_unicast_ttl(xsock_t sock, int val)
 	int ip_ttl = val;
 
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS,
-		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
+		       (const void*)(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IPV6_UNICAST_HOPS %u: %s",
 		       ip_ttl, comm_get_error_str(comm_get_last_error()));
@@ -1162,8 +944,7 @@ comm_set_unicast_ttl(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-int
-comm_set_multicast_ttl(xsock_t sock, int val)
+int comm_set_multicast_ttl(int sock, int val)
 {
     int family = comm_sock_get_family(sock);
 
@@ -1176,7 +957,7 @@ comm_set_multicast_ttl(xsock_t sock, int val)
 	u_char ip_multicast_ttl = val;
 
 	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
-		       XORP_SOCKOPT_CAST(&ip_multicast_ttl),
+		       (const void*)(&ip_multicast_ttl),
 		       sizeof(ip_multicast_ttl)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IP_MULTICAST_TTL %u: %s",
@@ -1192,7 +973,7 @@ comm_set_multicast_ttl(xsock_t sock, int val)
 	int ip_multicast_ttl = val;
 
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-		       XORP_SOCKOPT_CAST(&ip_multicast_ttl),
+		       (const void*)&ip_multicast_ttl,
 		       sizeof(ip_multicast_ttl)) < 0) {
 	    _comm_set_serrno();
 	    XLOG_ERROR("setsockopt IPV6_MULTICAST_HOPS %u: %s",
@@ -1213,8 +994,7 @@ comm_set_multicast_ttl(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-int
-comm_set_iface4(xsock_t sock, const struct in_addr *in_addr)
+int comm_set_iface4(int sock, const struct in_addr *in_addr)
 {
     int family = comm_sock_get_family(sock);
     struct in_addr my_addr;
@@ -1230,7 +1010,7 @@ comm_set_iface4(xsock_t sock, const struct in_addr *in_addr)
     else
 	my_addr.s_addr = INADDR_ANY;
     if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF,
-		   XORP_SOCKOPT_CAST(&my_addr), sizeof(my_addr)) < 0) {
+		   (const void*)&my_addr, sizeof(my_addr)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("setsockopt IP_MULTICAST_IF %s: %s",
 		   (in_addr)? inet_ntoa(my_addr) : "ANY",
@@ -1241,8 +1021,7 @@ comm_set_iface4(xsock_t sock, const struct in_addr *in_addr)
     return (XORP_OK);
 }
 
-int
-comm_set_iface6(xsock_t sock, unsigned int my_ifindex)
+int comm_set_iface6(int sock, unsigned int my_ifindex)
 {
 #ifdef HAVE_IPV6
     int family = comm_sock_get_family(sock);
@@ -1254,7 +1033,7 @@ comm_set_iface6(xsock_t sock, unsigned int my_ifindex)
     }
 
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		   XORP_SOCKOPT_CAST(&my_ifindex), sizeof(my_ifindex)) < 0) {
+		   (const void*)&my_ifindex, sizeof(my_ifindex)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("setsockopt IPV6_MULTICAST_IF for interface index %d: %s",
 		   my_ifindex, comm_get_error_str(comm_get_last_error()));
@@ -1269,8 +1048,7 @@ comm_set_iface6(xsock_t sock, unsigned int my_ifindex)
 #endif /* ! HAVE_IPV6 */
 }
 
-int
-comm_set_onesbcast(xsock_t sock, int enabled)
+int comm_set_onesbcast(int sock, int enabled)
 {
 #ifdef IP_ONESBCAST
     int family = comm_sock_get_family(sock);
@@ -1282,7 +1060,7 @@ comm_set_onesbcast(xsock_t sock, int enabled)
     }
 
     if (setsockopt(sock, IPPROTO_IP, IP_ONESBCAST,
-		   XORP_SOCKOPT_CAST(&enabled), sizeof(enabled)) < 0) {
+		   (const void*)(&enabled), sizeof(enabled)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("setsockopt IP_ONESBCAST %d: %s", enabled,
 		   comm_get_error_str(comm_get_last_error()));
@@ -1300,8 +1078,7 @@ comm_set_onesbcast(xsock_t sock, int enabled)
 #endif /* ! IP_ONESBCAST */
 }
 
-int
-comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+int comm_set_bindtodevice(int sock, const char * my_ifname)
 {
 #ifdef SO_BINDTODEVICE
     char tmp_ifname[IFNAMSIZ];
@@ -1316,9 +1093,6 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
      * and requires additional support for SO_BINDTODEVICE.
      * See socket(7) man page in Linux.
      *
-     * Note: strlcpy() is not present in glibc; strncpy() is used
-     * instead to avoid introducing a circular dependency on the
-     * C++ library libxorp.
      */
     strncpy(tmp_ifname, my_ifname, IFNAMSIZ-1);
     tmp_ifname[IFNAMSIZ-1] = '\0';
@@ -1353,8 +1127,7 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
 #endif
 }
 
-int
-comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
+int comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
 
@@ -1365,7 +1138,7 @@ comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
      * minsize is a fatal error.
      */
     if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
-		   XORP_SOCKOPT_CAST(&desired_bufsize),
+		   (const void*)&desired_bufsize,
 		   sizeof(desired_bufsize)) < 0) {
 	desired_bufsize -= delta;
 	while (1) {
@@ -1373,7 +1146,7 @@ comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 		delta /= 2;
 
 	    if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
-			   XORP_SOCKOPT_CAST(&desired_bufsize),
+			   (const void*)&desired_bufsize,
 			   sizeof(desired_bufsize)) < 0) {
 		_comm_set_serrno();
 		desired_bufsize -= delta;
@@ -1396,8 +1169,7 @@ comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
     return (desired_bufsize);
 }
 
-int
-comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
+int comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
 
@@ -1408,7 +1180,7 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
      * minsize is a fatal error.
      */
     if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
-		   XORP_SOCKOPT_CAST(&desired_bufsize),
+		   (const void*)&desired_bufsize,
 		   sizeof(desired_bufsize)) < 0) {
 	desired_bufsize -= delta;
 	while (1) {
@@ -1416,7 +1188,7 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 		delta /= 2;
 
 	    if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
-			   XORP_SOCKOPT_CAST(&desired_bufsize),
+			   (const void*)&desired_bufsize,
 			   sizeof(desired_bufsize)) < 0) {
 		_comm_set_serrno();
 		desired_bufsize -= delta;
@@ -1439,26 +1211,8 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
     return (desired_bufsize);
 }
 
-int
-comm_sock_get_family(xsock_t sock)
+int comm_sock_get_family(int sock)
 {
-#ifdef HOST_OS_WINDOWS
-    WSAPROTOCOL_INFO wspinfo;
-    int err, len;
-
-    len = sizeof(wspinfo);
-    err = getsockopt(sock, SOL_SOCKET, SO_PROTOCOL_INFO,
-			   XORP_SOCKOPT_CAST(&wspinfo), &len);
-    if (err != 0)  {
-	_comm_set_serrno();
-	XLOG_ERROR("Error getsockopt(SO_PROTOCOL_INFO) for socket %d: %s",
-		   sock, comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
-    }
-
-    return ((int)wspinfo.iAddressFamily);
-
-#else /* ! HOST_OS_WINDOWS */
     /* XXX: Should use struct sockaddr_storage. */
 #ifndef MAXSOCKADDR
 #define MAXSOCKADDR	128	/* max socket address structure size */
@@ -1478,17 +1232,15 @@ comm_sock_get_family(xsock_t sock)
     }
 
     return (un.sa.sa_family);
-#endif /* ! HOST_OS_WINDOWS */
 }
 
-int
-comm_sock_get_type(xsock_t sock)
+int comm_sock_get_type(int sock)
 {
     int err, type;
     socklen_t len = sizeof(type);
 
     err = getsockopt(sock, SOL_SOCKET, SO_TYPE,
-		     XORP_SOCKOPT_CAST(&type), &len);
+		     (void*)&type, &len);
     if (err != 0)  {
 	_comm_set_serrno();
 	XLOG_ERROR("Error getsockopt(SO_TYPE) for socket %d: %s",
@@ -1499,27 +1251,8 @@ comm_sock_get_type(xsock_t sock)
     return type;
 }
 
-int
-comm_sock_set_blocking(xsock_t sock, int is_blocking)
+int comm_sock_set_blocking(int sock, int is_blocking)
 {
-#ifdef HOST_OS_WINDOWS
-    u_long opt;
-    int flags;
-
-    if (is_blocking)
-	opt = 0;
-    else
-	opt = 1;
-
-    flags = ioctlsocket(sock, FIONBIO, &opt);
-    if (flags != 0) {
-	_comm_set_serrno();
-	XLOG_ERROR("FIONBIO error: %s",
-		   comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
-    }
-
-#else /* ! HOST_OS_WINDOWS */
     int flags;
     if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
 	_comm_set_serrno();
@@ -1539,13 +1272,11 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 		   comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
-#endif /* ! HOST_OS_WINDOWS */
 
     return (XORP_OK);
 }
 
-int
-comm_sock_is_connected(xsock_t sock, int *is_connected)
+int comm_sock_is_connected(int sock, int *is_connected)
 {
     struct sockaddr_storage ss;
     int err;
@@ -1562,17 +1293,6 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
     memset(&ss, 0, sslen);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
 
-#ifdef HOST_OS_WINDOWS
-    if (err == SOCKET_ERROR) {
-	if ((WSAGetLastError() == WSAENOTCONN)
-	    || (WSAGetLastError() == WSAEINPROGRESS)) {
-	    return (XORP_OK);	/* Socket is not connected */
-	}
-	_comm_set_serrno();
-	return (XORP_ERROR);
-    }
-
-#else /* ! HOST_OS_WINDOWS */
     if (err != 0) {
 	if ((err == ENOTCONN) || (err == ECONNRESET)) {
 	    return (XORP_OK);	/* Socket is not connected */
@@ -1580,7 +1300,6 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
-#endif /* ! HOST_OS_WINDOWS */
 
     /*  Socket is connected */
     *is_connected = 1;
@@ -1588,30 +1307,19 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
     return (XORP_OK);
 }
 
-void
-comm_sock_no_ipv6(const char* method, ...)
+void comm_sock_no_ipv6(const char* method, ...)
 {
-#ifdef HOST_OS_WINDOWS
-    _comm_serrno = WSAEAFNOSUPPORT;
-#else
     _comm_serrno = EAFNOSUPPORT;
-#endif
     XLOG_ERROR("%s: IPv6 support not present.", method);
     UNUSED(method);
 }
 
-void
-_comm_set_serrno(void)
+void _comm_set_serrno(void)
 {
-#ifdef HOST_OS_WINDOWS
-    _comm_serrno = WSAGetLastError();
-    WSASetLastError(0);
-#else
     _comm_serrno = errno;
     /*
      * TODO: XXX - Temporarily don't set errno to 0 we still have code
      * using errno 2005-05-09 Atanu.
      */
     /* errno = 0; */
-#endif
 }

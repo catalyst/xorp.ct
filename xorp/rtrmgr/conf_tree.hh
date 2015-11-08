@@ -61,9 +61,6 @@ public:
     ConfigTree(TemplateTree *tt, bool verbose);
     virtual ~ConfigTree();
 
-#if 0
-    ConfigTree& operator=(const ConfigTree& orig_tree);
-#endif
     bool parse(const string& configuration, const string& config_file,
 	       string& error_msg);
     void push_path();

@@ -156,11 +156,6 @@ Mld6igmpNode::start()
 int
 Mld6igmpNode::final_start()
 {
-#if 0	// TODO: XXX: PAVPAVPAV
-    if (! is_pending_up())
-	return (XORP_ERROR);
-#endif
-
     if (ProtoNode<Mld6igmpVif>::start() != XORP_OK) {
 	ProtoNode<Mld6igmpVif>::stop();
 	return (XORP_ERROR);
@@ -653,10 +648,6 @@ Mld6igmpNode::updates_made()
 	 mld6igmp_vif_iter != configured_vifs().end();
 	 ++mld6igmp_vif_iter) {
 	Vif* node_vif = &mld6igmp_vif_iter->second;
-#if 0
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-#endif
 	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
 	    // Add the vif to the list of old interfaces
 	    delete_vifs_list.push_back(node_vif->name());
@@ -1584,20 +1575,6 @@ Mld6igmpNode::is_directly_connected(const Mld6igmpVif& mld6igmp_vif,
 {
     if (! mld6igmp_vif.is_up())
 	return (false);
-
-#if 0	// TODO: not implemented yet
-    //
-    // Test the alternative subnets
-    //
-    list<IPvXNet>::const_iterator iter;
-    for (iter = mld6igmp_vif.alternative_subnet_list().begin();
-	 iter != mld6igmp_vif.alternative_subnet_list().end();
-	 ++iter) {
-	const IPvXNet& ipvxnet = *iter;
-	if (ipvxnet.contains(ipaddr_test))
-	    return true;
-    }
-#endif
 
     //
     // Test the same subnet addresses, or the P2P addresses

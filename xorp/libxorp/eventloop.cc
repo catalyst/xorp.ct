@@ -57,14 +57,12 @@ void dflt_sig_handler(int signo) {
     case SIGINT:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
-#ifndef	HOST_OS_WINDOWS
     case SIGXCPU:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
     case SIGXFSZ:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
-#endif
     default:
 	// This is a coding error and we need to fix it.
 	assert("WARNING:  Ignoring un-handled error in dflt_sig_handler." == NULL);
@@ -75,13 +73,8 @@ void dflt_sig_handler(int signo) {
     xorp_do_run = 0;
 
     // Now, kick any selects that are blocking,
-#ifndef	HOST_OS_WINDOWS
     // SIGURG seems harmless enough to use.
     kill(getpid(), SIGURG);
-#else
-    // Maybe this will work on Windows
-    raise(SIGINT);
-#endif
 
 }//dflt_sig_handler
 
@@ -99,10 +92,8 @@ void setup_dflt_sighandlers() {
 
     signal(SIGTERM, dflt_sig_handler);
     signal(SIGINT, dflt_sig_handler);
-#ifndef	HOST_OS_WINDOWS
     signal(SIGXCPU, dflt_sig_handler);
     signal(SIGXFSZ, dflt_sig_handler);
-#endif
 }
 
 
@@ -110,11 +101,7 @@ void setup_dflt_sighandlers() {
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
       _last_ev_run(0), _last_warned(0), _is_debug(false),
-#ifdef USE_WIN_DISPATCHER
-      _win_dispatcher(_clock)
-#else
       _selector_list(_clock)
-#endif
 {
     XLOG_ASSERT(eventloop_instance_count == 0);
     XLOG_ASSERT(_last_ev_run == 0);
@@ -227,19 +214,7 @@ EventLoop::do_work()
     }
 
     _timer_list.current_time(start);
-#if USE_WIN_DISPATCHER
-
-    // Seeing weird slownesses on windows..going to cap the timeout and see
-    // if that helps.
-    if (t.to_ms() > 100)
-	t.set_ms(100);
-    else if (t.to_ms() < 0)
-	t.set_ms(0);
-
-    _win_dispatcher.wait_and_dispatch(t);
-#else
     _selector_list.wait_and_dispatch(t);
-#endif
     if (eloop_trace.on()) {
 	TimeVal n2;
 	_timer_list.current_time(n2);
@@ -254,32 +229,20 @@ bool
 EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
 			  int priority)
 {
-#ifdef USE_WIN_DISPATCHER
-    return _win_dispatcher.add_ioevent_cb(fd, type, cb, priority);
-#else
     return _selector_list.add_ioevent_cb(fd, type, cb, priority);
-#endif
 }
 
 bool
 EventLoop::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
-#ifdef USE_WIN_DISPATCHER
-    return _win_dispatcher.remove_ioevent_cb(fd, type);
-#else
     _selector_list.remove_ioevent_cb(fd, type);
     return true;
-#endif
 }
 
 size_t
 EventLoop::descriptor_count() const
 {
-#ifdef USE_WIN_DISPATCHER
-    return _win_dispatcher.descriptor_count();
-#else
     return _selector_list.descriptor_count();
-#endif
 }
 
 /** Remove timer from timer list. */

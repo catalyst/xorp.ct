@@ -35,7 +35,6 @@
 
 #include "libxorp/xorp.h"
 
-#ifndef USE_WIN_DISPATCHER
 
 #include "callback.hh"
 #include "ioevents.hh"
@@ -279,5 +278,4 @@ private:
     size_t		_descriptor_count;
     bool		_is_debug;
 };
-#endif // USE_WIN_DISPATCHER
 #endif // __LIBXORP_SELECTOR_HH__

@@ -249,23 +249,6 @@ CliNode::cli_show_log_user(const string& 	, // server_name
 	    );
     }
     
-#if 0
-    list<CliClient *>::iterator iter;
-    for (iter = client_list().begin();
-	 iter != client_list().end(); ++iter) {
-	CliClient *tmp_cli_client = *iter;
-	
-	cli_client->cli_print(
-	    c_format("%-16s%-16s%-16s%-16s - %-16s (%s)\n",
-		     tmp_cli_client->cli_session_user_name().c_str(),
-		     tmp_cli_client->cli_session_term_name().c_str(),
-		     cstring(tmp_cli_client->cli_session_from_address()),
-		     tmp_cli_client->cli_session_start_time().c_str(),
-		     tmp_cli_client->cli_session_stop_time().c_str(),
-		     tmp_cli_client->cli_session_duration_time().c_str())
-	    );
-    }
-#endif
     
     return (XORP_OK);
 }

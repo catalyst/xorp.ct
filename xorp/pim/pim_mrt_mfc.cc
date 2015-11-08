@@ -511,19 +511,6 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 
     // TODO:  pim_mre_wc is un-used...need to see if it should be used,
     // and if not, just delete this code. --Ben
-#if 0
-    //
-    // Get the (*,G) entry
-    //
-    PimMre *pim_mre_wc = NULL;
-    if (pim_mre != NULL) {
-	if (pim_mre->is_wc())
-	    pim_mre_wc = pim_mre;
-	else
-	    pim_mre_wc = pim_mre->wc_entry();
-    }
-#endif
-
     if (is_geq_upcall)
 	goto is_geq_upcall_label;
     else

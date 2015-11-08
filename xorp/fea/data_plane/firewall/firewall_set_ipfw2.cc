@@ -314,7 +314,7 @@ FirewallSetIpfw2::add_entry(const FirewallEntry& firewall_entry,
     if (! firewall_entry.vifname().empty()) {
 	ipfw_insn_if* ifinsp = reinterpret_cast<ipfw_insn_if *>(rulep);
 	ifinsp->o.opcode = O_VIA;
-	strlcpy(ifinsp->name, firewall_entry.vifname().c_str(),
+	strncpy(ifinsp->name, firewall_entry.vifname().c_str(),
 		sizeof(ifinsp->name));
 	ifinsp->o.len |= F_INSN_SIZE(ipfw_insn_if);
 	rulep += F_INSN_SIZE(ipfw_insn_if);

@@ -693,12 +693,6 @@ TopologyManager::clear_mid_entries()
 vector<IPv4>
 TopologyManager::get_mid_addresses(const IPv4& main_addr)
 {
-#if 0
-    debug_msg("%s MyMainAddr %s MainAddr %s\n",
-	      __func__,
-	      cstring(_fm.get_main_addr())
-	      cstring(main_addr));
-#endif
     vector<IPv4> addrs;
 
     pair<MidAddrMap::const_iterator, MidAddrMap::const_iterator> range =

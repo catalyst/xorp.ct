@@ -288,15 +288,6 @@ protected:
     mutable int32_t _M_index;	// index in ref_counter_pool
 };
 
-#if 0
-template <typename _Tp>
-ref_ptr<const _Tp>::ref_ptr(const ref_ptr<_Tp>& __r)
-	: _M_ptr(0), _M_index(_r->_M_index)
-{
-    ref_counter_pool::instance().incr_counter(_M_index);
-}
-#endif
-
 /**
  * @short class for maintaining the storage of counters used by cref_ptr.
  *

@@ -31,9 +31,7 @@ is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
 	# C++ files
-	'fea_data_plane_manager_bsd.cc',
 	'fea_data_plane_manager_linux.cc',
-	'fea_data_plane_manager_windows.cc',
 	]
 
 if env['enable_click']:

@@ -573,19 +573,6 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt,
 	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
 	// no, so add all the path attributes
 	_packet->replace_pathattribute_list(pa_list);
-#if 0
-	PathAttributeList<IPv4>::const_iterator pai;
-	pai = rt.attributes()->begin();
-	while (pai != rt.attributes()->end()) {
-	    debug_msg("Adding attribute %s\n", (*pai)->str().c_str());
-	    /*
-	    ** Don't put a multicast nexthop in the parameter list.
-	    */
-	    if (!(NEXT_HOP == (*pai)->type() && safi == SAFI_MULTICAST))
-		_packet.add_pathatt(**pai);
-	    ++pai;
-	}
-#endif
 	if (SAFI_MULTICAST == safi) {
 	    // Multicast SAFI packets don't have a regular nexthop,
 	    // but have on in the MultiProtocol attribute instead.

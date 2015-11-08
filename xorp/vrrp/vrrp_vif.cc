@@ -255,19 +255,6 @@ VrrpVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 {
     UNUSED(from);
     UNUSED(payload);
-#if 0
-    // XXX the arp object should be part of VrrpVif
-    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
-	ARPd& arp = i->second->arpd();
-
-	try {
-	    arp.recv(from, payload);
-	} catch (const BadPacketException& e) {
-	    XLOG_WARNING("ARP packet error: %s", e.str().c_str());
-	    break;
-	}
-    }
-#endif
 }
 
 void

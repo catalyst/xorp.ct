@@ -1026,17 +1026,6 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     */
     size_t pa_len = BGPPacket::MAXPACKETSIZE;
     uint16_t length = 0;
-#if 0    
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	uint8_t buf[BGPPacket::MAXPACKETSIZE];
-	size_t pa_len = BGPPacket::MAXPACKETSIZE;
-	XLOG_ASSERT(pa->encode(buf, pa_len, peerdata));
-	length += pa_len;
-    }
-#endif
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
     p->encode(buf, pa_len, peerdata);
     length = pa_len;
@@ -1105,20 +1094,6 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     if(fwrite(&viewbuf[0], sizeof(viewbuf), 1, fp) != 1)
 	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
 
-#if 0
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-
-	uint8_t buf[BGPPacket::MAXPACKETSIZE];
-	size_t pa_len = BGPPacket::MAXPACKETSIZE;
-	XLOG_ASSERT(pa->encode(buf, pa_len, peerdata));
-	
-	if(fwrite(buf, pa_len, 1, fp) != 1)
-	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
-		       strerror(errno));
-    }
-#endif
     if(fwrite(buf, pa_len, 1, fp) != 1)
 	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
 		   strerror(errno));
@@ -1828,12 +1803,6 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	}
     } else if("update" == words[index]) {
 	size_t size = words.size();
-#if 0
-	if(0 != ((size - (index + 1)) % 2))
-	    xorp_throw(InvalidString,
-	       c_format("Incorrect number of arguments to update:\n[%s]",
-				line.c_str()));
-#endif
 	UpdatePacket *bgpupdate = new UpdatePacket();
 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);

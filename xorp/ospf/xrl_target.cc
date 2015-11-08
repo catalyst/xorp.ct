@@ -209,14 +209,6 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
     UNUSED(unicast);
     UNUSED(multicast);
 
-#if 0
-    // Routes coming from fib2mrib have unicast set as false, even though
-    // they are dealing with unicast addresses, so ignore that here.  This
-    // allows policy redistribution of routes coming from fib2mrib.
-    if (!unicast)
-	return XrlCmdError::OKAY();
-#endif
-
     if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
@@ -234,10 +226,6 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
     UNUSED(unicast);
     UNUSED(multicast);
 
-#if 0
-    if (!unicast)
-	return XrlCmdError::OKAY();
-#endif
 
     if (!_ospf.withdraw_route(network)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());

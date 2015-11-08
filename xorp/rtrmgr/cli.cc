@@ -26,9 +26,6 @@
 #include "libxorp/debug.h"
 #include "libxorp/token.hh"
 #include "libxorp/utils.hh"
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#endif
 
 
 
@@ -49,26 +46,16 @@
 #include "template_tree_node.hh"
 
 
-#ifdef HOST_OS_WINDOWS
-inline uid_t getuid() { return 0; }
-#endif
-
 static string
 get_user_name(uid_t uid)
 {
     string result;
 
-#ifdef HOST_OS_WINDOWS
-    // TODO: implement it for Windows
-    UNUSED(uid);
-    return (result);
-#else // ! HOST_OS_WINDOWS
     struct passwd* pw = getpwuid(uid);
     if (pw != NULL)
 	result = pw->pw_name;
     endpwent();
     return (result);
-#endif // ! HOST_OS_WINDOWS
 }
 
 static string
@@ -124,12 +111,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 	char buf[MAXHOSTNAMELEN];
 	memset(buf, 0, sizeof(buf));
 	if (gethostname(buf, sizeof(buf)) < 0) {
-#ifdef HOST_OS_WINDOWS
-       	    XLOG_FATAL("gethostname() failed: %s",
-		       win_strerror(WSAGetLastError()));
-#else
             XLOG_FATAL("gethostname() failed: %s", strerror(errno));
-#endif
 	}
 	buf[sizeof(buf) - 1] = '\0';
 	host_name = buf;
@@ -140,24 +122,6 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     _configuration_mode_prompt = c_format("%s@%s# ",
 					  user_name.c_str(),
 					  host_name.c_str());
-#if 0
-    //
-    // XXX: if we want to change the promps to be
-    // "user@hostname> " and "USER@HOSTNAME# "
-    // then uncomment this code.
-    //
-    string::size_type iter;
-    for (iter = 0; iter < _operational_mode_prompt.size(); ++iter) {
-	char& c = _operational_mode_prompt[iter];
-	if (xorp_isalpha(c))
-	    c = xorp_tolower(c);
-    }
-    for (iter = 0; iter < _configuration_mode_prompt.size(); ++iter) {
-	char& c = _configuration_mode_prompt[iter];
-	if (xorp_isalpha(c))
-	    c = xorp_toupper(c);
-    }
-#endif
 
     // Check for environmental variables that may overwrite the prompts
     char* value = NULL;
@@ -627,10 +591,6 @@ RouterCLI::add_op_mode_commands(CliCommand* com0, string& error_msg)
 {
     CliCommand *com1, *com2, *help_com, *exit_com, *quit_com;
 
-#if 0
-    com0->add_command("clear", "Clear information in the system *",
-		      false, error_msg);
-#endif
 
     // If no root node is specified, default to the true root
     if (com0 == NULL)

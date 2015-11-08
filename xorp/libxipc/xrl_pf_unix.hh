@@ -25,7 +25,6 @@
 
 #include "xrl_pf_stcp.hh"
 
-#ifndef	HOST_OS_WINDOWS
 
 class XrlPFUNIXListener : public XrlPFSTCPListener {
 public:
@@ -50,8 +49,6 @@ public:
     const char* protocol() const;
     static const char* protocol_name();
 };
-
-#endif
 
 #endif // __LIBXIPC_XRL_PF_UNIX_HH__
 

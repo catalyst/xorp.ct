@@ -389,33 +389,7 @@ main(int argc, char* argv[])
     test_as4_coding_compat(verbose);
 
     if (verbose) printf("All tests passed\n");
-#if 0
-    printf("Check for space leak: check memory usage now....\n");
-    TimerList::system_sleep(TimeVal(5, 0));
-    printf("Continuing...\n");
-    aspath = new ASPath(*aspathcopy);
-    delete aspathcopy;
-    for(i=0; i< 10000; i++) {
-	aspathcopy= new ASPath(*aspath);
-	delete aspath;
-	aspath = new ASPath(*aspathcopy);
-	delete aspathcopy;
-    }
-    printf("Done...\n");
-
-
-    for (i=1;i<=9;i++) {
-	asn = new AsNum(i);
-	assert(aspath->contains(*asn) == true);
-	delete asn;
-    }
-    asn = new AsNum;
-    assert(aspath->contains(*asn) == false);
-    delete asn;
-    TimerList::system_sleep(TimeVal(10, 0));
-#else
     delete aspath;
     delete aspathcopy;
-#endif
     exit(0);
 }

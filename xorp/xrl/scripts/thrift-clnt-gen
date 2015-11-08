@@ -257,11 +257,6 @@ def implement_unmarshall(cls, method_no, method):
     if len(method.rargs()) > 0 and arg_checks_enabled:
 	s += "#ifndef XIF_DISABLE_CLIENT_INPUT_CHECKS\n"
 	s += "    if (argf.count() != %d) {\n" % len(method.rargs())
-	s += "#if 0\n"
-	s += "        XLOG_ERROR(\"Wrong number of arguments (%%u != %%u)\",\n"
-	s += "            XORP_UINT_CAST(argf.count()),\n"
-	s += "            XORP_UINT_CAST(%d));\n" % len(method.rargs())
-	s += "#endif // no XLOG in here just yet.\n"
 	s += "        cb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
 	s += "    }\n"
 	s += "#endif\n"

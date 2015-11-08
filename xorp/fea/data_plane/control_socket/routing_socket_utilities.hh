@@ -22,7 +22,7 @@
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
 
 #include <xorp_config.h>
-#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
+#if defined(HAVE_ROUTING_SOCKETS) 
 
 #include "fea/fte.hh"
 #include "fea/iftree.hh"

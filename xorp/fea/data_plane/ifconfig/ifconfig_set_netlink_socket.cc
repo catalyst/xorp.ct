@@ -114,11 +114,7 @@ IfConfigSetNetlinkSocket::is_discard_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 
-#ifdef HOST_OS_LINUX
     return (true);
-#else
-    return (false);
-#endif
 }
 
 bool
@@ -127,11 +123,7 @@ IfConfigSetNetlinkSocket::is_unreachable_emulated(const IfTreeInterface& i)
 {
     UNUSED(i);
 
-#ifdef HOST_OS_LINUX
     return (true);
-#else
-    return (false);
-#endif
 }
 
 int
@@ -169,14 +161,12 @@ IfConfigSetNetlinkSocket::config_interface_begin(
 	return (XORP_OK);
     }
 
-#ifdef HOST_OS_LINUX
     //
     // XXX: Set the interface DOWN otherwise we may not be able to
     // set the MAC address or the MTU (limitation imposed by the Linux kernel).
     //
     if (pulled_ifp->enabled())
 	should_disable = true;
-#endif
 
     //
     // Set the MTU

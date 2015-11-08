@@ -148,11 +148,6 @@ public:
 
     XI* lookup_xrl(const string& name) const;
 
-#if 0
-    void batch_start(const string& target);
-    void batch_stop(const string& target);
-#endif
-
 protected:
     /**
      * Called when Finder connection is established.

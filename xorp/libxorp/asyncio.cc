@@ -37,12 +37,6 @@
 #include "xorpfd.hh"
 #include "asyncio.hh"
 
-#ifdef HOST_OS_WINDOWS
-#   define EDGE_TRIGGERED_READ_LATENCY		// IOT_READ may be delayed.
-#   define EDGE_TRIGGERED_WRITES		// IOT_WRITE is edge triggered.
-#   include "win_dispatcher.hh"
-#   include "win_io.h"
-#endif
 
 static class TraceAIO {
 public:
@@ -66,24 +60,6 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
     UNUSED(name);
 
     switch (error_num) {
-#ifdef HOST_OS_WINDOWS
-    case ERROR_IO_PENDING:
-	XLOG_WARNING("%s (fd = %p) got ERROR_IO_PENDING, continuing.", name,
-		     (void *)fd);
-	return true;
-    case WSAEINTR:
-	XLOG_WARNING("%s (fd = %p) got WSAEINTR, continuing.", name,
-		     (void *)fd);
-	return true;
-    case WSAEWOULDBLOCK:
-	XLOG_WARNING("%s (fd = %p) got WSAEWOULDBLOCK, continuing.", name,
-		     (void *)fd);
-	return true;
-    case WSAEINPROGRESS:
-	XLOG_WARNING("%s (fd = %p) got WSAEINPROGRESS, continuing.", name,
-		     (void *)fd);
-	return true;
-#else // ! HOST_OS_WINDOWS
     case EINTR:
 	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,
 		     XORP_INT_CAST(fd));
@@ -92,7 +68,6 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
 	XLOG_WARNING("%s (fd = %d) got EWOULDBLOCK, continuing.", name,
 		     XORP_INT_CAST(fd));
 	return true;
-#endif // ! HOST_OS_WINDOWS
     }
     return false;
 }
@@ -149,19 +124,6 @@ AsyncFileReader::add_buffer_with_offset(uint8_t*	b,
     }
 }
 
-#ifdef HOST_OS_WINDOWS
-void
-AsyncFileReader::disconnect(XorpFd fd, IoEventType type)
-{
-    assert(type == IOT_DISCONNECT);
-    assert(fd == _fd);
-    assert(fd.is_valid()); 
-    assert(fd.is_socket()); 
-    debug_msg("IOT_DISCONNECT close detected (reader side)\n");
-    BufferInfo* head = _buffers.front();
-    head->dispatch_callback(END_OF_FILE);
-}
-#endif // HOST_OS_WINDOWS
 
 void
 AsyncFileReader::read(XorpFd fd, IoEventType type)
@@ -178,56 +140,6 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 
     BufferInfo* head = _buffers.front();
     ssize_t done = 0;
-#ifdef HOST_OS_WINDOWS
-    BOOL result = FALSE;
-
-    switch (fd.type()) {
-    case XorpFd::FDTYPE_SOCKET:
-	done = recv(_fd.getSocket(), (char *)(head->buffer() + head->offset()),
-		    head->buffer_bytes() - head->offset(), 0);
-	if (done == SOCKET_ERROR) {
-	    _last_error = WSAGetLastError();
-	    done = -1;
-	    XLOG_WARNING("read error: _fd: %i  offset: %i  total-len: %i error: %s\n",
-			 (int)(_fd), (int)(head->offset()), (int)(head->buffer_bytes()),
-			 XSTRERROR);
-	} else if (done == 0) {
-	    // Graceful close; make sure complete_transfer() gets this.
-	    debug_msg("graceful close detected\n");
-	    _last_error = WSAENOTCONN;
-	    done = -1;
-	}
-	break;
-
-    case XorpFd::FDTYPE_PIPE:
-	// XXX: Return values need review.
-	done = win_pipe_read(_fd, head->buffer() + head->offset(),
-			     head->buffer_bytes() - head->offset());
-	_last_error = GetLastError();
-	break;
-
-    case XorpFd::FDTYPE_CONSOLE:
-	// XXX: Return values need review.
-	done = win_con_read(_fd, head->buffer() + head->offset(),
-			     head->buffer_bytes() - head->offset());
-	_last_error = GetLastError();
-	break;
-
-    case XorpFd::FDTYPE_FILE:
-	result = ReadFile(_fd, (LPVOID)(head->buffer() + head->offset()),
-			       (DWORD)(head->buffer_bytes() - head->offset()),
-			       (LPDWORD)&done, NULL);
-	if (result == FALSE) {
-	    _last_error = GetLastError();
-	    SetLastError(ERROR_SUCCESS);
-	}
-	break;
-
-    default:
-	XLOG_FATAL("Invalid descriptor type.");
-	break;
-    }
-#else // ! HOST_OS_WINDOWS
     errno = 0;
     _last_error = 0;
     done = ::read(_fd, head->buffer() + head->offset(),
@@ -239,7 +151,6 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 		     strerror(errno));
     }
     errno = 0;
-#endif // ! HOST_OS_WINDOWS
 
     if (aio_trace.on()) {
 	XLOG_INFO("afr: %p Read %d bytes, last-err: %i\n",
@@ -323,24 +234,6 @@ AsyncFileReader::start()
 	return false;
     }
 
-#ifdef HOST_OS_WINDOWS
-    // Windows notifies us of disconnections using a separate flag.
-    // The file descriptor may no longer be valid when we stop, so
-    // mark the IOT_DISCONNECT callback as being added using a boolean.
-    _disconnect_added = false;
-    if (_fd.is_socket()) {
-	_disconnect_added = e.add_ioevent_cb(
-	    _fd,
-	    IOT_DISCONNECT,
-	    callback(this, &AsyncFileReader::disconnect),
-	    _priority);
-	if (_disconnect_added == false) {
-	    XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
-	    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
-	    return false;
-	}
-    }
-#endif // HOST_OS_WINDOWS
 
     debug_msg("%p start\n", this);
 
@@ -357,12 +250,6 @@ AsyncFileReader::stop()
 
 #ifdef EDGE_TRIGGERED_WRITES
     _deferred_io_task.unschedule();
-#endif
-#ifdef HOST_OS_WINDOWS
-    if (_disconnect_added == true) {
-    	_eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
-	_disconnect_added = false;
-    }
 #endif
 
     _running = false;
@@ -383,9 +270,6 @@ AsyncFileReader::flush_buffers()
 string AsyncFileReader::toString() const {
     ostringstream oss;
     oss << AsyncFileOperator::toString() << " buffers: " << _buffers.size() << endl;
-#ifdef HOST_OS_WINDOWS
-    oss << " disconnect-added: " << _disconnect_added << endl;
-#endif
     return oss.str();
 }
 
@@ -543,17 +427,6 @@ iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
     iov_len  = data_len;
 }
 
-#ifdef HOST_OS_WINDOWS
-void
-AsyncFileWriter::disconnect(XorpFd fd, IoEventType type)
-{
-    assert(type == IOT_DISCONNECT);
-    assert(fd == _fd);
-    assert(fd.is_valid()); 
-    assert(fd.is_socket()); 
-    debug_msg("IOT_DISCONNECT close detected (writer side)\n");
-}
-#endif // HOST_OS_WINDOWS
 
 void
 AsyncFileWriter::write(XorpFd fd, IoEventType type)
@@ -565,9 +438,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     size_t total_bytes = 0;
     ssize_t done = 0;
     int flags = 0;
-#ifndef HOST_OS_WINDOWS
     bool mod_signals = true;
-#endif
 
 #ifdef MSG_NOSIGNAL
     flags |= MSG_NOSIGNAL;
@@ -631,7 +502,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    dst_addr.copy_out(sin);
 	    sin.sin_port = htons(dst_port);
 
-	    done = ::sendto(_fd.getSocket(), XORP_CONST_BUF_CAST(_iov[0].iov_base),
+	    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin),
@@ -646,7 +517,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    dst_addr.copy_out(sin6);
 	    sin6.sin6_port = htons(dst_port);
 
-	    done = ::sendto(_fd.getSocket(), XORP_CONST_BUF_CAST(_iov[0].iov_base),
+	    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin6),
@@ -661,52 +532,20 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	}
 
 	if (done < 0) {
-#ifdef HOST_OS_WINDOWS
-	    _last_error = WSAGetLastError();
-#else
 	    _last_error = errno;
-#endif
 	}
 
     } else {
 	//
 	// Write the data to the socket/file descriptor
 	//
-#ifdef HOST_OS_WINDOWS
-	if (fd.is_socket()) {
-	    // Socket handles take non-blocking writes.
-	    // WSASend() approximates writev().
-	    int result = WSASend(_fd.getSocket(), (LPWSABUF)_iov, iov_cnt,
-				 (LPDWORD)&done, 0, NULL, NULL);
-	    _last_error = (result == SOCKET_ERROR) ? WSAGetLastError() : 0;
-	    if (_last_error != 0) {
-		done = -1;
-		debug_msg("writer: winsock error %d\n", _last_error);
-	    }
-	} else {
-	    // Non-socket handles take blocking writes.
-	    // There is no writev() equivalent, so emulate it.
-	    BOOL result = TRUE;
-	    DWORD done2;
-	    for (uint32_t j = 0; j < iov_cnt; j++) {
-		done2 = 0;
-		result = WriteFile(_fd, (LPVOID)_iov[j].iov_base,
-				   (DWORD)_iov[j].iov_len, (LPDWORD)&done2,
-				   NULL);
-		done += done2;
-		if (result == FALSE)
-		    break;
-	    }
-	    _last_error = (result == FALSE) ? GetLastError() : 0;
-	}
-#else // ! HOST_OS_WINDOWS
 
 	if ((iov_cnt == 1) && (! mod_signals)) {
 	    //
 	    // No need for coalesce, so use send(2). This saves us
 	    // two sigaction calls since we can pass the MSG_NOSIGNAL flag.
 	    //
-	    done = ::send(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+	    done = ::send(_fd, (const void*)(_iov[0].iov_base),
 			  _iov[0].iov_len, flags);
 	    if (done < 0)
 		_last_error = errno;
@@ -716,7 +555,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 		_last_error = errno;
 	}
 	errno = 0;
-#endif // ! HOST_OS_WINDOWS
     }
 
     if (aio_trace.on()) {

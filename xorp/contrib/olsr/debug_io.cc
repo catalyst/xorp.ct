@@ -71,13 +71,11 @@ DebugIO::pp(const string& which, int level,
 	    pkt->decode(data, len);
 	    DOUT_LEVEL(_info, level) << pkt->str() << endl;
 
-#if 1
 	    // XXX no refcounting!
 	    const vector<Message*>& msgs = pkt->messages();
 	    vector<Message*>::const_iterator ii;
 	    for (ii = msgs.begin(); ii != msgs.end(); ii++)
 		delete (*ii);
-#endif
 	    delete pkt;
     } catch (InvalidPacket& e) {
 	    DOUT_LEVEL(_info, level) << "Bad packet: " <<

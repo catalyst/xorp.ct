@@ -33,7 +33,6 @@
 
 #include "fibconfig_table_get_sysctl.hh"
 
-
 //
 // Get the whole table information from the unicast forwarding table.
 //

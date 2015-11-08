@@ -60,11 +60,6 @@ public:
     void register_done(const XrlError& e, const string* token,
 		       const uint32_t* pid, const uint32_t* clientid);
     void generic_done(const XrlError& e);
-#if 0
-    bool request_config();
-    void receive_config(const XrlError& e, const bool* ready,
-			const string* config);
-#endif
 
     bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
 

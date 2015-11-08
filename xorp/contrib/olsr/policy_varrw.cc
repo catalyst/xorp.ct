@@ -93,13 +93,11 @@ OlsrVarRW::single_write(const Id& id, const Element& e)
 	_metric = u32.val();
     }
 	break;
-#if 1
     case VAR_VTYPE: {
 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
 	_vtype = u32.val();
     }
 	break;
-#endif
     case VAR_ORIGINATOR: {
 	const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
 	XLOG_ASSERT(eip != NULL);

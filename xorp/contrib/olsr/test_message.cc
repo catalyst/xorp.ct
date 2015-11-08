@@ -306,7 +306,6 @@ multi_packet_decode(TestInfo& info)
 
     DOUT(info) << pkt->str() << endl;
 
-#if 1
     {
     // Check that the 'first' and 'last' packet flags are set as
     // S-OLSR needs to see them.
@@ -321,9 +320,7 @@ multi_packet_decode(TestInfo& info)
 	    XLOG_ASSERT((*ii)->is_last() == true);
     }
     }
-#endif
 
-#if 1	// XXX refcounting was removed for now
     {
     const vector<Message*>& msgs = pkt->messages();
 
@@ -332,7 +329,6 @@ multi_packet_decode(TestInfo& info)
 	delete (*ii);
     }
     }
-#endif
 
     delete pkt;
     return true;
@@ -361,7 +357,6 @@ hna_packet_decode(TestInfo& info)
 
     DOUT(info) << pkt->str() << endl;
 
-#if 1	// XXX refcounting was removed for now
     {
     const vector<Message*>& msgs = pkt->messages();
 
@@ -370,7 +365,6 @@ hna_packet_decode(TestInfo& info)
 	delete (*ii);
     }
     }
-#endif
 
     delete pkt;
     return true;
@@ -399,7 +393,6 @@ mid_packet_decode(TestInfo& info)
 
     DOUT(info) << pkt->str() << endl;
 
-#if 1	// XXX refcounting was removed for now
     {
     const vector<Message*>& msgs = pkt->messages();
 
@@ -408,7 +401,6 @@ mid_packet_decode(TestInfo& info)
 	delete (*ii);
     }
     }
-#endif
 
     delete pkt;
     return true;
@@ -437,7 +429,6 @@ tc_packet_decode(TestInfo& info)
 
     DOUT(info) << pkt->str() << endl;
 
-#if 1	// XXX refcounting was removed for now
     {
     const vector<Message*>& msgs = pkt->messages();
 
@@ -446,7 +437,6 @@ tc_packet_decode(TestInfo& info)
 	delete (*ii);
     }
     }
-#endif
 
     delete pkt;
     return true;
@@ -476,7 +466,6 @@ hello_multi_link_packet_decode(TestInfo& info)
 
     DOUT(info) << pkt->str() << endl;
 
-#if 1	// XXX refcounting was removed for now
     {
     const vector<Message*>& msgs = pkt->messages();
 
@@ -485,7 +474,6 @@ hello_multi_link_packet_decode(TestInfo& info)
 	delete (*ii);
     }
     }
-#endif
 
     delete pkt;
     return true;
@@ -687,11 +675,6 @@ hello_packet_encode(TestInfo& info)
 
     pkt->encode(buf1);
 
-#if 0
-    for (size_t i = 0; i < buf1.size(); i++) {
-	fprintf(stderr, "0x%02x ", XORP_UINT_CAST(buf1[i]));
-    }
-#endif
 
     std::copy(&hello_multi_v4_packet_data[0],
 	&hello_multi_v4_packet_data[0] + sizeof(hello_multi_v4_packet_data),

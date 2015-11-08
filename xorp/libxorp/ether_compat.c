@@ -93,10 +93,6 @@
  * Center for Telecommunications Research
  * Columbia University, New York City
  */
-#if 0
-__FBSDID("$FreeBSD: /repoman/r/ncvs/src/lib/libc/net/ether_addr.c,v 1.15 2002/04/08 07:51:10 ru Exp $");
-#endif
-
 #include "libxorp/xorp.h"
 #include "libxorp/utility.h"
 #include "libxorp/ether_compat.h"

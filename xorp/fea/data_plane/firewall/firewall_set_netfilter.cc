@@ -445,7 +445,7 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
     //
     struct ipt_getinfo info;
     memset(&info, 0, sizeof(info));
-    strlcpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
+    strncpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
     socklen = sizeof(info);
     if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_INFO, &info, &socklen) < 0) {
 	error_msg = c_format("Could not get the NETFILTER IPv4 firewall table: "
@@ -465,7 +465,7 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
     // Initialize the replacement header
     //
     ipr = reinterpret_cast<struct ipt_replace *>(&buffer[0]);
-    strlcpy(ipr->name, _netfilter_table_name.c_str(), sizeof(ipr->name));
+    strncpy(ipr->name, _netfilter_table_name.c_str(), sizeof(ipr->name));
     ipr->valid_hooks = info.valid_hooks;
     ipr->num_counters = info.num_entries;
     ipr->num_entries = 0;
@@ -517,10 +517,10 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
 	    + _ALIGN(sizeof(error->error_target));
 	error->error_target.entry_target.u.user.target_size
 	    = _ALIGN(sizeof(error->error_target));
-	strlcpy(error->error_target.entry_target.u.user.name,
+	strncpy(error->error_target.entry_target.u.user.name,
 		IPT_ERROR_TARGET,
 		sizeof(error->error_target.entry_target.u.user.name));
-	strlcpy(error->error_target.error, "ERROR",
+	strncpy(error->error_target.error, "ERROR",
 		sizeof(error->error_target.error));
 
 	next_data_index += error->entry.next_offset;
@@ -575,7 +575,7 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
     //
     struct ip6t_getinfo info;
     memset(&info, 0, sizeof(info));
-    strlcpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
+    strncpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
     socklen = sizeof(info);
     if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_INFO, &info, &socklen) < 0) {
 	error_msg = c_format("Could not get the NETFILTER IPv6 firewall table: "
@@ -595,7 +595,7 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
     // Initialize the replacement header
     //
     ipr = reinterpret_cast<struct ip6t_replace *>(&buffer[0]);
-    strlcpy(ipr->name, _netfilter_table_name.c_str(), sizeof(ipr->name));
+    strncpy(ipr->name, _netfilter_table_name.c_str(), sizeof(ipr->name));
     ipr->valid_hooks = info.valid_hooks;
     ipr->num_counters = info.num_entries;
     ipr->num_entries = 0;
@@ -647,10 +647,10 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
 	    + _ALIGN(sizeof(error->error_target));
 	error->error_target.entry_target.u.user.target_size
 	    = _ALIGN(sizeof(error->error_target));
-	strlcpy(error->error_target.entry_target.u.user.name,
+	strncpy(error->error_target.entry_target.u.user.name,
 		IP6T_ERROR_TARGET,
 		sizeof(error->error_target.entry_target.u.user.name));
-	strlcpy(error->error_target.error, "ERROR",
+	strncpy(error->error_target.error, "ERROR",
 		sizeof(error->error_target.error));
 
 	next_data_index += error->entry.next_offset;
@@ -704,11 +704,11 @@ FirewallSetNetfilter::encode_chain4(const string& chain_name,
 	head->entry.target_offset = sizeof(head->entry);
 	head->entry.next_offset = sizeof(head->entry)
 	    + _ALIGN(sizeof(head->error_target));
-	strlcpy(head->error_target.entry_target.u.user.name, IPT_ERROR_TARGET,
+	strncpy(head->error_target.entry_target.u.user.name, IPT_ERROR_TARGET,
 		sizeof(head->error_target.entry_target.u.user.name));
 	head->error_target.entry_target.u.target_size
 	    = _ALIGN(sizeof(head->error_target));
-	strlcpy(head->error_target.error, chain_name.c_str(),
+	strncpy(head->error_target.error, chain_name.c_str(),
 		sizeof(head->error_target.error));
 
 	next_data_index += head->entry.next_offset;
@@ -745,7 +745,7 @@ FirewallSetNetfilter::encode_chain4(const string& chain_name,
 	foot->entry.target_offset = sizeof(foot->entry);
 	foot->entry.next_offset = sizeof(foot->entry)
 	    + _ALIGN(sizeof(foot->standard_target));
-	strlcpy(foot->standard_target.target.u.user.name, IPT_STANDARD_TARGET,
+	strncpy(foot->standard_target.target.u.user.name, IPT_STANDARD_TARGET,
 		sizeof(foot->standard_target.target.u.user.name));
 	foot->standard_target.target.u.target_size
 	    = _ALIGN(sizeof(foot->standard_target));
@@ -787,11 +787,11 @@ FirewallSetNetfilter::encode_chain6(const string& chain_name,
 	head->entry.target_offset = sizeof(head->entry);
 	head->entry.next_offset = sizeof(head->entry)
 	    + _ALIGN(sizeof(head->error_target));
-	strlcpy(head->error_target.entry_target.u.user.name, IP6T_ERROR_TARGET,
+	strncpy(head->error_target.entry_target.u.user.name, IP6T_ERROR_TARGET,
 		sizeof(head->error_target.entry_target.u.user.name));
 	head->error_target.entry_target.u.target_size
 	    = _ALIGN(sizeof(head->error_target));
-	strlcpy(head->error_target.error, chain_name.c_str(),
+	strncpy(head->error_target.error, chain_name.c_str(),
 		sizeof(head->error_target.error));
 
 	next_data_index += head->entry.next_offset;
@@ -828,7 +828,7 @@ FirewallSetNetfilter::encode_chain6(const string& chain_name,
 	foot->entry.target_offset = sizeof(foot->entry);
 	foot->entry.next_offset = sizeof(foot->entry)
 	    + _ALIGN(sizeof(foot->standard_target));
-	strlcpy(foot->standard_target.target.u.user.name, IP6T_STANDARD_TARGET,
+	strncpy(foot->standard_target.target.u.user.name, IP6T_STANDARD_TARGET,
 		sizeof(foot->standard_target.target.u.user.name));
 	foot->standard_target.target.u.target_size
 	    = _ALIGN(sizeof(foot->standard_target));
@@ -900,7 +900,7 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     // XXX: On this platform, ifname == vifname
     //
     if (! firewall_entry.vifname().empty()) {
-	strlcpy(ipt->ip.iniface, firewall_entry.vifname().c_str(),
+	strncpy(ipt->ip.iniface, firewall_entry.vifname().c_str(),
 		sizeof(ipt->ip.iniface));
     }
 
@@ -922,7 +922,7 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
 	    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
 	    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strlcpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
+	    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
 		    sizeof(iem->u.user.name));
 	    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
 	    break;
@@ -936,7 +936,7 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
 	    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
 	    ip_udp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strlcpy(iem->u.user.name, _netfilter_match_udp.c_str(),
+	    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
 		    sizeof(iem->u.user.name));
 	    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
 	    break;
@@ -954,7 +954,7 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     ptr += ipt->target_offset;
     ist = reinterpret_cast<struct ipt_standard_target *>(ptr);
     ist->target.u.user.target_size = XT_ALIGN(sizeof(*ist));
-    strlcpy(ist->target.u.user.name, IPT_STANDARD_TARGET,
+    strncpy(ist->target.u.user.name, IPT_STANDARD_TARGET,
 	    sizeof(ist->target.u.user.name));
     switch (firewall_entry.action()) {
     case FirewallEntry::ACTION_PASS:
@@ -1038,7 +1038,7 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     // XXX: On this platform, ifname == vifname
     //
     if (! firewall_entry.vifname().empty()) {
-	strlcpy(ipt->ipv6.iniface, firewall_entry.vifname().c_str(),
+	strncpy(ipt->ipv6.iniface, firewall_entry.vifname().c_str(),
 		sizeof(ipt->ipv6.iniface));
     }
 
@@ -1060,7 +1060,7 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
 	    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
 	    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strlcpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
+	    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
 		    sizeof(iem->u.user.name));
 	    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
 	    break;
@@ -1074,7 +1074,7 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
 	    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
 	    ip_udp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strlcpy(iem->u.user.name, _netfilter_match_udp.c_str(),
+	    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
 		    sizeof(iem->u.user.name));
 	    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
 	    break;
@@ -1092,7 +1092,7 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     ptr += ipt->target_offset;
     ist = reinterpret_cast<struct ip6t_standard_target *>(ptr);
     ist->target.u.user.target_size = XT_ALIGN(sizeof(*ist));
-    strlcpy(ist->target.u.user.name, IP6T_STANDARD_TARGET,
+    strncpy(ist->target.u.user.name, IP6T_STANDARD_TARGET,
 	    sizeof(ist->target.u.user.name));
     switch (firewall_entry.action()) {
     case FirewallEntry::ACTION_PASS:

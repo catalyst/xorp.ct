@@ -853,14 +853,6 @@ ASPath::merge_as4_path(AS4Path& as4_path)
     (*this) = as4_path;
 }
 
-#if 0
-AS4Path::AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
-     throw(CorruptMessage)
-{
-    decode(d, len);
-    cross_validate(as_path);
-}
-#endif
 
 
 AS4Path::AS4Path(const uint8_t* d, size_t len)

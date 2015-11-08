@@ -32,16 +32,6 @@
 #define	PATH_CURDIR			"."
 #define	PATH_PARENT			".."
 
-#define	NT_PATH_DELIMITER_CHAR		'\\'
-#define	NT_PATH_DELIMITER_STRING	"\\"
-#define	NT_PATH_ENV_DELIMITER_CHAR	';'
-#define	NT_PATH_ENV_DELIMITER_STRING	";"
-#define	NT_PATH_DRIVE_DELIMITER_CH	':'
-#define	NT_EXECUTABLE_SUFFIX		".exe"
-
-// NT specific
-#define	NT_PATH_UNC_PREFIX		"\\\\"
-#define	NT_PATH_DRIVE_SUFFIX		":"
 
 #define	UNIX_PATH_DELIMITER_CHAR	'/'
 #define	UNIX_PATH_DELIMITER_STRING	"/"
@@ -49,41 +39,12 @@
 #define	UNIX_PATH_ENV_DELIMITER_STRING	":"
 #define	UNIX_EXECUTABLE_SUFFIX		""
 
-#ifdef	HOST_OS_WINDOWS
-#define	PATH_DELIMITER_CHAR		NT_PATH_DELIMITER_CHAR
-#define	PATH_DELIMITER_STRING		NT_PATH_DELIMITER_STRING
-#define	PATH_ENV_DELIMITER_CHAR		NT_PATH_ENV_DELIMITER_CHAR
-#define	PATH_ENV_DELIMITER_STRING	NT_PATH_ENV_DELIMITER_STRING
-#define	EXECUTABLE_SUFFIX		NT_EXECUTABLE_SUFFIX
-#else	// ! HOST_OS_WINDOWS
 #define	PATH_DELIMITER_CHAR		UNIX_PATH_DELIMITER_CHAR
 #define	PATH_DELIMITER_STRING		UNIX_PATH_DELIMITER_STRING
 #define	PATH_ENV_DELIMITER_CHAR		UNIX_PATH_ENV_DELIMITER_CHAR
 #define	PATH_ENV_DELIMITER_STRING	UNIX_PATH_ENV_DELIMITER_STRING
 #define	EXECUTABLE_SUFFIX		UNIX_EXECUTABLE_SUFFIX
-#endif	// ! HOST_OS_WINDOWS
 
-
-/**
- * Convert a UNIX style path to the platform's native path format.
- *
- * @param path the UNIX style path to be converted.
- * @return the converted path.
- */
-inline string
-unix_path_to_native(const string& unixpath)
-{
-#ifdef HOST_OS_WINDOWS
-    string nativepath = unixpath;
-    string::size_type n = 0;
-    while (string::npos != (n = nativepath.find(UNIX_PATH_DELIMITER_CHAR, n))) {
-        nativepath[n] = NT_PATH_DELIMITER_CHAR;
-    }
-    return (nativepath);
-#else // ! HOST_OS_WINDOWS
-    return string(unixpath);
-#endif // ! HOST_OS_WINDOWS
-}
 
 /**
  * Determine if a provided native path string is an absolute path, or
@@ -100,19 +61,11 @@ is_absolute_path(const string& path, bool homeok = false)
     if (path.empty())
 	return false;
 
-#ifdef HOST_OS_WINDOWS
-    if ((path.find(NT_PATH_UNC_PREFIX) == 0) ||
-	((path.size() >= 2) && isalpha(path[0]) && path[1] == ':'))
-        return true;
-    return false;
-    UNUSED(homeok);
-#else // ! HOST_OS_WINDOWS
     if (path[0] == '/')
         return true;
     if (homeok && path[0] == '~')
         return true;
     return false;
-#endif // ! HOST_OS_WINDOWS
 }
 
 /**
@@ -237,30 +190,6 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
 				 string& final_filename,
 				 string& errmsg);
 
-#ifdef HOST_OS_WINDOWS
-/**
- * Helper function to quote command line arguments for MSVCRT-linked programs.
- * 
- * Given an argv array represented by an STL list of strings, and a
- * writable command line string, walk through the arguments and perform
- * quoting/escaping according to the rules for invoking programs linked
- * against the Microsoft Visual C Runtime Library.
- *
- * This function is necessary because the Win32 CreateProcess() API
- * function accepts a single command line string, as opposed to a
- * UNIX-style argv[] array; arguments must therefore be delimited by
- * white space, so white space in arguments themselves must be quoted.
- *
- * Note that such extensive quoting shouldn't be performed for the
- * pathname to the executable -- generally it is desirable to only
- * wrap the path name with quotes, and then pass that string to this
- * helper function.
- *
- * @param args list of argument strings to be escaped.
- * @param cmdline string to which the escaped command line should be appended.
- */
-void win_quote_args(const list<string>& args, string& cmdline);
-#endif // HOST_OS_WINDOWS
 
 /**
  * Count the number of bits that are set in a 32-bit wide integer.

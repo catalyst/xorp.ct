@@ -33,7 +33,6 @@
 
 #include "libcomm/comm_api.h"
 
-#include "fea/data_plane/managers/fea_data_plane_manager_bsd.hh"
 #ifdef XORP_USE_CLICK
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 #endif
@@ -41,7 +40,6 @@
 #include "fea/data_plane/managers/fea_data_plane_manager_dummy.hh"
 #endif
 #include "fea/data_plane/managers/fea_data_plane_manager_linux.hh"
-#include "fea/data_plane/managers/fea_data_plane_manager_windows.hh"
 
 #include "fea_io.hh"
 #include "fea_node.hh"
@@ -94,19 +92,6 @@ FeaNode::startup()
     if (_ifconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
     }
-#if 0
-    //
-    // XXX: The FirewallManager will be started only if needed
-    // when firewall rules are installed.
-    //
-    if (_firewall_manager.start(error_msg) != XORP_OK) {
-	//
-	// XXX: Just print an error in case the firewall support
-	// in the underlying system is not enabled.
-	//
-	XLOG_ERROR("Cannot start FirewallManager: %s", error_msg.c_str());
-    }
-#endif // 0
     if (_fibconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start FibConfig: %s", error_msg.c_str());
     }
@@ -241,58 +226,12 @@ FeaNode::load_data_plane_managers(string& error_msg)
 
     unload_data_plane_managers(dummy_error_msg);
 
-#if 0
-    //
-    // TODO: XXX: PAVPAVPAV: sample code for dynamic loading
-    //
-    void* plugin_handle = dlopen(library_name.c_str(), RTLD_LAZY);
-    if (plugin_handle == NULL) {
-	error_msg = c_format("Cannot open library %s: %s",
-			     library_name.c_str(),
-			     dlerror());
-	return (XORP_ERROR);
-    }
-    XLOG_TRACE(false, "Loaded library %s", library_name.c_str());
-    typedef FeaDataPlaneManager* (*create_t)(FeaNode& fea_node);
-    create_t create = (create_t)dlsym(plugin_handle, "create");
-    const char* dlsym_error = dlerror();
-    if (dlsym_error != NULL) {
-	error_msg = c_format("Cannot load symbol \"create\": %s", dlsym_error);
-	dlclose(plugin_handler);
-	return (XORP_ERROR);
-    }
-    fea_data_plane_manager = create(*this);
-
-    //
-    // TODO: XXX: PAVPAVPAV: sample code for destroying the dynamic loaded
-    // plugin.
-    //
-    typedef void (*destroy_t)();
-    destroy_t destroy = (destroy_t)dlsym(plugin_handle, "destroy");
-    const char* dlsym_error = dlerror();
-    if (dlsym_error != NULL) {
-	error_msg = c_format("Cannot load symbol \"destroy\": %s",
-			     dlsym_error);
-	return (XORP_ERROR);
-    }
-    destroy();
-
-#endif // 0
-
     if (is_dummy()) {
 #ifdef XORP_USE_FEA_DUMMY
 	fea_data_plane_manager = new FeaDataPlaneManagerDummy(*this);
 #endif
     } else {
-#if defined(HOST_OS_MACOSX) || defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-	fea_data_plane_manager = new FeaDataPlaneManagerBsd(*this);
-#elif defined(HOST_OS_LINUX)
 	fea_data_plane_manager = new FeaDataPlaneManagerLinux(*this);
-#elif defined(HOST_OS_WINDOWS)
-	fea_data_plane_manager = new FeaDataPlaneManagerWindows(*this);
-#else
-#error "No data plane manager to load: unknown system"
-#endif
     }
 
     if (register_data_plane_manager(fea_data_plane_manager, true)

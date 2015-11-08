@@ -44,15 +44,6 @@ ReaderIxTuple<A>::operator<(const ReaderIxTuple& them) const
     if (them.masked_addr() < masked_addr()) {
 	return false;
     }
-#if 0
-    //The MIB requires it to be least-specific first
-    if (prefix_len() < them.prefix_len()) {
-	return true;
-    }
-    if (them.prefix_len() < _prefix_len()) {
-	return false;
-    }
-#else
     //XXX But we don't have a Trie iterator for that, so we do most
     //specific first for now.
     if (prefix_len() < them.prefix_len()) {
@@ -61,7 +52,6 @@ ReaderIxTuple<A>::operator<(const ReaderIxTuple& them) const
     if (them.prefix_len() < prefix_len()) {
 	return true;
     }
-#endif
     if (_peer_id < them.peer_id()) {
 	return true;
     }

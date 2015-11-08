@@ -381,18 +381,6 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     // Drop in an aggregation filter - beheave like an IBGP peering
     filter_out->add_aggregation_filter(true);
 
-#if 0
-    //
-    // outgoing caches are obsolete
-    //
-    CacheTable<A> *cache_out =
-	new CacheTable<A>(ribname + "IpcChannelOutputCache",
-			  _master.safi(),
-			  filter_out,
-			  _master.rib_handler());
-    filter_out->set_next_table(cache_out);
-    _tables.insert(cache_out);
-#endif
 
     _ipc_rib_out_table =
 	new RibOutTable<A>(ribname + "IpcRibOutTable",
@@ -738,17 +726,6 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 				 self_addr);
     filter_out->set_next_table(policy_filter_out);
 
-#if 0   
-    //
-    // outbound cache tables are obsolete
-    //
-    CacheTable<A>* cache_out = 
-	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
-			  _master.safi(),
-			  policy_filter_out,
-			  peer_handler);
-    policy_filter_out->set_next_table(cache_out);
-#endif
 
     RibOutTable<A>* rib_out =
 	new RibOutTable<A>(_ribname + "RibOut" + peername,
@@ -1129,20 +1106,6 @@ BGPPlumbingAF<A>::delete_route(const IPNet<A>& net,
 PeerHandler that has no associated RibIn");
 
     rib_in = iter->second;
-#if 0
-    // no need to go to all the effort to create a full message here,
-    // as we'll do the lookup in ribin anyway
-    uint32_t genid;
-    FPAListRef pa_list;
-    const SubnetRoute<A> *found_route = rib_in->lookup_route(net, genid, pa_list);
-    if (found_route == NULL) {
-	XLOG_WARNING("Attempt to delete non existent route %s",
-		     net.str().c_str());
-	return result;
-    }
-    InternalMessage<A> rtmsg(found_route, pa_list, peer_handler, GENID_UNKNOWN);
-    result = rib_in->delete_route(rtmsg, NULL);
-#endif
     result = rib_in->delete_route(net);
     return result;
 }

@@ -79,14 +79,6 @@ xorp_isalpha(int c)
  * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
  * with ISO C99, and may not always be available on the system.
  */
-#if 0
-int
-xorp_isblank(int c)
-{
-    return isascii(c) && isblank(c);
-}
-#endif /* 0 */
-
 int
 xorp_iscntrl(int c)
 {

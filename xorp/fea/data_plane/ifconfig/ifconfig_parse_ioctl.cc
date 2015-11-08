@@ -72,7 +72,6 @@ int
 IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 				     int family, const vector<uint8_t>& buffer)
 {
-#ifndef HOST_OS_WINDOWS
     int s;
     uint32_t if_index = 0;
     string if_name, alias_if_name;
@@ -243,15 +242,7 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
 	} else {
-#ifndef HOST_OS_SOLARIS
 	    mtu = ifrcopy.ifr_mtu;
-#else
-	    //
-	    // XXX: Solaris supports ioctl(SIOCGIFMTU), but stores the MTU
-	    // in the ifr_metric field instead of ifr_mtu.
-	    //
-	    mtu = ifrcopy.ifr_metric;
-#endif // HOST_OS_SOLARIS
 	}
 	if (is_newlink || (mtu != ifp->mtu()))
 	    ifp->set_mtu(mtu);
@@ -597,14 +588,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
     comm_close(s);
 
     return (XORP_OK);
-#else // HOST_OS_WINDOWS
-    XLOG_FATAL("WinSock2 does not support struct ifreq.");
-
-    UNUSED(it);
-    UNUSED(family);
-    UNUSED(buffer);
-    return (XORP_ERROR);
-#endif // HOST_OS_WINDOWS
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF and not NETLINK

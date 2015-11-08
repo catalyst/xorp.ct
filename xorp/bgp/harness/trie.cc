@@ -96,19 +96,6 @@ Trie::lookup(const IPv6Net& n) const
     ** Look for a multiprotocol path attribute.
     */
     const MPReachNLRIAttribute<IPv6> *mpreach = 0;
-#if 0
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = update->pa_list().begin(); pai != update->pa_list().end();
-	 pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    break;
-	}
-    }
-#endif
     mpreach = update->mpreach<IPv6>(SAFI_UNICAST);
     if (mpreach == 0)
 	mpreach = update->mpreach<IPv6>(SAFI_MULTICAST);
@@ -149,23 +136,6 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
     const MPReachNLRIAttribute<IPv6> *mpreach = 0;
     const MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
 
-#if 0    
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    continue;
-	}
-	
-	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
-	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
-	    continue;
-	}
-    }
-#endif
     mpreach = p->mpreach<IPv6>(SAFI_UNICAST);
     if (!mpreach)
 	mpreach = p->mpreach<IPv6>(SAFI_MULTICAST);

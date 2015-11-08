@@ -177,16 +177,6 @@ IoIpDummy::join_multicast_group(const string& if_name,
 	return (XORP_ERROR);
     }
 
-#if 0	// TODO: enable or disable the enabled() check?
-    if (! vifp->enabled()) {
-	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
-			     "interface/vif is DOWN",
-			     cstring(group),
-			     if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
-#endif // 0/1
 
     // Add the group to the set of joined groups
     IoIpComm::JoinedMulticastGroup joined_group(if_name, vif_name, group);
@@ -214,16 +204,6 @@ IoIpDummy::leave_multicast_group(const string& if_name,
 	return (XORP_ERROR);
     }
 
-#if 0	// TODO: enable or disable the enabled() check?
-    if (! vifp->enabled()) {
-	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
-			     "interface/vif is DOWN",
-			     cstring(group),
-			     if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
-#endif // 0/1
 
     // Remove the group from the set of joined groups
     set<IoIpComm::JoinedMulticastGroup>::iterator iter;

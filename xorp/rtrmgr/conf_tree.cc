@@ -54,14 +54,6 @@ ConfigTree::~ConfigTree()
     // XXX: _root_node will handle the deletion of all the tree nodes
 }
 
-#if 0
-ConfigTree&
-ConfigTree::operator=(const ConfigTree& orig_tree)
-{
-    root_node().clone_subtree(orig_tree.const_root_node());
-    return *this;
-}
-#endif
 
 bool
 ConfigTree::parse(const string& configuration, const string& config_file,

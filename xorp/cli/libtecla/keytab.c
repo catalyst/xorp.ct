@@ -39,10 +39,6 @@
 #include "strngmem.h"
 
 static int _kt_extend_table(KeyTab *kt);
-#if 0
-static int _kt_parse_keybinding_string(const char *keyseq,
-				       char *binary, int *nc);
-#endif
 static int _kt_compare_strings(const char *s1, int n1, const char *s2, int n2);
 static void _kt_assign_action(KeySym *sym, KtBinder binder, KtKeyFn *keyfn);
 static char _kt_backslash_escape(const char *string, const char **endp);

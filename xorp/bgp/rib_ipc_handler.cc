@@ -322,22 +322,6 @@ RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
 	      unicast, multicast);
 
 // XXX: bug... wrong function called
-#if 0
-    /*
-    ** Create a subnet route
-    */
-    SubnetRoute<IPv4>* msg_route
-	= new SubnetRoute<IPv4>(nlri, 0, NULL);
-
-    /*
-    ** Make an internal message.
-    */
-    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
-
-    /*
-    ** Inject the message into the plumbing.
-    */
-#endif    
     if (unicast) {
 	_plumbing_unicast->delete_route(nlri, this);
 	_plumbing_unicast->push<IPv4>(this);
@@ -707,22 +691,6 @@ RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
 	      unicast, multicast);
 
 // XXX: bug... wrong function called
-#if 0
-    /*
-    ** Create a subnet route
-    */
-    SubnetRoute<IPv6>* msg_route
-	= new SubnetRoute<IPv6>(nlri, 0, NULL);
-
-    /*
-    ** Make an internal message.
-    */
-    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
-
-    /*
-    ** Inject the message into the plumbing.
-    */
-#endif    
     if (unicast) {
 	_plumbing_unicast->delete_route(nlri, this);
 	_plumbing_unicast->push<IPv6>(this);

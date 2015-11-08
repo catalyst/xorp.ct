@@ -2771,16 +2771,6 @@ XrlFeaTarget::add_remove_address(bool add, const string& ifname, const string& v
 	return (XORP_ERROR);
     }
 
-#if 0
-    // TODO:  Should we send gratuitous arp here??
-    if (send_gratuitous_arps(ifname, mac, error_msg) != XORP_OK) {
-	error_msg = c_format("Cannot set MAC address %s on interface %s: %s",
-			     ip.str().c_str(), ifname.c_str(),
-			     error_msg.c_str());
-	return (XORP_ERROR);
-    }
-#endif
-
     XLOG_WARNING("returning from add_remove_address, add: %i  vif: %s/%s  ip: %s\n",
 		 (int)(add), ifname.c_str(), vifname.c_str(), ip.str().c_str());
 

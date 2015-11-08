@@ -146,7 +146,6 @@
 #  endif /* __BEGIN_DECLS */
 #endif /* __BEGIN_DECLS */
 
-#include "xorp_osdep_begin.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -201,7 +200,6 @@
 
 #include "utility.h"
 
-#include "xorp_osdep_mid.h"
 
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
 #ifndef XORP_USE_USTL
@@ -270,6 +268,5 @@ typedef bool bool_t;
 #define XORP_OK		 (0)
 #define XORP_ERROR	(-1)
 
-#include "xorp_osdep_end.h"
 
 #endif /* __LIBXORP_XORP_H__ */

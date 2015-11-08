@@ -384,14 +384,6 @@ FibConfigEntrySetClick::delete_entry(const FteX& fte)
 	break;
     } while (false);
 
-#if 0	// TODO: XXX: currently, we don't have the next-hop info, hence
-	// we allow to delete an entry without the port number.
-    if (port < 0) {
-	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
-		   "table element to delete entry %s", fte.str().c_str());
-	return (XORP_ERROR);
-    }
-#endif // 0
 
     //
     // Write the configuration

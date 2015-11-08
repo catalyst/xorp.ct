@@ -57,18 +57,6 @@
 // FEA data plane manager class for Linux FEA.
 //
 
-#if 0
-extern "C" FeaDataPlaneManager* create(FeaNode& fea_node)
-{
-    return (new FeaDataPlaneManagerLinux(fea_node));
-}
-
-extern "C" void destroy(FeaDataPlaneManager* fea_data_plane_manager)
-{
-    delete fea_data_plane_manager;
-}
-#endif // 0
-
 
 FeaDataPlaneManagerLinux::FeaDataPlaneManagerLinux(FeaNode& fea_node)
     : FeaDataPlaneManager(fea_node, "Linux")
@@ -111,9 +99,7 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     //
     // Load the plugins
     //
-#if defined(HOST_OS_LINUX)
     _ifconfig_property = new IfConfigPropertyLinux(*this);
-#endif
 
 #if defined(HAVE_NETLINK_SOCKETS)
     _ifconfig_get = new IfConfigGetNetlinkSocket(*this);

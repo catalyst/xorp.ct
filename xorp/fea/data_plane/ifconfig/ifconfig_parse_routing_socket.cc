@@ -217,16 +217,6 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
 	ifm = (const struct if_msghdr*)(&(buffer[offset]));
 	if (ifm->ifm_version != RTM_VERSION) {
-#if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
-	    //
-	    // XXX: Silently ignore old messages.
-	    // The OpenBSD kernel sends each message twice, once as
-	    // RTM_VERSION and once as RTM_OVERSION, hence we need to ignore
-	    // the RTM_OVERSION duplicates.
-	    //
-	    if (ifm->ifm_version == RTM_OVERSION)
-		continue;
-#endif // RTM_OVERSION && HOST_OS_OPENBSD
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
 		       ifm->ifm_version);
@@ -728,36 +718,6 @@ rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	if (! has_peer_addr)
 	    ap->set_point_to_point(false);
 	
-#if 0	// TODO: don't get the flags?
-	do {
-	    //
-	    // Get IPv6 specific flags
-	    //
-	    int s;
-	    struct in6_ifreq ifrcopy6;
-	    
-	    s = socket(AF_INET6, SOCK_DGRAM, 0);
-	    if (s < 0) {
-		XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
-	    }
-	    memset(&ifrcopy6, 0, sizeof(ifrcopy6));
-	    strncpy(ifrcopy6.ifr_name, vifp->vifname().c_str(),
-		    sizeof(ifrcopy6.ifr_name) - 1);
-	    a.copy_out(ifrcopy6.ifr_addr);
-	    if (ioctl(s, SIOCGIFAFLAG_IN6, &ifrcopy6) < 0) {
-		XLOG_ERROR("ioctl(SIOCGIFAFLAG_IN6) for interface %s failed: %s",
-			   vifp->vif_name().c_str(), strerror(errno));
-	    }
-	    close (s);
-	    //
-	    // TODO: shall we ignore the anycast addresses?
-	    // TODO: what about TENTATIVE, DUPLICATED, DETACHED, DEPRECATED?
-	    //
-	    if (ifrcopy6.ifr_ifru.ifru_flags6 & IN6_IFF_ANYCAST) {
-		
-	    }
-	} while (false);
-#endif // 0/1
 	
 	// Mark as deleted if necessary
 	if (ifa->ifam_type == RTM_DELADDR)

@@ -182,20 +182,6 @@ FaceManager::receive(const string& interface, const string& vif,
 	return;		// not enabled, therefore not listening.
     }
 
-#if 0
-    // These checks are normally stubbed out, as it isn't possible
-    // to determine the destination address or port using the socket4 xif.
-
-    // Check for a port match, to accept this packet.
-    // Strictly this is only needed if we're running in the simulator.
-    if (dport != face->local_port())
-	return;
-
-    // Check for a match with the configured broadcast address to
-    // accept this packet.
-    if (dst != face->all_nodes_addr())
-	return;
-#endif
 
     Packet* pkt = new Packet(_md, faceid);
     try {

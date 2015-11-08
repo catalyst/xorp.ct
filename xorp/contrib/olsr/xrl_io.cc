@@ -388,13 +388,6 @@ XrlIO::status_change(ServiceBase*  service,
 
 	if (new_status != SERVICE_SHUTDOWN)
 	    return;
-#if 0
-	// Resolve ServiceBase* to XrlPort*.
-	// Note: this assertion can fail if we never detected the failure
-	// of the socket to start up.
-	XrlDeadPortMap::iterator ii = _dead_ports.find(service);
-	XLOG_ASSERT(ii != _dead_ports.end());
-#endif
 
 	return;
     }

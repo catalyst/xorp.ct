@@ -53,13 +53,6 @@ class Vertex {
      * @return true if this node comes before the other node.
      */
     inline bool operator<(const Vertex& other) const {
-#if 0
-	if (_main_addr == other.main_addr()) {
-	    if (_is_origin == other.is_origin())
-		return _t < other.type();
-	    return _is_origin > other.is_origin();
-	}
-#endif
 	return _main_addr < other.main_addr();
     }
 

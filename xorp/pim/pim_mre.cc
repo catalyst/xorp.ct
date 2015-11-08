@@ -834,26 +834,16 @@ PimMre::entry_can_remove() const
 	if (is_not_pruned_state() && const_override_timer().scheduled())
 	    return (false);
     }
-#if 0		// TODO: XXX: PAVPAVPAV: not needed?
-    if (inherited_olist_sg().any())
-	return (false);
-    if (inherited_olist_sg_rpt().any())
-	return (false);
-#endif // 0
-#if 1		// TODO: XXX: PAVPAVPAV: not needed?
     if (is_sg()) {
 	if (! is_register_noinfo_state())
 	    return (false);
     }
-#endif // 1
     
-#if 1		// TODO: XXX: PAVPAVPAV: not needed?
     if (is_wc() || is_sg()) {
 	if (i_am_assert_winner_state().any()
 	    || i_am_assert_loser_state().any())
 	    return (false);
     }
-#endif // 1
     
     if (is_sg()) {
 	// TODO: OK NOT to remove if the KeepaliveTimer(S,G) is running?

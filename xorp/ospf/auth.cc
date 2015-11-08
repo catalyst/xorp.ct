@@ -830,11 +830,6 @@ Auth::delete_simple_authentication_key(string& error_msg)
 	// limitation and therefore we shouldn't return an error here.
 	//
 	return (true);
-#if 0
-	error_msg = c_format("Cannot delete simple password authentication: "
-			     "no such is configured");
-	return (false);	// XXX: not a simple password authentication handler
-#endif
     }
 
     //
@@ -899,11 +894,6 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
 	// limitation and therefore we shouldn't return an error here.
 	//
 	return (true);
-#if 0
-	error_msg = c_format("Cannot delete MD5 password authentication: "
-			     "no such is configured");
-	return (false);
-#endif
     }
 
     XLOG_ASSERT(md5_ah != NULL);

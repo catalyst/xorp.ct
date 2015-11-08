@@ -199,28 +199,6 @@ Vrrp::setup_timers(bool skew)
     }
 }
 
-#if 0
-void
-Vrrp::check_ownership()
-{
-    bool own = true;
-
-    //_arpd.clear();
-
-    for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
-	own &= _vif.own(*i);
-
-	//if (!own)
-	//    _arpd.insert(*i);
-    }
-
-    //_arpd.ips_updated();
-
-    // This is broken if IPs are split (we have two, own one, but not the other)
-    _own = own;
-    setup_intervals();
-}
-#endif
 
 uint32_t
 Vrrp::priority() const
@@ -502,13 +480,6 @@ Vrrp::check_ips(const VrrpHeader& vh)
     return true;
 }
 
-#if 0
-ARPd&
-Vrrp::arpd()
-{
-    return _arpd;
-}
-#endif
 
 void
 Vrrp::get_info(string& state, IPv4& master) const

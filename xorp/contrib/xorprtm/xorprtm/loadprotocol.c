@@ -275,9 +275,7 @@ static DWORD DLL_PROTO = PROTO_IP_XORPRTM;
 static CHAR DLL_TITLE_IPV4[] = "Router Manager V2 adapter for XORP (IPv4)";
 static CHAR DLL_TITLE_IPV6[] = "Router Manager V2 adapter for XORP (IPv6)";
 static CHAR DLL_VENDOR[] = "www.xorp.org";
-#if 1
 static CHAR TRACING_DIR[] = "%windir%\\Tracing";
-#endif
 
 void
 add_protocol_to_registry(int family)
@@ -312,7 +310,6 @@ add_protocol_to_registry(int family)
     RegSetValueExA(hKey, "VendorName", 0, REG_SZ, DLL_VENDOR, sizeof(DLL_VENDOR));
     RegCloseKey(hKey);
 
-#if 1
  /* XXX: Enable console tracing for debugging. */
 
     result = RegCreateKeyExA(
@@ -338,7 +335,6 @@ add_protocol_to_registry(int family)
     RegSetValueExA(hKey, "FileDirectory", 0, REG_EXPAND_SZ, TRACING_DIR, sizeof(TRACING_DIR));
 
     RegCloseKey(hKey);
-#endif
 }
 
 int

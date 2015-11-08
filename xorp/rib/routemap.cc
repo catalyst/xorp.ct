@@ -36,13 +36,6 @@ RouteMap::RouteMap(const string& mapname)
 int
 RouteMap::add_rule(RMRule* rule)
 {
-#if 0
-    if (_ruleset[rule->seq()] != NULL) {
-	cerr << "Attempt to add duplicate rule number " << rule->seq() 
-	     << " to RouteMap " << _mapname << "\n";
-	return XORP_ERROR;
-    }
-#endif
     
     list<RMRule* >::iterator iter;
     for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) {

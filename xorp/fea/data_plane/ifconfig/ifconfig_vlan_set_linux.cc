@@ -287,7 +287,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	string tmp_vlan_name = c_format("vlan%u", vlan_id);
 
 	memset(&ifreq, 0, sizeof(ifreq));
-	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
 	if (ioctl(_s4, SIOCIFCREATE, &ifreq) < 0) {
 	    error_msg = c_format("Cannot create VLAN interface %s: %s",
 				 tmp_vlan_name.c_str(), strerror(errno));
@@ -305,8 +305,8 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	//
 	char new_vlan_name[sizeof(ifreq.ifr_name)];
 	memset(&ifreq, 0, sizeof(ifreq));
-	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
-	strlcpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
+	strncpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
 	ifreq.ifr_data = new_vlan_name;
 	if (ioctl(_s4, SIOCSIFNAME, &ifreq) < 0) {
 	    error_msg = c_format("Cannot rename VLAN interface %s to %s: %s",
@@ -346,7 +346,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     // Create the VLAN
     //
     memset(&vlanreq, 0, sizeof(vlanreq));
-    strlcpy(vlanreq.device1, parent_ifname.c_str(), sizeof(vlanreq.device1));
+    strncpy(vlanreq.device1, parent_ifname.c_str(), sizeof(vlanreq.device1));
     vlanreq.u.VID = vlan_id;
     vlanreq.cmd = ADD_VLAN_CMD;
     errno = 0;
@@ -387,9 +387,9 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	char new_vlan_name[sizeof(ifreq.ifr_newname)];
 
 	memset(&ifreq, 0, sizeof(ifreq));
-	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
-	strlcpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
-	strlcpy(ifreq.ifr_newname, new_vlan_name, sizeof(ifreq.ifr_newname));
+	strncpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
+	strncpy(ifreq.ifr_newname, new_vlan_name, sizeof(ifreq.ifr_newname));
 	if (ioctl(_s4, SIOCSIFNAME, &ifreq) < 0) {
 	    error_msg = c_format("Cannot rename VLAN interface %s to %s: %s",
 				 tmp_vlan_name.c_str(), new_vlan_name,
@@ -426,7 +426,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
 #ifdef HAVE_VLAN_BSD
     struct ifreq ifreq;
     memset(&ifreq, 0, sizeof(ifreq));
-    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
+    strncpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
     if (ioctl(_s4, SIOCIFDESTROY, &ifreq) < 0) {
         error_msg = c_format("Cannot destroy BSD VLAN interface %s: %s",
                              vlan_name.c_str(), strerror(errno));
@@ -438,7 +438,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
     struct vlan_ioctl_args vlanreq;
 
     memset(&vlanreq, 0, sizeof(vlanreq));
-    strlcpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1));
+    strncpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1));
     vlanreq.cmd = DEL_VLAN_CMD;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot destroy Linux VLAN interface %s: %s",

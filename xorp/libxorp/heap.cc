@@ -203,7 +203,6 @@ Heap::pop_obj(HeapBase *obj)
     DBG(verify());
 }
 
-#if 1
 /*
  * change object position and update references
  * XXX this one is never used!
@@ -243,7 +242,6 @@ Heap::move(Heap_Key new_key, HeapBase *object)
     }
     SET_OFFSET(i);
 }
-#endif // heap_move, unused
 
 // heapify() will reorganize data inside an array to maintain the
 // heap property. It is needed when we delete a bunch of entries.

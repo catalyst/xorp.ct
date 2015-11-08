@@ -23,7 +23,6 @@
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_LINUX_HH__
 
 #include <xorp_config.h>
-#ifdef HOST_OS_LINUX
 
 #include "fea/ifconfig_property.hh"
 
@@ -59,5 +58,4 @@ private:
     virtual bool test_have_ipv6() const;
 };
 
-#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_LINUX_HH__

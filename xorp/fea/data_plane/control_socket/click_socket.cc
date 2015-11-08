@@ -283,10 +283,6 @@ ClickSocket::start(string& error_msg)
 int
 ClickSocket::stop(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg)
-    return (XORP_ERROR);
-#else /* !HOST_OS_WINDOWS */
     //
     // XXX: First we should stop user-level Click, and then kernel-level Click.
     // Otherwise, the user-level Click process may block the unmounting
@@ -325,7 +321,6 @@ ClickSocket::stop(string& error_msg)
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 int
@@ -387,30 +382,7 @@ ClickSocket::load_kernel_module(const string& module_filename,
     // Load the kernel module using system-specific mechanism
     //
 
-#ifdef HOST_OS_FREEBSD
-    //
-    // Test if the kernel module was installed already
-    //
-    if (kldfind(module_name.c_str()) >= 0) {
-	return (XORP_OK);	// Module with the same name already loaded
-    }
 
-    //
-    // Load the kernel module
-    //
-    if (kldload(module_filename.c_str()) < 0) {
-	error_msg = c_format("Cannot load kernel module %s: %s",
-			     module_filename.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    _loaded_kernel_click_modules.push_back(module_filename);
-
-    return (XORP_OK);
-
-#endif // HOST_OS_FREEBSD
-
-#ifdef HOST_OS_LINUX
     //
     // Test if the kernel module was installed already
     //
@@ -483,35 +455,6 @@ ClickSocket::load_kernel_module(const string& module_filename,
     _loaded_kernel_click_modules.push_back(module_filename);
 
     return (XORP_OK);
-
-#endif // HOST_OS_LINUX
-
-#ifdef HOST_OS_MACOSX
-    // TODO: implement it
-    error_msg = c_format("No mechanism to load a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_MACOSX
-
-#ifdef HOST_OS_NETBSD
-    // TODO: implement it
-    error_msg = c_format("No mechanism to load a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_NETBSD
-
-#ifdef HOST_OS_OPENBSD
-    // TODO: implement it
-    error_msg = c_format("No mechanism to load a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_OPENBSD
-
-#ifdef HOST_OS_SOLARIS
-    // TODO: implement it
-    error_msg = c_format("No mechanism to load a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_SOLARIS
-
-    error_msg = c_format("No mechanism to load a kernel module");
-    return (XORP_ERROR);
 }
 
 int
@@ -541,40 +484,7 @@ ClickSocket::unload_kernel_module(const string& module_filename,
     // Unload the kernel module using system-specific mechanism
     //
 
-#ifdef HOST_OS_FREEBSD
-    //
-    // Find the kernel module ID.
-    //
-    int module_id = kldfind(module_name.c_str());
-    if (module_id < 0) {
-	error_msg = c_format("Cannot unload kernel module %s: "
-			     "module ID not found: %s",
-			     module_filename.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
 
-    //
-    // Unload the kernel module
-    //
-    if (kldunload(module_id) < 0) {
-	error_msg = c_format("Cannot unload kernel module %s: %s",
-			     module_filename.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    // Remove the module filename from the list of loaded modules
-    list<string>::iterator iter;
-    iter = find(_loaded_kernel_click_modules.begin(),
-		_loaded_kernel_click_modules.end(),
-		module_filename);
-    XLOG_ASSERT(iter != _loaded_kernel_click_modules.end());
-    _loaded_kernel_click_modules.erase(iter);
-
-    return (XORP_OK);
-
-#endif // HOST_OS_FREEBSD
-
-#ifdef HOST_OS_LINUX
     //
     // Unload the kernel module
     //
@@ -606,34 +516,6 @@ ClickSocket::unload_kernel_module(const string& module_filename,
 
     return (XORP_OK);
 
-#endif // HOST_OS_LINUX
-
-#ifdef HOST_OS_MACOSX
-    // TODO: implement it
-    error_msg = c_format("No mechanism to unload a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_MACOSX
-
-#ifdef HOST_OS_NETBSD
-    // TODO: implement it
-    error_msg = c_format("No mechanism to unload a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_NETBSD
-
-#ifdef HOST_OS_OPENBSD
-    // TODO: implement it
-    error_msg = c_format("No mechanism to unload a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_OPENBSD
-
-#ifdef HOST_OS_SOLARIS
-    // TODO: implement it
-    error_msg = c_format("No mechanism to unload a kernel module");
-    return (XORP_ERROR);
-#endif // HOST_OS_SOLARIS
-
-    error_msg = c_format("No mechanism to unload a kernel module");
-    return (XORP_ERROR);
 }
 
 string
@@ -675,12 +557,6 @@ ClickSocket::kernel_module_filename2modulename(const string& module_filename)
 int
 ClickSocket::mount_click_file_system(string& error_msg)
 {
-#if defined(HOST_OS_WINDOWS)
-    // Whilst Cygwin has a mount(), it is very different.
-    // Windows itself has no mount().
-    UNUSED(error_msg);
-    return (XORP_ERROR);
-#else
     if (_kernel_click_mount_directory.empty()) {
 	error_msg = c_format("Kernel Click mount directory is empty");
 	return (XORP_ERROR);
@@ -735,16 +611,8 @@ ClickSocket::mount_click_file_system(string& error_msg)
     // care of this.
     //
     int ret_value = -1;
-#ifdef HOST_OS_LINUX
     ret_value = mount("none", _kernel_click_mount_directory.c_str(),
 		      CLICK_FILE_SYSTEM_TYPE.c_str(), 0, 0);
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 499002400
-    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
-		      _kernel_click_mount_directory.c_str(), 0, 0, 0);
-#else
-    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
-		      _kernel_click_mount_directory.c_str(), 0, 0);
-#endif // ! HOST_OS_LINUX
 
     if (ret_value != 0) {
 	error_msg = c_format("Cannot mount Click file system "
@@ -757,16 +625,11 @@ ClickSocket::mount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory = _kernel_click_mount_directory;
 
     return (XORP_OK);
-#endif // HOST_OS_WINDOWS
 }
 
 int
 ClickSocket::unmount_click_file_system(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg);
-    return (XORP_OK);
-#else
     if (_mounted_kernel_click_mount_directory.empty())
 	return (XORP_OK);	// Directory not mounted
 
@@ -775,11 +638,7 @@ ClickSocket::unmount_click_file_system(string& error_msg)
     // umount(2), hence we need to take care of this.
     //
     int ret_value = -1;
-#if defined(HOST_OS_LINUX) || defined(HOST_OS_SOLARIS)
     ret_value = umount(_mounted_kernel_click_mount_directory.c_str());
-#else
-    ret_value = unmount(_mounted_kernel_click_mount_directory.c_str(), 0);
-#endif
 
     if (ret_value != 0) {
 	error_msg = c_format("Cannot unmount Click file system "
@@ -792,7 +651,6 @@ ClickSocket::unmount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory.erase();
 
     return (XORP_OK);
-#endif // HOST_OS_WINDOWS
 }
 
 int
@@ -869,16 +727,6 @@ ClickSocket::write_config(const string& element, const string& handler,
 			  bool has_user_config, const string& user_config,
 			  string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(element);
-    UNUSED(handler);
-    UNUSED(has_kernel_config);
-    UNUSED(kernel_config);
-    UNUSED(has_user_config);
-    UNUSED(user_config);
-    UNUSED(error_msg);
-    return (0);
-#else /* !HOST_OS_WINDOWS */
     if (is_kernel_click() && has_kernel_config) {
 	//
 	// Prepare the output handler name
@@ -1008,21 +856,13 @@ ClickSocket::write_config(const string& element, const string& handler,
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 ssize_t
 ClickSocket::write(XorpFd fd, const void* data, size_t nbytes)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(fd);
-    UNUSED(data);
-    UNUSED(nbytes);
-    return (0);
-#else
     _seqno++;
     return ::write(fd, data, nbytes);
-#endif
 }
 
 int
@@ -1143,19 +983,13 @@ int
 ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
 				string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(fd);
-    UNUSED(message);
-    UNUSED(error_msg);
-    return (XORP_ERROR);
-#else /* !HOST_OS_WINDOWS */
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
     for ( ; ; ) {
 	ssize_t got;
 	// Find how much data is queued in the first message
 	do {
-	    got = recv(fd, XORP_BUF_CAST(&buffer[0]),
+	    got = recv(fd, (void*)(&buffer[0]),
 		       buffer.size(),
 #ifdef MSG_DONTWAIT
 		       MSG_DONTWAIT |
@@ -1182,7 +1016,6 @@ ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 void

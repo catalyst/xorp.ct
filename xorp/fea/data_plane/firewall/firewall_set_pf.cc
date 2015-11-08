@@ -199,17 +199,6 @@ FirewallSetPf::update_entries(const list<FirewallEntry>& added_entries,
     //
     // XXX: If we need to use a single operation to delete an entry,
     // the following code can do it.
-#if 0
-    //
-    // Use a single operation to delete the entry
-    //
-    bool is_add = false;
-    uint32_t ticket = 0;
-    if (add_delete_transaction_entry(is_add, ticket, firewall_entry, error_msg)
-	!= XORP_OK) {
-	return (XORP_ERROR);
-    }
-#endif // 0
 
     return (push_entries(error_msg));
 }
@@ -553,7 +542,7 @@ FirewallSetPf::add_delete_transaction_entry(bool is_add, uint32_t ticket,
     // XXX: On this platform, ifname == vifname
     //
     if (! firewall_entry.vifname().empty()) {
-        strlcpy(pr.rule.ifname, firewall_entry.vifname().c_str(),
+        strncpy(pr.rule.ifname, firewall_entry.vifname().c_str(),
                 sizeof(pr.rule.ifname));
     }
 

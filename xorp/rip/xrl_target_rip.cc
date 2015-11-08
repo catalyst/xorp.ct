@@ -497,11 +497,6 @@ XrlRipTarget::rip_0_1_delete_simple_authentication_key(
 	// limitation and therefore we shouldn't return an error here.
 	//
 	return XrlCmdError::OKAY();
-#if 0
-	error_msg = c_format("Cannot delete simple password authentication: "
-			     "no such is configured");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-#endif
     }
 
     //
@@ -625,11 +620,6 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
 	// limitation and therefore we shouldn't return an error here.
 	//
 	return XrlCmdError::OKAY();
-#if 0
-	error_msg = c_format("Cannot delete MD5 password authentication: "
-			     "no such is configured");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-#endif
     }
 
     XLOG_ASSERT(md5_ah != NULL);

@@ -66,11 +66,6 @@ public:
     virtual bool expand_action(string& error_msg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
-#if 0    
-    template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
-						      string& result,
-						      string& error_msg) const;
-#endif
     template<class TreeNode> Xrl* expand_xrl_variables(const TreeNode& tn,
 						       string& error_msg) const;
     const string& request() const { return _request; }

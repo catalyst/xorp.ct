@@ -617,14 +617,6 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 	return false;
     }
 
-#if 0
-    // XXX This stops us getting stuck with everything queued up on
-    // finder client responses.  It's likely to be a cause of pain for
-    // existing code.
-    if (_fc->queries_pending() > 0)
-	return false;
-#endif
-
     //
     // Fast path - Xrl resolution in cache and no Xrls ahead blocked on
     // on response from Finder.  Fast path cannot be taken if earlier Xrls

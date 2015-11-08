@@ -114,15 +114,6 @@ Neighbor::recount_degree()
 bool
 Neighbor::is_cand_mpr()
 {
-#if 0
-    // A neighbor which will always forward MUST be an MPR, even
-    // if it has no two-hop links.
-    // XXX If this predicate always holds, we can't tell when a
-    // change in degree would cause a persistent MPR to be considered
-    // as an MPR candidate.
-    if (_willingness == OlsrTypes::WILL_ALWAYS)
-	return true;
-#endif
 
     // A neighbor which will never forward MUST NOT be an MPR.
     if (_willingness == OlsrTypes::WILL_NEVER)

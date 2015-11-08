@@ -120,39 +120,12 @@ SlaveConfigTree::commit_changes(string& result, XorpShellBase& xorpsh,
 	       "##########################################################\n");
     XLOG_TRACE(_verbose, "SlaveConfigTree::commit_changes\n");
 
-#if 0	// TODO: XXX: FIX IT!!
-    // XXX: we really should do this check, but we need to deal with
-    // unexpanded variables more gracefully.
-
-    //
-    // Two passes: the first checks for errors.  If no errors are
-    // found, attempt the actual commit.
-    //
-    size_t tid = 0;
-    tid = _xclient.begin_transaction();
-    _root_node.initialize_commit();
-    bool needs_activate = false;
-    bool needs_update = false;
-    if (_root_node.commit_changes(NULL, "", _xclient, tid,
-				  /* do_exec = */ false,
-				  /* do_commit = */ false,
-				  0, 0,
-				  result,
-				  needs_activate,
-				  needs_update) == false) {
-	// Something went wrong - return the error message.
-	return false;
-    }
-    CallBack empty_cb;
-    _xclient.end_transaction(tid, empty_cb);
-#else
     // Check the tree: whether all mandatory children nodes are present, etc.
     if (_root_node.check_config_tree(result) == false) {
 	_commit_status.set_error(result);
 	return false;
     }
     UNUSED(result);
-#endif
 
     _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_1);
 

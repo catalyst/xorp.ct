@@ -421,43 +421,6 @@ XorpShell::generic_done(const XrlError& e)
     exit(1);
 }
 
-#if 0
-bool
-XorpShell::request_config()
-{
-    return (_rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
-						   callback(this, &XorpShell::receive_config))
-	    == true);
-}
-
-void
-XorpShell::receive_config(const XrlError& e, const bool* ready,
-			  const string* config)
-{
-    if (e == XrlError::OKAY()) {
-	if (*ready) {
-	    _configuration = *config;
-	    _got_config = true;
-	    return;
-	} else {
-	    /* the rtrmgr is not ready to pass us a config - typically
-               this is because it is in the process of reconfiguring */
-	    _repeat_request_timer = 
-		eventloop().new_oneoff_after_ms(1000,
-                              callback(this, &XorpShell::request_config));
-	    return;
-	}
-    }
-
-    if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {
-	fprintf(stderr, "Authentication Failure\n");
-    } else {
-	fprintf(stderr, "Failed to register with router manager process\n");
-	fprintf(stderr, "%s\n", e.str().c_str());
-    }
-    exit(1);
-}
-#endif // 0
 
 bool
 XorpShell::lock_config(LOCK_CALLBACK cb)
@@ -616,12 +579,6 @@ void
 XorpShell::config_changed(uid_t user_id, const string& deltas,
 			  const string& deletions)
 {
-#if 0
-    if (_mode == MODE_COMMITTING) {
-	// This is the response back to our own request
-	return;
-    }
-#endif
     if (_mode == MODE_INITIALIZING) {
 	// We were just starting up
 	XLOG_ASSERT(deletions == "");

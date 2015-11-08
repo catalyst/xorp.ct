@@ -18,7 +18,6 @@
 // http://xorp.net
 
 #include <xorp_config.h>
-#ifdef HOST_OS_LINUX
 
 
 
@@ -78,5 +77,4 @@ IfConfigPropertyLinux::test_have_ipv6() const
 #endif // HAVE_IPV6
 }
 
-#endif // HOST_OS_LINUX
 

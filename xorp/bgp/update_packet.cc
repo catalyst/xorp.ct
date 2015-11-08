@@ -31,7 +31,6 @@
 #include "packet.hh"
 #include "peer.hh"
 
-#if 1
 void
 dump_bytes(const uint8_t *d, size_t l)
 {
@@ -40,9 +39,6 @@ dump_bytes(const uint8_t *d, size_t l)
 	    printf("%x ",*((const char *)d + i));
 	printf("\n");
 }
-#else
-void dump_bytes(const uint8_t*, size_t) {}
-#endif
 
 /* **************** UpdatePacket *********************** */
 
@@ -111,9 +107,6 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
     XLOG_ASSERT(len != 0);
     debug_msg("UpdatePacket::encode: len=%u\n", (uint32_t)len);
 
-#if 0
-    list <PathAttribute*>::const_iterator pai;
-#endif
     size_t i, pa_len = 0;
     size_t wr_len = wr_list().wire_size();
     size_t nlri_len = nlri_list().wire_size();
@@ -130,10 +123,6 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
 	}
     }
 
-#if 0
-    for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
-	pa_len += (*pai)->wire_size();
-#endif
 
     size_t desired_len = BGPPacket::MINUPDATEPACKET + wr_len + pa_len
 	+ nlri_len;
@@ -169,13 +158,6 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
     d[i++] = (pa_len >> 8) & 0xff;
     d[i++] = pa_len & 0xff;
 
-#if 0
-    // fill path attribute list
-    for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai) {
-        memcpy(d+i, (*pai)->data(), (*pai)->wire_size());
-	i += (*pai)->wire_size();
-    }
-#endif
     memcpy(d+i, pa_list_buf, pa_len);
     i += pa_len;
 
@@ -254,13 +236,6 @@ UpdatePacket::str() const
 	s += _pa_list->str();
 	s += "\n";
     }
-#if 0
-    list <PathAttribute*>::const_iterator pai = pa_list().begin();
-    while (pai != pa_list().end()) {
-	s = s + " - " + (*pai)->str() + "\n";
-	++pai;
-    }
-#endif
     
     s += _nlri_list.str("Nlri");
     return s;
@@ -284,30 +259,6 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     if (_wr_list != him.wr_list())
 	return false;
 
-#if 0
-    //path attribute equals
-    list <PathAttribute *> temp_att_list(pa_list());
-    temp_att_list.sort(compare_path_attributes);
-    list <PathAttribute *> temp_att_list_him(him.pa_list());
-    temp_att_list_him.sort(compare_path_attributes);
-
-    if (temp_att_list.size() != temp_att_list_him.size())
-	return false;
-
-    list <PathAttribute *>::const_iterator pai = temp_att_list.begin();
-    list <PathAttribute *>::const_iterator pai_him = temp_att_list_him.begin();
-    while (pai != temp_att_list.end() && pai_him != temp_att_list_him.end()) {
-	
-	if ( (**pai) == (**pai_him) ) {
-	    ++pai;
-	    ++pai_him;
-	} else  {
-	    debug_msg("%s did not match %s\n", (*pai)->str().c_str(),
-		      (*pai_him)->str().c_str());
-	    return false;
-	}
-    }
-#endif
 
     bool him_empty = him._pa_list->is_empty();
     bool me_empty = _pa_list->is_empty();

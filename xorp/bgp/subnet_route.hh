@@ -402,15 +402,6 @@ public:
      */
     const IPNet<A>& net() const {return _net;}
 
-#if 0
-    /**
-     * @return the address of the nexthop for this route.
-     */
-    // remove this because we shouldn't be pulling attributes directly
-    // out of the stored version - use a FastPathAttributeList
-    // instead.
-    const A& nexthop() const {return _attributes.nexthop();}
-#endif
 
     /**
      * @return a pointer to the path attribute list for this route.

@@ -232,10 +232,7 @@ InterfaceStatus (
 	TRACE1(ANY, "%d addresses associated with this adapter",
 	       pbind->AddressCount);
 #endif
-#if 0
-	rtm_newaddr(InterfaceIndex, pbind);
-#endif
- break;
+	break;
     case RIS_INTERFACE_ENABLED:
 	TRACE0(ANY, "interface is enabled");
 	break;

@@ -59,9 +59,6 @@ public:
 private:
     TimeVal* _tv;
 
-#ifdef __WIN32__
-    int ms_time_res;
-#endif
 };
 
 #endif // __LIBXORP_CLOCK_HH__

@@ -360,25 +360,14 @@ xorp_srandomdev()
 		len = rand_deg * sizeof state[0];
 
 	done = 0;
-#ifdef HOST_OS_WINDOWS
-	/* XXX: We need to use CAPI to get hardware randomness. */
-	UNUSED(fd);
-#else
 	fd = open("/dev/random", O_RDONLY, 0);
 	if (fd >= 0) {
 		if (read(fd, (void *) state, len) == (ssize_t) len)
 			done = 1;
 		close(fd);
 	}
-#endif
 
 	if (!done) {
-#ifdef HOST_OS_WINDOWS
-		/*
-		 * XXX: If we didn't get hardware randomness, fall back on
-		 * something else.
-		 */
-#else
 		struct timeval tv;
 		unsigned long junk;
 		// Newer compilers don't like reading un-initialized values..and I'm not
@@ -388,7 +377,6 @@ xorp_srandomdev()
 		free(mbuf);
 		gettimeofday(&tv, NULL);
 		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
-#endif
 		return;
 	}
 

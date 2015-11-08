@@ -24,7 +24,6 @@
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
 
-#ifndef USE_WIN_DISPATCHER
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
@@ -623,4 +622,3 @@ SelectorListObserverBase::~SelectorListObserverBase()
     if (_observed) _observed->remove_observer();
 }
 
-#endif // !HOST_OS_WINDOWS

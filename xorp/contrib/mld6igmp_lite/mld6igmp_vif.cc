@@ -1179,18 +1179,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     UNUSED(ip_ttl);
     UNUSED(ip_tos);
     UNUSED(ip_internet_control);
-#if 0
-    if (ip_ttl != MINTTL) {
-	error_msg = c_format("RX %s from %s to %s on vif %s: "
-			     "ip_ttl = %d instead of %d",
-			     proto_message_type2ascii(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str(),
-			     ip_ttl, MINTTL);
-	XLOG_WARNING("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-#endif // 0
     
     //
     // Source address check.

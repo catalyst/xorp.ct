@@ -116,9 +116,6 @@ public:
 
     list<ConfigOperator> allowed_operators() const;
 
-#if 0
-    bool check_template_tree(string& error_msg) const;
-#endif
     bool check_command_tree(const list<string>& commands,
 			    bool include_intermediate_nodes,
 			    bool include_read_only_nodes,

@@ -215,10 +215,6 @@ PimNode::start()
 int
 PimNode::final_start()
 {
-#if 0	// TODO: XXX: PAVPAVPAV
-    if (! is_pending_up())
-	return (XORP_ERROR);
-#endif
 
     if (ProtoNode<PimVif>::start() != XORP_OK) {
 	ProtoNode<PimVif>::stop();
@@ -711,10 +707,6 @@ PimNode::updates_made()
 	 pim_vif_iter != configured_vifs().end();
 	 ++pim_vif_iter) {
 	Vif* node_vif = &pim_vif_iter->second;
-#if 0
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-#endif
 	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
 	    // Add the vif to the list of old interfaces
 	    delete_vifs_list.push_back(node_vif->name());

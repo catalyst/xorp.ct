@@ -181,7 +181,7 @@ FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
     socklen_t socklen;
 
     memset(&info4, 0, sizeof(info4));
-    strlcpy(info4.name, _netfilter_table_name.c_str(), sizeof(info4.name));
+    strncpy(info4.name, _netfilter_table_name.c_str(), sizeof(info4.name));
 
     //
     // Get information about the size of the table
@@ -348,7 +348,7 @@ FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
     socklen_t socklen;
 
     memset(&info6, 0, sizeof(info6));
-    strlcpy(info6.name, _netfilter_table_name.c_str(), sizeof(info6.name));
+    strncpy(info6.name, _netfilter_table_name.c_str(), sizeof(info6.name));
 
     //
     // Get information about the size of the table

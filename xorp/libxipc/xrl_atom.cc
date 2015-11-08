@@ -202,26 +202,10 @@ XrlAtom::data_from_c_str(const char* c_str)
 	abort(); // Binary is a special case and handled at start of routine
 	break;
     case xrlatom_int64:
-#ifdef HOST_OS_WINDOWS
- #ifdef __MINGW32__
-	_i64val = (int64_t)strtoimax(c_str, (char**)NULL, 10);
- #else
-	_i64val = (int64_t)_strtoi64(c_str, (char**)NULL, 10);
- #endif
-#else
 	_i64val = (int64_t)strtoll(c_str, (char**)NULL, 10);
-#endif
 	break;
     case xrlatom_uint64:
-#ifdef HOST_OS_WINDOWS
- #ifdef __MINGW32__
-	_u64val = (int64_t)strtoumax(c_str, (char**)NULL, 10);
- #else
-	_u64val = (int64_t)_strtoui64(c_str, (char**)NULL, 10);
- #endif
-#else
 	_u64val = (uint64_t)strtoull(c_str, (char**)NULL, 10);
-#endif
 	break;
     case xrlatom_fp64:
 	sscanf(c_str, "%" XORP_SCNgFP64, &_fp64val);
@@ -613,22 +597,12 @@ XrlAtom::value() const
     case xrlatom_binary:
 	return xrlatom_encode_value(*_binary);
     case xrlatom_int64:
-#ifdef HOST_OS_WINDOWS
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64d",
-		 static_cast<long long>(_i64val));
-#else
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%lld",
 		 static_cast<long long>(_i64val));
-#endif
 	return xrlatom_encode_value(tmp, strlen(tmp));
     case xrlatom_uint64:
-#ifdef HOST_OS_WINDOWS
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64u",
-		 static_cast<unsigned long long>(_u64val));
-#else
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%llu",
 		 static_cast<unsigned long long>(_u64val));
-#endif
 	return xrlatom_encode_value(tmp, strlen(tmp));
     case xrlatom_fp64:
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]),

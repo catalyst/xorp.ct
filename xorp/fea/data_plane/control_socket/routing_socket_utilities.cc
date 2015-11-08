@@ -18,7 +18,7 @@
 // http://xorp.net
 
 #include <xorp_config.h>
-#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
+#if defined(HAVE_ROUTING_SOCKETS) 
 
 
 #include "fea/fea_module.h"
@@ -52,9 +52,6 @@
 #include <netinet6/in6_var.h>
 #endif
 
-#ifdef HOST_OS_WINDOWS
-#include "windows_routing_socket.h"
-#endif
 
 #include "system_utilities.hh"
 #include "routing_socket_utilities.hh"
@@ -159,14 +156,6 @@ next_sa(const struct sockaddr* sa)
     const size_t min_size = sizeof(u_long);
     size_t sa_size = min_size;
 
-#ifdef HOST_OS_WINDOWS
-    /*
-     * XXX: XORP's modified BSD-style routing socket interface
-     * to Router Manager V2 in Windows Longhorn always uses
-     * a fixed sockaddr size of sockaddr_storage.
-     */
-    sa_size = sizeof(struct sockaddr_storage);
-#else // ! HOST_OS_WINDOWS
 #ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     sa_size = sa->sa_len ? round_up(sa->sa_len, min_size) : min_size;
 #else // ! HAVE_STRUCT_SOCKADDR_SA_LEN
@@ -184,7 +173,6 @@ next_sa(const struct sockaddr* sa)
 	break;
     }
 #endif // ! HAVE_STRUCT_SOCKADDR_SA_LEN
-#endif // HOST_OS_WINDOWS
 
     // XXX: the sa_size offset is aligned, hence we can use a void pointer
     const void* p = reinterpret_cast<const uint8_t*>(sa) + sa_size;
@@ -231,7 +219,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	IPv4 netmask(sin->sin_addr);
 	return (netmask.mask_len());
     }
-#ifndef HOST_OS_WINDOWS // XXX not yet for windows
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -241,7 +228,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
-#endif
     default:
 	XLOG_FATAL("Invalid address family %d", family);
     }
@@ -284,7 +270,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	}
     }
     
-#ifndef HOST_OS_WINDOWS	// Not yet for Windows
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -302,7 +287,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
-#endif
     
     default:
 	XLOG_FATAL("Invalid address family %d", family);

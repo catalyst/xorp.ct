@@ -546,7 +546,7 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
     }
 
     // Check for a pending socket error if one exists.
-    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, XORP_SOCKOPT_CAST(&soerror),
+    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (void*)&soerror,
 		   &len) != 0) {
 	debug_msg("connect failed (getsockopt) %s\n", sock.str().c_str());
 	goto failed;

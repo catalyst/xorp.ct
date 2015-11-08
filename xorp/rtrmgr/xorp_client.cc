@@ -173,17 +173,3 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
     return xargs;
 }
 
-#if 0
-int
-XorpClient::send_xrl(const UnexpandedXrl& unexpanded_xrl, string& errmsg,
-		     XrlRouter::XrlCallback cb, bool do_exec)
-{
-    Xrl* xrl = unexpanded_xrl.expand(errmsg);
-
-    if (xrl == NULL)
-	return XORP_ERROR;
-    string return_spec = unexpanded_xrl.return_spec();
-    send_now(*xrl, cb, return_spec, do_exec);
-    return XORP_OK;
-}
-#endif // 0

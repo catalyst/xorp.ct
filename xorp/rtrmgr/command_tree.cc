@@ -72,32 +72,6 @@ CommandTreeNode::str() const
     }
 }
 
-#if 0
-const CommandTreeNode* 
-CommandTreeNode::subroot(list<string> path) const
-{
-    if (path.empty()) {
-	return this;
-    }
-    list<CommandTreeNode*>::const_iterator iter;
-    for (iter = _children.begin(); iter !=  _children.end(); ++iter) {
-	if ((*iter)->name() == path.front()) {
-	    path.pop_front();
-	    return (*iter)->subroot(path);
-	}
-    }
-    // Debugging only below this point
-    XLOG_TRACE(_verbose, "ERROR doing subroot at node >%s<\n", _name.c_str());
-    for (iter =_children.begin(); iter !=  _children.end(); ++iter) {
-	XLOG_TRACE(_verbose, "Child: %s\n", (*iter)->name().c_str());
-    }
-    while (!path.empty()) {
-	XLOG_TRACE(_verbose, "Path front is >%s<\n", path.front().c_str());
-	path.pop_front();
-    }
-    return NULL;
-}
-#endif // 0
 
 string
 CommandTreeNode::subtree_str() const

@@ -80,10 +80,6 @@ public:
 
     uint32_t genid() const { return _genid; }
 
-#if 0
-    // This is a hack to override const in DecisionTable.
-    void force_clear_push() const { _push = false; }
-#endif
 
     // this should only be called if the msg had been copied
     void inactivate() const {

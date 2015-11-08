@@ -332,17 +332,6 @@ private:
 
 
     void dump(const char *msg) const			{
-#if 0
-	debug_msg(" %s %s %s\n",
-		  msg,
-		  _k.str().c_str(), _p ? "PL" : "[]");
-	debug_msg("  U   %s\n",
-		  _up ? _up->_k.str().c_str() : "NULL");
-	debug_msg("  L   %s\n",
-		  _left ? _left->_k.str().c_str() : "NULL");
-	debug_msg("  R   %s\n",
-		  _right ? _right->_k.str().c_str() : "NULL");
-#endif
 	UNUSED(msg);
     }
 
@@ -906,11 +895,6 @@ public:
 	} else {
 	    _payload_count++;
 	}
-#if 0
-	printf("out->references: %d\n", out->references());
-	if (out->deleted())
-	    printf("node is deleted\n");
-#endif
 	return iterator(this, out);
     }
 
@@ -1014,23 +998,6 @@ public:
     void find_bounds(const A& a, A &lo, A &hi) const	{
 	_root->find_bounds(a, lo, hi);
     }
-#if 0	// compatibility stuff, has to go
-    /*
-     * return the lower and higher address in the range that contains a
-     * and would map to the same route.
-     */
-    A find_lower_bound(const A a) const		{
-	A lo, hi;
-	_root->find_bounds(a, lo, hi);
-	return lo;
-    }
-    A find_higher_bound(const A a) const		{
-	A lo, hi;
-	_root->find_bounds(a, lo, hi);
-	return hi;
-    }
-
-#endif // compatibility
     int route_count() const			{ return _payload_count; }
 
     void print() const;

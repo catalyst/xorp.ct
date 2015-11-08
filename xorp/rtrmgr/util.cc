@@ -244,7 +244,7 @@ find_executable_filename(const string& program_filename)
     }
 
     // Assume the path passed to us is a UNIX-style path.
-    executable_filename = unix_path_to_native(program_filename);
+    executable_filename = program_filename;
 
     //
     // TODO: take care of the commented-out access() calls below (by BMS).

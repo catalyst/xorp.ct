@@ -2057,17 +2057,6 @@ PathAttribute::operator<(const PathAttribute& him) const
 	XLOG_UNREACHABLE();
     default:
 	/* this must be an unknown attribute */
-#if 0
-	XLOG_ASSERT(dynamic_cast<const UnknownAttribute*>(this) != 0);
-	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
-	((const UnknownAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const UnknownAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen < hisbuflen)
-	    return true;
-	if (mybuflen > hisbuflen)
-	    return false;
-	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
-#endif
 	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
 	this->encode(mybuf, mybuflen, NULL);
 	him.encode(hisbuf, hisbuflen, NULL);
@@ -2343,60 +2332,8 @@ operator== (const PathAttributeList<A> &him) const
     return (memcmp(_canonical_data, him.canonical_data(), _canonical_length) == 0);
 }
 
-#if 0
-template<class A>
-void
-PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
-{
-    debug_msg("%p\n", this);
-
-    PathAttType type = new_att->type();
-
-    switch (new_att->type()) {
-    default:
-	break;
-
-    case ORIGIN:
-	_origin_att = (OriginAttribute *)new_att;
-	break;
-
-    case AS_PATH:
-	_aspath_att = (ASPathAttribute *)new_att;
-	break;
-
-    case NEXT_HOP:
-	_nexthop_att = (NextHopAttribute<A> *)new_att;
-	break;
-    }
-
-    debug_msg("Replace attribute\n");
-    debug_msg("Before: \n%s\n", str().c_str());
-    debug_msg("New Att: %s\n", new_att->str().c_str());
-    for (iterator i = begin(); i != end() ; ++i)
-	if ((*i)->type() == type) {
-	    insert(i, new_att);
-	    delete (*i);
-	    erase(i);
-	    debug_msg("After: \n%s\n", str().c_str());
-	    memset(_hash, 0, sizeof(_hash));
-	    return;
-	}
-    XLOG_UNREACHABLE();
-}
-#endif
 
 
-#if 0
-/*
- * Are all the mandatory attributes there?
- */
-template<class A>
-bool
-PathAttributeList<A>::complete() const {
-    FastPathAttributeList<A> fast_pa_list(const_cast<PathAttributeList<A>>(*this));
-    return fast_pa_list.complete();
-}
-#endif
 
 
 /**************************************************************************
@@ -2486,14 +2423,6 @@ PAListRef<A>::operator<(const PAListRef& palistref) const
 	// compare the content.
 	debug_msg("comparing content\n");
 	bool result = (*_palist) < (*(palistref.attributes()));
-#if 0
-	printf("first: %s\n", _palist->str().c_str());
-	printf("second: %s\n", palistref.attributes()->str().c_str());
-	if (result)
-	    printf("true\n");
-	else
-	    printf("false\n");
-#endif
 	return result;
     }
 
@@ -3095,18 +3024,6 @@ FastPathAttributeList<A>::add_path_attribute(PathAttribute *a)
     debug_msg("%p %s\n", this, a->str().c_str());
     XLOG_ASSERT(!_locked);
 
-#if 0
-    // we shouldn't need this code
-    if (_att.size() <= type) {
-	size_t old_size = _att.size();
-	_att.resize(type + 1);
-	printf("adding att of type %u, old size was %u, new size is %u\n",
-	       (uint32_t)type, (uint32_t)old_size, (uint32_t)_att.size());
-	for (size_t i = old_size; i < _att.size(); i++) {
-	    _att[i] = 0;
-	}
-    }
-#endif
 
     if (_att[type]) {
 	XLOG_ERROR("ERROR:  Attribute type: %d already exists.  Currently, only a single"

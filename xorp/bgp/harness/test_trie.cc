@@ -168,22 +168,6 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     */
  top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
-#if 0
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    mpreach->add_nlri(net);
-	    //mpreach->encode();
-
-	    debug_msg("%s\n", p->str().c_str());
-	    return;
-	}
-    }
-#endif
     mpreach = p->pa_list()->mpreach<IPv6>(SAFI_UNICAST);
 
     if(0 == mpreach) {
@@ -209,22 +193,6 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     */
  top:
     MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
-#if 0
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
-	    mpunreach->add_withdrawn(net);
-	    //mpunreach->encode();
-
-	    debug_msg("%s\n", p->str().c_str());
-	    return;
-	}
-    }
-#endif
     if (!p->pa_list().is_empty())
 	mpunreach = p->pa_list()->mpunreach<IPv6>(SAFI_UNICAST);
     else {
@@ -252,22 +220,6 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
     */
  top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
-#if 0
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
- 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    mpreach->set_nexthop(nexthop);
-	    //mpreach->encode();
-
-	    debug_msg("%s\n", p->str().c_str());
-	    return;
-	}
-    }
-#endif
 
     mpreach = p->pa_list()->mpreach<IPv6>(SAFI_UNICAST);
 

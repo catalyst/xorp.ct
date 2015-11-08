@@ -52,15 +52,6 @@ public:
     virtual bool
        filter(InternalMessage<A>& rtmsg) const = 0;
 protected:
-#if 0
-    void propagate_flags(const InternalMessage<A> *rtmsg,
-			 InternalMessage<A> *new_rtmsg) const;
-
-    void propagate_flags(const SubnetRoute<A>& route,
-			 SubnetRoute<A>& new_route) const;
-    virtual void drop_message(const InternalMessage<A> *rtmsg, 
-			      bool &modified) const ;
-#endif
 private:
 };
 

@@ -60,54 +60,6 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
     
     debug_msg("[BGP] Policy route dump: %s\n\n", rtmsg.str().c_str());
 
-#if 0
-    // "old" filter...
-    InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    bool was_filtered = (fmsg == NULL);
-    if (fmsg != NULL) {
-	if (fmsg->route() == rtmsg.route()) {
-	    // fmsg contains the original route, so we need to clone it,
-	    // or we'll get bad interactions when we set the policyfilter
-	    // on the new route below because the policyfilter is
-	    // propagated back to the parent.
-	    SubnetRoute<A>* copy_old_rt = new SubnetRoute<A>(*rtmsg.route());
-
-	    // clear the parent route, so noone downstream can mess up the
-	    // metadata on the route still stored in RibIn.
-	    copy_old_rt->set_parent_route(NULL);
-
-	    InternalMessage<A>* copy_fmsg
-		= new InternalMessage<A>(copy_old_rt, rtmsg.origin_peer(),
-					 rtmsg.genid());
-
-	    if (rtmsg.changed())
-		copy_fmsg->set_changed();
-
-	    if (rtmsg.push())
-		copy_fmsg->set_push();
-
-	    if (rtmsg.from_previous_peering())
-		copy_fmsg->set_from_previous_peering();
-
-	    fmsg = copy_fmsg;
-	    XLOG_ASSERT(fmsg->route() != rtmsg.route());
-	} else {
-	    // the route is already a copy, but we still need to clear the
-	    // parent route to prevent anyone downstream modifying the
-	    // metadata on the route still stored in RibIn
-	    const_cast<SubnetRoute<A>*>(fmsg->route())->set_parent_route(NULL);
-	}
-    }
-
-    // we want current filter
-    rtmsg.route()->set_policyfilter(0, RefPf());
-
-    // filter new message
-    InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
-    
-    bool accepted = (new_msg != NULL);
-
-#endif
 
     // clone the PA list, so we don't process it twice
     FPAListRef old_fpa_list = new FastPathAttributeList<A>(*rtmsg.attributes());

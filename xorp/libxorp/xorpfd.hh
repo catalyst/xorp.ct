@@ -64,11 +64,7 @@
  * work with sockets under Win64 such as libcomm).
  */
 
-#ifdef HOST_OS_WINDOWS
-#define	BAD_XORPFD	INVALID_HANDLE_VALUE
-#else
 #define	BAD_XORPFD	(-1)
-#endif
 
 class XorpFd {
 public:

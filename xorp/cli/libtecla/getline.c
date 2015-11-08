@@ -8648,10 +8648,6 @@ char *gl_get_line_net(GetLine *gl, const char *prompt,
 /*
  * Is input coming from a non-interactive source?
  */
-#if 0		/* XXX: the input is suppose to come from the network */
-  if(!gl->is_term)
-    return fgets(gl->line, gl->linelen, gl->input_fp);
-#endif
 /*
  * Record the new prompt and its displayed width.
  */
@@ -8668,22 +8664,9 @@ char *gl_get_line_net(GetLine *gl, const char *prompt,
  */
   waserr = gl_override_signal_handlers(gl);
 /*
- * After recording the current terminal settings, switch the terminal
- * into raw input mode.
- */
-#if 0
-  waserr = waserr || gl_raw_terminal_mode(gl);
-#endif
-/*
  * Attempt to read the line.
  */
   waserr = waserr || gl_get_input_line(gl, start_line, start_pos, val);
-/*
- * Restore terminal settings.
- */
-#if 0
-  gl_restore_terminal_attributes(gl);
-#endif
 /*
  * Restore the signal handlers.
  */
@@ -8783,16 +8766,6 @@ gl_reset_line(GetLine *gl)
  */
   gl->ntotal = 0;
   gl->line[0] = '\0';
-#if 0	/* TODO: do we need those? */
-  gl->number = -1;
-  gl->endline = 0;
-  gl->vi.command = 0;
-  gl->vi.undo.line[0] = '\0';
-  gl->vi.undo.ntotal = 0;
-  gl->vi.undo.buff_curpos = 0;
-  gl->vi.repeat.fn = 0;
-  gl->last_signal = -1;
-#endif /* 0 */
 
 /*
  * Forget any previous recall session.

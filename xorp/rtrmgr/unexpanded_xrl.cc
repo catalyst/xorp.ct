@@ -60,19 +60,6 @@ UnexpandedXrl::expand(string& errmsg) const
 	_xrl = NULL;
     }
 
-#if 0
-    if (_action.expand_xrl_variables(_node, request, errmsg) != XORP_OK) {
-	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
-	return NULL;
-    }
-    debug_msg("XRL expanded to %s\n", request.c_str());
-    try {
-	_xrl = new Xrl(request.c_str());
-    } catch (const InvalidString& e) {
-	debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
-	return NULL;
-    }
-#endif
     _xrl = _action.expand_xrl_variables(_node, errmsg);
     if (_xrl == NULL) {
 	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());

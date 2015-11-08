@@ -216,11 +216,6 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 					 mqe->delete_msg()->attributes(),
 					 mqe->delete_msg()->origin_peer(),
 					 mqe->delete_msg()->genid());
-#if 0
-	    // re-enable me!
-	    if (mqe->delete_msg()->changed())
-	    	preserve_msg->set_changed();
-#endif
 	    if (mqe->delete_msg()->copied())
 	    	preserve_msg->set_copied();
 	    real_old_msg = preserve_msg;
@@ -314,10 +309,6 @@ NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
 					 mqe->delete_msg()->attributes(),
 					 mqe->delete_msg()->origin_peer(),
 					 mqe->delete_msg()->genid());
-#if 0
-	    if (mqe->delete_msg()->changed())
-		preserve_msg->set_changed();
-#endif
 	    if (mqe->delete_msg()->copied())
 		preserve_msg->set_copied();
 	    real_msg = preserve_msg;

@@ -178,9 +178,6 @@ bool supports_mcast_tables = false;
 // Local structures/classes, typedefs and macros
 //
 
-#ifdef HOST_OS_WINDOWS
-typedef char *caddr_t;
-#endif
 
 //
 // Local variables
@@ -249,10 +246,6 @@ MfeaMrouter::start()
 {
     string error_msg;
 
-#ifdef HOST_OS_WINDOWS
-    XLOG_ERROR("Multicast routing is not supported on Windows");
-    return (XORP_ERROR);
-#endif
 
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
@@ -263,14 +256,12 @@ MfeaMrouter::start()
     if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
     
-#ifndef HOST_OS_WINDOWS
     // Check if we have the necessary permission
     if (geteuid() != 0) {
 	XLOG_ERROR("Must be root");
 	exit (1);
 	// return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
 
     // Register as multicast upcall receiver
     IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
@@ -1379,7 +1370,7 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
 		       sopt_arg, sz) < 0) {
 	    error_msg = c_format("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
-				 mfea_vif->name().c_str(), XSTRERROR,
+				 mfea_vif->name().c_str(), strerror( errno ),
 				 (int)(sz), mfea_vif->pif_index(),
 				 mfea_vif->addr_ptr() ? mfea_vif->addr_ptr()->str().c_str() : "NULL");
 	    return XORP_ERROR;
@@ -1463,7 +1454,6 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	// of type "struct vifctl", while other systems expect
 	// an argument of type "vifi_t".
 	//
-#ifdef HOST_OS_LINUX
 #ifdef USE_MULT_MCAST_TABLES
 	struct vifctl_ng vc_ng;
 	struct vifctl* vcp = &(vc_ng.vif);
@@ -1485,16 +1475,11 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	vcp->vifc_vifi = mfea_vif->vif_index();
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
 			       sopt_arg, sz);
-#else
-	vifi_t vifi = mfea_vif->vif_index();
-	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
-			       (void *)&vifi, sizeof(vifi));
-#endif
 
 	if (ret_value < 0) {
 	    XLOG_WARNING("setsockopt(MRT_DEL_VIF, %s (%i)) failed: %s",
 			 mfea_vif->name().c_str(), mfea_vif->vif_index(),
-			 XSTRERROR);
+			 strerror( errno ));
 	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
@@ -1517,7 +1502,7 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	if (ret_value < 0) {
 	    XLOG_WARNING("setsockopt(MRT6_DEL_MIF, %s (%i)) failed: %s",
 			 mfea_vif->name().c_str(), mfea_vif->vif_index(),
-			 XSTRERROR);
+			 strerror( errno ));
 	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING

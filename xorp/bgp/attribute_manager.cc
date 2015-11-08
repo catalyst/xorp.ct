@@ -23,14 +23,6 @@
 #include "bgp_module.h"
 #include "attribute_manager.hh"
 
-#if 0
-template <class A>
-bool
-StoredAttributeList<A>::operator<(const StoredAttributeList<A>& them) const
-{
-    return (memcmp(hash(), them.hash(), 16) < 0);
-}
-#endif
 
 template <class A>
 AttributeManager<A>::AttributeManager()

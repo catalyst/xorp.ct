@@ -28,36 +28,6 @@
 template <class A>
 class PathAttributeList;
 
-#if 0
-template <class A>
-class StoredAttributeList {
-public:
-    StoredAttributeList(const PathAttributeList<A> *att) {
-	_attribute_list = att;
-	_references = 1;
-    }
-
-    ~StoredAttributeList() {
-	if (_references == 0) {
-	    delete _attribute_list;
-	}
-    }
-
-    int references() const { return _references; }
-    void increase() { _references++; }
-    void decrease() { _references--; }
-    void clone_data() {
-	_attribute_list = new PathAttributeList<A>(*_attribute_list);
-    }
-    const PathAttributeList<A> *attribute() const { return _attribute_list; }
-    const uint8_t* hash() const { return _attribute_list->hash(); }
-    bool operator<(const StoredAttributeList<A>& them) const;
-private:
-    const PathAttributeList<A> *_attribute_list;
-    int _references;
-};
-
-#endif
 
 /**
  * Att_Ptr_Cmp is needed because we want BGPAttributeManager to use a

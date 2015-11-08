@@ -281,11 +281,9 @@ EmulateSubnetHops::forward(Frame frame)
     }
 
     // XXX no refcounting
-#if 1
     vector<Message*>::iterator kk;
     for (kk = messages.begin(); kk != messages.end(); kk++)
 	delete (*kk);
-#endif
 
     delete pkt;
 }

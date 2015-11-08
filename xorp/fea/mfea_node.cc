@@ -202,11 +202,6 @@ MfeaNode::start()
 int
 MfeaNode::final_start()
 {
-#if 0	// TODO: XXX: PAVPAVPAV
-    if (! is_pending_up())
-	return (XORP_ERROR);
-#endif
-
     if (ProtoNode<MfeaVif>::start() != XORP_OK) {
 	ProtoNode<MfeaVif>::stop();
 	return (XORP_ERROR);

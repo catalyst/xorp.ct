@@ -99,12 +99,6 @@ FinderTcpMessenger::read_event(int	      errval,
 bool
 FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
 {
-#if 0
-    if (pending()) {
-	XLOG_FATAL("Hit pending");
-	return false;
-    }
-#endif
     FinderXrlMessage* msg = new FinderXrlMessage(xrl);
 
     if (store_xrl_response(msg->seqno(), scb) == false) {

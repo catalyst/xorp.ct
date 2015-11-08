@@ -105,7 +105,6 @@ RouteManager::~RouteManager()
 {
     _route_update_task.unschedule();
 
-#if 1
     // XXX Ensure that clients can't see us any more.
     if (_er)
 	_er->set_route_manager(0);
@@ -113,7 +112,6 @@ RouteManager::~RouteManager()
 	_tm->set_route_manager(0);
     if (_nh)
 	_nh->set_route_manager(0);
-#endif
 
     // Clear internal routing tables.
     delete _previous;

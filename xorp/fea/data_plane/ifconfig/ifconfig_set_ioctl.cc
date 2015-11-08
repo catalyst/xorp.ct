@@ -67,7 +67,6 @@
 
 
 #ifdef HAVE_IPV6
-#ifdef HOST_OS_LINUX
 //
 // XXX: In case of Linux, we have "struct in6_ifreq" defined
 // in <linux/ipv6.h>. However, we cannot include that file along
@@ -83,7 +82,6 @@ struct in6_ifreq {
     uint32_t ifr6_prefixlen;
     unsigned int ifr6_ifindex;
 };
-#endif // HOST_OS_LINUX
 #endif // HAVE_IPV6
 
 
@@ -187,16 +185,7 @@ IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 
-#if	defined(HOST_OS_BSDI)		\
-	|| defined(HOST_OS_FREEBSD)	\
-	|| defined(HOST_OS_MACOSX)	\
-	|| defined(HOST_OS_NETBSD)	\
-	|| defined(HOST_OS_OPENBSD)	\
-	|| defined(HOST_OS_DRAGONFLYBSD)
-    return (true);
-#else
     return (false);
-#endif
 }
 
 bool
@@ -204,16 +193,7 @@ IfConfigSetIoctl::is_unreachable_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 
-#if	defined(HOST_OS_BSDI)		\
-	|| defined(HOST_OS_FREEBSD)	\
-	|| defined(HOST_OS_MACOSX)	\
-	|| defined(HOST_OS_NETBSD)	\
-	|| defined(HOST_OS_OPENBSD)	\
-	|| defined(HOST_OS_DRAGONFLYBSD)
-    return (true);
-#else
     return (false);
-#endif
 }
 
 int
@@ -250,14 +230,12 @@ IfConfigSetIoctl::config_interface_begin(const IfTreeInterface* pulled_ifp,
 	return (XORP_OK);
     }
 
-#ifdef HOST_OS_LINUX
     //
     // XXX: Set the interface DOWN otherwise we may not be able to
     // set the MAC address or the MTU (limitation imposed by the Linux kernel).
     //
     if (pulled_ifp->enabled())
 	should_disable = true;
-#endif
 
     //
     // Set the MTU
@@ -638,30 +616,7 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     memset(&ifreq, 0, sizeof(ifreq));
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-#if defined(SIOCSIFLLADDR)
-    //
-    // FreeBSD
-    //
-    ifreq.ifr_addr.sa_family = AF_LINK;
-    memcpy(ifreq.ifr_addr.sa_data, &ether_addr, sizeof(ether_addr));
-#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
-    ifreq.ifr_addr.sa_len = sizeof(ether_addr);
-#endif
-    if (ioctl(_s4, SIOCSIFLLADDR, &ifreq) < 0) {
-	error_msg = c_format("Cannot set the MAC address to %s "
-			     "on interface %s: %s",
-			     mac.str().c_str(),
-			     ifname.c_str(),
-			     strerror(errno));
-	return (XORP_ERROR);
-    }
 
-    return (XORP_OK);
-
-#elif defined(SIOCSIFHWADDR)
-    //
-    // Linux
-    //
     ifreq.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memcpy(ifreq.ifr_hwaddr.sa_data, &ether_addr, ETH_ALEN);
 #ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
@@ -678,17 +633,6 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
 
     return (XORP_OK);
 
-#else
-    //
-    // No mechanism: NetBSD and OpenBSD, et. al.
-    //
-    // XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) do not support
-    // setting the MAC address.
-    //
-    error_msg = c_format("No mechanism to set the MAC address "
-			 "on an interface");
-    return (XORP_ERROR);
-#endif
 }
 
 int
@@ -847,7 +791,6 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
     memset(&ifreq, 0, sizeof(ifreq));
     strncpy(ifreq.ifr_name, vifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-#if defined(HOST_OS_LINUX)
     //
     // XXX: In case of Linux, SIOCDIFADDR doesn't delete IPv4 addresses.
     // Hence, we use SIOCSIFADDR to add 0.0.0.0 as an address. The
@@ -869,36 +812,6 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
 
     return (XORP_OK);
 
-#elif defined(SIOCDIFADDR)
-    UNUSED(if_index);
-    UNUSED(prefix_len);
-
-    addr.copy_out(ifreq.ifr_addr);
-    if (ioctl(_s4, SIOCDIFADDR, &ifreq) < 0) {
-	error_msg = c_format("Cannot delete address '%s' "
-			     "on interface '%s' vif '%s': %s",
-			     addr.str().c_str(),
-			     ifname.c_str(), vifname.c_str(),
-			     strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-
-#else
-    //
-    // No mechanism to delete the address
-    //
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(addr);
-    UNUSED(prefix_len);
-
-    error_msg = c_format("No mechanism to delete an IPv4 address "
-			 "on an interface");
-    return (XORP_ERROR);
-#endif
 }
 
 int
@@ -1030,7 +943,6 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
 
 #else // HAVE_IPV6
 
-#if defined(HOST_OS_LINUX)
     //
     // XXX: Linux uses a weird struct in6_ifreq to do this, and this
     // name clashes with the KAME in6_ifreq.
@@ -1052,41 +964,6 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
 
     return (XORP_OK);
 
-#elif defined(SIOCDIFADDR_IN6)
-    struct in6_ifreq in6_ifreq;
-
-    UNUSED(if_index);
-    UNUSED(prefix_len);
-
-    memset(&in6_ifreq, 0, sizeof(in6_ifreq));
-    strncpy(in6_ifreq.ifr_name, vifname.c_str(),
-	    sizeof(in6_ifreq.ifr_name) - 1);
-    addr.copy_out(in6_ifreq.ifr_addr);
-
-    if (ioctl(_s6, SIOCDIFADDR_IN6, &in6_ifreq) < 0) {
-	error_msg = c_format("Cannot delete address '%s' "
-			     "on interface '%s' vif '%s': %s",
-			     addr.str().c_str(),
-			     ifname.c_str(), vifname.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-
-#else
-    //
-    // No mechanism to delete the address
-    //
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(addr);
-    UNUSED(prefix_len);
-
-    error_msg = c_format("No mechanism to delete an IPv6 address "
-			 "on an interface");
-    return (XORP_ERROR);
-#endif
 #endif // HAVE_IPV6
 }
 

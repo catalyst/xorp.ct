@@ -26,11 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
 
-#ifdef HAVE_GLOB_H
 #include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
-#endif
 
 #include "conf_tree.hh"
 #include "conf_tree_node.hh"
@@ -50,10 +46,6 @@
 #endif // ! HAVE_REGEX_H
 
 
-#ifdef HOST_OS_WINDOWS
-#define	stat	_stat
-#define	S_IFDIR	_S_IFDIR
-#endif
 
 extern int init_template_parser(const char* filename, TemplateTree* c);
 extern void complete_template_parser();

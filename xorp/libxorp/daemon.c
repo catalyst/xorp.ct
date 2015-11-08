@@ -29,19 +29,10 @@
  * SUCH DAMAGE.
  */
 
-#if 0
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)daemon.c	8.1 (Berkeley) 6/4/93";
-#endif /* LIBC_SCCS and not lint */
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD: src/lib/libc/gen/daemon.c,v 1.8 2007/01/09 00:27:53 imp Exp $");
-#endif
-
 #include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
 
-#ifndef HOST_OS_WINDOWS
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -49,14 +40,12 @@ __FBSDID("$FreeBSD: src/lib/libc/gen/daemon.c,v 1.8 2007/01/09 00:27:53 imp Exp 
 #include <signal.h>
 #include <unistd.h>
 
-#endif /* ! HOST_OS_WINDOWS */
 
 #include "daemon.h"
 
 int
 xorp_daemonize(int nochdir, int noclose)
 {
-#ifndef HOST_OS_WINDOWS
 	struct sigaction osa, sa;
 	int fd;
 	pid_t newgrp, newpid;
@@ -101,11 +90,6 @@ xorp_daemonize(int nochdir, int noclose)
 		if (fd > 2)
 			(void)close(fd);
 	}
-#else /* HOST_OS_WINDOWS */
-
-	UNUSED(nochdir);
-	UNUSED(noclose);
-#endif /* HOST_OS_WINDOWS */
 
 	return (0);
 }

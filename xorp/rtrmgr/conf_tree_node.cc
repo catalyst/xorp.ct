@@ -450,12 +450,6 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _modification_time = delta_node.modification_time();
 		    _value_committed = true;
 		}
-#if 0
-XXXXXXX to be copied to MasterConfigTreeNode
-		_actions_pending = 0;
-		_actions_succeeded = true;
-		_cmd_that_failed = NULL;
-#endif
 	    }
 	}
     }
@@ -1255,10 +1249,6 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id)
     TimerList::system_gettimeofday(&_modification_time);
     _deleted = true;
     _value_committed = false;
-#if 0
-XXXXX to be copied to MasterConfigTreeNode??
-    _actions_succeeded = true;
-#endif
 }
 
 void

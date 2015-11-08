@@ -247,12 +247,6 @@ protected:
 	return d + ((d[0] & Extended) ? 4 : 3);
     }
 
-#if 0
-    // storage for information in the attribute.
-
-    size_t	_size;	// this is only the size of the payload.
-    uint8_t *	_data;	// wire representation
-#endif
     uint8_t	_flags;
     uint8_t	_type;
 

@@ -460,7 +460,6 @@ template <class A>
 inline bool
 IPNet<A>::operator<(const IPNet& other) const
 {
-#if 1
     /*
      * say x = A/B and y = C/D, then
      *
@@ -490,37 +489,6 @@ IPNet<A>::operator<(const IPNet& other) const
     else
 	return this->masked_addr() < other.masked_addr();
 
-#else	// old code
-    const A& maddr_him = other.masked_addr();
-    uint8_t his_prefix_len = other.prefix_len();
-
-    //the ordering is important because we want the longest match to
-    //be first.  For example, we want the following:
-    //  128.16.0.0/24 < 128.16.64.0/24 <  128.16.0.0/16 < 128.17.0.0/24
-
-    if (_prefix_len == his_prefix_len) return _masked_addr < maddr_him;
-
-    // we need to check the case when one subnet is a subset of
-    // the other
-    if (_prefix_len < his_prefix_len) {
-	A test_addr(maddr_him.mask_by_prefix_len(_prefix_len));
-	if (_masked_addr == test_addr) {
-	    //his subnet is a subset of mine, so he goes first.
-	    return (false);
-	}
-    } else if (_prefix_len > his_prefix_len) {
-	A test_addr(_masked_addr.mask_by_prefix_len(his_prefix_len));
-	if (maddr_him == test_addr) {
-	    //my subnet is a subset of his, so I go first.
-	    return (true);
-	}
-    }
-    //the subnets don't overlap (or are identical), so just order by address
-    if (_masked_addr < maddr_him) {
-	return (true);
-    }
-    return (false);
-#endif
 }
 
 template <class A> string

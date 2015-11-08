@@ -255,10 +255,6 @@ Neighborhood::set_willingness(const OlsrTypes::WillType willingness)
 size_t
 Neighborhood::populate_hello(HelloMessage* hello)
 {
-#if 0
-    debug_msg("MyMainAddr %s HelloMessage* %p\n",
-	      cstring(_fm.get_main_addr()), hello);
-#endif
 
     size_t populated_count = 0;
 
@@ -285,11 +281,6 @@ Neighborhood::populate_hello(HelloMessage* hello)
 	} else {
 	    // We should not announce links for a disabled face; this
 	    // check is implemented further up in the call path.
-#if 0
-	    debug_msg("hello->faceid() is %u, l->faceid() is %u\n",
-		      XORP_UINT_CAST(hello->faceid()),
-		      XORP_UINT_CAST(l->faceid()));
-#endif
 	    // Invariant: This path should only be reached if there is
 	    // more than one OLSR interface configured administratively
 	    // up in this process.
@@ -539,14 +530,6 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
 			     bool& is_created)
     throw(BadLogicalLink)
 {
-#if 0
-    debug_msg("MyMainAddr %s FaceID %u RemoteAddr %s LocalAddr %s Vtime %s\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(faceid),
-	      cstring(remote_addr),
-	      cstring(local_addr),
-	      cstring(vtime));
-#endif
 
     OlsrTypes::LogicalLinkID linkid;
 
@@ -1157,14 +1140,6 @@ Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
     // Catchall: the two-hop link which we select must be OK.
     TwoHopLink* l2 = _twohop_links[(*ii)];
 
-#if 0
-    // TODO: Catchall for ETX metrics.
-    if (! l2->is_poor_etx()) {
-	xorp_throw(BadTwoHopCoverage,
-		   c_format("No suitable links to TwoHopNeighbor %u.",
-			    XORP_UINT_CAST(n2->id())));
-    }
-#endif
 
     return l2;
 
@@ -1578,7 +1553,6 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
     OlsrTypes::WillType will;
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
 
-#if 1
     // XXX: Make a pass to ensure nodes with WILL_ALWAYS are
     // added to the final set.
     // Such nodes are ALWAYS MPRs even if redundant, and SHOULD NOT
@@ -1593,7 +1567,6 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
 	if (n->willingness() == OlsrTypes::WILL_ALWAYS)
 	    final_mpr_set.insert(n->id());
     }
-#endif
 
     for (will = OlsrTypes::WILL_LOW; will < OlsrTypes::WILL_ALWAYS; will++) {
 	// For each previously selected MPR,

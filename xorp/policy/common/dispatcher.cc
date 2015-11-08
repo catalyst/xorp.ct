@@ -72,21 +72,10 @@ Dispatcher::Value Dispatcher::lookup(const Oper& op, unsigned argc, const Elemen
 /* NOTE:  add() is called before logging framework is online. */
 void Dispatcher::logAdd(const Oper& op, unsigned int k, const Element* arg1, const Element* arg2) const {
 // Enable this if debugging is needed.
-#if 0
-    printf("Adding operator: %s to dispatcher map[%d] %p %p\n",
-	   op.str().c_str(), k, arg1, arg2);
-    if (arg1) {
-	printf("arg1: %s\n", arg1->dbgstr().c_str());
-    }
-    if (arg2) {
-	printf("arg2: %s\n", arg2->dbgstr().c_str());
-    }
-#else
     UNUSED(op);
     UNUSED(k);
     UNUSED(arg1);
     UNUSED(arg2);
-#endif
 }
 
 void Dispatcher::logRun(const Oper& op, unsigned argc, const Element** argv, int key, const char* dbg) const {

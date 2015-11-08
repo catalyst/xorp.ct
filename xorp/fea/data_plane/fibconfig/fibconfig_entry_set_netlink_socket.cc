@@ -560,30 +560,6 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	    return XORP_OK;
 	}
 
-#if 0
-	do {
-	    // Check whether the error code matches
-	    if (last_errno != ESRCH) {
-		//
-		// XXX: The "No such process" error code is used by the
-		// kernel to indicate there is no such forwarding entry
-		// to delete.
-		//
-		break;
-	    }
-
-	    // Check whether the interface is down
-	    if (fte.ifname().empty())
-		break;		// No interface to check
-	    const IfTree& iftree = fibconfig().system_config_iftree();
-	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
-						    fte.vifname());
-	    if ((vifp != NULL) && vifp->enabled())
-		break;		// The interface is UP
-
-	    return (XORP_OK);
-	} while (false);
-#endif
 
 	XLOG_ERROR("Error checking netlink delete_entry request: %s", error_msg.c_str());
 	return (XORP_ERROR);

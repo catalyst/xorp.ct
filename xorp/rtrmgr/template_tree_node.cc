@@ -26,11 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
 
-#ifdef HAVE_GLOB_H
 #include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
-#endif
 
 
 
@@ -1352,40 +1348,6 @@ TemplateTreeNode::help_long() const
     return _help_long;
 }
 
-#if 0
-bool
-TemplateTreeNode::check_template_tree(string& error_msg) const
-{
-    //
-    // First check this node, then check recursively all children nodes
-    //
-
-    //
-    // Check whether all referred variable names are valid
-    //
-    map<string, BaseCommand *>::const_iterator iter1;
-    for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
-	const Command* command;
-	command = dynamic_cast<Command*>(iter1->second);
-	if (command) {
-	    if (! command->check_referred_variables(error_msg))
-		return false;
-	}
-    }
-
-    //
-    // Recursively check all children nodes
-    //
-    list<TemplateTreeNode*>::const_iterator iter2;
-    for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
-	const TemplateTreeNode* ttn = *iter2;
-	if (ttn->check_template_tree(error_msg) != true)
-	    return false;
-    }
-
-    return true;
-}
-#endif // 0
 
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
