@@ -22,7 +22,6 @@ Import('env')
 
 subdirs = [
 	'data_plane',
-	'tests',
 	'tools',
     ]
 

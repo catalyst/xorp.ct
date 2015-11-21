@@ -22,7 +22,6 @@ Import('env')
 
 subdirs = [
 	'tools',
-	'tests',
 	'harness',
     ]
 
@@ -101,7 +100,7 @@ libxorp_bgp_env = bgp_env.Clone()
 libxorp_bgp_srcs = [
 	'aspath.cc',
 	'attribute_manager.cc',
-        'bgp.cc',
+	'bgp.cc',
 	'bgp_trie.cc',
 	'bgp_varrw.cc',
 	'bgp_varrw_export.cc',
@@ -172,11 +171,6 @@ if is_shared:
             bgp_env.AddPostAction(libxorp_bgp,
                                   bgp_env.Symlink(obj.abspath,
                                                   os.path.join(bgp_env['xorp_alias_libdir'], str(obj))))
-else:
-    libxorp_ospf = bgp_env.StaticLibrary(target = 'libxorp_bgp',
-                                         source = libxorp_bgp_srcs,
-                                         LIBS = '')
-
 ### xorp_bgp
 
 #bgp_env2 = bgp_env.Clone()

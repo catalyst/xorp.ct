@@ -21,7 +21,6 @@ import os
 Import('env')
 
 subdirs = [
-	'tests',
 	'tools',
 	]
 

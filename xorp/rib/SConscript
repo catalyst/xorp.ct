@@ -25,7 +25,6 @@ env = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
 
 subdirs = [
-	'tests',
 	'tools',
 	]
 

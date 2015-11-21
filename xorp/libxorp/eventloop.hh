@@ -61,7 +61,9 @@ extern EnvTrace eloop_trace;
 class EventLoop :
     public NONCOPYABLE
 {
-public:
+    public:
+	static EventLoop& instance(void);
+private:
     /**
      * Constructor
      */
@@ -72,6 +74,9 @@ public:
      */
     virtual ~EventLoop();
 
+    static EventLoop* _instance;
+
+public:
     /**
      * Invoke all pending callbacks relating to XorpTimer and file
      * descriptor activity.  This function may block if there are no

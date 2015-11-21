@@ -21,7 +21,6 @@ Import('env')
 
 subdirs = [
 	#'config', # FIXME install
-	'tests',
     ]
 
 SConscript(dirs = subdirs, exports='env')

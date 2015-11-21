@@ -96,6 +96,16 @@ void setup_dflt_sighandlers() {
     signal(SIGXFSZ, dflt_sig_handler);
 }
 
+EventLoop* EventLoop::_instance = NULL;
+
+EventLoop& EventLoop::instance(void)
+{
+    if ( _instance == NULL )
+    {
+	_instance = new EventLoop;
+    }
+    return *_instance;
+}
 
 
 EventLoop::EventLoop()
