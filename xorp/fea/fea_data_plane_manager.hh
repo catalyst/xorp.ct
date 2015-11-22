@@ -24,7 +24,6 @@
 
 
 
-class EventLoop;
 class FeaNode;
 class FibConfig;
 class FibConfigEntryGet;
@@ -143,12 +142,6 @@ public:
      */
     virtual int stop_plugins(string& error_msg);
 
-    /**
-     * Get the event loop this instance is added to.
-     * 
-     * @return the event loop this instance is added to.
-     */
-    EventLoop&	eventloop();
 
     /**
      * Return true if the underlying system supports IPv4.

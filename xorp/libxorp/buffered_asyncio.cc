@@ -29,12 +29,11 @@
 
 extern bool is_pseudo_error(const char* name, XorpFd fd, int error_num);
 
-BufferedAsyncReader::BufferedAsyncReader(EventLoop& 		e,
-					 XorpFd 		fd,
+BufferedAsyncReader::BufferedAsyncReader( XorpFd 		fd,
 					 size_t 		reserve_bytes,
 					 const Callback& 	cb,
 					 int			priority)
-    : _eventloop(e), _fd(fd), _cb(cb), _buffer(reserve_bytes),
+    :  _fd(fd), _cb(cb), _buffer(reserve_bytes),
       _last_error(0),
       _priority(priority)
 {
@@ -132,7 +131,7 @@ BufferedAsyncReader::available_bytes() const
 void
 BufferedAsyncReader::start()
 {
-    if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_fd, IOT_READ,
 				  callback(this,
 					   &BufferedAsyncReader::io_event),
 				  _priority) ==
@@ -142,7 +141,7 @@ BufferedAsyncReader::start()
 
     if (_config.head_bytes >= _config.trigger_bytes) {
 	_ready_timer =
-	     _eventloop.new_oneoff_after_ms(0,
+	     EventLoop::instance().new_oneoff_after_ms(0,
 		callback(this, &BufferedAsyncReader::announce_event, DATA));
     }
 
@@ -154,7 +153,7 @@ BufferedAsyncReader::stop()
 {
     debug_msg("%p stop\n", this);
 
-    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+    EventLoop::instance().remove_ioevent_cb(_fd, IOT_READ);
     _ready_timer.unschedule();
 }
 
@@ -241,7 +240,7 @@ BufferedAsyncReader::announce_event(Event ev)
 
     if (_config.head_bytes >= _config.trigger_bytes) {
 	_ready_timer =
-	    _eventloop.new_oneoff_after_ms(0,
+	    EventLoop::instance().new_oneoff_after_ms(0,
 		callback(this, &BufferedAsyncReader::announce_event, DATA));
     }
 }

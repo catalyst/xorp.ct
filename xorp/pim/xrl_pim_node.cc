@@ -42,7 +42,6 @@ const TimeVal XrlPimNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 XrlPimNode::XrlPimNode(int		family,
 		       xorp_module_id	module_id,
-		       EventLoop&	eventloop,
 		       const string&	class_name,
 		       const string&	finder_hostname,
 		       uint16_t		finder_port,
@@ -51,20 +50,18 @@ XrlPimNode::XrlPimNode(int		family,
 		       const string&	mfea_target,
 		       const string&	rib_target,
 		       const string&	mld6igmp_target)
-    : PimNode(family, module_id, eventloop),
-      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+    : PimNode(family, module_id),
+      XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlPimTargetBase(&xrl_router()),
       PimNodeCli(*static_cast<PimNode *>(this)),
-      _eventloop(eventloop),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _mfea_target(mfea_target),
       _rib_target(rib_target),
       _mld6igmp_target(mld6igmp_target),
-      _ifmgr(eventloop, mfea_target.c_str(), xrl_router().finder_address(),
+      _ifmgr( mfea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
-      _mrib_transaction_manager(eventloop),
       _xrl_fea_client4(&xrl_router()),
 #ifdef HAVE_IPV6
       _xrl_fea_client6(&xrl_router()),
@@ -305,7 +302,7 @@ XrlPimNode::retry_xrl_task()
     if (_xrl_tasks_queue_timer.scheduled())
 	return;		// XXX: already scheduled
 
-    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
+    _xrl_tasks_queue_timer = EventLoop::instance().new_oneoff_after(
 	RETRY_TIMEVAL,
 	callback(this, &XrlPimNode::send_xrl_task));
 }
@@ -592,7 +589,7 @@ XrlPimNode::rib_register_startup()
 	//
 	// If an error, then try again
 	//
-	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	_rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::rib_register_startup));
 	return;
@@ -653,7 +650,7 @@ XrlPimNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    _rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::rib_register_startup));
 	}
@@ -699,7 +696,7 @@ XrlPimNode::rib_register_shutdown()
 	//
 	// If an error, then try again
 	//
-	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::rib_register_shutdown));
 	return;
@@ -762,7 +759,7 @@ XrlPimNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::rib_register_shutdown));
 	}
@@ -819,7 +816,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 	//
 	XLOG_ERROR("Failed to enable receiving MRIB information from the RIB. "
 		   "Will try again.");
-	_rib_redist_transaction_enable_timer = _eventloop.new_oneoff_after(
+	_rib_redist_transaction_enable_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
 	return;
@@ -880,7 +877,7 @@ XrlPimNode::rib_client_send_redist_transaction_enable_cb(
 	    XLOG_ERROR("Failed to enable receiving MRIB information from the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_redist_transaction_enable_timer = _eventloop.new_oneoff_after(
+	    _rib_redist_transaction_enable_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::send_rib_redist_transaction_enable));
 	}
@@ -994,7 +991,7 @@ XrlPimNode::rib_client_send_redist_transaction_disable_cb(
 	    XLOG_ERROR("Failed to disable receiving MRIB information from the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::rib_register_shutdown));
 	}
@@ -2229,7 +2226,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 		   (is_add)? "add" : "delete",
 		   pim_vif->name().c_str());
     start_timer_label:
-	_add_delete_protocol_mld6igmp_queue_timer = _eventloop.new_oneoff_after(
+	_add_delete_protocol_mld6igmp_queue_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
     }
@@ -2307,7 +2304,7 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 		       "Will try again.",
 		       (is_add)? "register" : "deregister",
 		       xrl_error.str().c_str());
-	    _add_delete_protocol_mld6igmp_queue_timer = _eventloop.new_oneoff_after(
+	    _add_delete_protocol_mld6igmp_queue_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlPimNode::send_add_delete_protocol_mld6igmp));
 	}

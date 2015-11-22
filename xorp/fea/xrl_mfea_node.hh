@@ -46,7 +46,6 @@ public:
     XrlMfeaNode(FeaNode&	fea_node,
 		int		family,
 		xorp_module_id	module_id,
-		EventLoop&	eventloop,
 		const string&	class_name,
 		const string&	finder_hostname,
 		uint16_t	finder_port,

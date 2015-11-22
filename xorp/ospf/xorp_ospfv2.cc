@@ -59,24 +59,23 @@ main(int /*argc*/, char **argv)
     xlog_start();
 
     try {
-	EventLoop eventloop;
 
 	string feaname = "fea";
 	string ribname = "rib";
 
-	XrlStdRouter xrl_router(eventloop, TARGET_OSPFv2);
+	XrlStdRouter xrl_router( TARGET_OSPFv2);
 
-	XrlIO<IPv4> io(eventloop, xrl_router, feaname, ribname);
-	Ospf<IPv4> ospf(OspfTypes::V2, eventloop, &io);
+	XrlIO<IPv4> io( xrl_router, feaname, ribname);
+	Ospf<IPv4> ospf(OspfTypes::V2,  &io);
 
 	XrlOspfV2Target v2target(&xrl_router, ospf, io);
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	io.startup();
 
 	setup_dflt_sighandlers();
 
 	while (xorp_do_run && ospf.running())
-	    eventloop.run();
+	    EventLoop::instance().run();
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

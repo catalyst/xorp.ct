@@ -33,6 +33,7 @@
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/timer.hh"
+#include "libxorp/eventloop.hh"
 
 
 //
@@ -43,7 +44,6 @@
 // Structures/classes, typedefs and macros
 //
 
-class EventLoop;
 class Mld6igmpGroupRecord;
 
 /**

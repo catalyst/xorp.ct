@@ -28,7 +28,7 @@
 
 class SlaveModuleManager : public GenericModuleManager {
 public:
-    SlaveModuleManager(EventLoop& eventloop);
+    SlaveModuleManager();
     GenericModule* new_module(const string& module_name, string& error_msg);
     bool module_is_active(const string& module_name) const;
 private:

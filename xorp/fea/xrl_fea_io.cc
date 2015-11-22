@@ -38,10 +38,9 @@
 #include "xrl_fea_io.hh"
 
 
-XrlFeaIo::XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
+XrlFeaIo::XrlFeaIo( XrlRouter& xrl_router,
 		   const string& xrl_finder_targetname)
-    : FeaIo(eventloop),
-      _xrl_router(xrl_router),
+    : _xrl_router(xrl_router),
       _xrl_finder_targetname(xrl_finder_targetname)
 {
 }

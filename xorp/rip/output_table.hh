@@ -42,13 +42,12 @@ class OutputTable :
     public OutputBase<A>
 {
 public:
-    OutputTable(EventLoop&	e,
-		Port<A>&	port,
+    OutputTable( Port<A>&	port,
 		PacketQueue<A>&	pkt_queue,
 		RouteDB<A>&	rdb,
 		const A&	ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
 		uint16_t	ip_port = RIP_AF_CONSTANTS<A>::IP_PORT)
-	: OutputBase<A>(e, port, pkt_queue, ip_addr, ip_port),
+	: OutputBase<A>( port, pkt_queue, ip_addr, ip_port),
 	  _rw(rdb), _rw_valid(false)
     {}
 

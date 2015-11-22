@@ -28,7 +28,6 @@
 #include "trace.hh"
 
 
-class EventLoop;
 
 template <typename A>
 class UpdateQueue;
@@ -78,7 +77,7 @@ public:
     typedef map<Net, Route*, NetCmp<A> >        RouteContainerNoRef;
 
 public:
-    RouteDB(EventLoop& e, PolicyFilters& pfs);
+    RouteDB( PolicyFilters& pfs);
     ~RouteDB();
 
     /**
@@ -193,7 +192,6 @@ public:
      */
     const UpdateQueue<A>& update_queue() const;
 
-    EventLoop& eventloop() 			{ return _eventloop; }
 
     /**
      * Push routes through policy filters for re-filtering.
@@ -221,7 +219,6 @@ protected:
     RouteContainer& routes();
 
 protected:
-    EventLoop&		_eventloop;
     RouteContainer	_routes;
     UpdateQueue<A>*	_uq;
     PolicyFilters&	_policy_filters;

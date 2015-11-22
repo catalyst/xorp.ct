@@ -47,9 +47,8 @@
 #include "profile_vars.hh"
 #endif
 
-FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
-    : _eventloop(eventloop),
-      _is_running(false),
+FeaNode::FeaNode( FeaIo& fea_io, bool is_dummy)
+    : _is_running(false),
       _is_dummy(is_dummy),
       _ifconfig(*this),
 #ifndef XORP_DISABLE_FIREWALL

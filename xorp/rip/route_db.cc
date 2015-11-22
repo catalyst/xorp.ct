@@ -60,9 +60,8 @@ NetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
 // RouteDB
 
 template <typename A>
-RouteDB<A>::RouteDB(EventLoop& e, PolicyFilters& pfs)
-    : _eventloop(e),
-      _policy_filters(pfs)
+RouteDB<A>::RouteDB( PolicyFilters& pfs)
+    : _policy_filters(pfs)
 {
     _uq = new UpdateQueue<A>();
 }
@@ -151,7 +150,7 @@ RouteDB<A>::set_deletion_timer(Route* r)
     RouteOrigin* o = r->origin();
     uint32_t deletion_ms = o->deletion_secs() * 1000;
 
-    XorpTimer t = _eventloop.new_oneoff_after_ms(deletion_ms,
+    XorpTimer t = EventLoop::instance().new_oneoff_after_ms(deletion_ms,
 				callback(this, &RouteDB<A>::delete_route, r));
 
     r->set_timer(t);
@@ -177,7 +176,7 @@ RouteDB<A>::set_expiry_timer(Route* r)
     uint32_t expiry_secs = o->expiry_secs();
 
     if (expiry_secs) {
-	t = _eventloop.new_oneoff_after_ms(expiry_secs * 1000,
+	t = EventLoop::instance().new_oneoff_after_ms(expiry_secs * 1000,
 			   callback(this, &RouteDB<A>::expire_route, r));
     }
     r->set_timer(t);
@@ -590,7 +589,7 @@ RouteWalker<A>::pause(uint32_t pause_ms)
     XorpTimer t = _pos->second->timer();
     if (t.scheduled() && _pos->second->cost() == RIP_INFINITY) {
 	TimeVal next_run;
-	_route_db.eventloop().current_time(next_run);
+	EventLoop::instance().current_time(next_run);
 	next_run += TimeVal(0, 1000 * pause_ms * 2); // factor of 2 == slack
 	if (t.expiry() <= next_run) {
 	    t.schedule_at(next_run);

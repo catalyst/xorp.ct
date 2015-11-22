@@ -32,17 +32,16 @@
 
 static void start()
 {
-    EventLoop e;
 
-    XrlStdRouter rtr(e, VrrpTarget::vrrp_target_name.c_str(),
+    XrlStdRouter rtr( VrrpTarget::vrrp_target_name.c_str(),
 		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     VrrpTarget vrrp(rtr);
 
-    wait_until_xrl_router_is_ready(e, rtr);
+    wait_until_xrl_router_is_ready( rtr);
 
     while (vrrp.running())
-	e.run();
+	EventLoop::instance().run();
 }
 
 int main(int argc, char* argv[])

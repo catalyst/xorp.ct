@@ -52,7 +52,6 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 public:
     XrlMld6igmpNode(int			family,
 		    xorp_module_id	module_id, 
-		    EventLoop&		eventloop,
 		    const string&	class_name,
 		    const string&	finder_hostname,
 		    uint16_t		finder_port,
@@ -946,7 +945,6 @@ private:
 	bool		_is_add;
     };
 
-    EventLoop&			_eventloop;
     const string		_finder_target;
     const string		_fea_target;
     const string		_mfea_target;

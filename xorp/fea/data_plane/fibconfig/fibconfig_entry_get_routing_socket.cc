@@ -50,7 +50,6 @@
 
 FibConfigEntryGetRoutingSocket::FibConfigEntryGetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntryGet(fea_data_plane_manager),
-      RoutingSocket(fea_data_plane_manager.eventloop()),
       _rs_reader(*(RoutingSocket *)this)
 {
 }

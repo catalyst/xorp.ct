@@ -34,8 +34,7 @@ template <typename A> class XrlRedistManager;
 
 class XrlRipngTarget : public XrlRipngTargetBase {
 public:
-    XrlRipngTarget(EventLoop&			e,
-		   XrlRouter& 			xr,
+    XrlRipngTarget( XrlRouter& 			xr,
 		   XrlProcessSpy& 		xps,
 		   XrlPortManager<IPv6>&	xpm,
 		   XrlRedistManager<IPv6>&	xrm,
@@ -327,7 +326,6 @@ public:
         const bool&     multicast);
 
 protected:
-    EventLoop& 			_e;
     XrlRipCommonTarget<IPv6>* 	_ct;
 };
 

@@ -80,9 +80,8 @@ uint16_t NetlinkSocket::_instance_cnt = 0;
 // Netlink Sockets (see netlink(7)) communication with the kernel
 //
 
-NetlinkSocket::NetlinkSocket(EventLoop& eventloop, uint32_t table_id)
-    : _eventloop(eventloop),
-      _fd(-1),
+NetlinkSocket::NetlinkSocket( uint32_t table_id)
+    : _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
       _nl_groups(0),		// XXX: no netlink multicast groups
@@ -280,7 +279,7 @@ NetlinkSocket::start(string& error_msg)
     //
     // Add the socket to the event loop
     //
-    if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_fd, IOT_READ,
 				callback(this, &NetlinkSocket::io_event))
 	== false) {
 	error_msg = c_format("Failed to add netlink socket to EventLoop");
@@ -298,7 +297,7 @@ NetlinkSocket::stop(string& error_msg)
     UNUSED(error_msg);
 
     if (_fd >= 0) {
-	_eventloop.remove_ioevent_cb(_fd);
+	EventLoop::instance().remove_ioevent_cb(_fd);
 	close(_fd);
 	_fd = -1;
     }

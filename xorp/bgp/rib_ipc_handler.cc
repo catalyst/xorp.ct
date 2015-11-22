@@ -347,13 +347,6 @@ XrlQueue<A>::XrlQueue(RibIpcHandler& rib_ipc_handler,
 }
 
 template<class A>
-EventLoop& 
-XrlQueue<A>::eventloop() const 
-{ 
-    return _rib_ipc_handler.eventloop(); 
-}
-
-template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 			     const IPNet<A>& net, const A& nexthop, 

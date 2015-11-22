@@ -28,7 +28,7 @@
 template<class A>
 class DummyNextHopResolver : public NextHopResolver<A> {
 public:
-    DummyNextHopResolver(EventLoop& eventloop, BGPMain& bgp);
+    DummyNextHopResolver( BGPMain& bgp);
 
     virtual ~DummyNextHopResolver();
 

@@ -137,9 +137,8 @@ Port<A>::create_peer(const Addr& addr)
 	Peer<A>* peer = new Peer<A>(*this, addr);
 	_peers.push_back(peer);
 
-	EventLoop& e = _pm.eventloop();
 	TimeVal now;
-	e.current_time(now);
+	EventLoop::instance().current_time(now);
 	peer->set_last_active(now);
 	start_peer_gc_timer();
 	return peer;
@@ -236,28 +235,27 @@ template <typename A>
 void
 Port<A>::start_output_processing()
 {
-    EventLoop& e = _pm.eventloop();
     RouteDB<A>& rdb = _pm.system().route_db();
 
     // Create triggered update output process
-    _tu_out = new OutputUpdates<A>(e, *this, *_packet_queue, rdb);
+    _tu_out = new OutputUpdates<A>( *this, *_packet_queue, rdb);
 
     // Schedule triggered update process
     TimeVal interval = TimeVal(constants().update_interval(), 0);
     double factor = constants().update_jitter() / 100.0;
     _ur_timer =
-	e.new_oneoff_after(random_uniform(interval, factor),
+	EventLoop::instance().new_oneoff_after(random_uniform(interval, factor),
 			   callback(this,
 				    &Port<A>::unsolicited_response_timeout));
 
     // Create unsolicited response (table dump) output process
-    _ur_out = new OutputTable<A>(e, *this, *_packet_queue, rdb);
+    _ur_out = new OutputTable<A>( *this, *_packet_queue, rdb);
 
     // Schedule unsolicited output process
     TimeVal delay = TimeVal(constants().triggered_update_delay(), 0);
     factor = constants().triggered_update_jitter() / 100.0;
     _tu_timer =
-	e.new_oneoff_after(random_uniform(delay, factor),
+	EventLoop::instance().new_oneoff_after(random_uniform(delay, factor),
 			   callback(this,
 				    &Port<A>::triggered_update_timeout));
 }
@@ -280,14 +278,13 @@ template <typename A>
 void
 Port<A>::start_request_table_timer()
 {
-    EventLoop& e = _pm.eventloop();
 
     if (constants().table_request_period_secs() == 0) {
 	// Don't start the timer, but cancel it instead
 	_rt_timer.unschedule();
 	return;
     }
-    _rt_timer = e.new_periodic_ms(
+    _rt_timer = EventLoop::instance().new_periodic_ms(
 	constants().table_request_period_secs() * 1000,
 	callback(this, &Port<A>::request_table_timeout));
 }
@@ -353,8 +350,7 @@ Port<A>::start_peer_gc_timer()
 
     // Set peer garbage collection timeout to 180 seconds since for RIP
     // MIB we need to keep track of quiescent peers for this long.
-    EventLoop& e = _pm.eventloop();
-    _gc_timer = e.new_periodic_ms(180 * 1000,
+    _gc_timer = EventLoop::instance().new_periodic_ms(180 * 1000,
 				  callback(this, &Port<A>::peer_gc_timeout));
 }
 
@@ -387,9 +383,8 @@ Port<A>::record_packet(Peer<A>* p)
 {
     counters().incr_packets_recv();
     if (p) {
-	EventLoop& e = _pm.eventloop();
 	TimeVal now;
-	e.current_time(now);
+	EventLoop::instance().current_time(now);
 	p->counters().incr_packets_recv();
 	p->set_last_active(now);
     }
@@ -487,9 +482,8 @@ template <typename A>
 void
 Port<A>::block_queries()
 {
-    EventLoop& e = _pm.eventloop();
     _query_blocked_timer
-	= e.new_oneoff_after_ms(constants().interquery_delay_ms(),
+	= EventLoop::instance().new_oneoff_after_ms(constants().interquery_delay_ms(),
 				callback(noop));
 }
 
@@ -719,9 +713,8 @@ Port<A>::parse_request(const Addr&			src_addr,
 	    // around, and re-instantiate to reply to table dump request
 	    delete _su_out;
 
-	    EventLoop& e = _pm.eventloop();
 	    RouteDB<A>& rdb = _pm.system().route_db();
-	    _su_out = new OutputTable<A>(e, *this, *_packet_queue, rdb,
+	    _su_out = new OutputTable<A>( *this, *_packet_queue, rdb,
 					 src_addr, src_port);
 	    _su_out->start();
 

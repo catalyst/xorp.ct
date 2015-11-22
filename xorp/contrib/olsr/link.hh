@@ -38,7 +38,6 @@ class Neighborhood;
 class LogicalLink {
   public:
     LogicalLink(Neighborhood* tm,
-	 EventLoop& eventloop,
 	 const OlsrTypes::LogicalLinkID id,
 	 const TimeVal& vtime,
 	 const IPv4& remote_addr,
@@ -198,7 +197,6 @@ class LogicalLink {
 
   private:
     Neighborhood*	_nh;
-    EventLoop&		_eventloop;
 
     /**
      * Unique identifier of link.

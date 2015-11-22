@@ -58,7 +58,6 @@ class XrlPimNode : public PimNode,
 public:
     XrlPimNode(int		family,
 	       xorp_module_id	module_id,
-	       EventLoop&	eventloop,
 	       const string&	class_name,
 	       const string&	finder_hostname,
 	       uint16_t		finder_port,
@@ -2534,7 +2533,6 @@ private:
 	bool		_is_delete_all;
     };
 
-    EventLoop&			_eventloop;
     const string		_finder_target;
     const string		_fea_target;
     const string		_mfea_target;

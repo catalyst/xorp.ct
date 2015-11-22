@@ -63,8 +63,7 @@
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 #endif
 
-XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
-			   FeaNode&			fea_node,
+XrlFeaTarget::XrlFeaTarget( FeaNode&			fea_node,
 			   XrlRouter&			xrl_router,
 #ifndef XORP_DISABLE_PROFILE
 			   Profile&			profile,
@@ -72,7 +71,6 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   XrlFibClientManager&		xrl_fib_client_manager,
 			   LibFeaClientBridge&		lib_fea_client_bridge)
     : XrlFeaTargetBase(&xrl_router),
-      _eventloop(eventloop),
       _fea_node(fea_node),
       _xrl_router(xrl_router),
 #ifndef XORP_DISABLE_PROFILE

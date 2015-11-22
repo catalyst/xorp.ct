@@ -618,8 +618,7 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 	return (XORP_ERROR);
     }
 
-    // Add the socket to the eventloop
-    if (eventloop().add_ioevent_cb(_socket_fd, IOT_CONNECT,
+    if (EventLoop::instance().add_ioevent_cb(_socket_fd, IOT_CONNECT,
 				   callback(this, &IoTcpUdpSocket::connect_io_cb))
 	!= true) {
 	error_msg = c_format("Failed to add I/O callback to complete outgoing connection");
@@ -1108,7 +1107,7 @@ IoTcpUdpSocket::close(string& error_msg)
     }
 
     // Remove it just in case, even though it may not be select()-ed
-    eventloop().remove_ioevent_cb(_socket_fd);
+    EventLoop::instance().remove_ioevent_cb(_socket_fd);
 
     // Delete the async writer
     if (_async_writer != NULL) {
@@ -1142,8 +1141,7 @@ IoTcpUdpSocket::tcp_listen(uint32_t backlog, string& error_msg)
 	return (XORP_ERROR);
     }
 
-    // Add the socket to the eventloop
-    if (eventloop().add_ioevent_cb(_socket_fd, IOT_ACCEPT,
+    if (EventLoop::instance().add_ioevent_cb(_socket_fd, IOT_ACCEPT,
 				   callback(this, &IoTcpUdpSocket::accept_io_cb))
 	!= true) {
 	error_msg = c_format("Failed to add I/O callback to accept connections");
@@ -1177,7 +1175,7 @@ IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 	// future if it improves performance.
 	//
 	int coalesce_buffers_n = 1;
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+	_async_writer = new AsyncFileWriter( _socket_fd,
 					    coalesce_buffers_n);
     }
 
@@ -1209,7 +1207,7 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
 	// future if it improves performance.
 	//
 	int coalesce_buffers_n = 1;
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+	_async_writer = new AsyncFileWriter( _socket_fd,
 					    coalesce_buffers_n);
     }
 
@@ -1495,7 +1493,7 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	_peer_port = get_sockadr_storage_port_number(ss);	
     }
 
-    if (eventloop().add_ioevent_cb(_socket_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_socket_fd, IOT_READ,
 				   callback(this, &IoTcpUdpSocket::data_io_cb))
 	!= true) {
 	error_msg = c_format("Failed to add I/O callback to receive data");
@@ -1628,10 +1626,7 @@ IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
 	return;
     }
 
-    //
-    // XXX: Remove from the eventloop for connect events.
-    //
-    eventloop().remove_ioevent_cb(_socket_fd, IOT_CONNECT);
+    EventLoop::instance().remove_ioevent_cb(_socket_fd, IOT_CONNECT);
 
     // Test whether the connection succeeded
     if (comm_sock_is_connected(_socket_fd, &is_connected) != XORP_OK) {
@@ -1901,12 +1896,11 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	// TCP data
 	if (bytes_recv == 0) {
 	    //
-	    // XXX: Remove from the eventloop for disconnect events.
 	    //
 	    // Note that IOT_DISCONNECT is available only on Windows,
 	    // hence we need to use IOT_READ instead.
 	    //
-	    eventloop().remove_ioevent_cb(_socket_fd, IOT_READ);
+	    EventLoop::instance().remove_ioevent_cb(_socket_fd, IOT_READ);
 	    io_tcpudp_receiver()->disconnect_event();
 	    return;
 	}
@@ -1939,10 +1933,7 @@ IoTcpUdpSocket::disconnect_io_cb(XorpFd fd, IoEventType io_event_type)
 	return;
     }
 
-    //
-    // XXX: Remove from the eventloop for disconnect events.
-    //
-    eventloop().remove_ioevent_cb(_socket_fd, IOT_DISCONNECT);
+    EventLoop::instance().remove_ioevent_cb(_socket_fd, IOT_DISCONNECT);
     io_tcpudp_receiver()->disconnect_event();
 }
 

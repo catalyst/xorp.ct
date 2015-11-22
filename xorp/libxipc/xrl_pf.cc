@@ -26,8 +26,8 @@
 // ----------------------------------------------------------------------------
 // XrlPFListener
 
-XrlPFListener::XrlPFListener(EventLoop& e, XrlDispatcher* d)
-    : _eventloop(e), _dispatcher(d)
+XrlPFListener::XrlPFListener( XrlDispatcher* d)
+    :  _dispatcher(d)
 {
 }
 
@@ -48,8 +48,8 @@ XrlPFListener::set_dispatcher(const XrlDispatcher* d)
 // ----------------------------------------------------------------------------
 // XrlPFSender
 
-XrlPFSender::XrlPFSender(const string& name, EventLoop& e, const char* address)
-	: _eventloop(e), _address(address), _name(name)
+XrlPFSender::XrlPFSender(const string& name,  const char* address)
+	:  _address(address), _name(name)
 {
 }
 

@@ -25,7 +25,7 @@
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_std_router.hh"
 #include "libxorp/profile.hh"
-
+#include "libxorp/eventloop.hh"
 #include "socket.hh"
 #include "packet.hh"
 
@@ -40,14 +40,13 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "policy/backend/version_filters.hh"
 
-class EventLoop;
 class XrlBgpTarget;
 
 class BGPMain : public ServiceBase,
 		public IfMgrHintObserver,
 		public ServiceChangeObserverBase {
 public:
-    BGPMain(EventLoop& eventloop);
+    BGPMain();
     ~BGPMain();
 
     /**
@@ -648,7 +647,6 @@ public:
     BGPPlumbing *plumbing_multicast() const { return _plumbing_multicast; }
 
     XrlStdRouter *get_router() { return _xrl_router; }
-    EventLoop& eventloop() { return _eventloop; }
     XrlBgpTarget *get_xrl_target() { return _xrl_target; }
 
     /**
@@ -946,7 +944,6 @@ private:
 			    vector<uint8_t>& attr_unknown);
 
 
-    EventLoop& _eventloop;
     bool _exit_loop;
     BGPPeerList *_peerlist;		// List of current BGP peers.
     BGPPeerList *_deleted_peerlist;	// List of deleted BGP peers.

@@ -36,13 +36,13 @@
 
 FirewallManager::FirewallManager(FeaNode&	fea_node,
 				 const IfTree&	iftree)
-    : _eventloop(fea_node.eventloop()),
-      _iftree(iftree),
+    : _iftree(iftree),
       _ftm(NULL),
       _next_token(0),
       _is_running(false)
 {
-    _ftm = new FirewallTransactionManager(_eventloop);
+	UNUSED(fea_node);
+    _ftm = new FirewallTransactionManager;
 }
 
 FirewallManager::~FirewallManager()
@@ -763,7 +763,7 @@ FirewallManager::BrowseState::get_entry_list_next6(FirewallEntry& firewall_entry
 void
 FirewallManager::BrowseState::schedule_timer()
 {
-    _timeout_timer = _firewall_manager.eventloop().new_oneoff_after_ms(
+    _timeout_timer = EventLoop::instance().new_oneoff_after_ms(
 	BROWSE_TIMEOUT_MS,
 	callback(this, &FirewallManager::BrowseState::timeout));
 }

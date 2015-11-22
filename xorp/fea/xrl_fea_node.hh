@@ -38,7 +38,6 @@
 #include "xrl_io_tcpudp_manager.hh"
 #include "xrl_mfea_node.hh"
 
-class EventLoop;
 
 /**
  * @short FEA (Forwarding Engine Abstraction) node class with XRL front-end.
@@ -57,7 +56,7 @@ public:
      * @param finder_port the XRL Finder port.
      * @param is_dummy if true, then run the FEA in dummy mode.
      */
-    XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
+    XrlFeaNode( const string& xrl_fea_targetname,
 	       const string& xrl_finder_targetname,
 	       const string& finder_hostname, uint16_t finder_port,
 	       bool is_dummy);
@@ -97,12 +96,6 @@ public:
      */
     bool	is_shutdown_received() const;
 
-    /**
-     * Get the event loop this service is added to.
-     * 
-     * @return the event loop this service is added to.
-     */
-    EventLoop&	eventloop() { return (_eventloop); }
 
     /**
      * Get the XRL transmission and reception point.
@@ -140,7 +133,6 @@ public:
     const string& xrl_finder_targetname() const { return (_xrl_finder_targetname); }
 
 private:
-    EventLoop&		_eventloop;	// The event loop to use
     XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
     XrlFeaIo		_xrl_fea_io;	// The FEA I/O XRL instance
     FeaNode		_fea_node;	// The FEA node

@@ -112,7 +112,7 @@ struct TwoHopLinkOrderPred {
  */
 class Neighborhood {
   public:
-    Neighborhood(Olsr& olsr, EventLoop& eventloop, FaceManager& fm);
+    Neighborhood(Olsr& olsr,  FaceManager& fm);
     ~Neighborhood();
 
     //
@@ -1086,7 +1086,6 @@ protected:
 
 private:
     Olsr&		_olsr;
-    EventLoop&		_eventloop;
     FaceManager&	_fm;
     TopologyManager*	_tm;
     RouteManager*	_rm;

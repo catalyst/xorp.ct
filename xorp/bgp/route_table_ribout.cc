@@ -396,8 +396,6 @@ RibOutTable<A>::wakeup()
     reschedule_self();
 }
 
-/* value is a tradeoff between not too many calls to timers, and not
-   being away from eventloop for too long - probably needs tuning*/
 #define MAX_MSGS_IN_BATCH 10
 
 template<class A>
@@ -413,8 +411,6 @@ RibOutTable<A>::pull_next_route()
 	return false;
 
     for (int msgs = 0; msgs < MAX_MSGS_IN_BATCH; msgs++) {
-	/* only request a limited about of messages, so we don't hog
-	   the eventloop for too long */
 
 	/* get_next_message will cause the upstream queue to send
            another update (add, delete, replace or push) through the
@@ -453,7 +449,7 @@ RibOutTable<A>::reschedule_self()
       timers */    
     if (_pull_routes_task.scheduled())
 	return;
-    _pull_routes_task = _peer->eventloop().new_task(
+    _pull_routes_task = EventLoop::instance().new_task(
 	callback(this, &RibOutTable<A>::pull_next_route),
 	XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 }

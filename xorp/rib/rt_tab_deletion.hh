@@ -27,7 +27,6 @@
 #include "rt_tab_base.hh"
 
 
-class EventLoop;
 
 /**
  * @short RouteTable that performs background deletion of routes when
@@ -49,8 +48,7 @@ public:
      */
     DeletionTable(const string& tablename,
 		  RouteTable<A>* parent,
-		  RouteTrie* ip_route_trie,
-		  EventLoop& eventloop);
+		  RouteTrie* ip_route_trie);
 
     /**
      * DeletionTable destructor.
@@ -120,7 +118,6 @@ protected:
     virtual void set_background_timer() = 0;
 
     RouteTable<A>*	_parent;
-    EventLoop&		_eventloop;
     RouteTrie*		_ip_route_table;
 };
 
@@ -131,9 +128,9 @@ template <class A>
 class TypedDeletionTable<A, IGP> : public DeletionTable<A> {
 public:
     TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
-	typename DeletionTable<A>::RouteTrie* ip_route_trie, EventLoop& eventloop) :
-	DeletionTable<A>(tablename, parent, ip_route_trie, eventloop),
-	_background_deletion_timer(this->_eventloop.new_oneoff_after_ms(
+	typename DeletionTable<A>::RouteTrie* ip_route_trie) :
+	DeletionTable<A>(tablename, parent, ip_route_trie),
+	_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
 		0, callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass))) {}
 
     ~TypedDeletionTable() {}
@@ -147,7 +144,7 @@ public:
 protected:
     void set_background_timer() {
 	// Callback immediately, but after network events or expired timers
-	_background_deletion_timer = this->_eventloop.new_oneoff_after_ms(0,
+	_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
 		callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass));
     }
 
@@ -158,9 +155,9 @@ template <class A>
 class TypedDeletionTable<A, EGP> : public DeletionTable<A> {
 public:
     TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
-	typename DeletionTable<A>::RouteTrie* ip_route_trie, EventLoop& eventloop) :
-	DeletionTable<A>(tablename, parent, ip_route_trie, eventloop),
-	_background_deletion_timer(this->_eventloop.new_oneoff_after_ms(
+	typename DeletionTable<A>::RouteTrie* ip_route_trie) :
+	DeletionTable<A>(tablename, parent, ip_route_trie),
+	_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
 		0, callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass))) {}
 
     ~TypedDeletionTable() {}
@@ -174,7 +171,7 @@ public:
 protected:
     void set_background_timer() {
 	// Callback immediately, but after network events or expired timers
-	_background_deletion_timer = this->_eventloop.new_oneoff_after_ms(0,
+	_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
 		callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass));
     }
 

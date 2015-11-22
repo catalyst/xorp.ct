@@ -32,8 +32,8 @@ class DelayQueue {
 public:
     typedef typename XorpCallback1<void, _Entry>::RefPtr DelayCallback;
 
-    DelayQueue(EventLoop& eventloop, uint32_t delay, DelayCallback forward)
-	: _eventloop(eventloop), _delay(delay), _forward(forward)
+    DelayQueue( uint32_t delay, DelayCallback forward)
+	:  _delay(delay), _forward(forward)
     {}
 
     /**
@@ -48,7 +48,6 @@ public:
     void fire();
 
 private:
-    EventLoop& _eventloop;
     deque<_Entry> _queue;
     const uint32_t _delay;	// Delay in seconds.
     DelayCallback _forward;	// Invoked to forward an entry from the queue.
@@ -79,7 +78,7 @@ DelayQueue<_Entry>::add(_Entry entry)
     // delay seconds. Forward this entry immediately and start the
     // timer. Start the timer first in case this code is re-entered.
 
-    _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
+    _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
 					 callback(this, &DelayQueue::next));
 
     _forward->dispatch(entry);
@@ -92,7 +91,7 @@ DelayQueue<_Entry>::fire()
     if (_timer.scheduled())
 	return;
     
-    _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
+    _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
 					 callback(this, &DelayQueue::next));
 }
 
@@ -103,7 +102,7 @@ DelayQueue<_Entry>::next()
     if (_queue.empty())
 	return;
 
-    _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
+    _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
 					 callback(this, &DelayQueue::next));
     
     _Entry entry = _queue.front();

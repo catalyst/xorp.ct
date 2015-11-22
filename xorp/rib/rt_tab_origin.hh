@@ -56,10 +56,8 @@ public:
      * @param admin_distance the default administrative distance for
      * routes in this table.
      * @param protocol_type the routing protocol type (@ref ProtocolType).
-     * @param eventloop the main event loop.
      */
-    OriginTable(const string& tablename, uint16_t admin_distance,
-		EventLoop& eventloop);
+    OriginTable(const string& tablename, uint16_t admin_distance);
 
     /**
      * OriginTable destructor.
@@ -170,7 +168,6 @@ public:
 protected:
     uint16_t		_admin_distance;	// 0 .. 255
     //
-    EventLoop&   	_eventloop;
     RouteTrie*		_ip_route_table;
     uint32_t	 	_gen;
 
@@ -185,8 +182,8 @@ class TypedOriginTable { };
 template <class A>
 class TypedOriginTable<A, IGP> : public OriginTable<A> {
 public:
-    TypedOriginTable(const string& tablename, uint16_t admin_distance, EventLoop& eventloop) :
-	OriginTable<A>(tablename, admin_distance, eventloop), _protocol(tablename, IGP) {}
+    TypedOriginTable(const string& tablename, uint16_t admin_distance) :
+	OriginTable<A>(tablename, admin_distance), _protocol(tablename, IGP) {}
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
@@ -208,8 +205,8 @@ protected:
 template <class A>
 class TypedOriginTable<A, EGP> : public OriginTable<A> {
 public:
-    TypedOriginTable(const string& tablename, uint16_t admin_distance, EventLoop& eventloop) :
-	OriginTable<A>(tablename, admin_distance, eventloop), _protocol(tablename, EGP) {}
+    TypedOriginTable(const string& tablename, uint16_t admin_distance) :
+	OriginTable<A>(tablename, admin_distance), _protocol(tablename, EGP) {}
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }

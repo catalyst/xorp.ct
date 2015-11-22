@@ -92,17 +92,12 @@ usage(const char *argv0, int exit_value)
 static void
 mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 {
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
 
     //
     // MLD6IGMP node
     //
     XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET,
 				       XORP_MODULE_MLD6IGMP,
-				       eventloop,
 				       xorp_module_name(AF_INET,
 							XORP_MODULE_MLD6IGMP),
 				       finder_hostname,
@@ -112,7 +107,7 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 							XORP_MODULE_FEA),
 				       xorp_module_name(AF_INET,
 							XORP_MODULE_MFEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_mld6igmp_node4.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_mld6igmp_node4.xrl_router());
 
     //
     // Startup
@@ -126,11 +121,11 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
     // Main loop
     //
     while (! xrl_mld6igmp_node4.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 
     while (xrl_mld6igmp_node4.xrl_router().pending()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 }
 

@@ -35,14 +35,13 @@ class RoutingSocketPlumber;
 
 /**
  * RoutingSocket class opens a routing socket and forwards data arriving
- * on the socket to RoutingSocketObservers.  The RoutingSocket hooks itself
- * into the EventLoop and activity usually happens asynchronously.
+ * on the socket to RoutingSocketObservers. 
  */
 class RoutingSocket :
     public NONCOPYABLE
 {
 public:
-    RoutingSocket(EventLoop& eventloop);
+    RoutingSocket();
     ~RoutingSocket();
 
     /**
@@ -134,7 +133,6 @@ private:
     static const size_t ROUTING_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 
 private:
-    EventLoop&	 _eventloop;
     int		 _fd;
     ObserverList _ol;
 

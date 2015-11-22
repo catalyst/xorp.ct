@@ -292,7 +292,7 @@ CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
     {
 	TimeVal now;
 	
-	eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	cli_client->set_cli_session_start_time(now);
     }
     cli_client->set_is_cli_session_active(true);
@@ -327,7 +327,7 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
 	_client_list.erase(iter);
 	delete cli_client;
     } else {
-	eventloop().remove_ioevent_cb(cli_client->input_fd(), IOT_READ);
+	EventLoop::instance().remove_ioevent_cb(cli_client->input_fd(), IOT_READ);
     }
 
     return (XORP_OK);
@@ -336,7 +336,7 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
 int
 CliClient::start_connection(string& error_msg)
 {
-    if (cli_node().eventloop().add_ioevent_cb(
+    if (EventLoop::instance().add_ioevent_cb(
 	    input_fd(),
 	    IOT_READ,
 	    callback(this, &CliClient::client_read),
@@ -664,11 +664,11 @@ CliClient::block_connection(bool is_blocked)
 	return (XORP_ERROR);
     
     if (is_blocked) {
-	cli_node().eventloop().remove_ioevent_cb(input_fd(), IOT_READ);
+	EventLoop::instance().remove_ioevent_cb(input_fd(), IOT_READ);
 	return (XORP_OK);
     }
 
-    if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(input_fd(), IOT_READ,
 					    callback(this, &CliClient::client_read),
 					      XorpTask::PRIORITY_HIGHEST)
 	== false)
@@ -828,14 +828,13 @@ CliClient::process_input_data()
 void
 CliClient::schedule_process_input_data()
 {
-    EventLoop& eventloop = cli_node().eventloop();
     OneoffTimerCallback cb = callback(this, &CliClient::process_input_data);
 
     //
     // XXX: Schedule the processing after 10ms to avoid increasing
     // the CPU usage.
     //
-    _process_pending_input_data_timer = eventloop.new_oneoff_after(
+    _process_pending_input_data_timer = EventLoop::instance().new_oneoff_after(
 	TimeVal(0, 10),
 	cb,
 	XorpTask::PRIORITY_LOWEST);

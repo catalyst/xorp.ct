@@ -49,7 +49,7 @@ template <typename A>
 PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
 			    bool unicast, bool multicast, int lines)
     : XrlBgpV0p3Client(&_xrl_rtr),
-      _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose),
+      _xrl_rtr( "print_routes"), _verbose(verbose),
       _unicast(unicast), _multicast(multicast), _lines(lines)
 {
     _prev_no_bgp = false;
@@ -58,9 +58,9 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
     // Wait for the finder to become ready.
     {
 	bool timed_out = false;
-	XorpTimer t = _eventloop.set_flag_after_ms(10000, &timed_out);
+	XorpTimer t = EventLoop::instance().set_flag_after_ms(10000, &timed_out);
 	while (_xrl_rtr.connected() == false && timed_out == false) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	}
 
 	if (_xrl_rtr.connected() == false) {
@@ -74,7 +74,7 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
 	_count = 0;
 	get_route_list_start(net, _unicast, _multicast);
 	while (_done == false || _active_requests > 0) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	    if (_lines == static_cast<int>(_count)) {
 		printf("Output truncated at %u lines\n",
 		       XORP_UINT_CAST(_count));
@@ -91,9 +91,9 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
 	XorpCallback0<void>::RefPtr cb
 	    = callback(this, &PrintRoutes::timer_expired);
 	_done = false;
-	_timer = _eventloop.new_oneoff_after_ms(interval*1000, cb);
+	_timer = EventLoop::instance().new_oneoff_after_ms(interval*1000, cb);
 	while (_done == false) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	}
     }
 }

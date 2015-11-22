@@ -879,7 +879,7 @@ void
 PimBsr::schedule_rp_table_apply_rp_changes()
 {
     _rp_table_apply_rp_changes_timer =
-	pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &PimBsr::rp_table_apply_rp_changes_timer_timeout));
 }
@@ -925,7 +925,7 @@ void
 PimBsr::schedule_clean_expire_bsr_zones()
 {
     _clean_expire_bsr_zones_timer =
-	pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &PimBsr::clean_expire_bsr_zones_timer_timeout));
 }
@@ -1461,7 +1461,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
 	TimeVal tv_left;
 	bsr_zone.const_bsr_timer().time_remaining(tv_left);
 	_bsr_timer =
-	    _pim_bsr.pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		tv_left,
 		callback(this, &BsrZone::bsr_timer_timeout));
     }
@@ -1471,7 +1471,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
 	TimeVal tv_left;
 	bsr_zone.const_scope_zone_expiry_timer().time_remaining(tv_left);
 	_scope_zone_expiry_timer =
-	    _pim_bsr.pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		tv_left,
 		callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     }
@@ -2045,7 +2045,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 				   config_bsr_zone->my_bsr_priority());
 	    // Set BS Timer to BS Timeout
 	    TimeVal tv(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0);
-	    _bsr_timer = pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    _bsr_timer = EventLoop::instance().new_oneoff_after(
 		tv,
 		callback(this, &BsrZone::bsr_timer_timeout));
 	    return (false);
@@ -2106,7 +2106,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	    }
 	}
 	// Set BS Timer to BS Timeout
-	_bsr_timer = pim_bsr().pim_node().eventloop().new_oneoff_after(
+	_bsr_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
@@ -2122,7 +2122,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	TimeVal rand_override = randomized_override_interval(_my_bsr_addr,
 							     _my_bsr_priority);
 	_bsr_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		rand_override,
 		callback(this, &BsrZone::bsr_timer_timeout));
 	return (false);
@@ -2143,7 +2143,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	// Set BS Timer to BS Timeout
 	_bsr_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 		callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
@@ -2166,7 +2166,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
 	// Set BS Timer to BS Timeout
 	_bsr_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 		callback(this, &BsrZone::bsr_timer_timeout));
 	return (true);
@@ -2178,7 +2178,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     _is_bsm_originate = true;
     // Set BS Timer to BS Period
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
     return (false);
@@ -2209,12 +2209,12 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
     // Set BS Timer to BS Timeout
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
     // Set SZ Timer to SZ Timeout
     _scope_zone_expiry_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     return (true);
@@ -2230,12 +2230,12 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     expire_candidate_rp_advertise_timer();	// Send my Cand-RP-Adv
     // Set BS Timer to BS Timeout
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
     // Set SZ Timer to SZ Timeout
     _scope_zone_expiry_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
     return (true);
@@ -2266,12 +2266,12 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	}
 	// Set BS Timer to BS Timeout
 	_bsr_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 		callback(this, &BsrZone::bsr_timer_timeout));
 	// Set SZ Timer to SZ Timeout
 	_scope_zone_expiry_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		TimeVal(PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT, 0),
 		callback(this, &BsrZone::scope_zone_expiry_timer_timeout));
 	return (true);
@@ -2395,7 +2395,7 @@ void
 BsrZone::expire_bsr_timer()
 {
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
 }
@@ -2429,7 +2429,7 @@ BsrZone::bsr_timer_timeout()
 	rand_override = randomized_override_interval(my_bsr_addr(),
 						     my_bsr_priority());
 	_bsr_timer =
-	    pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		rand_override,
 		callback(this, &BsrZone::bsr_timer_timeout));
 	
@@ -2465,7 +2465,7 @@ BsrZone::bsr_timer_timeout()
     
     // Set BS Timer to BS Period
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
     return;
@@ -2485,7 +2485,7 @@ BsrZone::bsr_timer_timeout()
     }
     // Set BS Timer to BS Period
     _bsr_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_PERIOD_DEFAULT, 0),
 	    callback(this, &BsrZone::bsr_timer_timeout));
     return;
@@ -2628,7 +2628,7 @@ BsrZone::start_candidate_rp_advertise_timer()
     // TODO: instead of PIM_CAND_RP_ADV_PERIOD_DEFAULT we should use
     // a configurable value
     _candidate_rp_advertise_timer =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_CAND_RP_ADV_PERIOD_DEFAULT, 0),
 	    callback(this, &BsrZone::candidate_rp_advertise_timer_timeout));
 }
@@ -2653,7 +2653,7 @@ BsrZone::expire_candidate_rp_advertise_timer()
 	return;
     }
     config_bsr_zone->candidate_rp_advertise_timer() =
-	pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(config_bsr_zone,
 		     &BsrZone::candidate_rp_advertise_timer_timeout));
@@ -2743,7 +2743,7 @@ BsrGroupPrefix::BsrGroupPrefix(BsrZone& bsr_zone,
 	TimeVal tv_left;
 	bsr_group_prefix.const_remove_timer().time_remaining(tv_left);
 	_remove_timer =
-	    _bsr_zone.pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		tv_left,
 		callback(this, &BsrGroupPrefix::remove_timer_timeout));
     }
@@ -2852,7 +2852,7 @@ void
 BsrGroupPrefix::schedule_bsr_group_prefix_remove()
 {
     _remove_timer =
-	bsr_zone().pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0),
 	    callback(this, &BsrGroupPrefix::remove_timer_timeout));
 }
@@ -2901,7 +2901,7 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
 	TimeVal tv_left;
 	bsr_rp.const_candidate_rp_expiry_timer().time_remaining(tv_left);
 	_candidate_rp_expiry_timer =
-	    _bsr_group_prefix.bsr_zone().pim_bsr().pim_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		tv_left,
 		callback(this, &BsrRp::candidate_rp_expiry_timer_timeout));
     }
@@ -2911,7 +2911,7 @@ void
 BsrRp::start_candidate_rp_expiry_timer()
 {
     _candidate_rp_expiry_timer =
-	bsr_group_prefix().bsr_zone().pim_bsr().pim_node().eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(_rp_holdtime, 0),
 	    callback(this, &BsrRp::candidate_rp_expiry_timer_timeout));
 }

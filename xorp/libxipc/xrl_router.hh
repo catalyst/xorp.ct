@@ -50,14 +50,12 @@ public:
     typedef XrlRouterDispatchState DispatchState;
 
 public:
-    XrlRouter(EventLoop&	e,
-	      const char*	class_name,
+    XrlRouter( const char*	class_name,
 	      const char*	finder_address,
 	      uint16_t		finder_port)
 	throw (InvalidAddress);
 
-    XrlRouter(EventLoop&	e,
-	      const char*	class_name,
+    XrlRouter( const char*	class_name,
 	      IPv4		finder_address,
 	      uint16_t		finder_port)
 	throw (InvalidAddress);
@@ -133,11 +131,6 @@ public:
     bool add_handler_internal(const string& cmd,
 			      const XrlRecvAsyncCallback& rcb);
 
-    /**
-     * @return EventLoop used by XrlRouter instance.
-     */
-    EventLoop& eventloop()		{ return _e; }
-
     const string& instance_name() const	{ return _instance_name; }
 
     const string& class_name() const	{ return XrlCmdMap::name(); }
@@ -212,7 +205,6 @@ private:
     ref_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
 
 protected:
-    EventLoop&			_e;
     FinderClient*		_fc;
     FinderClientXrlTarget*	_fxt;
     FinderTcpAutoConnector*	_fac;
@@ -232,9 +224,6 @@ private:
 };
 
 /**
- * Run EventLoop until an XrlRouter is ready.  If XrlRouter instance
- * fails while waiting to become ready, a warning is logged and exit()
- * is called.
  *
  * NB This method is essentially a placeholder.  A future revision to
  * the XrlRouter API is to add ServiceBase to its parent classes.
@@ -245,6 +234,6 @@ private:
  * @param e eventloop to run.
  * @param xr xrl_router to wait for.
  */
-void wait_until_xrl_router_is_ready(EventLoop& e, XrlRouter& xr);
+void wait_until_xrl_router_is_ready( XrlRouter& xr);
 
 #endif // __LIBXIPC_XRL_ROUTER_HH__

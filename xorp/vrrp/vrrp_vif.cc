@@ -68,7 +68,7 @@ VrrpVif::add_vrid(uint32_t vrid)
 {
     XLOG_ASSERT(find_vrid(vrid) == NULL);
 
-    _vrrps[vrid] = new Vrrp(*this, _vt.eventloop(), vrid);
+    _vrrps[vrid] = new Vrrp(*this,  vrid);
 }
 
 void

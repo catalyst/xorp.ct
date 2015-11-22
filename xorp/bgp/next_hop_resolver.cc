@@ -40,10 +40,8 @@
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
-				    EventLoop& eventloop,
 				    BGPMain& bgp)
     : _xrl_router(xrl_router),
-      _eventloop(eventloop),
       _bgp(bgp),
       _next_hop_rib_request(xrl_router, *this, _next_hop_cache,  bgp)
 {

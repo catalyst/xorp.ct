@@ -88,8 +88,8 @@ string AsyncFileOperator::toString() const {
 // ----------------------------------------------------------------------------
 // AsyncFileReader read method and entry hook
 
-AsyncFileReader::AsyncFileReader(EventLoop& e, XorpFd fd, int priority)
-    : AsyncFileOperator(e, fd, priority)
+AsyncFileReader::AsyncFileReader( XorpFd fd, int priority)
+    : AsyncFileOperator( fd, priority)
 {
 }
 
@@ -174,7 +174,7 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 	u_long remaining = 0;
 	int result = ioctlsocket(_fd.getSocket(), FIONREAD, &remaining);
 	if (result != SOCKET_ERROR && remaining > 0) {
-	    _deferred_io_task = _eventloop.new_oneoff_task(
+	    _deferred_io_task = EventLoop::instance().new_oneoff_task(
 		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
 	    XLOG_ASSERT(_deferred_io_task.scheduled());
 	}
@@ -226,8 +226,7 @@ AsyncFileReader::start()
 	return false;
     }
 
-    EventLoop& e = _eventloop;
-    if (e.add_ioevent_cb(_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_fd, IOT_READ,
 			 callback(this, &AsyncFileReader::read),
 			 _priority) == false) {
 	XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
@@ -246,7 +245,7 @@ AsyncFileReader::stop()
 {
     debug_msg("%p stop\n", this);
 
-    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+    EventLoop::instance().remove_ioevent_cb(_fd, IOT_READ);
 
 #ifdef EDGE_TRIGGERED_WRITES
     _deferred_io_task.unschedule();
@@ -281,9 +280,9 @@ string AsyncFileReader::toString() const {
 #define MAX_IOVEC 16
 #endif
 
-AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce,
+AsyncFileWriter::AsyncFileWriter( XorpFd fd, uint32_t coalesce,
 				 int priority)
-    : AsyncFileOperator(e, fd, priority)
+    : AsyncFileOperator( fd, priority)
 {
     static const uint32_t max_coalesce = 16;
     _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
@@ -311,7 +310,7 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
     _buffers.push_back(new BufferInfo(b, b_bytes, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running && !_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -333,7 +332,7 @@ AsyncFileWriter::add_buffer_sendto(const uint8_t*	b,
     _buffers.push_back(new BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running && !_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -354,7 +353,7 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running && !_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -373,7 +372,7 @@ AsyncFileWriter::add_data(const vector<uint8_t>&	data,
     _buffers.push_back(new BufferInfo(data, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running && !_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -394,7 +393,7 @@ AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
     _buffers.push_back(new BufferInfo(data, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running && !_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -572,7 +571,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 
 #ifdef EDGE_TRIGGERED_WRITES
     if (!(_buffers.empty() || _deferred_io_task.scheduled())) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
@@ -672,8 +671,7 @@ AsyncFileWriter::start()
 	return false;
     }
 
-    EventLoop& e = _eventloop;
-    if (e.add_ioevent_cb(_fd, IOT_WRITE,
+    if (EventLoop::instance().add_ioevent_cb(_fd, IOT_WRITE,
 			 callback(this, &AsyncFileWriter::write),
 			 _priority) == false) {
 	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
@@ -682,7 +680,7 @@ AsyncFileWriter::start()
 
 #ifdef EDGE_TRIGGERED_WRITES
     if (!_deferred_io_task.scheduled()) {
-	_deferred_io_task = _eventloop.new_oneoff_task(
+	_deferred_io_task = EventLoop::instance().new_oneoff_task(
 	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
     }
 #endif // EDGE_TRIGGERED_WRITES
@@ -700,7 +698,7 @@ AsyncFileWriter::stop()
 #ifdef EDGE_TRIGGERED_WRITES
     _deferred_io_task.unschedule();
 #endif // EDGE_TRIGGERED_WRITES
-    _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
+    EventLoop::instance().remove_ioevent_cb(_fd, IOT_WRITE);
     _running = false;
 }
 

@@ -95,16 +95,6 @@ Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
     _do_forward_sources.delete_payload_and_clear();
 }
 
-/**
- * Get the corresponding event loop.
- *
- * @return the corresponding event loop.
- */
-EventLoop&
-Mld6igmpGroupRecord::eventloop()
-{
-    return (_mld6igmp_vif.mld6igmp_node().eventloop());
-}
 
 /**
  * Find a source that should be forwarded.
@@ -238,7 +228,7 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources,
 	//
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
-	_group_timer = eventloop().new_oneoff_after(
+	_group_timer = EventLoop::instance().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
@@ -259,7 +249,7 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources,
 	//
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
-	_group_timer = eventloop().new_oneoff_after(
+	_group_timer = EventLoop::instance().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
@@ -380,7 +370,7 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources,
 	//
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
-	_group_timer = eventloop().new_oneoff_after(
+	_group_timer = EventLoop::instance().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
@@ -410,7 +400,7 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources,
 	TimeVal gt;
 	_group_timer.time_remaining(gt);
 
-	_group_timer = eventloop().new_oneoff_after(
+	_group_timer = EventLoop::instance().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 	calculate_forwarding_changes(old_is_include_mode,
@@ -558,7 +548,7 @@ Mld6igmpGroupRecord::lower_group_timer(const TimeVal& timeval)
     //
     _group_timer.time_remaining(timeval_remaining);
     if (timeval < timeval_remaining) {
-	_group_timer = eventloop().new_oneoff_after(
+	_group_timer = EventLoop::instance().new_oneoff_after(
 	    timeval,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
     }
@@ -736,7 +726,7 @@ Mld6igmpGroupRecord::schedule_periodic_group_query(const set<IPvX>& sources)
     // Note that we set the timer only if it wasn't running already.
     //
     if (! _group_query_timer.scheduled()) {
-	_group_query_timer = eventloop().new_periodic(
+	_group_query_timer = EventLoop::instance().new_periodic(
 	    _mld6igmp_vif.query_last_member_interval().get(),
 	    callback(this, &Mld6igmpGroupRecord::group_query_periodic_timeout));
     }
@@ -888,12 +878,12 @@ Mld6igmpGroupRecord::received_older_membership_report(int message_version)
 		//
 		timeval = _mld6igmp_vif.group_membership_interval();
 	    }
-	    _igmpv1_host_present_timer = eventloop().new_oneoff_after(
+	    _igmpv1_host_present_timer = EventLoop::instance().new_oneoff_after(
 		timeval,
 		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
 	    break;
 	case IGMP_V2:
-	    _igmpv2_mldv1_host_present_timer = eventloop().new_oneoff_after(
+	    _igmpv2_mldv1_host_present_timer = EventLoop::instance().new_oneoff_after(
 		timeval,
 		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
 	    break;
@@ -905,7 +895,7 @@ Mld6igmpGroupRecord::received_older_membership_report(int message_version)
     if (_mld6igmp_vif.proto_is_mld6()) {
 	switch (message_version) {
 	case MLD_V1:
-	    _igmpv2_mldv1_host_present_timer = eventloop().new_oneoff_after(
+	    _igmpv2_mldv1_host_present_timer = EventLoop::instance().new_oneoff_after(
 		timeval,
 		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
 	    break;

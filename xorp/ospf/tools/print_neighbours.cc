@@ -407,18 +407,17 @@ main(int argc, char **argv)
     }
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "print_neighbours");
+	XrlStdRouter xrl_router( "print_neighbours");
 
 	debug_msg("Waiting for router");
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	debug_msg("\n");
 
 	GetNeighbourList get_neighbour_list(xrl_router, version);
 	get_neighbour_list.start();
 	while(get_neighbour_list.busy())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
 	if (get_neighbour_list.fail()) {
 	    XLOG_ERROR("Failed to get neighbour list");
@@ -429,7 +428,7 @@ main(int argc, char **argv)
 	GetNeighbours get_neighbours(xrl_router, version, nlist);
 	get_neighbours.start();
 	while(get_neighbours.busy())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
 	if (get_neighbours.fail()) {
 	    XLOG_ERROR("Failed to get neighbour info");

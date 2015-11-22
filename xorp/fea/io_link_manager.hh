@@ -771,7 +771,6 @@ private:
 				 const Mac& mac, string& error_msg);
 
     FeaNode&		_fea_node;
-    EventLoop&		_eventloop;
     const IfTree&	_iftree;
 
     // Collection of raw link-level communication handlers keyed by protocol.

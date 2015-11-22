@@ -1024,7 +1024,6 @@ IoTcpUdpManager::IoTcpUdpManager(FeaNode&	fea_node,
 				 const IfTree&	iftree)
     : IoTcpUdpManagerReceiver(),
       _fea_node(fea_node),
-      _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _io_tcpudp_manager_receiver(NULL)
 {

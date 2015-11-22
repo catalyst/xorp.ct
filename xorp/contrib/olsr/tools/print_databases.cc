@@ -1459,12 +1459,11 @@ main(int argc, char **argv)
     argc--; ++argv;
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "print_databases");
+	XrlStdRouter xrl_router( "print_databases");
 
 	//debug_msg("Waiting for router\n");
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	//debug_msg("\n");
 
 	initialize_getters(xrl_router, olsr_name);
@@ -1479,7 +1478,7 @@ main(int argc, char **argv)
 	getter->get(argc, argv);
 
 	while (getter->busy())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
 	if (! getter->fail()) {
 	    getter->output();

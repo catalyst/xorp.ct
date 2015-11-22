@@ -209,15 +209,11 @@ main(int argc, char **argv)
 	return usage(argv[0]);
 
     try {
-	//
-	// Init stuff
-	//
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "add_route");
+	XrlStdRouter xrl_router( "add_route");
 
 	debug_msg("Waiting for router");
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	debug_msg("\n");
 
 	// Create table.
@@ -245,7 +241,7 @@ main(int argc, char **argv)
 	    TimerList::system_gettimeofday(&start);
 	    f.start();
 	    while (f.busy()) {
-		eventloop.run();
+		EventLoop::instance().run();
 	    }
 	    TimerList::system_gettimeofday(&end);
 	    delta = end - start;

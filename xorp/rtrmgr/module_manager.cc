@@ -56,7 +56,7 @@ Module::Module(ModuleManager& mmgr, const string& name, const string& path,
 Module::~Module()
 {
     XLOG_ASSERT(_status == MODULE_NOT_STARTED);
-    _mmgr.eventloop().remove_timer(_shutdown_timer);
+    EventLoop::instance().remove_timer(_shutdown_timer);
 }
 
 void
@@ -199,7 +199,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     ModuleManager::Process* process = _mmgr.find_process_by_path(_expath);
     XLOG_ASSERT(process != NULL);
     process->terminate();
-    _shutdown_timer = _mmgr.eventloop().new_oneoff_after(
+    _shutdown_timer = EventLoop::instance().new_oneoff_after(
 	Module::SHUTDOWN_TIMEOUT_TIMEVAL,
 	callback(this, &Module::terminate_with_prejudice, cb));
 }
@@ -239,7 +239,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     XLOG_ASSERT(process != NULL);
     process->terminate_with_prejudice();
     // Give it a couple more seconds to really go away
-    _shutdown_timer = _mmgr.eventloop().new_oneoff_after(
+    _shutdown_timer = EventLoop::instance().new_oneoff_after(
 	Module::SHUTDOWN_TIMEOUT_TIMEVAL,
 	callback(this, &Module::terminate_with_prejudice, cb));
 }
@@ -338,11 +338,11 @@ Module::module_stopped(int stop_signal)
     new_status(MODULE_STALLED);
 }
 
-ModuleManager::ModuleManager(EventLoop& eventloop, Rtrmgr& rtrmgr,
+ModuleManager::ModuleManager( Rtrmgr& rtrmgr,
 			     bool do_restart, bool verbose,
 			     const string& xorp_root_dir,
 			     const string& xorp_module_dir)
-    : GenericModuleManager(eventloop, verbose),
+    : GenericModuleManager( verbose),
       _rtrmgr(rtrmgr),
       _master_config_tree(NULL),
       _do_restart(do_restart),
@@ -698,7 +698,6 @@ ModuleManager::Process::startup(string& error_msg)
     XLOG_ASSERT(_run_command == NULL);
 
     _run_command = new RunCommand(
-	_mmgr.eventloop(),
 	_expath,
 	empty_args,	// XXX: no arguments allowed
 	callback(this, &ModuleManager::Process::stdout_cb),

@@ -30,7 +30,6 @@
 #include "libxorp/callback.hh"
 #include "libxorp/timer.hh"
 
-class EventLoop;
 
 
 /**
@@ -48,8 +47,7 @@ public:
      * @param real_command_name the real command name.
      * @param task_priority the priority to read stdout and stderr.
      */
-    RunCommandBase(EventLoop&		eventloop,
-		   const string&	command,
+    RunCommandBase( const string&	command,
 		   const string&	real_command_name,
 		   int 	   		task_priority =
 		   XorpTask::PRIORITY_DEFAULT);
@@ -407,7 +405,6 @@ private:
 
 
     static const size_t	BUF_SIZE = 8192;
-    EventLoop&		_eventloop;
 
     string		_command;
     string		_real_command_name;
@@ -466,8 +463,7 @@ public:
      * @param redirect_stderr_to_stdout if true redirect the stderr to stdout.
      * @param task_priority the priority to read stdout and stderr.
      */
-    RunCommand(EventLoop&			eventloop,
-	       const string&			command,
+    RunCommand( const string&			command,
 	       const list<string>&		argument_list,
 	       RunCommand::OutputCallback	stdout_cb,
 	       RunCommand::OutputCallback	stderr_cb,
@@ -563,8 +559,7 @@ public:
      * @param done_cb the callback to call when the command is completed.
      * @param task_priority the priority to read stdout and stderr.
      */
-    RunShellCommand(EventLoop&				eventloop,
-		    const string&			command,
+    RunShellCommand( const string&			command,
 		    const string&			argument_string,
 		    RunShellCommand::OutputCallback	stdout_cb,
 		    RunShellCommand::OutputCallback	stderr_cb,

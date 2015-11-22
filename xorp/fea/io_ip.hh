@@ -30,7 +30,6 @@
 //
 
 
-class EventLoop;
 class IfTree;
 class IfTreeInterface;
 class IfTreeVif;
@@ -87,13 +86,7 @@ public:
      */
     virtual bool is_running() const { return _is_running; }
 
-    /**
-     * Get the event loop.
-     *
-     * @return the event loop.
-     */
-    EventLoop& eventloop() { return (_eventloop); }
-
+    
     /**
      * Get the interface tree.
      *
@@ -326,7 +319,6 @@ protected:
 private:
     IoIpManager&	_io_ip_manager;		// The I/O IP manager
     FeaDataPlaneManager& _fea_data_plane_manager; // The data plane manager
-    EventLoop&		_eventloop;		// The event loop to use
     const IfTree&	_iftree;		// The interface tree to use
     int			_family;		// The address family
     uint8_t		_ip_protocol;	     // The protocol number (IPPROTO_*)

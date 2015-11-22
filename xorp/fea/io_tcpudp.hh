@@ -32,7 +32,6 @@
 //
 
 
-class EventLoop;
 class IfTree;
 class IfTreeInterface;
 class IfTreeVif;
@@ -84,13 +83,6 @@ public:
      * @return true if the instance is running, otherwise false.
      */
     virtual bool is_running() const { return _is_running; }
-
-    /**
-     * Get the event loop.
-     * 
-     * @return the event loop.
-     */
-    EventLoop& eventloop() { return (_eventloop); }
 
     /**
      * Get the interface tree.
@@ -468,7 +460,6 @@ protected:
 private:
     IoTcpUdpManager&	_io_tcpudp_manager;	// The I/O TCP/UDP manager
     FeaDataPlaneManager& _fea_data_plane_manager; // The data plane manager
-    EventLoop&		_eventloop;		// The event loop to use
     const IfTree&	_iftree;		// The interface tree to use
     const int		_family;		// The address family
     const bool		_is_tcp;	// If true, this is TCP, otherwise UDP

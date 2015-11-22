@@ -39,7 +39,6 @@
 #include "fibconfig_table_set.hh"
 #include "fibconfig_table_observer.hh"
 
-class EventLoop;
 class FeaNode;
 class FibConfigTransactionManager;
 class FibTableObserverBase;
@@ -76,13 +75,7 @@ public:
      */
     virtual ~FibConfig();
 
-    /**
-     * Get a reference to the @ref EventLoop instance.
-     *
-     * @return a reference to the @ref EventLoop instance.
-     */
-    EventLoop& eventloop() { return _eventloop; }
-
+   
     /**
      * Get a reference to the @ref NexthopPortMapper instance.
      *
@@ -741,7 +734,6 @@ protected:
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
     
 private:
-    EventLoop&				_eventloop;
 #ifndef XORP_DISABLE_PROFILE
     Profile&				_profile;
 #endif

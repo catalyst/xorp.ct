@@ -217,7 +217,7 @@ class RouteEntry {
  */
 class RouteManager {
   public:
-    RouteManager(Olsr& olsr, EventLoop& eventloop,
+    RouteManager(Olsr& olsr, 
 		 FaceManager* fm, Neighborhood* nh,
 		 TopologyManager* tm, ExternalRoutes* er);
     ~RouteManager();
@@ -441,7 +441,6 @@ class RouteManager {
 
   private:
     Olsr&		_olsr;
-    EventLoop&		_eventloop;
     FaceManager*	_fm;
     Neighborhood*	_nh;
     TopologyManager*	_tm;

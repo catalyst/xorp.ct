@@ -40,7 +40,7 @@ class RequestState;
  */
 class XrlPFSTCPListener : public XrlPFListener {
 public:
-    XrlPFSTCPListener(EventLoop& e, XrlDispatcher* xr = 0, uint16_t port = 0)
+    XrlPFSTCPListener( XrlDispatcher* xr = 0, uint16_t port = 0)
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSTCPListener();
 
@@ -55,7 +55,6 @@ public:
     virtual string toString() const;
 
 protected:
-    XrlPFSTCPListener(EventLoop* e, XrlDispatcher* xr = 0);
 
     XorpFd	_sock;
     string	_address_slash_port;
@@ -71,11 +70,9 @@ private:
  */
 class XrlPFSTCPSender : public XrlPFSender {
 public:
-    XrlPFSTCPSender(const string& name, EventLoop& e, const char* address = 0,
+    XrlPFSTCPSender(const string& name,  const char* address = 0,
 	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
 	throw (XrlPFConstructorError);
-    XrlPFSTCPSender(const string& name, EventLoop* e, const char* address = 0,
-		    TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
     virtual ~XrlPFSTCPSender();
 
     bool send(const Xrl& 			x,

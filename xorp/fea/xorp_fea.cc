@@ -94,8 +94,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port) {
 
     setup_dflt_sighandlers();
 
-    EventLoop eventloop;
-    XrlFeaNode xrl_fea_node(eventloop, xrl_fea_targetname,
+    XrlFeaNode xrl_fea_node( xrl_fea_targetname,
 			    xrl_finder_targetname, finder_hostname,
 			    finder_port, is_dummy);
 
@@ -106,7 +105,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port) {
     // Main loop
     //
     while (xorp_do_run && !xrl_fea_node.is_shutdown_received()) {
-	eventloop.run();
+		EventLoop::instance().run();
     }
 
     //
@@ -114,7 +113,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port) {
     //
     xrl_fea_node.shutdown();
     while (xrl_fea_node.is_running()) {
-	eventloop.run();
+		EventLoop::instance().run();
     }
 }
 

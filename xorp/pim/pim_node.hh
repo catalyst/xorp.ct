@@ -42,7 +42,6 @@
 #include "pim_vif.hh"
 
 
-class EventLoop;
 class IPvX;
 class IPvXNet;
 class PimMrt;
@@ -86,7 +85,7 @@ public:
      * XORP_MODULE_PIMDM would be allowed as well.
      * @param eventloop the event loop to use.
      */
-    PimNode(int family, xorp_module_id module_id, EventLoop& eventloop);
+    PimNode(int family, xorp_module_id module_id);
     
     /**
      * Destructor

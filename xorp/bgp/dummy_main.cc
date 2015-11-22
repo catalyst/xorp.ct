@@ -31,10 +31,9 @@
 #include "iptuple.hh"
 
 
-BGPMain::BGPMain(EventLoop& eventloop)
-    : _eventloop(eventloop)
+BGPMain::BGPMain()
 {
-    _local_data = new LocalData(_eventloop);
+    _local_data = new LocalData;
     _xrl_router = NULL;
 }
 
@@ -45,7 +44,7 @@ BGPMain::~BGPMain() {
     */
     if (_xrl_router != NULL)
 	while(_xrl_router->pending())
-	    eventloop().run();
+	    EventLoop::instance().run();
     delete _local_data;
 }
 

@@ -869,7 +869,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
     set_nbr_mrib_next_hop_rp(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -908,7 +908,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -998,7 +998,7 @@ PimMre::recompute_rpfp_nbr_wc_assert_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1087,7 +1087,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
     set_rpfp_nbr_wc(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -1126,7 +1126,7 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1175,7 +1175,7 @@ PimMre::recompute_rpfp_nbr_sg_assert_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1249,7 +1249,7 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
     set_rpfp_nbr_sg(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -1288,7 +1288,7 @@ PimMre::recompute_rpfp_nbr_sg_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1342,7 +1342,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	override_timer() =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::override_timer_timeout));
     }

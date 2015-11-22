@@ -44,8 +44,7 @@ class TemplateTree;
 
 class XorpShell : public XorpShellBase, XrlStdRouter {
 public:
-    XorpShell(EventLoop& eventloop,
-	      const string& IPCname, 
+    XorpShell( const string& IPCname, 
 	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
 	      bool verbose) throw (InitError);
@@ -103,7 +102,6 @@ public:
 
     bool get_rtrmgr_pid(PID_CALLBACK cb);
 
-    EventLoop& eventloop()		{ return _eventloop; }
     OpCommandList* op_cmd_list()	{ return _ocl; }
     SlaveConfigTree* config_tree()	{ return _ct; }
     TemplateTree* template_tree()	{ return _tt; }
@@ -128,7 +126,6 @@ private:
      */
     virtual void finder_disconnect_event();
 
-    EventLoop&		_eventloop; 
     XrlStdRouter&	_xrl_router;
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;

@@ -43,7 +43,6 @@
 
 FibConfigEntryGetClick::FibConfigEntryGetClick(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntryGet(fea_data_plane_manager),
-      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }

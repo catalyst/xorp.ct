@@ -57,7 +57,7 @@ VrrpTarget::VrrpTarget(XrlRouter& rtr)
     : XrlVrrpTargetBase(&rtr),
       _rtr(rtr),
       _running(true),
-      _ifmgr(rtr.eventloop(), fea_target_name.c_str(),
+      _ifmgr( fea_target_name.c_str(),
 	     rtr.finder_address(), rtr.finder_port()),
       _ifmgr_setup(false),
       _rawlink(&rtr),
@@ -79,12 +79,6 @@ VrrpTarget::VrrpTarget(XrlRouter& rtr)
 VrrpTarget::~VrrpTarget()
 {
     shutdown();
-}
-
-EventLoop&
-VrrpTarget::eventloop()
-{
-    return _rtr.eventloop();
 }
 
 void

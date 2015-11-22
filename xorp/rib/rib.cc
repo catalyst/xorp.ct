@@ -243,9 +243,8 @@ redist_tablename(const string& from_table)
 // RIB class
 
 template <typename A>
-RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
+RIB<A>::RIB(RibTransportType t, RibManager& rib_manager)
     : _rib_manager(rib_manager),
-      _eventloop(eventloop),
       _final_table(NULL),
       _errors_are_fatal(false),
       _connected_origin_table(NULL),
@@ -465,7 +464,7 @@ RIB<A>::new_origin_table(const string&	tablename,
 {
     OriginTable<A>* ot = NULL;
 
-    ot = new TypedOriginTable<A, protocol_type>(tablename, admin_distance, _eventloop);
+    ot = new TypedOriginTable<A, protocol_type>(tablename, admin_distance);
 
     if (ot == NULL || add_table(ot) != XORP_OK) {
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());

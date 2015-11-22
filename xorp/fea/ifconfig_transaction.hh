@@ -32,10 +32,9 @@ public:
     /**
      * Constructor.
      *
-     * @param eventloop the event loop to use.
      */
-    IfConfigTransactionManager(EventLoop& eventloop)
-	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
+    IfConfigTransactionManager()
+	: TransactionManager( TIMEOUT_MS, MAX_PENDING)
 	{
 	    _tid_exec = 0xFFFFFFFF;
 	}

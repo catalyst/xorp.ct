@@ -31,13 +31,12 @@
 #include "cli_node.hh"
 
 
-XrlCliNode::XrlCliNode(EventLoop&	eventloop,
-		       const string&	class_name,
+XrlCliNode::XrlCliNode( const string&	class_name,
 		       const string&	finder_hostname,
 		       uint16_t		finder_port,
 		       const string&	finder_target,
 		       CliNode&		cli_node)
-    : XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+    : XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
     XrlCliTargetBase(&xrl_router()),
       _cli_node(cli_node),

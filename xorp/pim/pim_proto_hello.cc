@@ -320,7 +320,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	TimeVal tv(hello_triggered_delay().get(), 0);
 	tv = random_uniform(tv);
 	_hello_once_timer =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		tv,
 		callback(this, &PimVif::hello_once_timer_timeout));
 	
@@ -389,7 +389,7 @@ PimNbr::pim_hello_holdtime_process(uint16_t holdtime)
     default:
 	// Start the Neighbor Liveness Timer
 	_neighbor_liveness_timer =
-	    pim_node()->eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		TimeVal(holdtime, 0),
 		callback(this, &PimNbr::neighbor_liveness_timer_timeout));
 	break;
@@ -537,7 +537,7 @@ void
 PimVif::hello_timer_start(uint32_t sec, uint32_t usec)
 {
     _hello_timer =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(sec, usec),
 	    callback(this, &PimVif::hello_timer_timeout));
 }
@@ -552,7 +552,7 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
     tv = random_uniform(tv);
     
     _hello_timer =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    tv,
 	    callback(this, &PimVif::hello_timer_timeout));
 }

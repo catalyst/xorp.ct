@@ -29,7 +29,6 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/service.hh"
 
-class EventLoop;
 class XrlJobBase;
 
 // ----------------------------------------------------------------------------
@@ -80,8 +79,7 @@ public:
     typedef ref_ptr<XrlJobBase> Job;
 
 public:
-    XrlJobQueue(EventLoop& 	e,
-		const string& 	finder_host,
+    XrlJobQueue( const string& 	finder_host,
 		uint16_t 	finder_port,
 		const string& 	tgtname);
     ~XrlJobQueue();
@@ -100,7 +98,6 @@ protected:
     void process_next_job();
 
 protected:
-    EventLoop&		_e;
     string 		_fhost;	// Finder host
     uint16_t 		_fport;	// Finder port
     string		_tgt; 	// Xrl target to for jobs

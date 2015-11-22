@@ -447,7 +447,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 
 	// _next_table->push((BGPRouteTable<A>*)this);
 	// call back immediately, but after network events or expired timers
-	_push_task = eventloop().new_task(
+	_push_task = EventLoop::instance().new_task(
 	    callback(this, &RibInTable<A>::push_next_changed_nexthop),
 	    XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
     }
@@ -602,12 +602,7 @@ RibInTable<A>::dump_state() const {
     return s;
 } 
 
-template<class A>
-EventLoop& 
-RibInTable<A>::eventloop() const 
-{
-    return _peer->eventloop();
-}
+
 
 
 template class RibInTable<IPv4>;

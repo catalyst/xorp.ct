@@ -69,13 +69,13 @@ XrlStdRouter::create_listener()
     switch (pf[0]) {
 	// For the benefit of bench_ipc.sh.
 	case 't':
-	    return new XrlPFSTCPListener(_e, this);
+	    return new XrlPFSTCPListener( this);
 	    break;
 	case 'x':
 #if XRL_PF != 'x'
 	    XLOG_ASSERT(_unix == NULL);
 #endif
-	    return new XrlPFUNIXListener(_e, this);
+	    return new XrlPFUNIXListener( this);
 	default:
 	    XLOG_ERROR("Unknown PF %s\n", pf);
 	    XLOG_ASSERT(false);
@@ -96,51 +96,46 @@ destroy_listener(XrlPFListener*& l)
 // ----------------------------------------------------------------------------
 // XrlStdRouter implementation
 
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
+XrlStdRouter::XrlStdRouter( const char*	class_name,
 			   bool		unix_socket)
-    : XrlRouter(eventloop, class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
+    : XrlRouter( class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
+XrlStdRouter::XrlStdRouter( const char*	class_name,
 			   IPv4		finder_address,
 			   bool		unix_socket)
-    : XrlRouter(eventloop, class_name, finder_address,
+    : XrlRouter( class_name, finder_address,
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
+XrlStdRouter::XrlStdRouter( const char*	class_name,
 			   IPv4		finder_address,
 			   uint16_t	finder_port,
 			   bool		unix_socket)
-    : XrlRouter(eventloop, class_name, finder_address, finder_port)
+    : XrlRouter( class_name, finder_address, finder_port)
 {
     construct(unix_socket);
 }
 
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
+XrlStdRouter::XrlStdRouter( const char*	class_name,
 			   const char*	finder_address,
 			   bool		unix_socket)
-    : XrlRouter(eventloop, class_name, finder_address,
+    : XrlRouter( class_name, finder_address,
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
+XrlStdRouter::XrlStdRouter( const char*	class_name,
 			   const char*	finder_address,
 			   uint16_t	finder_port,
 			   bool		unix_socket)
-    : XrlRouter(eventloop, class_name, finder_address, finder_port)
+    : XrlRouter( class_name, finder_address, finder_port)
 {
     construct(unix_socket);
 }
@@ -168,7 +163,7 @@ XrlStdRouter::construct(bool unix_socket)
 void
 XrlStdRouter::create_unix_listener()
 {
-    _unix = new XrlPFUNIXListener(_e, this);
+    _unix = new XrlPFUNIXListener( this);
     add_listener(_unix);
 }
 

@@ -70,8 +70,7 @@ struct ShowDistancesOptions {
 class ShowDistancesProcessor
     : public XrlShowDistancesTargetBase, public ServiceBase {
 public:
-    ShowDistancesProcessor(EventLoop&		    e,
-			   ShowDistancesOptions&    opts);
+    ShowDistancesProcessor( ShowDistancesOptions&    opts);
     ~ShowDistancesProcessor();
 
     int startup();
@@ -108,7 +107,6 @@ public:
 			  const XrlAtomList* distances);
 
 protected:
-    EventLoop&				_e;
     const ShowDistancesOptions&		_opts;
     XrlRouter*				_rtr;
     XorpTimer				_t;
@@ -116,10 +114,8 @@ protected:
     multimap<uint32_t, string>		_admin_distances;
 };
 
-ShowDistancesProcessor::ShowDistancesProcessor(EventLoop&		e,
-					       ShowDistancesOptions&	o)
-    : _e(e),
-      _opts(o),
+ShowDistancesProcessor::ShowDistancesProcessor( ShowDistancesOptions&	o)
+    : _opts(o),
       _rtr(NULL)
 {
 }
@@ -141,7 +137,7 @@ ShowDistancesProcessor::startup()
 
     // Create XrlRouter
     string process = c_format("show_distances<%d>", XORP_INT_CAST(getpid()));
-    _rtr = new XrlStdRouter(_e, process.c_str(),
+    _rtr = new XrlStdRouter( process.c_str(),
 			    _opts.finder_host.c_str(), _opts.finder_port);
 
     // Glue the router to the Xrl methods class exports
@@ -152,7 +148,7 @@ ShowDistancesProcessor::startup()
 
     // Start timer to poll whether XrlRouter becomes ready or fails so
     // we can continue processing.
-    _t = _e.new_periodic_ms(250, callback(this,
+    _t = EventLoop::instance().new_periodic_ms(250, callback(this,
 			    &ShowDistancesProcessor::poll_ready_failed));
     set_status(SERVICE_STARTING);
     return (XORP_OK);
@@ -480,14 +476,13 @@ main(int argc, char* const argv[])
 	    usage();
 	}
 
-	EventLoop e;
-	ShowDistancesProcessor sad(e, sad_opts);
+	ShowDistancesProcessor sad( sad_opts);
 
 	sad.startup();
 
 	while ((sad.status() != SERVICE_FAILED)
 	       && (sad.status() != SERVICE_SHUTDOWN)) {
-	    e.run();
+	    EventLoop::instance().run();
 	}
 
 	if (sad.status() == SERVICE_FAILED) {

@@ -34,9 +34,8 @@
 #include "static_routes_node.hh"
 #include "static_routes_varrw.hh"
 
-StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
+StaticRoutesNode::StaticRoutesNode()
     : ServiceBase("StaticRoutes"),
-      _eventloop(eventloop),
       _protocol_name("static"),		// TODO: must be known by RIB
       _is_enabled(true),		// XXX: enabled by default
       _startup_requests_n(0),

@@ -118,8 +118,7 @@ XrlProcessSpy::startup()
 void
 XrlProcessSpy::schedule_register_retry(uint32_t idx)
 {
-    EventLoop& e = _rtr.eventloop();
-    _retry = e.new_oneoff_after_ms(100,
+    _retry = EventLoop::instance().new_oneoff_after_ms(100,
 				   callback(this,
 					    &XrlProcessSpy::send_register,
 					    idx));
@@ -171,8 +170,7 @@ XrlProcessSpy::shutdown()
 void
 XrlProcessSpy::schedule_deregister_retry(uint32_t idx)
 {
-    EventLoop& e = _rtr.eventloop();
-    _retry = e.new_oneoff_after_ms(100,
+    _retry = EventLoop::instance().new_oneoff_after_ms(100,
 				   callback(this,
 					    &XrlProcessSpy::send_deregister,
 					    idx));

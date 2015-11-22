@@ -48,13 +48,11 @@ double OlsrTypes::DEFAULT_HYST_THRESHOLD_LOW = 0.3f;
 double OlsrTypes::DEFAULT_HYST_SCALING = 0.3f;
 
 LogicalLink::LogicalLink(Neighborhood* nh,
-    EventLoop& eventloop,
     const OlsrTypes::LogicalLinkID id,
     const TimeVal& vtime,
     const IPv4& remote_addr,
     const IPv4& local_addr)
  : _nh(nh),
-   _eventloop(eventloop),
    _id(id),
    _faceid(OlsrTypes::UNUSED_FACE_ID),
    _neighborid(OlsrTypes::UNUSED_NEIGHBOR_ID),
@@ -72,7 +70,7 @@ LogicalLink::LogicalLink(Neighborhood* nh,
     // L_time is scheduled here for the first time, although it will
     //        also be updated by update_timers().
     //
-    _dead_timer = _eventloop.new_oneoff_after(
+    _dead_timer = EventLoop::instance().new_oneoff_after(
 			  vtime,
 			  callback(this, &LogicalLink::event_dead_timer));
 }
@@ -87,7 +85,7 @@ LogicalLink::update_timers(const TimeVal& vtime, bool saw_self,
     // 2.1 Update L_ASYM_time.
     if (_asym_timer.scheduled())
 	_asym_timer.clear();
-    _asym_timer = _eventloop.new_oneoff_after(
+    _asym_timer = EventLoop::instance().new_oneoff_after(
 			  vtime,
 			  callback(this, &LogicalLink::event_asym_timer));
 
@@ -105,7 +103,7 @@ LogicalLink::update_timers(const TimeVal& vtime, bool saw_self,
 	    // 2.2.2  L_SYM_time = current time + validity time
 	    if (_sym_timer.scheduled())
 		_sym_timer.clear();
-	    _sym_timer = _eventloop.new_oneoff_after(vtime,
+	    _sym_timer = EventLoop::instance().new_oneoff_after(vtime,
 			    callback(this, &LogicalLink::event_sym_timer));
 
 	    // 7.1.1, 2.2.2: L_time = L_SYM_time + NEIGHB_HOLD_TIME
@@ -121,7 +119,7 @@ LogicalLink::update_timers(const TimeVal& vtime, bool saw_self,
 
     if (_dead_timer.scheduled())
 	_dead_timer.clear();
-    _dead_timer = _eventloop.new_oneoff_at(dead_time,
+    _dead_timer = EventLoop::instance().new_oneoff_at(dead_time,
 	callback(this, &LogicalLink::event_dead_timer));
 }
 

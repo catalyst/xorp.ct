@@ -43,9 +43,8 @@
 #include "ospf.hh"
 
 template <typename A>
-Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
-    : _version(version), _eventloop(eventloop),
-      _testing(false),
+Ospf<A>::Ospf(OspfTypes::Version version,  IO<A>* io)
+    : _version(version), _testing(false),
       _io(io), _reason("Waiting for IO"), _process_status(PROC_STARTUP),
       _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
       _instance_id(0), _router_id(0),

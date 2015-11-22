@@ -47,14 +47,12 @@ Peer::~Peer()
     debug_msg("XXX Deleting peer %p\n", this);
 }
 
-Peer::Peer(EventLoop    *eventloop,
-	   XrlStdRouter *xrlrouter,
+Peer::Peer( XrlStdRouter *xrlrouter,
 	   const string& peername,
 	   const uint32_t genid,
 	   const string& target_hostname,
 	   const string& target_port)
-    : _eventloop(eventloop),
-      _xrlrouter(xrlrouter),
+    : _xrlrouter(xrlrouter),
       _peername(peername),
       _genid(genid),
       _target_hostname(target_hostname),
@@ -74,7 +72,7 @@ Peer::Peer(EventLoop    *eventloop,
 {
     debug_msg("XXX Creating peer %p\n", this);
     Iptuple iptuple;
-    _localdata = new LocalData(*eventloop);
+    _localdata = new LocalData;
     _localdata->set_use_4byte_asnums(false);
     _localdata->set_as(AsNum(0));
     _peerdata = new BGPPeerData(*_localdata, iptuple, AsNum(0), IPv4(),0);
@@ -108,7 +106,6 @@ Peer::copy(const Peer& rhs)
 {
     debug_msg("peername: %s\n", rhs._peername.c_str());
 
-    _eventloop = rhs._eventloop;
     _xrlrouter = rhs._xrlrouter;
 
     _peername = rhs._peername;
@@ -151,7 +148,7 @@ Peer::is_this_you(const string& peer_name) const
     */
     if(!_up) {
 	TimeVal now;
-	_eventloop->current_time(now);
+	EventLoop::instance().current_time(now);
 	if(now - _shutdown_time > TimeVal(60 * 10, 0))
 	    return Peer::PLEASE_DELETE_ME;
     }
@@ -180,7 +177,7 @@ Peer::shutdown()
     XLOG_ASSERT(_up);	// We should only ever be shutdown once.
 
     _up = false;
-    _eventloop->current_time(_shutdown_time);
+    EventLoop::instance().current_time(_shutdown_time);
     
     /*
     ** The corresponding test peer may have a tcp connection with a
@@ -522,7 +519,7 @@ Peer::send_packet(const string& line, const vector<string>& words)
     const char update[] = "update";
     if(update == words[3]) {
 	TimeVal tv;
-	_eventloop->current_time(tv);
+	EventLoop::instance().current_time(tv);
 	try {
 	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
 	} catch(CorruptMessage& c) {
@@ -785,7 +782,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
 	    ** Save the update message in the sent trie.
 	    */
 	    TimeVal tv;
-	    _eventloop->current_time(tv);
+	    EventLoop::instance().current_time(tv);
 	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
 
 	    _smcb = callback(this, &Peer::send_dump_callback,
@@ -1599,7 +1596,7 @@ Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 
     if(!_traffic_sent.is_empty()) {
 	TimeVal tv;
-	_eventloop->current_time(tv);
+	EventLoop::instance().current_time(tv);
 	_traffic_sent->dispatch(buf, len, tv);
     }
 

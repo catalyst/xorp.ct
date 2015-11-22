@@ -35,7 +35,6 @@
 #include "xrl_target.hh"
 
 
-class EventLoop;
 
 /**
  * @short Main top-level class containing RIBs and main eventloop.
@@ -55,7 +54,7 @@ public:
      * @param xrl_std_router the XRL router to use.
      * @param fea_target the FEA XRL target name.
      */
-    RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
+    RibManager( XrlStdRouter& xrl_std_router,
 	       const string& fea_target);
 
     /**
@@ -511,7 +510,7 @@ private:
     		 bool is_xrl_transaction_output);
 
     template <typename A>
-    static int redist_enable_xrl_output(EventLoop& eventloop, XrlRouter& rtr, Profile& profile,
+    static int redist_enable_xrl_output( XrlRouter& rtr, Profile& profile,
 	RIB<A>& rib, const string& to_xrl_target, const string& proto, const IPNet<A>& network_prefix,
 	const string& cookie, bool is_xrl_transaction_output);
 
@@ -521,7 +520,6 @@ private:
 
     ProcessStatus       _status_code;
     string              _status_reason;
-    EventLoop&		_eventloop;		// The event loop to use
     XrlStdRouter&	_xrl_router;		// The XRL router to use
     RegisterServer	_register_server;    // To notify clients about route change
 

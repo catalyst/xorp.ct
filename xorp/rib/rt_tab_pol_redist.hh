@@ -191,7 +191,6 @@ private:
 
 
     XrlRouter&			_xrl_router;
-    EventLoop&			_eventloop;
 
     PolicyRedistMap&		_redist_map;
 

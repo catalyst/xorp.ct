@@ -33,13 +33,12 @@
 #include <getopt.h>
 #endif
 
-InterfaceMonitor::InterfaceMonitor(EventLoop&		eventloop,
-				   const string&	class_name,
+InterfaceMonitor::InterfaceMonitor( const string&	class_name,
 				   const string&	finder_hostname,
 				   uint16_t		finder_port,
 				   const string&	fea_target)
     : ServiceBase(class_name),
-      _ifmgr(eventloop, fea_target.c_str(), finder_hostname.c_str(),
+      _ifmgr( fea_target.c_str(), finder_hostname.c_str(),
 	     finder_port),
       _startup_requests_n(0),
       _shutdown_requests_n(0)
@@ -674,9 +673,8 @@ interface_monitor_main(const string& finder_hostname, uint16_t finder_port,
     //
     // Init stuff
     //
-    EventLoop eventloop;
 
-    InterfaceMonitor ifmon(eventloop, process_name, finder_hostname,
+    InterfaceMonitor ifmon( process_name, finder_hostname,
 			   finder_port, "fea");
 
     //
@@ -688,7 +686,7 @@ interface_monitor_main(const string& finder_hostname, uint16_t finder_port,
     // Main loop
     //
     while (ifmon.status() == SERVICE_STARTING) {
-	eventloop.run();
+		EventLoop::instance().run();
     }
 
     if (ifmon.status() == SERVICE_RUNNING) {
@@ -701,7 +699,7 @@ interface_monitor_main(const string& finder_hostname, uint16_t finder_port,
     ifmon.shutdown();
     while ((ifmon.status() != SERVICE_SHUTDOWN)
 	   && (ifmon.status() != SERVICE_FAILED)) {
-	eventloop.run();
+		EventLoop::instance().run();
     }
 }
 

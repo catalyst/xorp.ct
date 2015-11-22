@@ -92,23 +92,18 @@ fib2mrib_main(const string& finder_hostname, uint16_t finder_port) {
 
     setup_dflt_sighandlers();
 
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
 
     //
     // Fib2mrib node
     //
     XrlFib2mribNode xrl_fib2mrib_node(
-	eventloop,
 	"fib2mrib",
 	finder_hostname,
 	finder_port,
 	"finder",
 	"fea",
 	"rib");
-    wait_until_xrl_router_is_ready(eventloop, xrl_fib2mrib_node.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_fib2mrib_node.xrl_router());
 
     // Startup
     xrl_fib2mrib_node.startup();
@@ -117,7 +112,7 @@ fib2mrib_main(const string& finder_hostname, uint16_t finder_port) {
     // Main loop
     //
     while (xorp_do_run && !xrl_fib2mrib_node.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 }
 

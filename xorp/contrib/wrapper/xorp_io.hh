@@ -24,11 +24,11 @@
 #include "xrl/interfaces/socket4_xif.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
+#include "libxorp/eventloop.hh"
 
 
 #include "io.hh"
 
-class EventLoop;
 
 class XrlIO : public IO {
 
@@ -45,7 +45,7 @@ public:
      * @param feaname the name of the FEA XRL target.
      * @param ribname the name of the RIB XRL target.
      */
-    XrlIO(EventLoop& eventloop, XrlRouter& xrl_router,
+    XrlIO( XrlRouter& xrl_router,
           const string& feaname, const string& ribname, string protocol);
 
     /**
@@ -108,7 +108,6 @@ public:
     void fromXorp(int cmd, string network,  bool unicast, bool multicast, string nexthop, uint32_t metric);
 
 private:
-    EventLoop&          _eventloop;
     XrlRouter&          _xrl_router;
     string              _feaname;
     string              _ribname;

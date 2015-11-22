@@ -956,29 +956,25 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
 class IfMgrXrlMirrorRouter : public XrlStdRouter
 {
 public:
-    IfMgrXrlMirrorRouter(EventLoop&	e,
-			 const char*	class_name)
-	: XrlStdRouter(e, class_name), _o(NULL)
+    IfMgrXrlMirrorRouter( const char*	class_name)
+	: XrlStdRouter( class_name), _o(NULL)
     {}
 
-    IfMgrXrlMirrorRouter(EventLoop&	e,
-			 const char*	class_name,
+    IfMgrXrlMirrorRouter( const char*	class_name,
 			 IPv4		finder_addr)
-	: XrlStdRouter(e, class_name, finder_addr), _o(NULL)
+	: XrlStdRouter( class_name, finder_addr), _o(NULL)
     {}
 
-    IfMgrXrlMirrorRouter(EventLoop&	e,
-			 const char*	class_name,
+    IfMgrXrlMirrorRouter( const char*	class_name,
 			 IPv4		finder_addr,
 			 uint16_t	finder_port)
-	: XrlStdRouter(e, class_name, finder_addr, finder_port), _o(NULL)
+	: XrlStdRouter( class_name, finder_addr, finder_port), _o(NULL)
     {}
 
-    IfMgrXrlMirrorRouter(EventLoop&	e,
-			 const char*	class_name,
+    IfMgrXrlMirrorRouter( const char*	class_name,
 			 const char*	finder_hostname,
 			 uint16_t	finder_port)
-	: XrlStdRouter(e, class_name, finder_hostname, finder_port), _o(NULL)
+	: XrlStdRouter( class_name, finder_hostname, finder_port), _o(NULL)
     {}
 
     /**
@@ -1034,26 +1030,24 @@ protected:
 
 static const char* CLSNAME = "ifmgr_mirror";
 
-IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
-			       const char*	rtarget,
+IfMgrXrlMirror::IfMgrXrlMirror( const char*	rtarget,
 			       IPv4		finder_addr,
 			       uint16_t		finder_port)
 
     : ServiceBase("FEA Interface Mirror"),
-      _e(e), _finder_addr(finder_addr), _finder_port(finder_port),
+      _finder_addr(finder_addr), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL),
       _updates_delay(TimeVal::ZERO())
 
 {
 }
 
-IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
-			       const char*	rtarget,
+IfMgrXrlMirror::IfMgrXrlMirror( const char*	rtarget,
 			       const char*	finder_hostname,
 			       uint16_t		finder_port)
 
     : ServiceBase("FEA Interface Mirror"),
-      _e(e), _finder_hostname(finder_hostname), _finder_port(finder_port),
+       _finder_hostname(finder_hostname), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL),
       _updates_delay(TimeVal::ZERO())
 {
@@ -1084,11 +1078,11 @@ IfMgrXrlMirror::startup()
 
     if (_rtr == NULL) {
 	if (! _finder_hostname.empty()) {
-	    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
+	    _rtr = new IfMgrXrlMirrorRouter( CLSNAME,
 					    _finder_hostname.c_str(),
 					    _finder_port);
 	} else {
-	    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
+	    _rtr = new IfMgrXrlMirrorRouter( CLSNAME,
 					    _finder_addr,
 					    _finder_port);
 	}
@@ -1167,7 +1161,7 @@ IfMgrXrlMirror::updates_made()
     if (_updates_timer.scheduled())
 	return;
 
-    _updates_timer = _e.new_oneoff_after(
+    _updates_timer = EventLoop::instance().new_oneoff_after(
 	_updates_delay,
 	callback(this, &IfMgrXrlMirror::do_updates));
 }

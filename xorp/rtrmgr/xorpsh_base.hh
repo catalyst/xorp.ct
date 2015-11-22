@@ -23,7 +23,6 @@
 #define __RTRMGR_XORPSH_BASE_HH__
 
 
-class EventLoop;
 class OpCommandList;
 class SlaveConfigTree;
 class TemplateTree;
@@ -60,7 +59,6 @@ public:
 	MODE_SHUTDOWN
     };
 
-    virtual EventLoop& eventloop() = 0;
 
     virtual OpCommandList* op_cmd_list() = 0;
 

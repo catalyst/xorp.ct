@@ -58,26 +58,25 @@ main(int /*argc*/, char **argv)
     xlog_start();
 
     try {
-        EventLoop eventloop;
 
         string feaname = "fea";
         string ribname = "rib";
         string protocol(TARGET_WRAPPER);
 
-        XrlStdRouter xrl_router(eventloop, TARGET_WRAPPER);
+        XrlStdRouter xrl_router( TARGET_WRAPPER);
 
-        XrlIO io(eventloop, xrl_router, feaname, ribname,protocol);
-        Wrapper wrapper(eventloop, &io);
+        XrlIO io( xrl_router, feaname, ribname,protocol);
+        Wrapper wrapper( &io);
 
         XrlWrapper4Target target(&xrl_router, wrapper, io);
-        wait_until_xrl_router_is_ready(eventloop, xrl_router);
+        wait_until_xrl_router_is_ready( xrl_router);
         io.wstartup(&wrapper);
-        while (!io.doReg()) eventloop.run();
+        while (!io.doReg()) EventLoop::instance().run();
 
-        XorpTimer wakeywakey = eventloop.new_periodic_ms(50, callback(wakeup_hook, 1));
+        XorpTimer wakeywakey = EventLoop::instance().new_periodic_ms(50, callback(wakeup_hook, 1));
 
         while (wrapper.running())
-            eventloop.run();
+            EventLoop::instance().run();
     } catch(...) {
         xorp_catch_standard_exceptions();
     }

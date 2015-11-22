@@ -27,11 +27,10 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "policy/backend/policytags.hh"
-
+#include "libxorp/eventloop.hh"
 #include "io.hh"
 #include "xrl_queue.hh"
 
-class EventLoop;
 class XrlPort;
 
 typedef list<XrlPort*>			XrlPortList;
@@ -53,7 +52,7 @@ class XrlIO : public IO,
      * @param feaname the name of the FEA XRL target.
      * @param ribname the name of the RIB XRL target.
      */
-    XrlIO(EventLoop& eventloop, XrlRouter& xrl_router,
+    XrlIO( XrlRouter& xrl_router,
 	  const string& feaname, const string& ribname);
 
     /**
@@ -432,7 +431,6 @@ private:
     void try_start_next_port();
 
 private:
-    EventLoop&		_eventloop;
     XrlRouter&		_xrl_router;
     string		_feaname;
     string		_ribname;

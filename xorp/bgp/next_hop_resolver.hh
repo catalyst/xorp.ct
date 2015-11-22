@@ -87,8 +87,7 @@ class BGPMain;
 template<class A>
 class NextHopResolver {
 public:
-    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& eventloop,
-		    BGPMain& bgp);
+    NextHopResolver(XrlStdRouter *xrl_router, BGPMain& bgp);
 
     virtual ~NextHopResolver();
 
@@ -200,17 +199,12 @@ public:
 	return &_next_hop_rib_request;
     }
 
-    /**
-     * Get a reference to the main timer list
-     */
-    EventLoop& eventloop() {return _eventloop;}
-
+    
 protected:
     list<DecisionTable<A> *> _decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
-    EventLoop& _eventloop;
     BGPMain& _bgp;
     NextHopCache<A> _next_hop_cache;
     NextHopRibRequest<A> _next_hop_rib_request;

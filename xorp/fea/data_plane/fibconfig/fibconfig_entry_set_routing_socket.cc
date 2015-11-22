@@ -47,8 +47,7 @@
 //
 
 FibConfigEntrySetRoutingSocket::FibConfigEntrySetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntrySet(fea_data_plane_manager),
-      RoutingSocket(fea_data_plane_manager.eventloop())
+    : FibConfigEntrySet(fea_data_plane_manager)
 {
 }
 

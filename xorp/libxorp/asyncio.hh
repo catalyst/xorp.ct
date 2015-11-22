@@ -33,8 +33,7 @@
 
 struct iovec;
 
-// Asynchronous file transfer classes.  These utilize XORP EventLoop
-// and the IoEvent framework to read / write files asynchronously.  The
+// Asynchronous file transfer classes.    The
 // user creates and AsyncFile{Reader,Writer} and adds a buffer for
 // reading / writing with add_buffer().  A callback is provided with
 // each buffer is called every time I/O happens on the buffer.
@@ -129,9 +128,9 @@ public:
     virtual string toString() const;
 
 protected:
-    AsyncFileOperator(EventLoop& e, XorpFd fd, 
+    AsyncFileOperator( XorpFd fd, 
 		      int priority = XorpTask::PRIORITY_DEFAULT)
-	: _eventloop(e), _fd(fd), _running(false),
+	:  _fd(fd), _running(false),
 	  _last_error(0), _priority(priority)
     {
 	int fl = fcntl(fd, F_GETFL);
@@ -139,7 +138,6 @@ protected:
     }
     virtual ~AsyncFileOperator();
 
-    EventLoop&		_eventloop;
     XorpFd		_fd;
     bool		_running;
     int			_last_error;
@@ -152,10 +150,9 @@ protected:
 class AsyncFileReader : public AsyncFileOperator {
 public:
     /**
-     * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor to read from.
      */
-    AsyncFileReader(EventLoop& e, XorpFd fd,
+    AsyncFileReader( XorpFd fd,
 		    int priority = XorpTask::PRIORITY_DEFAULT);
     virtual ~AsyncFileReader();
 
@@ -252,12 +249,11 @@ class AsyncFileWriter :
 {
 public:
     /**
-     * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor marked as non-blocking to write to.
      * @param coalesce the number of buffers to coalesce for each write()
      *        system call.
      */
-    AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1,
+    AsyncFileWriter( XorpFd fd, uint32_t coalesce = 1,
 		    int priority = XorpTask::PRIORITY_DEFAULT);
 
     virtual ~AsyncFileWriter();

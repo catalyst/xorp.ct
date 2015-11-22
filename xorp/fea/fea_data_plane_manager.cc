@@ -819,11 +819,7 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
     return (ret_value);
 }
 
-EventLoop&
-FeaDataPlaneManager::eventloop()
-{
-    return (_fea_node.eventloop());
-}
+
 
 bool
 FeaDataPlaneManager::have_ipv4() const

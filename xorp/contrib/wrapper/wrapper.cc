@@ -27,8 +27,8 @@
 #include "libcomm/comm_api.h"
 
 
-Wrapper::Wrapper(EventLoop& eventloop, IO* io)
-    : _eventloop(eventloop), _io(io),_status(INIT),
+Wrapper::Wrapper( IO* io)
+    :  _io(io),_status(INIT),
       _reason("Waiting for IO"), _process_status(PROC_STARTUP),_main_addr("1.1.1.1"),
       server_ready(false),conn_ready(false),clientApp(""),clientPara("")
 {
@@ -105,7 +105,7 @@ bool Wrapper::recvData(wrapperData_t * data)
         if (r_buf_left<=0) {
             while (!socketselect(conn_sock,45000)) {
                 try {
-                    _eventloop.run();
+                    EventLoop::instance().run();
                 } catch(...) {
                     xorp_catch_standard_exceptions();
                 }
@@ -186,7 +186,7 @@ bool Wrapper::wait_for_cmd()
             /*  Wait for a connection, then accept() it  */
             while (!socketselect(listen_sock, 45000)) {
                 try {
-                    _eventloop.run();
+                    EventLoop::instance().run();
                 } catch(...) {
                     xorp_catch_standard_exceptions();
                 }
@@ -751,7 +751,6 @@ void Wrapper::runClient(string cmd, string para)
     fprintf(stderr,"Wrapper4 run >>%s %s<<\n",clientApp.c_str(),clientPara.c_str());
 
     run_cmd = new RunShellCommand(
-        _eventloop,
         clientApp,
         clientPara,
         callback(this, &Wrapper::runcmdCB),

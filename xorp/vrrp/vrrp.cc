@@ -50,7 +50,7 @@ out_of_range(const string& msg, const T& x)
 // XXX init from VrrpPacket::mcast_group
 const Mac Vrrp::mcast_mac = Mac("01:00:5E:00:00:12");
 
-Vrrp::Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid)
+Vrrp::Vrrp(VrrpVif& vif,  uint32_t vrid)
     : _vif(vif),
       _vrid(vrid),
       _priority(100),
@@ -75,10 +75,10 @@ Vrrp::Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid)
     _source_mac = Mac(tmp);
     //_arpd.set_mac(_source_mac);
 
-    _master_down_timer = e.new_periodic_ms(0x29a,
+    _master_down_timer = EventLoop::instance().new_periodic_ms(0x29a,
 			    callback(this, &Vrrp::master_down_expiry));
 
-    _adver_timer = e.new_periodic_ms(0x29a,
+    _adver_timer = EventLoop::instance().new_periodic_ms(0x29a,
 			    callback(this, &Vrrp::adver_expiry));
     cancel_timers();
 

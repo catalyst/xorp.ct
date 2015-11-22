@@ -57,9 +57,8 @@ const TimeVal ClickSocket::USER_CLICK_STARTUP_MAX_WAIT_TIME = TimeVal(1, 0);
 // Click Sockets communication with Click
 //
 
-ClickSocket::ClickSocket(EventLoop& eventloop)
-    : _eventloop(eventloop),
-      _seqno(0),
+ClickSocket::ClickSocket()
+    : _seqno(0),
       _instance_no(_instance_cnt++),
       _is_enabled(false),
       _duplicate_routes_to_kernel(false),
@@ -265,7 +264,7 @@ ClickSocket::start(string& error_msg)
 	//
 	// Add the socket to the event loop
 	//
-	if (_eventloop.add_ioevent_cb(_user_fd, IOT_READ,
+	if (EventLoop::instance().add_ioevent_cb(_user_fd, IOT_READ,
 				    callback(this, &ClickSocket::io_event))
 	    == false) {
 	    error_msg = c_format("Failed to add user-level Click socket "
@@ -295,7 +294,7 @@ ClickSocket::stop(string& error_msg)
 	    //
 	    // Remove the socket from the event loop and close it
 	    //
-	    _eventloop.remove_ioevent_cb(_user_fd);
+	    EventLoop::instance().remove_ioevent_cb(_user_fd);
 	    comm_close(_user_fd);
 	    _user_fd.clear();
 	}
@@ -660,8 +659,7 @@ ClickSocket::execute_user_click_command(const string& command,
     if (_user_click_run_command != NULL)
 	return (XORP_ERROR);	// XXX: command is already running
 
-    _user_click_run_command = new RunCommand(_eventloop,
-					     command,
+    _user_click_run_command = new RunCommand( command,
 					     argument_list,
 					     callback(this, &ClickSocket::user_click_command_stdout_cb),
 					     callback(this, &ClickSocket::user_click_command_stderr_cb),

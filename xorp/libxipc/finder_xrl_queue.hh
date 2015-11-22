@@ -61,7 +61,6 @@ private:
 protected:
     void push();
     void dispatch_one();
-    EventLoop& eventloop();
 
 protected:
     friend class FinderXrlCommandBase;

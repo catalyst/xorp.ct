@@ -47,8 +47,7 @@ class XrlFib2mribNode : public Fib2mribNode,
 			public XrlStdRouter,
 			public XrlFib2mribTargetBase {
 public:
-    XrlFib2mribNode(EventLoop&		eventloop,
-		    const string&	class_name,
+    XrlFib2mribNode( const string&	class_name,
 		    const string&	finder_hostname,
 		    uint16_t		finder_port,
 		    const string&	finder_target,
@@ -384,7 +383,6 @@ private:
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    EventLoop&		_eventloop;
     XrlFtiV0p2Client	_xrl_fea_fti_client;
     XrlFeaFibV0p1Client	_xrl_fea_fib_client;
     XrlRibV0p1Client	_xrl_rib_client;

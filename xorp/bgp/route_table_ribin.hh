@@ -29,7 +29,6 @@
 #include "crash_dump.hh"
 #include "bgp_trie.hh"
 
-class EventLoop;
 
 /**
  * @short Specialized BGPRouteTable that stores routes from a BGP peer.
@@ -133,7 +132,6 @@ public:
     string dump_state() const;
 
 private:
-    EventLoop& eventloop() const;
 
     BgpTrie<A>* _route_table;
     const PeerHandler *_peer;

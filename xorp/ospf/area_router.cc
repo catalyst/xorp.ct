@@ -55,8 +55,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
       _summaries(true), _stub_default_announce(false), _stub_default_cost(0),
       _external_flooding(false),
       _last_entry(0), _allocated_entries(0), _readers(0),
-      _queue(ospf.get_eventloop(),
-	     OspfTypes::MinLSInterval,
+      _queue( OspfTypes::MinLSInterval,
 	     callback(this, &AreaRouter<A>::publish_all)),
       _lsid(1),
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
@@ -81,7 +80,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
     rlsa->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     rlsa->record_creation_time(now);
 
     Lsa_header& header = rlsa->get_header();
@@ -836,7 +835,7 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
     }
     
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     if (!lsar->maxage())
 	lsar->update_age(now);
 
@@ -1215,7 +1214,7 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     lsar->get_header().set_advertising_router(_ospf.get_router_id());
     lsar->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     lsar->record_creation_time(now);
     lsar->encode();
 
@@ -1257,10 +1256,10 @@ void
 AreaRouter<A>::refresh_summary_lsa(Lsa::LsaRef lsar)
 {
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(lsar, now);
 
-    lsar->get_timer() = _ospf.get_eventloop().
+    lsar->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_summary_lsa,
 				  lsar));
@@ -1364,7 +1363,7 @@ AreaRouter<A>::summary_replace(OspfTypes::AreaID area, IPNet<A> net,
     nlsar->get_header().set_advertising_router(_ospf.get_router_id());
     nlsar->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     nlsar->record_creation_time(now);
     nlsar->encode();
 
@@ -1465,7 +1464,7 @@ AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar, bool& indb)
     type7->set_metric(aselsa->get_metric());
     type7->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     type7->record_creation_time(now);
 
     type7->encode();
@@ -1518,7 +1517,7 @@ AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
     aselsa->set_e_bit(type7->get_e_bit());
     aselsa->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     aselsa->record_creation_time(now);
 
     aselsa->encode();
@@ -1608,7 +1607,7 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 	bool indb;
 	lsar = external_generate_type7(lsar, indb);
 	XLOG_ASSERT(indb);
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	update_age_and_seqno(lsar, now);
     }
 	break;
@@ -1706,10 +1705,10 @@ AreaRouter<A>::update_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
     XLOG_ASSERT(lsar->get_peerid() == peerid);
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(lsar, now);
     
-    lsar->get_timer() = _ospf.get_eventloop().
+    lsar->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_link_lsa,
 				  peerid,
@@ -1762,7 +1761,7 @@ AreaRouter<A>::generate_network_lsa(OspfTypes::PeerID peerid,
     NetworkLsa *nlsa = new NetworkLsa(_ospf.get_version());
     nlsa->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     nlsa->record_creation_time(now);
 
     Lsa_header& header = nlsa->get_header();
@@ -1844,11 +1843,11 @@ AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
     }
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(_db[index], now);
 
     // Prime this Network-LSA to be refreshed.
-    nlsa->get_timer() = _ospf.get_eventloop().
+    nlsa->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_network_lsa,
 				  peerid,
@@ -2144,7 +2143,7 @@ AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
     }
 	
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(_db[index], now);
 
     publish_all(_db[index]);
@@ -2218,7 +2217,7 @@ AreaRouter<A>::generate_default_route()
 
     snlsa->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     snlsa->record_creation_time(now);
 
     Lsa_header& header = snlsa->get_header();
@@ -2351,10 +2350,10 @@ AreaRouter<A>::refresh_default_route()
     snlsa->set_metric(_stub_default_cost);
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(_db[index], now);
 
-    snlsa->get_timer() = _ospf.get_eventloop().
+    snlsa->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this,
 				  &AreaRouter<A>::refresh_default_route));
@@ -2393,7 +2392,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
     OspfTypes::Version version = _ospf.get_version();
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
 
     routing_begin();
     
@@ -2709,7 +2708,7 @@ AreaRouter<A>::age_lsa(Lsa::LsaRef lsar)
 	return false;
     }
 
-    lsar->get_timer() = _ospf.get_eventloop().
+    lsar->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::MaxAge -
 				 lsar->get_header().get_ls_age(), 0),
 			 callback(this,
@@ -2740,7 +2739,7 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
 #ifdef PARANOIA
     if (!lsar->get_self_originating()) {
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	if (!lsar->maxage())
 	    lsar->update_age(now);
     }
@@ -2810,7 +2809,7 @@ AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
 	lsar->set_maxage();
 
     if (_reincarnate.empty())
-	_reincarnate_timer = _ospf.get_eventloop().
+	_reincarnate_timer = EventLoop::instance().
 	    new_periodic_ms(1000, callback(this, &AreaRouter<A>::reincarnate));
 	
     _reincarnate.push_back(lsar);
@@ -2827,7 +2826,7 @@ AreaRouter<A>::reincarnate()
 	XLOG_ASSERT((*i)->max_sequence_number());
 	if ((*i)->empty_nack()) {
 	    TimeVal now;
-	    _ospf.get_eventloop().current_time(now);
+	    EventLoop::instance().current_time(now);
 	    (*i)->revive(now);
 	    XLOG_INFO("Reviving an LSA that reached MaxSequenceNumber %s",
 		      cstring(*(*i)));
@@ -3073,7 +3072,7 @@ AreaRouter<A>::compare_lsa(const Lsa_header& lsah, size_t& index) const
 	if (!_db[index]->maxage()) {
 	    // Update the age before checking this field.
 	    TimeVal now;
-	    _ospf.get_eventloop().current_time(now);
+	    EventLoop::instance().current_time(now);
 	    _db[index]->update_age(now);
 	}
 	return compare_lsa(lsah, _db[index]->get_header());
@@ -3113,7 +3112,7 @@ AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
 			list<Lsa::LsaRef>& lsas)
 {
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
 
     list<Ls_request>::const_iterator i;
     for(i = reqs.begin(); i != reqs.end(); i++) {
@@ -3166,7 +3165,7 @@ AreaRouter<A>::valid_entry_database(OspfTypes::PeerID peerid, size_t index)
 
     if (!lsar->maxage()) {
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	lsar->update_age(now);
     }
 
@@ -3354,11 +3353,11 @@ AreaRouter<A>::update_router_links()
     }
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(_router_lsa, now);
 
     // Prime this Router-LSA to be refreshed.
-    router_lsa->get_timer() = _ospf.get_eventloop().
+    router_lsa->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_router_lsa,
 				  /* timer */true));
@@ -3410,7 +3409,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
 	    return;
 
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	update_age_and_seqno(_db[index], now);
 
 	_queue.add(_db[index]);
@@ -3514,7 +3513,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
 	nprefixes.insert(nprefixes.begin(), prefixes.begin(), prefixes.end());
 
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	update_age_and_seqno(lsar, now);
 
 	_queue.add(lsar);
@@ -3551,7 +3550,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
     oprefixes.insert(oprefixes.begin(), prefixes.begin(), prefixes.end());
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     update_age_and_seqno(lsar, now);
 
     _queue.add(lsar);
@@ -3566,7 +3565,7 @@ AreaRouter<A>::publish(const OspfTypes::PeerID peerid,
     debug_msg("Publish: %s\n", cstring(*lsar));
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
 
     // Update the age field unless its self originating.
     if (lsar->get_self_originating()) {
@@ -3889,7 +3888,7 @@ AreaRouter<A>::routing_schedule_total_recompute()
     if (_routing_recompute_timer.scheduled())
 	return;
 
-    _routing_recompute_timer = _ospf.get_eventloop().
+    _routing_recompute_timer = EventLoop::instance().
 	new_oneoff_after(TimeVal(_routing_recompute_delay, 0),
 			 callback(this, &AreaRouter<A>::routing_timer));
     

@@ -41,8 +41,8 @@
 
 #include <deque>
 
-EmulateSubnet::EmulateSubnet(TestInfo& info, EventLoop& eventloop)
- : _info(info), _eventloop(eventloop),
+EmulateSubnet::EmulateSubnet(TestInfo& info) 
+ : _info(info), 
    _queue_add(1), _queue_remove(2),
    _all_nodes_addr(IPv4::ALL_ONES())
 {
@@ -73,7 +73,7 @@ EmulateSubnet::receive_frames(
 
     XLOG_ASSERT(_queue[_queue_add].size() == 1);
 
-    _timer = _eventloop.
+    _timer = EventLoop::instance().
 	 new_oneoff_after_ms(10, callback(this, &EmulateSubnet::next));
 }
 
@@ -190,8 +190,8 @@ EmulateSubnet::forward(Frame frame)
 }
 
 EmulateSubnetHops::EmulateSubnetHops(TestInfo& info,
-    EventLoop& eventloop, uint8_t hopdelta, uint8_t maxlinks)
- : EmulateSubnet(info, eventloop),
+     uint8_t hopdelta, uint8_t maxlinks)
+ : EmulateSubnet(info),
    _hopdelta(hopdelta),
    _maxlinks(maxlinks),
    _empty_pkt_drops(0),

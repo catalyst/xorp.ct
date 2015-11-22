@@ -67,8 +67,7 @@ struct IsTwoHopLinkStrictPred {
  */
 class Neighbor {
   public:
-    Neighbor(EventLoop& ev,
-	     Neighborhood* parent,
+    Neighbor( Neighborhood* parent,
 	     const OlsrTypes::NeighborID nid,
 	     const IPv4& main_addr,
 	     const OlsrTypes::LogicalLinkID linkid);
@@ -276,7 +275,6 @@ class Neighbor {
     bool update_cand_mpr(bool was_cand_mpr);
 
   private:
-    EventLoop&		    _eventloop;
     Neighborhood*	    _parent;
 
     OlsrTypes::NeighborID   _id;

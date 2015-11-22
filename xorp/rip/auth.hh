@@ -27,7 +27,6 @@
 
 #include "packets.hh"
 
-class EventLoop;
 
 /**
  * @short Base clase for RIPv2 authentication mechanisms.
@@ -458,9 +457,8 @@ public:
     /**
      * Constructor
      *
-     * @param eventloop the EventLoop instance to used for time reference.
      */
-    MD5AuthHandler(EventLoop& eventloop);
+    MD5AuthHandler();
 
     /**
      * Get the effective name of the authentication scheme.
@@ -603,7 +601,6 @@ public:
     bool empty() const;
 
 protected:
-    EventLoop&	_eventloop;		// The event loop
     KeyChain	_valid_key_chain;	// The set of all valid keys
     KeyChain	_invalid_key_chain;	// The set of all invalid keys
     NullAuthHandler _null_handler;	// Null handler if no valid keys

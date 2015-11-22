@@ -46,16 +46,11 @@
 #include "libxipc/xrl_router.hh"
 #include "xrl_queue.hh"
 
-XrlQueue::XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router)
-    : _io(0), _eventloop(eventloop), _xrl_router(xrl_router), _flying(0)
+XrlQueue::XrlQueue( XrlRouter& xrl_router)
+    : _io(0),  _xrl_router(xrl_router), _flying(0)
 {
 }
 
-EventLoop&
-XrlQueue::eventloop() const
-{
-    return _eventloop;
-}
 
 void
 XrlQueue::queue_add_route(string ribname, const IPv4Net& net,

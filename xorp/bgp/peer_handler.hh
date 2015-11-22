@@ -195,7 +195,6 @@ public:
      */
     uint32_t get_prefix_count() const;
 
-    virtual EventLoop& eventloop() const;
 
 
 #ifdef HAVE_IPV6

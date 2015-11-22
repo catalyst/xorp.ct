@@ -259,20 +259,19 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 {
     XorpUnexpectedHandler catch_all(xorp_unexpected_handler);
     try {
-	EventLoop		e;
-	System<A>		rip_system(e);
-	XrlStdRouter		xsr(e, XrlTarget<A>::name(),
+	System<A>		rip_system;
+	XrlStdRouter		xsr( XrlTarget<A>::name(),
 				    finder_host.c_str(), finder_port);
 	XrlProcessSpy		xps(xsr);
-	IfMgrXrlMirror 		ixm(e, xrl_fea_name(),
+	IfMgrXrlMirror 		ixm( xrl_fea_name(),
 				    FinderConstants::FINDER_DEFAULT_HOST(),
 				    FinderConstants::FINDER_DEFAULT_PORT());
 	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
 	XrlRedistManager<A>	xrm(rip_system);
 
-	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, rip_system);
+	XrlTargetType xrlt( xsr, xps, xpm, xrm, rip_system);
 
-	wait_until_xrl_router_is_ready(e, xsr);
+	wait_until_xrl_router_is_ready( xsr);
 
 	Service2XrlTargetStatus<A> smon(xrlt);
 
@@ -280,7 +279,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	xps.startup();
 	smon.add_service(&xps);
 
-	XrlRibNotifier<A> xn(e, rip_system.route_db().update_queue(), xsr);
+	XrlRibNotifier<A> xn( rip_system.route_db().update_queue(), xsr);
 	xn.startup();
 	smon.add_service(&xn);
 
@@ -299,7 +298,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	while (xorp_do_run
 	       && (smon.have_status(SERVICE_FAILED) == false)
 	       && (xsr.failed() == false)) {
-	    e.run();
+		EventLoop::instance().run();
 	}
 
 	xps.shutdown();
@@ -309,11 +308,11 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	xrm.shutdown();
 
 	bool flag(false);
-	XorpTimer t = e.set_flag_after_ms(5000, &flag);
+	XorpTimer t = EventLoop::instance().set_flag_after_ms(5000, &flag);
 	while (flag == false &&
 	       smon.have_status(
 		   ServiceStatus(~(SERVICE_FAILED | SERVICE_SHUTDOWN)))) {
-	    e.run();
+		EventLoop::instance().run();
 	}
 
 	smon.remove_service(&xps);

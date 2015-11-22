@@ -36,7 +36,6 @@
 
 
 class XrlStdRouter;
-class EventLoop;
 class IfMgrCommandBase;
 class IfMgrXrlMirrorRouter;
 class IfMgrXrlMirrorTarget;
@@ -108,8 +107,7 @@ public:
      * @param finder_addr address to route finder messages to.
      * @param finder_port port to direct finder messages to.
      */
-    IfMgrXrlMirror(EventLoop&	e,
-		   const char*	rtarget,
+    IfMgrXrlMirror( const char*	rtarget,
 		   IPv4		finder_addr,
 		   uint16_t	finder_port);
 
@@ -122,8 +120,7 @@ public:
      * @param finder_hostname host name to route finder messages to.
      * @param finder_port port to direct finder messages to.
      */
-    IfMgrXrlMirror(EventLoop&	e,
-		   const char*	rtarget,
+    IfMgrXrlMirror( const char*	rtarget,
 		   const char*	finder_hostname,
 		   uint16_t	finder_port);
 
@@ -190,7 +187,6 @@ protected:
     void unregister_cb(const XrlError& e);
 
 protected:
-    EventLoop&			_e;
     IPv4			_finder_addr;
     string			_finder_hostname;
     uint16_t			_finder_port;

@@ -705,16 +705,9 @@ XrlIO<A>::delete_route(IPNet<A> net)
 }
 
 template<class A>
-XrlQueue<A>::XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router)
-    : _io(0), _eventloop(eventloop), _xrl_router(xrl_router), _flying(0)
+XrlQueue<A>::XrlQueue( XrlRouter& xrl_router)
+    : _io(0),  _xrl_router(xrl_router), _flying(0)
 {
-}
-
-template<class A>
-EventLoop& 
-XrlQueue<A>::eventloop() const 
-{ 
-    return _eventloop;
 }
 
 template<class A>

@@ -26,13 +26,12 @@
 #include "route_db.hh"
 
 template <typename A>
-OutputUpdates<A>::OutputUpdates(EventLoop&	e,
-				Port<A>&	port,
+OutputUpdates<A>::OutputUpdates( Port<A>&	port,
 				PacketQueue<A>&	pkt_queue,
 				RouteDB<A>&	rdb,
 				const A&	dst_addr,
 				uint16_t	dst_port)
-    : OutputBase<A>(e, port, pkt_queue, dst_addr, dst_port),
+    : OutputBase<A>( port, pkt_queue, dst_addr, dst_port),
       _uq(rdb.update_queue())
 {
 }
@@ -114,7 +113,7 @@ OutputUpdates<A>::output_packet()
     if (r != 0) {
 	// Not finished with updates so set time to reschedule self
 	this->_op_timer 
-	    = this->_e.new_oneoff_after_ms(this->interpacket_gap_ms(),
+	    = EventLoop::instance().new_oneoff_after_ms(this->interpacket_gap_ms(),
 			callback(this, &OutputUpdates<A>::output_packet));
     } else {
 	// Finished with updates for this run.  Do not set timer.

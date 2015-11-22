@@ -30,7 +30,7 @@
  */
 class DebugIO : public IO {
   public:
-    DebugIO(TestInfo& info, EventLoop& eventloop);
+    DebugIO(TestInfo& info );
 
     virtual ~DebugIO();
 
@@ -194,7 +194,6 @@ class DebugIO : public IO {
 
   private:
     TestInfo&		_info;
-    EventLoop&		_eventloop;
     int			_packets;
 
     uint32_t			_next_interface_id;

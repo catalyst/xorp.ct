@@ -563,7 +563,6 @@ class Peer {
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
 	  _area_type(area_type), _go_called(false),
 	  _enabled(false), _passive(false), _passive_host(false),
-	  _auth_handler(_ospf.get_eventloop()),
 	  _interface_state(Down),
 	  _hello_packet(ospf.get_version())
     {
@@ -1500,7 +1499,7 @@ class Neighbour {
 	    _rxmt_wrapper[i] = 0;
 
 	TimeVal t;
-	_ospf.get_eventloop().current_time(t);
+	EventLoop::instance().current_time(t);
 	// If we are debugging numbers starting from 0 are easier to
 	// deal with.
 #ifdef	DEBUG_LOGGING

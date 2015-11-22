@@ -57,7 +57,7 @@ public:
     typedef list<FinderEvent> EventQueue;
 
 public:
-    Finder(EventLoop& e);
+    Finder();
     virtual ~Finder();
 
 protected:
@@ -161,10 +161,8 @@ protected:
 
     bool class_exists(const string& class_name) const;
 
-    EventLoop& eventloop() const { return _e; }
 
 protected:
-    EventLoop&		 _e;
     XrlCmdMap		 _cmds;
     FinderMessengerBase* _active_messenger;	// Currently active endpoint
     FinderMessengerList	 _messengers;		// List of Finder

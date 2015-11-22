@@ -143,9 +143,8 @@ CliClient::~CliClient()
 
     set_log_output(false);
 
-    // Remove the input file descriptor from the eventloop
     if (_input_fd.is_valid()) {
-	cli_node().eventloop().remove_ioevent_cb(_input_fd, IOT_READ);
+	EventLoop::instance().remove_ioevent_cb(_input_fd, IOT_READ);
     }
 
     // Close files and file descriptors

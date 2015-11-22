@@ -27,9 +27,9 @@
 // FEA (Forwarding Engine Abstraction) I/O interface.
 //
 
+#include "libxorp/eventloop.hh"
 
 
-class EventLoop;
 class FeaNode;
 class InstanceWatcher;
 
@@ -43,7 +43,7 @@ public:
      *
      * @param eventloop the event loop to use.
      */
-    FeaIo(EventLoop& eventloop);
+    FeaIo();
 
     /**
      * Destructor
@@ -71,13 +71,7 @@ public:
      */
     bool	is_running() const;
 
-    /**
-     * Get the event loop this service is added to.
-     *
-     * @return the event loop this service is added to.
-     */
-    EventLoop& eventloop() { return (_eventloop); }
-
+    
     /**
      * Add a watcher for the status of a component instance.
      *
@@ -142,7 +136,6 @@ protected:
 						   string& error_msg) = 0;
 
 private:
-    EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
 
     list<pair<string, InstanceWatcher *> > _instance_watchers;

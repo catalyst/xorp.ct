@@ -33,11 +33,11 @@ class TopologyManager;
  */
 class MidEntry {
 public:
-    MidEntry(EventLoop& ev, TopologyManager* parent,
+    MidEntry( TopologyManager* parent,
 	     const OlsrTypes::MidEntryID id, const IPv4& iface_addr,
 	     const IPv4& main_addr, const uint16_t distance,
 	     const TimeVal& vtime)
-     : _ev(ev), _parent(parent), _id(id),
+     :  _parent(parent), _id(id),
        _iface_addr(iface_addr), _main_addr(main_addr),
        _distance(distance)
     {
@@ -76,7 +76,6 @@ public:
     void event_dead();
 
 private:
-    EventLoop&		_ev;
     TopologyManager*	_parent;
     OlsrTypes::MidEntryID		_id;
     IPv4		_iface_addr;
@@ -90,13 +89,13 @@ private:
  */
 class TopologyEntry {
 public:
-    TopologyEntry(EventLoop& ev, TopologyManager* parent,
+    TopologyEntry( TopologyManager* parent,
 		  OlsrTypes::TopologyID id,
 		  const IPv4& dest, const IPv4& lasthop,
 		  const uint16_t distance,
 		  const uint16_t seqno,
 		  const TimeVal& vtime)
-     : _ev(ev), _parent(parent), _id(id), _destination(dest),
+     :  _parent(parent), _id(id), _destination(dest),
        _lasthop(lasthop), _distance(distance), _seqno(seqno)
     {
 	update_timer(vtime);
@@ -133,7 +132,6 @@ public:
     void event_dead();
 
 private:
-    EventLoop&			_ev;
     TopologyManager*		_parent;
 
     /**
@@ -174,7 +172,7 @@ private:
  */
 class TopologyManager {
   public:
-    TopologyManager(Olsr& olsr, EventLoop& eventloop,
+    TopologyManager(Olsr& olsr, 
 		    FaceManager& fm, Neighborhood& nh);
     ~TopologyManager();
 
@@ -565,7 +563,6 @@ protected:
 
 private:
     Olsr&		_olsr;
-    EventLoop&		_eventloop;
     FaceManager&	_fm;
     Neighborhood&	_nh;
     RouteManager*	_rm;

@@ -34,11 +34,10 @@
 
 
 VifManager::VifManager(XrlRouter& xrl_router,
-		       EventLoop& eventloop,
 		       RibManager* rib_manager,
 		       const string& fea_target)
     : _rib_manager(rib_manager),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router.finder_address(),
+      _ifmgr( fea_target.c_str(), xrl_router.finder_address(),
 	     xrl_router.finder_port()),
       _startup_requests_n(0),
       _shutdown_requests_n(0)

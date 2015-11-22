@@ -43,8 +43,7 @@ class OutputUpdates :
     public OutputBase<A>
 {
 public:
-    OutputUpdates(EventLoop&	  e,
-		  Port<A>&	  port,
+    OutputUpdates( Port<A>&	  port,
 		  PacketQueue<A>& pkt_queue,
 		  RouteDB<A>&	  rdb,
 		  const A&	  ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),

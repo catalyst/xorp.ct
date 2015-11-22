@@ -42,10 +42,9 @@
 #include "neighborhood.hh"
 #include "topology.hh"
 
-TopologyManager::TopologyManager(Olsr& olsr, EventLoop& eventloop,
+TopologyManager::TopologyManager(Olsr& olsr, 
     FaceManager& fm, Neighborhood& nh)
      : _olsr(olsr),
-       _eventloop(eventloop),
        _fm(fm),
        _nh(nh),
        _rm(0),
@@ -108,7 +107,7 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
     }
 
     TimeVal now;
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     if (is_found) {
 	TopologyEntry* tc = _topology[tcid];
@@ -156,7 +155,7 @@ TopologyManager::add_tc_entry(const IPv4& dest_addr,
 			    XORP_UINT_CAST(tcid)));
     }
 
-    _topology[tcid] = new TopologyEntry(_eventloop, this, tcid,
+    _topology[tcid] = new TopologyEntry( this, tcid,
 					dest_addr, origin_addr,
 					distance, ansn, expiry_time);
 
@@ -625,7 +624,7 @@ TopologyManager::add_mid_entry(const IPv4& main_addr,
 			    XORP_UINT_CAST(mid_id)));
     }
 
-    _mids[mid_id] = new MidEntry(_eventloop, this, mid_id, iface_addr,
+    _mids[mid_id] = new MidEntry( this, mid_id, iface_addr,
 				 main_addr, distance, vtime);
 
     // Tot up another MID entry for this main address and MID entry combo.
@@ -1015,7 +1014,7 @@ TopologyManager::event_receive_mid(
     }
 
     TimeVal now;
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     // 5.4.2 Process each interface listed in MID message.
     size_t added_mid_count = 0;
@@ -1068,7 +1067,7 @@ TopologyEntry::update_timer(const TimeVal& vtime)
 {
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
-    _expiry_timer = _ev.new_oneoff_after(vtime,
+    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
 	callback(this, &TopologyEntry::event_dead));
 }
 
@@ -1084,7 +1083,7 @@ MidEntry::update_timer(const TimeVal& vtime)
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
-    _expiry_timer = _ev.new_oneoff_after(vtime,
+    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
 	callback(this, &MidEntry::event_dead));
 }
 

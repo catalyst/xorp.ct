@@ -40,10 +40,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // FinderTcpBase
 
-FinderTcpBase::FinderTcpBase(EventLoop& e, XorpFd sock)
+FinderTcpBase::FinderTcpBase( XorpFd sock)
     : _sock(sock),
-      _reader(e, sock),
-      _writer(e, sock),
+      _reader( sock),
+      _writer( sock),
       _isize(0), _osize(0)
 {
     debug_msg("Constructor for FinderTcpBase object 0x%p\n", this);
@@ -284,12 +284,11 @@ FinderTcpBase::closed() const
 ///////////////////////////////////////////////////////////////////////////////
 // FinderTcpListenerBase
 
-FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
-					     IPv4	interface,
+FinderTcpListenerBase::FinderTcpListenerBase( IPv4	interface,
 					     uint16_t	port,
 					     bool	en)
     throw (InvalidAddress, InvalidPort)
-    : _e(e), _en(false), _addr(interface), _port(port)
+    :  _en(false), _addr(interface), _port(port)
 {
     comm_init();
 
@@ -317,7 +316,6 @@ FinderTcpListenerBase::~FinderTcpListenerBase()
 {
     set_enabled(false);
     // XXX: duplicate call; set_enabled() will remove callback
-    //_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
     debug_msg("Destructing Listener with fd = %s\n", _lsock.str().c_str());
     comm_close(_lsock.getSocket());
 }
@@ -330,11 +328,11 @@ FinderTcpListenerBase::set_enabled(bool en)
 
     if (en) {
 	IoEventCb cb = callback(this, &FinderTcpListenerBase::connect_hook);
-	if (false == _e.add_ioevent_cb(_lsock, IOT_ACCEPT, cb)) {
+	if (false == EventLoop::instance().add_ioevent_cb(_lsock, IOT_ACCEPT, cb)) {
 	    XLOG_FATAL("Failed to add io event callback\n");
 	}
     } else {
-	_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
+	EventLoop::instance().remove_ioevent_cb(_lsock, IOT_ACCEPT);
     }
     _en = en;
 }

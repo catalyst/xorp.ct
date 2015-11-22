@@ -24,7 +24,7 @@
 
 PrintPeers::PrintPeers(bool verbose, int interval) 
     : XrlBgpV0p3Client(&_xrl_rtr), 
-    _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
+    _xrl_rtr( "print_peers"), _verbose(verbose)
 {
     _prev_no_bgp = false;
     _prev_no_peers = false;
@@ -32,9 +32,9 @@ PrintPeers::PrintPeers(bool verbose, int interval)
     // Wait for the finder to become ready.
     {
 	bool timed_out = false;
-	XorpTimer t = _eventloop.set_flag_after_ms(10000, &timed_out);
+	XorpTimer t = EventLoop::instance().set_flag_after_ms(10000, &timed_out);
 	while (_xrl_rtr.connected() == false && timed_out == false) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	}
 
 	if (_xrl_rtr.connected() == false) {
@@ -48,7 +48,7 @@ PrintPeers::PrintPeers(bool verbose, int interval)
 	_count = 0;
 	get_peer_list_start();
 	while (_done == false) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	}
 	// Infinite loop by design.
 	// The command will be repeated every interval seconds until

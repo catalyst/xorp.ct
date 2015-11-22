@@ -36,8 +36,7 @@ class Neighborhood;
  */
 class TwoHopNeighbor {
   public:
-    TwoHopNeighbor(EventLoop& ev,
-		   Neighborhood* parent,
+    TwoHopNeighbor( Neighborhood* parent,
 		   const OlsrTypes::TwoHopNodeID id,
 		   const IPv4& main_addr,
 		   const OlsrTypes::TwoHopLinkID tlid);
@@ -141,7 +140,6 @@ class TwoHopNeighbor {
     }
 
   private:
-    EventLoop&		    _ev;
     Neighborhood*	    _parent;
 
     /**
@@ -193,7 +191,7 @@ class TwoHopNeighbor {
  */
 class TwoHopLink {
 public:
-    TwoHopLink(EventLoop& ev, Neighborhood* parent,
+    TwoHopLink( Neighborhood* parent,
 	       OlsrTypes::TwoHopLinkID tlid,
 	       Neighbor* nexthop, const TimeVal& vtime);
 
@@ -297,7 +295,6 @@ public:
     void event_dead();
 
 private:
-    EventLoop&			_ev;
     Neighborhood*		_parent;
 
     /**

@@ -727,12 +727,6 @@ PeerHandler::get_prefix_count() const
 	_plumbing_multicast->get_prefix_count(this);
 }
 
-EventLoop&
-PeerHandler::eventloop() const
-{
-    return _peer->main()->eventloop();
-}
-
 
 /** IPv6 stuff */
 #ifdef HAVE_IPV6

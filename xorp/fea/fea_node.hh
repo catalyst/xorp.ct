@@ -29,7 +29,7 @@
 #ifndef XORP_DISABLE_PROFILE
 #include "libxorp/profile.hh"
 #endif
-
+#include "libxorp/eventloop.hh"
 #include "fibconfig.hh"
 #ifndef XORP_DISABLE_FIREWALL
 #include "firewall_manager.hh"
@@ -40,7 +40,6 @@
 #include "io_tcpudp_manager.hh"
 #include "nexthop_port_mapper.hh"
 
-class EventLoop;
 class FeaIo;
 
 /**
@@ -57,7 +56,7 @@ public:
      * @param fea_io the FeaIo instance to use.
      * @param is_dummy if true, then run the FEA in dummy mode.
      */
-    FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy);
+    FeaNode( FeaIo& fea_io, bool is_dummy);
 
     /**
      * Destructor
@@ -107,14 +106,6 @@ public:
      * @return true if running in dummy mode, otherwise false.
      */
     bool	is_dummy() const { return _is_dummy; }
-
-    /**
-     * Get the event loop this service is added to.
-     * 
-     * @return the event loop this service is added to.
-     */
-    EventLoop& eventloop() { return (_eventloop); }
-
 #ifndef XORP_DISABLE_PROFILE
     /**
      * Get the Profile instance.
@@ -226,7 +217,6 @@ private:
      */
     int unload_data_plane_managers(string& error_msg);
 
-    EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
     bool	_is_dummy;	// True if running in dummy node
 #ifndef XORP_DISABLE_PROFILE

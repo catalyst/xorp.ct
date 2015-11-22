@@ -208,8 +208,7 @@ display_route_terse(const IPNet<A>&	net,
 class ShowRoutesProcessor
     : public XrlShowRoutesTargetBase, public ServiceBase {
 public:
-    ShowRoutesProcessor(EventLoop&	   e,
-			ShowRoutesOptions& opts);
+    ShowRoutesProcessor( ShowRoutesOptions& opts);
     ~ShowRoutesProcessor();
 
     int startup();
@@ -294,7 +293,6 @@ public:
     void request_cease_cb(const XrlError& xe);
 
 protected:
-    EventLoop&			_e;
     const ShowRoutesOptions& 	_opts;
     XrlRouter*			_rtr;
     XorpTimer			_t;
@@ -303,10 +301,8 @@ protected:
     string			_cookie;
 };
 
-ShowRoutesProcessor::ShowRoutesProcessor(EventLoop&		e,
-					 ShowRoutesOptions&	o)
-    : _e(e),
-      _opts(o),
+ShowRoutesProcessor::ShowRoutesProcessor( ShowRoutesOptions&	o)
+    : _opts(o),
       _rtr(NULL),
       _network_prefix4(IPv4::ZERO(), 0),	// XXX: get the whole table
       _network_prefix6(IPv6::ZERO(), 0)		// XXX: get the whole table
@@ -333,7 +329,7 @@ ShowRoutesProcessor::startup()
 
     // Create XrlRouter
     string process = c_format("show_routes<%d>", XORP_INT_CAST(getpid()));
-    _rtr = new XrlStdRouter(_e, process.c_str(),
+    _rtr = new XrlStdRouter( process.c_str(),
 			    _opts.finder_host.c_str(), _opts.finder_port);
 
     // Glue the router to the Xrl methods class exports
@@ -344,7 +340,7 @@ ShowRoutesProcessor::startup()
 
     // Start timer to poll whether XrlRouter becomes ready or fails so
     // we can continue processing.
-    _t = _e.new_periodic_ms(250,
+    _t = EventLoop::instance().new_periodic_ms(250,
 			    callback(this,
 				     &ShowRoutesProcessor::poll_ready_failed));
     set_status(SERVICE_STARTING);
@@ -862,8 +858,7 @@ main(int argc, char* const argv[])
 
 	sr_opts.protocol = argv[3];
 
-	EventLoop e;
-	ShowRoutesProcessor srp(e, sr_opts);
+	ShowRoutesProcessor srp( sr_opts);
 
 
 	srp.startup();
@@ -889,7 +884,7 @@ main(int argc, char* const argv[])
 
 	while ((srp.status() != SERVICE_FAILED)
 	       && (srp.status() != SERVICE_SHUTDOWN)) {
-	    e.run();
+	    EventLoop::instance().run();
 	}
 
 	if (srp.status() == SERVICE_FAILED) {

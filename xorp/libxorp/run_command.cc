@@ -96,15 +96,14 @@ get_path_bshell()
 
 }
 
-RunCommand::RunCommand(EventLoop&			eventloop,
-		       const string&			command,
+RunCommand::RunCommand( const string&			command,
 		       const list<string>&		argument_list,
 		       RunCommand::OutputCallback	stdout_cb,
 		       RunCommand::OutputCallback	stderr_cb,
 		       RunCommand::DoneCallback		done_cb,
 		       bool				redirect_stderr_to_stdout,
 		       int task_priority)
-    : RunCommandBase(eventloop, command, command, task_priority),
+    : RunCommandBase( command, command, task_priority),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb),
@@ -113,14 +112,13 @@ RunCommand::RunCommand(EventLoop&			eventloop,
     set_argument_list(argument_list);
 }
 
-RunShellCommand::RunShellCommand(EventLoop&		eventloop,
-				 const string&		command,
+RunShellCommand::RunShellCommand( const string&		command,
 				 const string&		argument_string,
 				 RunShellCommand::OutputCallback stdout_cb,
 				 RunShellCommand::OutputCallback stderr_cb,
 				 RunShellCommand::DoneCallback	 done_cb,
 				 int task_priority)
-    : RunCommandBase(eventloop, get_path_bshell(), command, task_priority),
+    : RunCommandBase( get_path_bshell(), command, task_priority),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb)
@@ -135,12 +133,10 @@ RunShellCommand::RunShellCommand(EventLoop&		eventloop,
     set_argument_list(l);
 }
 
-RunCommandBase::RunCommandBase(EventLoop&		eventloop,
-			       const string&		command,
+RunCommandBase::RunCommandBase( const string&		command,
 			       const string&		real_command_name,
 			       int task_priority)
-    : _eventloop(eventloop),
-      _command(command),
+    : _command(command),
       _real_command_name(real_command_name),
       _stdout_file_reader(NULL),
       _stderr_file_reader(NULL),
@@ -165,7 +161,7 @@ RunCommandBase::RunCommandBase(EventLoop&		eventloop,
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
 
-    _done_timer = _eventloop.new_timer(callback(this, &RunCommandBase::done));
+    _done_timer = EventLoop::instance().new_timer(callback(this, &RunCommandBase::done));
 }
 
 RunCommandBase::~RunCommandBase()
@@ -317,8 +313,7 @@ RunCommandBase::execute()
 
 
     // Create the stdout and stderr readers
-    _stdout_file_reader = new AsyncFileReader(_eventloop,
-					      XorpFd(fileno(_stdout_stream)),
+    _stdout_file_reader = new AsyncFileReader( XorpFd(fileno(_stdout_stream)),
 					      task_priority());
     _stdout_file_reader->add_buffer(
 	_stdout_buffer,
@@ -332,8 +327,7 @@ RunCommandBase::execute()
 	return (XORP_ERROR);
     }
 
-    _stderr_file_reader = new AsyncFileReader(_eventloop,
-					      XorpFd(fileno(_stderr_stream)),
+    _stderr_file_reader = new AsyncFileReader( XorpFd(fileno(_stderr_stream)),
 					      task_priority());
     _stderr_file_reader->add_buffer(
 	_stderr_buffer,

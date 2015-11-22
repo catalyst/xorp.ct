@@ -59,22 +59,21 @@ main(int /*argc*/, char **argv)
     // prints OLSR protocol status in a manner near identical to olsrd.
 
     try {
-	EventLoop eventloop;
 
 	string feaname = "fea";
 	string ribname = "rib";
 
-	XrlStdRouter xrl_router(eventloop, TARGET_OLSR);
+	XrlStdRouter xrl_router( TARGET_OLSR);
 
-	XrlIO io(eventloop, xrl_router, feaname, ribname);
-	Olsr olsr(eventloop, &io);
+	XrlIO io( xrl_router, feaname, ribname);
+	Olsr olsr( &io);
 
 	XrlOlsr4Target target(&xrl_router, olsr, io);
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	io.startup();
 
 	while (olsr.running())
-	    eventloop.run();
+	    EventLoop::instance().run();
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

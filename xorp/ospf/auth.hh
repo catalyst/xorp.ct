@@ -27,7 +27,6 @@
 
 
 
-class EventLoop;
 
 /**
  * @short Base clase for OSPFv2 authentication mechanisms.
@@ -404,9 +403,8 @@ public:
     /**
      * Constructor
      *
-     * @param eventloop the EventLoop instance to used for time reference.
      */
-    MD5AuthHandler(EventLoop& eventloop);
+    MD5AuthHandler();
 
     /**
      * Get the effective name of the authentication scheme.
@@ -538,7 +536,6 @@ public:
     bool empty() const;
 
 protected:
-    EventLoop&	_eventloop;		// The event loop
     KeyChain	_valid_key_chain;	// The set of all valid keys
     KeyChain	_invalid_key_chain;	// The set of all invalid keys
     NullAuthHandler _null_handler;	// Null handler if no valid keys
@@ -550,7 +547,7 @@ protected:
  */
 class Auth {
  public:
-    Auth(EventLoop& eventloop) : _eventloop(eventloop), _auth_handler(NULL)
+    Auth() :  _auth_handler(NULL)
     {
 	set_method("none");
     }
@@ -579,7 +576,7 @@ class Auth {
 	}
 
 	if ("md5" == method) {
-	    _auth_handler = new MD5AuthHandler(_eventloop);
+	    _auth_handler = new MD5AuthHandler;
 	    return true;
 	}
 
@@ -692,7 +689,6 @@ class Auth {
     bool delete_md5_authentication_key(uint8_t key_id, string& error_msg);
 
  private:
-    EventLoop&		_eventloop;		// The event loop
     AuthHandlerBase*	_auth_handler;		// The authentication handler
 };
 

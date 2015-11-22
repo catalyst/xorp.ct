@@ -42,7 +42,6 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 					bool multicast)
     : RouteTable<A>(table_name),
       _xrl_router(rtr),
-      _eventloop(_xrl_router.eventloop()),
       _redist_map(rmap),
       _redist_client(&_xrl_router),
       _multicast(multicast)

@@ -176,7 +176,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    effective_query_interval() * effective_robustness_variable()
 	    + query_response_interval().get() / 2;
 	_other_querier_timer =
-	    mld6igmp_node().eventloop().new_oneoff_after(
+	    EventLoop::instance().new_oneoff_after(
 		other_querier_present_interval,
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
@@ -727,7 +727,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 			false,
 			dummy_error_msg);
     _startup_query_count = 0;		// XXX: not a startup case
-    _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
+    _query_timer = EventLoop::instance().new_oneoff_after(
 	effective_query_interval(),
 	callback(this, &Mld6igmpVif::query_timer_timeout));
 }
@@ -773,7 +773,7 @@ Mld6igmpVif::query_timer_timeout()
 	interval = effective_query_interval();
     }
 
-    _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
+    _query_timer = EventLoop::instance().new_oneoff_after(
 	interval,
 	callback(this, &Mld6igmpVif::query_timer_timeout));
 }

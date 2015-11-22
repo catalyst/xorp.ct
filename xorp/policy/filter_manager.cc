@@ -40,7 +40,6 @@ FilterManager::FilterManager(const CodeMap& imp,
 
 	_import(imp), _sourcematch(sm), _export(exp),
 	_sets(sets), _tagmap(tagmap),
-	_eventloop(rtr.eventloop()),
 	_push_timeout(2000),
 	_process_watch(pw),
 	_policy_backend(&rtr),
@@ -226,7 +225,7 @@ FilterManager::flush_updates_now()
     flush_queue(_import_queue,filter::IMPORT);
 
     // push routes [may get overwritten, its ok for now].
-    _push_timer = _eventloop.new_oneoff_after_ms(_push_timeout,
+    _push_timer = EventLoop::instance().new_oneoff_after_ms(_push_timeout,
 			callback(this,&FilterManager::push_routes_now));
 }
 
@@ -234,7 +233,7 @@ void
 FilterManager::flush_updates(uint32_t msec)
 {
     // delayed flush
-    _flush_timer = _eventloop.new_oneoff_after_ms(msec,
+    _flush_timer = EventLoop::instance().new_oneoff_after_ms(msec,
 			callback(this,&FilterManager::flush_updates_now));
 }
 

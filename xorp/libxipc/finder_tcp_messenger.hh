@@ -36,8 +36,7 @@ class FinderTcpMessenger
     : public FinderMessengerBase, protected FinderTcpBase
 {
 public:
-    FinderTcpMessenger(EventLoop&		e,
-		       FinderMessengerManager*	mm,
+    FinderTcpMessenger( FinderMessengerManager*	mm,
 		       XorpFd			sock,
 		       XrlCmdMap&		cmds);
 
@@ -88,8 +87,7 @@ public:
     typedef FinderTcpListenerBase::AddrList Addr4List;
     typedef FinderTcpListenerBase::NetList Net4List;
 
-    FinderTcpListener(EventLoop& e,
-		      FinderMessengerManager& mm,
+    FinderTcpListener( FinderMessengerManager& mm,
 		      XrlCmdMap& cmds,
 		      IPv4 iface,
 		      uint16_t port,
@@ -111,8 +109,7 @@ protected:
 
 class FinderTcpConnector {
 public:
-    FinderTcpConnector(EventLoop&		e,
-		       FinderMessengerManager&	mm,
+    FinderTcpConnector( FinderMessengerManager&	mm,
 		       XrlCmdMap&		cmds,
 		       IPv4			host,
 		       uint16_t			port);
@@ -131,7 +128,6 @@ public:
     uint16_t finder_port() const;
     
 protected:
-    EventLoop&		    _e;
     FinderMessengerManager& _mm;
     XrlCmdMap&		    _cmds;
     IPv4		    _host;
@@ -147,9 +143,7 @@ class FinderTcpAutoConnector
     : public FinderTcpConnector, public FinderMessengerManager
 {
 public:
-    FinderTcpAutoConnector(
-			   EventLoop&		     	e,
-			   FinderMessengerManager& 	mm,
+    FinderTcpAutoConnector( FinderMessengerManager& 	mm,
 			   XrlCmdMap&		     	cmds,
 			   IPv4		     		host,
 			   uint16_t		     	port,

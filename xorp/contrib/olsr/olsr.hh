@@ -55,7 +55,7 @@
  */
 class Olsr {
   public:
-    Olsr(EventLoop& eventloop, IO* io);
+    Olsr( IO* io);
 
     /**
      * @return true if this routing process is running.
@@ -112,9 +112,6 @@ class Olsr {
 	_io->register_address_status(cb);
     }
 
-    inline EventLoop& get_eventloop() {
-	return _eventloop;
-    }
 
     inline FaceManager& face_manager() {
 	return _fm;
@@ -564,7 +561,6 @@ class Olsr {
     bool clear_database();
 
   private:
-    EventLoop&		_eventloop;
     IO*			_io;
 
     FaceManager		_fm;

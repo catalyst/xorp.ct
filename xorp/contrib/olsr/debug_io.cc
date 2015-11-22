@@ -38,8 +38,8 @@
 #include "olsr.hh"
 #include "debug_io.hh"
 
-DebugIO::DebugIO(TestInfo& info, EventLoop& eventloop)
-    : _info(info), _eventloop(eventloop), _packets(0),
+DebugIO::DebugIO(TestInfo& info) 
+    : _info(info),  _packets(0),
       _next_interface_id(1)
 {
     initialize_message_decoder(_md);
@@ -57,7 +57,7 @@ DebugIO::pp(const string& which, int level,
 {
 
     TimeVal now;
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
     // 'now' is relative, so don't use pretty_print().
     DOUT_LEVEL(_info, level) << now.str() << endl;
     DOUT_LEVEL(_info, level) << which << "("

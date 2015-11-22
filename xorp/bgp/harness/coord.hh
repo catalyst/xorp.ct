@@ -27,7 +27,7 @@
 
 class Coord {
 public:
-    Coord(EventLoop& eventloop, Command& command);
+    Coord( Command& command);
     void command(const string& command);
     void status(const string&	peer, string& status);
     bool pending();
@@ -42,7 +42,6 @@ public:
 
 private:
     bool _done;
-    EventLoop& _eventloop;
     Command& _command;
 };
 

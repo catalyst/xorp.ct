@@ -33,19 +33,18 @@ void go() {
 
     setup_dflt_sighandlers();
 
-    EventLoop e;
 
-    XrlStdRouter rtr(e,PolicyTarget::policy_target_name.c_str(),
+    XrlStdRouter rtr(PolicyTarget::policy_target_name.c_str(),
 		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     PolicyTarget policy_target(rtr);
     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);
 
     while (xorp_do_run && !rtr.ready())
-	e.run();
+	EventLoop::instance().run();
 
     while (xorp_do_run && policy_target.running())
-	e.run();
+	EventLoop::instance().run();
 }
 
 int main(int /* argc */, char* argv[])

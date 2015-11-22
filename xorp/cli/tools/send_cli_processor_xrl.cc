@@ -167,12 +167,11 @@ send_cli_processor_xrl_main(const string& finder_hostname,
     bool done_flag = false;
     bool success_flag = false;
 
-    EventLoop eventloop;
 
-    XrlStdRouter xrl_std_router(eventloop, STD_ROUTER_NAME,
+    XrlStdRouter xrl_std_router( STD_ROUTER_NAME,
 				finder_hostname.c_str(), finder_port);
     xrl_std_router.finalize();
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router);
+    wait_until_xrl_router_is_ready( xrl_std_router);
 
 
     send_process_command(&xrl_std_router,
@@ -186,7 +185,7 @@ send_cli_processor_xrl_main(const string& finder_hostname,
 			 &success_flag);
 
     while (xrl_std_router.pending() || !done_flag) {
-	eventloop.run();
+		EventLoop::instance().run();
     }
 
     if (success_flag)

@@ -1169,8 +1169,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	//
 	// Schedule a timer to dispatch immediately the callback
 	//
-	EventLoop& eventloop = xorp_client().eventloop();
-	_save_config_completed_timer = eventloop.new_oneoff_after(
+	_save_config_completed_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal::ZERO(),
 	    callback(this,
 		     &MasterConfigTree::save_config_done_cb,

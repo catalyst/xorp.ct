@@ -33,7 +33,7 @@ class Damping {
  public:
     static const uint32_t FIXED = 1000;
 
-    Damping(EventLoop& eventloop);
+    Damping();
 
     void set_damping(bool damping);
 
@@ -87,7 +87,6 @@ class Damping {
     uint32_t get_reuse_time(uint32_t merit) const;
 	
  private:
-    EventLoop& _eventloop;
     bool _damping;		// True if damping is enabled.
     uint32_t _half_life;	// Half life in minutes.
     uint32_t _max_hold_down;	// Maximum hold down time in minutes.

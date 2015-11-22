@@ -43,7 +43,6 @@
 // Structures/classes, typedefs and macros
 //
 
-class EventLoop;
 class Mld6igmpGroupRecord;
 
 /**

@@ -177,8 +177,8 @@ XrlCoordTarget::datain_0_1_closed(const string&  peer, const uint32_t& genid)
 /*
 -------------------- IMPLEMENTATION --------------------
 */
-Coord::Coord(EventLoop& eventloop, Command& command)
-    : _done(false), _eventloop(eventloop), _command(command)
+Coord::Coord( Command& command)
+    : _done(false),  _command(command)
 {
 }
 
@@ -271,16 +271,15 @@ main(int argc, char **argv)
     }
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter router(eventloop, server, finder_host.c_str());
-	Command com(eventloop, router);
-	Coord coord(eventloop, com);
+	XrlStdRouter router( server, finder_host.c_str());
+	Command com( router);
+	Coord coord( com);
 	XrlCoordTarget xrl_target(&router, coord);
 
-	wait_until_xrl_router_is_ready(eventloop, router);
+	wait_until_xrl_router_is_ready( router);
 
 	while (coord.done() == false) {
-	    eventloop.run();
+		EventLoop::instance().run();
 	}
 
     } catch(...) {

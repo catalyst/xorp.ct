@@ -28,7 +28,6 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 
-class EventLoop;
 
 
 class InterfaceMonitor : public IfMgrHintObserver,
@@ -38,14 +37,12 @@ public:
     /**
      * InterfaceMonitor constructor
      *
-     * @param eventloop this process's EventLoop.
      * @param class_name the XRL class name of this target.
      * @param finder_hostname the finder's host name.
      * @param finder_port the finder's port.
      * @param fea_target the FEA target name.
      */
-    InterfaceMonitor(EventLoop&		eventloop,
-		     const string&	class_name,
+    InterfaceMonitor( const string&	class_name,
 		     const string&	finder_hostname,
 		     uint16_t		finder_port,
 		     const string&	fea_target);

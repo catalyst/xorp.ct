@@ -241,9 +241,8 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     Trie trie;
 
     /* need peer data to be able to encode */
-    EventLoop eventloop;
     Iptuple iptuple;
-    LocalData localdata(eventloop);
+    LocalData localdata;
     localdata.set_as(AsNum(0)); 
     localdata.set_use_4byte_asnums(false);
     BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);
@@ -359,9 +358,8 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     Trie trie;
 
     /* need peer data to be able to encode */
-    EventLoop eventloop;
     Iptuple iptuple;
-    LocalData localdata(eventloop);
+    LocalData localdata;
     localdata.set_use_4byte_asnums(false);
     localdata.set_as(AsNum(0));
     BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);

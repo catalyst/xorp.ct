@@ -62,13 +62,11 @@ const char* str(VarE v) {
  * @module_id: The module ID (must be either %XORP_MODULE_PIMSM
  * or %XORP_MODULE_PIMDM).
  * TODO: XXX: XORP_MODULE_PIMDM is not implemented yet.
- * @eventloop: The event loop.
  * 
  * PIM node constructor.
  **/
-PimNode::PimNode(int family, xorp_module_id module_id,
-		 EventLoop& eventloop)
-    : ProtoNode<PimVif>(family, module_id, eventloop),
+PimNode::PimNode(int family, xorp_module_id module_id)
+    : ProtoNode<PimVif>(family, module_id),
       _pim_mrt(this),
       _pim_mrib_table(*this),
       _rp_table(*this),

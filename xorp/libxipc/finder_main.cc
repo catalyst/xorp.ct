@@ -164,8 +164,7 @@ finder_main(int argc, char* const argv[])
     //
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	EventLoop e;
-	FinderServer fs(e, FinderConstants::FINDER_DEFAULT_HOST(), bind_port);
+	FinderServer fs( FinderConstants::FINDER_DEFAULT_HOST(), bind_port);
 
 	list<IPv4>::const_iterator ci = bind_addrs.begin();
 	while (ci != bind_addrs.end()) {
@@ -180,10 +179,10 @@ finder_main(int argc, char* const argv[])
 	}
 	XorpTimer twirl;
 	if (run_verbose)
-	    twirl = e.new_periodic_ms(250, callback(print_twirl));
+	    twirl = EventLoop::instance().new_periodic_ms(250, callback(print_twirl));
 
 	while (xorp_do_run) {
-	    e.run();
+	    EventLoop::instance().run();
 	}
     } catch (const InvalidPort& i) {
 	XLOG_ERROR("%s: a finder may already be running.\n",

@@ -36,11 +36,9 @@
 //
 template<class A>
 OriginTable<A>::OriginTable(const string&	tablename,
-			    uint16_t		admin_distance,
-			    EventLoop&		eventloop)
+			    uint16_t		admin_distance)
     : RouteTable<A>(tablename),
       _admin_distance(admin_distance),
-      _eventloop(eventloop),
       _gen(0)
 {
     XLOG_ASSERT(admin_distance <= 255);
@@ -188,7 +186,7 @@ void
 TypedOriginTable<A, IGP>::allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie)
 {
     new TypedDeletionTable<A, IGP>("Delete(" + this->tablename() + ")", this,
-	    ip_route_trie, this->_eventloop);
+	    ip_route_trie);
 }
 
 template <class A>
@@ -196,7 +194,7 @@ void
 TypedOriginTable<A, EGP>::allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie)
 {
     new TypedDeletionTable<A, EGP>("Delete(" + this->tablename() + ")", this,
-	    ip_route_trie, this->_eventloop);
+	    ip_route_trie);
 }
 
 template class OriginTable<IPv4>;

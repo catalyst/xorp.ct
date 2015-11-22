@@ -33,7 +33,6 @@
 #include "policy/backend/policytags.hh"
 #include "policy/backend/policy_filters.hh"
 
-class EventLoop;
 
 
 class StaticRouteBase {
@@ -420,19 +419,13 @@ public:
      * 
      * @param eventloop the event loop to use.
      */
-    StaticRoutesNode(EventLoop& eventloop);
+    StaticRoutesNode();
 
     /**
      * Destructor
      */
     virtual ~StaticRoutesNode();
 
-    /**
-     * Get the event loop this node is added to.
-     * 
-     * @return the event loop this node is added to.
-     */
-    EventLoop&	eventloop()	{ return _eventloop; }
 
     /**
      * Get the protocol name.
@@ -909,7 +902,6 @@ private:
      */
     void set_node_status(ProcessStatus v) { _node_status = v; }
 
-    EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
     bool		_is_enabled;		// Flag whether node is enabled

@@ -25,10 +25,9 @@
 // RibNotifierBase<A> implementation
 
 template <typename A>
-RibNotifierBase<A>::RibNotifierBase(EventLoop&	 e,
-				 UpdateQueue<A>& uq,
+RibNotifierBase<A>::RibNotifierBase( UpdateQueue<A>& uq,
 				 uint32_t	 ms)
-    : _e(e), _uq(uq), _poll_ms(ms)
+    :  _uq(uq), _poll_ms(ms)
 {
     _ri = _uq.create_reader();
 }
@@ -43,7 +42,7 @@ template <typename A>
 void
 RibNotifierBase<A>::start_polling()
 {
-    _t = _e.new_periodic_ms(_poll_ms,
+    _t = EventLoop::instance().new_periodic_ms(_poll_ms,
 			    callback(this, &RibNotifierBase<A>::poll_updates));
 }
 

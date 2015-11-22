@@ -31,7 +31,7 @@
  */
 class EmulateSubnet {
  public:
-    EmulateSubnet(TestInfo& info, EventLoop& eventloop);
+    EmulateSubnet(TestInfo& info);
     virtual ~EmulateSubnet();
 
     /**
@@ -114,7 +114,6 @@ protected:
 
 protected:
     TestInfo&	_info;
-    EventLoop&	_eventloop;
 
     map<const Multiplex, DebugIO *> _ios;
 
@@ -136,7 +135,7 @@ protected:
  */
 class EmulateSubnetHops : public EmulateSubnet {
  public:
-    EmulateSubnetHops(TestInfo& info, EventLoop& eventloop,
+    EmulateSubnetHops(TestInfo& info, 
 		      uint8_t hopdelta = 1, uint8_t maxlinks = 2);
 
     virtual ~EmulateSubnetHops();

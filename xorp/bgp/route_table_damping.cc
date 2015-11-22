@@ -140,7 +140,7 @@ DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 	_damped.erase(r);
 	if (damping_global()) {
 		DampRoute<A> damproute(new_rtmsg.route(), new_rtmsg.genid());
-		damproute.timer() = eventloop().
+		damproute.timer() = EventLoop::instance().
 		    new_oneoff_after(exp,
 				     callback(this,
 					      &DampingTable<A>::undamp,
@@ -296,7 +296,7 @@ DampingTable<A>::update_figure_of_merit(Damp& damp,
 	damp._damped = true;
 	_damp_count++;
 	DampRoute<A> damproute(rtmsg.route(), rtmsg.genid());
-	damproute.timer() = eventloop().
+	damproute.timer() = EventLoop::instance().
 	    new_oneoff_after(TimeVal(_damping.get_reuse_time(damp._merit), 0),
 			     callback(this,
 				      &DampingTable<A>::undamp,
@@ -345,13 +345,6 @@ DampingTable<A>::undamp(IPNet<A> net)
     this->_next_table->add_route(rtmsg,
 				 static_cast<BGPRouteTable<A>*>(this));
     this->_next_table->push(static_cast<BGPRouteTable<A>*>(this));
-}
-
-template<class A>
-EventLoop& 
-DampingTable<A>::eventloop() const 
-{
-    return _peer->eventloop();
 }
 
 

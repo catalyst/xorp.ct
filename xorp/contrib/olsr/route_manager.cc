@@ -73,11 +73,9 @@ RouteEntry::str()
     return output;
 }
 
-RouteManager::RouteManager(Olsr& olsr, EventLoop& eventloop,
-			   FaceManager* fm, Neighborhood* nh,
+RouteManager::RouteManager(Olsr& olsr, FaceManager* fm, Neighborhood* nh,
 			   TopologyManager* tm, ExternalRoutes* er)
      : _olsr(olsr),
-       _eventloop(eventloop),
        _fm(fm),
        _nh(nh),
        _tm(tm),
@@ -94,7 +92,7 @@ RouteManager::RouteManager(Olsr& olsr, EventLoop& eventloop,
     //    route table (if doing incremental calculation), or:
     // 2. we are asked to by our clients.
     //
-    _route_update_task = _eventloop.new_oneoff_task(
+    _route_update_task = EventLoop::instance().new_oneoff_task(
 	callback(this, &RouteManager::recompute_all_routes),
 	XorpTask::PRIORITY_DEFAULT,
 	XorpTask::WEIGHT_DEFAULT);

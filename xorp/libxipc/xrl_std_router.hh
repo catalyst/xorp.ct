@@ -41,27 +41,23 @@
  */
 class XrlStdRouter : public XrlRouter {
 public:
-    XrlStdRouter(EventLoop& eventloop, const char* class_name,
+    XrlStdRouter( const char* class_name,
 		 bool unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name,
+    XrlStdRouter( const char*	class_name,
 		 IPv4		finder_address,
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name,
+    XrlStdRouter( const char*	class_name,
 		 IPv4		finder_address,
 		 uint16_t	finder_port,
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name,
+    XrlStdRouter( const char*	class_name,
 		 const char*	finder_address,
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name,
+    XrlStdRouter( const char*	class_name,
 		 const char*	finder_address,
 		 uint16_t	finder_port,
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);

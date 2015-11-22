@@ -233,7 +233,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
     iter_end_dft = mfea_node().mfea_dft().group_by_prefix_end(group_range);
     TimeVal now;
     
-    mfea_node().eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     
     for (iter_dft = iter_begin_dft; iter_dft != iter_end_dft; ++iter_dft) {
 	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;

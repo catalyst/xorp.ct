@@ -46,9 +46,9 @@ typedef XorpCallback3<bool,
  */
 class DupeTuple {
 public:
-    DupeTuple(EventLoop& ev, FaceManager* parent, const IPv4& origin,
+    DupeTuple( FaceManager* parent, const IPv4& origin,
 	      const uint16_t seqno, const TimeVal& vtime)
-     : _ev(ev), _parent(parent),
+     :  _parent(parent),
        _origin(origin), _seqno(seqno), _is_forwarded(false)
     {
 	update_timer(vtime);
@@ -112,7 +112,6 @@ public:
     void event_dead();
 
 private:
-    EventLoop&	    _ev;
     FaceManager*    _parent;
 
     set<OlsrTypes::FaceID>    _iface_list;	// D_iface_list
@@ -128,7 +127,7 @@ private:
  */
 class FaceManager {
   public:
-    FaceManager(Olsr& olsr, EventLoop& ev);
+    FaceManager(Olsr& olsr);
     ~FaceManager();
 
     MessageDecoder& message_decoder() { return _md; }
@@ -667,7 +666,6 @@ class FaceManager {
 
   private:
     Olsr&		_olsr;
-    EventLoop&		_eventloop;
     MessageDecoder	_md;
     Neighborhood*	_nh;
 

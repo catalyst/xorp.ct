@@ -44,7 +44,7 @@ class FinderTcpBase :
     public NONCOPYABLE
 {
 public:
-    FinderTcpBase(EventLoop& e, XorpFd fd);
+    FinderTcpBase( XorpFd fd);
 
     virtual ~FinderTcpBase();
 
@@ -135,8 +135,7 @@ public:
     typedef vector<IPv4Net> NetList;
 
 public:
-    FinderTcpListenerBase(EventLoop&	e,
-			  IPv4		iface,
+    FinderTcpListenerBase( IPv4		iface,
 			  uint16_t	port,
 			  bool		en = true)
 	throw (InvalidAddress, InvalidPort);
@@ -181,10 +180,8 @@ protected:
      */
     void connect_hook(XorpFd fd, IoEventType type);
 
-    EventLoop& eventloop() const { return _e; }
 
 protected:
-    EventLoop&	_e;
     XorpFd	_lsock;
     bool	_en;
 

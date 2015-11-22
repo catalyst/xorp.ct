@@ -59,8 +59,7 @@ public:
     typedef IPNet<A>	Net;
 
 public:
-    OutputBase(EventLoop&	e,
-	       Port<A>&		port,
+    OutputBase( Port<A>&		port,
 	       PacketQueue<A>&	pkt_queue,
 	       const A&		ip_addr,
 	       uint16_t		ip_port);
@@ -130,7 +129,6 @@ protected:
     void incr_packets_sent()			{ _pkts_out++; }
 
 protected:
-    EventLoop&		_e;
     Port<A>&		_port;	    // Port associated with output
     PacketQueue<A>&	_pkt_queue; // Place for generated packets to go
     const A		_ip_addr;   // IP address for output packets
@@ -142,12 +140,11 @@ protected:
 };
 
 template <typename A>
-OutputBase<A>::OutputBase(EventLoop&	  e,
-			  Port<A>&	  port,
+OutputBase<A>::OutputBase( Port<A>&	  port,
 			  PacketQueue<A>& pkt_queue,
 			  const A&	  ip_addr,
 			  uint16_t	  ip_port)
-    : _e(e), _port(port), _pkt_queue(pkt_queue),
+    :  _port(port), _pkt_queue(pkt_queue),
       _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0),
       _policy_filters(port.port_manager().system().policy_filters())
 {

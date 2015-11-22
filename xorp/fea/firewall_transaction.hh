@@ -46,11 +46,10 @@ public:
     /**
      * Constructor.
      *
-     * @param eventloop the event loop to use.
      * @see FirewallManager.
      */
-    FirewallTransactionManager(EventLoop& eventloop)
-	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
+    FirewallTransactionManager()
+	: TransactionManager( TIMEOUT_MS, MAX_PENDING)
     {}
 
     /**

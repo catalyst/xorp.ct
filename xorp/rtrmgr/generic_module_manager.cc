@@ -68,9 +68,8 @@ GenericModule::str() const
 //
 
 
-GenericModuleManager::GenericModuleManager(EventLoop& eventloop, bool verbose) 
-    : _eventloop(eventloop),
-      _verbose(verbose)
+GenericModuleManager::GenericModuleManager( bool verbose) 
+    : _verbose(verbose)
 {
 }
 

@@ -34,7 +34,6 @@
 #include "policy/backend/policytags.hh"
 
 class RibIpcHandler;
-class EventLoop;
 
 template <class A>
 class XrlQueue {
@@ -100,7 +99,6 @@ private:
      */
     bool sendit_spec(Queued& q, const char *bgp);
 
-    EventLoop& eventloop() const;
 
     void route_command_done(const XrlError& error, const string comment);
 };
@@ -203,11 +201,6 @@ public:
      * @return true
      */
     virtual bool originate_route_handler() const {return true;}
-
-    /**
-     * @return the main eventloop
-     */
-    virtual EventLoop& eventloop() const { return _xrl_router.eventloop();}
 
 
     /** IPv6 stuff */

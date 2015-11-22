@@ -71,13 +71,11 @@ MfeaRouteStorage::MfeaRouteStorage() : distance(0), is_binary(false), max_vifs_o
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MFEA).
- * @eventloop: The event loop.
  * 
  * MFEA node constructor.
  **/
-MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
-		   EventLoop& eventloop)
-    : ProtoNode<MfeaVif>(family, module_id, eventloop),
+MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id)
+    : ProtoNode<MfeaVif>(family, module_id),
       IfConfigUpdateReporterBase(fea_node.ifconfig().ifconfig_update_replicator()),
       _fea_node(fea_node),
       _mfea_mrouter(*this, fea_node.fibconfig()),

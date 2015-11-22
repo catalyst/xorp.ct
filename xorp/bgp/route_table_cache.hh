@@ -27,6 +27,7 @@
 #include "route_table_base.hh"
 #include "crash_dump.hh"
 #include "libxorp/ref_trie.hh"
+#include "libxorp/eventloop.hh"
 #include "peer_handler.hh"
 
 /**
@@ -47,7 +48,6 @@ private:
 };
 
 
-class EventLoop;
 
 /**
  * @short specialized BGPRouteTable that stores routes modified by a
@@ -117,7 +117,6 @@ public:
 
     string dump_state() const;
 
-    EventLoop& eventloop() const;
 
 private:
     RefTrie<A, const CacheRoute<A> > *_route_table;
@@ -146,7 +145,7 @@ public:
 
  	    if (empty) {
 		_deleter_task = 
-		    _peer->eventloop().new_task(
+		    EventLoop::instance().new_task(
 			callback(this, &DeleteAllNodes<A>::delete_some_nodes),
 			XorpTask::PRIORITY_BACKGROUND,
 			XorpTask::WEIGHT_DEFAULT);

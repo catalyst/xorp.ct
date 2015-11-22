@@ -86,8 +86,7 @@ public:
      * that's common to all the individual RIBs.
      * @param eventloop the main event loop.
      */
-    RIB(RibTransportType rib_type, RibManager& rib_manager,
-	EventLoop& eventloop);
+    RIB(RibTransportType rib_type, RibManager& rib_manager);
 
     /**
      * RIB Destructor.
@@ -714,7 +713,6 @@ protected:
     typedef map<string, RedistTable<A>* > RedistTableMap;
 
     RibManager&		_rib_manager;
-    EventLoop&		_eventloop;
     RouteTable<A>*	_final_table;
 
     bool		_multicast;

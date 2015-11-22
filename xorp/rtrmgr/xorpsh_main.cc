@@ -77,14 +77,14 @@ announce_waiting()
 }
 
 static bool
-wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router,
+wait_for_xrl_router_ready( XrlRouter& xrl_router,
 			  bool exit_on_error)
 {
-    XorpTimer announcer = eventloop.new_oneoff_after_ms(
+    XorpTimer announcer = EventLoop::instance().new_oneoff_after_ms(
 				3 * 1000, callback(&announce_waiting)
 				);
     while (xrl_router.ready() == false) {
-	eventloop.run();
+	EventLoop::instance().run();
 	if (xrl_router.failed()) {
 	    XLOG_ERROR("XrlRouter failed.  No Finder?");
 	    return false;
@@ -118,22 +118,19 @@ add_cmd_action_adaptor(const string& cmd, const list<string>& action,
 // ----------------------------------------------------------------------------
 // XorpShell implementation
 
-XorpShell::XorpShell(EventLoop& eventloop,
-		     const string& IPCname,
+XorpShell::XorpShell( const string& IPCname,
 		     const string& xorp_root_dir,
 		     const string& config_template_dir,
 		     bool verbose) throw (InitError)
-    : XrlStdRouter(eventloop, IPCname.c_str()),
-      _eventloop(eventloop),
+    : XrlStdRouter( IPCname.c_str()),
       _xrl_router(*this),
-      _xclient(_eventloop, _xrl_router),
+      _xclient( _xrl_router),
       _rtrmgr_client(&_xrl_router),
-      _mmgr(_eventloop),
       _is_connected_to_finder(false),
       _tt(NULL),
       _ct(NULL),
       _ocl(NULL),
-      _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
+      _cli_node(AF_INET, XORP_MODULE_CLI),
       _router_cli(NULL),
       _xorp_root_dir(xorp_root_dir),
       _verbose(verbose),
@@ -227,7 +224,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
 
     _is_connected_to_finder = false;
-    if (wait_for_xrl_router_ready(_eventloop, _xrl_router, exit_on_error)
+    if (wait_for_xrl_router_ready( _xrl_router, exit_on_error)
 	== false) {
 	// RtrMgr contains finder
 	error_msg = c_format("Failed to connect to the router manager");
@@ -250,7 +247,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
     }
     _mode = MODE_AUTHENTICATING;
     while (_authfile.empty()) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
 
     XLOG_TRACE(_verbose, "Registry with rtrmgr successful: token is %s\n",
@@ -292,7 +289,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
     }
 
     while (!_xrl_generic_done) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
 
     _mode = MODE_INITIALIZING;
@@ -307,7 +304,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
 
     XLOG_TRACE(_verbose, "Waiting to receive configuration from rtrmgr...");
     while (_got_config == false) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
 
     XLOG_TRACE(_verbose,
@@ -338,7 +335,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	_mode = MODE_SHUTDOWN;
 	// Run the event loop to cause the unregister to be sent
 	while (success && ! _xrl_generic_done) {
-	    _eventloop.run();
+	    EventLoop::instance().run();
 	}
 	xorp_throw(InitError, error_msg);
     }
@@ -363,10 +360,10 @@ XorpShell::run(const string& commands, bool exit_on_error)
 
     _mode = MODE_IDLE;
     while ((! is_interrupted) && (! is_user_exited)) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
     while (! done()) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
 
     _xrl_generic_done = false;
@@ -377,7 +374,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
     _mode = MODE_SHUTDOWN;
     // Run the event loop to cause the unregister to be sent
     while (success && ! _xrl_generic_done) {
-	_eventloop.run();
+	EventLoop::instance().run();
     }
 }
 
@@ -813,10 +810,9 @@ main(int argc, char *argv[])
     hostname[sizeof(hostname) - 1] = '\0';
 
     try {
-	EventLoop eventloop;
 	string xname = "xorpsh" + c_format("-%d-%s", XORP_INT_CAST(getpid()),
 					   hostname);
-	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
+	XorpShell xorpsh( xname, xorp_binary_root_dir(),
 			 template_dir, verbose);
 	xorpsh.run(commands, exit_on_error);
     } catch (const InitError& e) {

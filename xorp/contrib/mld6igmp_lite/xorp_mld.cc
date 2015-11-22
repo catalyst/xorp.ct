@@ -93,17 +93,12 @@ static void
 mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 {
 #ifdef HAVE_IPV6
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
 
     //
     // MLD6IGMP node
     //
     XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6,
 				       XORP_MODULE_MLD6IGMP,
-				       eventloop,
 				       xorp_module_name(AF_INET6,
 							XORP_MODULE_MLD6IGMP),
 				       finder_hostname,
@@ -113,7 +108,7 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 							XORP_MODULE_FEA),
 				       xorp_module_name(AF_INET6,
 							XORP_MODULE_MFEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_mld6igmp_node6.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_mld6igmp_node6.xrl_router());
     
     //
     // Startup
@@ -130,11 +125,11 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
     //
 #ifdef HAVE_IPV6_MULTICAST
     while (! xrl_mld6igmp_node6.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 
     while (xrl_mld6igmp_node6.xrl_router().pending()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 #endif // HAVE_IPV6_MULTICAST
 #endif // HAVE_IPV6

@@ -109,8 +109,7 @@ void
 RouteRedistributor<A>::withdraw_routes()
 {
     if (_wtimer.scheduled() == false) {
-	EventLoop& e = _route_db.eventloop();
-	_wtimer = e.new_periodic_ms(5,
+	_wtimer = EventLoop::instance().new_periodic_ms(5,
 				    callback(this, &RouteRedistributor::withdraw_batch));
     }
 }

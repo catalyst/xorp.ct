@@ -326,13 +326,7 @@ public:
      */
     MfeaDft& mfea_dft() const;
     
-    /**
-     * Get a reference to the @ref EventLoop.
-     * 
-     * @return a reference to the @ref EventLoop.
-     */
-    EventLoop& eventloop() const;
-    
+        
     /**
      * Get the address family.
      * 

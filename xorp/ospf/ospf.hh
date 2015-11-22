@@ -427,7 +427,7 @@ struct AddressInfo {
 template <typename A>
 class Ospf {
  public:
-    Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io);
+    Ospf(OspfTypes::Version version,  IO<A>* io);
 	
     /**
      * @return version of OSPF this implementation represents.
@@ -911,10 +911,6 @@ class Ospf {
      */
     OspfTypes::Version get_version() const { return _version; }
 
-    /**
-     * @return a reference to the eventloop, required for timers etc...
-     */
-    EventLoop& get_eventloop() { return _eventloop; }
 
     /**
      * The test status of OSPF.
@@ -991,7 +987,6 @@ class Ospf {
 
  private:
     const OspfTypes::Version _version;	// OSPF version.
-    EventLoop& _eventloop;
 
     bool _testing;		// True when testing.
 

@@ -42,7 +42,6 @@
 
 IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigObserver(fea_data_plane_manager),
-      RoutingSocket(fea_data_plane_manager.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 }

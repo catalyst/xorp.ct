@@ -39,7 +39,6 @@
 
 ref_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(const string& name,
-				  EventLoop&	eventloop,
 				  const char*	protocol,
 				  const char*	address)
 {
@@ -48,11 +47,11 @@ XrlPFSenderFactory::create_sender(const string& name,
     ref_ptr<XrlPFSender> rv;
     try {
 	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
-	    rv = new XrlPFSTCPSender(name, eventloop, address);
+	    rv = new XrlPFSTCPSender(name,  address);
 	    return rv;
 	}
 	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
-	    rv = new XrlPFUNIXSender(name, eventloop, address);
+	    rv = new XrlPFUNIXSender(name,  address);
 	    return rv;
 	}
     } catch (XorpException& e) {
@@ -63,7 +62,7 @@ XrlPFSenderFactory::create_sender(const string& name,
 }
 
 ref_ptr<XrlPFSender>
-XrlPFSenderFactory::create_sender(const string& name, EventLoop& eventloop,
+XrlPFSenderFactory::create_sender(const string& name, 
 				  const char* protocol_colon_address)
 {
     char *colon = strstr(const_cast<char*>(protocol_colon_address), ":");
@@ -75,7 +74,7 @@ XrlPFSenderFactory::create_sender(const string& name, EventLoop& eventloop,
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);
-    return create_sender(name, eventloop, protocol.c_str(), colon + 1);
+    return create_sender(name,  protocol.c_str(), colon + 1);
 }
 
 void

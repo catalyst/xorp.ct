@@ -62,8 +62,7 @@ map_changes(const IfTreeItem::State&		fci,
 }
 
 IfConfig::IfConfig(FeaNode& fea_node)
-    : _eventloop(fea_node.eventloop()),
-      _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
+      :_nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _itm(NULL),
       //_live_config("live-config"),
       _user_config("user-config"),
@@ -74,7 +73,7 @@ IfConfig::IfConfig(FeaNode& fea_node)
       _ifconfig_update_replicator(merged_config()),
       _is_running(false)
 {
-    _itm = new IfConfigTransactionManager(_eventloop);
+    _itm = new IfConfigTransactionManager;
 }
 
 IfConfig::~IfConfig()

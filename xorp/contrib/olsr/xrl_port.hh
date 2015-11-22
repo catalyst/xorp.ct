@@ -56,7 +56,6 @@ public:
      * @param all_nodes_addr address to send to
      */
     XrlPort(IO* io,
-	    EventLoop& eventloop,
 	    XrlRouter& xrl_router,
 	    const string& ssname,
 	    const string& ifname,
@@ -179,7 +178,6 @@ private:
 
 private:
     IO*			_io;
-    EventLoop&		_eventloop;
     XrlRouter&		_xrl_router;
 
     string		_ss;

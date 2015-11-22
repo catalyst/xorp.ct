@@ -52,7 +52,7 @@ public:
      * @param e eventloop.
      * @param vrid the VRRP id of this instance.
      */
-    Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid);
+    Vrrp(VrrpVif& vif,  uint32_t vrid);
     ~Vrrp();
 
     /**

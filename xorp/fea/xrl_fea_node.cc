@@ -45,36 +45,35 @@
 #include "xrl_mfea_node.hh"
 
 
-XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
+XrlFeaNode::XrlFeaNode( const string& xrl_fea_targetname,
 		       const string& xrl_finder_targetname,
 		       const string& finder_hostname, uint16_t finder_port,
 		       bool is_dummy)
-    : _eventloop(eventloop),
-      _xrl_router(eventloop, xrl_fea_targetname.c_str(),
+    : _xrl_router( xrl_fea_targetname.c_str(),
 		  finder_hostname.c_str(), finder_port),
-      _xrl_fea_io(eventloop, _xrl_router, xrl_finder_targetname),
-      _fea_node(eventloop, _xrl_fea_io, is_dummy),
+      _xrl_fea_io( _xrl_router, xrl_finder_targetname),
+      _fea_node( _xrl_fea_io, is_dummy),
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
       _xrl_io_link_manager(_fea_node.io_link_manager(), _xrl_router),
       _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
       _xrl_io_tcpudp_manager(_fea_node.io_tcpudp_manager(), _xrl_router),
-      _cli_node4(AF_INET, XORP_MODULE_CLI, _eventloop),
-      _xrl_cli_node(_eventloop, _cli_node4.module_name(), finder_hostname,
+      _cli_node4(AF_INET, XORP_MODULE_CLI),
+      _xrl_cli_node( _cli_node4.module_name(), finder_hostname,
 		    finder_port,
 		    xrl_finder_targetname,
 		    _cli_node4),
-      _xrl_mfea_node4(_fea_node, AF_INET, XORP_MODULE_MFEA, _eventloop,
+      _xrl_mfea_node4(_fea_node, AF_INET, XORP_MODULE_MFEA, 
 		      xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 		      finder_hostname, finder_port,
 		      xrl_finder_targetname),
 #ifdef HAVE_IPV6_MULTICAST
-      _xrl_mfea_node6(_fea_node, AF_INET6, XORP_MODULE_MFEA, _eventloop,
+      _xrl_mfea_node6(_fea_node, AF_INET6, XORP_MODULE_MFEA, 
 		      xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 		      finder_hostname, finder_port,
 		      xrl_finder_targetname),
 #endif
-      _xrl_fea_target(_eventloop, _fea_node, _xrl_router,
+      _xrl_fea_target( _fea_node, _xrl_router,
 #ifndef XORP_DISABLE_PROFILE
 		      _fea_node.profile(),
 #endif
@@ -92,17 +91,14 @@ XrlFeaNode::~XrlFeaNode()
 int
 XrlFeaNode::startup()
 {
-    wait_until_xrl_router_is_ready(eventloop(), xrl_router());
+    wait_until_xrl_router_is_ready( xrl_router());
 
     if (! fea_node().is_dummy()) {
 	// XXX: The multicast-related code doesn't have dummy mode (yet)
-	wait_until_xrl_router_is_ready(eventloop(),
-				       _xrl_cli_node.xrl_router());
-	wait_until_xrl_router_is_ready(eventloop(),
-				       _xrl_mfea_node4.xrl_router());
+	wait_until_xrl_router_is_ready( _xrl_cli_node.xrl_router());
+	wait_until_xrl_router_is_ready( _xrl_mfea_node4.xrl_router());
 #ifdef HAVE_IPV6_MULTICAST
-	wait_until_xrl_router_is_ready(eventloop(),
-				       _xrl_mfea_node6.xrl_router());
+	wait_until_xrl_router_is_ready( _xrl_mfea_node6.xrl_router());
 #endif
     }
 

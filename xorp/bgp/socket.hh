@@ -57,7 +57,7 @@ class Socket {
 public:
     static const int MAX_LISTEN_QUEUE = 5;
 
-    Socket(const Iptuple& iptuple, EventLoop& e);
+    Socket(const Iptuple& iptuple);
 
     /**
      * Given an address (IPv4 or IPv6) symbolic or numeric fill in the
@@ -70,8 +70,6 @@ public:
     static void init_sockaddr(string addr, uint16_t local_port,
 			      struct sockaddr_storage& ss, size_t& len);
 
-    //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
-    EventLoop& eventloop() {return _eventloop;}
 
     XorpFd get_sock() { return _s; }
 
@@ -111,7 +109,6 @@ private:
     */
     const Iptuple _iptuple;
 
-    EventLoop& _eventloop;
 
     /*
     ** Remote host. For debugging only
@@ -124,7 +121,7 @@ public:
     /**
      * @param iptuple specification of the connection endpoints.
      */
-    SocketClient(const Iptuple& iptuple, EventLoop& e, bool md5sig = false);
+    SocketClient(const Iptuple& iptuple,  bool md5sig = false);
     ~SocketClient();
 
     /**
@@ -286,8 +283,8 @@ private:
 
 class SocketServer : public Socket {
 public:
-    SocketServer(EventLoop& e);
-    SocketServer(const Iptuple& iptuple, EventLoop& e);
+    SocketServer();
+    SocketServer(const Iptuple& iptuple);
 };
 
 #endif // __BGP_SOCKET_HH__

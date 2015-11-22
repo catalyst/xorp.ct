@@ -57,11 +57,10 @@ main(int /*argc*/, char **argv)
     setup_dflt_sighandlers();
 
     try {
-	EventLoop eventloop;
 
 // 	signal(SIGINT, terminate_main_loop);
 
-	BGPMain bgp(eventloop);
+	BGPMain bgp;
 
 	/*
 	** By default assume there is a rib running.
@@ -73,7 +72,7 @@ main(int /*argc*/, char **argv)
 	** FEA and RIB to start.
 	*/
 	while (xorp_do_run && bgp.get_xrl_target()->waiting()) {
-	    eventloop.run();
+	    EventLoop::instance().run();
 	}
 
 	/*

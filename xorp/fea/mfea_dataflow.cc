@@ -314,11 +314,7 @@ MfeaDfe::mfea_dft() const
     return (_mfea_dfe_lookup.mfea_dft());
 }
 
-EventLoop&
-MfeaDfe::eventloop() const
-{
-    return (mfea_dft().mfea_node().eventloop());
-}
+
 
 int
 MfeaDfe::family() const
@@ -481,13 +477,13 @@ void
 MfeaDfe::start_measurement()
 {
     _measurement_timer =
-	eventloop().new_oneoff_after(_measurement_interval,
+	EventLoop::instance().new_oneoff_after(_measurement_interval,
 				     callback(this,
 					      &MfeaDfe::measurement_timer_timeout));
     
     TimeVal now;
     
-    mfea_dft().mfea_node().eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     _start_time[_delta_sg_count_index] = now;
 }
 

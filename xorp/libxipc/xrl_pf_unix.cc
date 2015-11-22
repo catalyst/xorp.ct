@@ -31,8 +31,8 @@
 
 const char* XrlPFUNIXListener::_protocol = "unix";
 
-XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
-    : XrlPFSTCPListener(&e, xr)
+XrlPFUNIXListener::XrlPFUNIXListener( XrlDispatcher* xr)
+    : XrlPFSTCPListener( xr)
 {
     string path = get_sock_path();
 
@@ -67,7 +67,7 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
     _address_slash_port = path;
     encode_address(_address_slash_port);
 
-    _eventloop.add_ioevent_cb(_sock, IOT_ACCEPT,
+    EventLoop::instance().add_ioevent_cb(_sock, IOT_ACCEPT,
          callback(dynamic_cast<XrlPFSTCPListener*>(this),
                   &XrlPFSTCPListener::connect_hook));
 }
@@ -135,8 +135,8 @@ XrlPFUNIXListener::decode_address(string& address)
 //
 ////////////////////////
 
-XrlPFUNIXSender::XrlPFUNIXSender(const string& name, EventLoop& e, const char* addr)
-	: XrlPFSTCPSender(name, &e, addr)
+XrlPFUNIXSender::XrlPFUNIXSender(const string& name,  const char* addr)
+	: XrlPFSTCPSender(name,  addr)
 {
     string address = addr;
     XrlPFUNIXListener::decode_address(address);

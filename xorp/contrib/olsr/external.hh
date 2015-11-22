@@ -66,7 +66,7 @@ struct ExternalRouteOrderPred {
  */
 class ExternalRoutes {
   public:
-    ExternalRoutes(Olsr& olsr, EventLoop& eventloop,
+    ExternalRoutes(Olsr& olsr, 
 		   FaceManager& fm, Neighborhood& nh);
     ~ExternalRoutes();
 
@@ -346,7 +346,6 @@ class ExternalRoutes {
 
 private:
     Olsr&		_olsr;
-    EventLoop&		_eventloop;
     FaceManager&	_fm;
     Neighborhood&	_nh;
     RouteManager*	_rm;
@@ -399,14 +398,12 @@ public:
      * Constructor for a external route learned from another OLSR peer.
      */
     explicit ExternalRoute(ExternalRoutes& parent,
-			   EventLoop& ev,
 			   const OlsrTypes::ExternalID erid,
 			   const IPv4Net& dest,
 			   const IPv4& lasthop,
 			   const uint16_t distance,
 			   const TimeVal& expiry_time)
      : _parent(parent),
-       _eventloop(ev),
        _id(erid),
        _is_self_originated(false),
        _dest(dest),
@@ -420,11 +417,9 @@ public:
      * Constructor for a external route originated by this node.
      */
     explicit ExternalRoute(ExternalRoutes& parent,
-			   EventLoop& ev,
 			   const OlsrTypes::ExternalID erid,
 			   const IPv4Net& dest)
      : _parent(parent),
-       _eventloop(ev),
        _id(erid),
        _is_self_originated(true),
        _dest(dest),
@@ -491,7 +486,6 @@ public:
 
 private:
     ExternalRoutes&		_parent;
-    EventLoop&			_eventloop;
     OlsrTypes::ExternalID	_id;
 
     /**

@@ -39,7 +39,6 @@
 
 
 XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
-				       EventLoop& eventloop,
 				       RandomGen& randgen,
 				       Rtrmgr& rtrmgr) 
     : XrlRtrmgrTargetBase(&r),
@@ -48,7 +47,6 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
       _finder_notifier_interface(&r),
       _userdb(userdb),
       _master_config_tree(NULL),
-      _eventloop(eventloop), 
       _randgen(randgen),
       _rtrmgr(rtrmgr),
       _exclusive(false),
@@ -294,7 +292,7 @@ XrlRtrmgrInterface::initialize_client_state(uid_t user_id,
     if (!_rtrmgr.ready()) {
 	delay = 2000;
     }
-    t = _eventloop.new_oneoff_after_ms(delay,
+    t = EventLoop::instance().new_oneoff_after_ms(delay,
              callback(this, &XrlRtrmgrInterface::send_client_state, 
 		      user_id, user->clientname()));
     _background_tasks.push_front(t);
@@ -693,7 +691,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
 	success = true;
 	_config_locked = true;
 	_lock_holder_token = token;
-	_lock_timer = _eventloop.new_oneoff_after_ms(
+	_lock_timer = EventLoop::instance().new_oneoff_after_ms(
 	    timeout, 
 	    callback(this, &XrlRtrmgrInterface::lock_timeout));
 	return XrlCmdError::OKAY();

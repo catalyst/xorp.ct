@@ -42,12 +42,11 @@ public:
     /**
      * Constructor.
      *
-     * @param eventloop the event loop to use.
      * @param fibconfig the FibConfig to use.
      * @see FibConfig.
      */
-    FibConfigTransactionManager(EventLoop& eventloop, FibConfig& fibconfig)
-	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING),
+    FibConfigTransactionManager( FibConfig& fibconfig)
+	: TransactionManager( TIMEOUT_MS, MAX_PENDING),
 	  _fibconfig(fibconfig)
     {}
 

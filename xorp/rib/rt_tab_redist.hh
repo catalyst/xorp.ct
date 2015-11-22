@@ -190,7 +190,7 @@ public:
     };
 
 public:
-    Redistributor(EventLoop& e, const string& name);
+    Redistributor( const string& name);
     virtual ~Redistributor();
 
     const string& name() const;
@@ -268,7 +268,6 @@ private:
 
 private:
 
-    EventLoop&			_e;
     string			_name;
     RedistTable<A>*		_table;
     RedistOutput<A>*		_output;

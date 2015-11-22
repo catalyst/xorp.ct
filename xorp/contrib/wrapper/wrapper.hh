@@ -58,7 +58,7 @@ typedef struct tcp_udp_opend_st {
 
 class Wrapper {
 public:
-    Wrapper(EventLoop& eventloop, IO* io);
+    Wrapper( IO* io);
 
     bool socketselect(int fd, int delay);
     bool sendData(wrapperData_t * data);
@@ -115,7 +115,6 @@ private:
     void close_opend();
     tcp_udp_opend_t opened_sock[MAX_OPEN_SOCK];
 
-    EventLoop&          _eventloop;
     IO*			_io;
     wrapperStatus	_status;
     char     		_data_buffer[MAXBUFFER];

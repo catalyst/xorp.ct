@@ -95,10 +95,9 @@ TwoHopLinkOrderPred::operator()(const OlsrTypes::TwoHopLinkID lhid,
     return false;
 }
 
-Neighborhood::Neighborhood(Olsr& olsr, EventLoop& eventloop,
+Neighborhood::Neighborhood(Olsr& olsr, 
     FaceManager& fm)
      : _olsr(olsr),
-       _eventloop(eventloop),
        _fm(fm),
        _tm(0),
        _link_order_pred(this),
@@ -126,7 +125,7 @@ Neighborhood::Neighborhood(Olsr& olsr, EventLoop& eventloop,
     // scheduled until we have neighbors to select as MPRs.
     // Weight this task to happen before route updates, as it SHOULD
     // happen before the state of our forwarding plane is changed.
-    _mpr_recount_task = _eventloop.new_oneoff_task(
+    _mpr_recount_task = EventLoop::instance().new_oneoff_task(
 	callback(this, &Neighborhood::recount_mpr_set),
 	XorpTask::PRIORITY_HIGH,
 	XorpTask::WEIGHT_DEFAULT);
@@ -401,7 +400,7 @@ Neighborhood::add_link(const TimeVal& vtime,
 			    XORP_UINT_CAST(linkid)));
     }
 
-    _links[linkid] = new LogicalLink(this, _eventloop, linkid, vtime,
+    _links[linkid] = new LogicalLink(this,  linkid, vtime,
 				     remote_addr, local_addr);
     _link_addr[make_pair(remote_addr, local_addr)] = linkid;
 
@@ -737,7 +736,7 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
     // Section 8.1: Associated neighbor MUST be created with the link
     // if it does not already exist.
     // We enforce this at language level with the constructor signature.
-    Neighbor* n = new Neighbor(_eventloop, this, neighborid,
+    Neighbor* n = new Neighbor( this, neighborid,
 					  main_addr, linkid);
     _neighbors[neighborid] = n;
 
@@ -1021,7 +1020,7 @@ Neighborhood::add_twohop_link(Neighbor* nexthop,
 			    XORP_UINT_CAST(tlid)));
     }
 
-    _twohop_links[tlid] = new TwoHopLink(_eventloop, this,
+    _twohop_links[tlid] = new TwoHopLink( this,
 					 tlid, nexthop, vtime);
 
     _twohop_link_addrs[make_pair(nexthop->main_addr(), remote_addr)] = tlid;
@@ -1221,7 +1220,7 @@ Neighborhood::add_twohop_node(const IPv4& main_addr,
 			    XORP_UINT_CAST(tnid)));
     }
 
-    _twohop_nodes[tnid] = new TwoHopNeighbor(_eventloop, this,
+    _twohop_nodes[tnid] = new TwoHopNeighbor( this,
 					      tnid, main_addr,
 					      tlid);
 
@@ -2267,7 +2266,7 @@ Neighborhood::start_tc_timer()
     debug_msg("%s -> TC_RUNNING\n", cstring(_fm.get_main_addr()));
 
     _tc_timer_state = TC_RUNNING;
-    _tc_timer = _eventloop.
+    _tc_timer = EventLoop::instance().
 	new_periodic(get_tc_interval(),
 		     callback(this, &Neighborhood::event_send_tc));
 }

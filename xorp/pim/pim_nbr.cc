@@ -179,7 +179,7 @@ PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     // (Re)start the timer to send the J/P message after time 0.
     // XXX: the automatic restarting will postpone the sending of
     // the message until we have no more entries to add to that message.
-    _jp_send_timer = pim_node()->eventloop().new_oneoff_after(
+    _jp_send_timer = EventLoop::instance().new_oneoff_after(
 	TimeVal(0, 0),
 	callback(this, &PimNbr::jp_send_timer_timeout));
     

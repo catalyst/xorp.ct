@@ -90,17 +90,10 @@ static void
 static_routes_main(const string& finder_hostname, uint16_t finder_port) {
 
     setup_dflt_sighandlers();
-
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
-
     //
     // StaticRoutes node
     //
     XrlStaticRoutesNode xrl_static_routes_node(
-	eventloop,
 	"static_routes",
 	finder_hostname,
 	finder_port,
@@ -108,8 +101,7 @@ static_routes_main(const string& finder_hostname, uint16_t finder_port) {
 	"fea",
 	"rib",
 	xorp_module_name(AF_INET, XORP_MODULE_MFEA));
-    wait_until_xrl_router_is_ready(eventloop,
-				   xrl_static_routes_node.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_static_routes_node.xrl_router());
 
     // Startup
     xrl_static_routes_node.startup();
@@ -118,7 +110,7 @@ static_routes_main(const string& finder_hostname, uint16_t finder_port) {
     // Main loop
     //
     while (xorp_do_run && !xrl_static_routes_node.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 }
 

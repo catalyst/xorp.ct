@@ -26,9 +26,9 @@
 #include "peer_handler.hh"
 #include "bgp_trie.hh"
 #include "crash_dump.hh"
+#include "libxorp/eventloop.hh"
 
 
-class EventLoop;
 /**
  * @short DeletionTable is a temporary BGPRouteTable used to delete
  * routes when a peer goes down
@@ -87,10 +87,10 @@ public:
     string str() const;
 
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool /*busy*/, BGPRouteTable<A> */*next_table*/) {
+    void output_state(bool /*busy*/, BGPRouteTable<A>* /*next_table*/) {
 	abort();
     }
-    bool get_next_message(BGPRouteTable<A> */*next_table*/) {
+    bool get_next_message(BGPRouteTable<A>* /*next_table*/) {
 	abort();
 	return false;
     }
@@ -107,9 +107,6 @@ public:
 private:
     void unplumb_self();
     bool delete_next_chain();
-    EventLoop& eventloop() const {
-	return _peer->eventloop();
-    }
 
     const PeerHandler *_peer;
     uint32_t _genid;

@@ -37,9 +37,8 @@
 #include "coord.hh"
 #include "command.hh"
 
-Command::Command(EventLoop& eventloop, XrlStdRouter& xrlrouter)
-    : _eventloop(eventloop),
-      _xrlrouter(xrlrouter),
+Command::Command( XrlStdRouter& xrlrouter)
+    : _xrlrouter(xrlrouter),
       _genid(0),
       _init_count(0)
     
@@ -400,7 +399,7 @@ Command::initialise_callback(const XrlError& error, string peername)
     }
 
     /* Add to the peer structure */
-    _peers.push_back(Peer(&_eventloop, &_xrlrouter, peername, _genid++,
+    _peers.push_back(Peer( &_xrlrouter, peername, _genid++,
 		       _target_hostname, _target_port));
 
     /* Add to the command structure */

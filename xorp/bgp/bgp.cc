@@ -48,9 +48,8 @@
 // ----------------------------------------------------------------------------
 // BGPMain implementation
 
-BGPMain::BGPMain(EventLoop& eventloop)
-    : _eventloop(eventloop),
-      _exit_loop(false),
+BGPMain::BGPMain()
+    : _exit_loop(false),
       _component_count(0),
       _ifmgr(NULL),
       _is_ifmgr_ready(false),
@@ -61,22 +60,20 @@ BGPMain::BGPMain(EventLoop& eventloop)
     ** Ideally these data structures should be created inline. However
     ** we need to finely control the order of destruction.
     */
-    _local_data = new LocalData(_eventloop),
+    _local_data = new LocalData;
     _peerlist = new BGPPeerList();
     _deleted_peerlist = new BGPPeerList();
-    _xrl_router = new XrlStdRouter(_eventloop, "bgp");
+    _xrl_router = new XrlStdRouter( "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
 
-    wait_until_xrl_router_is_ready(_eventloop, *_xrl_router);
+    wait_until_xrl_router_is_ready( *_xrl_router);
 
     _rib_ipc_handler = new RibIpcHandler(*_xrl_router, *this);
     _aggregation_handler = new AggregationHandler();
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
-							_eventloop,
 							*this);
 #ifdef HAVE_IPV6
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
-							_eventloop,
 							*this);
     PAListRef<IPv6>* palist6 =  new PAListRef<IPv6>(0);
     palist6->create_attribute_manager();
@@ -109,14 +106,14 @@ BGPMain::BGPMain(EventLoop& eventloop)
 					  *this);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
-    _process_watch = new ProcessWatch(_xrl_router, _eventloop,
+    _process_watch = new ProcessWatch(_xrl_router, 
 				      bgp_mib_name().c_str(),
 				      ::callback(this,
 						 &BGPMain::terminate));
 
     // Initialize the interface manager
     // TODO: the FEA targetname is hardcoded here!!
-    _ifmgr = new IfMgrXrlMirror(_eventloop, "fea",
+    _ifmgr = new IfMgrXrlMirror( "fea",
 				_xrl_router->finder_address(),
 				_xrl_router->finder_port());
     _ifmgr->set_observer(this);
@@ -162,7 +159,7 @@ BGPMain::~BGPMain()
 	   || DeleteAllNodes<IPv6>::running()
 #endif
 	) {
-	eventloop().run();
+	EventLoop::instance().run();
 	if (_peerlist->not_all_idle()) {
 	    // Kick them again
 	    XLOG_WARNING("Stopping all peers in ~BGPMain cleanup loop.\n");
@@ -188,9 +185,9 @@ BGPMain::~BGPMain()
     /*
     ** NOTE: We expect one timer to be pending. The timer is in the xrl_router.
     */
-    if (eventloop().timer_list_length() > 1)
+    if (EventLoop::instance().timer_list_length() > 1)
 	XLOG_INFO("EVENT: timers %u",
-		  XORP_UINT_CAST(eventloop().timer_list_length()));
+		  XORP_UINT_CAST(EventLoop::instance().timer_list_length()));
 
     /*
     ** Force the table de-registration from the RIB. Otherwise the
@@ -200,7 +197,7 @@ BGPMain::~BGPMain()
 
     start = time(NULL);
     while(_xrl_router->pending()) {
-	eventloop().run();
+	EventLoop::instance().run();
 	now = time(NULL);
 	if (now > start + 2) {
 	    XLOG_WARNING("xrl router still has pending operations after %i seconds, RIB deregister, giving up, xrl_router: %s",
@@ -219,7 +216,7 @@ BGPMain::~BGPMain()
 
     start = time(NULL);
     while(_xrl_router->pending()) {
-	eventloop().run();
+	EventLoop::instance().run();
 	now = time(NULL);
 	if (now > start + 2) {
 	    XLOG_WARNING("xrl router still has pending operations after %i seconds, delete RIB IPC, giving up, xrl_router: %s",
@@ -770,7 +767,7 @@ BGPMain::main_loop()
     debug_msg("BGPMain::main_loop started\n");
 
 #if defined(DEBUG_MAXIMUM_DELAY)
-    static XorpTimer t = eventloop().
+    static XorpTimer t = EventLoop::instance().
 	new_periodic_ms(1000, callback(check_callback_duration));
 #endif
     while ( xorp_do_run ) {
@@ -783,7 +780,7 @@ BGPMain::main_loop()
 		  current - last);
 #endif
 
-	eventloop().run();
+	EventLoop::instance().run();
 #if defined (DEBUG_MAXIMUM_DELAY)
 	last = current;;
 #endif
@@ -1030,10 +1027,10 @@ BGPMain::create_peer(BGPPeerData *pd)
 
     bool md5sig = !pd->get_md5_password().empty();
 
-    SocketClient *sock = new SocketClient(pd->iptuple(), eventloop(), md5sig);
+    SocketClient *sock = new SocketClient(pd->iptuple(),  md5sig);
 
     p = new BGPPeer(_local_data, pd, sock, this);
-    //    sock->set_eventloop(eventloop());
+    //    sock->set_eventloop(EventLoop::instance());
     sock->set_callback(callback(p, &BGPPeer::get_message));
 
     attach_peer(p);
@@ -1686,7 +1683,7 @@ BGPMain::register_ribname(const string& name)
 XorpFd
 BGPMain::create_listener(const Iptuple& iptuple)
 {
-    SocketServer s = SocketServer(iptuple, eventloop());
+    SocketServer s = SocketServer(iptuple);
     s.create_listener();
     return s.get_sock();
 }
@@ -1733,8 +1730,7 @@ BGPMain::start_server(const Iptuple& iptuple)
     if (!sfd.is_valid()) {
 	return;
     }
-    if (!eventloop().
-	add_ioevent_cb(sfd,
+    if (!EventLoop::instance().add_ioevent_cb(sfd,
 		     IOT_ACCEPT,
 		     callback(this, &BGPMain::connect_attempt,
 			      iptuple.get_local_addr(),
@@ -1756,7 +1752,7 @@ BGPMain::stop_server(const Iptuple& iptuple)
 	    if (*j == iptuple) {
 		i->_tuples.erase(j);
 		if (i->_tuples.empty()) {
-		    eventloop().remove_ioevent_cb(i->_serverfd);
+		    EventLoop::instance().remove_ioevent_cb(i->_serverfd);
 		    comm_close(i->_serverfd);
 		    _serverfds.erase(i);
 		}
@@ -1776,7 +1772,7 @@ BGPMain::stop_all_servers()
     list<Server>::iterator i;
     for (i = _serverfds.begin(); i != _serverfds.end();) {
 	debug_msg("%s\n", i->str().c_str());
-	eventloop().remove_ioevent_cb(i->_serverfd);
+	EventLoop::instance().remove_ioevent_cb(i->_serverfd);
 	comm_close(i->_serverfd);
 	_serverfds.erase(i++);
     }

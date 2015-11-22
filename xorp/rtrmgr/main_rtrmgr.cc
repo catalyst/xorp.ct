@@ -224,10 +224,6 @@ Rtrmgr::run()
 
     setup_dflt_sighandlers();
 
-    //
-    // Initialize the event loop
-    //
-    EventLoop eventloop;
 
     //
     // Print various information
@@ -284,8 +280,7 @@ Rtrmgr::run()
     //
     FinderServer* fs = NULL;
     try {
-	fs = new FinderServer(eventloop,
-			      FinderConstants::FINDER_DEFAULT_HOST(),
+	fs = new FinderServer( FinderConstants::FINDER_DEFAULT_HOST(),
 			      _bind_port);
 	while (_bind_addrs.empty() == false) {
 	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
@@ -307,13 +302,13 @@ Rtrmgr::run()
     //
     // Initialize the IPC mechanism
     //
-    XrlStdRouter xrl_router(eventloop, "rtrmgr", fs->addr(), fs->port());
-    XorpClient xclient(eventloop, xrl_router);
+    XrlStdRouter xrl_router( "rtrmgr", fs->addr(), fs->port());
+    XorpClient xclient( xrl_router);
 
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, *this, _do_restart, _verbose,
+    ModuleManager mmgr( *this, _do_restart, _verbose,
 		       xorp_binary_root_dir(), module_dir);
 
     try {
@@ -325,10 +320,10 @@ Rtrmgr::run()
 	UserDB userdb(_verbose);
 
 	userdb.load_password_file();
-	_xrt = new XrlRtrmgrInterface(xrl_router, userdb, eventloop, 
+	_xrt = new XrlRtrmgrInterface(xrl_router, userdb, 
 				      randgen, *this);
 
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 
 
 	_mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
@@ -349,7 +344,7 @@ Rtrmgr::run()
 	XorpTimer quit_timer;
 	if (_quit_time > 0) {
 	    quit_timer =
-		eventloop.new_oneoff_after_ms(_quit_time * 1000,
+		EventLoop::instance().new_oneoff_after_ms(_quit_time * 1000,
 					      callback(dflt_sig_handler, SIGTERM));
 	}
 
@@ -359,7 +354,7 @@ Rtrmgr::run()
 	//
 	while (xorp_do_run) {
 	    fflush(stdout);
-	    eventloop.run();
+	    EventLoop::instance().run();
 	    if (_mct->config_failed())
 		xorp_do_run = 0;
 	}
@@ -375,8 +370,8 @@ Rtrmgr::run()
 
 	// Wait until changes due to deleting config have finished
 	// being applied.
-	while (eventloop.events_pending() && (_mct->commit_in_progress())) {
-	    eventloop.run();
+	while (EventLoop::instance().events_pending() && (_mct->commit_in_progress())) {
+	    EventLoop::instance().run();
 	}
 	delete _mct;
 	_mct = NULL;
@@ -391,8 +386,8 @@ Rtrmgr::run()
 
     // Wait until child processes have terminated
     while ((mmgr.is_shutdown_completed() != true)
-	   && eventloop.events_pending()) {
-	eventloop.run();
+	   && EventLoop::instance().events_pending()) {
+	EventLoop::instance().run();
     }
 
     // Delete the XRL rtrmgr interface

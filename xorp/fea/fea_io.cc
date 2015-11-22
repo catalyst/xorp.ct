@@ -35,9 +35,8 @@
 #include "fea_io.hh"
 
 
-FeaIo::FeaIo(EventLoop& eventloop)
-    : _eventloop(eventloop),
-      _is_running(false)
+FeaIo::FeaIo()
+    : _is_running(false)
 {
 }
 

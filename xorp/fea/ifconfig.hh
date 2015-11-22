@@ -34,7 +34,6 @@
 #include "ifconfig_reporter.hh"
 #include "iftree.hh"
 
-class EventLoop;
 class FeaNode;
 class IfConfigErrorReporterBase;
 class IfConfigTransactionManager;
@@ -60,13 +59,7 @@ public:
      */
     virtual ~IfConfig();
 
-    /**
-     * Get a reference to the @ref EventLoop instance.
-     *
-     * @return a reference to the @ref EventLoop instance.
-     */
-    EventLoop& eventloop() { return _eventloop; }
-
+   
     /**
      * Get the status code.
      *
@@ -455,7 +448,6 @@ private:
 		       const IfTree& old_system_config,
 		       string& error_msg);
 
-    EventLoop&			_eventloop;
     NexthopPortMapper&		_nexthop_port_mapper;
     IfConfigTransactionManager* _itm;	// The interface transaction manager
 

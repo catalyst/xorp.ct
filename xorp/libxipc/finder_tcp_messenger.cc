@@ -32,11 +32,10 @@
 #include "finder_tcp_messenger.hh"
 
 
-FinderTcpMessenger::FinderTcpMessenger(EventLoop&		e,
-				       FinderMessengerManager*	mm,
+FinderTcpMessenger::FinderTcpMessenger( FinderMessengerManager*	mm,
 				       XorpFd			sock,
 				       XrlCmdMap&		cmds)
-    : FinderMessengerBase(e, mm, cmds), FinderTcpBase(e, sock)
+    : FinderMessengerBase( mm, cmds), FinderTcpBase( sock)
 {
     if (manager())
 	manager()->messenger_birth_event(this);
@@ -221,14 +220,13 @@ FinderTcpMessenger::error_event()
 // FinderTcpListener methods
 //
 
-FinderTcpListener::FinderTcpListener(EventLoop&		     e,
-				     FinderMessengerManager& mm,
+FinderTcpListener::FinderTcpListener( FinderMessengerManager& mm,
 				     XrlCmdMap&		     cmds,
 				     IPv4		     interface,
 				     uint16_t		     port,
 				     bool		     en)
     throw (InvalidAddress, InvalidPort)
-    : FinderTcpListenerBase(e, interface, port, en), _mm(mm), _cmds(cmds)
+    : FinderTcpListenerBase( interface, port, en), _mm(mm), _cmds(cmds)
 {
 }
 
@@ -240,7 +238,7 @@ bool
 FinderTcpListener::connection_event(XorpFd sock)
 {
     FinderTcpMessenger* m =
-	new FinderTcpMessenger(eventloop(), &_mm, sock, _cmds);
+	new FinderTcpMessenger(&_mm, sock, _cmds);
     // Check if manager has taken responsibility for messenger and clean up if
     // not.
     if (_mm.manages(m) == false)
@@ -253,12 +251,11 @@ FinderTcpListener::connection_event(XorpFd sock)
 // FinderTcpConnector methods
 //
 
-FinderTcpConnector::FinderTcpConnector(EventLoop&		e,
-				       FinderMessengerManager&	mm,
+FinderTcpConnector::FinderTcpConnector( FinderMessengerManager&	mm,
 				       XrlCmdMap&		cmds,
 				       IPv4			host,
 				       uint16_t 		port)
-    : _e(e), _mm(mm), _cmds(cmds), _host(host), _port(port)
+    :  _mm(mm), _cmds(cmds), _host(host), _port(port)
 {}
 
 FinderTcpConnector::~FinderTcpConnector()
@@ -281,7 +278,7 @@ FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 	return last_error;
     }
 
-    created_messenger = new FinderTcpMessenger(_e, &_mm, sock, _cmds);
+    created_messenger = new FinderTcpMessenger( &_mm, sock, _cmds);
     debug_msg("Created messenger %p\n", created_messenger);
     return 0;
 }
@@ -303,16 +300,14 @@ FinderTcpConnector::finder_port() const
 // FinderTcpAutoConnector methods
 //
 
-FinderTcpAutoConnector::FinderTcpAutoConnector(
-				EventLoop&		e,
-				FinderMessengerManager& real_manager,
+FinderTcpAutoConnector::FinderTcpAutoConnector( FinderMessengerManager& real_manager,
 				XrlCmdMap&		cmds,
 				IPv4			host,
 				uint16_t		port,
 				bool			en,
 				uint32_t 		give_up_ms
 				)
-    : FinderTcpConnector(e, *this, cmds, host, port),
+    : FinderTcpConnector( *this, cmds, host, port),
       _real_manager(real_manager), _connected(false), _connect_failed(false),
       _enabled(en), _once_active(false), _last_error(0), _consec_error(0)
 {
@@ -320,7 +315,7 @@ FinderTcpAutoConnector::FinderTcpAutoConnector(
 	start_timer();
 	if (give_up_ms) {
 	    _giveup_timer =
-		e.new_oneoff_after_ms(give_up_ms,
+		EventLoop::instance().new_oneoff_after_ms(give_up_ms,
 			callback(this,
 				 &FinderTcpAutoConnector::set_enabled, false));
 	}
@@ -412,7 +407,7 @@ FinderTcpAutoConnector::start_timer(uint32_t ms)
     XLOG_ASSERT(false == _retry_timer.scheduled());
     XLOG_ASSERT(false == _connected);
     _retry_timer =
-	_e.new_oneoff_after_ms(
+	EventLoop::instance().new_oneoff_after_ms(
 	    ms, callback(this, &FinderTcpAutoConnector::do_auto_connect));
 }
 

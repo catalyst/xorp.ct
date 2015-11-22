@@ -43,8 +43,7 @@ class OpInstance :
     public NONCOPYABLE
 {
 public:
-    OpInstance(EventLoop&			eventloop,
-	       OpCommand&			op_command,
+    OpInstance( OpCommand&			op_command,
 	       const string&			executable_filename,
 	       const list<string>&		command_argument_list,
 	       RouterCLI::OpModePrintCallback	print_cb,
@@ -68,7 +67,6 @@ private:
 		 const string& error_msg);
     void execute_done(bool success);
 
-    EventLoop&		_eventloop;
     OpCommand&		_op_command;
     string		_executable_filename;
     list<string>	_command_argument_list;
@@ -150,8 +148,7 @@ public:
      *
      * @return a pointer to the command instance on success.
      */
-    OpInstance* execute(EventLoop& eventloop,
-			const list<string>& command_line,
+    OpInstance* execute( const list<string>& command_line,
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb);
 
@@ -200,8 +197,7 @@ public:
     OpCommand* add_op_command(const OpCommand& op_command);
     bool command_match(const list<string>& command_parts,
 		       bool exact_match) const;
-    OpInstance *execute(EventLoop& eventloop,
-			const list<string>& command_parts,
+    OpInstance *execute( const list<string>& command_parts,
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, CliCommandMatch> top_level_commands() const;

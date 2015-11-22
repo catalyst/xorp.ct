@@ -218,7 +218,7 @@ DeletionTable<A>::initiate_background_deletion()
     // pushed from the output queue in the RibOut tables.
     this->_next_table->push(this);
 
-    _deletion_task = eventloop().new_task(
+    _deletion_task = EventLoop::instance().new_task(
 	callback(this, &DeletionTable<A>::delete_next_chain),
 	XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
 }

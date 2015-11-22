@@ -297,7 +297,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     // Assign a method to read from this descriptor
     //
-    if (eventloop().add_ioevent_cb(_packet_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_packet_fd, IOT_READ,
 				   callback(this, &IoLinkPcap::ioevent_read_cb))
 	== false) {
 	error_msg = c_format("Cannot add a pcap file descriptor to the set of "
@@ -319,7 +319,7 @@ IoLinkPcap::close_pcap_access(string& error_msg)
     //
     if (_packet_fd.is_valid()) {
 	// Remove it just in case, even though it may not be select()-ed
-	eventloop().remove_ioevent_cb(_packet_fd);
+	EventLoop::instance().remove_ioevent_cb(_packet_fd);
 	_packet_fd.clear();
     }
     if (_pcap != NULL) {
@@ -437,7 +437,7 @@ IoLinkPcap::recv_data()
     // XXX: Schedule a task to read again the data in case there are more
     // packets queued for receiving.
     //
-    _recv_data_task = eventloop().new_oneoff_task(
+    _recv_data_task = EventLoop::instance().new_oneoff_task(
 	callback(this, &IoLinkPcap::recv_data));
 
     //

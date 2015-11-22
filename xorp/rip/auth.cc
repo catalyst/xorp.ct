@@ -416,8 +416,7 @@ MD5AuthHandler::MD5Key::set_last_seqno_recv(const IPv4& src_addr,
 // ----------------------------------------------------------------------------
 // MD5AuthHandler implementation
 
-MD5AuthHandler::MD5AuthHandler(EventLoop& eventloop)
-    : _eventloop(eventloop)
+MD5AuthHandler::MD5AuthHandler()
 {
 }
 
@@ -708,7 +707,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     XorpTimer start_timer, end_timer;
     string dummy_error_msg;
 
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     if (start_timeval > end_timeval) {
 	error_msg = c_format("Start time is later than the end time");
@@ -720,13 +719,13 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     }
 
     if (start_timeval > now) {
-	start_timer = _eventloop.new_oneoff_at(
+	start_timer = EventLoop::instance().new_oneoff_at(
 	    start_timeval,
 	    callback(this, &MD5AuthHandler::key_start_cb, key_id));
     }
 
     if (end_timeval != TimeVal::MAXIMUM()) {
-	end_timer = _eventloop.new_oneoff_at(
+	end_timer = EventLoop::instance().new_oneoff_at(
 	    end_timeval,
 	    callback(this, &MD5AuthHandler::key_stop_cb, key_id));
     }

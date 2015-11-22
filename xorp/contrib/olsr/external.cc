@@ -79,10 +79,9 @@ ExternalRouteOrderPred::operator()(const OlsrTypes::ExternalID lhid,
  * ExternalRoutes.
  */
 
-ExternalRoutes::ExternalRoutes(Olsr& olsr, EventLoop& eventloop,
+ExternalRoutes::ExternalRoutes(Olsr& olsr, 
     FaceManager& fm, Neighborhood& nh)
      : _olsr(olsr),
-       _eventloop(eventloop),
        _fm(fm),
        _nh(nh),
        _rm(0),
@@ -214,7 +213,7 @@ ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
 		   XORP_UINT_CAST(erid)));
     }
 
-    _routes_in[erid] = new ExternalRoute(*this, _eventloop, erid,
+    _routes_in[erid] = new ExternalRoute(*this,  erid,
 					 dest, lasthop, distance,
 					 expiry_time);
 
@@ -401,7 +400,7 @@ ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
 		   XORP_UINT_CAST(erid)));
     }
 
-    _routes_out[erid] = new ExternalRoute(*this, _eventloop, erid, dest);
+    _routes_out[erid] = new ExternalRoute(*this,  erid, dest);
 
     _routes_out_by_dest.insert(make_pair(dest, erid));
 
@@ -534,7 +533,7 @@ ExternalRoutes::start_hna_send_timer()
 {
     debug_msg("%s -> HNA_RUNNING\n", cstring(_fm.get_main_addr()));
 
-    _hna_send_timer = _eventloop.
+    _hna_send_timer = EventLoop::instance().
 	new_periodic(get_hna_interval(),
 		     callback(this, &ExternalRoutes::event_send_hna));
 }
@@ -637,7 +636,7 @@ ExternalRoutes::event_receive_hna(
     XLOG_ASSERT(hna->origin() != _fm.get_main_addr());
 
     TimeVal now;
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     // 12.5, 2: For each address/mask pair in the message,
     // create or update an existing entry.
@@ -685,7 +684,7 @@ ExternalRoute::update_timer(const TimeVal& expiry_time)
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
-    _expiry_timer = _eventloop.
+    _expiry_timer = EventLoop::instance().
 	new_oneoff_at(expiry_time,
 		      callback(this, &ExternalRoute::event_expired));
 }

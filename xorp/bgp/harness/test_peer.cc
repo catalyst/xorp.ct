@@ -268,9 +268,9 @@ XrlTestPeerTarget::test_peer_0_1_terminate()
 /*
 -------------------- IMPLEMENTATION --------------------
 */
-TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
+TestPeer::TestPeer( XrlRouter& xrlrouter,
 		   const char *server, bool verbose)
-    : _eventloop(eventloop), _xrlrouter(xrlrouter), 
+    :  _xrlrouter(xrlrouter), 
       _server(server),
       _verbose(verbose),
      _done(false),
@@ -279,7 +279,7 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
       _flying(0),
      _bgp_bytes(0)
 {
-    _localdata = new LocalData(eventloop);
+    _localdata = new LocalData;
     _localdata->set_as(AsNum(0));
     _peerdata = new BGPPeerData(*_localdata, Iptuple(), AsNum(0), IPv4(), 0);
     // we force IBGP, as this does fewer tests
@@ -389,7 +389,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
    ** If there is a coordinator then add an I/O event callback.
    */
    if (0 != _coordinator.length() &&
-       !_eventloop.add_ioevent_cb(s, IOT_READ,
+       !EventLoop::instance().add_ioevent_cb(s, IOT_READ,
 				  callback(this, &TestPeer::receive),
 				  XorpTask::PRIORITY_LOWEST)) {
 	comm_sock_close(s);
@@ -404,7 +404,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
         XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
-    _async_writer = new AsyncFileWriter(_eventloop, s, XorpTask::PRIORITY_LOWEST);
+    _async_writer = new AsyncFileWriter( s, XorpTask::PRIORITY_LOWEST);
 
     _s = s;
 
@@ -455,7 +455,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if(!_eventloop.add_ioevent_cb(s, IOT_ACCEPT,
+    if(!EventLoop::instance().add_ioevent_cb(s, IOT_ACCEPT,
 				  callback(this,
 					   &TestPeer::connect_attempt),
 				  XorpTask::PRIORITY_LOWEST)) {
@@ -589,7 +589,7 @@ TestPeer::zap(XorpFd& fd, const char *msg)
     XorpFd tempfd = fd;
     fd.clear();
 
-   _eventloop.remove_ioevent_cb(tempfd);
+   EventLoop::instance().remove_ioevent_cb(tempfd);
    debug_msg("Removing I/O event cb for fd = %s\n", tempfd.str().c_str());
    if (comm_sock_close(tempfd) == -1) {
 	XLOG_WARNING("Close of %s failed: %s", msg, comm_get_last_error_str());
@@ -668,7 +668,7 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
     ** We don't want any more connection attempts so remove ourselves
     ** from the eventloop and close the file descriptor.
     */
-   _eventloop.remove_ioevent_cb(fd);
+   EventLoop::instance().remove_ioevent_cb(fd);
    debug_msg("Removing I/O event cb for fd = %s\n", fd.str().c_str());
    if (XORP_ERROR == comm_sock_close(fd))
 	XLOG_WARNING("Close failed");
@@ -677,7 +677,7 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
    ** If there is a coordinator then add an I/O event callback.
    */
    if(0 != _coordinator.length() &&
-       !_eventloop.add_ioevent_cb(connfd, IOT_READ,
+       !EventLoop::instance().add_ioevent_cb(connfd, IOT_READ,
 				  callback(this, &TestPeer::receive),
 				  XorpTask::PRIORITY_LOWEST)) {
 	comm_sock_close(connfd);
@@ -693,7 +693,7 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
         XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
-   _async_writer = new AsyncFileWriter(_eventloop, connfd, XorpTask::PRIORITY_LOWEST);
+   _async_writer = new AsyncFileWriter( connfd, XorpTask::PRIORITY_LOWEST);
 
    _s = connfd;
 }
@@ -750,7 +750,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 	_bgp_bytes = 0;
 	comm_sock_close(fd);
 	_s.clear();
-	_eventloop.remove_ioevent_cb(fd);
+	EventLoop::instance().remove_ioevent_cb(fd);
 	return;
     }
 
@@ -761,7 +761,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 	_bgp_bytes = 0;
 	comm_sock_close(fd);
 	_s.clear();
-	_eventloop.remove_ioevent_cb(fd);
+	EventLoop::instance().remove_ioevent_cb(fd);
 	return;
     }
 
@@ -821,7 +821,7 @@ TestPeer::queue_data(status st, uint8_t *ptr, size_t len, string error)
     Queued q;
     TimeVal tv;
 
-    _eventloop.current_time(tv);
+    EventLoop::instance().current_time(tv);
     q.secs = tv.sec();
     q.micro = tv.usec();
     q.st = st;
@@ -948,15 +948,14 @@ main(int argc, char **argv)
     }
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter router(eventloop, server, finder_host.c_str());
-	TestPeer test_peer(eventloop, router, server, verbose);
+	XrlStdRouter router( server, finder_host.c_str());
+	TestPeer test_peer( router, server, verbose);
 	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
 
-	wait_until_xrl_router_is_ready(eventloop, router);
+	wait_until_xrl_router_is_ready( router);
 
 	while(!test_peer.done()) {
-	    eventloop.run();
+		EventLoop::instance().run();
 	}
 
     } catch(...) {

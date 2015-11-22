@@ -39,7 +39,6 @@
 //
 
 
-class EventLoop;
 class IPvX;
 class IPvXNet;
 
@@ -55,12 +54,9 @@ public:
      * @param init_family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
      * @param init_module_id the module ID XORP_MODULE_* (@ref xorp_module_id).
-     * @param init_eventloop the event loop to use.
      */
-    ProtoNode(int init_family, xorp_module_id init_module_id,
-	      EventLoop& init_eventloop)
+    ProtoNode(int init_family, xorp_module_id init_module_id)
 	: ProtoUnit(init_family, init_module_id),
-	  _eventloop(init_eventloop),
 	  _node_status(PROC_NULL),
 	  _startup_requests_n(0),
 	  _shutdown_requests_n(0) {}
@@ -203,12 +199,6 @@ public:
      */
     uint32_t	maxvifs() const { return (_proto_vifs.size()); }
 
-    /**
-     * Get the event loop this node is added to.
-     * 
-     * @return the event loop this node is added to.
-     */
-    EventLoop& eventloop() { return (_eventloop); }
 
     /**
      * Receive a protocol packet.
@@ -550,7 +540,6 @@ private:
     // TODO: add vifs, etc
     
     vector<V *> _proto_vifs;	// The array with all protocol vifs
-    EventLoop&	_eventloop;	// The event loop to use
     
     map<string, uint32_t> _vif_name2vif_index_map;
     

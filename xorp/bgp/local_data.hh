@@ -40,11 +40,10 @@
  */
 class LocalData {
 public:
-    LocalData(EventLoop& eventloop) : _as(AsNum::AS_INVALID), 
+    LocalData() : _as(AsNum::AS_INVALID), 
 				      _use_4byte_asnums(false),
 				      _confed_id(AsNum::AS_INVALID),
 				      _route_reflector(false),
-				      _damping(eventloop),
 				      _jitter(true)
     {}
 

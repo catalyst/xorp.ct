@@ -29,8 +29,8 @@
 template <typename A>
 class DebugIO : public IO<A> {
  public:
-    DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
-	: _info(info), _eventloop(eventloop), _packets(0),
+    DebugIO(TestInfo& info, OspfTypes::Version version )
+	: _info(info),  _packets(0),
 	  _lsa_decoder(version), _next_interface_id(1)
     {
 	initialise_lsa_decoder(version, _lsa_decoder);
@@ -45,7 +45,7 @@ class DebugIO : public IO<A> {
 	    uint8_t* data, uint32_t len) {
 
 	TimeVal now;
-	_eventloop.current_time(now);
+	EventLoop::instance().current_time(now);
 	DOUT_LEVEL(_info, level) << now.pretty_print() << endl;
 	DOUT_LEVEL(_info, level) << which << "(" << interface << "," << vif
 		    << "," << dst.str() << "," << src.str()
@@ -397,7 +397,6 @@ class DebugIO : public IO<A> {
     }
  private:
     TestInfo& _info;
-    EventLoop& _eventloop;
     PacketDecoder _dec;
     int _packets;
     LsaDecoder _lsa_decoder;

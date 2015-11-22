@@ -42,7 +42,6 @@
 
 FibConfigEntrySetClick::FibConfigEntrySetClick(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntrySet(fea_data_plane_manager),
-      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _reinstall_all_entries_time_slice(100000, 20),	// 100ms, test every 20th iter
       _start_reinstalling_fte_table4(false),
@@ -466,7 +465,7 @@ FibConfigEntrySetClick::run_task_reinstall_all_entries()
     //
     if (_start_reinstalling_fte_table4 || _is_reinstalling_fte_table4) {
 	if (reinstall_all_entries4() == true) {
-	    _reinstall_all_entries_timer = fibconfig().eventloop().new_oneoff_after(
+	    _reinstall_all_entries_timer = EventLoop::instance().new_oneoff_after(
 		TimeVal(0, 1),
 		callback(this, &FibConfigEntrySetClick::run_task_reinstall_all_entries));
 	    return;
@@ -479,7 +478,7 @@ FibConfigEntrySetClick::run_task_reinstall_all_entries()
     //
     if (_start_reinstalling_fte_table6 || _is_reinstalling_fte_table6) {
 	if (reinstall_all_entries6() == true) {
-	    _reinstall_all_entries_timer = fibconfig().eventloop().new_oneoff_after(
+	    _reinstall_all_entries_timer = EventLoop::instance().new_oneoff_after(
 		TimeVal(0, 1),
 		callback(this, &FibConfigEntrySetClick::run_task_reinstall_all_entries));
 	    return;

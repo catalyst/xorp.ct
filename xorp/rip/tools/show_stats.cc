@@ -443,8 +443,7 @@ main(int argc, char* const argv[])
 	}
 
 	if (do_run) {
-	    EventLoop e;
-	    XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
+	    XrlJobQueue job_queue( finder_host, finder_port, xrl_target);
 	    if (argc == 3) {
 		if (ip_version == 4) {
 		    enqueue_address_query(job_queue,
@@ -475,7 +474,7 @@ main(int argc, char* const argv[])
 		    cerr << "Failed: " << job_queue.status_note() << endl;
 		    break;
 		}
-		e.run();
+		EventLoop::instance().run();
 	    }
 	}
     } catch (...) {

@@ -586,8 +586,7 @@ main(int argc, char* const argv[])
 	}
 
 	if (do_run) {
-	    EventLoop e;
-	    XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
+	    XrlJobQueue job_queue( finder_host, finder_port, xrl_target);
 
 	    if (do_single_line) {
 //  Address    Interface   State  Hello Rx  Hello Tx  Last Hello" << endl;
@@ -647,7 +646,7 @@ main(int argc, char* const argv[])
 		    cerr << "Failed: " << job_queue.status_note() << endl;
 		    break;
 		}
-		e.run();
+		EventLoop::instance().run();
 	    }
 	}
     } catch (...) {

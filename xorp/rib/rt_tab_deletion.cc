@@ -35,11 +35,9 @@
 template<class A>
 DeletionTable<A>::DeletionTable(const string& tablename,
 				RouteTable<A>* parent,
-				RouteTrie* ip_route_trie,
-				EventLoop& eventloop)
+				RouteTrie* ip_route_trie)
     : RouteTable<A>(tablename),
       _parent(parent),
-      _eventloop(eventloop),
       _ip_route_table(ip_route_trie)
 {
     XLOG_ASSERT(_parent != NULL);

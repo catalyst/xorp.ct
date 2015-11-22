@@ -108,13 +108,12 @@ announce_routes(XorpFd fd, vector<RipRoute<IPv6> >* my_routes)
 static void
 rip_announce(XorpFd fd, vector<RipRoute<IPv6> >& my_routes)
 {
-    EventLoop e;
-    XorpTimer t = e.new_periodic_ms(30 * 1000,
+    XorpTimer t = EventLoop::instance().new_periodic_ms(30 * 1000,
 				    callback(announce_routes, fd, &my_routes));
 
     announce_routes(fd, &my_routes);
     while (t.scheduled()) {
-	e.run();
+		EventLoop::instance().run();
     }
 }
 

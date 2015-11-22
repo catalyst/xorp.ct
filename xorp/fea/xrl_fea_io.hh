@@ -28,8 +28,8 @@
 //
 
 #include "fea_io.hh"
+#include "libxorp/eventloop.hh"
 
-class EventLoop;
 class XrlFeaNode;
 class XrlRouter;
 
@@ -45,7 +45,7 @@ public:
      * @param xrl_router the XRL transmission and reception point.
      * @param xrl_finder_targetname the XRL targetname of the Finder.
      */
-    XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
+    XrlFeaIo( XrlRouter& xrl_router,
 	     const string& xrl_finder_targetname);
 
     /**

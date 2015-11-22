@@ -57,24 +57,23 @@ main(int /*argc*/, char **argv)
     xlog_start();
 
     try {
-	EventLoop eventloop;
 
 	string feaname = "fea";
 	string ribname = "rib";
 
-	XrlStdRouter xrl_router(eventloop, TARGET_OSPFv3);
+	XrlStdRouter xrl_router( TARGET_OSPFv3);
 
-	XrlIO<IPv6> io_ipv6(eventloop, xrl_router, feaname, ribname);
-	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io_ipv6);
+	XrlIO<IPv6> io_ipv6( xrl_router, feaname, ribname);
+	Ospf<IPv6> ospf_ipv6(OspfTypes::V3,  &io_ipv6);
 
 	XrlOspfV3Target v3target(&xrl_router, ospf_ipv6, io_ipv6);
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	io_ipv6.startup();
 
 	setup_dflt_sighandlers();
 
 	while (xorp_do_run && ospf_ipv6.running())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
     } catch(...) {
 	xorp_catch_standard_exceptions();

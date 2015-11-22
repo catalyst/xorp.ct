@@ -40,9 +40,8 @@
 // #define DEBUG_FUNCTION_NAME
 // #define DETAILED_DEBUG
 
-FaceManager::FaceManager(Olsr& olsr, EventLoop& ev)
+FaceManager::FaceManager(Olsr& olsr)
     : _olsr(olsr),
-      _eventloop(ev),
       _nh(0),
       _next_faceid(1),
       _enabled_face_count(0),
@@ -950,7 +949,7 @@ void
 FaceManager::start_mid_timer()
 {
     debug_msg("starting MID timer\n");
-    _mid_timer = _olsr.get_eventloop().new_periodic(
+    _mid_timer = EventLoop::instance().new_periodic(
 	get_mid_interval(),
 	callback(this, &FaceManager::event_send_mid));
 }
@@ -1021,7 +1020,7 @@ FaceManager::event_send_mid()
 void
 FaceManager::start_hello_timer()
 {
-    _hello_timer = _olsr.get_eventloop().new_periodic(
+    _hello_timer = EventLoop::instance().new_periodic(
 	get_hello_interval(),
 	callback(this, &FaceManager::event_send_hello));
 }
@@ -1283,7 +1282,7 @@ FaceManager::update_dupetuple(const Message* msg, const bool is_forwarded)
     // If a duplicate set tuple was not found, record a new tuple with the
     // sequence number and origin inside the message.
     if (0 == dt) {
-	dt = new DupeTuple(_eventloop, this, msg->origin(),
+	dt = new DupeTuple( this, msg->origin(),
 			   msg->seqno(), get_dup_hold_time());
 	_duplicate_set.insert(make_pair(msg->origin(), dt));
     }
@@ -1326,7 +1325,7 @@ DupeTuple::update_timer(const TimeVal& vtime)
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
-    _expiry_timer = _ev.new_oneoff_after(vtime,
+    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
 	callback(this, &DupeTuple::event_dead));
 }
 

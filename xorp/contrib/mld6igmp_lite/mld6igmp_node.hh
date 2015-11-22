@@ -35,6 +35,7 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "mrt/buffer.h"
 #include "mrt/multicast_defs.h"
+#include "libxorp/eventloop.hh"
 
 
 //
@@ -46,7 +47,6 @@
 // Structures/classes, typedefs and macros
 //
 
-class EventLoop;
 class IPvX;
 class IPvXNet;
 class Mld6igmpVif;
@@ -70,7 +70,7 @@ public:
      * equal to XORP_MODULE_MLD6IGMP.
      * @param eventloop the event loop to use.
      */
-    Mld6igmpNode(int family, xorp_module_id module_id, EventLoop& eventloop);
+    Mld6igmpNode(int family, xorp_module_id module_id);
     
     /**
      * Destructor

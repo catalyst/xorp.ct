@@ -26,7 +26,6 @@
 #include "libxorp/callback.hh"
 #include "generic_module_manager.hh"
 
-class EventLoop;
 class MasterConfigTree;
 class ModuleManager;
 class Rtrmgr;
@@ -163,7 +162,7 @@ public:
      * @param xorp_root_dir the XORP root directory.
      * @param xorp_module_dir the XORP module directory.
      */
-    ModuleManager(EventLoop& eventloop, Rtrmgr& rtrmgr,
+    ModuleManager( Rtrmgr& rtrmgr,
 		  bool do_restart, bool verbose,
 		  const string& xorp_root_dir,
 		  const string& xorp_module_dir);

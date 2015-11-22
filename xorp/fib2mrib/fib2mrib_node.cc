@@ -34,9 +34,8 @@
 #include "fib2mrib_varrw.hh"
 
 
-Fib2mribNode::Fib2mribNode(EventLoop& eventloop)
+Fib2mribNode::Fib2mribNode()
     : ServiceBase("Fib2mrib"),
-      _eventloop(eventloop),
       _protocol_name("fib2mrib"),	// TODO: must be known by RIB
       _is_enabled(true),		// XXX: enabled by default
       _startup_requests_n(0),

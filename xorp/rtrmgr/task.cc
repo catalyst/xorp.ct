@@ -45,11 +45,9 @@
 // ----------------------------------------------------------------------------
 // DelayValidation implementation
 DelayValidation::DelayValidation(const string& module_name,
-				 EventLoop& eventloop,
 				 uint32_t ms,
 				 bool verbose)
     : Validation(module_name, verbose),
-      _eventloop(eventloop),
       _delay_in_ms(ms)
 {
 }
@@ -58,7 +56,7 @@ void
 DelayValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 {
     _cb = cb;
-    _timer = _eventloop.new_oneoff_after_ms(_delay_in_ms,
+    _timer = EventLoop::instance().new_oneoff_after_ms(_delay_in_ms,
 			callback(this, &DelayValidation::timer_expired));
     UNUSED(exec_id);
 }
@@ -83,11 +81,7 @@ XrlStatusValidation::XrlStatusValidation(const string& module_name,
 {
 }
 
-EventLoop&
-XrlStatusValidation::eventloop()
-{
-    return _task_manager.eventloop();
-}
+
 
 void
 XrlStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
@@ -151,7 +145,7 @@ XrlStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 	// This used to be a 1000-milisecond sleep, but that seems lame.  This would make
 	// commit changes take 1+ seconds of real-time, which sucks when you're scripting xorp.
 	// Changing it to zero. --Ben
-	_retry_timer = eventloop().new_oneoff_after_ms(0,
+	_retry_timer =EventLoop::instance().new_oneoff_after_ms(0,
 			callback(this, &XrlStatusValidation::dummy_response));
     }
 }
@@ -217,7 +211,7 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	if (_retries > MAX_STATUS_RETRIES) {
 	    _cb->dispatch(false);
 	}
-	_retry_timer = eventloop().new_oneoff_after_ms(1000,
+	_retry_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback(this, &XrlStatusValidation::validate,
 				 _exec_id, _cb));
 	break;
@@ -256,12 +250,6 @@ ProgramStatusValidation::~ProgramStatusValidation()
 	delete _run_command;
 	_run_command = NULL;
     }
-}
-
-EventLoop&
-ProgramStatusValidation::eventloop()
-{
-    return _task_manager.eventloop();
 }
 
 void
@@ -327,7 +315,6 @@ ProgramStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunShellCommand(
-	    eventloop(),
 	    executable_filename,
 	    program_arguments,
 	    callback(this, &ProgramStatusValidation::stdout_cb),
@@ -347,7 +334,7 @@ ProgramStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 	// exercise most of the same machinery, hence we schedule
 	// a dummy callback as if the program was called.
 	//
-	_delay_timer = eventloop().new_oneoff_after(
+	_delay_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &ProgramStatusValidation::execute_done, true));
     }
@@ -488,7 +475,7 @@ XrlStatusReadyValidation::handle_status_response(ProcessStatus status,
     case PROC_STARTUP:
     case PROC_NOT_READY:
 	// Got a valid response saying we should wait.
-	_retry_timer = eventloop().new_oneoff_after_ms(1000,
+	_retry_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
 				 &XrlStatusValidation::validate,
 				 _exec_id, _cb));
@@ -557,7 +544,7 @@ XrlStatusConfigMeValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_STARTUP:
 	// Got a valid response saying we should wait.
-	_retry_timer = eventloop().new_oneoff_after_ms(1000,
+	_retry_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
 				 &XrlStatusValidation::validate,
 				 _exec_id, _cb));
@@ -633,7 +620,7 @@ XrlStatusShutdownValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_SHUTDOWN:
 	// Got a valid response saying we should wait.
-	_retry_timer = eventloop().new_oneoff_after_ms(1000,
+	_retry_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback((XrlStatusValidation*)this,
 				 &XrlStatusValidation::validate,
 				 _exec_id, _cb));
@@ -745,12 +732,6 @@ XrlStartup::XrlStartup(const string& module_name,
 {
 }
 
-EventLoop&
-XrlStartup::eventloop() const
-{
-    return _task_manager.eventloop();
-}
-
 void
 XrlStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
@@ -808,7 +789,7 @@ XrlStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	//
 	XLOG_TRACE(_verbose, "XRL: dummy call to %s\n",
 		   _xrl_action.request().c_str());
-	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
+	_dummy_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback(this, &XrlStartup::dummy_response));
     }
 
@@ -860,11 +841,7 @@ ProgramStartup::~ProgramStartup()
     }
 }
 
-EventLoop&
-ProgramStartup::eventloop() const
-{
-    return _task_manager.eventloop();
-}
+
 
 void
 ProgramStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
@@ -928,7 +905,6 @@ ProgramStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunShellCommand(
-	    eventloop(),
 	    executable_filename,
 	    program_arguments,
 	    callback(this, &ProgramStartup::stdout_cb),
@@ -950,7 +926,7 @@ ProgramStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	//
 	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
 		   _program_action.request().c_str());
-	_delay_timer = eventloop().new_oneoff_after(
+	_delay_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &ProgramStartup::execute_done, true));
     }
@@ -1020,12 +996,6 @@ XrlShutdown::XrlShutdown(const string& module_name,
 {
 }
 
-EventLoop&
-XrlShutdown::eventloop() const
-{
-    return _task_manager.eventloop();
-}
-
 void
 XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
@@ -1086,7 +1056,7 @@ XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	//
 	XLOG_INFO("Shutdown with XRL: dummy call to %s\n",
 		   _xrl_action.request().c_str());
-	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
+	_dummy_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 			callback(this, &XrlShutdown::dummy_response));
     }
 
@@ -1151,12 +1121,6 @@ ProgramShutdown::~ProgramShutdown()
 	delete _run_command;
 	_run_command = NULL;
     }
-}
-
-EventLoop&
-ProgramShutdown::eventloop() const
-{
-    return _task_manager.eventloop();
 }
 
 void
@@ -1224,7 +1188,6 @@ ProgramShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunShellCommand(
-	    eventloop(),
 	    executable_filename,
 	    program_arguments,
 	    callback(this, &ProgramShutdown::stdout_cb),
@@ -1246,7 +1209,7 @@ ProgramShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	//
 	XLOG_TRACE(_verbose, "Program: dummy call to %s\n",
 		   _program_action.request().c_str());
-	_delay_timer = eventloop().new_oneoff_after(
+	_delay_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &ProgramShutdown::execute_done, true));
     }
@@ -1429,7 +1392,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	// functioning before we declare it dead.
 	if (--_xrl_resend_count > 0) {
 	    // Re-send the Xrl after a short delay.
-	    _xrl_resend_timer = task().eventloop().new_oneoff_after_ms(
+	    _xrl_resend_timer = EventLoop::instance().new_oneoff_after_ms(
 		_xrl_resend_delay_ms,
 		callback(this, &TaskXrlItem::resend));
 	    return;
@@ -1533,7 +1496,6 @@ TaskProgramItem::execute(string& errmsg)
 	XLOG_TRACE(_verbose, "Executing program: >%s<\n",
 		   program_request.c_str());
 	_run_command = new RunShellCommand(
-	    task().eventloop(),
 	    executable_filename,
 	    program_arguments,
 	    callback(this, &TaskProgramItem::stdout_cb),
@@ -1553,7 +1515,7 @@ TaskProgramItem::execute(string& errmsg)
 	// exercise most of the same machinery, hence we schedule
 	// a dummy callback as if the program was called.
 	//
-	_delay_timer = task().eventloop().new_oneoff_after(
+	_delay_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(0, 0),
 	    callback(this, &TaskProgramItem::execute_done, true));
     }
@@ -1981,7 +1943,7 @@ Task::step6_done(bool success)
 void
 Task::step7_wait()
 {
-    _wait_timer = _taskmgr.eventloop().new_oneoff_after_ms(1000,
+    _wait_timer = EventLoop::instance().new_oneoff_after_ms(1000,
 					callback(this, &Task::step7_kill));
 }
 
@@ -2033,11 +1995,7 @@ Task::xorp_client() const
     return _taskmgr.xorp_client();
 }
 
-EventLoop&
-Task::eventloop() const
-{
-    return _taskmgr.eventloop();
-}
+
 
 
 // ----------------------------------------------------------------------------
@@ -2322,11 +2280,7 @@ TaskManager::kill_process(const string& module_name)
 				callback(this, &TaskManager::null_callback));
 }
 
-EventLoop&
-TaskManager::eventloop() const
-{
-    return _module_manager.eventloop();
-}
+
 
 void
 TaskManager::null_callback()

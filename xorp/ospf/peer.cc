@@ -975,7 +975,7 @@ Peer<A>::initV3()
     LinkLsa *llsa = new LinkLsa(_ospf.get_version());
     llsa->set_self_originating(true);
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     llsa->record_creation_time(now);
     llsa->set_peerid(get_peerid());
     _link_lsa = Lsa::LsaRef(llsa);    
@@ -2066,7 +2066,7 @@ void
 Peer<A>::schedule_event(const char *event)
 {
     if (_scheduled_events.empty()) {
-	_event_timer = _ospf.get_eventloop().
+	_event_timer = EventLoop::instance().
 	    new_oneoff_after_ms(0,
 				callback(this,
 					 &Peer<A>::process_scheduled_events));
@@ -2112,7 +2112,7 @@ Peer<A>::start_hello_timer()
     // XXX - The hello packet should have all its parameters set.
 
     // Schedule one for the future.
-    _hello_timer = _ospf.get_eventloop().
+    _hello_timer = EventLoop::instance().
 	new_periodic_ms(_hello_packet.get_hello_interval() * 1000,
 			callback(this, &Peer<A>::send_hello_packet));
 
@@ -2147,7 +2147,7 @@ template <typename A>
 void
 Peer<A>::start_wait_timer()
 {
-    _wait_timer = _ospf.get_eventloop().
+    _wait_timer = EventLoop::instance().
 	new_oneoff_after(TimeVal(_hello_packet.get_router_dead_interval(), 0),
 			 callback(this, &Peer<A>::event_wait_timer));
 }
@@ -3669,7 +3669,7 @@ template <typename A>
 void
 Neighbour<A>::start_inactivity_timer()
 {
-    _inactivity_timer = _ospf.get_eventloop().
+    _inactivity_timer = EventLoop::instance().
 	new_oneoff_after(TimeVal(_peer.get_router_dead_interval(), 0),
 			 callback(this, &Neighbour::event_inactivity_timer));
 }
@@ -3743,7 +3743,7 @@ Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
 					     _peer.get_if_name().c_str(),
 					     comment).c_str());
 
-    _rxmt_timer[index] = _ospf.get_eventloop().
+    _rxmt_timer[index] = EventLoop::instance().
  	new_periodic_ms(_peer.get_rxmt_interval() * 1000,
 			callback(_rxmt_wrapper[index], &RxmtWrapper::doit));
 
@@ -3847,7 +3847,7 @@ Neighbour<A>::retransmitter()
 
     if (!_lsa_rxmt.empty()) {
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 
 	LinkStateUpdatePacket lsup(_ospf.get_version(),
 				   _ospf.get_lsa_decoder());
@@ -5226,7 +5226,7 @@ Neighbour<A>::change_state(State state)
 			      Full == state);
 
     if (Full == state)
-	_ospf.get_eventloop().current_time(_adjacency_time);
+	EventLoop::instance().current_time(_adjacency_time);
 
     // If we are dropping down states tear down any higher level state.
     if (previous_state > state)
@@ -5519,7 +5519,7 @@ Neighbour<A>::get_neighbour_info(NeighbourInfo& ninfo) const
     ninfo._bdr = IPv4(htonl(bdr));
 
     TimeVal now, diff;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     diff = now - _creation_time;
     ninfo._up = diff.sec();
     if (Full == get_state()) {

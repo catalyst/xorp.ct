@@ -93,10 +93,6 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
 
     setup_dflt_sighandlers();
 
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
 
     //
     // Initialize the random generator
@@ -112,7 +108,6 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
     //
     XrlPimNode xrl_pimsm_node4(AF_INET,
 			       XORP_MODULE_PIMSM,
-			       eventloop,
 			       xorp_module_name(AF_INET, XORP_MODULE_PIMSM),
 			       finder_hostname,
 			       finder_port,
@@ -121,7 +116,7 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
 			       xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 			       xorp_module_name(AF_INET, XORP_MODULE_RIB),
 			       xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
-    wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node4.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_pimsm_node4.xrl_router());
 
     //
     // Startup
@@ -136,14 +131,14 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
     // Main loop
     //
     while (xorp_do_run && !xrl_pimsm_node4.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 
     XLOG_INFO("Winding down pimsm, do-run: %i  node.is_done: %i\n",
 	      xorp_do_run, xrl_pimsm_node4.is_done());
 
     while (xrl_pimsm_node4.xrl_router().pending()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 
     // Manually clean up xrl_pim_node.  Without this logic, the destructor

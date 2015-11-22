@@ -37,14 +37,13 @@ class RunCommand;
 
 /**
  * ClickSocket class opens a Click socket and forwards data arriving
- * on the socket to ClickSocketObservers.  The ClickSocket hooks itself
- * into the EventLoop and activity usually happens asynchronously.
+ * on the socket to ClickSocketObservers.  
  */
 class ClickSocket :
     public NONCOPYABLE
 {
 public:
-    ClickSocket(EventLoop& eventloop);
+    ClickSocket();
     ~ClickSocket();
 
     /**
@@ -519,7 +518,6 @@ private:
     static const string CLICK_FILE_SYSTEM_TYPE;
 
 private:
-    EventLoop&	 _eventloop;
     XorpFd	 _kernel_fd;
     XorpFd	 _user_fd;
     ObserverList _ol;

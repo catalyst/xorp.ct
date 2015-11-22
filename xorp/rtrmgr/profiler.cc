@@ -268,12 +268,11 @@ main(int argc, char **argv)
 	return usage(argv[0]);
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "profiler");
+	XrlStdRouter xrl_router( "profiler");
 	XrlProfilerTarget profiler(&xrl_router);
 
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 
 	if (command == "list")
 	    profiler.list(target);
@@ -289,10 +288,10 @@ main(int argc, char **argv)
 	    XLOG_FATAL("Unknown command");
 
 	while (!profiler.done())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
 	while (xrl_router.pending())
- 	    eventloop.run();
+ 	    EventLoop::instance().run();
 
         } catch (...) {
 	xorp_catch_standard_exceptions();

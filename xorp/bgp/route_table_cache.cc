@@ -463,12 +463,7 @@ CacheTable<A>::dump_state() const {
     return s;
 }
 
-template<class A>
-EventLoop& 
-CacheTable<A>::eventloop() const 
-{
-    return _peer->eventloop();
-}
+
 
 template class CacheTable<IPv4>;
 template class CacheTable<IPv6>;

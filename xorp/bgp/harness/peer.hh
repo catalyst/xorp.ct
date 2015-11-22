@@ -26,15 +26,14 @@
 #include "libxorp/callback.hh"
 #include "libxorp/tokenize.hh"
 #include "bgp/peer.hh"
+#include "libxorp/eventloop.hh"
 
-class EventLoop;
 class TimeVal;
 
 class Peer {
 public:
 
-    Peer(EventLoop    *eventloop,
-	 XrlStdRouter *xrlrouter,
+    Peer( XrlStdRouter *xrlrouter,
 	 const string& peer_name,
 	 const uint32_t genid,
 	 const string& target_hostname,
@@ -118,7 +117,6 @@ protected:
     void send_keepalive();
     
 private:
-    EventLoop   *_eventloop;
     XrlStdRouter *_xrlrouter;
 
     /* we need these because the attribute encode methods reference them */

@@ -192,7 +192,6 @@ private:
     ConfQueue _export_queue;
     set<string> _push_queue;
 
-    EventLoop& _eventloop;
 
     // we should have a timer per protocol.
     XorpTimer _flush_timer;

@@ -143,12 +143,11 @@ Send<IPv6>::delete_route = &XrlRibV0p1Client::send_delete_route6;
 // XrlRibNotifier implementation
 
 template <typename A>
-XrlRibNotifier<A>::XrlRibNotifier(EventLoop&		e,
-				  UpdateQueue<A>&	uq,
+XrlRibNotifier<A>::XrlRibNotifier( UpdateQueue<A>&	uq,
 				  XrlRouter&		xr,
 				  uint32_t		mf,
 				  uint32_t		pms)
-    : RibNotifierBase<A>(e, uq, pms), ServiceBase("RIB Updater"),
+    : RibNotifierBase<A>( uq, pms), ServiceBase("RIB Updater"),
       _xs(xr), _cname(xr.class_name()), _iname(xr.instance_name()),
       _max_inflight(mf), _inflight(0)
 {
@@ -156,14 +155,13 @@ XrlRibNotifier<A>::XrlRibNotifier(EventLoop&		e,
 }
 
 template <typename A>
-XrlRibNotifier<A>::XrlRibNotifier(EventLoop&		e,
-				  UpdateQueue<A>&	uq,
+XrlRibNotifier<A>::XrlRibNotifier( UpdateQueue<A>&	uq,
 				  XrlSender&		xs,
 				  const string&		class_name,
 				  const string&		instance_name,
 				  uint32_t		mf,
 				  uint32_t		pms)
-    : RibNotifierBase<A>(e, uq, pms),
+    : RibNotifierBase<A>( uq, pms),
       _xs(xs), _cname(class_name), _iname(instance_name),
       _max_inflight(mf), _inflight(0)
 {

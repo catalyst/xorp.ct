@@ -805,7 +805,6 @@ private:
 		       const FilterBag::iterator& end);
 
     FeaNode&		_fea_node;
-    EventLoop&		_eventloop;
     const IfTree&	_iftree;
 
     // Collection of IP communication handlers keyed by protocol.

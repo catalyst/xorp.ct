@@ -49,7 +49,7 @@ class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigLoadCallBack;
 
 public:
-    XrlRtrmgrInterface(XrlRouter& r, UserDB& db, EventLoop& eventloop,
+    XrlRtrmgrInterface(XrlRouter& r, UserDB& db, 
 		       RandomGen& randgen, Rtrmgr& rtrmgr);
     ~XrlRtrmgrInterface();
 
@@ -224,7 +224,6 @@ private:
     set<uint32_t>	_clientids;
     UserDB&		_userdb;
     MasterConfigTree*	_master_config_tree;
-    EventLoop&		_eventloop;
     RandomGen&		_randgen;
     Rtrmgr&             _rtrmgr;
 

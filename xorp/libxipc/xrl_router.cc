@@ -104,14 +104,14 @@ finder_host(const char* host)
 }
 
 static string
-mk_instance_name(EventLoop& e, const char* classname)
+mk_instance_name( const char* classname)
 {
     static uint32_t sp = (uint32_t)getpid();
     static uint32_t sa = get_preferred_ipv4_addr().s_addr;
     static uint32_t sc;
 
     TimeVal now;
-    e.current_time(now);
+    EventLoop::instance().current_time(now);
     sc++;
 
     uint32_t data[5];
@@ -218,11 +218,11 @@ XrlRouter::initialize(const char* class_name,
 
     _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
-    _fac = new FinderTcpAutoConnector(_e, *_fc, _fc->commands(),
+    _fac = new FinderTcpAutoConnector( *_fc, _fc->commands(),
 				      finder_addr, finder_port,
 				      true, timeout_ms);
 
-    _instance_name = mk_instance_name(_e, class_name);
+    _instance_name = mk_instance_name( class_name);
 
     _fc->attach_observer(this);
     if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
@@ -234,12 +234,11 @@ XrlRouter::initialize(const char* class_name,
     _icnt++;
 }
 
-XrlRouter::XrlRouter(EventLoop&  e,
-		     const char* class_name,
+XrlRouter::XrlRouter( const char* class_name,
 		     const char* finder_addr,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false)
+    : XrlDispatcher(class_name),  _finalized(false)
 {
     IPv4 finder_ip;
     if (0 == finder_addr) {
@@ -254,12 +253,11 @@ XrlRouter::XrlRouter(EventLoop&  e,
     initialize(class_name, finder_ip, finder_port);
 }
 
-XrlRouter::XrlRouter(EventLoop&  e,
-		     const char* class_name,
+XrlRouter::XrlRouter( const char* class_name,
 		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false)
+    : XrlDispatcher(class_name),  _finalized(false)
 {
     if (0 == finder_port)
 	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
@@ -468,7 +466,7 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
     // create sender
     while (dbe->xrls().size()) {
 	const Xrl& x = dbe->xrls().front();
-	s = XrlPFSenderFactory::create_sender(dbe->key(), _e, x.protocol().c_str(),
+	s = XrlPFSenderFactory::create_sender(dbe->key(),  x.protocol().c_str(),
 					      x.target().c_str());
 	if (s.get() != 0)
 	    break;
@@ -636,7 +634,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     //
     DispatchState *ds = new XrlRouterDispatchState(xrl, xcb);
     _dsl.push_back(ds);
-    _fc->query(eventloop(), xrl_no_args,
+    _fc->query( xrl_no_args,
 	       callback(this, &XrlRouter::resolve_callback, ds));
 
     return true;
@@ -749,10 +747,10 @@ string XrlRouter::toString() const {
 // wait_until_xrl_router_is_ready
 
 void
-wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+wait_until_xrl_router_is_ready( XrlRouter& xrl_router)
 {
     while (! xrl_router.failed()) {
-	eventloop.run();
+	EventLoop::instance().run();
 	if (xrl_router.ready())
 	    return;
     }

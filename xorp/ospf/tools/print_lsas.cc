@@ -578,19 +578,18 @@ main(int argc, char **argv)
     }
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "print_lsas");
+	XrlStdRouter xrl_router( "print_lsas");
 
 	debug_msg("Waiting for router");
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	debug_msg("\n");
 
 	GetAreaList get_area_list(xrl_router, version);
 	if (area.empty()) {
 	    get_area_list.start();
 	    while(get_area_list.busy())
-		eventloop.run();
+		EventLoop::instance().run();
 
 	    if (get_area_list.fail()) {
 		XLOG_ERROR("Failed to get area list");
@@ -610,7 +609,7 @@ main(int argc, char **argv)
 
 	    fetchdb.start();
 	    while(fetchdb.busy())
-		eventloop.run();
+		EventLoop::instance().run();
 
 	    if (fetchdb.fail()) {
 		XLOG_ERROR("Failed to fetch area %s", i->str().c_str());

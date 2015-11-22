@@ -62,8 +62,7 @@ public:
      * @param cb the callback to invoke.
      * @param priority the task priority for the eventloop operations.
      */
-    BufferedAsyncReader(EventLoop& 	e,
-			XorpFd 		fd,
+    BufferedAsyncReader( XorpFd 		fd,
 			size_t 		reserve_bytes,
 			const Callback& cb,
 			int priority = XorpTask::PRIORITY_DEFAULT);
@@ -158,7 +157,6 @@ private:
 
     Config		_config;
 
-    EventLoop&		_eventloop;
     XorpFd		_fd;
     Callback		_cb;
 

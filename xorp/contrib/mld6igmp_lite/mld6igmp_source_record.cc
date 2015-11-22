@@ -93,9 +93,8 @@ Mld6igmpSourceRecord::~Mld6igmpSourceRecord()
 void
 Mld6igmpSourceRecord::set_source_timer(const TimeVal& timeval)
 {
-    EventLoop& eventloop = _group_record.eventloop();
 
-    _source_timer = eventloop.new_oneoff_after(
+    _source_timer = EventLoop::instance().new_oneoff_after(
 	timeval,
 	callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
 }
@@ -118,7 +117,6 @@ Mld6igmpSourceRecord::cancel_source_timer()
 void
 Mld6igmpSourceRecord::lower_source_timer(const TimeVal& timeval)
 {
-    EventLoop& eventloop = _group_record.eventloop();
     TimeVal timeval_remaining;
 
     //
@@ -126,7 +124,7 @@ Mld6igmpSourceRecord::lower_source_timer(const TimeVal& timeval)
     //
     _source_timer.time_remaining(timeval_remaining);
     if (timeval < timeval_remaining) {
-	_source_timer = eventloop.new_oneoff_after(
+	_source_timer = EventLoop::instance().new_oneoff_after(
 	    timeval,
 	    callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
     }

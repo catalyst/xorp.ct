@@ -41,23 +41,21 @@ const TimeVal XrlMld6igmpNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 XrlMld6igmpNode::XrlMld6igmpNode(int		family,
 				 xorp_module_id	module_id, 
-				 EventLoop&	eventloop,
 				 const string&	class_name,
 				 const string&	finder_hostname,
 				 uint16_t	finder_port,
 				 const string&	finder_target,
 				 const string&	fea_target,
 				 const string&	mfea_target)
-    : Mld6igmpNode(family, module_id, eventloop),
-      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+    : Mld6igmpNode(family, module_id),
+      XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlMld6igmpTargetBase(&xrl_router()),
       Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
-      _eventloop(eventloop),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _mfea_target(mfea_target),
-      _ifmgr(eventloop, mfea_target.c_str(), xrl_router().finder_address(),
+      _ifmgr( mfea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_fea_client4(&xrl_router()),
 #ifdef HAVE_IPV6
@@ -249,7 +247,7 @@ XrlMld6igmpNode::retry_xrl_task()
     if (_xrl_tasks_queue_timer.scheduled())
 	return;		// XXX: already scheduled
 
-    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
+    _xrl_tasks_queue_timer = EventLoop::instance().new_oneoff_after(
 	RETRY_TIMEVAL,
 	callback(this, &XrlMld6igmpNode::send_xrl_task));
 }
@@ -1075,7 +1073,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 		   mld6igmp_vif->name().c_str(),
 		   membership.dst_module_instance_name().c_str());
     start_timer_label:
-	_send_add_delete_membership_queue_timer = _eventloop.new_oneoff_after(
+	_send_add_delete_membership_queue_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_add_delete_membership));
     }
@@ -1145,7 +1143,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 		       "Will try again.",
 		       membership.operation_name(),
 		       xrl_error.str().c_str());
-	    _send_add_delete_membership_queue_timer = _eventloop.new_oneoff_after(
+	    _send_add_delete_membership_queue_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlMld6igmpNode::send_add_delete_membership));
 	}

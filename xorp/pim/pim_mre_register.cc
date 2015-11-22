@@ -251,7 +251,7 @@ PimMre::register_stop_timer_timeout()
     set_register_join_pending_state();
     // Stop timer(**) (** The Register-Stop Timer is set to Register_Probe_Time
     register_stop_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
 	    callback(this, &PimMre::register_stop_timer_timeout));
     // Send Null Register
@@ -303,7 +303,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;
@@ -318,7 +318,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node()->eventloop().new_oneoff_after(
+	EventLoop::instance().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;

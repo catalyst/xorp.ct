@@ -119,7 +119,7 @@ TransactionManager::start(uint32_t& new_tid)
     crank_tid();
 
     if (timeout_ms()) {
-	XorpTimer t = _e.new_oneoff_after_ms(
+	XorpTimer t = EventLoop::instance().new_oneoff_after_ms(
 	    timeout_ms(), 
 	    callback(this,&TransactionManager::timeout, _next_tid)
 	    );

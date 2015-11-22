@@ -32,9 +32,8 @@
 
 
 template <class A>
-DummyNextHopResolver<A>::DummyNextHopResolver(EventLoop& eventloop,
-					      BGPMain& bgp)
-    : NextHopResolver<A>(NULL, eventloop, bgp)
+DummyNextHopResolver<A>::DummyNextHopResolver( BGPMain& bgp)
+    : NextHopResolver<A>(NULL,  bgp)
 {
 }
 

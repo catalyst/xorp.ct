@@ -28,7 +28,7 @@
 
 class XrlPFUNIXListener : public XrlPFSTCPListener {
 public:
-    XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr = 0);
+    XrlPFUNIXListener( XrlDispatcher* xr = 0);
     ~XrlPFUNIXListener();
 
     const char* protocol() const;
@@ -44,7 +44,7 @@ private:
 class XrlPFUNIXSender : public XrlPFSTCPSender {
 public:
     XrlPFUNIXSender(const string& name,
-		    EventLoop& e, const char* address = 0);
+		     const char* address = 0);
 
     const char* protocol() const;
     static const char* protocol_name();

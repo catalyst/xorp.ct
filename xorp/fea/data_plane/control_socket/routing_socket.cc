@@ -59,9 +59,8 @@ pid_t RoutingSocket::_pid = getpid();
 // Routing Sockets communication with the kernel
 //
 
-RoutingSocket::RoutingSocket(EventLoop& eventloop)
-    : _eventloop(eventloop),
-      _fd(-1),
+RoutingSocket::RoutingSocket()
+    : _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++)
 {
@@ -106,7 +105,7 @@ RoutingSocket::start(int af, string& error_msg)
     //
     // Add the socket to the event loop
     //
-    if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(_fd, IOT_READ,
 				callback(this, &RoutingSocket::io_event))
 	== false) {
 	error_msg = c_format("Failed to add routing socket to EventLoop");
@@ -124,7 +123,7 @@ RoutingSocket::stop(string& error_msg)
     UNUSED(error_msg);
 
     if (_fd >= 0) {
-	_eventloop.remove_ioevent_cb(_fd);
+	EventLoop::instance().remove_ioevent_cb(_fd);
 	close(_fd);
 	_fd = -1;
     }

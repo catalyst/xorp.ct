@@ -33,26 +33,23 @@
 
 const TimeVal XrlStaticRoutesNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
-XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
-					 const string&	class_name,
+XrlStaticRoutesNode::XrlStaticRoutesNode( const string&	class_name,
 					 const string&	finder_hostname,
 					 uint16_t	finder_port,
 					 const string&	finder_target,
 					 const string&	fea_target,
 					 const string&	rib_target,
 					 const string& mfea_target)
-    : StaticRoutesNode(eventloop),
-      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+    : XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlStaticRoutesTargetBase(&xrl_router()),
-      _eventloop(eventloop),
       _xrl_rib_client(&xrl_router()),
       _xrl_mfea_client(&xrl_router()),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _rib_target(rib_target),
       _mfea_target(mfea_target),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
+      _ifmgr( fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
       _is_finder_alive(false),
@@ -158,7 +155,7 @@ XrlStaticRoutesNode::fea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_startup_timer = _eventloop.new_oneoff_after(
+	_fea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::fea_register_startup));
 	return;
@@ -219,7 +216,7 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
+	    _fea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::fea_register_startup));
 	}
@@ -258,7 +255,7 @@ XrlStaticRoutesNode::mfea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_startup_timer = _eventloop.new_oneoff_after(
+	_mfea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::mfea_register_startup));
 	return;
@@ -316,7 +313,7 @@ XrlStaticRoutesNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _mfea_register_startup_timer = _eventloop.new_oneoff_after(
+	    _mfea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::mfea_register_startup));
 	}
@@ -357,7 +354,7 @@ XrlStaticRoutesNode::mfea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_mfea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::mfea_register_shutdown));
 	return;
@@ -420,7 +417,7 @@ XrlStaticRoutesNode::finder_deregister_interest_mfea_cb(
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _mfea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::mfea_register_shutdown));
 	}
@@ -466,7 +463,7 @@ XrlStaticRoutesNode::fea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_fea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
 	return;
@@ -535,7 +532,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _fea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::fea_register_shutdown));
 	}
@@ -582,7 +579,7 @@ XrlStaticRoutesNode::rib_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	_rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::rib_register_startup));
 	return;
@@ -644,7 +641,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    _rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::rib_register_startup));
 	}
@@ -695,7 +692,7 @@ XrlStaticRoutesNode::rib_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
 	return;
@@ -760,7 +757,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
 	}
@@ -820,7 +817,7 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	_rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
     }
@@ -882,7 +879,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
 	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    _rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
 	}
@@ -947,7 +944,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
 	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    _rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
 	}
@@ -1065,7 +1062,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
 	}
@@ -1129,7 +1126,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
 	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
 	}
@@ -2300,7 +2297,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		   : "delete",
 		   static_route.network().str().c_str());
     start_timer_label:
-	_inform_rib_queue_timer = _eventloop.new_oneoff_after(
+	_inform_rib_queue_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::send_rib_route_change));
     }
@@ -2383,7 +2380,7 @@ XrlStaticRoutesNode::send_mfea_mfc_change()
 		   : "delete",
 		   static_route.mcast_addr().str().c_str());
     start_timer_label:
-	_inform_mfea_queue_timer = _eventloop.new_oneoff_after(
+	_inform_mfea_queue_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change));
     }
@@ -2457,7 +2454,7 @@ XrlStaticRoutesNode::send_mfea_mfc_change_cb(const XrlError& xrl_error)
 		       : (_inform_mfea_queue.front().is_replace_route())? "replace"
 		       : "delete",
 		       xrl_error.str().c_str());
-	    _inform_mfea_queue_timer = _eventloop.new_oneoff_after(
+	    _inform_mfea_queue_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change));
 	}
@@ -2535,7 +2532,7 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 		       : (_inform_rib_queue.front().is_replace_route())? "replace"
 		       : "delete",
 		       xrl_error.str().c_str());
-	    _inform_rib_queue_timer = _eventloop.new_oneoff_after(
+	    _inform_rib_queue_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_rib_route_change));
 	}

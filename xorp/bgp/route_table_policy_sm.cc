@@ -33,11 +33,9 @@ template <class A>
 PolicyTableSourceMatch<A>::PolicyTableSourceMatch(const string& tablename, 
 						  const Safi& safi,
 						  BGPRouteTable<A>* parent,
-						  PolicyFilters& pfs,
-						  EventLoop& ev)
+						  PolicyFilters& pfs)
     : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT_SOURCEMATCH),
-      _pushing_routes(false), _dump_iter(NULL), _ev(ev)
-
+      _pushing_routes(false), _dump_iter(NULL) 
 {
     this->_parent = parent;		
 }
@@ -61,7 +59,7 @@ PolicyTableSourceMatch<A>::push_routes(list<const PeerTableInfo<A>*>& peer_list)
 
     debug_msg("[BGP] Push routes\n");
 
-    _dump_task = eventloop().new_task(
+    _dump_task = EventLoop::instance().new_task(
 	callback(this, &PolicyTableSourceMatch<A>::do_background_dump),
 	XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
 }
@@ -98,13 +96,6 @@ PolicyTableSourceMatch<A>::end_route_dump()
     _dump_iter = NULL;
     _pushing_routes = false;
     _dump_task.unschedule();
-}
-
-template <class A>
-EventLoop&
-PolicyTableSourceMatch<A>::eventloop()
-{
-    return _ev;
 }
 
 template <class A>

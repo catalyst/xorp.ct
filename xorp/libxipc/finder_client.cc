@@ -201,12 +201,11 @@ private:
     FinderClientQuery();	// Not directly constructible.
 
 public:
-    FinderClientQuery(EventLoop&	   eventloop,
-		      FinderClient&	   fc,
+    FinderClientQuery( FinderClient&	   fc,
 		      const string&	   key,
 		      ResolvedTable&	   rt,
 		      const QueryCallback& qcb)
-	: FinderClientOneOffOp(fc), _eventloop(eventloop),
+	: FinderClientOneOffOp(fc), 
 	  _key(key), _rt(rt), _qcb(qcb)
     {
 	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
@@ -227,7 +226,7 @@ public:
 	// Test if the request is already resolvable
 	ResolvedTable::iterator rt_iter = _rt.find(_key);
 	if (rt_iter != _rt.end()) {
-	    _query_resolvable_timer = _eventloop.new_oneoff_after(
+	    _query_resolvable_timer = EventLoop::instance().new_oneoff_after(
 		TimeVal::ZERO(),
 		callback(this, &FinderClientQuery::query_resolvable_callback));
 	    return;
@@ -334,7 +333,6 @@ public:
     static uint32_t instance_count() { return _instance_count; }
 
 protected:
-    EventLoop&	   _eventloop;
     string	   _key;
     ResolvedTable& _rt;
     QueryCallback  _qcb;
@@ -718,11 +716,10 @@ FinderClient::enable_xrls(const string& instance_name)
 }
 
 void
-FinderClient::query(EventLoop&		 eventloop,
-		    const string&	 key,
+FinderClient::query( const string&	 key,
 		    const QueryCallback& qcb)
 {
-    Operation op(new FinderClientQuery(eventloop, *this, key, _rt, qcb));
+    Operation op(new FinderClientQuery( *this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
 }

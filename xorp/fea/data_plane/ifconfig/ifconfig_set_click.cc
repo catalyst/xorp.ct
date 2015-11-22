@@ -48,7 +48,6 @@
 
 IfConfigSetClick::IfConfigSetClick(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigSet(fea_data_plane_manager),
-      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _iftree("click-set"),
       _kernel_click_config_generator(NULL),
@@ -958,7 +957,6 @@ IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
     IfConfigSetClick& ifconfig_set_click,
     const string& command_name)
     : _ifconfig_set_click(ifconfig_set_click),
-      _eventloop(ifconfig_set_click.ifconfig().eventloop()),
       _command_name(command_name),
       _run_command(NULL)
 {
@@ -1003,7 +1001,6 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
     _command_argument_list.push_back(_tmp_filename);
 
     _run_command = new RunCommand(
-	_eventloop,
 	_command_name,
 	_command_argument_list,
 	callback(this, &IfConfigSetClick::ClickConfigGenerator::stdout_cb),

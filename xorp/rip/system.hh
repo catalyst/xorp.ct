@@ -44,20 +44,9 @@ public:
     typedef PortManagerBase<A>	PortManager;
 
 public:
-    System(EventLoop& e) : _e(e), _rtdb(e,_policy_filters), _pm(0) {}
+    System() :  _rtdb(_policy_filters), _pm(0) {}
     ~System();
 
-    /**
-     * Get @ref EventLoop instance that each object in system should
-     * use.
-     */
-    EventLoop& eventloop()			{ return _e; }
-
-    /**
-     * Get @ref EventLoop instance that each object in RIP system
-     * should use.
-     */
-    const EventLoop& eventloop() const		{ return _e; }
 
     /**
      * Get the Route Database that each object in the RIP system
@@ -125,7 +114,6 @@ public:
     Trace& route_trace() { return _rtdb.trace(); }
 
 protected:
-    EventLoop&		_e;
 
     //
     // There should be only one instatiation per process.

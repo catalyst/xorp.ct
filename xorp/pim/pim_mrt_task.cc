@@ -92,7 +92,7 @@ PimMrt::schedule_task()
     if (_pim_mre_task_list.empty())
 	return;		// No tasks to schedule
 
-    _pim_mre_task_timer = pim_node()->eventloop().new_oneoff_after(
+    _pim_mre_task_timer = EventLoop::instance().new_oneoff_after(
 	TimeVal(0, 1),
 	callback(this, &PimMrt::pim_mre_task_timer_timeout));
 }

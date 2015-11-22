@@ -312,7 +312,7 @@ Mld6igmpVif::start(string& error_msg)
     if (_startup_query_count > 0)
 	_startup_query_count--;
     TimeVal startup_query_interval = effective_query_interval() / 4;
-    _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
+    _query_timer = EventLoop::instance().new_oneoff_after(
 	startup_query_interval,
 	callback(this, &Mld6igmpVif::query_timer_timeout));
 

@@ -48,7 +48,7 @@ public:
 class XrlPFListener
 {
 public:
-    XrlPFListener(EventLoop& e, XrlDispatcher* d = 0);
+    XrlPFListener( XrlDispatcher* d = 0);
     virtual ~XrlPFListener();
 
     virtual const char*	address() const = 0;
@@ -58,14 +58,12 @@ public:
     bool set_dispatcher(const XrlDispatcher* d);
 
     const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
-    EventLoop& eventloop() const		{ return _eventloop; }
 
     virtual bool response_pending() const = 0;
 
     virtual string toString() const = 0;
 
 protected:
-    EventLoop& _eventloop;
     const XrlDispatcher* _dispatcher;
 };
 
@@ -81,7 +79,7 @@ public:
     XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
 
 public:
-    XrlPFSender(const string& name, EventLoop& e, const char* address);
+    XrlPFSender(const string& name,  const char* address);
     virtual ~XrlPFSender();
 
     /**
@@ -118,12 +116,10 @@ public:
     virtual void	batch_stop() {}
 
     const string& address() const		{ return _address; }
-    EventLoop& eventloop() const		{ return _eventloop; }
     virtual void set_address(const char* a) { _address = a; }
     virtual string toString() const;
 
 protected:
-    EventLoop& _eventloop;
     string _address;
     string _name; // for debugging
 };

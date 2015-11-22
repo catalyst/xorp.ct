@@ -51,13 +51,6 @@ public:
     }
 
     /**
-     * Get a reference to the @ref EventLoop instance.
-     *
-     * @return a reference to the @ref EventLoop instance.
-     */
-    EventLoop& eventloop() { return _fibconfig.eventloop(); }
-
-    /**
      * Process a list of IPv4 FIB route changes.
      * 
      * The FIB route changes come from the underlying system.
@@ -238,7 +231,6 @@ private:
 	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
-	EventLoop& eventloop() { return _xfcm->eventloop(); }
 	void	send_fib_client_route_change();
 
 	list<F>			_inform_fib_client_queue;

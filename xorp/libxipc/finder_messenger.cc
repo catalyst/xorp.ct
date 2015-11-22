@@ -27,10 +27,9 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
-FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
-					 FinderMessengerManager* fmm,
+FinderMessengerBase::FinderMessengerBase( FinderMessengerManager* fmm,
 					 XrlCmdMap& 		 cmds)
-    : _eventloop(e), _manager(fmm), _cmds(cmds)
+    :  _manager(fmm), _cmds(cmds)
 {
     //    _manager.messenger_birth_event(this);
     debug_msg("Constructor for %p\n", this);

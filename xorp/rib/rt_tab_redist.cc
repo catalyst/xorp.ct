@@ -57,9 +57,8 @@ template <typename A>
 const RedistNetCmp<A> Redistributor<A>::redist_net_cmp = RedistNetCmp<A>();
 
 template <typename A>
-Redistributor<A>::Redistributor(EventLoop& 	e,
-				const string& 	n)
-    : _e(e), _name(n), _table(0), _output(0), _policy(0),
+Redistributor<A>::Redistributor( const string& 	n)
+    :  _name(n), _table(0), _output(0), _policy(0),
       _rei(this), _oei(this), _dumping(false), _blocked(false)
 {
 }
@@ -154,7 +153,7 @@ Redistributor<A>::schedule_dump_timer()
 {
     XLOG_ASSERT(_blocked == false);
     debug_msg("schedule dump timer\n");
-    _dtimer = _e.new_oneoff_after_ms(0,
+    _dtimer = EventLoop::instance().new_oneoff_after_ms(0,
 				     callback(this,
 					      &Redistributor<A>::dump_a_route)
 				     );

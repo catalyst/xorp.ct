@@ -48,19 +48,15 @@ main (int /* argc */, char* argv[])
 
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	//
-	// Init stuff
-	//
-	EventLoop eventloop;
-	XrlStdRouter xrl_std_router_rib(eventloop, "rib");
+	XrlStdRouter xrl_std_router_rib( "rib");
 
 	//
 	// The RIB manager
 	//
-	RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
+	RibManager rib_manager( xrl_std_router_rib, "fea");
 	rib_manager.enable();
 
-	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
+	wait_until_xrl_router_is_ready( xrl_std_router_rib);
 
 	// Add the FEA as a RIB client
 	rib_manager.add_redist_xrl_output4("fea",	/* target_name */
@@ -89,7 +85,7 @@ main (int /* argc */, char* argv[])
 	//
 	string reason;
 	while (xorp_do_run && (rib_manager.status(reason) != PROC_DONE)) {
-	    eventloop.run();
+	    EventLoop::instance().run();
 	}
     } catch (...) {
 	xorp_catch_standard_exceptions();

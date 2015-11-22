@@ -95,7 +95,7 @@ private:
 
 class Nodes {
 public:
-    Nodes(Simulator* r, EventLoop& ev);
+    Nodes(Simulator* r);
     ~Nodes();
 
     /**
@@ -587,7 +587,6 @@ protected:
 
 private:
     Simulator* _parent;
-    EventLoop& _eventloop;
 
     /**
      * @short The next available instance ID for a pair of
@@ -643,9 +642,8 @@ public:
     };
 
 public:
-    Links(Simulator* r, EventLoop& ev, Nodes* n)
+    Links(Simulator* r,  Nodes* n)
      : _parent(r),
-       _eventloop(ev),
        _nodes(n)
     {}
 
@@ -707,12 +705,10 @@ public:
 	throw(NoSuchAddress);
 
     Simulator* parent() { return _parent; }
-    EventLoop& eventloop() { return _eventloop; }
     Nodes* nodes() { return _nodes; }
 
 private:
     Simulator* _parent;
-    EventLoop& _eventloop;
     Nodes* _nodes;
 
     multimap<pair<IPv4, IPv4>, LinkTuple>   _links;
@@ -726,19 +722,15 @@ class Simulator {
     bool cmd(Args& args) throw(InvalidString);
 
     /**
-     * @short Wait @param secs in EventLoop, whilst running other
      * callbacks.
      */
     void wait(const int secs);
 
-    inline EventLoop& eventloop() { return _eventloop; }
     inline TestInfo& info() { return _info; }
     inline Nodes& nodes() { return _nodes; }
     inline Links& links() { return _links; }
 
  private:
-    // common eventloop must be used for serialization in time domain.
-    EventLoop _eventloop;
     TestInfo _info;
     Nodes   _nodes;
     Links   _links;
@@ -746,8 +738,8 @@ class Simulator {
 
 Simulator::Simulator(bool verbose, int verbose_level)
     :  _info("simulator", verbose, verbose_level, cout),
-       _nodes(this, _eventloop),
-       _links(this,  _eventloop, &_nodes)
+       _nodes(this),
+       _links(this,   &_nodes)
 {}
 
 Simulator::~Simulator()
@@ -757,14 +749,13 @@ void
 Simulator::wait(const int secs)
 {
     bool timeout = false;
-    XorpTimer t = eventloop().set_flag_after(TimeVal(secs ,0), &timeout);
+    XorpTimer t = EventLoop::instance().set_flag_after(TimeVal(secs ,0), &timeout);
     while (! timeout)
-	eventloop().run();
+	EventLoop::instance().run();
 }
 
-Nodes::Nodes(Simulator* r, EventLoop& ev)
+Nodes::Nodes(Simulator* r)
  : _parent(r),
-   _eventloop(ev),
    _next_instance_id(1),
    _default_hello_interval(1),
    _default_mid_interval(1),
@@ -797,10 +788,10 @@ Nodes::create_node(const vector<IPv4>& addrs)
 				    _parent->info().verbose_level(),
 				    _parent->info().out());
 
-    DebugIO* dio = new DebugIO(*n_info, _eventloop);
+    DebugIO* dio = new DebugIO(*n_info);
     dio->startup();
 
-    Olsr* olsr = new Olsr(_eventloop, dio);
+    Olsr* olsr = new Olsr( dio);
 
     /*
      * apply simulation-wide defaults.
@@ -1738,7 +1729,7 @@ Links::add_link(const IPv4& left_addr, const IPv4& right_addr)
     NodeTuple& left = _parent->nodes().get_node_tuple_by_addr(left_addr);
     NodeTuple& right = _parent->nodes().get_node_tuple_by_addr(right_addr);
 
-    EmulateSubnet* es = new EmulateSubnet(_parent->info(), _eventloop);
+    EmulateSubnet* es = new EmulateSubnet(_parent->info());
 
     // TODO: Make the address/instance representation less wasteful...
     // and promote LinkTuple to a class like it should be.

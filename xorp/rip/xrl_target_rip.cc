@@ -36,7 +36,7 @@
 
 
 static int
-decode_time_string(EventLoop& eventloop, const string& time_string,
+decode_time_string( const string& time_string,
 		   TimeVal& timeval)
 {
     const char* s;
@@ -55,7 +55,7 @@ decode_time_string(EventLoop& eventloop, const string& time_string,
     // time format (e.g, the timezone and the summer time flag).
     //
     TimeVal now;
-    eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
     time_t local_time = now.sec();
     const struct tm* local_tm = localtime(&local_time);
     memcpy(&tm, local_tm, sizeof(tm));
@@ -73,13 +73,12 @@ decode_time_string(EventLoop& eventloop, const string& time_string,
     return (XORP_OK);
 }
 
-XrlRipTarget::XrlRipTarget(EventLoop&			el,
-			   XrlRouter&			xr,
+XrlRipTarget::XrlRipTarget( XrlRouter&			xr,
 			   XrlProcessSpy&		xps,
 			   XrlPortManager<IPv4>& 	xpm,
 			   XrlRedistManager<IPv4>&	xrm,
 			   System<IPv4>&		rip_system)
-    : XrlRipTargetBase(&xr), _e(el)
+    : XrlRipTargetBase(&xr) 
 {
     _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, rip_system);
 }
@@ -545,13 +544,13 @@ XrlRipTarget::rip_0_1_set_md5_authentication_key(
     // Decode the start and end time
     //
     if (! start_time.empty()) {
-	if (decode_time_string(_e, start_time, start_timeval) != XORP_OK) {
+	if (decode_time_string( start_time, start_timeval) != XORP_OK) {
 	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
     if (! end_time.empty()) {
-	if (decode_time_string(_e, end_time, end_timeval) != XORP_OK) {
+	if (decode_time_string( end_time, end_timeval) != XORP_OK) {
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
@@ -571,7 +570,7 @@ XrlRipTarget::rip_0_1_set_md5_authentication_key(
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     } else {
-	md5_ah = new MD5AuthHandler(_e);
+	md5_ah = new MD5AuthHandler;
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
 			    error_msg)
 	    != true) {

@@ -56,7 +56,6 @@
 
 XrlPort::XrlPort(
     IO*		    io,
-    EventLoop&	    eventloop,
     XrlRouter&	    xrl_router,
     const string&   ssname,
     const string&   ifname,
@@ -66,7 +65,6 @@ XrlPort::XrlPort(
     const IPv4&	    remote_addr)
     : ServiceBase("OlsrXrlPort"),
       _io(io),
-      _eventloop(eventloop),
       _xrl_router(xrl_router),
       _ss(ssname),
       _ifname(ifname),

@@ -186,8 +186,7 @@ public:
      * @param xrl Xrl to be resolved.
      * @param qcb callback to be dispatched when result is availble.
      */
-    void query(EventLoop&	    eventloop,
-	       const string&	    xrl,
+    void query( const string&	    xrl,
 	       const QueryCallback& qcb);
 
     /**

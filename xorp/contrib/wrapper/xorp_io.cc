@@ -41,16 +41,15 @@
 // --------------------------------------------------------------------------
 // XrlIO
 
-XrlIO::XrlIO(EventLoop& eventloop, XrlRouter& xrl_router,
+XrlIO::XrlIO( XrlRouter& xrl_router,
              const string& feaname, const string& ribname, string protocol)
-    : _eventloop(eventloop),
-      _xrl_router(xrl_router),
+    : _xrl_router(xrl_router),
       _feaname(feaname),
       _ribname(ribname),
       _protocol(protocol),
       _xrl_socket(&xrl_router),
       _rib(&xrl_router),
-      _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
+      _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
              _xrl_router.finder_port())
 {
     _admin_distance = 202;
@@ -90,7 +89,7 @@ XrlIO::forceclose(string xrl_sock)
     if (sent) {
         _init_callback_done = false;
         while (!_init_callback_done) {
-            _eventloop.run();
+            EventLoop::instance().run();
         }
     }
 }
@@ -159,7 +158,7 @@ XrlIO::register_rib(uint32_t admin_dist)
         } else {
             _init_callback_done = false;
             while (!_init_callback_done) {
-                _eventloop.run();
+                EventLoop::instance().run();
             }
         }
     }
@@ -177,7 +176,7 @@ XrlIO::register_rib(uint32_t admin_dist)
     } else {
         _init_callback_done = false;
         while (!_init_callback_done) {
-            _eventloop.run();
+            EventLoop::instance().run();
         }
     }
 }

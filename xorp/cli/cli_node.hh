@@ -45,7 +45,6 @@
 // Structures/classes, typedefs and macros
 //
 
-class EventLoop;
 class CliClient;
 class CliPipe;
 class IPvXNet;
@@ -69,8 +68,7 @@ public:
      * equal to XORP_MODULE_CLI.
      * @param init_eventloop the event loop to use.
      */
-    CliNode(int init_family, xorp_module_id init_module_id,
-	    EventLoop& init_eventloop);
+    CliNode(int init_family, xorp_module_id init_module_id);
 
     /**
      * Destructor

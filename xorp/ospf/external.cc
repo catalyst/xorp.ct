@@ -80,7 +80,7 @@ External<A>::announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
 				       false /* redist */);
     }
 
-    lsar->get_timer() = _ospf.get_eventloop().
+    lsar->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::MaxAge -
 				 lsar->get_header().get_ls_age(), 0),
 			 callback(this, &External<A>::maxage_reached, lsar));
@@ -309,7 +309,7 @@ void
 External<A>::announce_lsa(Lsa::LsaRef lsar)
 {
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     lsar->record_creation_time(now);
     lsar->encode();
 
@@ -367,7 +367,7 @@ template <typename A>
 void
 External<A>::start_refresh_timer(Lsa::LsaRef lsar)
 {
-    lsar->get_timer() = _ospf.get_eventloop().
+    lsar->get_timer() = EventLoop::instance().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &External<A>::refresh, lsar));
 }
@@ -379,7 +379,7 @@ External<A>::refresh(Lsa::LsaRef lsar)
     XLOG_ASSERT(lsar->valid());
 
     TimeVal now;
-    _ospf.get_eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     lsar->update_age_and_seqno(now);
 
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
@@ -835,7 +835,7 @@ External<A>::maxage_reached(Lsa::LsaRef lsar)
 
     if (!lsar->maxage()) {
 	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
+	EventLoop::instance().current_time(now);
 	lsar->update_age(now);
     }
 

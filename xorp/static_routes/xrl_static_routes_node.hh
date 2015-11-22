@@ -44,8 +44,7 @@ class XrlStaticRoutesNode : public StaticRoutesNode,
 			    public XrlStdRouter,
 			    public XrlStaticRoutesTargetBase {
 public:
-    XrlStaticRoutesNode(EventLoop&	eventloop,
-			const string&	class_name,
+    XrlStaticRoutesNode( const string&	class_name,
 			const string&	finder_hostname,
 			uint16_t	finder_port,
 			const string&	finder_target,
@@ -634,7 +633,6 @@ private:
     void send_mfea_mfc_change();
     void send_mfea_mfc_change_cb(const XrlError& xrl_error);
 
-    EventLoop&		_eventloop;
     XrlRibV0p1Client	_xrl_rib_client;
     XrlMfeaV0p1Client	_xrl_mfea_client;
     const string	_finder_target;

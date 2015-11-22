@@ -25,7 +25,6 @@
 #include "libxorp/eventloop.hh"
 #include "update_queue.hh"
 
-class EventLoop;
 
 /**
  * @short Base class for RIB notificatiers.
@@ -43,8 +42,7 @@ public:
     static const uint32_t DEFAULT_POLL_MS = 1000;
 
 public:
-    RibNotifierBase(EventLoop&	    eventloop,
-		    UpdateQueue<A>& update_queue,
+    RibNotifierBase( UpdateQueue<A>& update_queue,
 		    uint32_t	    poll_ms = DEFAULT_POLL_MS);
     virtual ~RibNotifierBase();
 
@@ -57,7 +55,6 @@ protected:
     bool poll_updates();
 
 protected:
-    EventLoop&					_e;
     UpdateQueue<A>&		  		_uq;
     typename UpdateQueue<A>::ReadIterator	_ri;
     uint32_t					_poll_ms;

@@ -447,9 +447,9 @@ template <typename A>
 bool
 Pause<A>::dispatch(XrlRouter& xrl_router, Profile&)
 {
+	UNUSED( xrl_router );
     this->incr_dispatch_attempts();
-    EventLoop& e = xrl_router.eventloop();
-    _t = e.new_oneoff_after_ms(_p_ms, callback(this, &Pause<A>::expire));
+    _t = EventLoop::instance().new_oneoff_after_ms(_p_ms, callback(this, &Pause<A>::expire));
     return true;
 }
 

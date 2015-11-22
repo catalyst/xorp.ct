@@ -290,8 +290,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 	new PolicyTableSourceMatch<A>(ribname + "PolicyExportSourceMatchTable",
 				      _master.safi(),
 				      _decision_table,
-				      _master.policy_filters(),
-				      _master.main().eventloop());
+				      _master.policy_filters());
     _decision_table->set_next_table(_policy_sourcematch_table);
 
     _aggregation_table =

@@ -28,7 +28,7 @@
 
 class TestPeer {
 public:
-    TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter, const char *server,
+    TestPeer( XrlRouter& xrlrouter, const char *server,
 	     bool verbose);
     ~TestPeer();
     bool done();
@@ -68,7 +68,6 @@ private:
     TestPeer& operator=(const TestPeer&);
 
 private:
-    EventLoop& _eventloop;
     XrlRouter& _xrlrouter;
 
     /* these are needed so we know how to decode ASnums (4-byte or 2-byte); */

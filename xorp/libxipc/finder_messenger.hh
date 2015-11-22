@@ -89,8 +89,7 @@ public:
     typedef XrlSender::Callback SendCallback;
 
 public:
-    FinderMessengerBase(EventLoop& e,
-			FinderMessengerManager* fmm,
+    FinderMessengerBase( FinderMessengerManager* fmm,
 			XrlCmdMap& cmds);
     
     virtual ~FinderMessengerBase();
@@ -99,7 +98,6 @@ public:
     virtual bool pending() const = 0;
 
     XrlCmdMap& command_map();
-    EventLoop& eventloop();
 
     void unhook_manager();
     FinderMessengerManager* manager();
@@ -135,7 +133,7 @@ private:
 		      FinderMessengerBase* fmb)
 	    : scb(cb)
 	{
-	    expiry = fmb->eventloop().new_oneoff_after_ms(RESPONSE_TIMEOUT_MS,
+	    expiry = EventLoop::instance().new_oneoff_after_ms(RESPONSE_TIMEOUT_MS,
 			callback(fmb,  &FinderMessengerBase::response_timeout,
 				 seqno));
 	}
@@ -153,7 +151,6 @@ private:
     friend class ResponseState;
 
 private:
-    EventLoop&				_eventloop;
     FinderMessengerManager*		_manager;
     SeqNoResponseMap		 	_expected_responses;
     XrlCmdMap&			 	_cmds;
@@ -169,11 +166,6 @@ FinderMessengerBase::command_map()
     return _cmds;
 }
 
-inline EventLoop&
-FinderMessengerBase::eventloop()
-{
-    return _eventloop;
-}
 
 inline FinderMessengerManager*
 FinderMessengerBase::manager()

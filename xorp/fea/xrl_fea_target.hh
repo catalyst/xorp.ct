@@ -30,7 +30,6 @@
 #include "xrl/targets/fea_base.hh"
 #include "xrl_fib_client_manager.hh"
 
-class EventLoop;
 #ifdef XORP_USE_CLICK
 class FeaDataPlaneManagerClick;
 #endif
@@ -57,8 +56,7 @@ public:
      *
      * @param eventloop the event loop to use.
      */
-    XrlFeaTarget(EventLoop&		eventloop,
-		 FeaNode&		fea_node,
+    XrlFeaTarget( FeaNode&		fea_node,
 		 XrlRouter&		xrl_router,
 #ifndef XORP_DISABLE_PROFILE
 		 Profile&		profile,
@@ -99,13 +97,7 @@ public:
      */
     bool	is_shutdown_received() const { return (_is_shutdown_received); }
 
-    /**
-     * Get the event loop this service is added to.
-     *
-     * @return the event loop this service is added to.
-     */
-    EventLoop&	eventloop() { return (_eventloop); }
-
+    
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
 	string&	name);
@@ -2773,7 +2765,6 @@ private:
     int send_gratuitous_arps(const string& ifname, const Mac& mac,
 			    string& error_msg);
 
-    EventLoop&		_eventloop;	// The event loop to use
     FeaNode&		_fea_node;	// The corresponding FeaNode
 
     XrlRouter&		       	_xrl_router;

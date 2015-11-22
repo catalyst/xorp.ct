@@ -47,8 +47,7 @@ public:
     PolicyTableSourceMatch(const string& tablename,
 			   const Safi& safi,
 			   BGPRouteTable<A>* parent,
-			   PolicyFilters& pfs,
-			   EventLoop& ev);
+			   PolicyFilters& pfs);
     ~PolicyTableSourceMatch();
 
     /**
@@ -97,11 +96,9 @@ private:
     bool pushing_routes();
 
 private:
-    EventLoop&		eventloop();
 
     bool		_pushing_routes;
     DumpIterator<A>*	_dump_iter;
-    EventLoop&		_ev;
     XorpTask		_dump_task;
 };
 

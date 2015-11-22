@@ -62,8 +62,7 @@ public:
     /**
      * Constructor.
      */
-    XrlRibNotifier(EventLoop&		e,
-		   UpdateQueue<A>&	uq,
+    XrlRibNotifier( UpdateQueue<A>&	uq,
 		   XrlRouter&		xr,
 		   uint32_t		max_inflight = DEFAULT_INFLIGHT,
 		   uint32_t		poll_ms = Super::DEFAULT_POLL_MS);
@@ -74,8 +73,7 @@ public:
      * debugging instances, ie a fake XrlSender can be used to test
      * behaviour of this class.
      */
-    XrlRibNotifier(EventLoop&		e,
-		   UpdateQueue<A>&	uq,
+    XrlRibNotifier( UpdateQueue<A>&	uq,
 		   XrlSender&		xs,
 		   const string&	class_name,
 		   const string&	intance_name,

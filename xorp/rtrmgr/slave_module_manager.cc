@@ -27,8 +27,8 @@
 
 #include "slave_module_manager.hh"
 
-SlaveModuleManager::SlaveModuleManager(EventLoop& eventloop) 
-    : GenericModuleManager(eventloop, false)
+SlaveModuleManager::SlaveModuleManager() 
+    : GenericModuleManager( false)
 {
 }
 

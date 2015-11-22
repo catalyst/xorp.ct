@@ -59,15 +59,13 @@ protected:
 
 class DelayValidation : public Validation {
 public:
-    DelayValidation(const string& module_name, EventLoop& eventloop,
-		    uint32_t ms, bool verbose);
+    DelayValidation(const string& module_name, uint32_t ms, bool verbose);
 
     void validate(RunShellCommand::ExecId exec_id, CallBack cb);
 
 private:
     void timer_expired();
 
-    EventLoop&	_eventloop;
     CallBack	_cb;
     uint32_t	_delay_in_ms;
     XorpTimer	_timer;
@@ -78,7 +76,7 @@ public:
     XrlStatusValidation(const string& module_name, const XrlAction& xrl_action,
 			TaskManager& taskmgr);
     virtual ~XrlStatusValidation() {
-	eventloop().remove_timer(_retry_timer);
+	EventLoop::instance().remove_timer(_retry_timer);
 	// TODO:  Should remove callbacks pointing to this as well,
 	// but that is a whole other problem...
     }
@@ -90,7 +88,6 @@ protected:
     virtual void xrl_done(const XrlError& e, XrlArgs* xrl_args);
     virtual void handle_status_response(ProcessStatus status,
 					const string& reason) = 0;
-    EventLoop& eventloop();
 
     const XrlAction&	_xrl_action;
     TaskManager&	_task_manager;
@@ -112,7 +109,6 @@ protected:
     virtual void handle_status_response(bool success,
 					const string& stdout_output,
 					const string& stderr_output) = 0;
-    EventLoop& eventloop();
 
     const ProgramAction& _program_action;
     TaskManager&	_task_manager;
@@ -241,7 +237,6 @@ public:
     virtual ~XrlStartup() {}
 
     void startup(const RunShellCommand::ExecId& exec_id, CallBack cb);
-    EventLoop& eventloop() const;
 
 private:
     void dummy_response();
@@ -261,7 +256,6 @@ public:
     virtual ~ProgramStartup();
 
     void startup(const RunShellCommand::ExecId& exec_id, CallBack cb);
-    EventLoop& eventloop() const;
 
 private:
     void stdout_cb(RunShellCommand* run_command, const string& output);
@@ -301,7 +295,6 @@ public:
     virtual ~XrlShutdown() {}
 
     void shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb);
-    EventLoop& eventloop() const;
 
 private:
     void dummy_response();
@@ -321,7 +314,6 @@ public:
     virtual ~ProgramShutdown();
 
     void shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb);
-    EventLoop& eventloop() const;
 
 private:
     void stdout_cb(RunShellCommand* run_command, const string& output);
@@ -449,7 +441,6 @@ public:
     void set_exec_id(const RunShellCommand::ExecId& v) { _exec_id = v; }
 
     const string& name() const { return _name; }
-    EventLoop& eventloop() const;
 
     bool verbose() const { return _verbose; }
 
@@ -534,7 +525,6 @@ public:
     bool do_exec() const { return _current_do_exec; }
     bool is_verification() const { return _is_verification; }
     bool verbose() const { return _verbose; }
-    EventLoop& eventloop() const;
 
     /**
      * @short kill_process is used to kill a fatally wounded process

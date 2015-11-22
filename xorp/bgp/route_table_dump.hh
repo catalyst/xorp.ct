@@ -27,11 +27,11 @@
 #include "bgp_trie.hh"
 #include "dump_iterators.hh"
 #include "peer_route_pair.hh"
+#include "libxorp/eventloop.hh"
 
 #define AUDIT_ENABLE
 #define AUDIT_LEN 1000
 
-class EventLoop;
 
 template<class A>
 class DumpTable : public BGPRouteTable<A>  {
@@ -108,7 +108,6 @@ private:
     void unplumb_self();
     void wakeup_downstream();
     bool do_next_route_dump();
-    EventLoop& eventloop() const {return _peer->eventloop();}
 
     const PeerHandler *_peer;
     DumpIterator<A> _dump_iter;

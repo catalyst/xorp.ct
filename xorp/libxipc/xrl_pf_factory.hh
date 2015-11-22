@@ -30,10 +30,10 @@ public:
     static void	 	startup();
     static void	 	shutdown();
 
-    static ref_ptr<XrlPFSender> create_sender(const string& name, EventLoop& eventloop,
+    static ref_ptr<XrlPFSender> create_sender(const string& name, 
 					      const char* proto_colon_addr);
 
-    static ref_ptr<XrlPFSender> create_sender(const string& name, EventLoop& e,
+    static ref_ptr<XrlPFSender> create_sender(const string& name, 
 					      const char* protocol,
 					      const char* address);
 };

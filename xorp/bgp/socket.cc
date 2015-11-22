@@ -43,12 +43,11 @@
 
 /* **************** BGPSocket - PUBLIC METHODS *********************** */
 
-Socket::Socket(const Iptuple& iptuple, EventLoop& e)
-    : _iptuple(iptuple), _eventloop(e)
+Socket::Socket(const Iptuple& iptuple)
+    : _iptuple(iptuple)
 {
     debug_msg("Socket constructor called: %s\n", _iptuple.str().c_str());
 
-    //    _eventloop = 0;
 
 #ifdef	DEBUG_PEERNAME
     _remote_host = "unconnected socket";
@@ -143,8 +142,8 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
 
 /* **************** BGPSocketClient - PUBLIC METHODS *********************** */
 
-SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e, bool md5sig)
-    : Socket(iptuple, e), _md5sig(md5sig)
+SocketClient::SocketClient(const Iptuple& iptuple,  bool md5sig)
+    : Socket(iptuple), _md5sig(md5sig)
 {
     debug_msg("SocketClient constructor called\n");
     _async_writer = 0;
@@ -476,8 +475,7 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
 
     const struct sockaddr *servername = get_remote_socket(len);
 
-    if (!eventloop().
-	add_ioevent_cb(sock,
+    if (!EventLoop::instance().add_ioevent_cb(sock,
 		    IOT_CONNECT,
 		     callback(this,
 			      &SocketClient::connect_socket_complete,
@@ -531,7 +529,7 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
 
     XLOG_ASSERT(get_sock() == sock);
 
-    eventloop().remove_ioevent_cb(sock);
+    EventLoop::instance().remove_ioevent_cb(sock);
 
     // Did the connection succeed?
     if (comm_sock_is_connected(sock, &is_connected) != XORP_OK) {
@@ -574,7 +572,7 @@ SocketClient::connect_socket_break()
 {
     _connecting = false;
 
-    eventloop().remove_ioevent_cb(get_sock());
+    EventLoop::instance().remove_ioevent_cb(get_sock());
     close_socket();
 }
 
@@ -585,7 +583,7 @@ SocketClient::async_add(XorpFd sock)
 	XLOG_FATAL("Failed to go non-blocking");
 
     XLOG_ASSERT(0 == _async_writer);
-    _async_writer = new AsyncFileWriter(eventloop(), sock);
+    _async_writer = new AsyncFileWriter(sock);
 
     XLOG_ASSERT(0 == _async_reader);
     //
@@ -594,7 +592,7 @@ SocketClient::async_add(XorpFd sock)
     // Also, the priority is lower than the tasks' background priority
     // to avoid being overloaded by high volume data from the peers.
     //
-    _async_reader = new AsyncFileReader(eventloop(), sock,
+    _async_reader = new AsyncFileReader( sock,
 					XorpTask::PRIORITY_BACKGROUND);
 
     async_read_start();
@@ -640,8 +638,8 @@ SocketClient::still_reading()
 
 /* **************** BGPSocketServer *********************** */
 
-SocketServer::SocketServer(const Iptuple& iptuple, EventLoop& e) :
-    Socket(iptuple, e)
+SocketServer::SocketServer(const Iptuple& iptuple) :
+    Socket(iptuple)
 {
     debug_msg("SocketServer constructor called\n");	
 }

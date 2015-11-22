@@ -56,12 +56,11 @@ bool forever = false;
 bool
 single_face(TestInfo& info)
 {
-    EventLoop eventloop;
 
-    DebugIO io(info, eventloop);
+    DebugIO io(info);
     io.startup();
 
-    Olsr olsr(eventloop, &io);
+    Olsr olsr( &io);
 
     FaceManager& fm = olsr.face_manager();
 
@@ -103,13 +102,13 @@ single_face(TestInfo& info)
 
     if (forever)
 	while (olsr.running())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(4 * hello_interval ,0),
+    XorpTimer t = EventLoop::instance().set_flag_after(TimeVal(4 * hello_interval ,0),
 					   &timeout);
     while (olsr.running() && !timeout) {
-	eventloop.run();
+	EventLoop::instance().run();
 	if (2 == io.packets())
 	    break;
     }
@@ -144,7 +143,6 @@ string suppress;
 bool
 two_faces(TestInfo& info, Stagger stagger)
 {
-    EventLoop eventloop;
 
     bool verbose[2];
     verbose[0] = info.verbose();
@@ -166,13 +164,13 @@ two_faces(TestInfo& info, Stagger stagger)
     TestInfo info2(info.test_name() + "(olsr2)" , verbose[1],
 		   info.verbose_level(), info.out());
 
-    DebugIO io_1(info1, eventloop);
+    DebugIO io_1(info1);
     io_1.startup();
-    DebugIO io_2(info2, eventloop);
+    DebugIO io_2(info2);
     io_2.startup();
     
-    Olsr olsr_1(eventloop, &io_1);
-    Olsr olsr_2(eventloop, &io_2);
+    Olsr olsr_1( &io_1);
+    Olsr olsr_2( &io_2);
 
     olsr_1.set_main_addr("192.0.2.1");
     olsr_2.set_main_addr("192.0.2.2");
@@ -216,7 +214,7 @@ two_faces(TestInfo& info, Stagger stagger)
     olsr_2.set_refresh_interval(TimeVal(refresh_interval, 0));
     olsr_2.set_interface_cost(interface_2, vif_2, interface_cost);
 
-    EmulateSubnet emu(info, eventloop);
+    EmulateSubnet emu(info);
 
     emu.bind_interface("olsr1", interface_1, vif_1, addr_1, MY_OLSR_PORT, io_1);
     emu.bind_interface("olsr2", interface_2, vif_2, addr_2, MY_OLSR_PORT, io_2);
@@ -234,15 +232,15 @@ two_faces(TestInfo& info, Stagger stagger)
 
     if (forever)
 	while (olsr_1.running() && olsr_2.running())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(20 * hello_interval, 0),
+    XorpTimer t = EventLoop::instance().set_flag_after(TimeVal(20 * hello_interval, 0),
 					   &timeout);
 
     const int expected = 16;
     while (olsr_1.running() && olsr_2.running() && !timeout) {
-	eventloop.run();
+	EventLoop::instance().run();
 	if (expected <= io_1.packets() + io_2.packets())
 	    break;
 	if (STAGGER1 == stagger && 1 == io_2.packets())
@@ -344,9 +342,9 @@ two_faces(TestInfo& info, Stagger stagger)
 
     timeout = false;
     t.clear();
-    t = eventloop.set_flag_after(3 * nh_1.get_neighbor_hold_time(), &timeout);
+    t = EventLoop::instance().set_flag_after(3 * nh_1.get_neighbor_hold_time(), &timeout);
     while (!timeout) {
-	eventloop.run();
+	EventLoop::instance().run();
 	if (!pulled_1 && STAGGER1 == stagger && expected_1 == io_1.packets()) {
 	    debug_msg("Pulling OLSR1.\n");
 	    emu.unbind_interface("olsr1", interface_1, vif_1, addr_1,

@@ -82,7 +82,7 @@ class AcceptSession;
  */
 class DampPeerOscillations {
  public:
-    DampPeerOscillations(EventLoop& eventloop, uint32_t restart_threshold,
+    DampPeerOscillations( uint32_t restart_threshold,
 			 uint32_t time_period, uint32_t idle_holdtime);
 
     /**
@@ -100,7 +100,6 @@ class DampPeerOscillations {
      */
     void reset();
  private:
-    EventLoop& _eventloop;		// Reference to the eventloop.
     const uint32_t _restart_threshold;	// Number of restart after
 					// which the idle holdtime
 					// will increase.

@@ -38,14 +38,13 @@
 /* XorpClient                                                          */
 /***********************************************************************/
 
-XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrl_router)
-    : _eventloop(eventloop),
-      _xrl_router(xrl_router)
+XorpClient::XorpClient( XrlRouter& xrl_router)
+    : _xrl_router(xrl_router)
 {
 }
 
 XorpClient::~XorpClient() {
-    _eventloop.remove_timer(_delay_timer);
+    EventLoop::instance().remove_timer(_delay_timer);
 }
 
 void
@@ -60,7 +59,7 @@ XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
 	debug_msg("send_sync before sending\n");
 	debug_msg("DUMMY SEND: immediate callback dispatch\n");
 	if (!cb.is_empty()) {
-	    _delay_timer = _eventloop.new_oneoff_after_ms(0,
+	    _delay_timer = EventLoop::instance().new_oneoff_after_ms(0,
 				callback(this, &XorpClient::fake_send_done,
 					 xrl_return_spec, cb));
 	}

@@ -61,13 +61,11 @@ IsTwoHopLinkStrictPred::operator()(OlsrTypes::TwoHopLinkID tlid)
     }
 }
 
-Neighbor::Neighbor(EventLoop& ev,
-		   Neighborhood* parent,
+Neighbor::Neighbor( Neighborhood* parent,
 		   const OlsrTypes::NeighborID nid,
 		   const IPv4& main_addr,
 		   const OlsrTypes::LogicalLinkID linkid)
- : _eventloop(ev),
-   _parent(parent),
+ : _parent(parent),
    _id(nid),
    _main_addr(main_addr),
    _is_mpr(false),
@@ -258,7 +256,7 @@ Neighbor::set_is_mpr_selector(bool value, const TimeVal& expiry_time)
 	debug_msg("scheduling %u's MPR selector expiry for %s\n",
 	    XORP_UINT_CAST(id()), cstring(expiry_time));
 
-	_mpr_selector_timer = _eventloop.new_oneoff_after(
+	_mpr_selector_timer = EventLoop::instance().new_oneoff_after(
 	    expiry_time,
 	    callback(this, &Neighbor::event_mpr_selector_expired));
     }

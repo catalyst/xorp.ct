@@ -339,7 +339,6 @@ private:
 		     const string& error_msg);
 
 	IfConfigSetClick& _ifconfig_set_click;
-	EventLoop&	_eventloop;
 	string		_command_name;
 	list<string>	_command_argument_list;
 	RunCommand*	_run_command;

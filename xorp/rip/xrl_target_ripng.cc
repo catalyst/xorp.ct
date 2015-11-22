@@ -35,13 +35,12 @@
 #include "xrl_target_common.hh"
 
 
-XrlRipngTarget::XrlRipngTarget(EventLoop&		el,
-			       XrlRouter&		xr,
+XrlRipngTarget::XrlRipngTarget( XrlRouter&		xr,
 			       XrlProcessSpy&		xps,
 			       XrlPortManager<IPv6>& 	xpm,
 			       XrlRedistManager<IPv6>&	xrm,
 			       System<IPv6>&		rip_system)
-    : XrlRipngTargetBase(&xr), _e(el)
+    : XrlRipngTargetBase(&xr) 
 {
     _ct = new XrlRipCommonTarget<IPv6>(xps, xpm, xrm, rip_system);
 }

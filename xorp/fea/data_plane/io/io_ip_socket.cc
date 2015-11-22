@@ -903,7 +903,7 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
 
 
     // Assign a method to read from this socket
-    if (eventloop().add_ioevent_cb(*rv, IOT_READ,
+    if (EventLoop::instance().add_ioevent_cb(*rv, IOT_READ,
 				   callback(this,
 					    &IoIpSocket::proto_socket_read))
 	== false) {
@@ -982,14 +982,14 @@ IoIpSocket::close_proto_sockets(string& error_msg)
     if (_proto_socket_out.is_valid()) {
 	// It probably wasn't added...but just in case code changes,
 	// keep the cleanup logic here.
-	eventloop().remove_ioevent_cb(_proto_socket_out);
+	EventLoop::instance().remove_ioevent_cb(_proto_socket_out);
 	comm_close(_proto_socket_out);
 	_proto_socket_out.clear();
     }
 
 #ifdef USE_SOCKET_PER_IFACE
     if (_mcast_proto_socket_in.is_valid()) {
-	eventloop().remove_ioevent_cb(_mcast_proto_socket_in);
+	EventLoop::instance().remove_ioevent_cb(_mcast_proto_socket_in);
 	comm_close(_mcast_proto_socket_in);
 	_mcast_proto_socket_in.clear();
     }
@@ -1013,7 +1013,7 @@ int IoIpSocket::cleanupXorpFd(XorpFd* fd) {
     //
     if (fd->is_valid()) {
 	// Remove it just in case, even though it may not be select()-ed
-	eventloop().remove_ioevent_cb(*fd);
+	EventLoop::instance().remove_ioevent_cb(*fd);
 
 
 	comm_close(*fd);

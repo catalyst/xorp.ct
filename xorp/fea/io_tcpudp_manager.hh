@@ -1251,7 +1251,6 @@ private:
     bool		is_my_address(const IPvX& local_addr) const;
 
     FeaNode&		_fea_node;
-    EventLoop&		_eventloop;
     const IfTree&	_iftree;
 
     // Collection of IP communication handlers keyed by sockid.

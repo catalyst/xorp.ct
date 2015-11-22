@@ -32,7 +32,7 @@ class ProcessWatch {
 public:
     typedef XorpCallback0<void>::RefPtr TerminateCallback;
 
-    ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
+    ProcessWatch(XrlStdRouter *xrl_router, 
 		 const char *bgp_mib_name,
 		 TerminateCallback cb);
 
@@ -76,7 +76,6 @@ protected:
 			const string& target_instance);
 
 private:
-    EventLoop& _eventloop;
     TerminateCallback _shutdown;
 
     bool _fea;

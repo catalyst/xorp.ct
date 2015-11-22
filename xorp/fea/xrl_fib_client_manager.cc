@@ -289,7 +289,7 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change()
 	// If an error, then start a timer to try again
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
-	_inform_fib_client_queue_timer = eventloop().new_oneoff_after(
+	_inform_fib_client_queue_timer = EventLoop::instance().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFibClientManager::FibClient<F>::send_fib_client_route_change));
     }
@@ -326,7 +326,7 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change_cb(
     //
     if (_inform_fib_client_queue_timer.scheduled())
 	return;
-    _inform_fib_client_queue_timer = eventloop().new_oneoff_after(
+    _inform_fib_client_queue_timer = EventLoop::instance().new_oneoff_after(
 	TimeVal(1, 0),
 	callback(this, &XrlFibClientManager::FibClient<F>::send_fib_client_route_change));
 }

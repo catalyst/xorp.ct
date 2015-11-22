@@ -30,7 +30,6 @@
 
 #include "io.hh"
 
-class EventLoop;
 template <typename A> class XrlIO;
 
 /**
@@ -41,7 +40,7 @@ template <typename A> class XrlIO;
 template <class A>
 class XrlQueue {
 public:
-    XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
+    XrlQueue( XrlRouter& xrl_router);
 
     void set_io(XrlIO<A> *io) {
 	_io = io;
@@ -59,7 +58,6 @@ private:
 					// allowed in flight.
 
     XrlIO<A>    *_io;
-    EventLoop& _eventloop;
     XrlRouter& _xrl_router;
 
     struct Queued {
@@ -95,7 +93,6 @@ private:
      */
     bool sendit_spec(Queued& q, const char *protocol);
 
-    EventLoop& eventloop() const;
 
     void route_command_done(const XrlError& error, const string comment);
 };
@@ -108,16 +105,15 @@ class XrlIO : public IO<A>,
 	      public IfMgrHintObserver,
 	      public ServiceChangeObserverBase {
  public:
-    XrlIO(EventLoop& eventloop, XrlRouter& xrl_router, const string& feaname,
+    XrlIO( XrlRouter& xrl_router, const string& feaname,
 	  const string& ribname)
-	: _eventloop(eventloop),
-	  _xrl_router(xrl_router),
+	: _xrl_router(xrl_router),
 	  _feaname(feaname),
 	  _ribname(ribname),
 	  _component_count(0),
-	  _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
+	  _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
 		 _xrl_router.finder_port()),
-	  _rib_queue(eventloop, xrl_router)
+	  _rib_queue( xrl_router)
 
     {
 	_ifmgr.set_observer(this);
@@ -451,7 +447,6 @@ class XrlIO : public IO<A>,
     void leave_multicast_group_cb(const XrlError& xrl_error, string interface,
 				  string vif);
 
-    EventLoop&		_eventloop;
     XrlRouter&		_xrl_router;
     string		_feaname;
     string		_ribname;

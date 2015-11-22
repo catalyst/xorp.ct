@@ -38,12 +38,11 @@
 #include "neighborhood.hh"
 #include "twohop.hh"
 
-TwoHopNeighbor::TwoHopNeighbor(EventLoop& ev, Neighborhood* parent,
+TwoHopNeighbor::TwoHopNeighbor( Neighborhood* parent,
 			       const OlsrTypes::TwoHopNodeID id,
 			       const IPv4& main_addr,
 			       const OlsrTypes::TwoHopLinkID tlid)
- : _ev(ev),
-   _parent(parent),
+ : _parent(parent),
    _id(id),
    _main_addr(main_addr),
    _is_strict(false),
@@ -126,10 +125,10 @@ TwoHopNeighbor::reset_covering_mprs()
     _coverage = 0;
 }
 
-TwoHopLink::TwoHopLink(EventLoop& ev, Neighborhood* parent,
+TwoHopLink::TwoHopLink( Neighborhood* parent,
 		       OlsrTypes::TwoHopLinkID tlid, Neighbor* nexthop,
 		       const TimeVal& vtime)
- : _ev(ev), _parent(parent), _id(tlid), _nexthop(nexthop), _destination(0)
+ :  _parent(parent), _id(tlid), _nexthop(nexthop), _destination(0)
 {
     update_timer(vtime);
 }
@@ -140,7 +139,7 @@ TwoHopLink::update_timer(const TimeVal& vtime)
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
-    _expiry_timer = _ev.new_oneoff_after(vtime,
+    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
 	callback(this, &TwoHopLink::event_dead));
 }
 

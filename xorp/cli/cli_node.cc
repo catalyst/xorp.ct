@@ -68,13 +68,11 @@
  * @init_family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @init_module_id: The module ID (must be %XORP_MODULE_CLI).
- * @init_eventloop: The event loop.
  * 
  * CLI node constructor.
  **/
-CliNode::CliNode(int init_family, xorp_module_id module_id,
-		 EventLoop& init_eventloop)
-    : ProtoNode<Vif>(init_family, module_id, init_eventloop),
+CliNode::CliNode(int init_family, xorp_module_id module_id)
+    : ProtoNode<Vif>(init_family, module_id),
       _cli_port(0),		// XXX: not defined yet
       _next_session_id(0),
       _startup_cli_prompt(XORP_CLI_PROMPT),
@@ -129,7 +127,7 @@ CliNode::start()
     //
     if (_cli_port != 0) {
 	if (sock_serv_open().is_valid()) {
-	    eventloop().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
+	    EventLoop::instance().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
 				       callback(this, &CliNode::accept_connection),
 				       XorpTask::PRIORITY_HIGHEST);
 	}
@@ -171,7 +169,7 @@ CliNode::stop()
     delete_pointers_list(_client_list);
 
     if (_cli_socket.is_valid())
-	eventloop().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
+	EventLoop::instance().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
     sock_serv_close();
 
     if (ProtoNode<Vif>::stop() != XORP_OK)

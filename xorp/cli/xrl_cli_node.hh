@@ -36,8 +36,7 @@
 class XrlCliNode : public XrlStdRouter,
 		   public XrlCliTargetBase {
 public:
-    XrlCliNode(EventLoop&	eventloop,
-	       const string&	class_name,
+    XrlCliNode( const string&	class_name,
 	       const string&	finder_hostname,
 	       uint16_t		finder_port,
 	       const string&	finder_target,

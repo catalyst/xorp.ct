@@ -384,8 +384,7 @@ MD5AuthHandler::MD5Key::set_last_seqno_recv(const IPv4& src_addr,
 // ----------------------------------------------------------------------------
 // MD5AuthHandler implementation
 
-MD5AuthHandler::MD5AuthHandler(EventLoop& eventloop)
-    : _eventloop(eventloop)
+MD5AuthHandler::MD5AuthHandler()
 {
 }
 
@@ -536,7 +535,7 @@ MD5AuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
     TimeVal now;
     vector<uint8_t> trailer;
 
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     MD5Key* key = best_outbound_key(now);
 
@@ -593,7 +592,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     XorpTimer start_timer, end_timer;
     string dummy_error_msg;
 
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
 
     if (start_timeval > end_timeval) {
 	error_msg = c_format("Start time is later than the end time");
@@ -611,7 +610,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     else
 	adj_timeval = TimeVal::ZERO();
     if (adj_timeval > now) {
-	start_timer = _eventloop.new_oneoff_at(
+	start_timer = EventLoop::instance().new_oneoff_at(
 	    adj_timeval,
 	    callback(this, &MD5AuthHandler::key_start_cb, key_id));
     }
@@ -623,7 +622,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     else
 	adj_timeval = TimeVal::MAXIMUM();
     if (adj_timeval != TimeVal::MAXIMUM()) {
-	end_timer = _eventloop.new_oneoff_at(
+	end_timer = EventLoop::instance().new_oneoff_at(
 	    adj_timeval,
 	    callback(this, &MD5AuthHandler::key_stop_cb, key_id));
     }
@@ -863,7 +862,7 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
     }
 
     // Create a new MD5 authentication handler and delete the old handler
-    md5_ah = new MD5AuthHandler(_eventloop);
+    md5_ah = new MD5AuthHandler;
     if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
 			max_time_drift, error_msg) != true) {
 	error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());

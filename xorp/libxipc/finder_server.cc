@@ -24,11 +24,10 @@
 #include "finder_module.h"
 #include "finder_server.hh"
 
-FinderServer::FinderServer(EventLoop& e,
-			   IPv4	      default_interface,
+FinderServer::FinderServer( IPv4	      default_interface,
 			   uint16_t   default_port)
     throw (InvalidAddress, InvalidPort)
-    : _e(e), _f(e), _fxt(_f)
+    : _fxt(_f)
 {
     char* value;
     IPv4 finder_addr = default_interface;
@@ -102,7 +101,7 @@ FinderServer::add_binding(IPv4 addr, uint16_t port)
     }
     try {
         _listeners.push_back(
-	    new FinderTcpListener(_e, _f, _f.commands(), addr, port)
+	    new FinderTcpListener( _f, _f.commands(), addr, port)
 	    );
     } catch (const bad_alloc&) {
 	return false;

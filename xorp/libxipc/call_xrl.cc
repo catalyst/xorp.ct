@@ -87,7 +87,7 @@ void usage()
 }
 
 static int
-call_xrl(EventLoop& e, XrlRouter& router, const char* request)
+call_xrl( XrlRouter& router, const char* request)
 {
     try {
 	Xrl x(request);
@@ -107,11 +107,11 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 				    &x));
 	    
 	    bool timed_out = false;
-	    XorpTimer timeout = e.set_flag_after_ms(wait_time, &timed_out);
+	    XorpTimer timeout = EventLoop::instance().set_flag_after_ms(wait_time, &timed_out);
 	    while (xorp_do_run && timed_out == false && done == false) {
 		// NB we don't test for resolve failed here because if
 		// resolved failed we want to wait before retrying.
-		e.run();
+		EventLoop::instance().run();
 	    }
 	    tries++;
 
@@ -163,8 +163,7 @@ preprocess_file(XrlParserFileInput& xfp)
 }
 
 static int
-input_file(EventLoop&	       eventloop,
-	   XrlRouter&	       router,
+input_file( XrlRouter&	       router,
 	   XrlParserFileInput& xfp)
 {
 
@@ -174,7 +173,7 @@ input_file(EventLoop&	       eventloop,
 	/* if line length is zero or line looks like a preprocessor directive
 	 * continue. */
 	if (l.length() == 0 || l[0] == '#') continue;
-	int err = call_xrl(eventloop, router, l.c_str());
+	int err = call_xrl( router, l.c_str());
 	if (err) {
 	    cerr << xfp.stack_trace() << endl;
 	    cerr << "Xrl failed: " << l;
@@ -185,8 +184,7 @@ input_file(EventLoop&	       eventloop,
 }
 
 static int
-input_files(EventLoop&	e,
-	    XrlRouter&	router,
+input_files( XrlRouter&	router,
 	    int		argc,
 	    char* const argv[],
 	    bool	pponly)
@@ -198,7 +196,7 @@ input_files(EventLoop&	e,
 		if (pponly) {
 		    preprocess_file(xfp);
 		} else {
-		    int err = input_file(e, router, xfp);
+		    int err = input_file( router, xfp);
 		    if (err)
 			return err;
 		}
@@ -209,7 +207,7 @@ input_files(EventLoop&	e,
 	    if (pponly) {
 		preprocess_file(xfp);
 	    } else {
-		input_file(e, router, xfp);
+		input_file( router, xfp);
 	    }
 	}
 	argc--;
@@ -219,13 +217,12 @@ input_files(EventLoop&	e,
 }
 
 static int
-input_cmds(EventLoop&  e,
-	   XrlRouter&  router,
+input_cmds( XrlRouter&  router,
 	   int	       argc,
 	   char* const argv[])
 {
     for (int i = 0; i < argc; i++) {
-	int err = call_xrl(e, router, argv[i]);
+	int err = call_xrl( router, argv[i]);
 	switch (err) {
 	case OK:
 	    break;
@@ -300,13 +297,12 @@ main(int argc, char* const argv[])
 
     int rv = 0;
     try {
-	EventLoop e;
-	XrlStdRouter router(e, ROUTER_NAME, finder_host.c_str(), port);
+	XrlStdRouter router( ROUTER_NAME, finder_host.c_str(), port);
 
 	router.finalize();
 
 	while (xorp_do_run && !router.failed() && !router.ready()) {
-	    e.run();
+	    EventLoop::instance().run();
 	}
 
 	if (router.failed()) {
@@ -319,11 +315,11 @@ main(int argc, char* const argv[])
 	}
 	else {
 	    if (fileinput) {
-		if (input_files(e, router, argc, argv, pponly)) {
+		if (input_files( router, argc, argv, pponly)) {
 		    rv = -1;
 		}
 	    } else if (argc != 0) {
-		if (input_cmds(e, router, argc, argv)) {
+		if (input_cmds( router, argc, argv)) {
 		    rv = -1;
 		}
 	    } else {

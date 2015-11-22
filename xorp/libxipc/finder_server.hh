@@ -50,7 +50,7 @@ public:
     /**
      * Constructor
      */
-    FinderServer(EventLoop& e, IPv4 default_interface, uint16_t default_port)
+    FinderServer( IPv4 default_interface, uint16_t default_port)
 	throw (InvalidAddress, InvalidPort);
 
     /**
@@ -83,7 +83,6 @@ public:
     uint16_t port() const { return _listeners.front()->port(); }
 
 protected:
-    EventLoop&		_e;
     Finder		_f;
     FinderXrlTarget	_fxt;
     Listeners		_listeners;

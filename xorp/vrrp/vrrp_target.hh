@@ -132,10 +132,6 @@ public:
     void delete_ip(const string& ifname, const IPv4& ip);
 
 
-    /**
-     * @return an instance of the eventloop.
-     */
-    EventLoop& eventloop();
 
 protected:
     XrlCmdError common_0_1_get_target_name(

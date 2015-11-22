@@ -32,7 +32,6 @@
 #include "firewall_get.hh"
 #include "firewall_set.hh"
 
-class EventLoop;
 class FeaNode;
 class FirewallTransactionManager;
 
@@ -55,13 +54,7 @@ public:
      */
     virtual ~FirewallManager();
 
-    /**
-     * Get a reference to the @ref EventLoop instance.
-     *
-     * @return a reference to the @ref EventLoop instance.
-     */
-    EventLoop& eventloop() { return _eventloop; }
-
+    
     /**
      * Get a reference to the interface configuration.
      *
@@ -364,7 +357,6 @@ private:
      */
     void generate_token();
 
-    EventLoop&				_eventloop;
     const IfTree&			_iftree;
 
     //

@@ -282,7 +282,7 @@ DumpTable<A>::initiate_background_dump()
     //delay the actual start of the dump to allow whoever is calling
     //us to get their act in order before we wake up the downstream
     //branch
-    _dump_timer = eventloop().
+    _dump_timer = EventLoop::instance().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
@@ -551,7 +551,7 @@ DumpTable<A>::schedule_unplumb_self()
        So we schedule the unplumbing once the current message
        processing has finished, and do it when nothing else is going
        on */
-    _dump_timer = eventloop().
+    _dump_timer = EventLoop::instance().
 	new_oneoff_after_ms(0,
 			    callback(this,
 				     &DumpTable<A>::unplumb_self));

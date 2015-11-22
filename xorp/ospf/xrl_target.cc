@@ -44,7 +44,7 @@
 
 
 static int
-decode_time_string(EventLoop& eventloop, const string& time_string,
+decode_time_string( const string& time_string,
 		   TimeVal& timeval)
 {
     const char* s;
@@ -63,7 +63,7 @@ decode_time_string(EventLoop& eventloop, const string& time_string,
     // time format (e.g, the timezone and the summer time flag).
     //
     TimeVal now;
-    eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
     time_t local_time = now.sec();
     const struct tm* local_tm = localtime(&local_time);
     memcpy(&tm, local_tm, sizeof(tm));
@@ -655,7 +655,7 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     // Decode the start and end time
     //
     if (! start_time.empty()) {
-	if (decode_time_string(_ospf.get_eventloop(), start_time,
+	if (decode_time_string( start_time,
 			       start_timeval)
 	    != XORP_OK) {
 	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
@@ -663,7 +663,7 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
 	}
     }
     if (! end_time.empty()) {
-	if (decode_time_string(_ospf.get_eventloop(), end_time, end_timeval)
+	if (decode_time_string(end_time, end_timeval)
 	    != XORP_OK) {
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);

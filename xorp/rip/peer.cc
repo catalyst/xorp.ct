@@ -127,10 +127,9 @@ Peer<A>::set_expiry_timer(Route* route)
 {
     XorpTimer t;
     uint32_t secs = expiry_secs();
-    EventLoop& eventloop = _port.port_manager().eventloop();
 
     if (secs) {
-        t = eventloop.new_oneoff_after_ms(secs * 1000,
+        t = EventLoop::instance().new_oneoff_after_ms(secs * 1000,
 					  callback(this, &Peer<A>::expire_route, route));
     }
     route->set_timer(t);

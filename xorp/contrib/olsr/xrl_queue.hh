@@ -30,7 +30,7 @@ class XrlIO;
  */
 class XrlQueue {
 public:
-    XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
+    XrlQueue( XrlRouter& xrl_router);
 
     void set_io(XrlIO* io) { _io = io; }
 
@@ -75,7 +75,6 @@ private:
 
     static const size_t WINDOW = 100;
 
-    EventLoop& eventloop() const;
 
     /**
      * @return true if the maximum number of XRLs flight has been exceeded.
@@ -108,7 +107,6 @@ private:
 
 private:
     XrlIO*		_io;
-    EventLoop&		_eventloop;
     XrlRouter&		_xrl_router;
     deque<Queued>	_xrl_queue;
 

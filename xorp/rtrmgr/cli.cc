@@ -3096,7 +3096,6 @@ RouterCLI::op_mode_func(const string& ,
 	// Verify that any previous command has been disposed of.
 	XLOG_ASSERT(NULL == _op_mode_cmd);
 	_op_mode_cmd = op_cmd_list()->execute(
-	    _xorpsh.eventloop(),
 	    path_segments,
 	    callback(this, &RouterCLI::op_mode_cmd_print),
 	    callback(this, &RouterCLI::op_mode_cmd_done));

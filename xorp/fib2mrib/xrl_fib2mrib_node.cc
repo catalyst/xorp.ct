@@ -32,25 +32,22 @@
 
 const TimeVal XrlFib2mribNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
-XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
-				 const string&	class_name,
+XrlFib2mribNode::XrlFib2mribNode( const string&	class_name,
 				 const string&	finder_hostname,
 				 uint16_t	finder_port,
 				 const string&	finder_target,
 				 const string&	fea_target,
 				 const string&	rib_target)
-    : Fib2mribNode(eventloop),
-      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+    : XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlFib2mribTargetBase(&xrl_router()),
-      _eventloop(eventloop),
       _xrl_fea_fti_client(&xrl_router()),
       _xrl_fea_fib_client(&xrl_router()),
       _xrl_rib_client(&xrl_router()),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _rib_target(rib_target),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
+      _ifmgr( fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
       _is_finder_alive(false),
@@ -167,7 +164,7 @@ XrlFib2mribNode::fea_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_startup_timer = _eventloop.new_oneoff_after(
+	_fea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::fea_register_startup));
 	return;
@@ -228,7 +225,7 @@ XrlFib2mribNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
+	    _fea_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::fea_register_startup));
 	}
@@ -279,7 +276,7 @@ XrlFib2mribNode::fea_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_fea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::fea_register_shutdown));
 	return;
@@ -349,7 +346,7 @@ XrlFib2mribNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _fea_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::fea_register_shutdown));
 	}
@@ -395,7 +392,7 @@ XrlFib2mribNode::rib_register_startup()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_startup_timer = _eventloop.new_oneoff_after(
+	_rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::rib_register_startup));
 	return;
@@ -457,7 +454,7 @@ XrlFib2mribNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
+	    _rib_register_startup_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_startup));
 	}
@@ -506,7 +503,7 @@ XrlFib2mribNode::rib_register_shutdown()
 	//
 	// If an error, then start a timer to try again.
 	//
-	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	_rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	return;
@@ -570,7 +567,7 @@ XrlFib2mribNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	}
@@ -656,7 +653,7 @@ XrlFib2mribNode::send_fea_add_fib_client()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	_fea_fib_client_registration_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
     }
@@ -723,7 +720,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
 		       "supports IPv4: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	    _fea_fib_client_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 	}
@@ -787,7 +784,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
 	    XLOG_ERROR("Failed to add IPv4 FIB client to the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	    _fea_fib_client_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 	}
@@ -900,7 +897,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(
 	    XLOG_ERROR("Cannot deregister IPv4 FIB client with the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	}
@@ -958,7 +955,7 @@ XrlFib2mribNode::send_rib_add_tables()
 	// If an error, then start a timer to try again.
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	_rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
     }
@@ -1019,7 +1016,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to add IPv4 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    _rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_rib_add_tables));
 	}
@@ -1136,7 +1133,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	}
@@ -1756,7 +1753,7 @@ XrlFib2mribNode::send_rib_route_change()
 		   : "delete",
 		   fib2mrib_route.network().str().c_str());
     start_timer_label:
-	_inform_rib_queue_timer = _eventloop.new_oneoff_after(
+	_inform_rib_queue_timer = EventLoop::instance().new_oneoff_after(
 	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::send_rib_route_change));
     }
@@ -1830,7 +1827,7 @@ XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
 		       : (_inform_rib_queue.front().is_replace_route())? "replace"
 		       : "delete",
 		       xrl_error.str().c_str());
-	    _inform_rib_queue_timer = _eventloop.new_oneoff_after(
+	    _inform_rib_queue_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_rib_route_change));
 	}
@@ -2044,7 +2041,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
 		       "supports IPv6: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	    _fea_fib_client_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 	}
@@ -2109,7 +2106,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
 	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+	    _fea_fib_client_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 	}
@@ -2178,7 +2175,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(
 	    XLOG_ERROR("Cannot deregister IPv6 FIB client with the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	}
@@ -2242,7 +2239,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
 	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+	    _rib_igp_table_registration_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::send_rib_add_tables));
 	}
@@ -2307,7 +2304,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
 	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    _rib_register_shutdown_timer = EventLoop::instance().new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlFib2mribNode::rib_register_shutdown));
 	}

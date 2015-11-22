@@ -66,7 +66,6 @@ public:
 private:
     void timer_expired();
 
-    EventLoop 	 	_eventloop;
     XrlStdRouter 	_xrl_rtr;
     detail_t 		_verbose;
     uint32_t 		_token;

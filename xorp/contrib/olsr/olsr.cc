@@ -37,13 +37,13 @@
 
 #include "olsr.hh"
 
-Olsr::Olsr(EventLoop& eventloop, IO* io)
-    : _eventloop(eventloop), _io(io),
-      _fm(*this, eventloop),
-      _nh(*this, eventloop, _fm),
-      _tm(*this, eventloop, _fm, _nh),
-      _er(*this, eventloop, _fm, _nh),
-      _rm(*this, eventloop, &_fm, &_nh, &_tm, &_er),
+Olsr::Olsr( IO* io)
+    :  _io(io),
+      _fm(*this),
+      _nh(*this, _fm),
+      _tm(*this, _fm, _nh),
+      _er(*this, _fm, _nh),
+      _rm(*this, &_fm, &_nh, &_tm, &_er),
       _reason("Waiting for IO"), _process_status(PROC_STARTUP)
 {
     _nh.set_topology_manager(&_tm);

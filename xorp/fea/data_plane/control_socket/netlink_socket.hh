@@ -35,14 +35,13 @@ class NetlinkSocketPlumber;
 
 /**
  * NetlinkSocket class opens a netlink socket and forwards data arriving
- * on the socket to NetlinkSocketObservers.  The NetlinkSocket hooks itself
- * into the EventLoop and activity usually happens asynchronously.
+ * on the socket to NetlinkSocketObservers.  
  */
 class NetlinkSocket :
     public NONCOPYABLE
 {
 public:
-    NetlinkSocket(EventLoop& eventloop, uint32_t table_id);
+    NetlinkSocket( uint32_t table_id);
     virtual ~NetlinkSocket();
 
     /**
@@ -176,7 +175,6 @@ private:
 
     static const size_t NETLINK_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 
-    EventLoop&	 _eventloop;
     int		 _fd;
     ObserverList _ol;
 

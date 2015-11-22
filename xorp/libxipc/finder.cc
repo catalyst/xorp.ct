@@ -362,7 +362,7 @@ validate_finder_classes_and_instances(const Finder::ClassTable&  classes,
 // Finder
 //
 
-Finder::Finder(EventLoop& e) : _e(e), _cmds("finder"), _active_messenger(0)
+Finder::Finder() :  _cmds("finder"), _active_messenger(0)
 {
 }
 
@@ -762,7 +762,7 @@ Finder::fill_targets_xrl_list(const string& target,
 void
 Finder::start_hello_timer()
 {
-    _hello = _e.new_periodic_ms(XORP_HELLO_TIMER_MS, callback(this, &Finder::send_hello));
+    _hello = EventLoop::instance().new_periodic_ms(XORP_HELLO_TIMER_MS, callback(this, &Finder::send_hello));
 }
 
 bool

@@ -36,20 +36,19 @@
 #include "redist_policy.hh"
 #include "profile_vars.hh"
 
-RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
+RibManager::RibManager( XrlStdRouter& xrl_std_router,
 		       const string& fea_target)
     : _status_code(PROC_NOT_READY),
       _status_reason("Initializing"),
-      _eventloop(eventloop),
       _xrl_router(xrl_std_router),
       _register_server(&_xrl_router),
-      _urib4(UNICAST, *this, _eventloop),
-      _mrib4(MULTICAST, *this, _eventloop),
+      _urib4(UNICAST, *this),
+      _mrib4(MULTICAST, *this),
 #ifdef HAVE_IPV6
-      _urib6(UNICAST, *this, _eventloop),
-      _mrib6(MULTICAST, *this, _eventloop),
+      _urib6(UNICAST, *this),
+      _mrib6(MULTICAST, *this),
 #endif
-      _vif_manager(_xrl_router, _eventloop, this, fea_target),
+      _vif_manager(_xrl_router, this, fea_target),
       _xrl_rib_target(&_xrl_router, _urib4, _mrib4,
 #ifdef HAVE_IPV6
 		      _urib6, _mrib6,
@@ -64,7 +63,7 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
     _mrib6.initialize(_register_server);
 #endif
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
-    _status_update_timer = _eventloop.new_periodic_ms(1000, cb);
+    _status_update_timer = EventLoop::instance().new_periodic_ms(1000, cb);
 #ifndef XORP_DISABLE_PROFILE
     initialize_profiling_variables(_profile);
 #endif
@@ -416,8 +415,7 @@ RibManager::make_redist_name(const string& xrl_target, const string& cookie,
 
 template <typename A>
 int
-RibManager::redist_enable_xrl_output(EventLoop&	eventloop,
-			 XrlRouter&	rtr,
+RibManager::redist_enable_xrl_output( XrlRouter&	rtr,
 			 Profile&	profile,
 			 RIB<A>&	rib,
 			 const string&	to_xrl_target,
@@ -460,8 +458,7 @@ RibManager::redist_enable_xrl_output(EventLoop&	eventloop,
 	return XORP_ERROR;
     }
 
-    Redistributor<A>* redist = new Redistributor<A>(eventloop,
-						    redist_name);
+    Redistributor<A>* redist = new Redistributor<A>( redist_name);
     redist->set_redist_table(rt);
     if (is_xrl_transaction_output) {
 	redist->set_output(
@@ -526,7 +523,7 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
 				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
-	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
+	int e = redist_enable_xrl_output( _xrl_router, _profile,
 					 _urib4,
 					 to_xrl_target, from_protocol,
 					 network_prefix, cookie,
@@ -536,7 +533,7 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
 	}
     }
     if (multicast) {
-	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
+	int e = redist_enable_xrl_output( _xrl_router, _profile,
 					 _mrib4,
 					 to_xrl_target, from_protocol,
 					 network_prefix, cookie,
@@ -645,7 +642,7 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
-	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
+	int e = redist_enable_xrl_output( _xrl_router, _profile,
 					 _urib6,
 					 to_xrl_target, from_protocol,
 					 network_prefix, cookie,
@@ -655,7 +652,7 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 	}
     }
     if (multicast) {
-	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
+	int e = redist_enable_xrl_output( _xrl_router, _profile,
 					 _mrib6,
 					 to_xrl_target, from_protocol,
 					 network_prefix, cookie,

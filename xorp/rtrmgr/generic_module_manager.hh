@@ -25,7 +25,6 @@
 
 
 
-class EventLoop;
 
 class GenericModule {
 public:
@@ -73,19 +72,17 @@ private:
 
 class GenericModuleManager {
 public:
-    GenericModuleManager(EventLoop& eventloop, bool verbose);
+    GenericModuleManager( bool verbose);
     virtual ~GenericModuleManager();
 
     bool module_exists(const string& module_name) const;
     GenericModule::ModuleStatus module_status(const string& module_name) const;
-    EventLoop& eventloop() { return _eventloop; }
     GenericModule* find_module(const string& module_name);
     const GenericModule* const_find_module(const string& module_name) const;
 
 protected:
     bool store_new_module(GenericModule *module, string& error_msg);
 
-    EventLoop&	_eventloop;
     map<string, GenericModule *> _modules;	// Map module name to module
     bool	_verbose;	// Set to true if output is verbose
 private:

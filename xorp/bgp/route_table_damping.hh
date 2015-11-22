@@ -133,7 +133,6 @@ public:
      */
     void undamp(IPNet<A> net);
 
-    EventLoop& eventloop() const;
 
  private:
     const PeerHandler *_peer;

@@ -73,16 +73,7 @@ public:
      */
     const PortList& const_ports() const	{ return _ports; }
 
-    /**
-     * Get EventLoop.
-     */
-    EventLoop& eventloop() 		{ return _system.eventloop(); }
-
-    /**
-     * Get EventLoop.
-     */
-    const EventLoop& eventloop() const	{ return _system.eventloop(); }
-
+    
     /**
      * Get IfMgrIfTree.
      */

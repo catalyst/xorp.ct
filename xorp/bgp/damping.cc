@@ -31,9 +31,8 @@
 #include "damping.hh"
 #include "bgp.hh"
 
-Damping::Damping(EventLoop& eventloop)
-    :	 _eventloop(eventloop),
-	 _damping(false),
+Damping::Damping()
+    : _damping(false),
 	 _half_life(15),
 	 _max_hold_down(60),
 	 _cutoff(3000),
@@ -105,7 +104,7 @@ Damping::init()
     }
 
     // Start the timer to incement the tick
-    _tick_tock = _eventloop.new_periodic_ms(1000,
+    _tick_tock = EventLoop::instance().new_periodic_ms(1000,
 					    callback(this, &Damping::tick));
 }
 

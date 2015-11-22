@@ -84,11 +84,10 @@ parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
 /**
  * Xrl Job Queue
  */
-XrlJobQueue::XrlJobQueue(EventLoop& 	e,
-	    const string& 		finder_host,
+XrlJobQueue::XrlJobQueue( const string& 		finder_host,
 	    uint16_t 			finder_port,
 	    const string& 		tgtname)
-    : _e(e), _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
+    :  _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
       _rtr(0), _rtr_poll_cnt(0)
 {
     set_status(SERVICE_READY);
@@ -104,10 +103,10 @@ XrlJobQueue::startup()
 {
     string cls = c_format("%s-%u\n", xlog_process_name(),
 			  XORP_UINT_CAST(getpid()));
-    _rtr = new XrlStdRouter(_e, cls.c_str(), _fhost.c_str(), _fport);
+    _rtr = new XrlStdRouter( cls.c_str(), _fhost.c_str(), _fport);
     _rtr->finalize();
     set_status(SERVICE_STARTING);
-    _rtr_poll = _e.new_periodic_ms(100,
+    _rtr_poll = EventLoop::instance().new_periodic_ms(100,
 				   callback(this, &XrlJobQueue::xrl_router_ready_poll));
     return (XORP_OK);
 }

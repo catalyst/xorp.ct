@@ -40,7 +40,6 @@
 // Structures/classes, typedefs and macros
 //
 
-class EventLoop;
 class FeaNode;
 class MfeaVif;
 class SgCount;
@@ -104,8 +103,7 @@ public:
      * equal to XORP_MODULE_MFEA.
      * @param eventloop the event loop to use.
      */
-    MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
-	     EventLoop& eventloop);
+    MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id);
     
     /**
      * Destructor

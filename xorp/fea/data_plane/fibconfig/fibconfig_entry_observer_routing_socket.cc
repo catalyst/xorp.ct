@@ -44,7 +44,6 @@
 
 FibConfigEntryObserverRoutingSocket::FibConfigEntryObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntryObserver(fea_data_plane_manager),
-      RoutingSocket(fea_data_plane_manager.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 }

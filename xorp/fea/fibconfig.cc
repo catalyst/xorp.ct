@@ -44,7 +44,7 @@
 
 FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
 		     const IfTree& merged_config_iftree)
-    : _eventloop(fea_node.eventloop()),
+    : 
 #ifndef XORP_DISABLE_PROFILE
       _profile(fea_node.profile()),
 #endif
@@ -62,7 +62,7 @@ FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
       _unicast_forwarding_table_id6_is_configured(false),
       _is_running(false)
 {
-    _ftm = new FibConfigTransactionManager(_eventloop, *this);
+    _ftm = new FibConfigTransactionManager( *this);
 }
 
 FibConfig::~FibConfig()

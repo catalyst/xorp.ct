@@ -95,13 +95,12 @@ protected:
 public:
     STCPRequestHandler(XrlPFSTCPListener& parent, XorpFd sock) :
 	_parent(parent), _sock(sock),
-	_reader(parent.eventloop(), sock, 4 * 65536,
+	_reader( sock, 4 * 65536,
 		callback(this, &STCPRequestHandler::read_event)),
-	_writer(parent.eventloop(), sock, MAX_WRITES),
+	_writer( sock, MAX_WRITES),
 	_responses_size(0),
 	_keepalive_timeout(DEFAULT_KEEPALIVE_TIMEOUT)
     {
-	EventLoop& e = _parent.eventloop();
 
 	// Set the STCP request timeout from environment variable if it is set.
 	char* value = getenv("XORP_LISTENER_KEEPALIVE_TIMEOUT");
@@ -119,7 +118,7 @@ public:
 	}
 
 	if (! _keepalive_timeout.is_zero()) {
-	    _life_timer = e.new_oneoff_after(_keepalive_timeout,
+	    _life_timer = EventLoop::instance().new_oneoff_after(_keepalive_timeout,
 					     callback(this,
 						      &STCPRequestHandler::die,
 						      "life timer expired",
@@ -458,11 +457,10 @@ STCPRequestHandler::response_pending() const
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
-				     XrlDispatcher* x,
+XrlPFSTCPListener::XrlPFSTCPListener( XrlDispatcher* x,
 				     uint16_t	    port)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, x), _address_slash_port()
+    : XrlPFListener( x), _address_slash_port()
 {
     in_addr myaddr = get_preferred_ipv4_addr();
 
@@ -485,14 +483,10 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
     }
 
     _address_slash_port = address_slash_port(addr, port);
-    _eventloop.add_ioevent_cb(_sock, IOT_ACCEPT,
+    EventLoop::instance().add_ioevent_cb(_sock, IOT_ACCEPT,
 			     callback(this, &XrlPFSTCPListener::connect_hook));
 }
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop* e, XrlDispatcher* x)
-    : XrlPFListener(*e, x)
-{
-}
 
 XrlPFSTCPListener::~XrlPFSTCPListener()
 {
@@ -501,7 +495,7 @@ XrlPFSTCPListener::~XrlPFSTCPListener()
 	// nb destructor for STCPRequestHandler triggers removal of node
 	// from list
     }
-    _eventloop.remove_ioevent_cb(_sock, IOT_ACCEPT);
+    EventLoop::instance().remove_ioevent_cb(_sock, IOT_ACCEPT);
     comm_close(_sock.getSocket());
     _sock.clear();
 }
@@ -713,26 +707,16 @@ const TimeVal XrlPFSTCPSender::DEFAULT_SENDER_KEEPALIVE_PERIOD = TimeVal(10, 0);
 
 uint32_t XrlPFSTCPSender::_next_uid = 0;
 
-XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
+XrlPFSTCPSender::XrlPFSTCPSender(const string& name, 
 				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
     throw (XrlPFConstructorError)
-	: XrlPFSender(name, e, addr_slash_port),
+	: XrlPFSender(name,  addr_slash_port),
       _uid(_next_uid++),
       _keepalive_time(keepalive_time)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
     construct();
-}
-
-XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
-				 const char* addr_slash_port,
-				 TimeVal keepalive_time)
-	: XrlPFSender(name, *e, addr_slash_port),
-	  _uid(_next_uid++), _writer(NULL),
-	  _keepalive_time(keepalive_time),
-	  _reader(NULL)
-{
 }
 
 void
@@ -755,14 +739,14 @@ XrlPFSTCPSender::construct()
 			    comm_get_error_str(err)));
     }
 
-    _reader = new BufferedAsyncReader(_eventloop, _sock, 4 * 65536,
+    _reader = new BufferedAsyncReader( _sock, 4 * 65536,
 				      callback(this,
 					       &XrlPFSTCPSender::read_event));
 
     _reader->set_trigger_bytes(STCPPacketHeader::header_size());
     _reader->start();
 
-    _writer = new AsyncFileWriter(_eventloop, _sock, MAX_WRITES);
+    _writer = new AsyncFileWriter( _sock, MAX_WRITES);
 
     _current_seqno   = 0;
     _active_bytes    = 0;
@@ -1101,7 +1085,7 @@ XrlPFSTCPSender::set_keepalive_time(const TimeVal& time)
 void
 XrlPFSTCPSender::start_keepalives()
 {
-    _keepalive_timer = _eventloop.new_periodic(
+    _keepalive_timer = EventLoop::instance().new_periodic(
 	_keepalive_time,
 	callback(this, &XrlPFSTCPSender::send_keepalive),
 	XorpTask::PRIORITY_XRL_KEEPALIVE);
@@ -1125,7 +1109,7 @@ XrlPFSTCPSender::defer_keepalives()
 string XrlPFSTCPSender::toString() const {
     ostringstream oss;
     TimeVal now;
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
     TimeVal ago = now;
     ago -= _keepalive_last_fired;
 
@@ -1155,7 +1139,7 @@ XrlPFSTCPSender::send_keepalive()
 {
     TimeVal now;
 
-    _eventloop.current_time(now);
+    EventLoop::instance().current_time(now);
     if (now - _keepalive_last_fired < _keepalive_time) {
 	// This keepalive timer has fired too soon. Rate-limit it.
 	debug_msg("Dropping keepalive due to rate-limiting\n");

@@ -258,16 +258,15 @@ is_port_for::operator() (XrlPort*& xp)
 // --------------------------------------------------------------------------
 // XrlIO
 
-XrlIO::XrlIO(EventLoop& eventloop, XrlRouter& xrl_router,
+XrlIO::XrlIO( XrlRouter& xrl_router,
 	     const string& feaname, const string& ribname)
-    : _eventloop(eventloop),
-      _xrl_router(xrl_router),
+    : _xrl_router(xrl_router),
       _feaname(feaname),
       _ribname(ribname),
       _component_count(0),
-      _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
+      _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
 	     _xrl_router.finder_port()),
-      _rib_queue(eventloop, xrl_router)
+      _rib_queue( xrl_router)
 {
     _ifmgr.set_observer(this);
     _ifmgr.attach_hint_observer(this);
@@ -514,7 +513,6 @@ XrlIO::enable_address(const string& interface, const string& vif,
 
     // Create XrlPort.
     XrlPort* xp = new XrlPort(this,
-			      _eventloop,
 			      _xrl_router,
 			      _feaname,
 			      interface,

@@ -27,7 +27,6 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 
-class EventLoop;
 class RibManager;
 class XrlRouter;
 
@@ -53,12 +52,11 @@ public:
      * VifManager constructor
      *
      * @param xrl_router this process's XRL router.
-     * @param eventloop this process's EventLoop.
      * @param rib_manager this class contains the actual RIBs for IPv4
      * and IPv6, unicast and multicast.
      * @param fea_target the FEA target name.
      */
-    VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
+    VifManager(XrlRouter& xrl_router, 
 	       RibManager* rib_manager, const string& fea_target);
 
     /**

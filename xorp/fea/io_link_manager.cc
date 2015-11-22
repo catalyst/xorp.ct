@@ -570,7 +570,6 @@ IoLinkManager::IoLinkManager(FeaNode&		fea_node,
 			     const IfTree&	iftree)
     : IoLinkManagerReceiver(),
       _fea_node(fea_node),
-      _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _io_link_manager_receiver(NULL)
 {

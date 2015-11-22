@@ -146,18 +146,17 @@ main(int argc, char **argv)
     }
 
     try {
-	EventLoop eventloop;
-	XrlStdRouter xrl_router(eventloop, "clear_database");
+	XrlStdRouter xrl_router( "clear_database");
 
 	debug_msg("Waiting for router");
 	xrl_router.finalize();
-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	wait_until_xrl_router_is_ready( xrl_router);
 	debug_msg("\n");
 
 	ClearDatabase clear_database(xrl_router, version);
 	clear_database.start();
 	while(clear_database.busy())
-	    eventloop.run();
+	    EventLoop::instance().run();
 
 	if (clear_database.fail()) {
 	    XLOG_ERROR("Failed to clear database");

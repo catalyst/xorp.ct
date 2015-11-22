@@ -43,13 +43,11 @@
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MLD6IGMP).
- * @eventloop: The event loop.
  * 
  * MLD6IGMP node constructor.
  **/
-Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
-			   EventLoop& eventloop)
-    : ProtoNode<Mld6igmpVif>(family, module_id, eventloop),
+Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id)
+    : ProtoNode<Mld6igmpVif>(family, module_id),
       _is_log_trace(false)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MLD6IGMP);

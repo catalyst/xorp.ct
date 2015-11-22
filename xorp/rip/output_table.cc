@@ -111,7 +111,7 @@ OutputTable<A>::output_packet()
 	// Not finished so set time to reschedule self and pause
 	// route walker.
 	this->_op_timer 
-	    = this->_e.new_oneoff_after_ms(this->interpacket_gap_ms(),
+	    = EventLoop::instance().new_oneoff_after_ms(this->interpacket_gap_ms(),
                           callback(this, &OutputTable<A>::output_packet));
 	_rw.pause(this->interpacket_gap_ms());
     }

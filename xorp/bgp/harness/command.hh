@@ -35,7 +35,7 @@ class TimeVal;
 
 class Command {
 public:
-    Command(EventLoop& eventloop, XrlStdRouter& xrlrouter);
+    Command( XrlStdRouter& xrlrouter);
 
     /*
     ** Load command map.
@@ -80,7 +80,6 @@ public:
 	throw(InvalidString);
     void initialise_callback(const XrlError& error, string peername);
 private:
-    EventLoop& _eventloop;
     XrlStdRouter& _xrlrouter;
     uint32_t _genid;
 

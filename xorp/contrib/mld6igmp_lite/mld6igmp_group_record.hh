@@ -85,13 +85,7 @@ public:
      */
     const IPvX&	group() const		{ return (_group); }
 
-    /**
-     * Get the corresponding event loop.
-     *
-     * @return the corresponding event loop.
-     */
-    EventLoop& eventloop();
-
+    
     /**
      * Test whether the filter mode is INCLUDE.
      *

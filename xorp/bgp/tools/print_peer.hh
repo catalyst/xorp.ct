@@ -82,7 +82,6 @@ public:
     string time_units(uint32_t s) const;
     
 private:
-    EventLoop _eventloop;
     XrlStdRouter _xrl_rtr;
     bool _verbose;
     uint32_t _token;

@@ -49,8 +49,7 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
 		 BGPMain *m) 
     : _unique_id(_unique_id_allocator++),
       _damping_peer_oscillations(true),
-      _damp_peer_oscillations(m->eventloop(),
-			      10,	/* restart threshold */
+      _damp_peer_oscillations( 10,	/* restart threshold */
 			      5 * 60,	/* time period */
 			      2 * 60 	/* idle holdtime */)
 {
@@ -90,8 +89,8 @@ BGPPeer::zero_stats()
     _last_error[0] = 0;
     _last_error[1] = 0;
     _established_transitions = 0;
-    _mainprocess->eventloop().current_time(_established_time);
-    _mainprocess->eventloop().current_time(_in_update_time);
+    EventLoop::instance().current_time(_established_time);
+    EventLoop::instance().current_time(_in_update_time);
 }
 
 void
@@ -156,7 +155,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     // 4) Save all the values that are required by mrt_update.
     // 5) Move all this code into a separate method.
     // 6) Keep the file open.
-    // 7) Don't call gettimeofday directly, get the time from the eventloop.
 
     string fname = "/tmp/bgpin.mrtd";
 
@@ -272,7 +270,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    _in_updates++;
-	    _mainprocess->eventloop().current_time(_in_update_time);
+	    EventLoop::instance().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
 
 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
@@ -1415,8 +1413,8 @@ BGPPeer::established()
 //     _in_total_messages = 0;
 //     _out_total_messages = 0;
     _established_transitions++;
-    _mainprocess->eventloop().current_time(_established_time);
-    _mainprocess->eventloop().current_time(_in_update_time);
+    EventLoop::instance().current_time(_established_time);
+    EventLoop::instance().current_time(_in_update_time);
     return true;
 }
 
@@ -1528,7 +1526,7 @@ BGPPeer::start_connect_retry_timer()
     debug_msg("Start Connect Retry timer after %u s\n",
 	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
-    _timer_connect_retry = _mainprocess->eventloop().
+    _timer_connect_retry = EventLoop::instance().
 	new_oneoff_after(jitter(TimeVal(_peerdata->get_retry_duration(), 0)),
 			 callback(this, &BGPPeer::event_connexp));
 }
@@ -1565,7 +1563,7 @@ BGPPeer::start_hold_timer()
 	/* Add another second to give the remote keepalive a chance */
 	duration += 1;
 	debug_msg("Holdtimer started %u s\n", XORP_UINT_CAST(duration));
-	_timer_hold_time = _mainprocess->eventloop().
+	_timer_hold_time = EventLoop::instance().
 	    new_oneoff_after(TimeVal(duration, 0),
 	    callback(this, &BGPPeer::event_holdexp));
     }
@@ -1598,8 +1596,7 @@ BGPPeer::start_keepalive_timer()
 	TimeVal delay = jitter(TimeVal(duration, 0));
 	// A keepalive must not be sent more frequently that once a second.
 	delay = delay < TimeVal(1, 0) ? TimeVal(1, 0) : delay;
-	_timer_keep_alive = _mainprocess->eventloop().
-	    new_oneoff_after(delay, callback(this, &BGPPeer::event_keepexp));
+	_timer_keep_alive = EventLoop::instance().new_oneoff_after(delay, callback(this, &BGPPeer::event_keepexp));
     }
 }
 
@@ -1618,7 +1615,7 @@ BGPPeer::start_stopped_timer()
     const int delay = 10;
     debug_msg("Stopped timer started with duration %d s\n", delay);
 
-    _timer_stopped = _mainprocess->eventloop().
+    _timer_stopped = EventLoop::instance().
 	new_oneoff_after(TimeVal(delay, 0),
 			 callback(this, &BGPPeer::hook_stopped));
 }
@@ -1637,7 +1634,7 @@ BGPPeer::start_idle_hold_timer()
     if (!_damping_peer_oscillations)
 	return;
 
-    _idle_hold = _mainprocess->eventloop().
+    _idle_hold = EventLoop::instance().
 	new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
 			 callback(this, &BGPPeer::event_idle_hold_exp));
     
@@ -1664,7 +1661,7 @@ BGPPeer::running_idle_hold_timer() const
 void 
 BGPPeer::start_delay_open_timer()
 {
-    _idle_hold = _mainprocess->eventloop().
+    _idle_hold = EventLoop::instance().
 	new_oneoff_after(TimeVal(_peerdata->get_delay_open_time(), 0),
 			 callback(this, &BGPPeer::event_delay_open_exp));
     
@@ -1700,7 +1697,7 @@ BGPPeer::release_resources()
     _in_total_messages = 0;
     _out_total_messages = 0;
 
-    _mainprocess->eventloop().current_time(_established_time);
+    EventLoop::instance().current_time(_established_time);
     return true;
 }
 
@@ -1828,7 +1825,7 @@ uint32_t
 BGPPeer::get_established_time() const
 {
     TimeVal now;
-    _mainprocess->eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     return now.sec() - _established_time.sec();
 }
 
@@ -1846,7 +1843,7 @@ BGPPeer::get_msg_stats(uint32_t& in_updates,
     out_msgs = _out_total_messages;
     memcpy(&last_error, _last_error, 2);
     TimeVal now;
-    _mainprocess->eventloop().current_time(now);
+    EventLoop::instance().current_time(now);
     in_update_elapsed = now.sec() - _in_update_time.sec();
 }
 
@@ -1878,8 +1875,7 @@ AcceptSession::AcceptSession(BGPPeer& peer, XorpFd sock)
 
     bool md5sig = !pd->get_md5_password().empty();
 
-    _socket_client = new SocketClient(pd->iptuple(),
-				     peer.main()->eventloop(), md5sig);
+    _socket_client = new SocketClient(pd->iptuple(), md5sig);
 
 
     _socket_client->set_callback(callback(this,
@@ -1928,8 +1924,7 @@ AcceptSession::start()
 	    XLOG_WARNING("Connection collision hold duration is 0 "
 			 "setting to %d seconds", hold_duration);
 	}
-	_open_wait = main()->
-	    eventloop().
+	_open_wait = EventLoop::instance().
 	    new_oneoff_after(TimeVal(hold_duration, 0),
 			     callback(this,
 				      &AcceptSession::no_open_received));
@@ -2308,7 +2303,6 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 // 	    _in_updates++;
-// 	    main()->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length, _peer.peerdata(), 
 			     _peer.main(), /*do checks*/true);
 
@@ -2393,12 +2387,10 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
     return true;
 }
 
-DampPeerOscillations::DampPeerOscillations(EventLoop& eventloop,
-					   uint32_t restart_threshold,
+DampPeerOscillations::DampPeerOscillations( uint32_t restart_threshold,
 					   uint32_t time_period,
 					   uint32_t idle_holdtime) 
-    : _eventloop(eventloop),
-      _restart_threshold(restart_threshold),
+    : _restart_threshold(restart_threshold),
       _time_period(time_period),
       _idle_holdtime(idle_holdtime),
       _restart_counter(0)
@@ -2409,8 +2401,7 @@ void
 DampPeerOscillations::restart()
 {
     if (0 == _restart_counter++) {
-	_zero_restart = _eventloop.
-	    new_oneoff_after(TimeVal(_time_period, 0),
+	_zero_restart = EventLoop::instance().new_oneoff_after(TimeVal(_time_period, 0),
 			     callback(this,
 				      &DampPeerOscillations::
 				      zero_restart_count));

@@ -33,7 +33,6 @@
 #include "mrt/multicast_defs.h"
 
 
-class EventLoop;
 class IPvX;
 class IPvXNet;
 class Mld6igmpVif;
@@ -57,7 +56,7 @@ public:
      * equal to XORP_MODULE_MLD6IGMP.
      * @param eventloop the event loop to use.
      */
-    Mld6igmpNode(int family, xorp_module_id module_id, EventLoop& eventloop);
+    Mld6igmpNode(int family, xorp_module_id module_id);
     
     /**
      * Destructor

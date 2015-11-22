@@ -55,14 +55,12 @@ extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
-OpInstance::OpInstance(EventLoop&			eventloop,
-		       OpCommand&			op_command,
+OpInstance::OpInstance( OpCommand&			op_command,
 		       const string&			executable_filename,
 		       const list<string>&		command_argument_list,
 		       RouterCLI::OpModePrintCallback	print_cb,
 		       RouterCLI::OpModeDoneCallback	done_cb)
-    : _eventloop(eventloop),
-      _op_command(op_command),
+    : _op_command(op_command),
       _executable_filename(executable_filename),
       _command_argument_list(command_argument_list),
       _run_command(NULL),
@@ -86,7 +84,6 @@ OpInstance::OpInstance(EventLoop&			eventloop,
 	// Run the program
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunCommand(
-	    _eventloop,
 	    _executable_filename,
 	    _command_argument_list,
 	    callback(this, &OpInstance::stdout_cb),
@@ -301,7 +298,7 @@ OpCommand::select_positional_argument(const list<string>& argument_list,
 }
 
 OpInstance *
-OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
+OpCommand::execute( const list<string>& command_line,
 		   RouterCLI::OpModePrintCallback print_cb,
 		   RouterCLI::OpModeDoneCallback done_cb)
 {
@@ -346,7 +343,7 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 	    resolved_list.end());
     }
 
-    OpInstance *opinst = new OpInstance(eventloop, *this,
+    OpInstance *opinst = new OpInstance( *this,
 					_command_executable_filename,
 					resolved_command_argument_list,
 					print_cb, done_cb);
@@ -693,7 +690,7 @@ OpCommandList::command_match(const list<string>& command_parts,
 }
 
 OpInstance*
-OpCommandList::execute(EventLoop& eventloop, const list<string>& command_parts,
+OpCommandList::execute( const list<string>& command_parts,
 		       RouterCLI::OpModePrintCallback print_cb,
 		       RouterCLI::OpModeDoneCallback done_cb) const
 {
@@ -702,8 +699,7 @@ OpCommandList::execute(EventLoop& eventloop, const list<string>& command_parts,
 	// Find the right command
 	if ((*iter)->command_match(command_parts, _slave_config_tree, true)) {
 	    // Execute it
-	    return (*iter)->execute(eventloop,
-				    command_parts, print_cb, done_cb);
+	    return (*iter)->execute( command_parts, print_cb, done_cb);
 	}
     }
     done_cb->dispatch(false, string("No matching command"));

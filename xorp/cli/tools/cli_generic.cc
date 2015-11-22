@@ -143,7 +143,7 @@ void
 CliGeneric::wait_xrl()
 {
     while (_xrl_pending)
-	_rtr.eventloop().run();
+	EventLoop::instance().run();
 }
 
 string
@@ -499,8 +499,7 @@ usage(const char* progname)
 void
 own(int argc, char* argv[])
 {
-    EventLoop e;
-    XrlStdRouter router(e, "cli_generic",
+    XrlStdRouter router( "cli_generic",
 		        FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     CliGeneric cg(router);
@@ -538,7 +537,7 @@ own(int argc, char* argv[])
     router.finalize();
 
     while (false == router.failed() && false == router.ready())
-	e.run();
+	EventLoop::instance().run();
 
     if (true == router.failed())
 	xorp_throw(CGException, "Router failed to communicate with finder.");
@@ -550,7 +549,7 @@ own(int argc, char* argv[])
     cg.own();
 
     while (cg.running())
-	e.run();
+	EventLoop::instance().run();
 }
 
 } // anon namespace

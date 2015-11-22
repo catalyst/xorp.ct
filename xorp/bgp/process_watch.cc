@@ -30,9 +30,9 @@
 #include "exceptions.hh"
 #include "process_watch.hh"
 
-ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
+ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, 
 			   const char *bgp_mib_name, TerminateCallback cb) :
-    _eventloop(eventloop), _shutdown(cb), _fea(false), _rib(false)
+     _shutdown(cb), _fea(false), _rib(false)
 {
 	
     /*
@@ -106,8 +106,7 @@ ProcessWatch::finder_death(const char *file, const int lineno)
 void
 ProcessWatch::start_kill_timer()
 {
-    _shutdown_timer = _eventloop.
-	new_oneoff_after_ms(1000 * 10, ::callback(::exit, -1));
+    _shutdown_timer = EventLoop::instance().new_oneoff_after_ms(1000 * 10, ::callback(::exit, -1));
 }
 
 bool

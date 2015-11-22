@@ -54,19 +54,13 @@ FinderXrlCommandQueue& FinderXrlCommandQueue::operator=(const FinderXrlCommandQu
     return *this;
 }
 
-inline EventLoop&
-FinderXrlCommandQueue::eventloop()
-{
-    return _m->eventloop();
-}
-
 inline void
 FinderXrlCommandQueue::push()
 {
     debug_msg("push\n");
     if (false == _pending && _cmds.empty() == false&&
 	_dispatcher.scheduled() == false) {
-	_dispatcher = eventloop().new_oneoff_after_ms(0,
+	_dispatcher = EventLoop::instance().new_oneoff_after_ms(0,
 			callback(this, &FinderXrlCommandQueue::dispatch_one));
     }
 }

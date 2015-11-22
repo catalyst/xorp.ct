@@ -95,10 +95,6 @@ pim_main(const string& finder_hostname, uint16_t finder_port) {
 
     setup_dflt_sighandlers();
 
-    //
-    // Init stuff
-    //
-    EventLoop eventloop;
 
     //
     // Initialize the random generator
@@ -114,7 +110,6 @@ pim_main(const string& finder_hostname, uint16_t finder_port) {
     //
     XrlPimNode xrl_pimsm_node6(AF_INET6,
 			       XORP_MODULE_PIMSM,
-			       eventloop,
 			       xorp_module_name(AF_INET6, XORP_MODULE_PIMSM),
 			       finder_hostname,
 			       finder_port,
@@ -123,7 +118,7 @@ pim_main(const string& finder_hostname, uint16_t finder_port) {
 			       xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 			       xorp_module_name(AF_INET6, XORP_MODULE_RIB),
 			       xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
-    wait_until_xrl_router_is_ready(eventloop, xrl_pimsm_node6.xrl_router());
+    wait_until_xrl_router_is_ready( xrl_pimsm_node6.xrl_router());
 
     //
     // Startup
@@ -140,11 +135,11 @@ pim_main(const string& finder_hostname, uint16_t finder_port) {
     //
 #ifdef HAVE_IPV6_MULTICAST
     while (xorp_do_run && !xrl_pimsm_node6.is_done()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 
     while (xrl_pimsm_node6.xrl_router().pending()) {
-	eventloop.run();
+	EventLoop::instance().run();
     }
 #endif // HAVE_IPV6_MULTICAST
 

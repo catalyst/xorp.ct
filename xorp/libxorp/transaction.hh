@@ -79,7 +79,6 @@ public:
     /**
      * Constuctor with a given event loop, timeout, and max pending commits.
      *
-     * @param e the EventLoop instance.
      * 
      * @param timeout_ms the inter-operation addition timeout.  If zero,
      *        timeouts are not used, otherwise a timeout will occur
@@ -89,10 +88,9 @@ public:
      * @param max_pending the maximum number of uncommitted transactions
      *        pending commit.
      */
-    TransactionManager(EventLoop& e,
-		       uint32_t timeout_ms = 0,
+    TransactionManager( uint32_t timeout_ms = 0,
 		       uint32_t max_pending = 10) : 
-	    _e(e), _timeout_ms(timeout_ms), _max_pending(max_pending), _next_tid(0)
+	     _timeout_ms(timeout_ms), _max_pending(max_pending), _next_tid(0)
     {
     }
 
@@ -281,7 +279,6 @@ private:
 private:
     typedef map<uint32_t, Transaction> TransactionDB;
 
-    EventLoop& _e;
     TransactionDB _transactions;
     uint32_t _timeout_ms;
     uint32_t _max_pending;
