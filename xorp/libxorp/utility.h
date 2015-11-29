@@ -87,42 +87,42 @@
  * the semantics hence we don't provide the implementation.
  */
 #ifdef __cplusplus
-inline const struct sockaddr_in *
+    inline const struct sockaddr_in *
 sockaddr2sockaddr_in(const struct sockaddr* sa)
 {
     const void* v = sa;
     return (reinterpret_cast<const struct sockaddr_in*>(v));
 }
 
-inline struct sockaddr_in *
+    inline struct sockaddr_in *
 sockaddr2sockaddr_in(struct sockaddr* sa)
 {
     void* v = sa;
     return (reinterpret_cast<struct sockaddr_in*>(v));
 }
 
-inline const struct sockaddr_in6 *
+    inline const struct sockaddr_in6 *
 sockaddr2sockaddr_in6(const struct sockaddr* sa)
 {
     const void* v = sa;
     return (reinterpret_cast<const struct sockaddr_in6*>(v));
 }
 
-inline struct sockaddr_in6 *
+    inline struct sockaddr_in6 *
 sockaddr2sockaddr_in6(struct sockaddr* sa)
 {
     void* v = sa;
     return (reinterpret_cast<struct sockaddr_in6*>(v));
 }
 
-inline const struct sockaddr *
+    inline const struct sockaddr *
 sockaddr_storage2sockaddr(const struct sockaddr_storage* ss)
 {
     const void* v = ss;
     return (reinterpret_cast<const struct sockaddr*>(v));
 }
 
-inline struct sockaddr *
+    inline struct sockaddr *
 sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
 {
     void* v = ss;
@@ -132,7 +132,7 @@ sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
 #endif /* __cplusplus */
 
 #define ADD_POINTER(pointer, size, type)				\
-	((type)(void *)(((uint8_t *)(pointer)) + (size)))
+    ((type)(void *)(((uint8_t *)(pointer)) + (size)))
 
 /*
  * Micro-optimization: byte ordering fix for constants.  htonl uses
@@ -143,8 +143,8 @@ sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
 #  define htonl_literal(x) (x)
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
 #  define htonl_literal(x) 						      \
-		((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
-		 (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))
+    ((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
+     (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))
 #else
 #  error "Endian detection is broken."
 #endif
@@ -155,39 +155,40 @@ sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
  * value of EOF.
  */
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
-extern int xorp_isalnum(int c);
-extern int xorp_isalpha(int c);
-/*
- * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
- * with ISO C99, and may not always be available on the system.
- */
-/* extern int xorp_isblank(int c); */
-extern int xorp_iscntrl(int c);
-extern int xorp_isdigit(int c);
-extern int xorp_isgraph(int c);
-extern int xorp_islower(int c);
-extern int xorp_isprint(int c);
-extern int xorp_ispunct(int c);
-extern int xorp_isspace(int c);
-extern int xorp_isupper(int c);
-extern int xorp_isxdigit(int c);
-extern int xorp_tolower(int c);
-extern int xorp_toupper(int c);
+    extern int xorp_isalnum(int c);
+    extern int xorp_isalpha(int c);
+    /*
+     * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
+     * with ISO C99, and may not always be available on the system.
+     */
+    /* extern int xorp_isblank(int c); */
+    extern int xorp_iscntrl(int c);
+    extern int xorp_isdigit(int c);
+    extern int xorp_isgraph(int c);
+    extern int xorp_islower(int c);
+    extern int xorp_isprint(int c);
+    extern int xorp_ispunct(int c);
+    extern int xorp_isspace(int c);
+    extern int xorp_isupper(int c);
+    extern int xorp_isxdigit(int c);
+    extern int xorp_tolower(int c);
+    extern int xorp_toupper(int c);
 
-/*
- * A strptime(3) wrapper that uses a local implementation of strptime(3)
- * if the operating system doesn't have one. Note that the particular
- * implementation is inside file "libxorp/strptime.c".
- */
-extern char *xorp_strptime(const char *buf, const char *fmt, struct tm *tm);
+    /*
+     * A strptime(3) wrapper that uses a local implementation of strptime(3)
+     * if the operating system doesn't have one. Note that the particular
+     * implementation is inside file "libxorp/strptime.c".
+     */
+    extern char *xorp_strptime(const char *buf, const char *fmt, struct tm *tm);
 
-/*
- * Function to return C-string representation of a boolean: "true" of "false".
- */
-extern const char *bool_c_str(int v);
+    /*
+     * Function to return C-string representation of a boolean: "true" of "false".
+     */
+    extern const char *bool_c_str(int v);
 
 #ifdef __cplusplus
 }

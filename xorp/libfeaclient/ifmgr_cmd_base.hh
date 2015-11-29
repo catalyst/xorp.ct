@@ -42,33 +42,34 @@ typedef XorpCallback1<void, const XrlError&>::RefPtr IfMgrXrlSendCB;
  * The two methods of forward are intended to facilitate maintaining
  * local and remote copies of IfMgrIfTree objects.
  */
-class IfMgrCommandBase {
-public:
-    virtual ~IfMgrCommandBase() = 0;
-    /**
-     * Execute Command to interface tree.
-     *
-     * @return true on success, false on failure.
-     */
-    virtual bool execute(IfMgrIfTree& tree) const = 0;
+class IfMgrCommandBase 
+{
+    public:
+	virtual ~IfMgrCommandBase() = 0;
+	/**
+	 * Execute Command to interface tree.
+	 *
+	 * @return true on success, false on failure.
+	 */
+	virtual bool execute(IfMgrIfTree& tree) const = 0;
 
-    /**
-     * Forward Command as an Xrl call to a remote target.
-     *
-     * @param sender xrl router to use as the command sender.
-     * @param xrl_target the target to direct the command to.
-     * @param xscb callback to invoke with Xrl result.
-     *
-     * @return true on success, false on failure.
-     */
-    virtual bool forward(XrlSender&	 sender,
-			 const string&	 xrl_target,
-			 const IfMgrXrlSendCB& xscb) const = 0;
+	/**
+	 * Forward Command as an Xrl call to a remote target.
+	 *
+	 * @param sender xrl router to use as the command sender.
+	 * @param xrl_target the target to direct the command to.
+	 * @param xscb callback to invoke with Xrl result.
+	 *
+	 * @return true on success, false on failure.
+	 */
+	virtual bool forward(XrlSender&	 sender,
+		const string&	 xrl_target,
+		const IfMgrXrlSendCB& xscb) const = 0;
 
-    /**
-     * Render command as string.
-     */
-    virtual string str() const = 0;
+	/**
+	 * Render command as string.
+	 */
+	virtual string str() const = 0;
 };
 
 #endif // __LIBFEACLIENT_IFMGR_CMD_BASE_HH__

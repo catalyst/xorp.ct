@@ -40,84 +40,84 @@
 template <typename A>
 class PacketQueue
 {
-public:
-    typedef list<const RipPacket<A>*> QueueRep;
+	public:
+		typedef list<const RipPacket<A>*> QueueRep;
 
-public:
-    PacketQueue();
-    ~PacketQueue();
+	public:
+		PacketQueue();
+		~PacketQueue();
 
-    /**
-     * Place packet in ready to sent queue.  The supplied packet is
-     * expected to have been allocated with the standard new operator
-     * and will be destructed by the packet queue when it is dropped
-     * or popped from the queue.
-     *
-     * This may cause older packets in the queue to be dropped to make
-     * sufficient space for new packet.
-     */
-    void enqueue_packet(const RipPacket<A>* pkt);
+		/**
+		 * Place packet in ready to sent queue.  The supplied packet is
+		 * expected to have been allocated with the standard new operator
+		 * and will be destructed by the packet queue when it is dropped
+		 * or popped from the queue.
+		 *
+		 * This may cause older packets in the queue to be dropped to make
+		 * sufficient space for new packet.
+		 */
+		void enqueue_packet(const RipPacket<A>* pkt);
 
-    /**
-     * @return true if no packets are queued, false otherwise.
-     */
-    bool empty() const;
+		/**
+		 * @return true if no packets are queued, false otherwise.
+		 */
+		bool empty() const;
 
-    /**
-     * Peek at head packet if it exists.
-     *
-     * @return pointer to head packet if it exists, 0 otherwise.
-     */
-    const RipPacket<A>* head() const;
+		/**
+		 * Peek at head packet if it exists.
+		 *
+		 * @return pointer to head packet if it exists, 0 otherwise.
+		 */
+		const RipPacket<A>* head() const;
 
-    /**
-     * Remove head packet.
-     */
-    void pop_head();
+		/**
+		 * Remove head packet.
+		 */
+		void pop_head();
 
-    /**
-     * Discard packet behind head packet to make space for new packets.
-     *
-     * @return true if an old packet was dropped, false if no packets
-     * dropped.
-     */
-    bool drop_old();
+		/**
+		 * Discard packet behind head packet to make space for new packets.
+		 *
+		 * @return true if an old packet was dropped, false if no packets
+		 * dropped.
+		 */
+		bool drop_old();
 
-    /**
-     * Flush queued packets.
-     */
-    void flush_packets();
+		/**
+		 * Flush queued packets.
+		 */
+		void flush_packets();
 
-    /**
-     * Set the maximum amount of data to buffer.
-     */
-    void set_max_buffered_bytes(uint32_t mb);
+		/**
+		 * Set the maximum amount of data to buffer.
+		 */
+		void set_max_buffered_bytes(uint32_t mb);
 
-    /**
-     * Get the maximum amount of buffered data.
-     */
-    uint32_t max_buffered_bytes() const;
+		/**
+		 * Get the maximum amount of buffered data.
+		 */
+		uint32_t max_buffered_bytes() const;
 
-    /**
-     * Get the current amount of buffered data.
-     */
-    uint32_t buffered_bytes() const;
+		/**
+		 * Get the current amount of buffered data.
+		 */
+		uint32_t buffered_bytes() const;
 
-    /**
-     * Get the number of packets dropped from queue.
-     */
-    uint32_t drop_count() const;
+		/**
+		 * Get the number of packets dropped from queue.
+		 */
+		uint32_t drop_count() const;
 
-    /**
-     * Reset packet drop counter.
-     */
-    void reset_drop_count();
+		/**
+		 * Reset packet drop counter.
+		 */
+		void reset_drop_count();
 
-protected:
-    QueueRep	_ready_packets;
-    uint32_t	_buffered_bytes;
-    uint32_t	_max_buffered_bytes;
-    uint32_t	_drops;
+	protected:
+		QueueRep	_ready_packets;
+		uint32_t	_buffered_bytes;
+		uint32_t	_max_buffered_bytes;
+		uint32_t	_drops;
 };
 
 #endif // __RIP_PACKET_QUEUE_HH__

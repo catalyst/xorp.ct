@@ -45,17 +45,20 @@
 #define IPV4_HEADER_SIZE    20		// without any options
 #define UDP_HEADER_SIZE	    8		// sizeof(udphdr)
 
-size_t
+    size_t
 HelloMessage::remove_link(const IPv4& remote_addr)
 {
     size_t removed_count = 0;
 
-    for (LinkBag::iterator ii = _links.begin(); ii != _links.end(); ) {
+    for (LinkBag::iterator ii = _links.begin(); ii != _links.end(); ) 
+    {
 	LinkAddrInfo& lai = (*ii).second;
-	if (remote_addr == lai.remote_addr()) {
+	if (remote_addr == lai.remote_addr()) 
+	{
 	    _links.erase(ii++);
 	    removed_count++;
-	} else {
+	} else 
+	{
 	    ii++;
 	}
     }
@@ -66,7 +69,8 @@ HelloMessage::remove_link(const IPv4& remote_addr)
 size_t
 HelloMessage::get_links_length() const
 {
-    if (_links.empty()) {
+    if (_links.empty()) 
+    {
 	return (0);
     }
 
@@ -74,9 +78,11 @@ HelloMessage::get_links_length() const
 
     LinkCode thislc;
     LinkBag::const_iterator ii;
-    for (ii = _links.begin(); ii != _links.end(); ii++) {
+    for (ii = _links.begin(); ii != _links.end(); ii++) 
+    {
 	const LinkAddrInfo& lai = (*ii).second;
-	if (ii == _links.begin() || (*ii).first != thislc) {
+	if (ii == _links.begin() || (*ii).first != thislc) 
+	{
 	    thislc = (*ii).first;
 	    if (_links.count(thislc) == 0)
 		continue;
@@ -97,14 +103,17 @@ HelloMessage::str() const
 
     LinkCode thislc;
     LinkBag::const_iterator ii;
-    for (ii = _links.begin(); ii != _links.end(); ii++) {
-	if (ii == _links.begin() || (*ii).first != thislc) {
+    for (ii = _links.begin(); ii != _links.end(); ii++) 
+    {
+	if (ii == _links.begin() || (*ii).first != thislc) 
+	{
 	    thislc = (*ii).first;
 	    if (_links.count(thislc) == 0)
 		continue;
 	    str += " ";
 	    str += thislc.str();
-	} else {
+	} else 
+	{
 	    str += ",";
 	}
 	str += " ";
@@ -114,19 +123,20 @@ HelloMessage::str() const
     return (str += "\n");
 }
 
-size_t
+    size_t
 HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
-    size_t& skiplen, bool haslq)
-    throw(InvalidLinkTuple)
+	size_t& skiplen, bool haslq)
+throw(InvalidLinkTuple)
 {
     size_t offset = 0;
 
     // minimum size check
     skiplen = len;
-    if (len < link_tuple_header_length()) {
+    if (len < link_tuple_header_length()) 
+    {
 	xorp_throw(InvalidLinkTuple,
-	    c_format("Runt link tuple, buffer size is %u",
-		     XORP_UINT_CAST(len)));
+		c_format("Runt link tuple, buffer size is %u",
+		    XORP_UINT_CAST(len)));
     }
 
     uint8_t code = extract_8(&buf[offset]);	    // Link Code
@@ -141,9 +151,11 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
 
     bool is_bad_link_code = false;
     LinkCode linkcode;
-    try {
+    try 
+    {
 	linkcode = code;
-    } catch(BadLinkCode blc) {
+    } catch(BadLinkCode blc) 
+    {
 	debug_msg("caught bad link code exception\n");
 	is_bad_link_code = true;
     }
@@ -151,17 +163,19 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
     // Invalid link tuples must be discarded silently as per RFC.
     // Tell the caller to skip only the rest of the buffer, if the
     // size reported on the wire would overflow the buffer.
-    if (is_bad_link_code || link_tuple_len > len) {
+    if (is_bad_link_code || link_tuple_len > len) 
+    {
 	if (link_tuple_len > len)
 	    skiplen = len;
 	xorp_throw(InvalidLinkTuple,
-	    c_format("Invalid link tuple, advertised size is %u, "
-		     "buffer size is %u",
-		     XORP_UINT_CAST(link_tuple_len), XORP_UINT_CAST(len)));
+		c_format("Invalid link tuple, advertised size is %u, "
+		    "buffer size is %u",
+		    XORP_UINT_CAST(link_tuple_len), XORP_UINT_CAST(len)));
     }
 
     size_t remaining = link_tuple_len - offset;
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	LinkAddrInfo lai(haslq);
 
 	if (remaining < lai.size())
@@ -174,9 +188,10 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
 	add_link(linkcode, lai); // XXX no check for dupes
     }
 
-    if (offset != link_tuple_len) {
+    if (offset != link_tuple_len) 
+    {
 	XLOG_WARNING("Link tuple has %u unparsed bytes",
-		     XORP_UINT_CAST(len - offset));
+		XORP_UINT_CAST(len - offset));
     }
 
     skiplen = offset;
@@ -184,7 +199,7 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
     return offset;
 }
 
-size_t
+    size_t
 LinkAddrInfo::copy_in(const uint8_t *from_uint8)
 {
     size_t offset = 0;
@@ -194,7 +209,8 @@ LinkAddrInfo::copy_in(const uint8_t *from_uint8)
 
     // Produce an encoding of the ETX measurement which is
     // compatible with olsrd.
-    if (has_etx()) {
+    if (has_etx()) 
+    {
 	_near_etx = extract_8(&buf[offset]);
 	_near_etx /= 255;
 	offset += sizeof(uint8_t);
@@ -214,7 +230,8 @@ LinkAddrInfo::copy_out(uint8_t* to_uint8) const
     uint8_t* buf = to_uint8;
 
     offset += _remote_addr.copy_out(&buf[offset]);
-    if (has_etx()) {
+    if (has_etx()) 
+    {
 	embed_8(&buf[offset], static_cast<uint8_t>(_near_etx * 255));
 	offset += sizeof(uint8_t);
 	embed_8(&buf[offset], static_cast<uint8_t>(_far_etx * 255));
@@ -224,13 +241,14 @@ LinkAddrInfo::copy_out(uint8_t* to_uint8) const
     return offset;
 }
 
-Message*
-HelloMessage::decode(uint8_t* buf, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    HelloMessage::decode(uint8_t* buf, size_t& len)
+throw(InvalidMessage)
 {
-    if (len < min_length()) {
+    if (len < min_length()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Runt HelloMessage, size is %u",
+		c_format("Runt HelloMessage, size is %u",
 		    XORP_UINT_CAST(len)));
     }
 
@@ -241,19 +259,22 @@ HelloMessage::decode(uint8_t* buf, size_t& len)
     offset += sizeof(uint16_t);	    // reserved (skip)
 
     message->set_htime(EightBitTime::to_timeval(
-	extract_8(&buf[offset])));
+		extract_8(&buf[offset])));
     offset += sizeof(uint8_t);	    // htime
 
     message->set_willingness(static_cast<OlsrTypes::WillType>(
-	extract_8(&buf[offset])));
+		extract_8(&buf[offset])));
     offset += sizeof(uint8_t);	    // willingness
 
     size_t remaining = message->adv_message_length() - offset;
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	size_t skiplen;
-	try {
+	try 
+	{
 	    message->decode_link_tuple(&buf[offset], remaining, skiplen);
-	} catch(InvalidLinkTuple ilt) {
+	} catch(InvalidLinkTuple ilt) 
+	{
 	    debug_msg("%s\n", cstring(ilt));
 	    XLOG_WARNING("Invalid link info tuple at offset %u",
 		    XORP_UINT_CAST(offset));
@@ -265,7 +286,7 @@ HelloMessage::decode(uint8_t* buf, size_t& len)
     return (message);
 }
 
-bool
+    bool
 HelloMessage::encode(uint8_t* buf, size_t& len)
 {
     if (len < length())
@@ -287,10 +308,12 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
 
     // link tuples
     LinkCode thislc;
-    for (LinkBag::iterator ii = _links.begin(); ii != _links.end(); ii++) {
+    for (LinkBag::iterator ii = _links.begin(); ii != _links.end(); ii++) 
+    {
 	LinkAddrInfo& lai = (*ii).second;
 	// Is this a new link state tuple?
-	if (ii == _links.begin() || (*ii).first != thislc) {
+	if (ii == _links.begin() || (*ii).first != thislc) 
+	{
 	    thislc = (*ii).first;   // The link code of the new tuple
 
 #ifdef DETAILED_DEBUG
@@ -299,9 +322,11 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
 	    // Invariant: ETX measurements MUST be present in
 	    // an LQ HELLO message, and MUST NOT be present in a
 	    // legacy HELLO message.
-	    if (0 != dynamic_cast<EtxHelloMessage*>(this)) {
+	    if (0 != dynamic_cast<EtxHelloMessage*>(this)) 
+	    {
 		XLOG_ASSERT(haslq == true);
-	    } else {
+	    } else 
+	    {
 		XLOG_ASSERT(haslq == false);
 	    }
 #endif
@@ -328,16 +353,17 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
     return true;
 }
 
-Message*
-HnaMessage::decode(uint8_t* buf, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    HnaMessage::decode(uint8_t* buf, size_t& len)
+throw(InvalidMessage)
 {
     HnaMessage* message = new HnaMessage();
 
     size_t offset = message->decode_common_header(buf, len);
     size_t remaining = message->adv_message_length() - offset;
 
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	if (remaining < (IPv4::addr_bytelen() * 2))
 	    break;
 
@@ -355,16 +381,17 @@ HnaMessage::decode(uint8_t* buf, size_t& len)
 	message->add_network(IPv4Net(addr, prefix_len));
     }
 
-    if (message->networks().empty()) {
+    if (message->networks().empty()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Runt HnaMessage, size is %u",
+		c_format("Runt HnaMessage, size is %u",
 		    XORP_UINT_CAST(len)));
     }
 
     return (message);
 }
 
-bool
+    bool
 HnaMessage::encode(uint8_t* buf, size_t& len)
 {
     if (len < length())
@@ -376,7 +403,8 @@ HnaMessage::encode(uint8_t* buf, size_t& len)
     size_t offset = get_common_header_length();
 
     vector<IPv4Net>::const_iterator ii;
-    for (ii = _networks.begin(); ii != _networks.end(); ii++) {
+    for (ii = _networks.begin(); ii != _networks.end(); ii++) 
+    {
 	offset += (*ii).masked_addr().copy_out(&buf[offset]);
 	offset += (*ii).netmask().copy_out(&buf[offset]);
     }
@@ -388,36 +416,38 @@ string
 Message::common_str() const
 {
     string s = c_format(
-	"msg: type %d vtime %s size %u origin %s ttl %u hops %u seq %u\n",
-	XORP_UINT_CAST(type()),
-	cstring(expiry_time()),
-	XORP_UINT_CAST(length()),
-	cstring(origin()),
-	XORP_UINT_CAST(ttl()),
-	XORP_UINT_CAST(hops()),
-	XORP_UINT_CAST(seqno()));
+	    "msg: type %d vtime %s size %u origin %s ttl %u hops %u seq %u\n",
+	    XORP_UINT_CAST(type()),
+	    cstring(expiry_time()),
+	    XORP_UINT_CAST(length()),
+	    cstring(origin()),
+	    XORP_UINT_CAST(ttl()),
+	    XORP_UINT_CAST(hops()),
+	    XORP_UINT_CAST(seqno()));
 
     return (s);
 }
 
-size_t
-Message::decode_common_header(uint8_t* ptr, size_t& len)
-    throw(InvalidMessage)
+    size_t
+    Message::decode_common_header(uint8_t* ptr, size_t& len)
+throw(InvalidMessage)
 {
 
-    if (len < Message::get_common_header_length()) {
+    if (len < Message::get_common_header_length()) 
+    {
 	xorp_throw(InvalidPacket,
-	    c_format("Message too short %u, must be at least %u",
+		c_format("Message too short %u, must be at least %u",
 		    XORP_UINT_CAST(len),
 		    XORP_UINT_CAST(Message::get_common_header_length())));
     }
 
     _adv_message_length = extract_16(&ptr[2]);
-    if (_adv_message_length > len) {
+    if (_adv_message_length > len) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Message too short %u, advertised size is %u",
-		XORP_UINT_CAST(len),
-		XORP_UINT_CAST(_adv_message_length)));
+		c_format("Message too short %u, advertised size is %u",
+		    XORP_UINT_CAST(len),
+		    XORP_UINT_CAST(_adv_message_length)));
     }
 
     set_type(ptr[0]);
@@ -435,9 +465,10 @@ Message::decode_common_header(uint8_t* ptr, size_t& len)
     set_seqno(extract_16(&ptr[10]));
 
     // 3.4, 2: Drop messages with invalid TTL.
-    if (ttl() <= 0) {
+    if (ttl() <= 0) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Invalid message TTL %u.", XORP_UINT_CAST(ttl())));
+		c_format("Invalid message TTL %u.", XORP_UINT_CAST(ttl())));
     }
 
     // Store the entire message in the Message parent class _msg field.
@@ -448,10 +479,11 @@ Message::decode_common_header(uint8_t* ptr, size_t& len)
     return (Message::get_common_header_length());
 }
 
-bool
+    bool
 Message::encode_common_header(uint8_t* ptr, size_t& len)
 {
-    if (len < Message::get_common_header_length()) {
+    if (len < Message::get_common_header_length()) 
+    {
 	debug_msg("insufficient space for common message header");
 	return false;
     }
@@ -476,17 +508,18 @@ MessageDecoder::~MessageDecoder()
 	delete i->second;
 }
 
-Message*
-MessageDecoder::decode(uint8_t* ptr, size_t len)
-    throw(InvalidMessage)
+    Message*
+    MessageDecoder::decode(uint8_t* ptr, size_t len)
+throw(InvalidMessage)
 {
 
     // Message knows what the minimum size is -- but only for its
     // address family.
 
-    if (len < Message::get_common_header_length()) {
+    if (len < Message::get_common_header_length()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Message too short %u, must be at least %u",
+		c_format("Message too short %u, must be at least %u",
 		    XORP_UINT_CAST(len),
 		    XORP_UINT_CAST(Message::get_common_header_length())));
     }
@@ -496,16 +529,18 @@ MessageDecoder::decode(uint8_t* ptr, size_t len)
 
     Message* decoder;
     map<OlsrTypes::MessageType, Message*>::iterator ii = _olsrv1.find(type);
-    if (ii == _olsrv1.end()) {
+    if (ii == _olsrv1.end()) 
+    {
 	decoder = &_olsrv1_unknown;
-    } else {
+    } else 
+    {
 	decoder = (*ii).second;
     }
 
     return (decoder->decode(ptr, len));
 }
 
-void
+    void
 MessageDecoder::register_decoder(Message* message)
 {
     XLOG_ASSERT(_olsrv1.find(message->type()) == _olsrv1.end());
@@ -513,16 +548,17 @@ MessageDecoder::register_decoder(Message* message)
     _olsrv1[message->type()] = message;
 }
 
-Message*
-MidMessage::decode(uint8_t* buf, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    MidMessage::decode(uint8_t* buf, size_t& len)
+throw(InvalidMessage)
 {
     MidMessage* message = new MidMessage();
 
     size_t offset = message->decode_common_header(buf, len);
     size_t remaining = message->adv_message_length() - offset;
 
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	if (remaining < IPv4::addr_bytelen())
 	    break;
 	message->add_interface(IPv4(&buf[offset]));
@@ -530,16 +566,17 @@ MidMessage::decode(uint8_t* buf, size_t& len)
 	remaining -= IPv4::addr_bytelen();
     }
 
-    if (message->interfaces().empty()) {
+    if (message->interfaces().empty()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Runt MidMessage, size is %u",
+		c_format("Runt MidMessage, size is %u",
 		    XORP_UINT_CAST(len)));
     }
 
     return (message);
 }
 
-bool
+    bool
 MidMessage::encode(uint8_t* buf, size_t& len)
 {
     if (len < length())
@@ -557,17 +594,19 @@ MidMessage::encode(uint8_t* buf, size_t& len)
     return true;
 }
 
-void
-Packet::decode(uint8_t* ptr, size_t len)
-    throw(InvalidPacket)
+    void
+    Packet::decode(uint8_t* ptr, size_t len)
+throw(InvalidPacket)
 {
     size_t offset = decode_packet_header(ptr, len);
     size_t remaining = len - offset;
     size_t index = 0;
 
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	Message* message;
-	try {
+	try 
+	{
 	    message = _message_decoder.decode(&ptr[offset], len - offset);
 
 	    message->set_is_first(0 == index++);
@@ -577,15 +616,17 @@ Packet::decode(uint8_t* ptr, size_t len)
 	    remaining -= message->length();
 
 	    add_message(message);
-	} catch (InvalidMessage& e) {
+	} catch (InvalidMessage& e) 
+	{
 	    debug_msg("%s\n", cstring(e));
 	    break;
 	}
     }
 
-   // 3.4, 1: Packet Processing: A node must discard a message with
-   // no messages.
-    if (_messages.empty()) {
+    // 3.4, 1: Packet Processing: A node must discard a message with
+    // no messages.
+    if (_messages.empty()) 
+    {
 	xorp_throw(InvalidPacket, c_format("Packet contains no messages."));
     }
 
@@ -593,28 +634,31 @@ Packet::decode(uint8_t* ptr, size_t len)
     // decoders as they need to track this information.
     (*_messages.rbegin())->set_is_last(true);
 
-    if (remaining > 0) {
+    if (remaining > 0) 
+    {
 	debug_msg("Packet has %d bytes remaining\n", XORP_INT_CAST(remaining));
     }
 }
 
-size_t
-Packet::decode_packet_header(uint8_t* ptr, size_t len)
-    throw(InvalidPacket)
+    size_t
+    Packet::decode_packet_header(uint8_t* ptr, size_t len)
+throw(InvalidPacket)
 {
     // 3.4, 1: Packet Processing: A node must discard a message with
     // no messages.
-    if (len <= Packet::get_packet_header_length()) {
+    if (len <= Packet::get_packet_header_length()) 
+    {
 	xorp_throw(InvalidPacket,
-	    c_format("Packet too short %u, must be > %u",
+		c_format("Packet too short %u, must be > %u",
 		    XORP_UINT_CAST(len),
 		    XORP_UINT_CAST(Packet::get_packet_header_length())));
     }
 
     size_t packet_length = extract_16(&ptr[0]);
-    if (len < packet_length) {
+    if (len < packet_length) 
+    {
 	xorp_throw(InvalidPacket,
-	    c_format("Packet too short %u, advertised size is %u",
+		c_format("Packet too short %u, advertised size is %u",
 		    XORP_UINT_CAST(len),
 		    XORP_UINT_CAST(packet_length)));
     }
@@ -660,7 +704,8 @@ Packet::bounded_length() const
     //	      XORP_UINT_CAST(free_bytes));
 
     vector<Message*>::const_iterator ii;
-    for (ii = _messages.begin(); ii != _messages.end(); ii++) {
+    for (ii = _messages.begin(); ii != _messages.end(); ii++) 
+    {
 	//debug_msg("about to take that little step\n");
 	size_t msglen = (*ii)->length();
 	// Check if appending this message would overflow MTU.
@@ -672,7 +717,7 @@ Packet::bounded_length() const
     return len;
 }
 
-bool
+    bool
 Packet::encode(vector<uint8_t>& pkt)
 {
     size_t bounded_len = bounded_length();
@@ -687,14 +732,16 @@ Packet::encode(vector<uint8_t>& pkt)
     size_t offset = get_packet_header_length();
 
     vector<Message*>::const_iterator ii;
-    for (ii = _messages.begin(); ii != _messages.end(); ii++) {
+    for (ii = _messages.begin(); ii != _messages.end(); ii++) 
+    {
 	size_t msglen = (*ii)->length();
 	// Check if appending this message would overflow MTU.
-	if (offset + msglen > bounded_len) {
+	if (offset + msglen > bounded_len) 
+	{
 	    debug_msg("mtu overflowed: %u + %u > %u",
-		      XORP_UINT_CAST(offset),
-		      XORP_UINT_CAST(msglen),
-		      XORP_UINT_CAST(bounded_len));
+		    XORP_UINT_CAST(offset),
+		    XORP_UINT_CAST(msglen),
+		    XORP_UINT_CAST(bounded_len));
 	    return false;
 	}
 	// Try to encode this message.
@@ -706,7 +753,7 @@ Packet::encode(vector<uint8_t>& pkt)
     return true;
 }
 
-void
+    void
 Packet::update_encoded_seqno(vector<uint8_t>& pkt)
 {
     embed_16(&pkt[2], seqno());
@@ -716,17 +763,17 @@ string
 Packet::str() const
 {
     string s = c_format("OLSRv1: len %u seq %u\n",
-	XORP_UINT_CAST(length()),
-	XORP_UINT_CAST(seqno()));
+	    XORP_UINT_CAST(length()),
+	    XORP_UINT_CAST(seqno()));
     vector<Message*>::const_iterator ii;
     for (ii = _messages.begin(); ii != _messages.end(); ii++)
 	s += (*ii)->str();
     return (s += '\n');
 }
 
-void
-TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
-    throw(InvalidMessage)
+    void
+    TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
+throw(InvalidMessage)
 {
     size_t offset = decode_common_header(buf, len);
     size_t remaining = adv_message_length() - min_length();
@@ -735,7 +782,8 @@ TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
     offset += sizeof(uint16_t);		// ANSN
     offset += sizeof(uint16_t);		// Reserved
 
-    while (remaining > 0) {
+    while (remaining > 0) 
+    {
 	LinkAddrInfo lai(haslq);
 	if (remaining < lai.size())
 	    break;
@@ -748,45 +796,51 @@ TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
     }
 }
 
-Message*
-TcMessage::decode(uint8_t* buf, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    TcMessage::decode(uint8_t* buf, size_t& len)
+throw(InvalidMessage)
 {
-    if (len < min_length()) {
+    if (len < min_length()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Runt TcMessage, size is %u", XORP_UINT_CAST(len)));
+		c_format("Runt TcMessage, size is %u", XORP_UINT_CAST(len)));
     }
 
     TcMessage* message = new TcMessage();
-    try {
+    try 
+    {
 	message->decode_tc_common(buf, len);
-    } catch (...) {
+    } catch (...) 
+    {
 	throw;
     }
 
     return (message);
 }
 
-Message*
-EtxTcMessage::decode(uint8_t* buf, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    EtxTcMessage::decode(uint8_t* buf, size_t& len)
+throw(InvalidMessage)
 {
-    if (len < min_length()) {
+    if (len < min_length()) 
+    {
 	xorp_throw(InvalidMessage,
-	    c_format("Runt EtxTcMessage, size is %u", XORP_UINT_CAST(len)));
+		c_format("Runt EtxTcMessage, size is %u", XORP_UINT_CAST(len)));
     }
 
     EtxTcMessage* message = new EtxTcMessage();
-    try {
+    try 
+    {
 	message->decode_tc_common(buf, len, true);
-    } catch (...) {
+    } catch (...) 
+    {
 	throw;
     }
 
     return (message);
 }
 
-bool
+    bool
 TcMessage::encode(uint8_t* buf, size_t& len)
 {
     if (len < length())
@@ -803,14 +857,17 @@ TcMessage::encode(uint8_t* buf, size_t& len)
     offset += sizeof(uint16_t);
 
     vector<LinkAddrInfo>::const_iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	const LinkAddrInfo& lai = *ii;
 #ifdef DETAILED_DEBUG
 	// Invariant: ETX information MUST be present in
 	// an LQ TC message, and MUST NOT be present in a legacy TC message.
-	if (0 != dynamic_cast<EtxTcMessage*>(this)) {
+	if (0 != dynamic_cast<EtxTcMessage*>(this)) 
+	{
 	    XLOG_ASSERT(lai.has_etx() == true);
-	} else {
+	} else 
+	{
 	    XLOG_ASSERT(lai.has_etx() == false);
 	}
 #endif
@@ -820,9 +877,9 @@ TcMessage::encode(uint8_t* buf, size_t& len)
     return true;
 }
 
-Message*
-UnknownMessage::decode(uint8_t* ptr, size_t& len)
-    throw(InvalidMessage)
+    Message*
+    UnknownMessage::decode(uint8_t* ptr, size_t& len)
+throw(InvalidMessage)
 {
     UnknownMessage* message = new UnknownMessage();
 
@@ -833,7 +890,7 @@ UnknownMessage::decode(uint8_t* ptr, size_t& len)
     return (message);
 }
 
-bool
+    bool
 UnknownMessage::encode(uint8_t* ptr, size_t& len)
 {
     store(ptr, len);
@@ -845,12 +902,14 @@ string
 MidMessage::str() const
 {
     string str = this->common_str() + "MID ";
-    if (_interfaces.empty()) {
+    if (_interfaces.empty()) 
+    {
 	str = "<empty>";
-    } else {
+    } else 
+    {
 	vector<IPv4>::const_iterator ii;
 	for (ii = _interfaces.begin(); ii != _interfaces.end(); ii++)
-	str += ii->str() + " ";
+	    str += ii->str() + " ";
     }
     return (str += "\n");
 }
@@ -863,10 +922,11 @@ static const char* ASYM_LINK_NAME = "asym";
 static const char* SYM_LINK_NAME = "sym";
 static const char* LOST_LINK_NAME = "lost";
 
-const char*
+    const char*
 LinkCode::linktype_to_str(OlsrTypes::LinkType t)
 {
-    switch (t) {
+    switch (t) 
+    {
 	NAME_CASE(UNSPEC_LINK);
 	NAME_CASE(ASYM_LINK);
 	NAME_CASE(SYM_LINK);
@@ -880,10 +940,11 @@ static const char* NOT_NEIGH_NAME = "not";
 static const char* SYM_NEIGH_NAME = "sym";
 static const char* MPR_NEIGH_NAME = "mpr";
 
-const char*
+    const char*
 LinkCode::neighbortype_to_str(OlsrTypes::NeighborType t)
 {
-    switch (t) {
+    switch (t) 
+    {
 	NAME_CASE(NOT_NEIGH);
 	NAME_CASE(SYM_NEIGH);
 	NAME_CASE(MPR_NEIGH);

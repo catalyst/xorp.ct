@@ -27,15 +27,16 @@
 
 #include "policy/common/varrw.hh"
 
-class TestVarRW : public VarRW {
-public:
-    const Element& read(const Id& id);
-    void  write(const Id& id, const Element& elem);
+class TestVarRW : public VarRW 
+{
+    public:
+	const Element& read(const Id& id);
+	void  write(const Id& id, const Element& elem);
 
-private:
-    typedef map<Id, const Element*> ELEM;
+    private:
+	typedef map<Id, const Element*> ELEM;
 
-    ELEM    _elem;
+	ELEM    _elem;
 };
 
 #endif // __POLICY_TEST_VARRW_HH__

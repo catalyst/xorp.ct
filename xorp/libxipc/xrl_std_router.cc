@@ -37,36 +37,42 @@
 
 static const char default_pf[] = { XRL_PF, '\0' };
 
-string XrlStdRouter::toString() const {
+string XrlStdRouter::toString() const 
+{
     ostringstream oss;
     oss << XrlRouter::toString();
     oss << "\n_unix: ";
 
-    if (_unix) {
+    if (_unix) 
+    {
 	oss << _unix->toString() << endl;
     }
-    else {
+    else 
+    {
 	oss << "NULL\n";
     }
 
-    if (_l) {
+    if (_l) 
+    {
 	oss << "LISTENER: " << _l->toString() << endl;
     }
-    else {
+    else 
+    {
 	oss << "LISTENER: NULL\n";
     }
     return oss.str();
 }
 
 
-XrlPFListener*
+    XrlPFListener*
 XrlStdRouter::create_listener()
 {
     const char* pf = getenv("XORP_PF");
     if (pf == NULL)
 	pf = default_pf;
 
-    switch (pf[0]) {
+    switch (pf[0]) 
+    {
 	// For the benefit of bench_ipc.sh.
 	case 't':
 	    return new XrlPFSTCPListener( this);
@@ -86,7 +92,7 @@ XrlStdRouter::create_listener()
     return 0;
 }
 
-static void
+    static void
 destroy_listener(XrlPFListener*& l)
 {
     delete l;
@@ -97,50 +103,50 @@ destroy_listener(XrlPFListener*& l)
 // XrlStdRouter implementation
 
 XrlStdRouter::XrlStdRouter( const char*	class_name,
-			   bool		unix_socket)
-    : XrlRouter( class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
-		FinderConstants::FINDER_DEFAULT_PORT())
+	bool		unix_socket)
+: XrlRouter( class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
+	FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter( const char*	class_name,
-			   IPv4		finder_address,
-			   bool		unix_socket)
-    : XrlRouter( class_name, finder_address,
-		FinderConstants::FINDER_DEFAULT_PORT())
+	IPv4		finder_address,
+	bool		unix_socket)
+: XrlRouter( class_name, finder_address,
+	FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter( const char*	class_name,
-			   IPv4		finder_address,
-			   uint16_t	finder_port,
-			   bool		unix_socket)
-    : XrlRouter( class_name, finder_address, finder_port)
+	IPv4		finder_address,
+	uint16_t	finder_port,
+	bool		unix_socket)
+: XrlRouter( class_name, finder_address, finder_port)
 {
     construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter( const char*	class_name,
-			   const char*	finder_address,
-			   bool		unix_socket)
-    : XrlRouter( class_name, finder_address,
-		FinderConstants::FINDER_DEFAULT_PORT())
+	const char*	finder_address,
+	bool		unix_socket)
+: XrlRouter( class_name, finder_address,
+	FinderConstants::FINDER_DEFAULT_PORT())
 {
     construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter( const char*	class_name,
-			   const char*	finder_address,
-			   uint16_t	finder_port,
-			   bool		unix_socket)
-    : XrlRouter( class_name, finder_address, finder_port)
+	const char*	finder_address,
+	uint16_t	finder_port,
+	bool		unix_socket)
+: XrlRouter( class_name, finder_address, finder_port)
 {
     construct(unix_socket);
 }
 
-void
+    void
 XrlStdRouter::construct(bool unix_socket)
 {
     _unix = _l = NULL;
@@ -160,7 +166,7 @@ XrlStdRouter::construct(bool unix_socket)
     add_listener(_l);
 }
 
-void
+    void
 XrlStdRouter::create_unix_listener()
 {
     _unix = new XrlPFUNIXListener( this);

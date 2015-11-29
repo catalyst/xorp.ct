@@ -35,7 +35,7 @@ ElementFactory::ElementFactory()
 {
 }
 
-void 
+    void 
 ElementFactory::add(const string& key, Callback cb)
 {
     // it is safe to blindly replace callbacks, but probably an error ;D
@@ -44,7 +44,7 @@ ElementFactory::add(const string& key, Callback cb)
     _map[key] = cb;
 }
 
-Element* 
+    Element* 
 ElementFactory::create(const string& key, const char* arg)
 {
     Map::iterator i = _map.find(key);
@@ -57,7 +57,7 @@ ElementFactory::create(const string& key, const char* arg)
     return (i->second)(arg);
 }
 
-bool
+    bool
 ElementFactory::can_create(const string& key)
 {
     return _map.find(key) != _map.end();

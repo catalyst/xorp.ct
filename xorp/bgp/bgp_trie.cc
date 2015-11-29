@@ -27,125 +27,133 @@
 template<class A>
 ChainedSubnetRoute<A>::
 ChainedSubnetRoute(const SubnetRoute<A>& route,
-		   const ChainedSubnetRoute<A>* prev)
-    : SubnetRoute<A>(route)
+		const ChainedSubnetRoute<A>* prev)
+: SubnetRoute<A>(route)
 {
-    if (prev != NULL) {
-	set_prev(prev);
-	set_next(prev->next());
-	_prev->set_next(this);
-	_next->set_prev(this);
-    } else {
-	_prev = this;
-	_next = this;
-    }
+	if (prev != NULL) 
+	{
+		set_prev(prev);
+		set_next(prev->next());
+		_prev->set_next(this);
+		_next->set_prev(this);
+	} else 
+	{
+		_prev = this;
+		_next = this;
+	}
 }
 
 template<class A>
 ChainedSubnetRoute<A>::
-ChainedSubnetRoute(const ChainedSubnetRoute<A>& original)
-    : SubnetRoute<A>(original)
+	ChainedSubnetRoute(const ChainedSubnetRoute<A>& original)
+: SubnetRoute<A>(original)
 {
-    _prev = &original;
-    _next = original.next();
-    original.set_next(this);
-    _next->set_prev(this);
+	_prev = &original;
+	_next = original.next();
+	original.set_next(this);
+	_next->set_prev(this);
 }
 
 template<class A>
 bool
-ChainedSubnetRoute<A>::unchain() const {
-    _prev->set_next(_next);
-    _next->set_prev(_prev);
-    return _next != this;
+ChainedSubnetRoute<A>::unchain() const 
+{
+	_prev->set_next(_next);
+	_next->set_prev(_prev);
+	return _next != this;
 }
 
 /*************************************************************************/
 
-template<class A>
+	template<class A>
 BgpTrie<A>::BgpTrie()
 {
 }
 
-template<class A>
+	template<class A>
 BgpTrie<A>::~BgpTrie()
 {
-    if (this->route_count() > 0) {
-	XLOG_FATAL("BgpTrie being deleted while still containing data\n");
-    }
+	if (this->route_count() > 0) 
+	{
+		XLOG_FATAL("BgpTrie being deleted while still containing data\n");
+	}
 }
 
 template<class A>
-typename BgpTrie<A>::iterator
+	typename BgpTrie<A>::iterator
 BgpTrie<A>::insert(const IPNet& net, const SubnetRoute<A>& route)
 {
-    typename PathmapType::iterator pmi = _pathmap.find(route.attributes());
-    const ChainedSubnetRoute* found = (pmi == _pathmap.end()) ? NULL : pmi->second;
-    ChainedSubnetRoute* chained_rt 
-	= new ChainedSubnetRoute(route, found);
+	typename PathmapType::iterator pmi = _pathmap.find(route.attributes());
+	const ChainedSubnetRoute* found = (pmi == _pathmap.end()) ? NULL : pmi->second;
+	ChainedSubnetRoute* chained_rt 
+		= new ChainedSubnetRoute(route, found);
 
-    // The trie will copy chained_rt.  The copy constructor will insert
-    // the copy into the chain after chained_rt.
-    iterator iter = ((RouteTrie*)this)->insert(net, *chained_rt);
+	// The trie will copy chained_rt.  The copy constructor will insert
+	// the copy into the chain after chained_rt.
+	iterator iter = ((RouteTrie*)this)->insert(net, *chained_rt);
 
-    if (found == NULL) {
-	debug_msg(" on new chain");
-	_pathmap[route.attributes()] = &(iter.payload());
-    }
-    debug_msg("\n");
-    chained_rt->unchain();
-    chained_rt->unref();
-    return iter;
+	if (found == NULL) 
+	{
+		debug_msg(" on new chain");
+		_pathmap[route.attributes()] = &(iter.payload());
+	}
+	debug_msg("\n");
+	chained_rt->unchain();
+	chained_rt->unref();
+	return iter;
 }
 
 template<class A>
-void
+	void
 BgpTrie<A>::erase(const IPNet& net)
 {
-    // unlink the node from the _pathmap chain
-    iterator iter = this->lookup_node(net);
-    XLOG_ASSERT(iter != this->end());
-    const ChainedSubnetRoute *found = &(iter.payload());
-    XLOG_ASSERT(iter.key() == net);
-    XLOG_ASSERT(found->net() == net);
+	// unlink the node from the _pathmap chain
+	iterator iter = this->lookup_node(net);
+	XLOG_ASSERT(iter != this->end());
+	const ChainedSubnetRoute *found = &(iter.payload());
+	XLOG_ASSERT(iter.key() == net);
+	XLOG_ASSERT(found->net() == net);
 
-    typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
-    if (pmi == _pathmap.end()) {
-	XLOG_ERROR("Error deleting route for %s with attributes %s", 
-		   net.str().c_str(),
-		   found->attributes()->str().c_str());
-	XLOG_INFO("Pathmap dump follows: \n");
-	for (pmi == _pathmap.begin(); pmi != _pathmap.end(); pmi++) {
-	    XLOG_INFO("%s\n\n", pmi->second->str().c_str());
+	typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
+	if (pmi == _pathmap.end()) 
+	{
+		XLOG_ERROR("Error deleting route for %s with attributes %s", 
+				net.str().c_str(),
+				found->attributes()->str().c_str());
+		XLOG_INFO("Pathmap dump follows: \n");
+		for (pmi == _pathmap.begin(); pmi != _pathmap.end(); pmi++) 
+		{
+			XLOG_INFO("%s\n\n", pmi->second->str().c_str());
+		}
+		XLOG_FATAL("Exiting\n");
 	}
-	XLOG_FATAL("Exiting\n");
-    }
-    if (pmi->second == found) {		// this was the head node
-	if (found->next() == found) {	 // it's the only node in the chain
-	    _pathmap.erase(pmi);
-	    debug_msg(" and erasing chain\n");
-	} else {			// there are other nodes
-	    _pathmap[found->attributes()] = found->next();
-	    found->unchain();
-	    debug_msg(" chain remains but head moved\n");
+	if (pmi->second == found) {		// this was the head node
+		if (found->next() == found) {	 // it's the only node in the chain
+			_pathmap.erase(pmi);
+			debug_msg(" and erasing chain\n");
+		} else {			// there are other nodes
+			_pathmap[found->attributes()] = found->next();
+			found->unchain();
+			debug_msg(" chain remains but head moved\n");
+		}
+	} else 
+	{
+		found->unchain();
+		debug_msg(" chain remains\n");
 	}
-    } else {
-	found->unchain();
-	debug_msg(" chain remains\n");
-    }
-    debug_msg("\n");
+	debug_msg("\n");
 
-    // now delete it from the Actual Trie
-    ((RouteTrie*)this)->erase(iter);
+	// now delete it from the Actual Trie
+	((RouteTrie*)this)->erase(iter);
 }
 
 template<class A>
-void
+	void
 BgpTrie<A>::delete_all_nodes()			
 {
-    while (_pathmap.empty() == false)
-	_pathmap.erase(_pathmap.begin());
-    ((RouteTrie*)this)->delete_all_nodes();
+	while (_pathmap.empty() == false)
+		_pathmap.erase(_pathmap.begin());
+	((RouteTrie*)this)->delete_all_nodes();
 }
 
 template class BgpTrie<IPv4>;

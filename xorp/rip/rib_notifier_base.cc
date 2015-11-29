@@ -24,43 +24,44 @@
 // ----------------------------------------------------------------------------
 // RibNotifierBase<A> implementation
 
-template <typename A>
+	template <typename A>
 RibNotifierBase<A>::RibNotifierBase( UpdateQueue<A>& uq,
-				 uint32_t	 ms)
-    :  _uq(uq), _poll_ms(ms)
+		uint32_t	 ms)
+:  _uq(uq), _poll_ms(ms)
 {
-    _ri = _uq.create_reader();
+	_ri = _uq.create_reader();
 }
 
-template <typename A>
+	template <typename A>
 RibNotifierBase<A>::~RibNotifierBase()
 {
-    _uq.destroy_reader(_ri);
+	_uq.destroy_reader(_ri);
 }
 
 template <typename A>
-void
+	void
 RibNotifierBase<A>::start_polling()
 {
-    _t = EventLoop::instance().new_periodic_ms(_poll_ms,
-			    callback(this, &RibNotifierBase<A>::poll_updates));
+	_t = EventLoop::instance().new_periodic_ms(_poll_ms,
+			callback(this, &RibNotifierBase<A>::poll_updates));
 }
 
 template <typename A>
-void
+	void
 RibNotifierBase<A>::stop_polling()
 {
-    _t.unschedule();
+	_t.unschedule();
 }
 
 template <typename A>
-bool
+	bool
 RibNotifierBase<A>::poll_updates()
 {
-    if (_uq.get(_ri)) {
-	updates_available();
-    }
-    return true;
+	if (_uq.get(_ri)) 
+	{
+		updates_available();
+	}
+	return true;
 }
 
 

@@ -44,123 +44,124 @@
  * 
  * There should be one node per FEA instance.
  */
-class XrlFeaNode {
-public:
-    /**
-     * Constructor.
-     *
-     * @param eventloop the event loop to use.
-     * @param xrl_fea_targetname the XRL targetname of the FEA.
-     * @param xrl_finder_targetname the XRL targetname of the Finder.
-     * @param finder_hostname the XRL Finder hostname.
-     * @param finder_port the XRL Finder port.
-     * @param is_dummy if true, then run the FEA in dummy mode.
-     */
-    XrlFeaNode( const string& xrl_fea_targetname,
-	       const string& xrl_finder_targetname,
-	       const string& finder_hostname, uint16_t finder_port,
-	       bool is_dummy);
+class XrlFeaNode 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param eventloop the event loop to use.
+		 * @param xrl_fea_targetname the XRL targetname of the FEA.
+		 * @param xrl_finder_targetname the XRL targetname of the Finder.
+		 * @param finder_hostname the XRL Finder hostname.
+		 * @param finder_port the XRL Finder port.
+		 * @param is_dummy if true, then run the FEA in dummy mode.
+		 */
+		XrlFeaNode( const string& xrl_fea_targetname,
+				const string& xrl_finder_targetname,
+				const string& finder_hostname, uint16_t finder_port,
+				bool is_dummy);
 
-    /**
-     * Destructor
-     */
-    virtual	~XrlFeaNode();
+		/**
+		 * Destructor
+		 */
+		virtual	~XrlFeaNode();
 
-    /**
-     * Startup the service operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		startup();
+		/**
+		 * Startup the service operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		startup();
 
-    /**
-     * Shutdown the service operation.
-     *
-     * Gracefully shutdown the FEA.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		shutdown();
+		/**
+		 * Shutdown the service operation.
+		 *
+		 * Gracefully shutdown the FEA.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		shutdown();
 
-    /**
-     * Test whether the service is running.
-     *
-     * @return true if the service is still running, otherwise false.
-     */
-    bool	is_running() const;
+		/**
+		 * Test whether the service is running.
+		 *
+		 * @return true if the service is still running, otherwise false.
+		 */
+		bool	is_running() const;
 
-    /**
-     * Test whether a shutdown XRL request has been received.
-     *
-     * @return true if shutdown XRL request has been received, otherwise false.
-     */
-    bool	is_shutdown_received() const;
+		/**
+		 * Test whether a shutdown XRL request has been received.
+		 *
+		 * @return true if shutdown XRL request has been received, otherwise false.
+		 */
+		bool	is_shutdown_received() const;
 
 
-    /**
-     * Get the XRL transmission and reception point.
-     *
-     * @return reference to the XRL transmission and reception point.
-     */
-    XrlStdRouter& xrl_router() { return (_xrl_router); }
+		/**
+		 * Get the XRL transmission and reception point.
+		 *
+		 * @return reference to the XRL transmission and reception point.
+		 */
+		XrlStdRouter& xrl_router() { return (_xrl_router); }
 
-    /**
-     * Get the FEA I/O XRL instance.
-     *
-     * @return reference to the FEA I/O XRL instance.
-     */
-    XrlFeaIo&	xrl_fea_io() { return (_xrl_fea_io); }
+		/**
+		 * Get the FEA I/O XRL instance.
+		 *
+		 * @return reference to the FEA I/O XRL instance.
+		 */
+		XrlFeaIo&	xrl_fea_io() { return (_xrl_fea_io); }
 
-    /**
-     * Get the FEA node instance.
-     *
-     * @return reference to the FEA node instance.
-     */
-    FeaNode&	fea_node() { return (_fea_node); }
+		/**
+		 * Get the FEA node instance.
+		 *
+		 * @return reference to the FEA node instance.
+		 */
+		FeaNode&	fea_node() { return (_fea_node); }
 
-    /**
-     * Get the FEA XRL target.
-     *
-     * @return reference to the FEA XRL target.
-     */
-    XrlFeaTarget& xrl_fea_target() { return (_xrl_fea_target); }
+		/**
+		 * Get the FEA XRL target.
+		 *
+		 * @return reference to the FEA XRL target.
+		 */
+		XrlFeaTarget& xrl_fea_target() { return (_xrl_fea_target); }
 
-    /**
-     * Get the Finder's XRL target name.
-     *
-     * @return the Finder's XRL target name.
-     */
-    const string& xrl_finder_targetname() const { return (_xrl_finder_targetname); }
+		/**
+		 * Get the Finder's XRL target name.
+		 *
+		 * @return the Finder's XRL target name.
+		 */
+		const string& xrl_finder_targetname() const { return (_xrl_finder_targetname); }
 
-private:
-    XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
-    XrlFeaIo		_xrl_fea_io;	// The FEA I/O XRL instance
-    FeaNode		_fea_node;	// The FEA node
-    LibFeaClientBridge	_lib_fea_client_bridge;
+	private:
+		XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
+		XrlFeaIo		_xrl_fea_io;	// The FEA I/O XRL instance
+		FeaNode		_fea_node;	// The FEA node
+		LibFeaClientBridge	_lib_fea_client_bridge;
 
-    XrlFibClientManager	_xrl_fib_client_manager; // The FIB client manager
-    XrlIoLinkManager	_xrl_io_link_manager;	// Link raw I/O manager
-    XrlIoIpManager	_xrl_io_ip_manager;	// IP raw I/O manager
-    XrlIoTcpUdpManager	_xrl_io_tcpudp_manager;	// TCP/UDP I/O manager
+		XrlFibClientManager	_xrl_fib_client_manager; // The FIB client manager
+		XrlIoLinkManager	_xrl_io_link_manager;	// Link raw I/O manager
+		XrlIoIpManager	_xrl_io_ip_manager;	// IP raw I/O manager
+		XrlIoTcpUdpManager	_xrl_io_tcpudp_manager;	// TCP/UDP I/O manager
 
-    // MFEA-related stuff
-    // TODO: XXX: This should be refactored and better integrated with the FEA.
-    // TODO: XXX: For now we don't have a dummy MFEA
+		// MFEA-related stuff
+		// TODO: XXX: This should be refactored and better integrated with the FEA.
+		// TODO: XXX: For now we don't have a dummy MFEA
 
-    //
-    // XXX: TODO: The CLI stuff is temporary needed (and used) by the
-    // multicast modules.
-    //
-    CliNode		_cli_node4;
-    XrlCliNode		_xrl_cli_node;
-    XrlMfeaNode		_xrl_mfea_node4;	// The IPv4 MFEA
+		//
+		// XXX: TODO: The CLI stuff is temporary needed (and used) by the
+		// multicast modules.
+		//
+		CliNode		_cli_node4;
+		XrlCliNode		_xrl_cli_node;
+		XrlMfeaNode		_xrl_mfea_node4;	// The IPv4 MFEA
 #ifdef HAVE_IPV6_MULTICAST
-    XrlMfeaNode		_xrl_mfea_node6;	// The IPv6 MFEA
+		XrlMfeaNode		_xrl_mfea_node6;	// The IPv6 MFEA
 #endif
 
-    XrlFeaTarget	_xrl_fea_target;	// The FEA XRL target
+		XrlFeaTarget	_xrl_fea_target;	// The FEA XRL target
 
-    const string	_xrl_finder_targetname;	// The Finder target name
+		const string	_xrl_finder_targetname;	// The Finder target name
 };
 
 #endif // __FEA_XRL_FEA_NODE_HH__

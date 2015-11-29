@@ -23,10 +23,10 @@
 #define __LIBXORP_TESTS_HH__
 
 #define print_passed(a) cout << "Test Passed (" << a << ")  " << __FUNCTION__ \
-                             << " " << __FILE__ << ":" << __LINE__ << endl;
+    << " " << __FILE__ << ":" << __LINE__ << endl;
 
 #define print_failed(a) cerr << "Test Failed (" << a << ")  " << __FUNCTION__ \
-                             << " " << __FILE__ << ":" << __LINE__ << endl;
+    << " " << __FILE__ << ":" << __LINE__ << endl;
 
 
 //
@@ -36,12 +36,12 @@
 #define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
 
 #define _verbose_log(file, line, x...)					\
-do {									\
-    if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
-	printf(x);							\
-    }									\
-} while(0)
+    do {									\
+	if (verbose()) {							\
+	    printf("From %s:%d: ", file, line);				\
+	    printf(x);							\
+	}									\
+    } while(0)
 
 
 
@@ -52,14 +52,14 @@ do {									\
 #define verbose_match(s1, s2)						\
     _verbose_match(__FILE__, __LINE__, s1, s2)
 
-bool
+    bool
 _verbose_match(const char* file, int line, const string& s1, const string& s2)
 {
     bool match = s1 == s2;
-    
+
     _verbose_log(file, line, "%s:  Comparing %s == %s\n",
-		 match ? "Test Passed" : "Test Failed",
-		 s1.c_str(), s2.c_str());
+	    match ? "Test Passed" : "Test Failed",
+	    s1.c_str(), s2.c_str());
     if (match == false)
 	incr_failures();
     return match;
@@ -76,11 +76,11 @@ _verbose_match(const char* file, int line, const string& s1, const string& s2)
 #define verbose_assert(cond, desc) 					\
     _verbose_assert(__FILE__, __LINE__, cond, desc)
 
-bool
+    bool
 _verbose_assert(const char* file, int line, bool cond, const string& desc)
 {
     _verbose_log(file, line,
-		 "%s:  Testing %s\n", cond ? "Test Passed" : "Test Failed", desc.c_str());
+	    "%s:  Testing %s\n", cond ? "Test Passed" : "Test Failed", desc.c_str());
     if (cond == false)
 	incr_failures();
     return cond;

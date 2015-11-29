@@ -31,8 +31,8 @@
 // ----------------------------------------------------------------------------
 // TaskNode methods
 
-TaskNode::TaskNode(TaskList* task_list, BasicTaskCallback cb)
-    : _task_list(task_list), _cb(cb), _ref_cnt(0), _priority(0), _weight(0)
+    TaskNode::TaskNode(TaskList* task_list, BasicTaskCallback cb)
+: _task_list(task_list), _cb(cb), _ref_cnt(0), _priority(0), _weight(0)
 {
     debug_msg("TaskNode constructor %p\n", this);
 }
@@ -44,21 +44,21 @@ TaskNode::~TaskNode()
     unschedule();
 }
 
-void
+    void
 TaskNode::add_ref()
 {
     _ref_cnt++;
     debug_msg("add_ref on %p, now ref_cnt = %d\n", this, _ref_cnt);
 }
 
-void
+    void
 TaskNode::release_ref()
 {
     if (--_ref_cnt <= 0)
 	delete this;
 }
 
-void
+    void
 TaskNode::schedule(int priority, int weight)
 {
     debug_msg("TaskNode schedule %p p = %d, w = %d\n", this, priority, weight);
@@ -70,7 +70,7 @@ TaskNode::schedule(int priority, int weight)
     _task_list->schedule_node(this);
 }
 
-void
+    void
 TaskNode::reschedule()
 {
     XLOG_ASSERT(_task_list != NULL);
@@ -78,7 +78,7 @@ TaskNode::reschedule()
     _task_list->schedule_node(this);
 }
 
-void
+    void
 TaskNode::unschedule()
 {
     if (scheduled())
@@ -91,47 +91,52 @@ TaskNode::unschedule()
 // the TaskList XorpTask creation methods (e.g. TaskList::new_oneoff_at(), etc)
 // actually refer to.
 
-class OneoffTaskNode2 : public TaskNode {
-public:
-    OneoffTaskNode2(TaskList* task_list, const OneoffTaskCallback& cb)
-	: TaskNode(task_list, callback(this, &OneoffTaskNode2::run)),
-	  _cb(cb) {}
+class OneoffTaskNode2 : public TaskNode 
+{
+    public:
+	OneoffTaskNode2(TaskList* task_list, const OneoffTaskCallback& cb)
+	    : TaskNode(task_list, callback(this, &OneoffTaskNode2::run)),
+	    _cb(cb) {}
 
-private:
-    void run(XorpTask& xorp_task) {
-	debug_msg("OneoffTaskNode2::run() %p\n", this);
-	//
-	// XXX: we have to unschedule before the callback dispatch, in case
-	// the callback decides to schedules again the task.
-	//
-	xorp_task.unschedule();
-	_cb->dispatch();
-    }
+    private:
+	void run(XorpTask& xorp_task) 
+	{
+	    debug_msg("OneoffTaskNode2::run() %p\n", this);
+	    //
+	    // XXX: we have to unschedule before the callback dispatch, in case
+	    // the callback decides to schedules again the task.
+	    //
+	    xorp_task.unschedule();
+	    _cb->dispatch();
+	}
 
-    OneoffTaskCallback _cb;
+	OneoffTaskCallback _cb;
 };
 
-class RepeatedTaskNode2 : public TaskNode {
-public:
-    RepeatedTaskNode2(TaskList* task_list, const RepeatedTaskCallback& cb)
-	: TaskNode(task_list, callback(this, &RepeatedTaskNode2::run)),
-	  _cb(cb) {}
+class RepeatedTaskNode2 : public TaskNode 
+{
+    public:
+	RepeatedTaskNode2(TaskList* task_list, const RepeatedTaskCallback& cb)
+	    : TaskNode(task_list, callback(this, &RepeatedTaskNode2::run)),
+	    _cb(cb) {}
 
-private:
-    void run(XorpTask& xorp_task) {
-	if (! _cb->dispatch()) {
-	    xorp_task.unschedule();
+    private:
+	void run(XorpTask& xorp_task) 
+	{
+	    if (! _cb->dispatch()) 
+	    {
+		xorp_task.unschedule();
+	    }
 	}
-    }
 
-    RepeatedTaskCallback _cb;
+	RepeatedTaskCallback _cb;
 };
 
 
 // ----------------------------------------------------------------------------
 // XorpTask
 
-void
+    void
 XorpTask::unschedule()
 {
     if (_task_node != NULL)
@@ -155,7 +160,8 @@ TaskList::~TaskList()
 {
 #ifdef notyet
     // Attempting to plug the leak causes problems elsewhere.
-    while (! _rr_list.empty()) {
+    while (! _rr_list.empty()) 
+    {
 	map<int, RoundRobinQueue*>::iterator ii = _rr_list.begin();
 	delete (*ii).second;
 	_rr_list.erase(ii);
@@ -163,9 +169,9 @@ TaskList::~TaskList()
 #endif
 }
 
-XorpTask
+    XorpTask
 TaskList::new_oneoff_task(const OneoffTaskCallback& cb,
-			  int priority, int weight)
+	int priority, int weight)
 {
     debug_msg("new oneoff task %p p = %d, w = %d\n", this, priority, weight);
 
@@ -174,9 +180,9 @@ TaskList::new_oneoff_task(const OneoffTaskCallback& cb,
     return XorpTask(task_node);
 }
 
-XorpTask
+    XorpTask
 TaskList::new_task(const RepeatedTaskCallback& cb,
-		   int priority, int weight)
+	int priority, int weight)
 {
     debug_msg("new task %p p = %d, w = %d\n", this, priority, weight);
 
@@ -190,8 +196,10 @@ TaskList::get_runnable_priority() const
 {
     map<int, RoundRobinQueue*>::const_iterator rri;
 
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
-	if (rri->second->size() != 0) {
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) 
+    {
+	if (rri->second->size() != 0) 
+	{
 	    return rri->first;
 	}
     }
@@ -205,8 +213,10 @@ TaskList::empty() const
     bool result = true;
     map<int, RoundRobinQueue*>::const_iterator rri;
 
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
-	if (rri->second->size() != 0) {
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) 
+    {
+	if (rri->second->size() != 0) 
+	{
 	    result = false;
 	    break;
 	}
@@ -215,16 +225,18 @@ TaskList::empty() const
     return result;
 }
 
-void
+    void
 TaskList::run()
 {
     map<int, RoundRobinQueue*>::const_iterator rri;
 
     debug_msg("TaskList run()\n");
 
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) 
+    {
 	RoundRobinQueue* rr = rri->second;
-	if (rr->size() != 0) {
+	if (rr->size() != 0) 
+	{
 	    TaskNode* task_node = static_cast<TaskNode*>(rr->get_next_entry());
 	    debug_msg("node to run: %p\n", task_node);
 	    XorpTask xorp_task(task_node);
@@ -234,21 +246,23 @@ TaskList::run()
     }
 }
 
-RoundRobinQueue*
+    RoundRobinQueue*
 TaskList::find_round_robin(int priority)
 {
     map<int, RoundRobinQueue*>::iterator rri = _rr_list.find(priority);
 
-    if (rri == _rr_list.end()) {
+    if (rri == _rr_list.end()) 
+    {
 	RoundRobinQueue* rr = new RoundRobinQueue();
 	_rr_list[priority] = rr;
 	return rr;
-    } else {
+    } else 
+    {
 	return rri->second;
     }
 }
 
-void 
+    void 
 TaskList::schedule_node(TaskNode* task_node)
 {
     debug_msg("TaskList::schedule_node: n = %p\n", task_node);
@@ -258,7 +272,7 @@ TaskList::schedule_node(TaskNode* task_node)
     rr->push(obj, task_node->weight());
 }
 
-void
+    void
 TaskList::unschedule_node(TaskNode* task_node)
 {
     debug_msg("TaskList::unschedule_node: n = %p\n", task_node);

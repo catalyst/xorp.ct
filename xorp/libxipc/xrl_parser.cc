@@ -45,9 +45,11 @@ XrlParseError::get_coordinates(size_t& lineno, size_t& charno) const
 {
     lineno = 1;
     charno = 0;
-    for (size_t i = 0; i < _offset; i++) {
+    for (size_t i = 0; i < _offset; i++) 
+    {
 	charno++;
-	if (_input[i] == '\n') {
+	if (_input[i] == '\n') 
+	{
 	    lineno++;
 	    charno = 0;
 	}
@@ -63,7 +65,8 @@ XrlParseError::pretty_print(const size_t termwidth) const
 
     size_t wwidth = termwidth - 7; // ...XXX...\n
 
-    if (wwidth < 20) {
+    if (wwidth < 20) 
+    {
 	wwidth = 20; // just fix if termwidth is wacko
     }
 
@@ -74,7 +77,8 @@ XrlParseError::pretty_print(const size_t termwidth) const
     string snapshot;	// Window of _input to display
     string indicator;	// indicator string to appear below snapshot
 
-    if (start != 0) {
+    if (start != 0) 
+    {
 	snapshot = "...";
 	indicator = string(3, ' ');
     }
@@ -84,13 +88,16 @@ XrlParseError::pretty_print(const size_t termwidth) const
 	indicator += string(offset, ' ');
     indicator += string("^");
 
-    if (end < (ssize_t)_input.size()) {
+    if (end < (ssize_t)_input.size()) 
+    {
 	snapshot += "...";
     }
 
     // Filter chars that will give us problems for display
-    for (string::iterator si = snapshot.begin(); si != snapshot.end(); si++) {
-	if (xorp_iscntrl(*si) || !isascii(*si)) {
+    for (string::iterator si = snapshot.begin(); si != snapshot.end(); si++) 
+    {
+	if (xorp_iscntrl(*si) || !isascii(*si)) 
+	{
 	    *si = ' ';
 	}
     }
@@ -101,125 +108,134 @@ XrlParseError::pretty_print(const size_t termwidth) const
 
     // Gloop it up to go.
     return c_format("XrlParseError at line %u char %u: ", XORP_UINT_CAST(lno),
-		    XORP_UINT_CAST(cno))
+	    XORP_UINT_CAST(cno))
 	+ _reason + string("\n") + snapshot + string("\n") + indicator;
 }
 
 // ----------------------------------------------------------------------------
 // Utility routines for Xrl parsing
 
-static inline void
+    static inline void
 advance_to_either(const string& input, string::const_iterator& sci,
-		  const char* choices) {
-    while (sci != input.end()) {
+	const char* choices) 
+{
+    while (sci != input.end()) 
+    {
 	if (strchr(choices,*sci)) break;
 	sci++;
     }
 }
 
-static inline void
+    static inline void
 advance_to_char(const string& input, string::const_iterator& sci, char c)
 {
-    while (sci != input.end()) {
+    while (sci != input.end()) 
+    {
 	if (*sci == c) break;
 	sci++;
     }
 }
 
-static inline bool
+    static inline bool
 isxrlplain(int c)
 {
     return (xorp_isalnum(c) || c == '_' || c == '-');
 }
 
-static inline size_t
+    static inline size_t
 skip_xrl_plain_chars(const string& input, string::const_iterator& sci)
 {
     string::const_iterator start = sci;
-    for ( ; sci != input.end() && isxrlplain(*sci); sci++) {
+    for ( ; sci != input.end() && isxrlplain(*sci); sci++) 
+    {
 	// XXX: Empty body
     }
     return sci - start;
 }
 
-static inline char
+    static inline char
 c_escape_to_char(const string& input,
-		 string::const_iterator sci) {
+	string::const_iterator sci) 
+{
 
     if (sci == input.end())
 	throw XrlParseError(input, sci,
-			    "Unterminated escape sequence");
+		"Unterminated escape sequence");
 
-    switch (*sci) {
+    switch (*sci) 
+    {
 	// --- C character escape sequences ----
 	// Unfortunately escapes 'abfnrtv' do not map to
 	// <char value> - <offset>
-    case 'a':
-	sci++;
-	return '\a';
-    case 'b':
-	sci++;
-	return '\b';
-    case 'f':
-	sci++;
-	return '\f';
-    case 'n':
-	sci++;
-	return '\n';
-    case 'r':
-	sci++;
-	return '\r';
-    case 'v':
-	sci++;
-	return '\v';
-	// ---- Hex value to be interpreted ----
-    case 'x': {
-	sci++;
-	if (sci == input.end())
-	    throw XrlParseError(input, sci, "Unexpected end of input.");
-	char v = 0;
-	for (int n = 0; sci != input.end() && n < 2 && xorp_isxdigit(*sci);
-	     n++, sci++) {
-	    char c = xorp_tolower(*sci);
-	    v *= 16;
-	    v += (c < '9') ? (c - '0') : (c - 'a' + 10);
-	}
-	return v;
-    }
-	// ---- Octal value to be interpreted ----
-    case '9': // Invalid values
-    case '8':
-	throw XrlParseError(input, sci,
-			    c_format("%c is not an octal character.", *sci));
-    case '7': // Can have upto 3 octal chars...
-    case '6':
-    case '5':
-    case '4':
-    case '3':
-    case '2':
-    case '1':
-    case '0':
-	char v = *sci - '0';
-	sci++;
-	for (int n = 0;
-	     n < 2 && sci != input.end() && *sci >= '0' && *sci <= '7';
-	     n++, sci++) {
-	    v *= 8;
-	    v += *sci - '0';
-	}
-	return v;
+	case 'a':
+	    sci++;
+	    return '\a';
+	case 'b':
+	    sci++;
+	    return '\b';
+	case 'f':
+	    sci++;
+	    return '\f';
+	case 'n':
+	    sci++;
+	    return '\n';
+	case 'r':
+	    sci++;
+	    return '\r';
+	case 'v':
+	    sci++;
+	    return '\v';
+	    // ---- Hex value to be interpreted ----
+	case 'x': 
+	    {
+		sci++;
+		if (sci == input.end())
+		    throw XrlParseError(input, sci, "Unexpected end of input.");
+		char v = 0;
+		for (int n = 0; sci != input.end() && n < 2 && xorp_isxdigit(*sci);
+			n++, sci++) 
+		{
+		    char c = xorp_tolower(*sci);
+		    v *= 16;
+		    v += (c < '9') ? (c - '0') : (c - 'a' + 10);
+		}
+		return v;
+	    }
+	    // ---- Octal value to be interpreted ----
+	case '9': // Invalid values
+	case '8':
+	    throw XrlParseError(input, sci,
+		    c_format("%c is not an octal character.", *sci));
+	case '7': // Can have upto 3 octal chars...
+	case '6':
+	case '5':
+	case '4':
+	case '3':
+	case '2':
+	case '1':
+	case '0':
+	    char v = *sci - '0';
+	    sci++;
+	    for (int n = 0;
+		    n < 2 && sci != input.end() && *sci >= '0' && *sci <= '7';
+		    n++, sci++) 
+	    {
+		v *= 8;
+		v += *sci - '0';
+	    }
+	    return v;
     }
     // Everything else
     return *sci++;
 }
 
-static inline bool
+    static inline bool
 iscrlf(int c)
 {
     return (c == '\n') || (c == '\r');
 }
 
-static inline bool
+    static inline bool
 skip_to_next_line(const string& s, string::const_iterator& sci)
 {
     while ( sci != s.end() && !iscrlf(*sci) )
@@ -229,36 +245,41 @@ skip_to_next_line(const string& s, string::const_iterator& sci)
     return sci != s.end();
 }
 
-static inline void
+    static inline void
 skip_past_blanks(const string& s, string::const_iterator& sci)
 {
-    while (sci != s.end() && ( xorp_isspace(*sci) || xorp_iscntrl(*sci) )) {
+    while (sci != s.end() && ( xorp_isspace(*sci) || xorp_iscntrl(*sci) )) 
+    {
 	sci++;
     }
 }
 
-static inline void
+    static inline void
 skip_one_char(const string&, string::const_iterator* sci)
 {
     sci++;
 }
 
-static inline void
+    static inline void
 skip_cplusplus_comments(const string& s, string::const_iterator& sci)
 {
     assert(*sci == '/');
     sci++;
-    if (sci == s.end()) {
+    if (sci == s.end()) 
+    {
 	// the last character was a '/' - this isn't a comment, so push
 	// it back on and return
 	sci--;
 	return;
-    } else if (*sci == '*') {
+    } else if (*sci == '*') 
+    {
 	// it's a C-style comment
 	string::const_iterator sci_start = sci;
 	char prev = '\0';
-	while (sci != s.end()) {
-	    if (*sci == '/' && prev == '*') {
+	while (sci != s.end()) 
+	{
+	    if (*sci == '/' && prev == '*') 
+	    {
 		sci++;
 		return;
 	    }
@@ -266,25 +287,30 @@ skip_cplusplus_comments(const string& s, string::const_iterator& sci)
 	    sci++;
 	}
 	throw XrlParseError(s, sci_start, "Unterminated comment.");
-    } else if (*sci == '/') {
+    } else if (*sci == '/') 
+    {
 	// it's a C++ style comment
 	skip_to_next_line(s, sci);
-    } else {
+    } else 
+    {
 	// it's not a comment - push the '/' back on, and return;
 	sci--;
 	return;
     }
 }
 
-static inline void
+    static inline void
 skip_comments_and_blanks(const string& s, string::const_iterator& sci)
 {
-    for (;;) {
+    for (;;) 
+    {
 	skip_past_blanks(s, sci);
-	if (sci == s.end() || (*sci != '#' && *sci != '/')) {
+	if (sci == s.end() || (*sci != '#' && *sci != '/')) 
+	{
 	    break;
 	}
-	if (*sci == '/') {
+	if (*sci == '/') 
+	{
 	    skip_cplusplus_comments(s, sci);
 	    continue;
 	}
@@ -292,9 +318,9 @@ skip_comments_and_blanks(const string& s, string::const_iterator& sci)
     }
 }
 
-static inline void
+    static inline void
 get_single_quoted_value(const string& s, string::const_iterator& sci,
-			string& token)
+	string& token)
 {
     assert(*sci == '\'');
 
@@ -303,17 +329,18 @@ get_single_quoted_value(const string& s, string::const_iterator& sci,
 
     string::const_iterator sci_start = sci;
     advance_to_char(s, sci, '\'');
-    if (sci == s.end()) {
+    if (sci == s.end()) 
+    {
 	throw XrlParseError(s, sci_start, "Unterminated single quote.");
     }
     token = string(sci_start, sci);
     sci++;
 }
 
-static inline void
+    static inline void
 get_double_quoted_value(const string& input,
-			string::const_iterator& sci,
-			string& token)
+	string::const_iterator& sci,
+	string& token)
 {
     assert(*sci == '\"');
 
@@ -321,16 +348,19 @@ get_double_quoted_value(const string& input,
 
     sci++;
 
-    for (;;) {
+    for (;;) 
+    {
 	string::const_iterator sci_start = sci;
 	while (sci != input.end() && *sci != '\"' && *sci != '\'')
 	    sci++;
 	token.append(sci_start, sci);
-	if (*sci == '\\') {
+	if (*sci == '\\') 
+	{
 	    sci++;
-	    if (sci == input.end()) {
+	    if (sci == input.end()) 
+	    {
 		throw XrlParseError(input, sci,
-				    "Unterminated double quote");
+			"Unterminated double quote");
 	    }
 	    char c = c_escape_to_char(input, sci);
 	    token.append(1, c);
@@ -339,54 +369,57 @@ get_double_quoted_value(const string& input,
 	    break;
 	if (sci == input.end())
 	    throw XrlParseError(input, sci,
-				"Unterminated double quote");
+		    "Unterminated double quote");
 
     }
     sci++;
 }
 
-static void
+    static void
 get_unquoted_value(const string& input,
-		   string::const_iterator& sci,
-		   string& token)
+	string::const_iterator& sci,
+	string& token)
 {
     string::const_iterator sci_start = sci;
     char prev = '\0';
-    while (sci != input.end()) {
+    while (sci != input.end()) 
+    {
 	if (xorp_isspace(*sci) || iscrlf(*sci) ||
-	    *sci == '&' || *sci == ';' || *sci == '>')
-	   break;
+		*sci == '&' || *sci == ';' || *sci == '>')
+	    break;
 	prev = *sci;
 	sci++;
     }
     // we need to backup if we hit "->" because "-" is allowed in
     // values, but "->" can terminate a value
-    if ((sci != input.end()) && (*sci == '>') && (prev == '-')) {
+    if ((sci != input.end()) && (*sci == '>') && (prev == '-')) 
+    {
 	--sci;
     }
     token = string(sci_start, sci);
 }
 
-static inline string::const_iterator
+    static inline string::const_iterator
 uninterrupted_token_end(const string& input,
-			string::const_iterator& sci)
+	string::const_iterator& sci)
 {
     string::const_iterator end = sci;
 
     while (end != input.end() &&
-	  ( !xorp_isspace(*end) && isascii(*end) && !xorp_iscntrl(*end) )) {
+	    ( !xorp_isspace(*end) && isascii(*end) && !xorp_iscntrl(*end) )) 
+    {
 	end++;
     }
 
     return end;
 }
 
-static inline void
+    static inline void
 get_protocol_target_and_command(const string& input,
-				string::const_iterator& sci,
-				string& protocol,
-				string& target,
-				string& command)
+	string::const_iterator& sci,
+	string& protocol,
+	string& target,
+	string& command)
 {
     string::const_iterator start = sci;
 
@@ -399,7 +432,7 @@ get_protocol_target_and_command(const string& input,
     sci += 3;
     start = sci;
     while (sci != input.end() && !(xorp_isspace(*sci) && iscrlf(*sci)) &&
-	   *sci != '/')
+	    *sci != '/')
 	sci++;
     if (*sci != '/')
 	throw XrlParseError(input, sci, "Expected to find a /");
@@ -409,8 +442,9 @@ get_protocol_target_and_command(const string& input,
     start = ++sci;
     char prev = '\0';
     while (sci != input.end() &&
-	   !(xorp_isspace(*sci) || iscrlf(*sci) ||
-	     !(isxrlplain(*sci) || *sci == '/' || *sci == '.'))) {
+	    !(xorp_isspace(*sci) || iscrlf(*sci) ||
+		!(isxrlplain(*sci) || *sci == '/' || *sci == '.'))) 
+    {
 	prev = *sci;
 	sci++;
     }
@@ -425,56 +459,65 @@ get_protocol_target_and_command(const string& input,
     return;
 }
 
-static void
+    static void
 push_atoms_and_spells(XrlArgs* args,
-		      list<XrlAtomSpell>* spells,
-		      const string& input,
-		      const string::const_iterator& atom_start,
-		      const string::const_iterator& value_start,
-		      const string& atom_name,
-		      const string& atom_type,
-		      const string& atom_value) {
-    try {
+	list<XrlAtomSpell>* spells,
+	const string& input,
+	const string::const_iterator& atom_start,
+	const string::const_iterator& value_start,
+	const string& atom_name,
+	const string& atom_type,
+	const string& atom_value) 
+{
+    try 
+    {
 	XrlAtomType t = XrlAtom::lookup_type(atom_type);
-	if (atom_value.empty()) {
+	if (atom_value.empty()) 
+	{
 	    if (args)
 		args->add(XrlAtom(atom_name, t));
 	    if (spells != 0)
 		spells->push_back(XrlAtomSpell(atom_name, t, ""));
-	} else if (atom_value[0] == '$') {
+	} else if (atom_value[0] == '$') 
+	{
 	    if (args)
 		args->add(XrlAtom(atom_name, t));
 
 	    if (spells == 0)
 		throw XrlParseError(input, value_start,
-				    "Found a spell character without a spell"
-				    "list to store information.");
+			"Found a spell character without a spell"
+			"list to store information.");
 
 	    // This v ugly to have here - want to check for duplicate
 	    // atom name or variable name.
 	    for (list<XrlAtomSpell>::const_iterator i = spells->begin();
-		 i != spells->end(); i++) {
-		if (i->atom_name() == atom_name) {
+		    i != spells->end(); i++) 
+	    {
+		if (i->atom_name() == atom_name) 
+		{
 		    string e = c_format("Duplicate atom name - \"%s\".",
-						  atom_name.c_str());
+			    atom_name.c_str());
 		    throw XrlParseError(input, atom_start, e);
 		}
-		if (i->spell() == atom_value) {
+		if (i->spell() == atom_value) 
+		{
 		    string e = c_format("Duplicate variable name - \"%s\".",
-						  atom_value.c_str());
+			    atom_value.c_str());
 		    throw XrlParseError(input, value_start, e);
 		}
 	    }
 	    spells->push_back(XrlAtomSpell(atom_name, t, atom_value));
-	} else {
+	} else 
+	{
 	    if (args == 0)
 		throw XrlParseError(input, value_start,
-				    "Atom cannot be specified here");
+			"Atom cannot be specified here");
 	    args->add(XrlAtom(atom_name, t, atom_value));
 	}
-    } catch (const XrlArgs::XrlAtomFound& /*xaf*/) {
+    } catch (const XrlArgs::XrlAtomFound& /*xaf*/) 
+    {
 	string e = c_format("Duplicate atom name - \"%s\".",
-				      atom_name.c_str());
+		atom_name.c_str());
 	throw XrlParseError(input, atom_start, e);
     }
 }
@@ -482,12 +525,13 @@ push_atoms_and_spells(XrlArgs* args,
 // ----------------------------------------------------------------------------
 // XrlParser
 
-bool
+    bool
 XrlParser::start_next() throw (XrlParserInputException)
 {
     _input.clear();
 
-    while (_xpi.getline(_input) == true) {
+    while (_xpi.getline(_input) == true) 
+    {
 	// Ignore blank lines and CPP directives (at least for time being).
 	if (_input.size() > 0 && _input[0] != '#') break;
     }
@@ -495,13 +539,14 @@ XrlParser::start_next() throw (XrlParserInputException)
     return (_input.size() > 0);
 }
 
-bool
+    bool
 XrlParser::parse_atoms_and_spells(XrlArgs* args,
-				  list<XrlAtomSpell>* spells)
+	list<XrlAtomSpell>* spells)
 {
     assert(_pos < _input.end());
     skip_comments_and_blanks(_input, _pos);
-    while (_pos != _input.end() && !iscrlf(*_pos) && !xorp_isspace(*_pos)) {
+    while (_pos != _input.end() && !iscrlf(*_pos) && !xorp_isspace(*_pos)) 
+    {
 	assert(_pos < _input.end());
 	skip_comments_and_blanks(_input, _pos);
 
@@ -517,24 +562,27 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
 	atom_name = string(token_start, _pos);
 	if (!XrlAtom::valid_name(atom_name))
 	    throw XrlParseError(_input, token_start,
-				c_format("%s is not a valid name",
-					 atom_name.c_str()));
+		    c_format("%s is not a valid name",
+			atom_name.c_str()));
 
 	skip_comments_and_blanks(_input, _pos);
 	string atom_type;
-	if (_pos != _input.end() && *_pos == ':') {
+	if (_pos != _input.end() && *_pos == ':') 
+	{
 	    _pos++;
 	    skip_comments_and_blanks(_input, _pos);
 	    token_start = _pos;
 	    char prev = '\0';
-	    while (_pos != _input.end() && isxrlplain(*_pos)) {
+	    while (_pos != _input.end() && isxrlplain(*_pos)) 
+	    {
 		prev = *_pos;
 		_pos++;
 	    }
 
 	    // We need to backup if we hit "->" because "-" by itself
 	    // is allowed in a type name.
-	    if ((_pos != _input.end()) && (*_pos == '>') && (prev == '-')) {
+	    if ((_pos != _input.end()) && (*_pos == '>') && (prev == '-')) 
+	    {
 		_pos--;
 	    }
 
@@ -543,28 +591,33 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
 	    atom_type = string(token_start, _pos);
 	    if (!XrlAtom::valid_type(atom_type))
 		throw XrlParseError(_input, token_start,
-				    c_format("%s is not a valid type",
-					     atom_type.c_str()));
+			c_format("%s is not a valid type",
+			    atom_type.c_str()));
 	    assert(_pos <= _input.end());
-	} else {
+	} else 
+	{
 	    throw XrlParseError(_input, _pos, "Expected :<type> argument");
 	}
 
 	skip_comments_and_blanks(_input, _pos);
 	assert(_pos <= _input.end());
 	string atom_value;
-	if (_pos != _input.end() && *_pos == '=') {
+	if (_pos != _input.end() && *_pos == '=') 
+	{
 	    _pos++;
 	    skip_comments_and_blanks(_input, _pos);
 	    token_start = _pos;
 	    assert(_pos <= _input.end());
-	    if (*_pos == '\'') {
+	    if (*_pos == '\'') 
+	    {
 		get_single_quoted_value(_input, _pos, atom_value);
 		atom_value = xrlatom_encode_value(atom_value);
-	    } else if (*_pos == '\"') {
+	    } else if (*_pos == '\"') 
+	    {
 		get_double_quoted_value(_input, _pos, atom_value);
 		atom_value = xrlatom_encode_value(atom_value);
-	    } else {
+	    } else 
+	    {
 		get_unquoted_value(_input, _pos, atom_value);
 	    }
 	    if (atom_value.empty())
@@ -573,8 +626,8 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
 	}
 	assert(_pos <= _input.end());
 	push_atoms_and_spells(args, spells,
-			      _input, atom_start, token_start,
-			      atom_name, atom_type, atom_value);
+		_input, atom_start, token_start,
+		atom_name, atom_type, atom_value);
 	if (_pos != _input.end() && *_pos == '&')
 	    _pos++;
 	else
@@ -584,13 +637,15 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
     return true;
 }
 
-bool
+    bool
 XrlParser::get(string& protocol, string& target, string& command,
-	       XrlArgs* args,
-	       list<XrlAtomSpell>* spells) throw (XrlParseError) {
+	XrlArgs* args,
+	list<XrlAtomSpell>* spells) throw (XrlParseError) 
+{
 
     skip_comments_and_blanks(_input, _pos);
-    if (finished()) {
+    if (finished()) 
+    {
 	return false;
     }
 
@@ -604,14 +659,17 @@ XrlParser::get(string& protocol, string& target, string& command,
     get_protocol_target_and_command(_input, _pos, protocol, target, command);
     skip_comments_and_blanks(_input, _pos);
 
-    if (_pos == _input.end()) {
+    if (_pos == _input.end()) 
+    {
 	return true;
     }
-    if (*_pos == '?') {
+    if (*_pos == '?') 
+    {
 	_pos++;
-	if (_pos == _input.end()) {
+	if (_pos == _input.end()) 
+	{
 	    throw XrlParseError(_input, _pos,
-				"Expected to find atom or spell");
+		    "Expected to find atom or spell");
 	}
 	parse_atoms_and_spells(args, spells);
     }
@@ -619,13 +677,14 @@ XrlParser::get(string& protocol, string& target, string& command,
     return true;
 }
 
-bool
+    bool
 XrlParser::get(string& r) throw (XrlParseError)
 {
     string protocol, target, command;
     XrlArgs args;
 
-    if (get(protocol, target, command, args)) {
+    if (get(protocol, target, command, args)) 
+    {
 	Xrl x(target, command, args);
 	r = x.str();
 	return true;
@@ -633,34 +692,35 @@ XrlParser::get(string& r) throw (XrlParseError)
     return false;
 }
 
-bool
+    bool
 XrlParser::get(string&  protocol,
-	       string&  target,
-	       string&  command,
-	       XrlArgs& args)
-    throw (XrlParseError)
+	string&  target,
+	string&  command,
+	XrlArgs& args)
+throw (XrlParseError)
 {
     return get(protocol, target, command, &args, 0);
 }
 
-bool
+    bool
 XrlParser::get(string&		   protocol,
-	       string&		   target,
-	       string&		   command,
-	       XrlArgs&		   args,
-	       list<XrlAtomSpell>& spells)
-    throw (XrlParseError)
+	string&		   target,
+	string&		   command,
+	XrlArgs&		   args,
+	list<XrlAtomSpell>& spells)
+throw (XrlParseError)
 {
     return get(protocol, target, command, &args, &spells);
 }
 
-bool
+    bool
 XrlParser::get_return_specs(list<XrlAtomSpell>& spells)
 {
     spells.clear();
 
     skip_comments_and_blanks(_input, _pos);
-    if (_pos == _input.end()) {
+    if (_pos == _input.end()) 
+    {
 	// There is no return spec
 	return false;
     }
@@ -675,11 +735,12 @@ XrlParser::get_return_specs(list<XrlAtomSpell>& spells)
     return (!spells.empty());
 }
 
-bool
+    bool
 XrlParser::resync()
 {
 
-    while (start_next() == true) {
+    while (start_next() == true) 
+    {
 	if (_input.find("://") != string::npos)
 	    return true;
     }

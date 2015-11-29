@@ -36,7 +36,7 @@
 
 int
 IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
-		    bool do_checksum, string& error_msg) const
+	bool do_checksum, string& error_msg) const
 {
     const IpHeader4& orig_ip4 = *this;
     size_t datalen = orig_ip4.ip_len();
@@ -44,7 +44,8 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     //
     // If the data packet is small enough, then don't fragment it
     //
-    if (datalen <= mtu) {
+    if (datalen <= mtu) 
+    {
 	return (XORP_OK);
     }
 
@@ -56,26 +57,28 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     size_t frag_optlen = 0;		// The optlen to copy into fragments
     size_t frag_ip_hl;
 
-    if (orig_ip4.ip_off() & IpHeader4::FRAGMENT_FLAGS_IP_DF) {
+    if (orig_ip4.ip_off() & IpHeader4::FRAGMENT_FLAGS_IP_DF) 
+    {
 	// Fragmentation is forbidded
 	error_msg = c_format("Cannot fragment encapsulated IP packet "
-			     "from %s to %s: "
-			     "fragmentation not allowed",
-			     cstring(orig_ip4.ip_src()),
-			     cstring(orig_ip4.ip_dst()));
+		"from %s to %s: "
+		"fragmentation not allowed",
+		cstring(orig_ip4.ip_src()),
+		cstring(orig_ip4.ip_dst()));
 	XLOG_WARNING("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (((mtu - (orig_ip4.ip_header_len())) & ~7) < 8) {
+    if (((mtu - (orig_ip4.ip_header_len())) & ~7) < 8) 
+    {
 	//
 	// Fragmentation is possible only if we can put at least
 	// 8 octets per fragment (except the last one).
 	//
 	error_msg = c_format("Cannot fragment encapsulated IP packet "
-			     "from %s to %s: "
-			     "cannot send fragment with size less than 8 octets",
-			     cstring(orig_ip4.ip_src()),
-			     cstring(orig_ip4.ip_dst()));
+		"from %s to %s: "
+		"cannot send fragment with size less than 8 octets",
+		cstring(orig_ip4.ip_src()),
+		cstring(orig_ip4.ip_dst()));
 	XLOG_WARNING("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -95,11 +98,13 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	cp = (const u_char *)(orig_ip4.data() + orig_ip4.size());
 	dp = (u_char *)(frag_ip4.data() + frag_ip4.size());
 	cnt = orig_ip4.ip_header_len() - IpHeader4::SIZE;
-	for (; cnt > 0; cnt -= optlen, cp += optlen) {
+	for (; cnt > 0; cnt -= optlen, cp += optlen) 
+	{
 	    opt = cp[0];
 	    if (opt == IpHeader4::OPTIONS_IPOPT_EOL)
 		break;
-	    if (opt == IpHeader4::OPTIONS_IPOPT_NOP) {
+	    if (opt == IpHeader4::OPTIONS_IPOPT_NOP) 
+	    {
 		// Preserve for IP mcast tunnel's LSRR alignment.
 		*dp++ = IpHeader4::OPTIONS_IPOPT_NOP;
 		optlen = 1;
@@ -109,36 +114,40 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	    //
 	    // Check for bogus lengths
 	    //
-	    if ((size_t)cnt < IpHeader4::OPTIONS_IPOPT_OLEN + sizeof(*cp)) {
+	    if ((size_t)cnt < IpHeader4::OPTIONS_IPOPT_OLEN + sizeof(*cp)) 
+	    {
 		error_msg = c_format("Cannot fragment encapsulated IP "
-				     "packet from %s to %s: "
-				     "malformed IPv4 option",
-				     cstring(orig_ip4.ip_src()),
-				     cstring(orig_ip4.ip_dst()));
+			"packet from %s to %s: "
+			"malformed IPv4 option",
+			cstring(orig_ip4.ip_src()),
+			cstring(orig_ip4.ip_dst()));
 		XLOG_WARNING("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    optlen = cp[IpHeader4::OPTIONS_IPOPT_OLEN];
 	    if (((size_t)optlen < IpHeader4::OPTIONS_IPOPT_OLEN + sizeof(*cp))
-		|| (optlen > cnt)) {
+		    || (optlen > cnt)) 
+	    {
 		error_msg = c_format("Cannot fragment encapsulated IP "
-				     "packet from %s to %s: "
-				     "malformed IPv4 option",
-				     cstring(orig_ip4.ip_src()),
-				     cstring(orig_ip4.ip_dst()));
+			"packet from %s to %s: "
+			"malformed IPv4 option",
+			cstring(orig_ip4.ip_src()),
+			cstring(orig_ip4.ip_dst()));
 		XLOG_WARNING("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 
 	    if (optlen > cnt)
 		optlen = cnt;
-	    if (IpHeader4::OPTIONS_COPIED_FLAG & opt) {
+	    if (IpHeader4::OPTIONS_COPIED_FLAG & opt) 
+	    {
 		memcpy(dp, cp, optlen);
 		dp += optlen;
 	    }
 	}
 	for (optlen = dp - (u_char *)(frag_ip4.data() + frag_ip4.size());
-	     optlen & 0x3; optlen++) {
+		optlen & 0x3; optlen++) 
+	{
 	    *dp++ = IpHeader4::OPTIONS_IPOPT_EOL;
 	}
 	frag_optlen = optlen;	// return (optlen);
@@ -175,18 +184,20 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 
 	data_start += first_frag_len;
     }
-    
+
     //
     // Create the remaining of the fragments
     //
-    while (data_start < data_end) {
+    while (data_start < data_end) 
+    {
 	size_t nfb = (mtu - frag_ip_hl) / 8;
 	size_t frag_len = frag_ip_hl + nfb*8;
 	size_t frag_data_len = nfb*8;
 	bool is_last_fragment = false;
 
 	// Compute the fragment length
-	if (data_end - data_start <= frag_data_len) {
+	if (data_end - data_start <= frag_data_len) 
+	{
 	    frag_data_len = data_end - data_start;
 	    frag_len = frag_ip_hl + frag_data_len;
 	    is_last_fragment = true;
@@ -207,7 +218,7 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 
 	    if (! is_last_fragment)
 		frag_ip_off_flags |= IpHeader4::FRAGMENT_FLAGS_IP_MF;
-	    
+
 	    frag_ip_off += (data_start - orig_ip4.ip_header_len()) / 8;	// XXX
 	    frag_ip4.set_ip_off(frag_ip_off_flags | frag_ip_off);
 	}
@@ -225,27 +236,31 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     return (XORP_OK);
 }
 
-void
+    void
 IpHeader4Writer::compute_checksum()
 {
     set_ip_sum(0);
     set_ip_sum(ntohs(inet_checksum(data(), ip_header_len())));
 }
 
-ArpHeader::ArpHeader() {
+ArpHeader::ArpHeader() 
+{
     memset(this, 0, sizeof(*this));
     ah_hw_len = 6;
     ah_proto_len = 4;
 }
 
-ArpHeader::ArpHeader(const vector<uint8_t>& pkt) {
+ArpHeader::ArpHeader(const vector<uint8_t>& pkt) 
+{
     XLOG_ASSERT(pkt.size() <= sizeof(*this));
     memcpy(this, &pkt[0], pkt.size());
-    if (ah_hw_len != 6) {
+    if (ah_hw_len != 6) 
+    {
 	XLOG_WARNING("Bad arp header len: %i\n", (int)(ah_hw_len));
 	ah_hw_len = 6;
     }
-    if (ah_proto_len != 4) {
+    if (ah_proto_len != 4) 
+    {
 	XLOG_WARNING("Bad arp proto len: %i\n", (int)(ah_proto_len));
 	ah_proto_len = 4;
     }
@@ -309,7 +324,7 @@ ArpHeader::make_reply(vector<uint8_t>& out, const Mac& mac) const
     memcpy(&out[0], &reply, reply.size());
 }
 
-void
+    void
 ArpHeader::set_sender(const Mac& mac, const IPv4& ip)
 {
     ah_hw_fmt = htons(HW_ETHER);
@@ -319,7 +334,7 @@ ArpHeader::set_sender(const Mac& mac, const IPv4& ip)
     ah_proto_len = ip.copy_out(&ah_data_store[ah_hw_len]);
 }
 
-void
+    void
 ArpHeader::set_request(const IPv4& ip)
 {
     XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
@@ -329,7 +344,7 @@ ArpHeader::set_request(const IPv4& ip)
     ip.copy_out(&ah_data_store[ah_hw_len * 2 + ah_proto_len]);
 }
 
-void
+    void
 ArpHeader::set_reply(const Mac& mac, const IPv4& ip)
 {
     XLOG_ASSERT(ah_hw_fmt    == htons(HW_ETHER));
@@ -349,7 +364,7 @@ ArpHeader::size() const
     return rv;
 }
 
-void
+    void
 ArpHeader::make_gratuitous(vector<uint8_t>& data, const Mac& mac, const IPv4& ip)
 {
     ArpHeader arp;

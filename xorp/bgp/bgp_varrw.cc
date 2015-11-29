@@ -51,23 +51,23 @@ BGPVarRW<A>::BGPVarRW(const string& name) :
 	_wrote_pfilter[i] = false;
 }
 
-template <class A>
+    template <class A>
 BGPVarRW<A>::~BGPVarRW()
 {
     cleanup();
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::cleanup()
 {
 
     if (_ptags)
-        delete _ptags;
+	delete _ptags;
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::attach_route(InternalMessage<A>& rtmsg, bool no_modify)
 {
     cleanup();
@@ -84,15 +84,16 @@ BGPVarRW<A>::attach_route(InternalMessage<A>& rtmsg, bool no_modify)
     _aggr_brief_mode = rtmsg.route()->aggr_brief_mode();
     _aggr_prefix_len = rtmsg.route()->aggr_prefix_len();
 
-    for (int i = 0; i < 3; i++) {
-        if (_wrote_pfilter[i])
-            _pfilter[i].release();
-        _wrote_pfilter[i] = false;
+    for (int i = 0; i < 3; i++) 
+    {
+	if (_wrote_pfilter[i])
+	    _pfilter[i].release();
+	_wrote_pfilter[i] = false;
     }
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::detach_route(InternalMessage<A>& rtmsg)
 {
     UNUSED(rtmsg);
@@ -101,107 +102,107 @@ BGPVarRW<A>::detach_route(InternalMessage<A>& rtmsg)
 
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_policytags()
 {
     return _rtmsg->route()->policytags().element();
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_tag()
 {
     return _rtmsg->route()->policytags().element_tag();
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_filter_im()
 {
     return new ElemFilter(_rtmsg->route()->policyfilter(0));
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_filter_sm()
 {
     return new ElemFilter(_rtmsg->route()->policyfilter(1));
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_filter_ex()
 {
     return new ElemFilter(_rtmsg->route()->policyfilter(2));
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv4>::read_network4()
 {
     return new ElemIPv4Net(_rtmsg->route()->net());
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv6>::read_network4()
 {
     return NULL;
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv6>::read_network6()
 {
     return _ef.create(ElemIPv6Net::id, 
-		      _rtmsg->route()->net().str().c_str());
+	    _rtmsg->route()->net().str().c_str());
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv4>::read_network6()
 {
     return NULL;
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv6>::read_nexthop6()
 {
     return _ef.create(ElemIPv6NextHop::id, 
-		      _palist->nexthop().str().c_str());
+	    _palist->nexthop().str().c_str());
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv4>::read_nexthop6()
 {
     return NULL;
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv4>::read_nexthop4()
 {
     return new ElemIPv4NextHop(_palist->nexthop());
 }
 
 template <>
-Element*
+    Element*
 BGPVarRW<IPv6>::read_nexthop4()
 {
     return NULL;
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_aspath()
 {
     return new ElemASPath(_palist->aspath());
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_origin()
 {
     uint32_t origin = _palist->origin();
@@ -209,18 +210,19 @@ BGPVarRW<A>::read_origin()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_localpref()
 {
     const LocalPrefAttribute* lpref = _palist->local_pref_att(); 
-    if (lpref) {
+    if (lpref) 
+    {
 	return _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str());
     } else
 	return NULL;
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_community()
 {
     const CommunityAttribute* ca = _palist->community_att();
@@ -234,12 +236,12 @@ BGPVarRW<A>::read_community()
     const set<uint32_t>& com = ca->community_set();
     for (set<uint32_t>::const_iterator i = com.begin(); i != com.end(); ++i) 
 	es->insert(ElemCom32(*i));
-    
+
     return es;
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_med()
 {
     const MEDAttribute* med = _palist->med_att();
@@ -250,7 +252,7 @@ BGPVarRW<A>::read_med()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_med_remove()
 {
     const MEDAttribute* med = _palist->med_att();
@@ -261,7 +263,7 @@ BGPVarRW<A>::read_med_remove()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_aggregate_prefix_len()
 {
     // No-op. Should never be called.
@@ -269,7 +271,7 @@ BGPVarRW<A>::read_aggregate_prefix_len()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_aggregate_brief_mode()
 {
     // No-op. Should never be called.
@@ -277,7 +279,7 @@ BGPVarRW<A>::read_aggregate_brief_mode()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_was_aggregated()
 {
     if (_aggr_prefix_len == SR_AGGR_EBGP_WAS_AGGREGATED)
@@ -287,7 +289,7 @@ BGPVarRW<A>::read_was_aggregated()
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::single_read(const Id& id)
 {
     ReadCallback cb = _callbacks._read_map[id];
@@ -296,7 +298,7 @@ BGPVarRW<A>::single_read(const Id& id)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_community(const Element& e)
 {
     _route_modify = true;
@@ -307,31 +309,33 @@ BGPVarRW<A>::write_community(const Element& e)
 
     if (_palist->community_att())
 	_palist->remove_attribute_by_type(COMMUNITY);
-	
+
     CommunityAttribute ca;
-   
+
     for (typename ElemSetCom32::const_iterator i = es.begin(); i != es.end(); 
-	 ++i) {
+	    ++i) 
+    {
 	ca.add_community( (*i).val());
     }	
-    
+
     _palist->add_path_attribute(ca);
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRW<A>::read_neighbor()
 {
     Element* e = NULL;
     const PeerHandler* ph = _rtmsg->origin_peer();
-    if (ph != NULL && !ph->originate_route_handler()) {
+    if (ph != NULL && !ph->originate_route_handler()) 
+    {
 	e = _ef.create(ElemIPv4::id, ph->get_peer_addr().c_str());
     }
     return e;
 }
 
 template <class A>
-InternalMessage<A>*
+    InternalMessage<A>*
 BGPVarRW<A>::filtered_message()
 {
     XLOG_ASSERT(_modified && _rtmsg);
@@ -340,7 +344,7 @@ BGPVarRW<A>::filtered_message()
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_filter_im(const Element& e)
 {
     const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
@@ -349,7 +353,7 @@ BGPVarRW<A>::write_filter_im(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_filter_sm(const Element& e)
 {
     const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
@@ -358,7 +362,7 @@ BGPVarRW<A>::write_filter_sm(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_filter_ex(const Element& e)
 {
     const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
@@ -367,7 +371,7 @@ BGPVarRW<A>::write_filter_ex(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_policytags(const Element& e)
 {
     if (!_ptags)
@@ -375,14 +379,14 @@ BGPVarRW<A>::write_policytags(const Element& e)
 
     _ptags->set_ptags(e);
     _wrote_ptags = true;
-    
+
     // XXX: maybe we should make policytags be like filter pointers... i.e. meta
     // information, rather than real route information...
     _route_modify = true;
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_tag(const Element& e)
 {
     if (!_ptags)
@@ -395,14 +399,14 @@ BGPVarRW<A>::write_tag(const Element& e)
 }
 
 template <>
-void
+    void
 BGPVarRW<IPv4>::write_nexthop4(const Element& e)
 {
     write_nexthop(e);
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_nexthop(const Element& e)
 {
     _route_modify = true;
@@ -412,52 +416,53 @@ BGPVarRW<A>::write_nexthop(const Element& e)
 
     A nh;
 
-    switch (eip->var()) {
-    case ElemNextHop<A>::VAR_NONE:
-	nh = eip->addr();
-	break;
+    switch (eip->var()) 
+    {
+	case ElemNextHop<A>::VAR_NONE:
+	    nh = eip->addr();
+	    break;
 
-    case ElemNextHop<A>::VAR_SELF:
-	XLOG_ASSERT(_self != nh);
-	nh = _self;
-	break;
+	case ElemNextHop<A>::VAR_SELF:
+	    XLOG_ASSERT(_self != nh);
+	    nh = _self;
+	    break;
 
-    case ElemNextHop<A>::VAR_PEER_ADDRESS:
-	XLOG_ASSERT(_peer != nh);
-	nh = _peer;
-	break;
+	case ElemNextHop<A>::VAR_PEER_ADDRESS:
+	    XLOG_ASSERT(_peer != nh);
+	    nh = _peer;
+	    break;
 
-    case ElemNextHop<A>::VAR_DISCARD:
-    case ElemNextHop<A>::VAR_REJECT:
-    case ElemNextHop<A>::VAR_NEXT_TABLE:
-	XLOG_ASSERT(!"not implemented");
-	break;
+	case ElemNextHop<A>::VAR_DISCARD:
+	case ElemNextHop<A>::VAR_REJECT:
+	case ElemNextHop<A>::VAR_NEXT_TABLE:
+	    XLOG_ASSERT(!"not implemented");
+	    break;
     }
 
     _palist->replace_nexthop(nh);
 }
 
 template <>
-void
+    void
 BGPVarRW<IPv6>::write_nexthop4(const Element& /* e */)
 {
 }
 
 template <>
-void
+    void
 BGPVarRW<IPv6>::write_nexthop6(const Element& e)
 {
     write_nexthop(e);
 }
 
 template <>
-void
+    void
 BGPVarRW<IPv4>::write_nexthop6(const Element& /* e */)
 {
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_aspath(const Element& e)
 {
     _route_modify = true;
@@ -468,21 +473,21 @@ BGPVarRW<A>::write_aspath(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_med(const Element& e)
 {
     _route_modify = true;
 
     if (_palist->med_att())
 	_palist->remove_attribute_by_type(MED);
-	
+
     const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
     MEDAttribute med(u32.val());
     _palist->add_path_attribute(med);
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_med_remove(const Element& e)
 {
     const ElemBool& med_remove = dynamic_cast<const ElemBool&>(e);
@@ -497,7 +502,7 @@ BGPVarRW<A>::write_med_remove(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_aggregate_prefix_len(const Element& e)
 {
     // We should not set the aggr_pref_len if already set by someone else!
@@ -505,7 +510,8 @@ BGPVarRW<A>::write_aggregate_prefix_len(const Element& e)
 	return;
 
     const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
-    if (u32.val() <= 128) {
+    if (u32.val() <= 128) 
+    {
 	// Only accept valid prefix_len values, since out of range values
 	// might get interpreted later as special markers
 	_aggr_prefix_len = u32.val();
@@ -514,7 +520,7 @@ BGPVarRW<A>::write_aggregate_prefix_len(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_aggregate_brief_mode(const Element& e)
 {
     const ElemBool& brief_mode = dynamic_cast<const ElemBool&>(e);
@@ -528,7 +534,7 @@ BGPVarRW<A>::write_aggregate_brief_mode(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_was_aggregated(const Element& e)
 {
     // No-op. Should never be called.
@@ -536,21 +542,21 @@ BGPVarRW<A>::write_was_aggregated(const Element& e)
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_localpref(const Element& e)
 {
     _route_modify = true;
 
     if (_palist->local_pref_att())
 	_palist->remove_attribute_by_type(LOCAL_PREF);
-	
+
     const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
     LocalPrefAttribute lpref(u32.val());
     _palist->add_path_attribute(lpref);
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::write_origin(const Element& e)
 {
     _route_modify = true;
@@ -560,26 +566,26 @@ BGPVarRW<A>::write_origin(const Element& e)
 
     if (u32.val() > INCOMPLETE)
 	XLOG_FATAL("Unknown origin: %d\n", u32.val());
-	
+
     origin = static_cast<OriginType>(u32.val());
-    
+
     _palist->replace_origin(origin);
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::single_write(const Id& id, const Element& e)
 {
     if (_no_modify)
 	return;
-    
+
     WriteCallback cb = _callbacks._write_map[id];
     XLOG_ASSERT(cb);
     (this->*cb)(e);
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::end_write()
 {
     // I think there should be a better way of modifying bgp routes... [a copy
@@ -587,7 +593,8 @@ BGPVarRW<A>::end_write()
 
     // OK.  The real problem is that you can't clone a subnet route, and assign
     // path attributes to it!
-    if (_no_modify) {
+    if (_no_modify) 
+    {
 	return;
     }
 
@@ -599,8 +606,10 @@ BGPVarRW<A>::end_write()
 
     // only meta routing stuff changed [i.e. policy filter pointers... so we can
     // get away without creating a new subnet route, etc]
-    if (!_route_modify) {
-	for (int i = 0; i < 3; i++) {
+    if (!_route_modify) 
+    {
+	for (int i = 0; i < 3; i++) 
+	{
 	    if (_wrote_pfilter[i])
 		route->set_policyfilter(i, _pfilter[i]);
 	}
@@ -612,14 +621,16 @@ BGPVarRW<A>::end_write()
     if (_wrote_ptags)
 	route->set_policytags(*_ptags);
 
-    for (int i = 0; i < 3; i++) {
-	if (_wrote_pfilter[i]) {
+    for (int i = 0; i < 3; i++) 
+    {
+	if (_wrote_pfilter[i]) 
+	{
 	    // XXX we need to change the policyfilter in the ORIGINAL ROUTE too.
 	    // i.e. the version should be kept in the ribin subnetroute copy.
 	    // If we just store it in the copy we send down stream, next time we
 	    // get a push, we will get the wrong filter pointer [it will always
 	    // be the original one which was in ribin,.. as we never update it].
-	   route->set_policyfilter(i, _pfilter[i]);
+	    route->set_policyfilter(i, _pfilter[i]);
 	}
     }
 
@@ -634,23 +645,24 @@ BGPVarRW<A>::end_write()
 }
 
 template <class A>
-bool
+    bool
 BGPVarRW<A>::modified()
 {
     return _modified;
 }
 
 template <class A>
-string
+    string
 BGPVarRW<A>::more_tracelog()
 {
     string x = "BGP " + _name + " route: ";
     uint32_t level = trace();
 
-    
+
     if (level > 0)
 	x += _rtmsg->net().str();
-    if (level > 1) {
+    if (level > 1) 
+    {
 	x += " Full route: ";
 	x += _rtmsg->str();
     }
@@ -659,44 +671,44 @@ BGPVarRW<A>::more_tracelog()
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::set_peer(const A& peer)
 {
     _peer = peer;
 }
 
 template <class A>
-void
+    void
 BGPVarRW<A>::set_self(const A& self)
 {
     _self = self;
 }
 
-template <class A>
+    template <class A>
 BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 {
     init_rw(VarRW::VAR_POLICYTAGS, 
 	    &BGPVarRW<A>::read_policytags, &BGPVarRW<A>::write_policytags);
-    
+
     init_rw(VarRW::VAR_TAG,
 	    &BGPVarRW<A>::read_tag, &BGPVarRW<A>::write_tag);
 
     init_rw(VarRW::VAR_FILTER_IM, 
 	    &BGPVarRW<A>::read_filter_im, &BGPVarRW<A>::write_filter_im);
-    
+
     init_rw(VarRW::VAR_FILTER_SM, 
 	    &BGPVarRW<A>::read_filter_sm, &BGPVarRW<A>::write_filter_sm);
-    
+
     init_rw(VarRW::VAR_FILTER_EX, 
 	    &BGPVarRW<A>::read_filter_ex, &BGPVarRW<A>::write_filter_ex);
 
     init_rw(BGPVarRW<A>::VAR_NETWORK4, &BGPVarRW<A>::read_network4, NULL);
-    
+
     init_rw(BGPVarRW<A>::VAR_NEXTHOP4, 
 	    &BGPVarRW<A>::read_nexthop4, &BGPVarRW<A>::write_nexthop4);
 
     init_rw(BGPVarRW<A>::VAR_NETWORK6, &BGPVarRW<A>::read_network6, NULL);
-    
+
     init_rw(BGPVarRW<A>::VAR_NEXTHOP6, 
 	    &BGPVarRW<A>::read_nexthop6, &BGPVarRW<A>::write_nexthop6);
 
@@ -734,7 +746,7 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 }
 
 template <class A>
-void
+    void
 BGPVarRWCallbacks<A>::init_rw(const VarRW::Id& id, RCB rcb, WCB wcb)
 {
     if (rcb)

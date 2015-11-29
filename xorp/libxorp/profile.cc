@@ -31,23 +31,24 @@
 #include "debug.h"
 #include "profile.hh"
 
-Profile::Profile()
-    : _profile_cnt(0)
+    Profile::Profile()
+: _profile_cnt(0)
 {
 }
 
 Profile::~Profile()
 {
-    while (!_profiles.empty()) {
+    while (!_profiles.empty()) 
+    {
 	profiles::iterator i = _profiles.begin();
 	i->second->zap();
 	_profiles.erase(i);
     }
 }
 
-void
-Profile::create(const string& pname, const string& comment)
-    throw(PVariableExists)
+    void
+    Profile::create(const string& pname, const string& comment)
+throw(PVariableExists)
 {
     // Catch initialization problems.
 #ifndef XORP_USE_USTL
@@ -59,9 +60,9 @@ Profile::create(const string& pname, const string& comment)
     _profiles[pname] = ref_ptr<ProfileState>(p);
 }
 
-void
-Profile::log(const string& pname, string comment)
-    throw(PVariableUnknown,PVariableNotEnabled)
+    void
+    Profile::log(const string& pname, string comment)
+throw(PVariableUnknown,PVariableNotEnabled)
 {
     profiles::iterator i = _profiles.find(pname);
 
@@ -72,19 +73,14 @@ Profile::log(const string& pname, string comment)
     // In order to be logging, we must be enabled.
     if (!i->second->enabled())
 	xorp_throw(PVariableNotEnabled, pname.c_str());
-    
-#if	0
-    // Make sure that this variable is not locked.
-    if (!i->second->locked())
-	xorp_throw(PVariableLocked, pname.c_str());
-#endif
-    
+
+
     TimeVal tv;
     TimerList::system_gettimeofday(&tv);
     i->second->logptr()->push_back(ProfileLogEntry(tv, comment));
 }
 
-void
+    void
 Profile::enable(const string& pname) throw(PVariableUnknown,PVariableLocked)
 {
     profiles::iterator i = _profiles.find(pname);
@@ -101,12 +97,12 @@ Profile::enable(const string& pname) throw(PVariableUnknown,PVariableLocked)
     // Don't allow a locked entry to be enabled.
     if (i->second->locked())
 	xorp_throw(PVariableLocked, pname.c_str());
-    
+
     i->second->set_enabled(true);
     _profile_cnt++;
 }
 
-void
+    void
 Profile::disable(const string& pname) throw(PVariableUnknown)
 {
     profiles::iterator i = _profiles.find(pname);
@@ -123,7 +119,7 @@ Profile::disable(const string& pname) throw(PVariableUnknown)
     _profile_cnt--;
 }
 
-void
+    void
 Profile::lock_log(const string& pname) throw(PVariableUnknown,PVariableLocked)
 {
     profiles::iterator i = _profiles.find(pname);
@@ -145,9 +141,9 @@ Profile::lock_log(const string& pname) throw(PVariableUnknown,PVariableLocked)
     i->second->set_iterator(i->second->logptr()->begin());
 }
 
-bool 
-Profile::read_log(const string& pname, ProfileLogEntry& entry) 
-    throw(PVariableUnknown,PVariableNotLocked)
+    bool 
+    Profile::read_log(const string& pname, ProfileLogEntry& entry) 
+throw(PVariableUnknown,PVariableNotLocked)
 {
     profiles::iterator i = _profiles.find(pname);
 
@@ -170,9 +166,9 @@ Profile::read_log(const string& pname, ProfileLogEntry& entry)
     return true;
 }
 
-void
-Profile::release_log(const string& pname) 
-    throw(PVariableUnknown,PVariableNotLocked)
+    void
+    Profile::release_log(const string& pname) 
+throw(PVariableUnknown,PVariableNotLocked)
 {
     profiles::iterator i = _profiles.find(pname);
 
@@ -188,7 +184,7 @@ Profile::release_log(const string& pname)
     i->second->set_locked(false);
 }
 
-void
+    void
 Profile::clear(const string& pname) throw(PVariableUnknown,PVariableLocked)
 {
     profiles::iterator i = _profiles.find(pname);
@@ -210,7 +206,8 @@ Profile::get_list() const
 {
     ostringstream oss;
     profiles::const_iterator i = _profiles.begin();
-    while (i != _profiles.end()) {
+    while (i != _profiles.end()) 
+    {
 	oss << i->first << "\t" << i->second->size() << "\t"
 	    << (i->second->enabled() ? "enabled" : "disabled")
 	    << "\t" << i->second->comment() << "\n";
@@ -220,7 +217,7 @@ Profile::get_list() const
 }
 
 // simple profiler
-SP::SAMPLE
+    SP::SAMPLE
 SP::sampler_time()
 {
     TimeVal tv;
@@ -239,7 +236,7 @@ SP::sampler_time()
 // XXX watch out on SMP systems - make sure u're always reading the same tsc
 // (i.e., same core running the process - set affinity.  On Linux use taskset).
 // Or disable smp.  -sorbo
-SP::SAMPLE
+    SP::SAMPLE
 SP::sampler_tsc(void)
 {   
     uint64_t tsc;
@@ -250,7 +247,8 @@ SP::sampler_tsc(void)
 }
 #endif // __HAVE_TSC__
 
-namespace SP {
+namespace SP 
+{
     SAMPLE      _samples[SP_MAX_SAMPLES];
     const char* _desc[SP_MAX_SAMPLES];
     unsigned    _samplec;
@@ -261,13 +259,13 @@ namespace SP {
 #endif // __HAVE_TSC__
 }
 
-void
+    void
 SP::set_sampler(SAMPLER sampler)
 {
     _sampler = sampler;
 }
 
-void
+    void
 SP::add_sample(const char* desc)
 {
     if (!_sampler)
@@ -281,7 +279,7 @@ SP::add_sample(const char* desc)
     _samplec++;
 }
 
-void
+    void
 SP::print_samples()
 {
     if (!_samplec)
@@ -292,24 +290,26 @@ SP::print_samples()
     printf("\n");
     printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
 
-    for (unsigned i = 0; i < _samplec; i++) {
-        printf("%llu\t", (long long unsigned) _samples[i]);
-        if (i != 0) {
-            SAMPLE a, b, diff;
+    for (unsigned i = 0; i < _samplec; i++) 
+    {
+	printf("%llu\t", (long long unsigned) _samples[i]);
+	if (i != 0) 
+	{
+	    SAMPLE a, b, diff;
 
-            a = _samples[i - 1];
-            b = _samples[i];
+	    a = _samples[i - 1];
+	    b = _samples[i];
 
-            XLOG_ASSERT(a <= b);
+	    XLOG_ASSERT(a <= b);
 
-            diff = b - a;
+	    diff = b - a;
 
-            printf("%12llu\t%10.2f\t",
-		   (long long unsigned) diff, (double) diff / total * 100.0);
-        } else
-            printf("\t\t\t\t");
+	    printf("%12llu\t%10.2f\t",
+		    (long long unsigned) diff, (double) diff / total * 100.0);
+	} else
+	    printf("\t\t\t\t");
 
-        printf("%s\n", _desc[i]);
+	printf("%s\n", _desc[i]);
     }
     printf("Total %llu\n", (long long unsigned) total);
     printf("\n");
@@ -317,7 +317,7 @@ SP::print_samples()
     _samplec = 0;
 }
 
-SP::SAMPLE
+    SP::SAMPLE
 SP::sample()
 {
     if (_sampler)

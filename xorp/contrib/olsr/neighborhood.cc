@@ -45,8 +45,10 @@
 bool
 CandMprOrderPred::operator()(const Neighbor* lhs, const Neighbor* rhs) const
 {
-    if (lhs->willingness() == rhs->willingness()) {
-	if (lhs->reachability() == rhs->reachability()) {
+    if (lhs->willingness() == rhs->willingness()) 
+    {
+	if (lhs->reachability() == rhs->reachability()) 
+	{
 	    return lhs->degree() > rhs->degree();
 	}
 	return lhs->reachability() > rhs->reachability();
@@ -54,17 +56,20 @@ CandMprOrderPred::operator()(const Neighbor* lhs, const Neighbor* rhs) const
     return lhs->willingness() > rhs->willingness();
 }
 
-bool
+    bool
 LinkOrderPred::operator()(const OlsrTypes::LogicalLinkID lhid,
-			  const OlsrTypes::LogicalLinkID rhid)
+	const OlsrTypes::LogicalLinkID rhid)
 {
-    try {
+    try 
+    {
 	const LogicalLink* lhs = _nh->get_logical_link(lhid);
 	const LogicalLink* rhs = _nh->get_logical_link(rhid);
 
-	if (lhs->is_sym() == rhs->is_sym()) {
+	if (lhs->is_sym() == rhs->is_sym()) 
+	{
 	    // TODO: ETX collation predicates go here.
-	    if (lhs->sym_time_remaining() == rhs->sym_time_remaining()) {
+	    if (lhs->sym_time_remaining() == rhs->sym_time_remaining()) 
+	    {
 		// Final collation tiebreak: Return if the link has a higher ID.
 		return lhs->id() > rhs->id();
 	    }
@@ -77,15 +82,17 @@ LinkOrderPred::operator()(const OlsrTypes::LogicalLinkID lhid,
     return false;
 }
 
-bool
+    bool
 TwoHopLinkOrderPred::operator()(const OlsrTypes::TwoHopLinkID lhid,
-				const OlsrTypes::TwoHopLinkID rhid)
+	const OlsrTypes::TwoHopLinkID rhid)
 {
-    try {
+    try 
+    {
 	TwoHopLink* lhs = _nh->get_twohop_link(lhid);
 	TwoHopLink* rhs = _nh->get_twohop_link(rhid);
 
-	if (lhs->time_remaining() == rhs->time_remaining()) {
+	if (lhs->time_remaining() == rhs->time_remaining()) 
+	{
 	    // Final collation tiebreak: Return if the link has a higher ID.
 	    return lhs->id() > rhs->id();
 	}
@@ -96,28 +103,28 @@ TwoHopLinkOrderPred::operator()(const OlsrTypes::TwoHopLinkID lhid,
 }
 
 Neighborhood::Neighborhood(Olsr& olsr, 
-    FaceManager& fm)
-     : _olsr(olsr),
-       _fm(fm),
-       _tm(0),
-       _link_order_pred(this),
-       _twohop_link_order_pred(this),
-       _next_linkid(1),
-       _next_neighborid(1),
-       _next_twohop_linkid(1),
-       _next_twohop_nodeid(1),
-       _enabled_face_count(0),
-       _willingness(OlsrTypes::WILL_DEFAULT),
-       _refresh_interval(TimeVal(OlsrTypes::DEFAULT_REFRESH_INTERVAL, 0)),
-       _mpr_computation_enabled(true),
-       _mpr_coverage(OlsrTypes::DEFAULT_MPR_COVERAGE),
-       _tc_interval(TimeVal(OlsrTypes::DEFAULT_TC_INTERVAL, 0)),
-       _tc_redundancy(OlsrTypes::DEFAULT_TC_REDUNDANCY),
-       _tc_timer_state(TC_STOPPED),
-       _tc_current_ansn(1),
-       _tc_previous_ans_count(0),
-       _loss_triggered_tc_enabled(true),
-       _change_triggered_tc_enabled(false)
+	FaceManager& fm)
+: _olsr(olsr),
+    _fm(fm),
+    _tm(0),
+    _link_order_pred(this),
+    _twohop_link_order_pred(this),
+    _next_linkid(1),
+    _next_neighborid(1),
+    _next_twohop_linkid(1),
+    _next_twohop_nodeid(1),
+    _enabled_face_count(0),
+    _willingness(OlsrTypes::WILL_DEFAULT),
+    _refresh_interval(TimeVal(OlsrTypes::DEFAULT_REFRESH_INTERVAL, 0)),
+    _mpr_computation_enabled(true),
+    _mpr_coverage(OlsrTypes::DEFAULT_MPR_COVERAGE),
+    _tc_interval(TimeVal(OlsrTypes::DEFAULT_TC_INTERVAL, 0)),
+    _tc_redundancy(OlsrTypes::DEFAULT_TC_REDUNDANCY),
+    _tc_timer_state(TC_STOPPED),
+    _tc_current_ansn(1),
+    _tc_previous_ans_count(0),
+    _loss_triggered_tc_enabled(true),
+    _change_triggered_tc_enabled(false)
 {
     _fm.add_message_cb(callback(this, &Neighborhood::event_receive_hello));
 
@@ -126,9 +133,9 @@ Neighborhood::Neighborhood(Olsr& olsr,
     // Weight this task to happen before route updates, as it SHOULD
     // happen before the state of our forwarding plane is changed.
     _mpr_recount_task = EventLoop::instance().new_oneoff_task(
-	callback(this, &Neighborhood::recount_mpr_set),
-	XorpTask::PRIORITY_HIGH,
-	XorpTask::WEIGHT_DEFAULT);
+	    callback(this, &Neighborhood::recount_mpr_set),
+	    XorpTask::PRIORITY_HIGH,
+	    XorpTask::WEIGHT_DEFAULT);
 
     // XXX does this cause a leak?
     _mpr_recount_task.unschedule();
@@ -155,10 +162,11 @@ Neighborhood::~Neighborhood()
  * Protocol variable methods.
  */
 
-bool
+    bool
 Neighborhood::set_mpr_coverage(const uint32_t coverage)
 {
-    if (_mpr_coverage != coverage) {
+    if (_mpr_coverage != coverage) 
+    {
 	_mpr_coverage = coverage;
 	if (_enabled_face_count > 0)
 	    schedule_mpr_recount();
@@ -167,7 +175,7 @@ Neighborhood::set_mpr_coverage(const uint32_t coverage)
     return true;
 }
 
-void
+    void
 Neighborhood::set_tc_interval(const TimeVal& interval)
 {
     if (interval == _tc_interval)
@@ -175,48 +183,53 @@ Neighborhood::set_tc_interval(const TimeVal& interval)
 
     _tc_interval = interval;
 
-    if (_tc_timer.scheduled()) {
+    if (_tc_timer.scheduled()) 
+    {
 	// Change period.
 	reschedule_tc_timer();
 
 	// Fire one off now.
 	debug_msg("%s: Scheduling an immediate TC due to a change in "
-		  "TC interval.\n", cstring(_fm.get_main_addr()));
+		"TC interval.\n", cstring(_fm.get_main_addr()));
 	reschedule_immediate_tc_timer();
     }
 }
 
-bool
+    bool
 Neighborhood::set_tc_redundancy(const OlsrTypes::TcRedundancyType type)
 {
     debug_msg("TcRedundancy %u\n", XORP_UINT_CAST(type));
 
-    if (type == _tc_redundancy) {
+    if (type == _tc_redundancy) 
+    {
 	debug_msg("%s == %s, no-op.\n",
-		  tcr_to_str(type),
-		  tcr_to_str(_tc_redundancy));
+		tcr_to_str(type),
+		tcr_to_str(_tc_redundancy));
 	return true;
     }
 
-    if (type > OlsrTypes::TCR_END) {
+    if (type > OlsrTypes::TCR_END) 
+    {
 	XLOG_ERROR("Topology control mode %u out of range.",
-		   XORP_UINT_CAST(type));
+		XORP_UINT_CAST(type));
 	return false;
     }
 
     if (willingness() == OlsrTypes::WILL_NEVER &&
-	type != OlsrTypes::TCR_MPRS_IN) {
+	    type != OlsrTypes::TCR_MPRS_IN) 
+    {
 	XLOG_ERROR("Topology control mode %u invalid when configured not to "
-		   "forward OLSR traffic.",
-		   XORP_UINT_CAST(type));
+		"forward OLSR traffic.",
+		XORP_UINT_CAST(type));
 	return false;
     }
 
     _tc_redundancy = type;
 
-    if (is_mpr()) {
+    if (is_mpr()) 
+    {
 	debug_msg("%s: Scheduling an immediate TC due to a change in "
-		  "TC redundancy.\n", cstring(_fm.get_main_addr()));
+		"TC redundancy.\n", cstring(_fm.get_main_addr()));
 	reschedule_immediate_tc_timer();
     }
 
@@ -225,7 +238,7 @@ Neighborhood::set_tc_redundancy(const OlsrTypes::TcRedundancyType type)
     return true;
 }
 
-void
+    void
 Neighborhood::set_willingness(const OlsrTypes::WillType willingness)
 {
     debug_msg("Willingness %u\n", XORP_UINT_CAST(willingness));
@@ -235,14 +248,15 @@ Neighborhood::set_willingness(const OlsrTypes::WillType willingness)
 
     _willingness = willingness;
     XLOG_INFO("Willingness-to-forward is set to %s.\n",
-	      will_to_str(willingness));
+	    will_to_str(willingness));
 
     // 15.1: A node with willingness equal to WILL_NEVER SHOULD have
     // TC_REDUNDANCY also equal to zero.
-    if (willingness == OlsrTypes::WILL_NEVER) {
+    if (willingness == OlsrTypes::WILL_NEVER) 
+    {
 	debug_msg("Setting TC redundancy to %s to match willingness %s.\n",
-		  tcr_to_str(OlsrTypes::TCR_MPRS_IN),
-	          will_to_str(willingness));
+		tcr_to_str(OlsrTypes::TCR_MPRS_IN),
+		will_to_str(willingness));
 	set_tc_redundancy(OlsrTypes::TCR_MPRS_IN);
     }
 }
@@ -251,7 +265,7 @@ Neighborhood::set_willingness(const OlsrTypes::WillType willingness)
  * Methods which interact with other major classes.
  */
 
-size_t
+    size_t
 Neighborhood::populate_hello(HelloMessage* hello)
 {
 
@@ -266,18 +280,21 @@ Neighborhood::populate_hello(HelloMessage* hello)
     hello->set_willingness(willingness());
 
     map<OlsrTypes::LogicalLinkID, LogicalLink*>::iterator ii;
-    for (ii = _links.begin(); ii != _links.end(); ii++) {
+    for (ii = _links.begin(); ii != _links.end(); ii++) 
+    {
 	const LogicalLink* l = (*ii).second;
 	const Neighbor* n = l->destination();
 
-	if (hello->faceid() == l->faceid()) {
+	if (hello->faceid() == l->faceid()) 
+	{
 	    LinkCode lc(n->neighbor_type(), l->link_type());
 
 	    // The link is local to this interface, therefore we
 	    // advertise it by its remote interface address.
 	    hello->add_link(lc, l->remote_addr());
 	    populated_count++;
-	} else {
+	} else 
+	{
 	    // We should not announce links for a disabled face; this
 	    // check is implemented further up in the call path.
 	    // Invariant: This path should only be reached if there is
@@ -300,15 +317,17 @@ Neighborhood::populate_hello(HelloMessage* hello)
     return populated_count;
 }
 
-void
+    void
 Neighborhood::push_topology()
 {
     size_t n_pushed = 0;
     size_t n2_pushed = 0;
 
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
-	if (true == push_neighbor((*ii).second)) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
+	if (true == push_neighbor((*ii).second)) 
+	{
 	    n_pushed++;
 	}
     }
@@ -316,21 +335,23 @@ Neighborhood::push_topology()
     debug_msg("Pushed %u neighbors to SPT.\n", XORP_UINT_CAST(n_pushed));
 
     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::iterator jj;
-    for (jj = _twohop_nodes.begin(); jj != _twohop_nodes.end(); jj++) {
-	if (true == push_twohop_neighbor((*jj).second)) {
+    for (jj = _twohop_nodes.begin(); jj != _twohop_nodes.end(); jj++) 
+    {
+	if (true == push_twohop_neighbor((*jj).second)) 
+	{
 	    n2_pushed++;
 	}
     }
 
     debug_msg("Pushed %u two-hop neighbors to SPT.\n",
-	      XORP_UINT_CAST(n2_pushed));
+	    XORP_UINT_CAST(n2_pushed));
 }
 
 /*
  * Network interface methods.
  */
 
-void
+    void
 Neighborhood::add_face(const OlsrTypes::FaceID faceid)
 {
     debug_msg("FaceID %u\n", XORP_UINT_CAST(faceid));
@@ -338,7 +359,7 @@ Neighborhood::add_face(const OlsrTypes::FaceID faceid)
     UNUSED(faceid);
 }
 
-void
+    void
 Neighborhood::delete_face(const OlsrTypes::FaceID faceid)
 {
     debug_msg("FaceID %u\n", XORP_UINT_CAST(faceid));
@@ -349,27 +370,32 @@ Neighborhood::delete_face(const OlsrTypes::FaceID faceid)
     // pull all link-state information associated with the
     // address(es) configured on this interface.
     map<OlsrTypes::LogicalLinkID, LogicalLink*>::iterator ii, jj;
-    for (ii = _links.begin(); ii != _links.end(); ) {
+    for (ii = _links.begin(); ii != _links.end(); ) 
+    {
 	jj = ii++;
 	LogicalLink* l = (*jj).second;
-	if (l->faceid() == faceid) {
+	if (l->faceid() == faceid) 
+	{
 	    delete_link(l->id());
 	    deleted_link_count++;
 	}
     }
 
     --_enabled_face_count;
-    if (_enabled_face_count == 0) {
+    if (_enabled_face_count == 0) 
+    {
 	// If no interfaces remaining, ensure TC timer has stopped.
 	stop_tc_timer();
-    } else {
+    } else 
+    {
 	// If there were any links on the interface we have just
 	// removed, we SHOULD schedule an MPR recount AND a route
 	// computation.
 	// [If we use per-interface granular MPR selection then we should
 	//  probably been notified of this already as part of the
 	//  delete_link() call graph above.]
-	if (deleted_link_count > 0) {
+	if (deleted_link_count > 0) 
+	{
 	    schedule_mpr_recount();
 	    if (_rm)
 		_rm->schedule_route_update();
@@ -381,43 +407,44 @@ Neighborhood::delete_face(const OlsrTypes::FaceID faceid)
  * One-hop link methods.
  */
 
-OlsrTypes::LogicalLinkID
+    OlsrTypes::LogicalLinkID
 Neighborhood::add_link(const TimeVal& vtime,
-			  const IPv4& remote_addr,
-			  const IPv4& local_addr)
-    throw(BadLogicalLink)
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
+throw(BadLogicalLink)
 {
     debug_msg("MyMainAddr %s RemoteAddr %s LocalAddr %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(remote_addr), cstring(local_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(remote_addr), cstring(local_addr));
 
     OlsrTypes::LogicalLinkID linkid = _next_linkid++;
 
     // Throw an exception if we overflowed the LogicalLinkID space.
-    if (_links.find(linkid) != _links.end()) {
+    if (_links.find(linkid) != _links.end()) 
+    {
 	xorp_throw(BadLogicalLink,
-		   c_format("Mapping for LogicalLinkID %u already exists",
-			    XORP_UINT_CAST(linkid)));
+		c_format("Mapping for LogicalLinkID %u already exists",
+		    XORP_UINT_CAST(linkid)));
     }
 
     _links[linkid] = new LogicalLink(this,  linkid, vtime,
-				     remote_addr, local_addr);
+	    remote_addr, local_addr);
     _link_addr[make_pair(remote_addr, local_addr)] = linkid;
 
     debug_msg("New link: %s -> %s\n",
-	      cstring(local_addr), cstring(remote_addr));
+	    cstring(local_addr), cstring(remote_addr));
     XLOG_TRACE(_olsr.trace()._neighbor_events,
-	       "New link: %s -> %s\n",
-		cstring(local_addr), cstring(remote_addr));
+	    "New link: %s -> %s\n",
+	    cstring(local_addr), cstring(remote_addr));
 
     return linkid;
 }
 
-bool
+    bool
 Neighborhood::delete_link(OlsrTypes::LogicalLinkID linkid)
 {
     debug_msg("MyMainAddr %s LinkID %u\n",
-	      cstring(_fm.get_main_addr()), XORP_UINT_CAST(linkid));
+	    cstring(_fm.get_main_addr()), XORP_UINT_CAST(linkid));
 
     // Find link tuple by ID.
     map<OlsrTypes::LogicalLinkID, LogicalLink*>::iterator ii =
@@ -430,7 +457,8 @@ Neighborhood::delete_link(OlsrTypes::LogicalLinkID linkid)
     // Find address-to-link in map, erase entry if found.
     map<pair<IPv4, IPv4>, OlsrTypes::LogicalLinkID>::iterator jj =
 	_link_addr.find(make_pair(l->remote_addr(), l->local_addr()));
-    if (jj != _link_addr.end()) {
+    if (jj != _link_addr.end()) 
+    {
 	_link_addr.erase(jj);
     }
 
@@ -441,19 +469,21 @@ Neighborhood::delete_link(OlsrTypes::LogicalLinkID linkid)
     //
     // We must check if the neighbor ID is initialized as this method
     // may be called if we are unable to create the neighbor.
-    if (l->neighbor_id() != OlsrTypes::UNUSED_NEIGHBOR_ID) {
+    if (l->neighbor_id() != OlsrTypes::UNUSED_NEIGHBOR_ID) 
+    {
 	bool is_unlinked = l->destination()->delete_link(linkid);
-	if (is_unlinked) {
+	if (is_unlinked) 
+	{
 	    debug_msg("Deleting neighbor %u.\n", l->neighbor_id());
 	    delete_neighbor(l->neighbor_id());
 	}
     }
 
     debug_msg("Delete link: %s -> %s\n",
-	      cstring(l->local_addr()), cstring(l->remote_addr()));
+	    cstring(l->local_addr()), cstring(l->remote_addr()));
     XLOG_TRACE(_olsr.trace()._neighbor_events,
-	       "Delete link: %s -> %s\n",
-	       cstring(l->local_addr()), cstring(l->remote_addr()));
+	    "Delete link: %s -> %s\n",
+	    cstring(l->local_addr()), cstring(l->remote_addr()));
 
     // Destroy the link.
     _links.erase(ii);
@@ -466,25 +496,27 @@ Neighborhood::delete_link(OlsrTypes::LogicalLinkID linkid)
     return true;
 }
 
-void
+    void
 Neighborhood::clear_links()
 {
     map<OlsrTypes::LogicalLinkID, LogicalLink*>::iterator ii;
-    for (ii = _links.begin(); ii != _links.end(); ii++) {
+    for (ii = _links.begin(); ii != _links.end(); ii++) 
+    {
 	delete_link((*ii).first);
     }
 }
 
-const LogicalLink*
-Neighborhood::find_best_link(const Neighbor* n)
-    throw(BadLinkCoverage)
+    const LogicalLink*
+    Neighborhood::find_best_link(const Neighbor* n)
+throw(BadLinkCoverage)
 {
     const set<OlsrTypes::LogicalLinkID>& links = n->links();
 
-    if (links.empty()) {
+    if (links.empty()) 
+    {
 	xorp_throw(BadLinkCoverage,
-		   c_format("No suitable links to Neighbor %u.",
-			    XORP_UINT_CAST(n->id())));
+		c_format("No suitable links to Neighbor %u.",
+		    XORP_UINT_CAST(n->id())));
     }
 
     set<OlsrTypes::LogicalLinkID>::const_iterator ii =
@@ -493,46 +525,49 @@ Neighborhood::find_best_link(const Neighbor* n)
     // Catchall: the link which we arrive at must be OK.
     const LogicalLink* l = _links[(*ii)];
 
-    if (! l->is_sym()) {
+    if (! l->is_sym()) 
+    {
 	xorp_throw(BadLinkCoverage,
-		   c_format("No suitable links to Neighbor %u.",
-			    XORP_UINT_CAST(n->id())));
+		c_format("No suitable links to Neighbor %u.",
+		    XORP_UINT_CAST(n->id())));
     }
 
     return l;
 }
 
-OlsrTypes::LogicalLinkID
-Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr)
-    throw(BadLogicalLink)
+    OlsrTypes::LogicalLinkID
+    Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr)
+throw(BadLogicalLink)
 {
     //debug_msg("RemoteAddr %s LocalAddr %s\n",
     //	cstring(remote_addr), cstring(local_addr));
 
     map<pair<IPv4, IPv4>, OlsrTypes::LogicalLinkID>::iterator ii =
 	_link_addr.find(make_pair(remote_addr, local_addr));
-    if (ii == _link_addr.end()) {
+    if (ii == _link_addr.end()) 
+    {
 	xorp_throw(BadLogicalLink,
-		   c_format("No mapping for %s:%s exists",
-			    cstring(remote_addr),
-			    cstring(local_addr)));
+		c_format("No mapping for %s:%s exists",
+		    cstring(remote_addr),
+		    cstring(local_addr)));
     }
 
     return (*ii).second;
 }
 
-OlsrTypes::LogicalLinkID
+    OlsrTypes::LogicalLinkID
 Neighborhood::update_link(const OlsrTypes::FaceID faceid,
-			     const IPv4& remote_addr,
-			     const IPv4& local_addr,
-			     const TimeVal& vtime,
-			     bool& is_created)
-    throw(BadLogicalLink)
+	const IPv4& remote_addr,
+	const IPv4& local_addr,
+	const TimeVal& vtime,
+	bool& is_created)
+throw(BadLogicalLink)
 {
 
     OlsrTypes::LogicalLinkID linkid;
 
-    try {
+    try 
+    {
 	linkid = get_linkid(remote_addr, local_addr);
 	is_created = false;
 
@@ -541,7 +576,8 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
 	// the face will have gone down and all its links with it.
 	XLOG_ASSERT(faceid == _links[linkid]->faceid());
 
-    } catch(BadLogicalLink& bl) {
+    } catch(BadLogicalLink& bl) 
+    {
 	debug_msg("allocating new link entry.\n");
 
 	// XXX: May throw an exception again, or even bad_alloc.
@@ -563,22 +599,23 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
     return linkid;
 }
 
-const LogicalLink*
-Neighborhood::get_logical_link(const OlsrTypes::LogicalLinkID linkid)
-    throw(BadLogicalLink)
+    const LogicalLink*
+    Neighborhood::get_logical_link(const OlsrTypes::LogicalLinkID linkid)
+throw(BadLogicalLink)
 {
     //debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
 
-    if (_links.find(linkid) == _links.end()) {
+    if (_links.find(linkid) == _links.end()) 
+    {
 	xorp_throw(BadLogicalLink,
-		   c_format("No mapping for %u exists",
-			    XORP_UINT_CAST(linkid)));
+		c_format("No mapping for %u exists",
+		    XORP_UINT_CAST(linkid)));
     }
 
     return _links[linkid];
 }
 
-void
+    void
 Neighborhood::get_logical_link_list(list<OlsrTypes::LogicalLinkID>& l1_list)
     const
 {
@@ -592,23 +629,24 @@ Neighborhood::get_logical_link_list(list<OlsrTypes::LogicalLinkID>& l1_list)
  * One-hop neighbor methods.
  */
 
-OlsrTypes::NeighborID
-Neighborhood::get_neighborid_by_main_addr(const IPv4& main_addr)
-    throw(BadNeighbor)
+    OlsrTypes::NeighborID
+    Neighborhood::get_neighborid_by_main_addr(const IPv4& main_addr)
+throw(BadNeighbor)
 {
     //debug_msg("MainAddr %s\n", cstring(main_addr));
 
-    if (_neighbor_addr.find(main_addr) == _neighbor_addr.end()) {
+    if (_neighbor_addr.find(main_addr) == _neighbor_addr.end()) 
+    {
 	xorp_throw(BadNeighbor,
-		   c_format("No mapping for %s exists", cstring(main_addr)));
+		c_format("No mapping for %s exists", cstring(main_addr)));
     }
 
     return _neighbor_addr[main_addr];
 }
 
-OlsrTypes::NeighborID
-Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
-    throw(BadNeighbor)
+    OlsrTypes::NeighborID
+    Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
+throw(BadNeighbor)
 {
     debug_msg("RemoteAddr %s\n", cstring(remote_addr));
 
@@ -624,18 +662,21 @@ Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
     // If not found by main address, we need to walk the one-hop link state.
     // We only have one end of the link so we must do a linear search.
     map<OlsrTypes::LogicalLinkID, LogicalLink*>::iterator ii;
-    for (ii = _links.begin(); ii != _links.end(); ii++) {
+    for (ii = _links.begin(); ii != _links.end(); ii++) 
+    {
 	LogicalLink* l = (*ii).second;
-	if (l->remote_addr() == remote_addr) {
+	if (l->remote_addr() == remote_addr) 
+	{
 	    nid = l->neighbor_id();
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (is_found == false) {
+    if (is_found == false) 
+    {
 	xorp_throw(BadNeighbor,
-		   c_format("No mapping for %s exists", cstring(remote_addr)));
+		c_format("No mapping for %s exists", cstring(remote_addr)));
     }
 
     // Invariant: If a link is found, its neighbor ID
@@ -646,30 +687,31 @@ Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
     return nid;
 }
 
-OlsrTypes::NeighborID
+    OlsrTypes::NeighborID
 Neighborhood::update_neighbor(const IPv4& main_addr,
-    const OlsrTypes::LogicalLinkID linkid,
-    const bool is_new_link,
-    const OlsrTypes::WillType will,
-    const bool is_mpr_selector,
-    const TimeVal& mprs_expiry_time,
-    bool& is_created)
-    throw(BadNeighbor)
+	const OlsrTypes::LogicalLinkID linkid,
+	const bool is_new_link,
+	const OlsrTypes::WillType will,
+	const bool is_mpr_selector,
+	const TimeVal& mprs_expiry_time,
+	bool& is_created)
+throw(BadNeighbor)
 {
     debug_msg("MyMainAddr %s MainAddr %s LinkID %u new %s will %u "
-	      "mprsel %s expiry %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      XORP_UINT_CAST(linkid),
-	      bool_c_str(is_new_link),
-	      XORP_UINT_CAST(will),
-	      bool_c_str(is_mpr_selector),
-	      cstring(mprs_expiry_time));
+	    "mprsel %s expiry %s\n",
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    XORP_UINT_CAST(linkid),
+	    bool_c_str(is_new_link),
+	    XORP_UINT_CAST(will),
+	    bool_c_str(is_mpr_selector),
+	    cstring(mprs_expiry_time));
 
     OlsrTypes::NeighborID nid;
     Neighbor* n;
 
-    try {
+    try 
+    {
 	nid = get_neighborid_by_main_addr(main_addr);
 	n = _neighbors[nid];
 	is_created = false;
@@ -678,7 +720,8 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
 	// if it does not already exist. N_status will be updated.
 	n->update_link(linkid);
 
-    } catch(BadNeighbor& bn) {
+    } catch(BadNeighbor& bn) 
+    {
 	// Create a new neighbor tuple.
 	// XXX May throw BadNeighbor if a neighbor ID cannot be allocated,
 	// i.e. we ran out of neighbor ID space.
@@ -687,7 +730,8 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
 	is_created = true;
     }
 
-    if (is_new_link) {
+    if (is_new_link) 
+    {
 	// Set back-reference from LogicalLink to Neighbor. Whilst a
 	// Neighbor may have many LogicalLinks, a LogicalLink MUST be
 	// associated with one and only one Neighbor.
@@ -715,29 +759,30 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
     return nid;
 }
 
-OlsrTypes::NeighborID
+    OlsrTypes::NeighborID
 Neighborhood::add_neighbor(const IPv4& main_addr,
-    OlsrTypes::LogicalLinkID linkid)
-    throw(BadNeighbor)
+	OlsrTypes::LogicalLinkID linkid)
+throw(BadNeighbor)
 {
     debug_msg("MyMainAddr %s MainAddr %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr));
 
     OlsrTypes::NeighborID neighborid = _next_neighborid++;
 
     // Throw an exception if we overflow the neighbor ID space.
-    if (_neighbors.find(neighborid) != _neighbors.end()) {
+    if (_neighbors.find(neighborid) != _neighbors.end()) 
+    {
 	xorp_throw(BadNeighbor,
-		   c_format("Mapping for NeighborID %u already exists",
-			    XORP_UINT_CAST(neighborid)));
+		c_format("Mapping for NeighborID %u already exists",
+		    XORP_UINT_CAST(neighborid)));
     }
 
     // Section 8.1: Associated neighbor MUST be created with the link
     // if it does not already exist.
     // We enforce this at language level with the constructor signature.
     Neighbor* n = new Neighbor( this, neighborid,
-					  main_addr, linkid);
+	    main_addr, linkid);
     _neighbors[neighborid] = n;
 
     XLOG_ASSERT(_neighbor_addr.find(main_addr) == _neighbor_addr.end());
@@ -747,7 +792,8 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
     // us as a two-hop neighbor.
     // XXX Should we only do this when the neighbor is first considered
     // symmetric?
-    try {
+    try 
+    {
 	OlsrTypes::TwoHopNodeID tnid =
 	    get_twohop_nodeid_by_main_addr(main_addr);
 	_twohop_nodes[tnid]->set_is_strict(false);
@@ -755,7 +801,7 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
 
     debug_msg("New neighbor: %s\n", cstring(n->main_addr()));
     XLOG_TRACE(_olsr.trace()._neighbor_events,
-	       "New neighbor: %s\n", cstring(n->main_addr()));
+	    "New neighbor: %s\n", cstring(n->main_addr()));
 
     // We defer associating the Neighbor with its first LogicalLink
     // fully until both have been created.
@@ -763,12 +809,12 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
     return neighborid;
 }
 
-bool
+    bool
 Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
 {
     debug_msg("MyMainAddr %s NeighborID %u\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(nid));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(nid));
 
     XLOG_ASSERT(_neighbors.find(nid) != _neighbors.end());
 
@@ -797,7 +843,8 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
 
     // If the one-hop neighbor being lost is already known to us as a
     // two-hop neighbor, ensure that the 'N2 is not also an N' flag is cleared.
-    try {
+    try 
+    {
 	OlsrTypes::TwoHopNodeID tnid =
 	    get_twohop_nodeid_by_main_addr(n->main_addr());
 	_twohop_nodes[tnid]->set_is_strict(true);
@@ -808,11 +855,12 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
 
     debug_msg("Delete neighbor: %s\n", cstring(n->main_addr()));
     XLOG_TRACE(_olsr.trace()._neighbor_events,
-	       "Delete neighbor: %s\n", cstring(n->main_addr()));
+	    "Delete neighbor: %s\n", cstring(n->main_addr()));
 
     map<IPv4, OlsrTypes::NeighborID>::iterator jj =
 	_neighbor_addr.find(n->main_addr());
-    if (jj != _neighbor_addr.end()) {
+    if (jj != _neighbor_addr.end()) 
+    {
 	_neighbor_addr.erase(jj);
     }
 
@@ -823,16 +871,17 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
     return true;
 }
 
-const Neighbor*
-Neighborhood::get_neighbor(const OlsrTypes::NeighborID nid)
-    throw(BadNeighbor)
+    const Neighbor*
+    Neighborhood::get_neighbor(const OlsrTypes::NeighborID nid)
+throw(BadNeighbor)
 {
     debug_msg("NeighborID %u\n", XORP_UINT_CAST(nid));
 
-    if (_neighbors.find(nid) == _neighbors.end()) {
+    if (_neighbors.find(nid) == _neighbors.end()) 
+    {
 	xorp_throw(BadNeighbor,
-		   c_format("No mapping for %u exists",
-			    XORP_UINT_CAST(nid)));
+		c_format("No mapping for %u exists",
+		    XORP_UINT_CAST(nid)));
     }
 
     return _neighbors[nid];
@@ -847,26 +896,28 @@ Neighborhood::get_neighbor_list(list<OlsrTypes::NeighborID>& n1_list) const
 	n1_list.push_back((*ii).first);
 }
 
-bool
+    bool
 Neighborhood::is_sym_neighbor_addr(const IPv4& remote_addr)
 {
     debug_msg("%s: RemoteAddr %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(remote_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(remote_addr));
 
     bool is_sym = false;
-    try {
+    try 
+    {
 	OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr);
 	debug_msg("nid is %u\n", XORP_UINT_CAST(nid));
 	is_sym = _neighbors[nid]->is_sym();
-    } catch (BadNeighbor& bn) {
+    } catch (BadNeighbor& bn) 
+    {
 	debug_msg("threw exception: %s\n", cstring(bn));
     }
 
     return is_sym;
 }
 
-void
+    void
 Neighborhood::schedule_ans_update(const bool is_deleted)
 {
     // Force an update of the ANSN if a neighbor is deleted,
@@ -876,25 +927,28 @@ Neighborhood::schedule_ans_update(const bool is_deleted)
 
     // If we should be originating TC broadcasts, and we have neighbors
     // to advertise, restart the timer in RUNNING mode.
-    if (! _mpr_selector_set.empty()) {
-	if (_tc_timer_state != TC_RUNNING) {
+    if (! _mpr_selector_set.empty()) 
+    {
+	if (_tc_timer_state != TC_RUNNING) 
+	{
 	    debug_msg("%s: Restarting timer due to non-empty ANS.\n",
-		      cstring(_fm.get_main_addr()));
+		    cstring(_fm.get_main_addr()));
 	    start_tc_timer();
 	}
 
 	// If we are configured to send early TCs, and such a change
 	// happened, and we are flooding non-empty TCs, schedule an early TC.
-	if (_change_triggered_tc_enabled) {
+	if (_change_triggered_tc_enabled) 
+	{
 	    debug_msg("%s: Scheduling an immediate TC due to a change in "
-		      "the ANS.\n",
-		      cstring(_fm.get_main_addr()));
+		    "the ANS.\n",
+		    cstring(_fm.get_main_addr()));
 	    reschedule_immediate_tc_timer();
 	}
     }
 }
 
-bool
+    bool
 Neighborhood::push_neighbor(const Neighbor* n)
 {
     // Reject non-symmetric neighbors.
@@ -903,9 +957,11 @@ Neighborhood::push_neighbor(const Neighbor* n)
 
     // Choose the best link to this neighbor.
     const LogicalLink* l;
-    try {
+    try 
+    {
 	l = find_best_link(n);
-    } catch(BadLinkCoverage blc) {
+    } catch(BadLinkCoverage blc) 
+    {
 	// Don't add this neighbor -- there are no good links to it.
 	return false;
     }
@@ -920,19 +976,19 @@ Neighborhood::push_neighbor(const Neighbor* n)
  * Two-hop link methods.
  */
 
-OlsrTypes::TwoHopLinkID
+    OlsrTypes::TwoHopLinkID
 Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
-				 Neighbor& nexthop,
-				 const OlsrTypes::FaceID faceid,
-				 const TimeVal& vtime)
-    throw(BadTwoHopLink)
+	Neighbor& nexthop,
+	const OlsrTypes::FaceID faceid,
+	const TimeVal& vtime)
+throw(BadTwoHopLink)
 {
     debug_msg("MyMainAddr %s NodeAddr %s Nexthop %s FaceID %u Vtime %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(node_info.remote_addr()),
-	      cstring(nexthop.main_addr()),
-	      XORP_UINT_CAST(faceid),
-	      cstring(vtime));
+	    cstring(_fm.get_main_addr()),
+	    cstring(node_info.remote_addr()),
+	    cstring(nexthop.main_addr()),
+	    XORP_UINT_CAST(faceid),
+	    cstring(vtime));
 
     OlsrTypes::TwoHopLinkID tlid;
     bool is_new_l2 = false;
@@ -940,14 +996,16 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
     // Check to see if the two-hop link exists.
     map<pair<IPv4, IPv4>, OlsrTypes::TwoHopLinkID>::iterator ii =
 	_twohop_link_addrs.find(make_pair(nexthop.main_addr(),
-					  node_info.remote_addr()));
-    if (ii == _twohop_link_addrs.end()) {
+		    node_info.remote_addr()));
+    if (ii == _twohop_link_addrs.end()) 
+    {
 	// If the two-hop link does not exist, attempt to create it.
 	// May throw BadTwoHopLink.
 	debug_msg("adding new two-hop link\n");
 	tlid = add_twohop_link(&nexthop, node_info.remote_addr(), vtime);
 	is_new_l2 = true;
-    } else {
+    } else 
+    {
 	// Update timer and status for existing two-hop link.
 	debug_msg("updating two-hop link timer\n");
 	tlid = (*ii).second;
@@ -960,23 +1018,26 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
 
     OlsrTypes::TwoHopNodeID tnid;
     bool is_new_n2 = false;
-    try {
+    try 
+    {
 	// Update the associated TwoHopNeighbor, creating it if needed.
 	tnid = update_twohop_node(node_info.remote_addr(),
-				  tlid, is_new_l2, is_new_n2);
-    } catch (BadTwoHopNode btn) {
+		tlid, is_new_l2, is_new_n2);
+    } catch (BadTwoHopNode btn) 
+    {
 	// Re-throw exception with appropriate type for this method.
 	xorp_throw(BadTwoHopLink,
-		   c_format("Could not create TwoHopNode with "
-			    "address %s",
-			    cstring(node_info.remote_addr())));
+		c_format("Could not create TwoHopNode with "
+		    "address %s",
+		    cstring(node_info.remote_addr())));
     }
 
     // TODO: When ETX metrics are in use, we need only trigger a route
     // computation, or MPR computation, if the two-hop link is considered
     // good at this point.
 
-    if (is_new_l2) {
+    if (is_new_l2) 
+    {
 	// Associate new TwoHopLink with new or existing TwoHopNeighbor.
 	tl->set_destination(_twohop_nodes[tnid]);
 
@@ -993,16 +1054,16 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
     return tlid;
 }
 
-OlsrTypes::TwoHopLinkID
+    OlsrTypes::TwoHopLinkID
 Neighborhood::add_twohop_link(Neighbor* nexthop,
-			      const IPv4& remote_addr,
-			      const TimeVal& vtime)
-    throw(BadTwoHopLink)
+	const IPv4& remote_addr,
+	const TimeVal& vtime)
+throw(BadTwoHopLink)
 {
     debug_msg("MyMainAddr %s Neighbor %u Vtime %s\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(nexthop->id()),
-	      cstring(vtime));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(nexthop->id()),
+	    cstring(vtime));
 
     // Neighbor must exist.
     XLOG_ASSERT(0 != nexthop);
@@ -1014,14 +1075,15 @@ Neighborhood::add_twohop_link(Neighbor* nexthop,
     OlsrTypes::TwoHopLinkID tlid = _next_twohop_linkid++;
 
     // Throw an exception if we overflowed the TwoHopLinkID space.
-    if (_twohop_links.find(tlid) != _twohop_links.end()) {
+    if (_twohop_links.find(tlid) != _twohop_links.end()) 
+    {
 	xorp_throw(BadTwoHopLink,
-		   c_format("Mapping for TwoHopLinkID %u already exists",
-			    XORP_UINT_CAST(tlid)));
+		c_format("Mapping for TwoHopLinkID %u already exists",
+		    XORP_UINT_CAST(tlid)));
     }
 
     _twohop_links[tlid] = new TwoHopLink( this,
-					 tlid, nexthop, vtime);
+	    tlid, nexthop, vtime);
 
     _twohop_link_addrs[make_pair(nexthop->main_addr(), remote_addr)] = tlid;
 
@@ -1033,12 +1095,12 @@ Neighborhood::add_twohop_link(Neighbor* nexthop,
     return tlid;
 }
 
-bool
+    bool
 Neighborhood::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {
     debug_msg("MyMainAddr %s TwoHopLinkID %u\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(tlid));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(tlid));
 
     map<OlsrTypes::TwoHopLinkID, TwoHopLink*>::iterator ii =
 	_twohop_links.find(tlid);
@@ -1062,7 +1124,8 @@ Neighborhood::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     // will also delete the TwoHopNeighbor.
     // XXX: For LQ we must check if the two-hop is no longer 'reachable'.
     bool is_n2_unlinked = n2->delete_twohop_link(tlid);
-    if (is_n2_unlinked) {
+    if (is_n2_unlinked) 
+    {
 	debug_msg("Deleting two-hop neighbor %u.\n", XORP_UINT_CAST(n2->id()));
 	delete_twohop_node(n2->id());
     }
@@ -1078,13 +1141,13 @@ Neighborhood::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     return is_n2_unlinked;
 }
 
-bool
+    bool
 Neighborhood::delete_twohop_link_by_addrs(const IPv4& nexthop_addr,
-					  const IPv4& twohop_addr)
+	const IPv4& twohop_addr)
 {
     debug_msg("NexthopAddr %s TwohopAddr %s\n",
-	      cstring(nexthop_addr),
-	      cstring(twohop_addr));
+	    cstring(nexthop_addr),
+	    cstring(twohop_addr));
 
     map<pair<IPv4, IPv4>, OlsrTypes::TwoHopLinkID>::iterator ii =
 	_twohop_link_addrs.find(make_pair(nexthop_addr, twohop_addr));
@@ -1096,21 +1159,22 @@ Neighborhood::delete_twohop_link_by_addrs(const IPv4& nexthop_addr,
     return is_last;
 }
 
-TwoHopLink*
-Neighborhood::get_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
-    throw(BadTwoHopLink)
+    TwoHopLink*
+    Neighborhood::get_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
+throw(BadTwoHopLink)
 {
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
 
-    if (_twohop_links.find(tlid) == _twohop_links.end()) {
+    if (_twohop_links.find(tlid) == _twohop_links.end()) 
+    {
 	xorp_throw(BadTwoHopLink,
-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tlid)));
+		c_format("No mapping for %u exists", XORP_UINT_CAST(tlid)));
     }
 
     return _twohop_links[tlid];
 }
 
-void
+    void
 Neighborhood::get_twohop_link_list(list<OlsrTypes::TwoHopLinkID>& l2_list)
     const
 {
@@ -1120,21 +1184,22 @@ Neighborhood::get_twohop_link_list(list<OlsrTypes::TwoHopLinkID>& l2_list)
 	l2_list.push_back((*ii).first);
 }
 
-const TwoHopLink*
-Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
-    throw(BadTwoHopCoverage)
+    const TwoHopLink*
+    Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
+throw(BadTwoHopCoverage)
 {
     const set<OlsrTypes::TwoHopLinkID>& twohop_links = n2->twohop_links();
 
-    if (twohop_links.empty()) {
+    if (twohop_links.empty()) 
+    {
 	xorp_throw(BadTwoHopCoverage,
-		   c_format("No suitable links to TwoHopNeighbor %u.",
-			    XORP_UINT_CAST(n2->id())));
+		c_format("No suitable links to TwoHopNeighbor %u.",
+		    XORP_UINT_CAST(n2->id())));
     }
 
     set<OlsrTypes::TwoHopLinkID>::const_iterator ii =
 	min_element(twohop_links.begin(), twohop_links.end(),
-			 _twohop_link_order_pred);
+		_twohop_link_order_pred);
 
     // Catchall: the two-hop link which we select must be OK.
     TwoHopLink* l2 = _twohop_links[(*ii)];
@@ -1148,30 +1213,32 @@ Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
  * Two-hop neighbor methods.
  */
 
-OlsrTypes::TwoHopNodeID
+    OlsrTypes::TwoHopNodeID
 Neighborhood::update_twohop_node(const IPv4& main_addr,
-    const OlsrTypes::TwoHopLinkID tlid,
-    const bool is_new_l2,
-    bool& is_n2_created)
-    throw(BadTwoHopNode)
+	const OlsrTypes::TwoHopLinkID tlid,
+	const bool is_new_l2,
+	bool& is_n2_created)
+throw(BadTwoHopNode)
 {
     debug_msg("MyMainAddr %s MainAddr %s TwoHopLinkID %u IsNewL2 %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      XORP_UINT_CAST(tlid),
-	      bool_c_str(is_new_l2));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    XORP_UINT_CAST(tlid),
+	    bool_c_str(is_new_l2));
 
     // Check if the TwoHopNeighbor with main_addr already exists.
     OlsrTypes::TwoHopNodeID tnid;
 
     map<IPv4, OlsrTypes::TwoHopNodeID>::iterator ii =
 	_twohop_node_addrs.find(main_addr);
-    if (ii == _twohop_node_addrs.end()) {
+    if (ii == _twohop_node_addrs.end()) 
+    {
 	// A new TwoHopNeighbor needs to be created.
 	// May throw BadTwoHopNode.
 	tnid = add_twohop_node(main_addr, tlid);
 	is_n2_created = true;
-    } else {
+    } else 
+    {
 	// We are updating the existing TwoHopNeighbor.
 	tnid = (*ii).second;
 
@@ -1182,54 +1249,58 @@ Neighborhood::update_twohop_node(const IPv4& main_addr,
 
     // Check if the two-hop neighbor we are updating is already a
     // one-hop neighbor, and update the 'strict 2-hop' flag accordingly.
-    try {
+    try 
+    {
 	OlsrTypes::NeighborID nid = get_neighborid_by_main_addr(main_addr);
 	_twohop_nodes[tnid]->set_is_strict(false);
 	UNUSED(nid);
-    } catch (BadNeighbor bn) {
+    } catch (BadNeighbor bn) 
+    {
 	_twohop_nodes[tnid]->set_is_strict(true);
     }
 
     return tnid;
 }
 
-OlsrTypes::TwoHopNodeID
+    OlsrTypes::TwoHopNodeID
 Neighborhood::add_twohop_node(const IPv4& main_addr,
-			      const OlsrTypes::TwoHopLinkID tlid)
-    throw(BadTwoHopNode)
+	const OlsrTypes::TwoHopLinkID tlid)
+throw(BadTwoHopNode)
 {
     debug_msg("MyMainAddr %s MainAddr %s TwoHopLinkID %u\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      XORP_UINT_CAST(tlid));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    XORP_UINT_CAST(tlid));
 
 #ifdef DETAILED_DEBUG
-    if (_twohop_node_addrs.find(main_addr) != _twohop_node_addrs.end()) {
+    if (_twohop_node_addrs.find(main_addr) != _twohop_node_addrs.end()) 
+    {
 	xorp_throw(BadTwoHopNode,
-		   c_format("Mapping for %s already exists",
-			    cstring(main_addr)));
+		c_format("Mapping for %s already exists",
+		    cstring(main_addr)));
     }
 #endif
 
     OlsrTypes::TwoHopNodeID tnid = _next_twohop_nodeid++;
 
     // Throw an exception if we overflowed the TwoHopNodeID space.
-    if (_twohop_nodes.find(tnid) != _twohop_nodes.end()) {
+    if (_twohop_nodes.find(tnid) != _twohop_nodes.end()) 
+    {
 	xorp_throw(BadTwoHopNode,
-		   c_format("Mapping for TwoHopNodeID %u already exists",
-			    XORP_UINT_CAST(tnid)));
+		c_format("Mapping for TwoHopNodeID %u already exists",
+		    XORP_UINT_CAST(tnid)));
     }
 
     _twohop_nodes[tnid] = new TwoHopNeighbor( this,
-					      tnid, main_addr,
-					      tlid);
+	    tnid, main_addr,
+	    tlid);
 
     _twohop_node_addrs[main_addr] = tnid;
 
     return tnid;
 }
 
-bool
+    bool
 Neighborhood::delete_twohop_node(const OlsrTypes::TwoHopNodeID tnid)
 {
     debug_msg("TwoHopNodeID %u\n", XORP_UINT_CAST(tnid));
@@ -1244,8 +1315,10 @@ Neighborhood::delete_twohop_node(const OlsrTypes::TwoHopNodeID tnid)
     map<IPv4, OlsrTypes::TwoHopNodeID>::iterator jj =
 	_twohop_node_addrs.find(n2->main_addr());
     for (jj = _twohop_node_addrs.begin(); jj != _twohop_node_addrs.end();
-	 jj++) {
-	if ((*jj).second == tnid) {
+	    jj++) 
+    {
+	if ((*jj).second == tnid) 
+	{
 	    _twohop_node_addrs.erase(jj);
 	    break;
 	}
@@ -1263,39 +1336,41 @@ Neighborhood::delete_twohop_node(const OlsrTypes::TwoHopNodeID tnid)
     return true;
 }
 
-OlsrTypes::TwoHopNodeID
-Neighborhood::get_twohop_nodeid_by_main_addr(const IPv4& main_addr)
-    throw(BadTwoHopNode)
+    OlsrTypes::TwoHopNodeID
+    Neighborhood::get_twohop_nodeid_by_main_addr(const IPv4& main_addr)
+throw(BadTwoHopNode)
 {
     debug_msg("MainAddr %s\n", cstring(main_addr));
 
     map<IPv4, OlsrTypes::TwoHopNodeID>::const_iterator ii =
 	_twohop_node_addrs.find(main_addr);
 
-    if (ii == _twohop_node_addrs.end()) {
+    if (ii == _twohop_node_addrs.end()) 
+    {
 	xorp_throw(BadTwoHopNode,
-		   c_format("No mapping for %s exists", cstring(main_addr)));
+		c_format("No mapping for %s exists", cstring(main_addr)));
     }
 
     return (*ii).second;
 }
 
 const TwoHopNeighbor*
-Neighborhood::get_twohop_neighbor(const OlsrTypes::TwoHopNodeID tnid) const
-    throw(BadTwoHopNode)
+    Neighborhood::get_twohop_neighbor(const OlsrTypes::TwoHopNodeID tnid) const
+throw(BadTwoHopNode)
 {
     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::const_iterator ii = 
 	_twohop_nodes.find(tnid);
 
-    if (ii == _twohop_nodes.end()) {
+    if (ii == _twohop_nodes.end()) 
+    {
 	xorp_throw(BadTwoHopNode,
-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tnid)));
+		c_format("No mapping for %u exists", XORP_UINT_CAST(tnid)));
     }
 
     return (*ii).second;
 }
 
-void
+    void
 Neighborhood::get_twohop_neighbor_list(list<OlsrTypes::TwoHopNodeID>& n2_list)
     const
 {
@@ -1305,30 +1380,34 @@ Neighborhood::get_twohop_neighbor_list(list<OlsrTypes::TwoHopNodeID>& n2_list)
 	n2_list.push_back((*ii).first);
 }
 
-bool
+    bool
 Neighborhood::push_twohop_neighbor(TwoHopNeighbor* n2)
 {
     debug_msg("called\n");
 
     // Reject two-hop neighbors which are also Neighbors, or have no links.
-    if (! n2->is_strict()) {
+    if (! n2->is_strict()) 
+    {
 	debug_msg("%s: rejected n2 %s due to !strict\n",
-		  cstring(_fm.get_main_addr()),
-		  cstring(n2->main_addr()));
+		cstring(_fm.get_main_addr()),
+		cstring(n2->main_addr()));
 	return false;
     }
 
-    if (! n2->is_reachable()) {
+    if (! n2->is_reachable()) 
+    {
 	debug_msg("%s: rejected n2 %s due to !reachable\n",
-		  cstring(_fm.get_main_addr()),
-		  cstring(n2->main_addr()));
+		cstring(_fm.get_main_addr()),
+		cstring(n2->main_addr()));
 	return false;
     }
 
     const TwoHopLink* l2;
-    try {
+    try 
+    {
 	l2 = find_best_twohop_link(n2);
-    } catch (BadTwoHopCoverage btc) {
+    } catch (BadTwoHopCoverage btc) 
+    {
 	debug_msg("Caught BadTwoHopCoverage.\n");
 	//xorp_print_standard_exceptions();
 	return false;
@@ -1343,35 +1422,38 @@ Neighborhood::push_twohop_neighbor(TwoHopNeighbor* n2)
  * MPR selector methods.
  */
 
-void
+    void
 Neighborhood::update_mpr_selector(const OlsrTypes::NeighborID nid,
-				  const TimeVal& vtime)
+	const TimeVal& vtime)
 {
     debug_msg("NeighborID %u Vtime %s\n",
-	      XORP_UINT_CAST(nid),
-	       cstring(vtime));
+	    XORP_UINT_CAST(nid),
+	    cstring(vtime));
 
     _neighbors[nid]->set_is_mpr_selector(true, vtime);
 
     debug_msg("Added MPR selector %s\n",
-	      cstring(_neighbors[nid]->main_addr()));
+	    cstring(_neighbors[nid]->main_addr()));
     XLOG_TRACE(_olsr.trace()._mpr_selection,
-	       "Added MPR selector %s\n",
-	       cstring(_neighbors[nid]->main_addr()));
+	    "Added MPR selector %s\n",
+	    cstring(_neighbors[nid]->main_addr()));
 
     bool was_mpr = is_mpr();
     bool is_created = false;
 
-    if (_mpr_selector_set.find(nid) == _mpr_selector_set.end()) {
+    if (_mpr_selector_set.find(nid) == _mpr_selector_set.end()) 
+    {
 	_mpr_selector_set.insert(nid);
 	is_created = true;
     }
 
     // 9.3 Start originating TC broadcasts, if we have now become an MPR.
-    if (!was_mpr && ! _mpr_selector_set.empty()) {
-	if (is_created) {
+    if (!was_mpr && ! _mpr_selector_set.empty()) 
+    {
+	if (is_created) 
+	{
 	    debug_msg("%s now becoming an MPR node.\n",
-		      cstring(_fm.get_main_addr()));
+		    cstring(_fm.get_main_addr()));
 	}
 	start_tc_timer();
     }
@@ -1379,7 +1461,7 @@ Neighborhood::update_mpr_selector(const OlsrTypes::NeighborID nid,
     XLOG_ASSERT(_mpr_selector_set.size() > 0);
 }
 
-void
+    void
 Neighborhood::delete_mpr_selector(const OlsrTypes::NeighborID nid)
 {
     debug_msg("NeighborID %u\n", XORP_UINT_CAST(nid));
@@ -1390,41 +1472,45 @@ Neighborhood::delete_mpr_selector(const OlsrTypes::NeighborID nid)
     _neighbors[nid]->set_is_mpr_selector(false, TimeVal());
 
     debug_msg("Expired MPR selector %s\n",
-	      cstring(_neighbors[nid]->main_addr()));
+	    cstring(_neighbors[nid]->main_addr()));
     XLOG_TRACE(_olsr.trace()._mpr_selection,
-	       "Expired MPR selector %s\n",
-	       cstring(_neighbors[nid]->main_addr()));
+	    "Expired MPR selector %s\n",
+	    cstring(_neighbors[nid]->main_addr()));
 
     // 9.3 If our MPR selector set is now empty,
     // change the TC timer state to FINISHING.
-    if (_mpr_selector_set.empty()) {
+    if (_mpr_selector_set.empty()) 
+    {
 	debug_msg("%s now has no MPR selectors.\n",
-		  cstring(_fm.get_main_addr()));
+		cstring(_fm.get_main_addr()));
 	finish_tc_timer();
 
 	// 9.3 When a change to the MPR selector set is detected and
 	// this change can be attributed to a link failure, an early
 	// TC message SHOULD be transmitted.
-	if (_loss_triggered_tc_enabled) {
+	if (_loss_triggered_tc_enabled) 
+	{
 	    debug_msg("%s: Scheduling an immediate TC due to the loss of "
-		      "all MPR selectors.\n",
-		      cstring(_fm.get_main_addr()));
+		    "all MPR selectors.\n",
+		    cstring(_fm.get_main_addr()));
 
 	    reschedule_immediate_tc_timer();
 	}
     }
 }
 
-bool
+    bool
 Neighborhood::is_mpr_selector_addr(const IPv4& remote_addr)
 {
     debug_msg("RemoteAddr %s\n", cstring(remote_addr));
 
     bool is_mpr_selector = false;
-    try {
+    try 
+    {
 	OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr);
 	is_mpr_selector = _neighbors[nid]->is_mpr_selector();
-    } catch (BadNeighbor& bn) {
+    } catch (BadNeighbor& bn) 
+    {
 	debug_msg("threw exception: %s\n", cstring(bn));
     }
 
@@ -1436,7 +1522,7 @@ Neighborhood::is_mpr_selector_addr(const IPv4& remote_addr)
  * MPR selection methods.
  */
 
-void
+    void
 Neighborhood::recount_mpr_set()
 {
     //if (_neighbors.empty()
@@ -1453,7 +1539,8 @@ Neighborhood::recount_mpr_set()
 
     set<OlsrTypes::NeighborID> new_mpr_set; // For debugging.
 
-    if (_mpr_computation_enabled) {
+    if (_mpr_computation_enabled) 
+    {
 	// 8.3.1, 1: Start with an MPR set made of all members of N with
 	// willingness equal to WILL_ALWAYS.
 	covered_n2_count += consider_persistent_cand_mprs(dbg);
@@ -1461,18 +1548,21 @@ Neighborhood::recount_mpr_set()
 	// 8.3.1, 3: If N2 is still not fully covered, ensure that for
 	// all uncovered strict N2 reachable only via 1 edge, their
 	// neighbor N is selected as an MPR.
-	if (covered_n2_count < reachable_n2_count) {
+	if (covered_n2_count < reachable_n2_count) 
+	{
 	    covered_n2_count += consider_poorly_covered_twohops(dbg);
 	}
 
 	// 8.3.1, 4: If N2 is still not fully covered, consider
 	// candidate MPRs in descending order of willingness, reachability
 	// and degree.
-	if (covered_n2_count < reachable_n2_count) {
+	if (covered_n2_count < reachable_n2_count) 
+	{
 	    consider_remaining_cand_mprs(reachable_n2_count, covered_n2_count, dbg);
 	}
 
-	if (covered_n2_count < reachable_n2_count) {
+	if (covered_n2_count < reachable_n2_count) 
+	{
 	    dbg << " covered_n2_count: " << covered_n2_count << " reachable_n2_count: "
 		<< reachable_n2_count << endl;
 	    XLOG_WARNING("%s", dbg.str().c_str());
@@ -1487,7 +1577,8 @@ Neighborhood::recount_mpr_set()
 	// minimizing the set.
 	XLOG_ASSERT(covered_n2_count >= reachable_n2_count);
 
-    } else {
+    } else 
+    {
 	// All one-hop neighbors with non-zero willingness are considered
 	// MPRs when the MPR algorithm has been disabled.
 	// Typically this is used when the topology is extremely dense.
@@ -1496,17 +1587,19 @@ Neighborhood::recount_mpr_set()
 	UNUSED(added_mpr_count);
     }
 
-    if (! (new_mpr_set == _mpr_set)) {
+    if (! (new_mpr_set == _mpr_set)) 
+    {
 	// TODO: Print the changes to the MPR set just like olsrd does.
 	debug_msg("%s: MPR set changed, now: \n",
-		  cstring(_fm.get_main_addr()));
+		cstring(_fm.get_main_addr()));
 	set<OlsrTypes::NeighborID>::const_iterator ii;
-	for (ii = new_mpr_set.begin(); ii != new_mpr_set.end(); ii++) {
+	for (ii = new_mpr_set.begin(); ii != new_mpr_set.end(); ii++) 
+	{
 	    debug_msg("\t%s\n",
-		      cstring(get_neighbor((*ii))->main_addr()));
+		    cstring(get_neighbor((*ii))->main_addr()));
 	}
 
-        // TODO: Section 8.5: We MAY trigger an early HELLO when the MPR
+	// TODO: Section 8.5: We MAY trigger an early HELLO when the MPR
 	// set changes. The RFC does not specify if this early HELLO
 	// should be sent on all interfaces, or only those from which the
 	// newly selected MPRs are reachable.
@@ -1517,13 +1610,14 @@ Neighborhood::recount_mpr_set()
     _mpr_set = new_mpr_set;
 }
 
-size_t
+    size_t
 Neighborhood::mark_all_n1_as_mprs(set<OlsrTypes::NeighborID>& final_mpr_set)
 {
     size_t mpr_count = 0;
 
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	Neighbor* n =(*ii).second;
 
 	if (n->willingness() == OlsrTypes::WILL_NEVER)
@@ -1537,9 +1631,9 @@ Neighborhood::mark_all_n1_as_mprs(set<OlsrTypes::NeighborID>& final_mpr_set)
     return mpr_count;
 }
 
-size_t
-Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
-    throw(BadTwoHopCoverage)
+    size_t
+    Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
+throw(BadTwoHopCoverage)
 {
     size_t withdrawn_mpr_count = 0;
 
@@ -1561,23 +1655,28 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
     // MPR set for protocol validation.
     // It should not be needed for production, as n->is_mpr() is only
     // examined when a TC message is being issued, or ANSN is being updated.
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	const Neighbor* n =(*ii).second;
 	if (n->willingness() == OlsrTypes::WILL_ALWAYS)
 	    final_mpr_set.insert(n->id());
     }
 
-    for (will = OlsrTypes::WILL_LOW; will < OlsrTypes::WILL_ALWAYS; will++) {
+    for (will = OlsrTypes::WILL_LOW; will < OlsrTypes::WILL_ALWAYS; will++) 
+    {
 	// For each previously selected MPR,
 	// in reverse order of ID. XXX this may not be deterministic.
-	for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+	for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+	{
 	    Neighbor* n =(*ii).second;
-	    if (n->is_mpr() && n->willingness() == will) {
+	    if (n->is_mpr() && n->willingness() == will) 
+	    {
 		//
 		// If any N2 covered by N is poorly covered without N,
 		// do not remove N from the MPR set.
 		//
-		if (! is_essential_mpr(n)) {
+		if (! is_essential_mpr(n)) 
+		{
 		    //
 		    // N is non-essential. Withdraw N from each of its N2.
 		    //
@@ -1586,7 +1685,8 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
 
 		    // For each N2 of N.
 		    set<OlsrTypes::TwoHopLinkID>::const_iterator jj;
-		    for (jj = n2_links.begin(); jj != n2_links.end(); jj++) {
+		    for (jj = n2_links.begin(); jj != n2_links.end(); jj++) 
+		    {
 			TwoHopLink* l2 = _twohop_links[(*jj)];
 			TwoHopNeighbor* n2 = l2->destination();
 
@@ -1595,19 +1695,21 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
 			n->set_is_mpr(false);
 
 			// Invariant: N2 must remain covered.
-			if (! n2->is_covered()) {
+			if (! n2->is_covered()) 
+			{
 			    xorp_throw(BadTwoHopCoverage, c_format(
-				       "OLSR node %s has uncovered "
-				       "TwoHopNode %u (%sreachable "
-				       "%u two-hop links)",
-				       cstring(_fm.get_main_addr()),
-				       XORP_UINT_CAST(n2->id()),
-				       n2->is_reachable() ? "" : "un",
-				       XORP_UINT_CAST(n2->reachability())));
+					"OLSR node %s has uncovered "
+					"TwoHopNode %u (%sreachable "
+					"%u two-hop links)",
+					cstring(_fm.get_main_addr()),
+					XORP_UINT_CAST(n2->id()),
+					n2->is_reachable() ? "" : "un",
+					XORP_UINT_CAST(n2->reachability())));
 			}
 		    }
 		    ++withdrawn_mpr_count;
-		} else {
+		} else 
+		{
 		    // N remains an MPR. Add N to the produced MPR set.
 		    final_mpr_set.insert(n->id());
 		}
@@ -1618,7 +1720,7 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
     return withdrawn_mpr_count;
 }
 
-void
+    void
 Neighborhood::add_cand_mpr(const OlsrTypes::NeighborID nid)
 {
     schedule_mpr_recount();
@@ -1628,7 +1730,7 @@ Neighborhood::add_cand_mpr(const OlsrTypes::NeighborID nid)
     UNUSED(nid);
 }
 
-void
+    void
 Neighborhood::withdraw_cand_mpr(const OlsrTypes::NeighborID nid)
 {
     schedule_mpr_recount();
@@ -1638,7 +1740,7 @@ Neighborhood::withdraw_cand_mpr(const OlsrTypes::NeighborID nid)
     UNUSED(nid);
 }
 
-bool
+    bool
 Neighborhood::is_essential_mpr(const Neighbor* n)
 {
     bool is_essential = false;
@@ -1647,10 +1749,12 @@ Neighborhood::is_essential_mpr(const Neighbor* n)
     // For each reachable strict N2 of N, consider if its MPR status
     // is essential to covering the strict N2.
     set<OlsrTypes::TwoHopLinkID>::const_iterator ii;
-    for (ii = n2_links.begin(); ii != n2_links.end(); ii++) {
+    for (ii = n2_links.begin(); ii != n2_links.end(); ii++) 
+    {
 	const TwoHopLink* l2 = _twohop_links[(*ii)];
 	const TwoHopNeighbor* n2 = l2->destination();
-	if (n2->is_strict() && n2->coverage() <= mpr_coverage()) {
+	if (n2->is_strict() && n2->coverage() <= mpr_coverage()) 
+	{
 	    is_essential = true;
 	    break;
 	}
@@ -1659,24 +1763,26 @@ Neighborhood::is_essential_mpr(const Neighbor* n)
     return is_essential;
 }
 
-void
+    void
 Neighborhood::reset_onehop_mpr_state()
 {
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	Neighbor* n = (*ii).second;
 	n->set_is_mpr(false);
     }
 }
 
-size_t
+    size_t
 Neighborhood::reset_twohop_mpr_state(ostringstream& oss)
 {
     size_t n2_count = 0;
 
     // Clear all existing MPR coverage counts.
     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::iterator ii;
-    for (ii = _twohop_nodes.begin(); ii != _twohop_nodes.end(); ii++) {
+    for (ii = _twohop_nodes.begin(); ii != _twohop_nodes.end(); ii++) 
+    {
 	TwoHopNeighbor* n2 = (*ii).second;
 
 	// Reset N2's MPR coverage.
@@ -1690,7 +1796,8 @@ Neighborhood::reset_twohop_mpr_state(ostringstream& oss)
 	update_twohop_reachability(n2);
 
 	// If N2 is strict and is reachable, count it as a member of N2.
-	if (n2->is_strict() && n2->is_reachable()) {
+	if (n2->is_strict() && n2->is_reachable()) 
+	{
 	    oss << "Counting 2-hop neighbor, is strict and reachable: " << n2->reachability()
 		<< ", n2: " << n2->toStringBrief() << endl;
 	    n2_count++;
@@ -1700,7 +1807,7 @@ Neighborhood::reset_twohop_mpr_state(ostringstream& oss)
     return n2_count;
 }
 
-void
+    void
 Neighborhood::update_onehop_reachability(Neighbor* n)
 {
     size_t reachability = 0;
@@ -1709,7 +1816,8 @@ Neighborhood::update_onehop_reachability(Neighbor* n)
     // Consider each edge between this N and each N2.
     // If N2 is uncovered, count it.
     set<OlsrTypes::TwoHopLinkID>::const_iterator ii;
-    for (ii = n2_links.begin(); ii != n2_links.end(); ii++) {
+    for (ii = n2_links.begin(); ii != n2_links.end(); ii++) 
+    {
 	TwoHopLink* l2 = _twohop_links[(*ii)];
 	if (! l2->destination()->is_covered())
 	    ++reachability;
@@ -1718,7 +1826,7 @@ Neighborhood::update_onehop_reachability(Neighbor* n)
     n->set_reachability(reachability);
 }
 
-void
+    void
 Neighborhood::update_twohop_reachability(TwoHopNeighbor* n2)
 {
     size_t reachability = 0;
@@ -1728,7 +1836,8 @@ Neighborhood::update_twohop_reachability(TwoHopNeighbor* n2)
     // If the N is an MPR candidate, the edge is considered OK for
     // transit and is a link by which the N2 reachable, so count it.
     set<OlsrTypes::TwoHopLinkID>::const_iterator ii;
-    for (ii = n_links.begin(); ii != n_links.end(); ii++) {
+    for (ii = n_links.begin(); ii != n_links.end(); ii++) 
+    {
 	TwoHopLink* l2 = _twohop_links[(*ii)];
 
 	// Persistent MPR candidates take priority, hence short-circuit OR.
@@ -1736,11 +1845,12 @@ Neighborhood::update_twohop_reachability(TwoHopNeighbor* n2)
 	// XXX: Should check if l2 is a 'good' link for ETX
 	// to be treated correctly during MPR computation.
 	if (l2->nexthop()->is_persistent_cand_mpr() ||
-	    l2->nexthop()->is_cand_mpr()) {
+		l2->nexthop()->is_cand_mpr()) 
+	{
 	    debug_msg("%s: %s is reachable via cand-mpr %s\n",
-		      cstring(_fm.get_main_addr()),
-		      cstring(l2->destination()->main_addr()),
-		      cstring(l2->nexthop()->main_addr()));
+		    cstring(_fm.get_main_addr()),
+		    cstring(l2->destination()->main_addr()),
+		    cstring(l2->nexthop()->main_addr()));
 	    ++reachability;
 	}
     }
@@ -1748,14 +1858,15 @@ Neighborhood::update_twohop_reachability(TwoHopNeighbor* n2)
     n2->set_reachability(reachability);
 }
 
-size_t
+    size_t
 Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
 {
     size_t persistent_mpr_count = 0;
 
     // Mark each WILL_ALWAYS neighbor as an MPR in this pass.
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	Neighbor* n = (*ii).second;
 	if (n->willingness() != OlsrTypes::WILL_ALWAYS)
 	    continue;
@@ -1764,8 +1875,8 @@ Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
     }
 
     debug_msg("%s: persistent_mpr_count is %u\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(persistent_mpr_count));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(persistent_mpr_count));
 
     size_t covered_n2_count = 0;
 
@@ -1782,7 +1893,8 @@ Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
     // as covered by a WILL_ALWAYS node will go away.
     //
     map<OlsrTypes::TwoHopLinkID, TwoHopLink*>::iterator jj;
-    for (jj = _twohop_links.begin(); jj != _twohop_links.end(); jj++) {
+    for (jj = _twohop_links.begin(); jj != _twohop_links.end(); jj++) 
+    {
 	TwoHopLink* l2 = (*jj).second;
 	Neighbor* n = l2->nexthop();
 	TwoHopNeighbor* n2 = l2->destination();
@@ -1792,10 +1904,11 @@ Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
 	// Reachability of N2 is implied by the existence of the link
 	// and the willingness of N, so checking for it is redundant here.
 	if (n2->is_strict() &&
-	    n->willingness() == OlsrTypes::WILL_ALWAYS) {
+		n->willingness() == OlsrTypes::WILL_ALWAYS) 
+	{
 	    debug_msg("%s: adding WILL_ALWAYS MPR %s\n",
-		      cstring(_fm.get_main_addr()),
-		      cstring(n->main_addr()));
+		    cstring(_fm.get_main_addr()),
+		    cstring(n->main_addr()));
 
 	    XLOG_ASSERT(n->is_mpr());
 
@@ -1803,7 +1916,8 @@ Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
 	    dbg << "Covered n2: " << n2->toStringBrief() << " in consider_persistent.\n";
 	    covered_n2_count++;
 	}
-	else {
+	else 
+	{
 	    dbg << "NOT covering n2: " << n2->toStringBrief() << " in consider_persistent, strict: "
 		<< n2->is_strict() << "  n: " << n->toStringBrief() << " n->willingness: " << n->willingness() << endl;
 	}
@@ -1811,22 +1925,24 @@ Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
 
     // The count may be 0 if the persistent MPRs have no 2-hop links.
     debug_msg("%s: covered_n2_count is %u\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(covered_n2_count));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(covered_n2_count));
 
     return covered_n2_count;
 }
 
-size_t
+    size_t
 Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
 {
     size_t covered_n2_count = 0;
 
     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::iterator ii;
-    for (ii = _twohop_nodes.begin(); ii != _twohop_nodes.end(); ii++) {
+    for (ii = _twohop_nodes.begin(); ii != _twohop_nodes.end(); ii++) 
+    {
 	TwoHopNeighbor* n2 = (*ii).second;
 	if (n2->is_strict() && n2->reachability() == 1 &&
-	    !n2->is_covered()) {
+		!n2->is_covered()) 
+	{
 	    //
 	    // N2 is a strict, uncovered two-hop neighbor with reachability
 	    // of 1, after ETX is taken into account. For brevity,
@@ -1850,7 +1966,8 @@ Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
 		<< n->toStringBrief() << endl;
 	    covered_n2_count++;
 	}
-	else {
+	else 
+	{
 	    dbg << "NOT Counting poorly_covered n2: " << n2->toStringBrief() << "  strict: " << n2->is_strict()
 		<< "  reachability: " << n2->reachability() << "  n2-covered: " << n2->is_covered() << endl;
 	}
@@ -1859,9 +1976,9 @@ Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
     return covered_n2_count;
 }
 
-void
+    void
 Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
-					   size_t& covered_n2_count, ostringstream& dbg)
+	size_t& covered_n2_count, ostringstream& dbg)
 {
     typedef set<Neighbor*, CandMprOrderPred> CandMprBag;
     UNUSED(n2_count);
@@ -1871,10 +1988,12 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
     // Construct the MPR candidate set.
     // Skip the ALWAYS neighbors, they have already been covered.
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
-    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+    for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+    {
 	Neighbor* n = (*ii).second;
 	if (n->is_cand_mpr() &&
-	    n->willingness() != OlsrTypes::WILL_ALWAYS) {
+		n->willingness() != OlsrTypes::WILL_ALWAYS) 
+	{
 	    // 8.4.1, 4.1:
 	    // Recompute n's reachability. We cannot amortize or
 	    // distribute this computation as it depends on the
@@ -1887,7 +2006,8 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
 	    if (n->reachability() > 0)
 		cand_mprs.insert(n); // Insertion sort.
 	}
-	else {
+	else 
+	{
 	    dbg << "Not using n: " << n->toStringBrief() << " as cand_mpr, willingness: "
 		<< n->willingness() << "  is_cand_mpr: " << n->is_cand_mpr() << "  is_mpr: "
 		<< n->is_mpr() << endl;
@@ -1897,7 +2017,8 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
     // 8.3.1, 4.2: Select as an MPR the node with highest
     // willingness, reachability and degree.
     CandMprBag::iterator jj;
-    for (jj = cand_mprs.begin(); jj != cand_mprs.end(); jj++) {
+    for (jj = cand_mprs.begin(); jj != cand_mprs.end(); jj++) 
+    {
 	Neighbor* n = (*jj);
 
 	dbg << "Checking neighbour: " << n->toStringBrief() << "  link count: "
@@ -1914,17 +2035,20 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
 	// Redundant MPRs will be later eliminated by minimize_mpr_set().
 	const set<OlsrTypes::TwoHopLinkID>& links = n->twohop_links();
 	set<OlsrTypes::TwoHopLinkID>::const_iterator kk;
-	for (kk = links.begin(); kk != links.end(); kk++) {
+	for (kk = links.begin(); kk != links.end(); kk++) 
+	{
 	    TwoHopLink* l2 = _twohop_links[(*kk)];
 	    TwoHopNeighbor* n2 = l2->destination();
-	    if (n2->is_strict()) {
+	    if (n2->is_strict()) 
+	    {
 		// Mark this strict N2 as covered by N. Mark N as MPR.
 		dbg << "Adding covering_mpr: " << n->toStringBrief() << "  to n2: " << n2->toStringBrief() << endl;
 		n2->add_covering_mpr(n->id());
 		n->set_is_mpr(true);
 		covered_n2_count++;
 	    }
-	    else {
+	    else 
+	    {
 		dbg << "n2: " << n2->toStringBrief() << "  is strict, skipping.\n";
 	    }
 	}
@@ -1935,7 +2059,7 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
  * Callback methods, for event processing.
  */
 
-void
+    void
 Neighborhood::event_link_sym_timer(OlsrTypes::LogicalLinkID linkid)
 {
     XLOG_ASSERT(_links.find(linkid) != _links.end());
@@ -1959,7 +2083,7 @@ Neighborhood::event_link_sym_timer(OlsrTypes::LogicalLinkID linkid)
     //_rm->schedule_route_update();
 }
 
-void
+    void
 Neighborhood::event_link_asym_timer(OlsrTypes::LogicalLinkID linkid)
 {
     // Transition: ASYM -> LOST.
@@ -1985,14 +2109,14 @@ Neighborhood::event_link_asym_timer(OlsrTypes::LogicalLinkID linkid)
     //_rm->schedule_route_update();
 }
 
-void
+    void
 Neighborhood::event_link_lost_timer(OlsrTypes::LogicalLinkID linkid)
 {
     XLOG_UNFINISHED();	    // XXX TODO
     UNUSED(linkid);
 }
 
-void
+    void
 Neighborhood::event_link_dead_timer(OlsrTypes::LogicalLinkID linkid)
 {
     // Transition: * -> DEAD.
@@ -2000,19 +2124,19 @@ Neighborhood::event_link_dead_timer(OlsrTypes::LogicalLinkID linkid)
     delete_link(linkid);
 }
 
-void
+    void
 Neighborhood::event_mpr_selector_expired(const OlsrTypes::NeighborID nid)
 {
     // Transition: * -> DEAD.
     debug_msg("MPR selector for neighbor %u expired, deleting it.\n",
-	      XORP_UINT_CAST(nid));
+	    XORP_UINT_CAST(nid));
 
     // 8.4.1: Deletion of MPR selector tuples occurs in case of
     // expiration of the timer.
     delete_mpr_selector(nid);
 }
 
-void
+    void
 Neighborhood::event_twohop_link_dead_timer(const OlsrTypes::TwoHopLinkID tlid)
 {
     // Transition: * -> DEAD.
@@ -2025,32 +2149,34 @@ Neighborhood::event_twohop_link_dead_timer(const OlsrTypes::TwoHopLinkID tlid)
     delete_twohop_link(tlid);
 }
 
-bool
+    bool
 Neighborhood::event_receive_hello(
-    Message* msg,
-    const IPv4& remote_addr,
-    const IPv4& local_addr)
+	Message* msg,
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
 {
     HelloMessage* hello = dynamic_cast<HelloMessage *>(msg);
     if (0 == hello)
 	return false;	// I did not consume this message.
 
-    if (hello->ttl() != 1 || hello->hops() != 0) {
+    if (hello->ttl() != 1 || hello->hops() != 0) 
+    {
 	debug_msg("Rejecting HELLO with ttl %u and hop-count %u\n",
-		  hello->ttl(), hello->hops());
+		hello->ttl(), hello->hops());
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting HELLO with ttl %u and hop-count %u\n",
-		    hello->ttl(), hello->hops());
+		"Rejecting HELLO with ttl %u and hop-count %u\n",
+		hello->ttl(), hello->hops());
 
 	return true;	// I consumed this message.
     }
 
     // We should never see HELLO messages originating from our own
     // main address, unless they are being looped back for some reason.
-    if (_fm.get_main_addr() == hello->origin()) {
+    if (_fm.get_main_addr() == hello->origin()) 
+    {
 	debug_msg("Rejecting self-originated HELLO\n");
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting self-originated HELLO\n");
+		"Rejecting self-originated HELLO\n");
 	return true;
     }
 
@@ -2073,11 +2199,14 @@ Neighborhood::event_receive_hello(
     // the addresses listed in the link message, then the
     // rules for updating the link tuple change.
     //
-    if (! hello->links().empty()) {
+    if (! hello->links().empty()) 
+    {
 	HelloMessage::LinkBag::const_iterator ii;
-	for (ii = linkbag.begin(); ii != linkbag.end(); ii++) {
+	for (ii = linkbag.begin(); ii != linkbag.end(); ii++) 
+	{
 	    const LinkAddrInfo& lai = (*ii).second;
-	    if (local_addr == lai.remote_addr()) {
+	    if (local_addr == lai.remote_addr()) 
+	    {
 		mylc = (*ii).first;
 		i_was_mentioned = true;
 		break;
@@ -2088,15 +2217,17 @@ Neighborhood::event_receive_hello(
     // Update the link state tuple, creating it if needed.
     bool is_new_link = false;
     OlsrTypes::LogicalLinkID linkid;
-    try {
+    try 
+    {
 	linkid = update_link(hello->faceid(), remote_addr, local_addr,
-			     hello->expiry_time(), is_new_link);
+		hello->expiry_time(), is_new_link);
 
 	// 7.1.1: Update the link state timers.
 	_links[linkid]->update_timers(hello->expiry_time(),
-				      i_was_mentioned, mylc);
+		i_was_mentioned, mylc);
 
-    } catch(BadLogicalLink& bl) {
+    } catch(BadLogicalLink& bl) 
+    {
 	debug_msg("could not update link\n");
 	return true;	// I consumed this message.
     }
@@ -2107,16 +2238,18 @@ Neighborhood::event_receive_hello(
     bool is_new_neighbor = false;
     bool is_mpr_selector = i_was_mentioned && mylc.is_mpr_neighbor();
     OlsrTypes::NeighborID nid;
-    try {
+    try 
+    {
 	nid = update_neighbor(hello->origin(),
-			      linkid,
-			      is_new_link,
-			      hello->willingness(),
-			      is_mpr_selector,
-			      hello->expiry_time(),
-			      is_new_neighbor);
+		linkid,
+		is_new_link,
+		hello->willingness(),
+		is_mpr_selector,
+		hello->expiry_time(),
+		is_new_neighbor);
 
-    } catch(BadNeighbor& bn) {
+    } catch(BadNeighbor& bn) 
+    {
 	debug_msg("could not update neighbor\n");
 	if (is_new_link)
 	    delete_link(linkid);
@@ -2126,31 +2259,34 @@ Neighborhood::event_receive_hello(
     Neighbor* n = _neighbors[nid];
 
     // Process two-hop neighbors, if link(s) with neighbor are now symmetric.
-    if (n->is_sym()) {
+    if (n->is_sym()) 
+    {
 	HelloMessage::LinkBag::const_iterator ii;
-	for (ii = linkbag.begin(); ii != linkbag.end(); ii++) {
+	for (ii = linkbag.begin(); ii != linkbag.end(); ii++) 
+	{
 	    const LinkAddrInfo& lai = (*ii).second;
 	    // 8.2.1, 1.1: A node cannot be its own two-hop neighbor.
 	    if (_fm.is_local_addr(lai.remote_addr()))
 		continue;
-	    switch ((*ii).first.neighbortype()) {
-	    case OlsrTypes::MPR_NEIGH:
-	    case OlsrTypes::SYM_NEIGH:
-		// 8.2.1, 1.2: Create or update two-hop neighbor tuple.
-		// Interpreted as: add a link to a two-hop neighbor.
-		// May throw BadTwoHopLink.
-		update_twohop_link(lai, *n, hello->faceid(),
-				   hello->expiry_time());
-		break;
-	    case OlsrTypes::NOT_NEIGH:
-		// 8.2.1, 2: Delete two-hop neighbor tuple.
-		// Interpreted as: delete a neighbor's link to a
-		// two-hop neighbor.
-		delete_twohop_link_by_addrs(hello->origin(),
-					    lai.remote_addr());
-		break;
-	    default:
-		break;
+	    switch ((*ii).first.neighbortype()) 
+	    {
+		case OlsrTypes::MPR_NEIGH:
+		case OlsrTypes::SYM_NEIGH:
+		    // 8.2.1, 1.2: Create or update two-hop neighbor tuple.
+		    // Interpreted as: add a link to a two-hop neighbor.
+		    // May throw BadTwoHopLink.
+		    update_twohop_link(lai, *n, hello->faceid(),
+			    hello->expiry_time());
+		    break;
+		case OlsrTypes::NOT_NEIGH:
+		    // 8.2.1, 2: Delete two-hop neighbor tuple.
+		    // Interpreted as: delete a neighbor's link to a
+		    // two-hop neighbor.
+		    delete_twohop_link_by_addrs(hello->origin(),
+			    lai.remote_addr());
+		    break;
+		default:
+		    break;
 	    }
 	}
     }
@@ -2158,7 +2294,7 @@ Neighborhood::event_receive_hello(
     return true;	// I consumed this message.
 }
 
-bool
+    bool
 Neighborhood::event_send_tc()
 {
     debug_msg("%s: TC timer fired\n", cstring(_fm.get_main_addr()));
@@ -2166,7 +2302,7 @@ Neighborhood::event_send_tc()
 #ifdef DETAILED_DEBUG
     // 9.3 TC timer should only fire if running or finishing.
     XLOG_ASSERT(_tc_timer_state == TC_RUNNING ||
-		_tc_timer_state == TC_FINISHING);
+	    _tc_timer_state == TC_FINISHING);
 #endif
 
     TcMessage* tc = new TcMessage();
@@ -2177,14 +2313,16 @@ Neighborhood::event_send_tc()
     tc->set_hop_count(0);
     tc->set_seqno(_fm.get_msg_seqno());
 
-    if (_tc_timer_state == TC_RUNNING) {
+    if (_tc_timer_state == TC_RUNNING) 
+    {
 	size_t curr_ans_count = 0;
 	size_t curr_ans_changes = 0;
 
 	// Compute the Advertised Neighbor Set, according to the
 	// current TC_REDUNDANCY mode.
 	map<OlsrTypes::NeighborID, Neighbor*>::const_iterator ii;
-	for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
+	for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) 
+	{
 	    Neighbor* n = (*ii).second;
 
 	    // Maintain a count of the number of Neighbors which have
@@ -2195,7 +2333,8 @@ Neighborhood::event_send_tc()
 	    if (was_advertised != is_advertised)
 		++curr_ans_changes;
 
-	    if (is_advertised) {
+	    if (is_advertised) 
+	    {
 		++curr_ans_count;
 		tc->add_neighbor(n->main_addr());
 	    }
@@ -2205,15 +2344,18 @@ Neighborhood::event_send_tc()
 	}
 
 	// Deal with transitions to an empty ANS.
-	if (curr_ans_count == 0) {
+	if (curr_ans_count == 0) 
+	{
 	    XLOG_ASSERT(tc->neighbors().empty());
-	    if (_tc_previous_ans_count == 0) {
+	    if (_tc_previous_ans_count == 0) 
+	    {
 		// If the TC timer was started because we have a non-empty
 		// MPR selector set, but the ANS set became empty before
 		// the current timer phase, transition to STOPPED state.
 		stop_tc_timer();
 		return false;
-	    } else {
+	    } else 
+	    {
 		// If the ANS just computed was empty, transition to
 		// FINISHING state to signal that we now have no neighbors
 		// to advertise.
@@ -2240,8 +2382,10 @@ Neighborhood::event_send_tc()
 
     // If TC timer is in 'finishing' state, and no further ticks are
     // pending, ensure that the TC timer is now unscheduled.
-    if (_tc_timer_state == TC_FINISHING) {
-	if (--_tc_timer_ticks_remaining == 0) {
+    if (_tc_timer_state == TC_FINISHING) 
+    {
+	if (--_tc_timer_ticks_remaining == 0) 
+	{
 	    _tc_timer_state = TC_STOPPED;
 	    return false;
 	}
@@ -2254,13 +2398,13 @@ Neighborhood::event_send_tc()
  * Timer manipulation methods.
  */
 
-void
+    void
 Neighborhood::stop_all_timers()
 {
     stop_tc_timer();
 }
 
-void
+    void
 Neighborhood::start_tc_timer()
 {
     debug_msg("%s -> TC_RUNNING\n", cstring(_fm.get_main_addr()));
@@ -2268,10 +2412,10 @@ Neighborhood::start_tc_timer()
     _tc_timer_state = TC_RUNNING;
     _tc_timer = EventLoop::instance().
 	new_periodic(get_tc_interval(),
-		     callback(this, &Neighborhood::event_send_tc));
+		callback(this, &Neighborhood::event_send_tc));
 }
 
-void
+    void
 Neighborhood::stop_tc_timer()
 {
     debug_msg("%s -> TC_STOPPED\n", cstring(_fm.get_main_addr()));
@@ -2280,13 +2424,14 @@ Neighborhood::stop_tc_timer()
     _tc_timer_state = TC_STOPPED;
 }
 
-void
+    void
 Neighborhood::finish_tc_timer()
 {
     XLOG_ASSERT(_tc_timer_state == TC_RUNNING ||
-		_tc_timer_state == TC_FINISHING);
+	    _tc_timer_state == TC_FINISHING);
 
-    if (_tc_timer_state == TC_RUNNING) {
+    if (_tc_timer_state == TC_RUNNING) 
+    {
 	debug_msg("%s -> TC_FINISHING\n", cstring(_fm.get_main_addr()));
 	_tc_timer_state = TC_FINISHING;
 
@@ -2298,26 +2443,26 @@ Neighborhood::finish_tc_timer()
     }
 }
 
-void
+    void
 Neighborhood::reschedule_immediate_tc_timer()
 {
     XLOG_ASSERT(_tc_timer_state == TC_RUNNING ||
-		_tc_timer_state == TC_FINISHING);
+	    _tc_timer_state == TC_FINISHING);
 
     _tc_timer.schedule_now();
 }
 
-void
+    void
 Neighborhood::restart_tc_timer()
 {
     reschedule_tc_timer();
 }
 
-void
+    void
 Neighborhood::reschedule_tc_timer()
 {
     XLOG_ASSERT(_tc_timer_state == TC_RUNNING ||
-		_tc_timer_state == TC_FINISHING);
+	    _tc_timer_state == TC_FINISHING);
 
     _tc_timer.reschedule_after(get_tc_interval());
 }

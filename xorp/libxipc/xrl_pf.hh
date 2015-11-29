@@ -39,32 +39,32 @@ class XrlDispatcher;
 
 class XrlPFConstructorError : public XorpReasonedException
 {
-public:
-    XrlPFConstructorError(const char* file, size_t line, const string& reason)
-	: XorpReasonedException("XrlPFConstructorError", file, line, reason)
-    {}
+    public:
+	XrlPFConstructorError(const char* file, size_t line, const string& reason)
+	    : XorpReasonedException("XrlPFConstructorError", file, line, reason)
+	{}
 };
 
 class XrlPFListener
 {
-public:
-    XrlPFListener( XrlDispatcher* d = 0);
-    virtual ~XrlPFListener();
+    public:
+	XrlPFListener( XrlDispatcher* d = 0);
+	virtual ~XrlPFListener();
 
-    virtual const char*	address() const = 0;
+	virtual const char*	address() const = 0;
 
-    virtual const char*	protocol() const = 0;
+	virtual const char*	protocol() const = 0;
 
-    bool set_dispatcher(const XrlDispatcher* d);
+	bool set_dispatcher(const XrlDispatcher* d);
 
-    const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
+	const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
 
-    virtual bool response_pending() const = 0;
+	virtual bool response_pending() const = 0;
 
-    virtual string toString() const = 0;
+	virtual string toString() const = 0;
 
-protected:
-    const XrlDispatcher* _dispatcher;
+    protected:
+	const XrlDispatcher* _dispatcher;
 };
 
 
@@ -72,56 +72,56 @@ protected:
 // XrlPFSender
 
 class XrlPFSender
-    : public NONCOPYABLE
+: public NONCOPYABLE
 {
-public:
-    typedef
-    XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
+    public:
+	typedef
+	    XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
 
-public:
-    XrlPFSender(const string& name,  const char* address);
-    virtual ~XrlPFSender();
+    public:
+	XrlPFSender(const string& name,  const char* address);
+	virtual ~XrlPFSender();
 
-    /**
-     * Send an Xrl.
-     *
-     * This method attempts to perform the sender side processing of an XRL.
-     *
-     * If a direct_call the method will return true or false to indicate
-     * success to the caller.  If not a direct call, a failure will be
-     * communicated via a callback since there's no way to get the information
-     * directly back to the caller.
-     *
-     * @param xrl XRL to be sent.
-     * @param direct_call indication of whether the caller is on the stack.
-     * @param cb Callback to be invoked with result.
-     *
-     */
-    virtual bool send(const Xrl& 		xrl,
-		      bool 			direct_call,
-		      const SendCallback& 	cb) = 0;
+	/**
+	 * Send an Xrl.
+	 *
+	 * This method attempts to perform the sender side processing of an XRL.
+	 *
+	 * If a direct_call the method will return true or false to indicate
+	 * success to the caller.  If not a direct call, a failure will be
+	 * communicated via a callback since there's no way to get the information
+	 * directly back to the caller.
+	 *
+	 * @param xrl XRL to be sent.
+	 * @param direct_call indication of whether the caller is on the stack.
+	 * @param cb Callback to be invoked with result.
+	 *
+	 */
+	virtual bool send(const Xrl& 		xrl,
+		bool 			direct_call,
+		const SendCallback& 	cb) = 0;
 
-    virtual bool	sends_pending() const = 0;
-    virtual const char*	protocol() const = 0;
+	virtual bool	sends_pending() const = 0;
+	virtual const char*	protocol() const = 0;
 
-    /**
-     * Determine if the underlying transport is still open.
-     *
-     * @return true if the transport is alive.
-     */
-    virtual bool	alive() const = 0;
+	/**
+	 * Determine if the underlying transport is still open.
+	 *
+	 * @return true if the transport is alive.
+	 */
+	virtual bool	alive() const = 0;
 
-    // XXX Unfinished support for XRL batching.
-    virtual void	batch_start() {}
-    virtual void	batch_stop() {}
+	// XXX Unfinished support for XRL batching.
+	virtual void	batch_start() {}
+	virtual void	batch_stop() {}
 
-    const string& address() const		{ return _address; }
-    virtual void set_address(const char* a) { _address = a; }
-    virtual string toString() const;
+	const string& address() const		{ return _address; }
+	virtual void set_address(const char* a) { _address = a; }
+	virtual string toString() const;
 
-protected:
-    string _address;
-    string _name; // for debugging
+    protected:
+	string _address;
+	string _name; // for debugging
 };
 
 #endif // __LIBXIPC_XRL_PF_HH__

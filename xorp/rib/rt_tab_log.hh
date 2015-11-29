@@ -41,27 +41,28 @@
  * This class is strictly for debugging and testing purposes.
  */
 template<typename A>
-class LogTable : public RouteTable<A> {
-public:
-    LogTable(const string& tablename, RouteTable<A>* parent);
-    ~LogTable();
+class LogTable : public RouteTable<A> 
+{
+	public:
+		LogTable(const string& tablename, RouteTable<A>* parent);
+		~LogTable();
 
-    int add_route(const IPRouteEntry<A>& route);
-    int delete_route(const IPRouteEntry<A>*);
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
-    TableType type() const { return LOG_TABLE; }
-    RouteTable<A>* parent() { return _parent; }
-    const RouteTable<A>* parent() const { return _parent; }
-    void set_parent(RouteTable<A>* new_parent);
-    string str() const;
+		int add_route(const IPRouteEntry<A>& route);
+		int delete_route(const IPRouteEntry<A>*);
+		const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
+		const IPRouteEntry<A>* lookup_route(const A& addr) const;
+		RouteRange<A>* lookup_route_range(const A& addr) const;
+		TableType type() const { return LOG_TABLE; }
+		RouteTable<A>* parent() { return _parent; }
+		const RouteTable<A>* parent() const { return _parent; }
+		void set_parent(RouteTable<A>* new_parent);
+		string str() const;
 
-    uint32_t update_number() const;
+		uint32_t update_number() const;
 
-private:
-    RouteTable<A>* _parent;
-    uint32_t	   _update_number;
+	private:
+		RouteTable<A>* _parent;
+		uint32_t	   _update_number;
 };
 
 
@@ -73,18 +74,19 @@ private:
  * -*- UNTESTED -*-
  */
 template <typename A>
-class OstreamLogTable : public LogTable<A> {
-public:
-    ostream& get();
-    OstreamLogTable(const string& 	tablename,
-		    RouteTable<A>*	parent,
-		    ostream& 		out);
-    int add_route(const IPRouteEntry<A>& route);
-    int delete_route(const IPRouteEntry<A>*);
-    string str() const;
+class OstreamLogTable : public LogTable<A> 
+{
+	public:
+		ostream& get();
+		OstreamLogTable(const string& 	tablename,
+				RouteTable<A>*	parent,
+				ostream& 		out);
+		int add_route(const IPRouteEntry<A>& route);
+		int delete_route(const IPRouteEntry<A>*);
+		string str() const;
 
-private:
-    ostream& _o;
+	private:
+		ostream& _o;
 };
 
 
@@ -95,16 +97,17 @@ private:
  * -*- UNTESTED -*-
  */
 template <typename A>
-class XLogTraceTable : public LogTable<A> {
-public:
-    XLogTraceTable(const string& 	tablename,
-		   RouteTable<A>* 	parent);
+class XLogTraceTable : public LogTable<A> 
+{
+	public:
+		XLogTraceTable(const string& 	tablename,
+				RouteTable<A>* 	parent);
 
-    int add_route(const IPRouteEntry<A>& 	route);
+		int add_route(const IPRouteEntry<A>& 	route);
 
-    int delete_route(const IPRouteEntry<A>* 	proute);
+		int delete_route(const IPRouteEntry<A>* 	proute);
 
-    string str() const;
+		string str() const;
 };
 
 /**
@@ -114,16 +117,17 @@ public:
  * -*- UNTESTED -*-
  */
 template <typename A>
-class DebugMsgLogTable : public LogTable<A> {
-public:
-    DebugMsgLogTable(const string& 	tablename,
-		     RouteTable<A>* 	parent);
+class DebugMsgLogTable : public LogTable<A> 
+{
+	public:
+		DebugMsgLogTable(const string& 	tablename,
+				RouteTable<A>* 	parent);
 
-    int add_route(const IPRouteEntry<A>& 	route);
+		int add_route(const IPRouteEntry<A>& 	route);
 
-    int delete_route(const IPRouteEntry<A>* 	proute);
+		int delete_route(const IPRouteEntry<A>* 	proute);
 
-    string str() const;
+		string str() const;
 };
 
 #endif // __RIB_RT_TAB_LOG_HH__

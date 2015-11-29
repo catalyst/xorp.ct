@@ -30,7 +30,8 @@
 #pragma hdrstop
 
 /* XXX: move to headers */
-typedef union _sockunion_t {
+typedef union _sockunion_t 
+{
     struct sockaddr     sa;
     struct sockaddr_in     sin;
     struct sockaddr_in6     sin6;
@@ -65,7 +66,7 @@ CONFIGURATION_ENTRY g_ce;
 /*
  * Issue a routing socket message for a single changed destination.
  */
-DWORD
+    DWORD
 rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
 {
 #ifdef IPV6_DLL
@@ -84,7 +85,7 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
     DWORD result;
 
     if (!prdi)
-        return NO_ERROR;
+	return NO_ERROR;
 
     TRACE1(NETWORK, "RtmDestInfo Destination %p", prdi);
 
@@ -99,8 +100,10 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
      * been added, changed or deleted for the given situation.
      * We look only at the unicast routing view.
      */
-    for (i = 0; i < prdi->NumberOfViews; i++) {
-	if (prdi->ViewInfo[i].ViewId == RTM_VIEW_ID_UCAST) {
+    for (i = 0; i < prdi->NumberOfViews; i++) 
+    {
+	if (prdi->ViewInfo[i].ViewId == RTM_VIEW_ID_UCAST) 
+	{
 #ifdef IPV6_DLL
 	    /*
 	     * XXX: Don't filter IPv6 routes [yet].
@@ -109,7 +112,8 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
 	    /*
 	     * Ignore routes to the all-ones broadcast destination.
 	     */
-	    if ((dst.s_addr == INADDR_BROADCAST && dstprefix == 32)) {
+	    if ((dst.s_addr == INADDR_BROADCAST && dstprefix == 32)) 
+	    {
 		TRACE0(NETWORK, "ignoring all-ones broadcast");
 		break;
 	    }
@@ -117,26 +121,30 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
 	    /*
 	     * XXX: Ignore multicast routes (for now).
 	     */
-	    if (IN4_IS_ADDR_MULTICAST(dst.s_addr)) {
+	    if (IN4_IS_ADDR_MULTICAST(dst.s_addr)) 
+	    {
 		TRACE0(NETWORK, "ignoring multicast route");
 		break;
 	    }
 #endif /* notyet */
 #endif /* IPV6_DLL */
-	    if (prdi->ViewInfo[i].NumRoutes == 0) {
+	    if (prdi->ViewInfo[i].NumRoutes == 0) 
+	    {
 		TRACE0(NETWORK, "route deleted");
 		type = RTM_DELETE;
-	    } else if (prdi->ViewInfo[i].NumRoutes == 1) {
+	    } else if (prdi->ViewInfo[i].NumRoutes == 1) 
+	    {
 		TRACE0(NETWORK, "route added");
 		type = RTM_ADD;
-	    } else {
+	    } else 
+	    {
 		/*
 		 * XXX: The route has multiple next-hops. We do not know
 		 * which next-hop we should send to the FEA, so do not
 		 * process such changes for now.
 		 */
 		TRACE1(NETWORK, "route change, dest %d nexthops, no msg",
-		       prdi->ViewInfo[i].NumRoutes);
+			prdi->ViewInfo[i].NumRoutes);
 		type = 0;
 	    }
 	    break;  /* stop when unicast route view is dealt with. */
@@ -146,7 +154,8 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
      * Craft a routing socket message based on the changes.
      * We only allocate memory here if we require it.
      */
-    if (type != 0) {
+    if (type != 0) 
+    {
 	sockunion_t *sa;
 	struct rt_msghdr *rtm;
 #ifdef IPV6_DLL
@@ -182,7 +191,8 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
 	 * next-hop from the destination reported as changed.
 	 * XXX: Better error checking here considered desirable.
 	 */
-	if (type == RTM_ADD) {
+	if (type == RTM_ADD) 
+	{
 	    PRTM_ROUTE_INFO prri;
 	    RTM_NEXTHOP_INFO nhi;
 
@@ -191,29 +201,31 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
 
 	    /* XXX weird heap malloc. */
 	    MALLOC(&prri,
-		   RTM_SIZE_OF_ROUTE_INFO(g_ce.rrpRtmProfile.MaxNextHopsInRoute), &result);
+		    RTM_SIZE_OF_ROUTE_INFO(g_ce.rrpRtmProfile.MaxNextHopsInRoute), &result);
 
 	    result = RtmGetRouteInfo(reh, prdi->ViewInfo[i].Route, prri, NULL);
-	    if (result != NO_ERROR) {
+	    if (result != NO_ERROR) 
+	    {
 		TRACE1(NETWORK, "RtmGetRouteInfo() returns %d", result);
 	    }
 
 	    result = RtmGetNextHopInfo(reh, prri->NextHopsList.NextHops[0],
-				       &nhi);
-	    if (result != NO_ERROR) {
+		    &nhi);
+	    if (result != NO_ERROR) 
+	    {
 		TRACE1(ANY, "Error %u getting next hop", result);
 	    }
 
 	    /* Gateway */
 #ifdef IPV6_DLL
 	    RTM_IPV6_GET_ADDR_AND_LEN(nhip.s6_addr, nhprefix,
-				      &nhi.NextHopAddress);
+		    &nhi.NextHopAddress);
 	    ++sa;
 	    sa->sin6.sin6_family = AF_INET6;
 	    sa->sin6.sin6_addr = nhip;
 #else
 	    RTM_IPV4_GET_ADDR_AND_LEN(nhip.s_addr, nhprefix,
-				      &nhi.NextHopAddress);
+		    &nhi.NextHopAddress);
 	    ++sa;
 	    sa->sin.sin_family = AF_INET;
 	    sa->sin.sin_addr = nhip;
@@ -255,7 +267,7 @@ rtm_send_dest_change(RTM_ENTITY_HANDLE reh, PRTM_DEST_INFO prdi)
  * This has a very important consequence: our thread blocks until the
  * client thread reads its data or the pipe is disconnected.
  */
-void
+    void
 broadcast_pipe_message(void *msg, int msgsize)
 {
     pipe_instance_t *pp;
@@ -263,18 +275,22 @@ broadcast_pipe_message(void *msg, int msgsize)
     int result;
     int nbytes;
 
-    for (i = 0; i < PIPE_INSTANCES; i++) {
+    for (i = 0; i < PIPE_INSTANCES; i++) 
+    {
 	pp = g_ce.pipes[i];
-	if (pp != NULL && pp->state == PIPE_STATE_CONNECTED) {
+	if (pp != NULL && pp->state == PIPE_STATE_CONNECTED) 
+	{
 	    result = WriteFile(pp->pipe, msg, msgsize, &nbytes, NULL);
-	    if (result == 0) {
+	    if (result == 0) 
+	    {
 		result = GetLastError();
 		TRACE1(NETWORK, "broadcast: write error %d", result);
 		if (result == ERROR_PIPE_NOT_CONNECTED ||
-		    result == ERROR_NO_DATA ||
-		    result == ERROR_BROKEN_PIPE) {
+			result == ERROR_NO_DATA ||
+			result == ERROR_BROKEN_PIPE) 
+		{
 		    TRACE1(NETWORK,
-			   "broadcast: pipe %p disconnected; reconnecting.", pp->pipe);
+			    "broadcast: pipe %p disconnected; reconnecting.", pp->pipe);
 		    /*
 		     * We may be called by a reader thread. To avoid
 		     * introducing loops, we schedule the listen
@@ -282,7 +298,7 @@ broadcast_pipe_message(void *msg, int msgsize)
 		     */
 		    ResetEvent(pp->revent);
 		    QueueUserWorkItem(
-			(LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
+			    (LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
 		}
 	    }
 	}
@@ -290,7 +306,7 @@ broadcast_pipe_message(void *msg, int msgsize)
 }
 
 
-DWORD
+    DWORD
 ProcessRouteChange (VOID)
 {
     DWORD           dwErr           = NO_ERROR;
@@ -302,49 +318,49 @@ ProcessRouteChange (VOID)
 
     /* loop dequeueing messages until RTM says there are no more left */
     while (!bDone)
-	{
-	    /* retrieve route changes */
-	    uiNumDests = 1;
-	    dwErr = RtmGetChangedDests(
+    {
+	/* retrieve route changes */
+	uiNumDests = 1;
+	dwErr = RtmGetChangedDests(
 		g_ce.hRtmHandle,                    /* my RTMv2 handle  */
 		g_ce.hRtmNotificationHandle,        /* my notification handle  */
 		&uiNumDests,                        /*   # dest info's required */
 		/* g # dest info's supplied */
 		&rdiDestination);                   /* g buffer for dest info's */
 
-	    switch (dwErr)
-		{
-		case ERROR_NO_MORE_ITEMS:
-		    bDone = TRUE;
-		    dwErr = NO_ERROR;
-		    if (uiNumDests < 1)
-			break;
-		    /* else continue below to process the last destination */
+	switch (dwErr)
+	{
+	    case ERROR_NO_MORE_ITEMS:
+		bDone = TRUE;
+		dwErr = NO_ERROR;
+		if (uiNumDests < 1)
+		    break;
+		/* else continue below to process the last destination */
 
-/* XXX: Does not specify what the change(s) are, just that they */
-/* occurred, on *this destination*. maybe we should figure */
-/* this out? */
+		/* XXX: Does not specify what the change(s) are, just that they */
+		/* occurred, on *this destination*. maybe we should figure */
+		/* this out? */
 
-		case NO_ERROR:
-		    rtm_send_dest_change(g_ce.hRtmHandle, &rdiDestination);
+	    case NO_ERROR:
+		rtm_send_dest_change(g_ce.hRtmHandle, &rdiDestination);
 
-		    /* release the destination info */
-		    if (RtmReleaseChangedDests(
+		/* release the destination info */
+		if (RtmReleaseChangedDests(
 			    g_ce.hRtmHandle,            /* my RTMv2 handle  */
 			    g_ce.hRtmNotificationHandle,/* my notif handle  */
 			    uiNumDests,                 /* 1 */
 			    &rdiDestination             /* released dest info */
 			    ) != NO_ERROR)
-			TRACE0(NETWORK, "Error releasing changed dests");
+		    TRACE0(NETWORK, "Error releasing changed dests");
 
-		    break;
+		break;
 
-		default:
-		    bDone = TRUE;
-		    TRACE1(NETWORK, "Error %u RtmGetChangedDests", dwErr);
-		    break;
-		}
-	} /* while  */
+	    default:
+		bDone = TRUE;
+		TRACE1(NETWORK, "Error %u RtmGetChangedDests", dwErr);
+		break;
+	}
+    } /* while  */
 
     LEAVE_XORPRTM_API();
 
@@ -356,32 +372,32 @@ ProcessRouteChange (VOID)
  * Where we get called by RTMv2 when things happen to the routing table.
  */
 DWORD
-APIENTRY
+    APIENTRY
 RTM_CallbackEvent (
-    RTM_ENTITY_HANDLE   hRtmHandle, /* registration handle */
-    RTM_EVENT_TYPE      retEvent,
-    PVOID               pvContext1,
-    PVOID               pvContext2)
+	RTM_ENTITY_HANDLE   hRtmHandle, /* registration handle */
+	RTM_EVENT_TYPE      retEvent,
+	PVOID               pvContext1,
+	PVOID               pvContext2)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE1(ENTER, "Entering RTM_CallbackEvent: %u", retEvent);
 
     do                          /* breakout loop */
+    {
+	UNREFERENCED_PARAMETER(hRtmHandle);
+	UNREFERENCED_PARAMETER(pvContext1);
+	UNREFERENCED_PARAMETER(pvContext2);
+
+	/* only route change notifications are processed */
+	if (retEvent != RTM_CHANGE_NOTIFICATION)
 	{
-	    UNREFERENCED_PARAMETER(hRtmHandle);
-	    UNREFERENCED_PARAMETER(pvContext1);
-	    UNREFERENCED_PARAMETER(pvContext2);
+	    dwErr = ERROR_NOT_SUPPORTED;
+	    break;
+	}
 
-	    /* only route change notifications are processed */
-	    if (retEvent != RTM_CHANGE_NOTIFICATION)
-		{
-		    dwErr = ERROR_NOT_SUPPORTED;
-		    break;
-		}
-
-	    dwErr = ProcessRouteChange();
-	} while (FALSE);
+	dwErr = ProcessRouteChange();
+    } while (FALSE);
 
     TRACE0(LEAVE, "Leaving  RTM_CallbackEvent");
 
@@ -393,7 +409,7 @@ RTM_CallbackEvent (
  * Create a new instance of a pipe and return a pointer to
  * its instance structure.
  */
-pipe_instance_t *
+    pipe_instance_t *
 pipe_new(void)
 {
     pipe_instance_t *npp;
@@ -419,9 +435,10 @@ pipe_new(void)
      * Create the event object used to signal connection completion.
      */
     npp->cevent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (npp->cevent == NULL) {
+    if (npp->cevent == NULL) 
+    {
 	result = GetLastError();
-        TRACE1(CONFIGURATION, "Error %u creating event", result);
+	TRACE1(CONFIGURATION, "Error %u creating event", result);
 	goto fail;
     }
     npp->cov.hEvent = npp->cevent;
@@ -430,9 +447,10 @@ pipe_new(void)
      * Create the event object used to signal read completion.
      */
     npp->revent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (npp->revent == NULL) {
+    if (npp->revent == NULL) 
+    {
 	result = GetLastError();
-        TRACE1(CONFIGURATION, "Error %u creating event", result);
+	TRACE1(CONFIGURATION, "Error %u creating event", result);
 	goto fail;
     }
     npp->rov.hEvent = npp->revent;
@@ -441,18 +459,20 @@ pipe_new(void)
      * Create the instance of the named pipe itself.
      */
     npp->pipe = CreateNamedPipeA(XORPRTM_PIPENAME,
-				 PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-				 PIPE_TYPE_MESSAGE, PIPE_INSTANCES, 0, 0,
-				 XORPRTM_PIPETIMEOUT, NULL);
-    if (npp->pipe == NULL) {
+	    PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+	    PIPE_TYPE_MESSAGE, PIPE_INSTANCES, 0, 0,
+	    XORPRTM_PIPETIMEOUT, NULL);
+    if (npp->pipe == NULL) 
+    {
 	result = GetLastError();
 	TRACE1(CONFIGURATION, "Error %u creating named pipe", result);
 	goto fail;
     }
 
     failed = 0;
-  fail:
-    if (failed) {
+fail:
+    if (failed) 
+    {
 	pipe_destroy(npp);
 	npp = NULL;
     }
@@ -463,7 +483,7 @@ pipe_new(void)
 /*
  * XXX: This must be called from primary thread, or lock held if not!
  */
-int
+    int
 pipe_listen(pipe_instance_t *pp)
 {
     int retval;
@@ -482,10 +502,11 @@ pipe_listen(pipe_instance_t *pp)
      */
     ResetEvent(pp->cevent);
     result = RegisterWaitForSingleObject(&(pp->cwait), pp->cevent,
-					 pipe_connect_cb, pp, INFINITE,
-					 WT_EXECUTEINIOTHREAD |
-					 WT_EXECUTEONLYONCE);
-    if (result == 0) {
+	    pipe_connect_cb, pp, INFINITE,
+	    WT_EXECUTEINIOTHREAD |
+	    WT_EXECUTEONLYONCE);
+    if (result == 0) 
+    {
 	result = GetLastError();
 	TRACE1(CONFIGURATION, "Error %u RegisterWaitForSingleObject()", result);
 	goto fail;
@@ -500,10 +521,11 @@ pipe_listen(pipe_instance_t *pp)
      */
     ResetEvent(pp->revent);
     result = RegisterWaitForSingleObject(&(pp->rwait), pp->revent,
-					 pipe_read_cb, pp, INFINITE,
-					 WT_EXECUTEINIOTHREAD |
-					 WT_EXECUTEONLYONCE);
-    if (result == 0) {
+	    pipe_read_cb, pp, INFINITE,
+	    WT_EXECUTEINIOTHREAD |
+	    WT_EXECUTEONLYONCE);
+    if (result == 0) 
+    {
 	result = GetLastError();
 	TRACE1(CONFIGURATION, "Error %u RegisterWaitForSingleObject()", result);
 	goto fail;
@@ -519,17 +541,21 @@ pipe_listen(pipe_instance_t *pp)
      * with the OVERLAPPED parameter.
      */
     result = ConnectNamedPipe(pp->pipe, &pp->cov);
-    if (result == 0) {
+    if (result == 0) 
+    {
 	result = GetLastError();
-	if (result == ERROR_PIPE_LISTENING) {
+	if (result == ERROR_PIPE_LISTENING) 
+	{
 	    TRACE0(NETWORK, "Error: listening; Reconnecting named pipe");
 	    result = ConnectNamedPipe(pp->pipe, &pp->cov);
 	}
-	if (result == ERROR_PIPE_CONNECTED) {
+	if (result == ERROR_PIPE_CONNECTED) 
+	{
 	    TRACE0(NETWORK, "Error: named pipe already connected");
 	    goto fail;
 	}
-	if (result == ERROR_NO_DATA) {
+	if (result == ERROR_NO_DATA) 
+	{
 	    TRACE0(NETWORK, "Error: previous session not cleaned up");
 	    goto fail;
 	}
@@ -538,14 +564,17 @@ pipe_listen(pipe_instance_t *pp)
     pp->state = PIPE_STATE_LISTEN;
 
     retval = 0;
-  fail:
-    if (retval == -1) {
-	if (pp->cwait != NULL) {
+fail:
+    if (retval == -1) 
+    {
+	if (pp->cwait != NULL) 
+	{
 	    UnregisterWaitEx(pp->cwait, pp->cevent);
 	    ResetEvent(pp->cevent);
 	    pp->cwait = NULL;
 	}
-	if (pp->rwait != NULL) {
+	if (pp->rwait != NULL) 
+	{
 	    UnregisterWaitEx(pp->rwait, pp->revent);
 	    ResetEvent(pp->revent);
 	    pp->rwait = NULL;
@@ -561,7 +590,7 @@ pipe_listen(pipe_instance_t *pp)
  *
  * XXX: This must be called from primary thread, or lock held if not!
  */
-void
+    void
 pipe_disconnect(pipe_instance_t *pp)
 {
 
@@ -579,21 +608,25 @@ pipe_disconnect(pipe_instance_t *pp)
      * NULL out the second argument to UnregisterWaitEx().
      * We can't, however, do that from a service thread.
      */
-    if (pp->cwait != NULL) {
-        UnregisterWaitEx(pp->cwait, pp->cevent);
+    if (pp->cwait != NULL) 
+    {
+	UnregisterWaitEx(pp->cwait, pp->cevent);
 	ResetEvent(pp->cevent);
 	pp->cwait = NULL;
     }
-    if (pp->rwait != NULL) {
-        UnregisterWaitEx(pp->rwait, pp->revent);
+    if (pp->rwait != NULL) 
+    {
+	UnregisterWaitEx(pp->rwait, pp->revent);
 	ResetEvent(pp->revent);
 	pp->rwait = NULL;
     }
 
-    if (pp->pipe != NULL) {
-        CancelIo(pp->pipe);
+    if (pp->pipe != NULL) 
+    {
+	CancelIo(pp->pipe);
 	if (pp->state == PIPE_STATE_CONNECTED ||
-	    pp->state == PIPE_STATE_LISTEN) {
+		pp->state == PIPE_STATE_LISTEN) 
+	{
 	    DisconnectNamedPipe(pp->pipe);
 	}
     }
@@ -603,7 +636,7 @@ pipe_disconnect(pipe_instance_t *pp)
     TRACE0(ENTER, "Leaving pipe_disconnect");
 }
 
-void
+    void
 pipe_destroy(pipe_instance_t *pp)
 {
 
@@ -614,15 +647,18 @@ pipe_destroy(pipe_instance_t *pp)
 
     pipe_disconnect(pp);
 
-    if (pp->revent != NULL) {
+    if (pp->revent != NULL) 
+    {
 	CloseHandle(pp->revent);
 	pp->rov.hEvent = pp->revent = NULL;
     }
-    if (pp->cevent != NULL) {
+    if (pp->cevent != NULL) 
+    {
 	CloseHandle(pp->cevent);
 	pp->cov.hEvent = pp->cevent = NULL;
     }
-    if (pp->pipe != NULL) {
+    if (pp->pipe != NULL) 
+    {
 	CloseHandle(pp->pipe);
 	pp->pipe = NULL;
     }
@@ -634,7 +670,7 @@ pipe_destroy(pipe_instance_t *pp)
     TRACE0(ENTER, "Leaving pipe_destroy");
 }
 
-void CALLBACK
+    void CALLBACK
 pipe_connect_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 {
     pipe_instance_t *pp;
@@ -647,7 +683,8 @@ pipe_connect_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 
     /* XXX CHECK STATE */
 
-    if (pp->state != PIPE_STATE_LISTEN) {
+    if (pp->state != PIPE_STATE_LISTEN) 
+    {
 	TRACE0(NETWORK, "WARNING: pipe state is not LISTEN");
     }
 
@@ -657,8 +694,8 @@ pipe_connect_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
      * run as lockless as possible, so do not block the service thread.
      */
     /*
-      result = GetOverlappedResult(pp->pipe, &pp->cov, &nbytes, TRUE);
-    */
+       result = GetOverlappedResult(pp->pipe, &pp->cov, &nbytes, TRUE);
+       */
 
     pp->state = PIPE_STATE_CONNECTED;
 
@@ -667,9 +704,11 @@ pipe_connect_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
      * the client.
      */
     result = ReadFile(pp->pipe, pp->rbuf, pp->rsize, NULL, &pp->rov);
-    if (result == 0) {
+    if (result == 0) 
+    {
 	result = GetLastError();
-	if (result != ERROR_IO_PENDING) {
+	if (result != ERROR_IO_PENDING) 
+	{
 	    TRACE1(ANY, "WARNING: pipe_connect_cb read returned %d", result);
 	}
     }
@@ -690,7 +729,7 @@ pipe_connect_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
  * Therefore, use QueueUserWorkItem() to make sure that pipe_listen()
  * is invoked after a context switch.
  */
-void WINAPI
+    void WINAPI
 pipe_relisten_cb(void *ctx)
 {
     pipe_instance_t *pp;
@@ -706,7 +745,7 @@ pipe_relisten_cb(void *ctx)
     LeaveCriticalSection(&pp->rcs);
 }
 
-void WINAPI
+    void WINAPI
 pipe_reread_cb(void *ctx)
 {
     pipe_instance_t *pp;
@@ -719,7 +758,8 @@ pipe_reread_cb(void *ctx)
 
     failed = 0;
 
-    if (pp->state != PIPE_STATE_CONNECTED) {
+    if (pp->state != PIPE_STATE_CONNECTED) 
+    {
 	TRACE0(NETWORK, "WARNING: not PIPE_STATE_CONNECTED");
     }
 
@@ -734,12 +774,15 @@ pipe_reread_cb(void *ctx)
      * Post a new read request. Deal with fatal errors.
      */
     result = ReadFile(pp->pipe, pp->rbuf, pp->rsize, NULL, &pp->rov);
-    if (result == 0) {
+    if (result == 0) 
+    {
 	result = GetLastError();
-	if (result != ERROR_IO_PENDING) {
+	if (result != ERROR_IO_PENDING) 
+	{
 	    TRACE1(ANY, "WARNING: pipe_reread_cb read returned %d", result);
 	}
-	if (result == ERROR_BROKEN_PIPE) {
+	if (result == ERROR_BROKEN_PIPE) 
+	{
 	    failed = 1;
 	    goto fail;
 	}
@@ -749,31 +792,33 @@ pipe_reread_cb(void *ctx)
      * to avoid being preempted if the client disconnects.
      */
     result = RegisterWaitForSingleObject(&(pp->rwait), pp->revent,
-					 pipe_read_cb, pp, INFINITE,
-					 WT_EXECUTEINIOTHREAD |
-					 WT_EXECUTEONLYONCE);
-    if (result == 0) {
+	    pipe_read_cb, pp, INFINITE,
+	    WT_EXECUTEINIOTHREAD |
+	    WT_EXECUTEONLYONCE);
+    if (result == 0) 
+    {
 	result = GetLastError();
 	TRACE1(CONFIGURATION, "Error %u RegisterWaitForSingleObject()", result);
 	failed = 1;
     }
 
-  fail:
+fail:
     /*
      * If a fatal error occurred, disconnect the pipe client, and
      * listen for a new connection on this instance.
      */
-    if (failed) {
+    if (failed) 
+    {
 	ResetEvent(pp->revent);
 	QueueUserWorkItem(
-	    (LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
+		(LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
     }
-  out:
+out:
     TRACE0(ENTER, "Leaving pipe_reread_cb");
     LeaveCriticalSection(&pp->rcs);
 }
 
-void CALLBACK
+    void CALLBACK
 pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 {
     struct rt_msghdr *rtm;
@@ -785,7 +830,8 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
     EnterCriticalSection(&pp->rcs);
     TRACE1(ENTER, "Entering pipe_read_cb %p", lpParameter);
 
-    if (pp->state != PIPE_STATE_CONNECTED) {
+    if (pp->state != PIPE_STATE_CONNECTED) 
+    {
 	TRACE0(NETWORK, "WARNING: not PIPE_STATE_CONNECTED, bailing.");
 	/*
 	 * XXX: Is something racy, or is it just me?
@@ -796,10 +842,12 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
     }
 
     result = GetOverlappedResult(pp->pipe, &pp->rov, &nbytes, TRUE);
-    if (result == 0) {
+    if (result == 0) 
+    {
 	result = GetLastError();
 	TRACE1(NETWORK, "WARNING: pipe_read_cb read returned %d", result);
-	if (result == ERROR_BROKEN_PIPE) {
+	if (result == ERROR_BROKEN_PIPE) 
+	{
 	    /*
 	     * We must queue the new listen on a separate thread to
 	     * avoid infinite recursion.
@@ -807,7 +855,7 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 	    TRACE0(NETWORK, "Posting listen again.");
 	    ResetEvent(pp->revent);
 	    QueueUserWorkItem(
-		(LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
+		    (LPTHREAD_START_ROUTINE)pipe_relisten_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
 	    goto out;
 	}
     }
@@ -820,7 +868,8 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
      * We use -1 as ENOBUFS, etc are not part of the namespace.
      */
     rtm = (struct rt_msghdr *)&pp->rbuf[0];
-    if (rtm->rtm_version != RTM_VERSION) {
+    if (rtm->rtm_version != RTM_VERSION) 
+    {
 	TRACE1(NETWORK, "Invalid rtm_version %d, dropping.", rtm->rtm_version);
 	goto drop;
     }
@@ -828,45 +877,52 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
      * Sanity check size.
      */
     if (rtm->rtm_msglen > nbytes ||
-	nbytes < sizeof(struct rt_msghdr)) {
+	    nbytes < sizeof(struct rt_msghdr)) 
+    {
 	TRACE1(NETWORK, "Invalid rtm_msglen %d, dropping.", rtm->rtm_msglen);
 	rtm->rtm_errno = -1;
 	goto drop;
     }
-    if (rtm->rtm_pid == 0) {
+    if (rtm->rtm_pid == 0) 
+    {
 	TRACE1(NETWORK, "Invalid rtm_pid %d, dropping.", rtm->rtm_pid);
 	rtm->rtm_errno = -1;
 	goto bounce;
     }
 
-    switch (rtm->rtm_type) {
-    case RTM_ADD:
-	result = rtm_add_route(rtm, nbytes);
-	if (result == 0) {
-	    TRACE0(NETWORK, "route added successfully");
-	} else {
-	    TRACE0(NETWORK, "failed to add route");
-	}
-	rtm->rtm_errno = result;
-	break;
+    switch (rtm->rtm_type) 
+    {
+	case RTM_ADD:
+	    result = rtm_add_route(rtm, nbytes);
+	    if (result == 0) 
+	    {
+		TRACE0(NETWORK, "route added successfully");
+	    } else 
+	    {
+		TRACE0(NETWORK, "failed to add route");
+	    }
+	    rtm->rtm_errno = result;
+	    break;
 
-    case RTM_DELETE:
-	result = rtm_delete_route(rtm, nbytes);
-	if (result == 0) {
-	    TRACE0(NETWORK, "route deleted successfully");
-	} else {
-	    TRACE0(NETWORK, "failed to delete route");
-	}
-	rtm->rtm_errno = result;
-	break;
+	case RTM_DELETE:
+	    result = rtm_delete_route(rtm, nbytes);
+	    if (result == 0) 
+	    {
+		TRACE0(NETWORK, "route deleted successfully");
+	    } else 
+	    {
+		TRACE0(NETWORK, "failed to delete route");
+	    }
+	    rtm->rtm_errno = result;
+	    break;
 
-    default:
-	TRACE1(NETWORK, "Invalid rtm_type %d, dropping.", rtm->rtm_type);
-	rtm->rtm_errno = -1;
-	break;
+	default:
+	    TRACE1(NETWORK, "Invalid rtm_type %d, dropping.", rtm->rtm_type);
+	    rtm->rtm_errno = -1;
+	    break;
     }
 
-  bounce:
+bounce:
     /*
      * There is currently no analogue of the BSD SO_LOOPBACK option.
      * XXX: Normally processes will hear their own messages echoed across
@@ -875,47 +931,47 @@ pipe_read_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
      * after issuing it.
      */
     broadcast_pipe_message(pp->rbuf, nbytes);
-  drop:
+drop:
     TRACE0(NETWORK, "Posting read again.");
     ResetEvent(pp->revent);
     QueueUserWorkItem(
-	(LPTHREAD_START_ROUTINE)pipe_reread_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
+	    (LPTHREAD_START_ROUTINE)pipe_reread_cb, (PVOID)pp, WT_EXECUTEINIOTHREAD);
 
-  out:
+out:
     TRACE0(ENTER, "Leaving pipe_read_cb");
     LeaveCriticalSection(&pp->rcs);
 }
 
 
 static
-VOID
+    VOID
 FreeEventEntry (
-    PQUEUE_ENTRY        pqeEntry)
+	PQUEUE_ENTRY        pqeEntry)
 {
     EE_Destroy(CONTAINING_RECORD(pqeEntry, EVENT_ENTRY, qeEventQueueLink));
 }
 
 
 
-DWORD
+    DWORD
 EE_Create (
-    ROUTING_PROTOCOL_EVENTS rpeEvent,
-    MESSAGE                 mMessage,
-    PEVENT_ENTRY            *ppeeEventEntry)
+	ROUTING_PROTOCOL_EVENTS rpeEvent,
+	MESSAGE                 mMessage,
+	PEVENT_ENTRY            *ppeeEventEntry)
 {
     DWORD               dwErr = NO_ERROR;
     PEVENT_ENTRY        peeEntry; /* scratch */
 
     /* validate parameters */
     if (!ppeeEventEntry)
-        return ERROR_INVALID_PARAMETER;
+	return ERROR_INVALID_PARAMETER;
 
     *ppeeEventEntry = NULL;
 
     /* allocate the interface entry structure */
     MALLOC(&peeEntry, sizeof(EVENT_ENTRY), &dwErr);
     if (dwErr != NO_ERROR)
-        return dwErr;
+	return dwErr;
 
     /* initialize various fields */
     InitializeQueueHead(&(peeEntry->qeEventQueueLink));
@@ -929,12 +985,12 @@ EE_Create (
 
 
 
-DWORD
+    DWORD
 EE_Destroy (
-    PEVENT_ENTRY            peeEventEntry)
+	PEVENT_ENTRY            peeEventEntry)
 {
     if (!peeEventEntry)
-        return NO_ERROR;
+	return NO_ERROR;
 
     FREE(peeEventEntry);
 
@@ -942,10 +998,10 @@ EE_Destroy (
 }
 
 
-DWORD
+    DWORD
 EnqueueEvent(
-    ROUTING_PROTOCOL_EVENTS rpeEvent,
-    MESSAGE                 mMessage)
+	ROUTING_PROTOCOL_EVENTS rpeEvent,
+	MESSAGE                 mMessage)
 {
     DWORD           dwErr = NO_ERROR;
     PEVENT_ENTRY    peeEntry = NULL;
@@ -954,21 +1010,21 @@ EnqueueEvent(
     /* destroyed in EE_DequeueEvent */
 
     if (dwErr == NO_ERROR)
-	{
-	    ACQUIRE_QUEUE_LOCK(&(g_ce.lqEventQueue));
+    {
+	ACQUIRE_QUEUE_LOCK(&(g_ce.lqEventQueue));
 
-	    Enqueue(&(g_ce.lqEventQueue.head), &(peeEntry->qeEventQueueLink));
+	Enqueue(&(g_ce.lqEventQueue.head), &(peeEntry->qeEventQueueLink));
 
-	    RELEASE_QUEUE_LOCK(&(g_ce.lqEventQueue));
-	}
+	RELEASE_QUEUE_LOCK(&(g_ce.lqEventQueue));
+    }
 
     return dwErr;
 }
 
-DWORD
+    DWORD
 DequeueEvent(
-    ROUTING_PROTOCOL_EVENTS  *prpeEvent,
-    MESSAGE                  *pmMessage)
+	ROUTING_PROTOCOL_EVENTS  *prpeEvent,
+	MESSAGE                  *pmMessage)
 {
     DWORD           dwErr   = NO_ERROR;
     PQUEUE_ENTRY    pqe     = NULL;
@@ -976,21 +1032,23 @@ DequeueEvent(
 
     ACQUIRE_QUEUE_LOCK(&(g_ce.lqEventQueue));
 
-    do {
-        if (IsQueueEmpty(&(g_ce.lqEventQueue.head))) {
-            dwErr = ERROR_NO_MORE_ITEMS;
-            TRACE0(CONFIGURATION, "No events in the queue.");
-            break;
-        }
+    do 
+    {
+	if (IsQueueEmpty(&(g_ce.lqEventQueue.head))) 
+	{
+	    dwErr = ERROR_NO_MORE_ITEMS;
+	    TRACE0(CONFIGURATION, "No events in the queue.");
+	    break;
+	}
 
-        pqe = Dequeue(&(g_ce.lqEventQueue.head));
-        pee = CONTAINING_RECORD(pqe, EVENT_ENTRY, qeEventQueueLink);
-        *(prpeEvent) = pee->rpeEvent;
-        *(pmMessage) = pee->mMessage;
+	pqe = Dequeue(&(g_ce.lqEventQueue.head));
+	pee = CONTAINING_RECORD(pqe, EVENT_ENTRY, qeEventQueueLink);
+	*(prpeEvent) = pee->rpeEvent;
+	*(pmMessage) = pee->mMessage;
 
-        /* created in EE_EnqueueEvent */
-        EE_Destroy(pee);
-        pee = NULL;
+	/* created in EE_EnqueueEvent */
+	EE_Destroy(pee);
+	pee = NULL;
     } while (FALSE);
 
     RELEASE_QUEUE_LOCK(&(g_ce.lqEventQueue));
@@ -998,9 +1056,9 @@ DequeueEvent(
     return dwErr;
 }
 
-DWORD
+    DWORD
 CE_Create (
-    PCONFIGURATION_ENTRY    pce)
+	PCONFIGURATION_ENTRY    pce)
 {
     DWORD dwErr = NO_ERROR;
 
@@ -1008,220 +1066,244 @@ CE_Create (
     ZeroMemory(pce, sizeof(CONFIGURATION_ENTRY));
     pce->dwTraceID = INVALID_TRACEID;
 
-    do {
-        /* initialize the read-write lock */
-        CREATE_READ_WRITE_LOCK(&(pce->rwlLock));
-        if (!READ_WRITE_LOCK_CREATED(&(pce->rwlLock))) {
-            dwErr = GetLastError();
+    do 
+    {
+	/* initialize the read-write lock */
+	CREATE_READ_WRITE_LOCK(&(pce->rwlLock));
+	if (!READ_WRITE_LOCK_CREATED(&(pce->rwlLock))) 
+	{
+	    dwErr = GetLastError();
 
-            TRACE1(CONFIGURATION, "Error %u creating read-write-lock", dwErr);
+	    TRACE1(CONFIGURATION, "Error %u creating read-write-lock", dwErr);
 
-            break;
-        }
+	    break;
+	}
 
-        /* initialize the global heap */
-        pce->hGlobalHeap = HeapCreate(0, 0, 0);
-        if (pce->hGlobalHeap == NULL) {
-            dwErr = GetLastError();
-            TRACE1(CONFIGURATION, "Error %u creating global heap", dwErr);
+	/* initialize the global heap */
+	pce->hGlobalHeap = HeapCreate(0, 0, 0);
+	if (pce->hGlobalHeap == NULL) 
+	{
+	    dwErr = GetLastError();
+	    TRACE1(CONFIGURATION, "Error %u creating global heap", dwErr);
 
-            break;
-        }
+	    break;
+	}
 
 	/*
-         * Initialize the count of threads that are active in subsystem.
-         * Create the semaphore released by each thread when it is done;
-         * required for clean stop to the protocol.
+	 * Initialize the count of threads that are active in subsystem.
+	 * Create the semaphore released by each thread when it is done;
+	 * required for clean stop to the protocol.
 	 */
-        pce->ulActivityCount = 0;
-        pce->hActivitySemaphore = CreateSemaphore(NULL, 0, 0xfffffff, NULL);
-        if (pce->hActivitySemaphore == NULL) {
-            dwErr = GetLastError();
-            TRACE1(CONFIGURATION, "Error %u creating semaphore", dwErr);
-            break;
-        }
+	pce->ulActivityCount = 0;
+	pce->hActivitySemaphore = CreateSemaphore(NULL, 0, 0xfffffff, NULL);
+	if (pce->hActivitySemaphore == NULL) 
+	{
+	    dwErr = GetLastError();
+	    TRACE1(CONFIGURATION, "Error %u creating semaphore", dwErr);
+	    break;
+	}
 
-        /* Logging & Tracing Information */
-        pce->dwTraceID  = TraceRegister(XORPRTM_TRACENAME);
+	/* Logging & Tracing Information */
+	pce->dwTraceID  = TraceRegister(XORPRTM_TRACENAME);
 
-        /* Event Queue */
-        INITIALIZE_LOCKED_QUEUE(&(pce->lqEventQueue));
-        if (!LOCKED_QUEUE_INITIALIZED(&(pce->lqEventQueue))) {
-            dwErr = GetLastError();
-            TRACE1(CONFIGURATION, "Error %u initializing locked queue", dwErr);
-            break;
-        }
+	/* Event Queue */
+	INITIALIZE_LOCKED_QUEUE(&(pce->lqEventQueue));
+	if (!LOCKED_QUEUE_INITIALIZED(&(pce->lqEventQueue))) 
+	{
+	    dwErr = GetLastError();
+	    TRACE1(CONFIGURATION, "Error %u initializing locked queue", dwErr);
+	    break;
+	}
 
-        /* Protocol State */
-        pce->iscStatus = XORPRTM_STATUS_STOPPED;
+	/* Protocol State */
+	pce->iscStatus = XORPRTM_STATUS_STOPPED;
 
     } while (FALSE);
 
-    if (dwErr != NO_ERROR) {
-        /* something went wrong, so cleanup. */
-        TRACE0(CONFIGURATION, "Failed to create configuration entry");
-        CE_Destroy(pce);
+    if (dwErr != NO_ERROR) 
+    {
+	/* something went wrong, so cleanup. */
+	TRACE0(CONFIGURATION, "Failed to create configuration entry");
+	CE_Destroy(pce);
     }
 
     return dwErr;
 }
 
-DWORD
+    DWORD
 CE_Destroy (
-    PCONFIGURATION_ENTRY    pce)
+	PCONFIGURATION_ENTRY    pce)
 {
     /* Event Queue */
     if (LOCKED_QUEUE_INITIALIZED(&(pce->lqEventQueue)))
-        DELETE_LOCKED_QUEUE((&(pce->lqEventQueue)), FreeEventEntry);
+	DELETE_LOCKED_QUEUE((&(pce->lqEventQueue)), FreeEventEntry);
 
     /* Logging & Tracing Information */
-    if (pce->dwTraceID != INVALID_TRACEID) {
-        TraceDeregister(pce->dwTraceID);
-        pce->dwTraceID = INVALID_TRACEID;
+    if (pce->dwTraceID != INVALID_TRACEID) 
+    {
+	TraceDeregister(pce->dwTraceID);
+	pce->dwTraceID = INVALID_TRACEID;
     }
 
     /* destroy the semaphore released by each thread when it is done */
-    if (pce->hActivitySemaphore != NULL) {
-        CloseHandle(pce->hActivitySemaphore);
-        pce->hActivitySemaphore = NULL;
+    if (pce->hActivitySemaphore != NULL) 
+    {
+	CloseHandle(pce->hActivitySemaphore);
+	pce->hActivitySemaphore = NULL;
     }
 
-    if (pce->hGlobalHeap != NULL) {
-        HeapDestroy(pce->hGlobalHeap);
-        pce->hGlobalHeap = NULL;
+    if (pce->hGlobalHeap != NULL) 
+    {
+	HeapDestroy(pce->hGlobalHeap);
+	pce->hGlobalHeap = NULL;
     }
 
     /* delete the read-write lock */
     if (READ_WRITE_LOCK_CREATED(&(pce->rwlLock)))
-        DELETE_READ_WRITE_LOCK(&(pce->rwlLock));
+	DELETE_READ_WRITE_LOCK(&(pce->rwlLock));
 
     return NO_ERROR;
 }
 
-DWORD
+    DWORD
 CE_Initialize (
-    PCONFIGURATION_ENTRY    pce,
-    HANDLE                  hMgrNotificationEvent,
-    PSUPPORT_FUNCTIONS      psfSupportFunctions,
-    PXORPRTM_GLOBAL_CONFIG pigc)
+	PCONFIGURATION_ENTRY    pce,
+	HANDLE                  hMgrNotificationEvent,
+	PSUPPORT_FUNCTIONS      psfSupportFunctions,
+	PXORPRTM_GLOBAL_CONFIG pigc)
 {
     DWORD   dwErr               = NO_ERROR;
     pipe_instance_t *pp;
     int i, pipefail;
 
-    do {
-        pce->ulActivityCount    = 0;
+    do 
+    {
+	pce->ulActivityCount    = 0;
 
 	pce->hMprConfig = NULL;
 	dwErr = MprConfigServerConnect(NULL, &pce->hMprConfig);
-	if (dwErr != NO_ERROR) {
-            TRACE0(CONFIGURATION, "could not obtain mpr config handle");
+	if (dwErr != NO_ERROR) 
+	{
+	    TRACE0(CONFIGURATION, "could not obtain mpr config handle");
 	}
 
-        /* Router Manager Information */
-        pce->hMgrNotificationEvent   = hMgrNotificationEvent;
-        if (psfSupportFunctions)
-            pce->sfSupportFunctions      = *psfSupportFunctions;
+	/* Router Manager Information */
+	pce->hMgrNotificationEvent   = hMgrNotificationEvent;
+	if (psfSupportFunctions)
+	    pce->sfSupportFunctions      = *psfSupportFunctions;
 
 	pipefail = 0;
-	for (i = 0; i < PIPE_INSTANCES; i++) {
+	for (i = 0; i < PIPE_INSTANCES; i++) 
+	{
 	    pp = pipe_new();
-	    if (pp == NULL) {
+	    if (pp == NULL) 
+	    {
 		pipefail = 1;
 		break;
-	    } else {
+	    } else 
+	    {
 		pipe_listen(pp);
 		pce->pipes[i] = pp;
 	    }
 	}
 
-	if (pipefail) {
-            TRACE0(CONFIGURATION, "failed to allocate all pipes");
+	if (pipefail) 
+	{
+	    TRACE0(CONFIGURATION, "failed to allocate all pipes");
 	    break;
 	}
 	TRACE0(ANY, "Listening on pipes ok.");
 
-        pce->reiRtmEntity.RtmInstanceId = 0;
+	pce->reiRtmEntity.RtmInstanceId = 0;
 #ifdef IPV6_DLL
-        pce->reiRtmEntity.AddressFamily = AF_INET6;
+	pce->reiRtmEntity.AddressFamily = AF_INET6;
 #else
-        pce->reiRtmEntity.AddressFamily = AF_INET;
+	pce->reiRtmEntity.AddressFamily = AF_INET;
 #endif
-        pce->reiRtmEntity.EntityId.EntityProtocolId = PROTO_IP_XORPRTM;
-        pce->reiRtmEntity.EntityId.EntityInstanceId = 0;
+	pce->reiRtmEntity.EntityId.EntityProtocolId = PROTO_IP_XORPRTM;
+	pce->reiRtmEntity.EntityId.EntityInstanceId = 0;
 
-        dwErr = RtmRegisterEntity(
-            &pce->reiRtmEntity,
-            NULL,
-            RTM_CallbackEvent,
-            TRUE,
-            &pce->rrpRtmProfile,
-            &pce->hRtmHandle);
-        if (dwErr != NO_ERROR) {
-            TRACE1(CONFIGURATION, "Error %u registering with RTM", dwErr);
-            break;
-        }
+	dwErr = RtmRegisterEntity(
+		&pce->reiRtmEntity,
+		NULL,
+		RTM_CallbackEvent,
+		TRUE,
+		&pce->rrpRtmProfile,
+		&pce->hRtmHandle);
+	if (dwErr != NO_ERROR) 
+	{
+	    TRACE1(CONFIGURATION, "Error %u registering with RTM", dwErr);
+	    break;
+	}
 	TRACE0(ANY, "registered entity ok.");
 
-        dwErr = RtmRegisterForChangeNotification(
-            pce->hRtmHandle,
-            RTM_VIEW_MASK_UCAST,
-            RTM_CHANGE_TYPE_ALL,
-            NULL,
-            &pce->hRtmNotificationHandle);
-        if (dwErr != NO_ERROR) {
-            TRACE1(CONFIGURATION,
-                   "Error %u registering for change with RTM", dwErr);
-            break;
-        }
+	dwErr = RtmRegisterForChangeNotification(
+		pce->hRtmHandle,
+		RTM_VIEW_MASK_UCAST,
+		RTM_CHANGE_TYPE_ALL,
+		NULL,
+		&pce->hRtmNotificationHandle);
+	if (dwErr != NO_ERROR) 
+	{
+	    TRACE1(CONFIGURATION,
+		    "Error %u registering for change with RTM", dwErr);
+	    break;
+	}
 	TRACE0(ANY, "registered rtm changes ok.");
 
-        pce->iscStatus = XORPRTM_STATUS_RUNNING;
+	pce->iscStatus = XORPRTM_STATUS_RUNNING;
     } while (FALSE);
 
-    if (dwErr != NO_ERROR) {
+    if (dwErr != NO_ERROR) 
+    {
 	TRACE0(ANY, "init failed, cleaning up.");
-        CE_Cleanup(pce);
-    } else {
+	CE_Cleanup(pce);
+    } else 
+    {
 	TRACE0(ANY, "Leaving init ok ");
     }
 
     return dwErr;
 }
 
-DWORD
+    DWORD
 CE_Cleanup(PCONFIGURATION_ENTRY pce)
 {
     DWORD dwErr = NO_ERROR;
     int i;
 
-    if (pce->hRtmNotificationHandle) {
-        dwErr = RtmDeregisterFromChangeNotification(
-            pce->hRtmHandle,
-            pce->hRtmNotificationHandle);
-        if (dwErr != NO_ERROR)
-            TRACE1(CONFIGURATION,
-                   "Error %u deregistering for change from RTM", dwErr);
+    if (pce->hRtmNotificationHandle) 
+    {
+	dwErr = RtmDeregisterFromChangeNotification(
+		pce->hRtmHandle,
+		pce->hRtmNotificationHandle);
+	if (dwErr != NO_ERROR)
+	    TRACE1(CONFIGURATION,
+		    "Error %u deregistering for change from RTM", dwErr);
     }
     pce->hRtmNotificationHandle = NULL;
 
-    if (pce->hRtmHandle) {
-        dwErr = RtmDeregisterEntity(pce->hRtmHandle);
+    if (pce->hRtmHandle) 
+    {
+	dwErr = RtmDeregisterEntity(pce->hRtmHandle);
 
-        if (dwErr != NO_ERROR)
-            TRACE1(CONFIGURATION,
-                   "Error %u deregistering from RTM", dwErr);
+	if (dwErr != NO_ERROR)
+	    TRACE1(CONFIGURATION,
+		    "Error %u deregistering from RTM", dwErr);
     }
     pce->hRtmHandle             = NULL;
 
-    for (i = 0; i < PIPE_INSTANCES; i++) {
-	if (pce->pipes[i]) {
+    for (i = 0; i < PIPE_INSTANCES; i++) 
+    {
+	if (pce->pipes[i]) 
+	{
 	    pipe_destroy(pce->pipes[i]);
 	    pce->pipes[i] = NULL;
 	}
     }
 
-    if (pce->hMprConfig != NULL) {
+    if (pce->hMprConfig != NULL) 
+    {
 	MprConfigServerDisconnect(pce->hMprConfig);
     }
     pce->hMprConfig = NULL;
@@ -1231,9 +1313,9 @@ CE_Cleanup(PCONFIGURATION_ENTRY pce)
     return NO_ERROR;
 }
 
-VOID
+    VOID
 CM_WorkerFinishStopProtocol (
-    PVOID   pvContext)
+	PVOID   pvContext)
 {
     DWORD           dwErr = NO_ERROR;
     MESSAGE         mMessage;
@@ -1243,14 +1325,14 @@ CM_WorkerFinishStopProtocol (
     ulThreadCount = (ULONG)pvContext;
 
     TRACE1(ENTER, "Entering WorkerFinishStopProtocol: active threads %u",
-           ulThreadCount);
+	    ulThreadCount);
 
     /* NOTE: since this is called while the router is stopping, there is no */
     /* need for it to use ENTER_XORPRTM_WORKER()/LEAVE_XORPRTM_WORKER() */
 
     /* waits for all threads to stop */
     while (ulThreadCount-- > 0)
-        WaitForSingleObject(g_ce.hActivitySemaphore, INFINITE);
+	WaitForSingleObject(g_ce.hActivitySemaphore, INFINITE);
 
 
     /* acquire the lock and release it, just to be sure that all threads */
@@ -1270,18 +1352,18 @@ CM_WorkerFinishStopProtocol (
     /* inform router manager that we are done */
     ZeroMemory(&mMessage, sizeof(MESSAGE));
     if (EnqueueEvent(ROUTER_STOPPED, mMessage) == NO_ERROR)
-        SetEvent(g_ce.hMgrNotificationEvent);
+	SetEvent(g_ce.hMgrNotificationEvent);
 
     TRACE0(LEAVE, "Leaving  WorkerFinishStopProtocol");
 }
 
 /* APIFUNCTIONS */
 
-DWORD
+    DWORD
 CM_StartProtocol (
-    HANDLE                  hMgrNotificationEvent,
-    PSUPPORT_FUNCTIONS      psfSupportFunctions,
-    PVOID                   pvGlobalInfo)
+	HANDLE                  hMgrNotificationEvent,
+	PSUPPORT_FUNCTIONS      psfSupportFunctions,
+	PVOID                   pvGlobalInfo)
 {
     DWORD dwErr = NO_ERROR;
 
@@ -1291,34 +1373,38 @@ CM_StartProtocol (
      */
     ACQUIRE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    do {
-        if (g_ce.iscStatus != XORPRTM_STATUS_STOPPED) {
-            TRACE1(CONFIGURATION, "Error: %s already installed",
-		   XORPRTM_LOGNAME);
-            dwErr = ERROR_CAN_NOT_COMPLETE;
+    do 
+    {
+	if (g_ce.iscStatus != XORPRTM_STATUS_STOPPED) 
+	{
+	    TRACE1(CONFIGURATION, "Error: %s already installed",
+		    XORPRTM_LOGNAME);
+	    dwErr = ERROR_CAN_NOT_COMPLETE;
 
-            break;
-        }
-        dwErr = CE_Initialize(&g_ce,
-                              hMgrNotificationEvent,
-                              psfSupportFunctions,
-                              (PXORPRTM_GLOBAL_CONFIG) pvGlobalInfo);
+	    break;
+	}
+	dwErr = CE_Initialize(&g_ce,
+		hMgrNotificationEvent,
+		psfSupportFunctions,
+		(PXORPRTM_GLOBAL_CONFIG) pvGlobalInfo);
     } while (FALSE);
 
     RELEASE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    if (dwErr == NO_ERROR) {
-        TRACE1(CONFIGURATION, "%s has successfully started", XORPRTM_LOGNAME);
-    } else {
-        TRACE2(CONFIGURATION, "Error: %s failed to start (%d)",
-	       XORPRTM_LOGNAME, dwErr);
+    if (dwErr == NO_ERROR) 
+    {
+	TRACE1(CONFIGURATION, "%s has successfully started", XORPRTM_LOGNAME);
+    } else 
+    {
+	TRACE2(CONFIGURATION, "Error: %s failed to start (%d)",
+		XORPRTM_LOGNAME, dwErr);
     }
 
     return dwErr;
 }
 
 
-DWORD
+    DWORD
 CM_StopProtocol ()
 {
     DWORD dwErr         = NO_ERROR;
@@ -1329,81 +1415,83 @@ CM_StopProtocol ()
 
     ACQUIRE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    do {
-        /* cannot stop if already stopped */
-        if (g_ce.iscStatus != XORPRTM_STATUS_RUNNING)
-	    {
-		TRACE0(CONFIGURATION, "Error ip sample already stopped");
-		dwErr = ERROR_CAN_NOT_COMPLETE;
+    do 
+    {
+	/* cannot stop if already stopped */
+	if (g_ce.iscStatus != XORPRTM_STATUS_RUNNING)
+	{
+	    TRACE0(CONFIGURATION, "Error ip sample already stopped");
+	    dwErr = ERROR_CAN_NOT_COMPLETE;
 
-		break;
-	    }
+	    break;
+	}
 
 	/*
 	 * Set XORPRTM's status to STOPPING; this prevents any more work
 	 * items from being queued, and it prevents the ones already
 	 * queued from executing.
 	 */
-        g_ce.iscStatus = XORPRTM_STATUS_STOPPING;
+	g_ce.iscStatus = XORPRTM_STATUS_STOPPING;
 
 	/*
-         * find out how many threads are either queued or active in XORPRTM;
-         * we will have to wait for this many threads to exit before we
-         * clean up XORPRTM's resources.
+	 * find out how many threads are either queued or active in XORPRTM;
+	 * we will have to wait for this many threads to exit before we
+	 * clean up XORPRTM's resources.
 	 */
-        ulThreadCount = g_ce.ulActivityCount;
-        TRACE2(CONFIGURATION, "%u threads are active in %s", ulThreadCount,
-	       XORPRTM_LOGNAME);
+	ulThreadCount = g_ce.ulActivityCount;
+	TRACE2(CONFIGURATION, "%u threads are active in %s", ulThreadCount,
+		XORPRTM_LOGNAME);
     } while (FALSE);
 
     RELEASE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    if (dwErr == NO_ERROR) {
-        bSuccess = QueueUserWorkItem(
-            (LPTHREAD_START_ROUTINE)CM_WorkerFinishStopProtocol,
-            (PVOID) ulThreadCount,
-            0); /* no flags */
-        dwErr = (bSuccess) ? ERROR_PROTOCOL_STOP_PENDING : GetLastError();
+    if (dwErr == NO_ERROR) 
+    {
+	bSuccess = QueueUserWorkItem(
+		(LPTHREAD_START_ROUTINE)CM_WorkerFinishStopProtocol,
+		(PVOID) ulThreadCount,
+		0); /* no flags */
+	dwErr = (bSuccess) ? ERROR_PROTOCOL_STOP_PENDING : GetLastError();
     }
 
     return dwErr;
 }
 
-DWORD
+    DWORD
 CM_GetGlobalInfo (
-    PVOID          pvGlobalInfo,
-    PULONG              pulBufferSize,
-    PULONG         pulStructureVersion,
-    PULONG              pulStructureSize,
-    PULONG              pulStructureCount)
+	PVOID          pvGlobalInfo,
+	PULONG              pulBufferSize,
+	PULONG         pulStructureVersion,
+	PULONG              pulStructureSize,
+	PULONG              pulStructureCount)
 {
     DWORD                   dwErr = NO_ERROR;
     PXORPRTM_GLOBAL_CONFIG pigc;
     ULONG                   ulSize = sizeof(XORPRTM_GLOBAL_CONFIG);
 
     do
+    {
+	if((*pulBufferSize < ulSize) || (pvGlobalInfo == NULL))
 	{
-	    if((*pulBufferSize < ulSize) || (pvGlobalInfo == NULL))
-		{
-		    dwErr = ERROR_INSUFFICIENT_BUFFER;
-		    TRACE1(CONFIGURATION,
-			   "CM_GetGlobalInfo: *ulBufferSize %u",
-			   *pulBufferSize);
-
-		    *pulBufferSize = ulSize;
-
-		    break;
-		}
+	    dwErr = ERROR_INSUFFICIENT_BUFFER;
+	    TRACE1(CONFIGURATION,
+		    "CM_GetGlobalInfo: *ulBufferSize %u",
+		    *pulBufferSize);
 
 	    *pulBufferSize = ulSize;
 
-	    if (pulStructureVersion)    *pulStructureVersion    = 1;
-	    if (pulStructureSize)       *pulStructureSize       = ulSize;
-	    if (pulStructureCount)      *pulStructureCount      = 1;
+	    break;
+	}
 
-	    pigc = (PXORPRTM_GLOBAL_CONFIG) pvGlobalInfo;
+	*pulBufferSize = ulSize;
 
-	} while (FALSE);
+	if (pulStructureVersion)    *pulStructureVersion    = 1;
+	if (pulStructureSize)       *pulStructureSize       = ulSize;
+	if (pulStructureCount)      *pulStructureCount      = 1;
+
+	pigc = (PXORPRTM_GLOBAL_CONFIG) pvGlobalInfo;
+
+    } while (FALSE);
 
     return dwErr;
 }
@@ -1415,10 +1503,10 @@ CM_GetGlobalInfo (
  * the ip router manager is retrieving the ROUTER_STOPPED message, so
  * we do not call ENTER_XORPRTM_API()/LEAVE_XORPRTM_API().
  */
-DWORD
+    DWORD
 CM_GetEventMessage (
-    ROUTING_PROTOCOL_EVENTS *prpeEvent,
-    MESSAGE                 *pmMessage)
+	ROUTING_PROTOCOL_EVENTS *prpeEvent,
+	MESSAGE                 *pmMessage)
 {
     DWORD           dwErr       = NO_ERROR;
 
@@ -1427,23 +1515,24 @@ CM_GetEventMessage (
     return dwErr;
 }
 
-BOOL WINAPI
+    BOOL WINAPI
 DllMain(HINSTANCE hInstance, DWORD dwReason, PVOID pvImpLoad)
 {
     BOOL bError = TRUE;
 
-    switch (dwReason) {
-    case DLL_PROCESS_ATTACH:
-	DisableThreadLibraryCalls(hInstance);
-	bError = (CE_Create(&g_ce) == NO_ERROR) ? TRUE : FALSE;
-	break;
+    switch (dwReason) 
+    {
+	case DLL_PROCESS_ATTACH:
+	    DisableThreadLibraryCalls(hInstance);
+	    bError = (CE_Create(&g_ce) == NO_ERROR) ? TRUE : FALSE;
+	    break;
 
-    case DLL_PROCESS_DETACH:
-	CE_Destroy(&g_ce);
-	break;
+	case DLL_PROCESS_DETACH:
+	    CE_Destroy(&g_ce);
+	    break;
 
-    default:
-	break;
+	default:
+	    break;
     }
 
     return bError;
@@ -1454,11 +1543,11 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, PVOID pvImpLoad)
  * XXX: We should report errors in more detail, e.g. if the
  * route could not be added because it already existed, etc.
  */
-int
+    int
 rtm_add_route(struct rt_msghdr *rtm, int msgsize)
 {
     static const proper_msgsize = (sizeof(struct rt_msghdr) +
-				   (sizeof(sockunion_t) * 3));
+	    (sizeof(sockunion_t) * 3));
     sockunion_t *sa;
 #ifdef IPV6_DLL
     struct in6_addr in6_dest;
@@ -1491,7 +1580,7 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
     if (rtm->rtm_type != RTM_ADD)
 	return -1;
     if ((rtm->rtm_addrs & (RTA_DST|RTA_GATEWAY|RTA_NETMASK)) !=
-	(RTA_DST|RTA_GATEWAY|RTA_NETMASK))
+	    (RTA_DST|RTA_GATEWAY|RTA_NETMASK))
 	return -1;
 
     nhh = NULL;
@@ -1540,7 +1629,8 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
      * XXX IPv6!
      */
     result = GetBestRoute(in_nexthop.s_addr, INADDR_ANY, &ro);
-    if (result != NO_ERROR) {
+    if (result != NO_ERROR) 
+    {
 	TRACE1(NETWORK, "error: GetBestRoute() returned %d", result);
 	return -1;
     }
@@ -1571,7 +1661,8 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
 #endif /* IPV6_DLL */
 
     result = RtmAddNextHop(g_ce.hRtmHandle, &nhi, &nhh, &changeFlags);
-    if (result != NO_ERROR) {
+    if (result != NO_ERROR) 
+    {
 	TRACE1(NETWORK, "error %u adding nexthop", result);
 	retval = -1;
 	goto out;
@@ -1590,8 +1681,9 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
     changeFlags = 0;
 
     result = RtmAddRouteToDest(g_ce.hRtmHandle, &nrh, &dest, &ri, INFINITE,
-			       NULL, 0, NULL, &changeFlags);
-    if (result != NO_ERROR) {
+	    NULL, 0, NULL, &changeFlags);
+    if (result != NO_ERROR) 
+    {
 	TRACE1(NETWORK, "error %u adding route", result);
 	retval = -1;
 	goto out;
@@ -1599,7 +1691,7 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
 
     retval = 0;
 
-  out:
+out:
     if (nrh != NULL)
 	RtmReleaseRoutes(g_ce.hRtmHandle, 1, &nrh);
     if (nhh != NULL)
@@ -1613,11 +1705,11 @@ rtm_add_route(struct rt_msghdr *rtm, int msgsize)
  * XXX: We should report errors in more detail, e.g. if the
  * route could not be added because it already existed, etc.
  */
-int
+    int
 rtm_delete_route(struct rt_msghdr *rtm, int msgsize)
 {
     static const min_msgsize = (sizeof(struct rt_msghdr) +
-				(sizeof(sockunion_t) * 2));
+	    (sizeof(sockunion_t) * 2));
     sockunion_t *sa;
     struct in_addr in_dest;
     struct in_addr in_mask;
@@ -1667,17 +1759,20 @@ rtm_delete_route(struct rt_msghdr *rtm, int msgsize)
     ZeroMemory(&di, sizeof(di));
     di.DestAddress = dest;
     result = RtmGetExactMatchDestination(g_ce.hRtmHandle, &dest,
-					 RTM_THIS_PROTOCOL,
-					 RTM_VIEW_MASK_UCAST, &di);
-    if (result != NO_ERROR) {
+	    RTM_THIS_PROTOCOL,
+	    RTM_VIEW_MASK_UCAST, &di);
+    if (result != NO_ERROR) 
+    {
 	TRACE1(NETWORK, "error %u looking up route to delete", result);
 	retval = -1;
 	goto out;
     }
     i = 0;
     found = 0;
-    for (i = 0; i < di.NumberOfViews; i++) {
-	if (di.ViewInfo[i].ViewId == RTM_VIEW_ID_UCAST) {
+    for (i = 0; i < di.NumberOfViews; i++) 
+    {
+	if (di.ViewInfo[i].ViewId == RTM_VIEW_ID_UCAST) 
+	{
 	    /*
 	     * Return a match only if the unicast view for our protocol
 	     * contains a single next-hop route to the destination.
@@ -1687,15 +1782,17 @@ rtm_delete_route(struct rt_msghdr *rtm, int msgsize)
 	    break;
 	}
     }
-    if (!found) {
+    if (!found) 
+    {
 	TRACE0(NETWORK, "route not found in table");
 	retval = -1;
 	goto out;
     }
 
     result = RtmDeleteRouteToDest(g_ce.hRtmHandle, di.ViewInfo[i].Route,
-				  &changeflags);
-    if (result != NO_ERROR) {
+	    &changeflags);
+    if (result != NO_ERROR) 
+    {
 	TRACE1(NETWORK, "error %u deleting route", result);
 	retval = -1;
 	goto out;
@@ -1703,11 +1800,11 @@ rtm_delete_route(struct rt_msghdr *rtm, int msgsize)
 
     retval = 0;
 
-  out:
+out:
     return (retval);
 }
 
-int
+    int
 rtm_ifannounce(LPWSTR ifname, DWORD ifindex, int what)
 {
     WCHAR fnameW[IFNAMSIZ];
@@ -1720,12 +1817,14 @@ rtm_ifannounce(LPWSTR ifname, DWORD ifindex, int what)
     ifa = NULL;
     retval = -1;
 
-    if ((what != IFAN_ARRIVAL) && (what != IFAN_DEPARTURE)) {
+    if ((what != IFAN_ARRIVAL) && (what != IFAN_DEPARTURE)) 
+    {
 	goto out;
     }
 
     ifa = malloc(sizeof(*ifa));
-    if (ifa == NULL) {
+    if (ifa == NULL) 
+    {
 	goto out;
     }
     ifa->ifan_name[0] = '\0';
@@ -1743,15 +1842,18 @@ rtm_ifannounce(LPWSTR ifname, DWORD ifindex, int what)
      * interface deletion. We could look it up from the transport,
      * but it's more work to deliver redundant information.
      */
-    if (what == IFAN_ARRIVAL) {
+    if (what == IFAN_ARRIVAL) 
+    {
 	if (ifname == NULL)
 	    goto out;
 
 	result = MprConfigGetFriendlyName(g_ce.hMprConfig, ifname, fnameW,
-					  sizeof(fnameW));
-	if (result != NO_ERROR) {
+		sizeof(fnameW));
+	if (result != NO_ERROR) 
+	{
 	    TRACE1(NETWORK, "can't find friendlyname for ifname %S", ifname);
-	} else {
+	} else 
+	{
 	    wcstombs(ifa->ifan_name, fnameW, IFNAMSIZ);
 	}
     }
@@ -1770,7 +1872,7 @@ rtm_ifannounce(LPWSTR ifname, DWORD ifindex, int what)
 
     retval = 0;
 
-  out:
+out:
     if (ifa != NULL)
 	free(ifa);
 
@@ -1779,7 +1881,7 @@ rtm_ifannounce(LPWSTR ifname, DWORD ifindex, int what)
     return (retval);
 }
 
-int
+    int
 rtm_ifinfo(DWORD ifindex, int up)
 {
     struct if_msghdr *ifm;
@@ -1792,7 +1894,8 @@ rtm_ifinfo(DWORD ifindex, int up)
     retval = -1;
 
     ifm = malloc(sizeof(*ifm));
-    if (ifm == NULL) {
+    if (ifm == NULL) 
+    {
 	goto out;
     }
 
@@ -1812,7 +1915,7 @@ rtm_ifinfo(DWORD ifindex, int up)
 
     retval = 0;
 
-  out:
+out:
     if (ifm != NULL)
 	free(ifm);
 
@@ -1837,11 +1940,11 @@ rtm_ifinfo(DWORD ifindex, int up)
 int
 rtm_newaddr(DWORD ifindex,
 #ifdef IPV6_DLL
-	    PIPV6_ADAPTER_BINDING_INFO pbind
+	PIPV6_ADAPTER_BINDING_INFO pbind
 #else
-	    PIP_ADAPTER_BINDING_INFO pbind
+	PIP_ADAPTER_BINDING_INFO pbind
 #endif
-    )
+	)
 {
     static const msgsize =
 	sizeof(struct ifa_msghdr) + (sizeof(sockunion_t) * 2);
@@ -1869,7 +1972,8 @@ rtm_newaddr(DWORD ifindex,
     sa = (sockunion_t *)(ifam + 1);
     sa2 = (sa + 1);
 
-    for (i = 0; i < pbind->AddressCount; i++) {
+    for (i = 0; i < pbind->AddressCount; i++) 
+    {
 	ifam->ifam_msglen = msgsize;
 	ifam->ifam_version = RTM_VERSION;
 	ifam->ifam_type = RTM_NEWADDR;
@@ -1894,7 +1998,7 @@ rtm_newaddr(DWORD ifindex,
 
     retval = 0;
 
-  out:
+out:
     if (ifam != NULL)
 	free(ifam);
 

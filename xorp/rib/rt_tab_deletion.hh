@@ -35,147 +35,152 @@
  * Its template class, A, must be either the IPv4 class of the IPv6 class.
  */
 template<class A>
-class DeletionTable : public RouteTable<A> {
-public:
-    typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
-    /**
-     * DeletionTable constructor.
-     *
-     * @param tablename used for debugging.
-     * @param parent Upstream routing table (usually an origin table).
-     * @param ip_route_trie the entire route trie from the OriginTable
-     * that contains routes we're going to delete (as a background task).
-     */
-    DeletionTable(const string& tablename,
-		  RouteTable<A>* parent,
-		  RouteTrie* ip_route_trie);
+class DeletionTable : public RouteTable<A> 
+{
+	public:
+		typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
+		/**
+		 * DeletionTable constructor.
+		 *
+		 * @param tablename used for debugging.
+		 * @param parent Upstream routing table (usually an origin table).
+		 * @param ip_route_trie the entire route trie from the OriginTable
+		 * that contains routes we're going to delete (as a background task).
+		 */
+		DeletionTable(const string& tablename,
+				RouteTable<A>* parent,
+				RouteTrie* ip_route_trie);
 
-    /**
-     * DeletionTable destructor.
-     */
-    virtual ~DeletionTable();
+		/**
+		 * DeletionTable destructor.
+		 */
+		virtual ~DeletionTable();
 
-    /**
-     * Add a route.  If the route was stored in the DeletionTable,
-     * we'll remove it and propagate the delete and add downstream.
-     *
-     * @param route the route entry to be added.
-     * @param caller the caller route table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_igp_route(const IPRouteEntry<A>& route);
-    int add_egp_route(const IPRouteEntry<A>& route);
+		/**
+		 * Add a route.  If the route was stored in the DeletionTable,
+		 * we'll remove it and propagate the delete and add downstream.
+		 *
+		 * @param route the route entry to be added.
+		 * @param caller the caller route table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int add_igp_route(const IPRouteEntry<A>& route);
+		int add_egp_route(const IPRouteEntry<A>& route);
 
-    /**
-     * Delete a route.  This route MUST NOT be in the DeletionTable trie.
-     *
-     * @param route the route entry to be deleted.
-     * @param b determines if the better route is coming right after deleting route
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_igp_route(const IPRouteEntry<A>* route, bool b = false);
-    int delete_egp_route(const IPRouteEntry<A>* route, bool b = false);
+		/**
+		 * Delete a route.  This route MUST NOT be in the DeletionTable trie.
+		 *
+		 * @param route the route entry to be deleted.
+		 * @param b determines if the better route is coming right after deleting route
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int delete_igp_route(const IPRouteEntry<A>* route, bool b = false);
+		int delete_egp_route(const IPRouteEntry<A>* route, bool b = false);
 
-    /**
-     * Delete all the routes that are in this DeletionTable.  The
-     * deletion is not propagated downstream, so this is only useful
-     * when shutting down the RIB.
-     */
-    void delete_all_routes();
+		/**
+		 * Delete all the routes that are in this DeletionTable.  The
+		 * deletion is not propagated downstream, so this is only useful
+		 * when shutting down the RIB.
+		 */
+		void delete_all_routes();
 
-    /**
-     * Delete a route, and reschedule background_deletion_pass again
-     * on a zero-second timer until all the routes have been deleted
-     */
-    virtual void background_deletion_pass();
+		/**
+		 * Delete a route, and reschedule background_deletion_pass again
+		 * on a zero-second timer until all the routes have been deleted
+		 */
+		virtual void background_deletion_pass();
 
-    /**
-     * Remove ourself from the plumbing and delete ourself.
-     */
-    void unplumb_self();
+		/**
+		 * Remove ourself from the plumbing and delete ourself.
+		 */
+		void unplumb_self();
 
-    /**
-     * @return the table type (@ref TableType).
-     */
-    TableType type() const	{ return DELETION_TABLE; }
+		/**
+		 * @return the table type (@ref TableType).
+		 */
+		TableType type() const	{ return DELETION_TABLE; }
 
-    /**
-     * Change the parent of this route table.
-     */
-    void set_parent(RouteTable<A>* new_parent);
+		/**
+		 * Change the parent of this route table.
+		 */
+		void set_parent(RouteTable<A>* new_parent);
 
-    /**
-     * Render the DeletionTable as a string for debugging purposes.
-     */
-    string str() const;
+		/**
+		 * Render the DeletionTable as a string for debugging purposes.
+		 */
+		string str() const;
 
-    RouteTable<A>* parent() { return _parent; }
-    const RouteTable<A>* parent() const { return _parent; }
+		RouteTable<A>* parent() { return _parent; }
+		const RouteTable<A>* parent() const { return _parent; }
 
-protected:
-    virtual int generic_add_route(const IPRouteEntry<A>& route) = 0;
-    virtual int generic_delete_route(const IPRouteEntry<A>* route) = 0;
-    virtual void set_background_timer() = 0;
+	protected:
+		virtual int generic_add_route(const IPRouteEntry<A>& route) = 0;
+		virtual int generic_delete_route(const IPRouteEntry<A>* route) = 0;
+		virtual void set_background_timer() = 0;
 
-    RouteTable<A>*	_parent;
-    RouteTrie*		_ip_route_table;
+		RouteTable<A>*	_parent;
+		RouteTrie*		_ip_route_table;
 };
 
 template <class A, ProtocolType PROTOCOL_TYPE>
 class TypedDeletionTable { };
 
 template <class A>
-class TypedDeletionTable<A, IGP> : public DeletionTable<A> {
-public:
-    TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
-	typename DeletionTable<A>::RouteTrie* ip_route_trie) :
-	DeletionTable<A>(tablename, parent, ip_route_trie),
-	_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
-		0, callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass))) {}
+class TypedDeletionTable<A, IGP> : public DeletionTable<A> 
+{
+	public:
+		TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
+				typename DeletionTable<A>::RouteTrie* ip_route_trie) :
+			DeletionTable<A>(tablename, parent, ip_route_trie),
+			_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
+						0, callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass))) {}
 
-    ~TypedDeletionTable() {}
+		~TypedDeletionTable() {}
 
-    int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_igp_route(route); }
+		int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
+		int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_igp_route(route); }
 
-    //XXX This is hack, because callback can't register call
-    //    to function from base class from the derived class
-    void background_deletion_pass() { DeletionTable<A>::background_deletion_pass(); }
-protected:
-    void set_background_timer() {
-	// Callback immediately, but after network events or expired timers
-	_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
-		callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass));
-    }
+		//XXX This is hack, because callback can't register call
+		//    to function from base class from the derived class
+		void background_deletion_pass() { DeletionTable<A>::background_deletion_pass(); }
+	protected:
+		void set_background_timer() 
+		{
+			// Callback immediately, but after network events or expired timers
+			_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
+					callback(this, &TypedDeletionTable<A, IGP>::background_deletion_pass));
+		}
 
-    XorpTimer		_background_deletion_timer;
+		XorpTimer		_background_deletion_timer;
 };
 
 template <class A>
-class TypedDeletionTable<A, EGP> : public DeletionTable<A> {
-public:
-    TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
-	typename DeletionTable<A>::RouteTrie* ip_route_trie) :
-	DeletionTable<A>(tablename, parent, ip_route_trie),
-	_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
-		0, callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass))) {}
+class TypedDeletionTable<A, EGP> : public DeletionTable<A> 
+{
+	public:
+		TypedDeletionTable(const string& tablename, RouteTable<A>* parent,
+				typename DeletionTable<A>::RouteTrie* ip_route_trie) :
+			DeletionTable<A>(tablename, parent, ip_route_trie),
+			_background_deletion_timer(EventLoop::instance().new_oneoff_after_ms(
+						0, callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass))) {}
 
-    ~TypedDeletionTable() {}
+		~TypedDeletionTable() {}
 
-    int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_egp_route(route); }
+		int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
+		int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_egp_route(route); }
 
-    //XXX This is hack, because callback can't register call
-    //    to function from base class from the derived class
-    void background_deletion_pass() { DeletionTable<A>::background_deletion_pass(); }
-protected:
-    void set_background_timer() {
-	// Callback immediately, but after network events or expired timers
-	_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
-		callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass));
-    }
+		//XXX This is hack, because callback can't register call
+		//    to function from base class from the derived class
+		void background_deletion_pass() { DeletionTable<A>::background_deletion_pass(); }
+	protected:
+		void set_background_timer() 
+		{
+			// Callback immediately, but after network events or expired timers
+			_background_deletion_timer = EventLoop::instance().new_oneoff_after_ms(0,
+					callback(this, &TypedDeletionTable<A, EGP>::background_deletion_pass));
+		}
 
-    XorpTimer		_background_deletion_timer;
+		XorpTimer		_background_deletion_timer;
 };
 
 #endif // __RIB_RT_TAB_DELETION_HH__

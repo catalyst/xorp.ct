@@ -25,12 +25,12 @@
 #include "policy_utils.hh"
 
 
-template <class T>
+    template <class T>
 ElemSetAny<T>::ElemSetAny(const Set& val) : ElemSet(_hash), _val(val) 
 {
 }
 
-template <class T>
+    template <class T>
 ElemSetAny<T>::ElemSetAny(const char* c_str) : ElemSet(_hash)
 {
     if (!c_str)
@@ -40,13 +40,14 @@ ElemSetAny<T>::ElemSetAny(const char* c_str) : ElemSet(_hash)
     set<string> s;
     policy_utils::str_to_set(c_str, s);
 
-    for (set<string>::iterator i = s.begin(); i != s.end(); ++i) {
+    for (set<string>::iterator i = s.begin(); i != s.end(); ++i) 
+    {
 	const char* str = (*i).c_str();
 	_val.insert(T(str));
     }
 }
 
-template <class T>
+    template <class T>
 ElemSetAny<T>::ElemSetAny() : ElemSet(_hash)
 {
 }
@@ -60,9 +61,10 @@ ElemSetAny<T>::str() const
     if (!_val.size())
 	return s;
 
-    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
+    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) 
+    {
 	s += (*i).str();
-        s += ",";
+	s += ",";
     }
 
     // remove last comma
@@ -72,24 +74,26 @@ ElemSetAny<T>::str() const
 }
 
 template <class T>
-string ElemSetAny<T>::dbgstr() const {
+string ElemSetAny<T>::dbgstr() const 
+{
     ostringstream oss;
     oss << "ElemSetAny: id: " << id << "hash: " << (int)(hash()) << " vals: ";
-    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
+    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) 
+    {
 	oss << (*i).str();
     }
     return oss.str();
 }
 
 template <class T>
-void 
+    void 
 ElemSetAny<T>::insert(const T& s) 
 {
     _val.insert(s);
 }
 
 template <class T>
-void
+    void
 ElemSetAny<T>::insert(const ElemSetAny<T>& s)
 {
     _val.insert(s._val.begin(), s._val.end());
@@ -123,7 +127,7 @@ ElemSetAny<T>::operator<(const ElemSetAny<T>& rhs) const
     // the left set.
     Set tmp;
     set_intersection(_val.begin(), _val.end(), rset.begin(), rset.end(),
-        insert_iterator<Set>(tmp, tmp.begin()));
+	    insert_iterator<Set>(tmp, tmp.begin()));
 
     return tmp == _val;
 }
@@ -217,19 +221,20 @@ ElemSetAny<T>::nonempty_intersection(const ElemSetAny<T>& rhs) const
 {
     Set tmp;
     set_intersection(_val.begin(), _val.end(),
-		     rhs._val.begin(), rhs._val.end(),
-		     insert_iterator<Set>(tmp,tmp.begin()));
+	    rhs._val.begin(), rhs._val.end(),
+	    insert_iterator<Set>(tmp,tmp.begin()));
 
     return tmp.size();
 }
 
 template <class T>
-void
+    void
 ElemSetAny<T>::erase(const ElemSetAny<T>& rhs)
 {
     // go through all elements and delete ones present
     for (typename Set::const_iterator i = rhs._val.begin(); 
-	 i != rhs._val.end(); ++i) {
+	    i != rhs._val.end(); ++i) 
+    {
 
 	typename Set::iterator j = _val.find(*i);
 
@@ -239,21 +244,21 @@ ElemSetAny<T>::erase(const ElemSetAny<T>& rhs)
 }
 
 template <class T>
-void
+    void
 ElemSetAny<T>::erase(const ElemSet& rhs)
 {
     erase(dynamic_cast<const ElemSetAny<T>&>(rhs));
 }
 
 template <class T>
-typename ElemSetAny<T>::iterator
+    typename ElemSetAny<T>::iterator
 ElemSetAny<T>::begin()
 {
     return _val.begin();
 }
 
 template <class T>
-typename ElemSetAny<T>::iterator
+    typename ElemSetAny<T>::iterator
 ElemSetAny<T>::end()
 {
     return _val.end();

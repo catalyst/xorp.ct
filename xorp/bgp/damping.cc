@@ -31,17 +31,17 @@
 #include "damping.hh"
 #include "bgp.hh"
 
-Damping::Damping()
-    : _damping(false),
-	 _half_life(15),
-	 _max_hold_down(60),
-	 _cutoff(3000),
-	 _tick(0)
+    Damping::Damping()
+: _damping(false),
+    _half_life(15),
+    _max_hold_down(60),
+    _cutoff(3000),
+    _tick(0)
 {
     init();
 }
 
-void
+    void
 Damping::set_damping(bool damping)
 {
     _damping = damping;
@@ -54,40 +54,41 @@ Damping::get_damping() const
     return _damping;
 }
 
-void
+    void
 Damping::set_half_life(uint32_t half_life)
 {
     _half_life = half_life;
     init();
 }
 
-void
+    void
 Damping::set_max_hold_down(uint32_t max_hold_down)
 {
     _max_hold_down = max_hold_down;
     init();
 }
 
-void
+    void
 Damping::set_reuse(uint32_t reuse)
 {
     _reuse = reuse;
     init();
 }
 
-void
+    void
 Damping::set_cutoff(uint32_t cutoff)
 {
     _cutoff = cutoff;
     init();
 }
 
-void
+    void
 Damping::init()
 {
     debug_msg("init\n");
 
-    if (!_damping) {
+    if (!_damping) 
+    {
 	halt();
 	return;
     }
@@ -97,24 +98,25 @@ Damping::init()
 
     double decay_1 = exp((1.0 / (_half_life * 60.0)) * log(1.0/2.0));
     double decay_i = decay_1;
-    for (size_t i = 0; i < array_size; i++) {
+    for (size_t i = 0; i < array_size; i++) 
+    {
 	_decay[i] = static_cast<uint32_t>(decay_i * FIXED);
-// 	printf("%d %d %f\n",i, _decay[i], decay_i);
+	// 	printf("%d %d %f\n",i, _decay[i], decay_i);
 	decay_i = pow(decay_1, static_cast<int>(i + 2));
     }
 
     // Start the timer to incement the tick
     _tick_tock = EventLoop::instance().new_periodic_ms(1000,
-					    callback(this, &Damping::tick));
+	    callback(this, &Damping::tick));
 }
 
-void
+    void
 Damping::halt()
 {
     _tick_tock.unschedule();
 }
 
-bool
+    bool
 Damping::tick()
 {
     _tick++;    

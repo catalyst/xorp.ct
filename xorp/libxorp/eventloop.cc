@@ -50,26 +50,27 @@ void dflt_sig_handler(int signo) {
     //reestablish signal handler
     signal(signo, (&dflt_sig_handler));
 
-    switch (signo) {
-    case SIGTERM:
-	strncpy(xorp_sig_msg_buffer, "SIGTERM received", sizeof(xorp_sig_msg_buffer));
-	goto do_terminate;
-    case SIGINT:
-	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
-	goto do_terminate;
-    case SIGXCPU:
-	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
-	goto do_terminate;
-    case SIGXFSZ:
-	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
-	goto do_terminate;
-    default:
-	// This is a coding error and we need to fix it.
-	assert("WARNING:  Ignoring un-handled error in dflt_sig_handler." == NULL);
-	return;
+    switch (signo) 
+    {
+	case SIGTERM:
+	    strncpy(xorp_sig_msg_buffer, "SIGTERM received", sizeof(xorp_sig_msg_buffer));
+	    goto do_terminate;
+	case SIGINT:
+	    strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
+	    goto do_terminate;
+	case SIGXCPU:
+	    strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
+	    goto do_terminate;
+	case SIGXFSZ:
+	    strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
+	    goto do_terminate;
+	default:
+	    // This is a coding error and we need to fix it.
+	    assert("WARNING:  Ignoring un-handled error in dflt_sig_handler." == NULL);
+	    return;
     }//switch
 
-  do_terminate:
+do_terminate:
     xorp_do_run = 0;
 
     // Now, kick any selects that are blocking,
@@ -79,14 +80,17 @@ void dflt_sig_handler(int signo) {
 }//dflt_sig_handler
 
 
-void xorp_sig_atexit() {
-    if (xorp_sig_msg_buffer[0]) {
+void xorp_sig_atexit() 
+{
+    if (xorp_sig_msg_buffer[0]) 
+    {
 	cerr << "WARNING:  Process: " << getpid() << " has message from dflt_sig_handler: "
-	     << xorp_sig_msg_buffer << endl;
+	    << xorp_sig_msg_buffer << endl;
     }
 }
 
-void setup_dflt_sighandlers() {
+void setup_dflt_sighandlers() 
+{
     memset(xorp_sig_msg_buffer, 0, sizeof(xorp_sig_msg_buffer));
     atexit(xorp_sig_atexit);
 
@@ -108,10 +112,10 @@ EventLoop& EventLoop::instance(void)
 }
 
 
-EventLoop::EventLoop()
-    : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
-      _last_ev_run(0), _last_warned(0), _is_debug(false),
-      _selector_list(_clock)
+    EventLoop::EventLoop()
+: _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
+    _last_ev_run(0), _last_warned(0), _is_debug(false),
+    _selector_list(_clock)
 {
     XLOG_ASSERT(eventloop_instance_count == 0);
     XLOG_ASSERT(_last_ev_run == 0);
@@ -144,7 +148,7 @@ EventLoop::~EventLoop()
     _clock = NULL;
 }
 
-void
+    void
 EventLoop::run()
 {
     static const time_t MAX_ALLOWED = (XORP_HELLO_TIMER_MS/1000) + 2;
@@ -159,7 +163,8 @@ EventLoop::run()
     time_t now  = t.sec();
     time_t diff = now - _last_ev_run;
 
-    if (now - _last_warned > 0 && (diff > MAX_ALLOWED)) {
+    if (now - _last_warned > 0 && (diff > MAX_ALLOWED)) 
+    {
 	XLOG_WARNING("%d seconds between calls to EventLoop::run", (int)diff);
 	_last_warned = now;
     }
@@ -173,76 +178,87 @@ EventLoop::run()
     _last_ev_run = t.sec();
 }
 
-void
+    void
 EventLoop::do_work()
 {
     TimeVal t;
     TimeVal start;
 
     _timer_list.get_next_delay(t);
-    
+
     // Run timers if they need it.
-    if (t == TimeVal::ZERO()) {
+    if (t == TimeVal::ZERO()) 
+    {
 	_timer_list.current_time(start);
 	_timer_list.run();
-	if (eloop_trace.on()) {
+	if (eloop_trace.on()) 
+	{
 	    _timer_list.advance_time();
 	    TimeVal n2;
 	    _timer_list.current_time(n2);
-	    if (n2.to_ms() > start.to_ms() + 20) {
+	    if (n2.to_ms() > start.to_ms() + 20) 
+	    {
 		XLOG_INFO("timer-list run took too long to run: %lims\n",
-			  (long)(n2.to_ms() - start.to_ms()));
+			(long)(n2.to_ms() - start.to_ms()));
 	    }
 	}
     }
-    
-    if (!_task_list.empty()) {
+
+    if (!_task_list.empty()) 
+    {
 	_timer_list.current_time(start);
 	_task_list.run();
-	if (eloop_trace.on()) {
+	if (eloop_trace.on()) 
+	{
 	    _timer_list.advance_time();
 	    TimeVal n2;
 	    _timer_list.current_time(n2);
-	    if (n2.to_ms() > start.to_ms() + 20) {
+	    if (n2.to_ms() > start.to_ms() + 20) 
+	    {
 		XLOG_INFO("task-list run took too long to run: %lims\n",
-			  (long)(n2.to_ms() - start.to_ms()));
+			(long)(n2.to_ms() - start.to_ms()));
 	    }
 	}
-	if (!_task_list.empty()) {
+	if (!_task_list.empty()) 
+	{
 	    // Run task again as soon as possible.
 	    t.set_ms(0);
 	}
     }
-    
+
     // If we are trying to shut down..make sure the event loop
     // doesn't hang forever.
-    if (!xorp_do_run) {
+    if (!xorp_do_run) 
+    {
 	if ((t == TimeVal::MAXIMUM()) ||
-	    (t.to_ms() > 1000)) {
+		(t.to_ms() > 1000)) 
+	{
 	    t = TimeVal(1, 0); // one sec
 	}
     }
 
     _timer_list.current_time(start);
     _selector_list.wait_and_dispatch(t);
-    if (eloop_trace.on()) {
+    if (eloop_trace.on()) 
+    {
 	TimeVal n2;
 	_timer_list.current_time(n2);
-	if (n2.to_ms() > start.to_ms() + t.to_ms() + 20) {
+	if (n2.to_ms() > start.to_ms() + t.to_ms() + 20) 
+	{
 	    XLOG_INFO("wait-and-dispatch took too long to run: %lims\n",
-		      (long)(n2.to_ms() - start.to_ms()));
+		    (long)(n2.to_ms() - start.to_ms()));
 	}
     }
 }
 
-bool
+    bool
 EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
-			  int priority)
+	int priority)
 {
     return _selector_list.add_ioevent_cb(fd, type, cb, priority);
 }
 
-bool
+    bool
 EventLoop::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
     _selector_list.remove_ioevent_cb(fd, type);
@@ -256,25 +272,26 @@ EventLoop::descriptor_count() const
 }
 
 /** Remove timer from timer list. */
-void EventLoop::remove_timer(XorpTimer& t) {
+void EventLoop::remove_timer(XorpTimer& t) 
+{
     _timer_list.remove_timer(t);
 }
 
 
-XorpTask
+    XorpTask
 EventLoop::new_oneoff_task(const OneoffTaskCallback& cb, int priority,
-			   int weight)
+	int weight)
 {
     return _task_list.new_oneoff_task(cb, priority, weight);
 }
 
-XorpTask
+    XorpTask
 EventLoop::new_task(const RepeatedTaskCallback& cb, int priority, int weight)
 {
     return _task_list.new_task(cb, priority, weight);
 }
 
-void
+    void
 EventLoop::set_aggressiveness(int num)
 {
     _aggressiveness = num;

@@ -36,74 +36,75 @@ class XrlRouter;
 /**
  * @short FEA (Forwarding Engine Abstraction) XRL-based I/O class.
  */
-class XrlFeaIo : public FeaIo {
-public:
-    /**
-     * Constructor.
-     *
-     * @param eventloop the event loop to use.
-     * @param xrl_router the XRL transmission and reception point.
-     * @param xrl_finder_targetname the XRL targetname of the Finder.
-     */
-    XrlFeaIo( XrlRouter& xrl_router,
-	     const string& xrl_finder_targetname);
+class XrlFeaIo : public FeaIo 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param eventloop the event loop to use.
+		 * @param xrl_router the XRL transmission and reception point.
+		 * @param xrl_finder_targetname the XRL targetname of the Finder.
+		 */
+		XrlFeaIo( XrlRouter& xrl_router,
+				const string& xrl_finder_targetname);
 
-    /**
-     * Destructor
-     */
-    virtual	~XrlFeaIo();
+		/**
+		 * Destructor
+		 */
+		virtual	~XrlFeaIo();
 
-    /**
-     * Startup the service operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		startup();
+		/**
+		 * Startup the service operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		startup();
 
-    /**
-     * Shutdown the service operation.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		shutdown();
+		/**
+		 * Shutdown the service operation.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		shutdown();
 
-    /**
-     * Test whether the service is running.
-     *
-     * @return true if the service is still running, otherwise false.
-     */
-    bool	is_running() const;
+		/**
+		 * Test whether the service is running.
+		 *
+		 * @return true if the service is still running, otherwise false.
+		 */
+		bool	is_running() const;
 
-    /**
-     * Register interest in events relating to a particular instance.
-     *
-     * @param instance_name name of target instance to receive event
-     * notifications for.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int register_instance_event_interest(const string& instance_name,
-					 string& error_msg);
+		/**
+		 * Register interest in events relating to a particular instance.
+		 *
+		 * @param instance_name name of target instance to receive event
+		 * notifications for.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int register_instance_event_interest(const string& instance_name,
+				string& error_msg);
 
-    /**
-     * Deregister interest in events relating to a particular instance.
-     *
-     * @param instance_name name of target instance to stop event
-     * notifications for.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int deregister_instance_event_interest(const string& instance_name,
-					   string& error_msg);
+		/**
+		 * Deregister interest in events relating to a particular instance.
+		 *
+		 * @param instance_name name of target instance to stop event
+		 * notifications for.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int deregister_instance_event_interest(const string& instance_name,
+				string& error_msg);
 
-private:
-    void register_instance_event_interest_cb(const XrlError& xrl_error,
-					     string instance_name);
-    void deregister_instance_event_interest_cb(const XrlError& xrl_error,
-					       string instance_name);
+	private:
+		void register_instance_event_interest_cb(const XrlError& xrl_error,
+				string instance_name);
+		void deregister_instance_event_interest_cb(const XrlError& xrl_error,
+				string instance_name);
 
-    XrlRouter&		_xrl_router;	// The standard XRL send/recv point
-    const string	_xrl_finder_targetname;	// The Finder target name
+		XrlRouter&		_xrl_router;	// The standard XRL send/recv point
+		const string	_xrl_finder_targetname;	// The Finder target name
 };
 
 #endif // __FEA_XRL_FEA_IO_HH__

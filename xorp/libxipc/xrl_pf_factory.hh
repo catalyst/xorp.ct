@@ -25,17 +25,18 @@
 #include "xrl_error.hh"
 #include "xrl_pf.hh"
 
-class XrlPFSenderFactory {
-public:
-    static void	 	startup();
-    static void	 	shutdown();
+class XrlPFSenderFactory 
+{
+    public:
+	static void	 	startup();
+	static void	 	shutdown();
 
-    static ref_ptr<XrlPFSender> create_sender(const string& name, 
-					      const char* proto_colon_addr);
+	static ref_ptr<XrlPFSender> create_sender(const string& name, 
+		const char* proto_colon_addr);
 
-    static ref_ptr<XrlPFSender> create_sender(const string& name, 
-					      const char* protocol,
-					      const char* address);
+	static ref_ptr<XrlPFSender> create_sender(const string& name, 
+		const char* protocol,
+		const char* address);
 };
 
 #endif // __LIBXIPC_XRL_PF_FACTORY_HH__

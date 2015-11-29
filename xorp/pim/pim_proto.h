@@ -87,20 +87,20 @@
 #define PIMDM_VERSION_MAX			PIMDM_V2
 #define PIMDM_VERSION_DEFAULT			PIMDM_V2
 #define PIM_V1					(proto_is_pimsm() ?	      \
-							PIMSM_V1	      \
-							: PIMDM_V1)
+		PIMSM_V1	      \
+		: PIMDM_V1)
 #define PIM_V2					(proto_is_pimsm() ?	      \
-							PIMSM_V2	      \
-							: PIMDM_V2)
+		PIMSM_V2	      \
+		: PIMDM_V2)
 #define PIM_VERSION_MIN				(proto_is_pimsm() ?	      \
-							PIMSM_VERSION_MIN     \
-							: PIMDM_VERSION_MIN)
+		PIMSM_VERSION_MIN     \
+		: PIMDM_VERSION_MIN)
 #define PIM_VERSION_MAX				(proto_is_pimsm() ?	      \
-							PIMSM_VERSION_MAX     \
-							: PIMDM_VERSION_MAX)
+		PIMSM_VERSION_MAX     \
+		: PIMDM_VERSION_MAX)
 #define PIM_VERSION_DEFAULT			(proto_is_pimsm() ?	      \
-							PIMSM_VERSION_DEFAULT \
-							: PIMDM_VERSION_DEFAULT)
+		PIMSM_VERSION_DEFAULT \
+		: PIMDM_VERSION_DEFAULT)
 
 /*
  * Protocol messages specific definitions.
@@ -167,9 +167,9 @@
 #define PIM_BOOTSTRAP_HASH_MASK_LEN_IPV4_DEFAULT	30
 #define PIM_BOOTSTRAP_HASH_MASK_LEN_IPV6_DEFAULT	126
 #define PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(ip_family)			\
-			((ip_family == AF_INET)?			\
-				PIM_BOOTSTRAP_HASH_MASK_LEN_IPV4_DEFAULT \
-				: PIM_BOOTSTRAP_HASH_MASK_LEN_IPV6_DEFAULT)
+	((ip_family == AF_INET)?			\
+	 PIM_BOOTSTRAP_HASH_MASK_LEN_IPV4_DEFAULT \
+	 : PIM_BOOTSTRAP_HASH_MASK_LEN_IPV6_DEFAULT)
 
 /* PIM_GRAFT-related definitions */
 #define PIM_GRAFT_RETRY_PERIOD_DEFAULT		3
@@ -193,26 +193,26 @@
 #define ADDRF_IPv4		1
 #define ADDRF_IPv6		2
 #define ADDRF_NATIVE_ENCODING	0		/* Type of encoding within
-						 * a specific address family
-						 */
+										 * a specific address family
+										 */
 
 #ifndef HAVE_IPV6
 #define ADDRF2IP_ADDRF(addr_family)					\
-		(((addr_family) == ADDRF_IPv4) ? (AF_INET) : (-1))
+	(((addr_family) == ADDRF_IPv4) ? (AF_INET) : (-1))
 #define IP_ADDRF2ADDRF(ip_family)					\
-		(((ip_family) == AF_INET) ? (ADDRF_IPv4) : (-1))
+	(((ip_family) == AF_INET) ? (ADDRF_IPv4) : (-1))
 
 #else
 #define ADDRF2IP_ADDRF(addr_family)					\
-		(((addr_family) == ADDRF_IPv4) ? (AF_INET) 		\
-			: ((addr_family) == ADDRF_IPv6) ?		\
-				(AF_INET6)				\
-				: (-1))
+	(((addr_family) == ADDRF_IPv4) ? (AF_INET) 		\
+	 : ((addr_family) == ADDRF_IPv6) ?		\
+	 (AF_INET6)				\
+	 : (-1))
 #define IP_ADDRF2ADDRF(ip_family)					\
-		(((ip_family) == AF_INET) ? (ADDRF_IPv4)		\
-			: ((ip_family) == AF_INET6) ?			\
-				(ADDRF_IPv6)				\
-				: (-1))
+	(((ip_family) == AF_INET) ? (ADDRF_IPv4)		\
+	 : ((ip_family) == AF_INET6) ?			\
+	 (ADDRF_IPv6)				\
+	 : (-1))
 
 #endif /* HAVE_IPV6 */
 
@@ -225,23 +225,23 @@
 /* PIM message max. payload (IP header and Router Alert IP option excluded) */
 #ifndef HAVE_IPV6
 #define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
-					(IP_MAXPACKET			\
-						- sizeof(struct ip)	\
-						- 4*sizeof(uint8_t))	\
-					: (0))
+		(IP_MAXPACKET			\
+		 - sizeof(struct ip)	\
+		 - 4*sizeof(uint8_t))	\
+		: (0))
 #else
 #ifndef IPV6_MAXPACKET
 #define IPV6_MAXPACKET 65535	/* ip6 max packet size without Jumbo payload */
 #endif
 
 #define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
-					(IP_MAXPACKET			\
-					 - sizeof(struct ip)		\
-					- 4*sizeof(uint8_t))		\
-					: ((ip_family) == AF_INET6) ?	\
-						(IPV6_MAXPACKET		\
-						- 4*sizeof(uint8_t))	\
-						: (0))
+		(IP_MAXPACKET			\
+		 - sizeof(struct ip)		\
+		 - 4*sizeof(uint8_t))		\
+		: ((ip_family) == AF_INET6) ?	\
+		(IPV6_MAXPACKET		\
+		 - 4*sizeof(uint8_t))	\
+		: (0))
 #endif /* HAVE_IPV6 */
 
 /*
@@ -261,54 +261,54 @@
 #define FAMILY2PREFIXLEN(ip_family) family2addr_bitlen(ip_family)
 #endif
 #define GET_ENCODED_UNICAST_ADDR(rcvd_family, unicast_ipaddr, buffer)	\
-do {									\
-	int addr_family_;						\
-									\
-	BUFFER_GET_OCTET(addr_family_, (buffer));			\
-	(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
-	if ((rcvd_family) != family())					\
+	do {									\
+		int addr_family_;						\
+		\
+		BUFFER_GET_OCTET(addr_family_, (buffer));			\
+		(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
+		if ((rcvd_family) != family())					\
 		goto rcvd_family_error;					\
-	BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
-	BUFFER_GET_IPADDR((rcvd_family), (unicast_ipaddr), (buffer));	\
-} while (0)
+		BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
+		BUFFER_GET_IPADDR((rcvd_family), (unicast_ipaddr), (buffer));	\
+	} while (0)
 #define ENCODED_UNICAST_ADDR_SIZE(ip_family)				\
-			(2*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
+	(2*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
 
 #define GET_ENCODED_GROUP_ADDR(rcvd_family, group_ipaddr, mask_len, reserved, buffer) \
-do {									\
-	int addr_family_;						\
-									\
-	BUFFER_GET_OCTET(addr_family_, (buffer));			\
-	(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
-	if ((rcvd_family) != family())					\
+	do {									\
+		int addr_family_;						\
+		\
+		BUFFER_GET_OCTET(addr_family_, (buffer));			\
+		(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
+		if ((rcvd_family) != family())					\
 		goto rcvd_family_error;					\
-	BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
-	BUFFER_GET_OCTET((reserved), (buffer));				\
-	BUFFER_GET_OCTET((mask_len), (buffer));				\
-	BUFFER_GET_IPADDR((rcvd_family), (group_ipaddr), (buffer));	\
-	if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
+		BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
+		BUFFER_GET_OCTET((reserved), (buffer));				\
+		BUFFER_GET_OCTET((mask_len), (buffer));				\
+		BUFFER_GET_IPADDR((rcvd_family), (group_ipaddr), (buffer));	\
+		if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
 		goto rcvd_mask_len_error;				\
-} while (0)
+	} while (0)
 #define ENCODED_GROUP_ADDR_SIZE(ip_family)				\
-			(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
+	(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
 
 #define GET_ENCODED_SOURCE_ADDR(rcvd_family, source_ipaddr, mask_len, flags, buffer) \
-do {									\
-	int addr_family_;						\
-									\
-	BUFFER_GET_OCTET(addr_family_, (buffer));			\
-	(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
-	if ((rcvd_family) != family())					\
+	do {									\
+		int addr_family_;						\
+		\
+		BUFFER_GET_OCTET(addr_family_, (buffer));			\
+		(rcvd_family) = ADDRF2IP_ADDRF(addr_family_);			\
+		if ((rcvd_family) != family())					\
 		goto rcvd_family_error;					\
-	BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
-	BUFFER_GET_OCTET((flags), (buffer));				\
-	BUFFER_GET_OCTET((mask_len), (buffer));				\
-	BUFFER_GET_IPADDR((rcvd_family), (source_ipaddr), (buffer));	\
-	if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
+		BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
+		BUFFER_GET_OCTET((flags), (buffer));				\
+		BUFFER_GET_OCTET((mask_len), (buffer));				\
+		BUFFER_GET_IPADDR((rcvd_family), (source_ipaddr), (buffer));	\
+		if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
 		goto rcvd_mask_len_error;				\
-} while (0)
+	} while (0)
 #define ENCODED_SOURCE_ADDR_SIZE(ip_family)				\
-			(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
+	(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
 
 /*
  * Macros to put PIM-specific encoded addresses to a datastream.
@@ -318,75 +318,75 @@ do {									\
  *	'invalid_addr_family_error' 'buflen_error'
  */
 #define PUT_ENCODED_UNICAST_ADDR(ip_family, unicast_ipaddr, buffer)	\
-do {									\
-	int addr_family_;						\
-									\
-	addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
-	if (addr_family_ < 0)						\
+	do {									\
+		int addr_family_;						\
+		\
+		addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
+		if (addr_family_ < 0)						\
 		goto invalid_addr_family_error;				\
-	BUFFER_PUT_OCTET(addr_family_, (buffer));			\
-	BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
-	BUFFER_PUT_IPADDR((unicast_ipaddr), (buffer));			\
-} while (0)
+		BUFFER_PUT_OCTET(addr_family_, (buffer));			\
+		BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
+		BUFFER_PUT_IPADDR((unicast_ipaddr), (buffer));			\
+	} while (0)
 
 #define PUT_ENCODED_GROUP_ADDR(ip_family, group_ipaddr, mask_len, reserved, buffer)\
-do {									\
-	int addr_family_;						\
-									\
-	addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
-	if (addr_family_ < 0)						\
+	do {									\
+		int addr_family_;						\
+		\
+		addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
+		if (addr_family_ < 0)						\
 		goto invalid_addr_family_error;				\
-	BUFFER_PUT_OCTET(addr_family_, (buffer));			\
-	BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
-	BUFFER_PUT_OCTET(reserved, (buffer));	/* E.g., EGADDR_Z_BIT */\
-	BUFFER_PUT_OCTET((mask_len), (buffer));				\
-	BUFFER_PUT_IPADDR((group_ipaddr), (buffer));			\
-} while (0)
+		BUFFER_PUT_OCTET(addr_family_, (buffer));			\
+		BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
+		BUFFER_PUT_OCTET(reserved, (buffer));	/* E.g., EGADDR_Z_BIT */\
+		BUFFER_PUT_OCTET((mask_len), (buffer));				\
+		BUFFER_PUT_IPADDR((group_ipaddr), (buffer));			\
+	} while (0)
 
 #define PUT_ENCODED_SOURCE_ADDR(ip_family, source_ipaddr, mask_len, flags, buffer) \
-do {									\
-	int addr_family_;						\
-									\
-	addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
-	if (addr_family_ < 0)						\
+	do {									\
+		int addr_family_;						\
+		\
+		addr_family_ = IP_ADDRF2ADDRF((ip_family));			\
+		if (addr_family_ < 0)						\
 		goto invalid_addr_family_error;				\
-	BUFFER_PUT_OCTET(addr_family_, (buffer));			\
-	BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
-	BUFFER_PUT_OCTET((flags), (buffer));				\
-	BUFFER_PUT_OCTET((mask_len), (buffer));				\
-	BUFFER_PUT_IPADDR((source_ipaddr), (buffer));			\
-} while (0)
+		BUFFER_PUT_OCTET(addr_family_, (buffer));			\
+		BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
+		BUFFER_PUT_OCTET((flags), (buffer));				\
+		BUFFER_PUT_OCTET((mask_len), (buffer));				\
+		BUFFER_PUT_IPADDR((source_ipaddr), (buffer));			\
+	} while (0)
 
 #define BUFFER_PUT_SKIP_PIM_HEADER(buffer)				\
-do {									\
-	BUFFER_PUT_SKIP(sizeof(struct pim), (buffer));			\
-} while (0)
+	do {									\
+		BUFFER_PUT_SKIP(sizeof(struct pim), (buffer));			\
+	} while (0)
 
 /*
  * The ASCII names of the PIM protocol control messages
  */
 #define PIMTYPE2ASCII(t)						\
-(((t) == PIM_HELLO) ?							\
-    "PIM_HELLO"								\
-    : ((t) == PIM_REGISTER) ?						\
-	"PIM_REGISTER"							\
-	: ((t) == PIM_REGISTER_STOP) ?					\
-	    "PIM_REGISTER_STOP"						\
-	    : ((t) == PIM_JOIN_PRUNE) ?					\
-		"PIM_JOIN_PRUNE"					\
-		: ((t) == PIM_BOOTSTRAP) ?				\
-		    "PIM_BOOTSTRAP"					\
-		    : ((t) == PIM_ASSERT) ?				\
-			"PIM_ASSERT"					\
-			: ((t) == PIM_GRAFT) ?				\
-			    "PIM_GRAFT"					\
-			    : ((t) == PIM_GRAFT_ACK) ?			\
-				"PIM_GRAFT_ACK"				\
-				: ((t) == PIM_CAND_RP_ADV) ?		\
-				    "PIM_CAND_RP_ADV"			\
-				    : ((t) == PIM_ALL_DF_ELECTION) ?	\
-					"PIM_ALL_DF_ELECTION"		\
-					: "PIM_type_unknown")
+	(((t) == PIM_HELLO) ?							\
+	 "PIM_HELLO"								\
+	 : ((t) == PIM_REGISTER) ?						\
+	 "PIM_REGISTER"							\
+	 : ((t) == PIM_REGISTER_STOP) ?					\
+	 "PIM_REGISTER_STOP"						\
+	 : ((t) == PIM_JOIN_PRUNE) ?					\
+	 "PIM_JOIN_PRUNE"					\
+	 : ((t) == PIM_BOOTSTRAP) ?				\
+	 "PIM_BOOTSTRAP"					\
+	 : ((t) == PIM_ASSERT) ?				\
+	 "PIM_ASSERT"					\
+	 : ((t) == PIM_GRAFT) ?				\
+	 "PIM_GRAFT"					\
+	 : ((t) == PIM_GRAFT_ACK) ?			\
+	 "PIM_GRAFT_ACK"				\
+	 : ((t) == PIM_CAND_RP_ADV) ?		\
+	 "PIM_CAND_RP_ADV"			\
+	 : ((t) == PIM_ALL_DF_ELECTION) ?	\
+	 "PIM_ALL_DF_ELECTION"		\
+	 : "PIM_type_unknown")
 
 /*
  * Global variables

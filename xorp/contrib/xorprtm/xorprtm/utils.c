@@ -30,17 +30,18 @@
 #include "pchsample.h"
 #pragma hdrstop
 
-BOOL
+    BOOL
 EnterSubsystemAPI()
 {
     BOOL    bEntered    = FALSE;
 
     ACQUIRE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    if (g_ce.iscStatus == XORPRTM_STATUS_RUNNING) {
-        /* subsystem is running, so continue */
-        g_ce.ulActivityCount++;
-        bEntered = TRUE;
+    if (g_ce.iscStatus == XORPRTM_STATUS_RUNNING) 
+    {
+	/* subsystem is running, so continue */
+	g_ce.ulActivityCount++;
+	bEntered = TRUE;
     }
 
     RELEASE_WRITE_LOCK(&(g_ce.rwlLock));
@@ -48,28 +49,31 @@ EnterSubsystemAPI()
     return bEntered;
 }
 
-BOOL
+    BOOL
 EnterSubsystemWorker()
 {
     BOOL    bEntered    = FALSE;
 
     ACQUIRE_WRITE_LOCK(&(g_ce.rwlLock));
 
-    do {
-        /* subsystem is running, so the function may continue */
-        if (g_ce.iscStatus == XORPRTM_STATUS_RUNNING) {
-            bEntered = TRUE;
-            break;
-        }
+    do 
+    {
+	/* subsystem is running, so the function may continue */
+	if (g_ce.iscStatus == XORPRTM_STATUS_RUNNING) 
+	{
+	    bEntered = TRUE;
+	    break;
+	}
 
-        /* subsystem is not running, but it was, so the function must stop */
-        if (g_ce.iscStatus == XORPRTM_STATUS_STOPPING) {
-            g_ce.ulActivityCount--;
-            ReleaseSemaphore(g_ce.hActivitySemaphore, 1, NULL);
-            break;
-        }
+	/* subsystem is not running, but it was, so the function must stop */
+	if (g_ce.iscStatus == XORPRTM_STATUS_STOPPING) 
+	{
+	    g_ce.ulActivityCount--;
+	    ReleaseSemaphore(g_ce.hActivitySemaphore, 1, NULL);
+	    break;
+	}
 
-        /* subsystem probably never started. quit. */
+	/* subsystem probably never started. quit. */
     } while (FALSE);
 
     RELEASE_WRITE_LOCK(&(g_ce.rwlLock));
@@ -77,14 +81,15 @@ EnterSubsystemWorker()
     return bEntered;
 }
 
-VOID
+    VOID
 LeaveSubsystemWorker()
 {
     ACQUIRE_WRITE_LOCK(&(g_ce.rwlLock));
 
     g_ce.ulActivityCount--;
-    if (g_ce.iscStatus == XORPRTM_STATUS_STOPPING) {
-        ReleaseSemaphore(g_ce.hActivitySemaphore, 1, NULL);
+    if (g_ce.iscStatus == XORPRTM_STATUS_STOPPING) 
+    {
+	ReleaseSemaphore(g_ce.hActivitySemaphore, 1, NULL);
     }
 
     RELEASE_WRITE_LOCK(&(g_ce.rwlLock));

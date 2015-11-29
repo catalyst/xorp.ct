@@ -32,24 +32,25 @@ class XrlError;
  * Base for classes able to transport Xrls.
  * See xrl_router.hh for implementor of this base class.
  */
-class XrlSender {
-public:
-    virtual ~XrlSender() {}
+class XrlSender 
+{
+    public:
+	virtual ~XrlSender() {}
 
-    typedef XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr Callback;
+	typedef XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr Callback;
 
-    /**
-     * @param xrl Xrl to be sent.
-     * @param scb callback to be invoked with result from Xrl
-     *
-     * @return true if Xrl is accepted for sending, false otherwise.
-     */
-    virtual bool send(const Xrl& xrl, const Callback& scb) = 0;
+	/**
+	 * @param xrl Xrl to be sent.
+	 * @param scb callback to be invoked with result from Xrl
+	 *
+	 * @return true if Xrl is accepted for sending, false otherwise.
+	 */
+	virtual bool send(const Xrl& xrl, const Callback& scb) = 0;
 
-    /**
-     * Return true if sender has send requests pending.
-     */
-    virtual bool pending() const = 0;
+	/**
+	 * Return true if sender has send requests pending.
+	 */
+	virtual bool pending() const = 0;
 };
 
 #endif // __LIBXIPC_XRL_SENDER_HH__

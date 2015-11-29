@@ -48,133 +48,133 @@ class Finder :
     public NONCOPYABLE,
     public FinderMessengerManager
 {
-public:
-    typedef list<FinderMessengerBase*> FinderMessengerList;
-    typedef map<FinderMessengerBase*, FinderXrlCommandQueue> OutQueueTable;
-    typedef map<string, FinderTarget> TargetTable;
-    typedef map<string, FinderClass> ClassTable;
-    typedef list<string> Resolveables;
-    typedef list<FinderEvent> EventQueue;
+    public:
+	typedef list<FinderMessengerBase*> FinderMessengerList;
+	typedef map<FinderMessengerBase*, FinderXrlCommandQueue> OutQueueTable;
+	typedef map<string, FinderTarget> TargetTable;
+	typedef map<string, FinderClass> ClassTable;
+	typedef list<string> Resolveables;
+	typedef list<FinderEvent> EventQueue;
 
-public:
-    Finder();
-    virtual ~Finder();
+    public:
+	Finder();
+	virtual ~Finder();
 
-protected:
-    /* Methods for FinderMessengerManager interface */
-    void messenger_active_event(FinderMessengerBase*);
-    void messenger_inactive_event(FinderMessengerBase*);
-    void messenger_stopped_event(FinderMessengerBase*);
-    void messenger_birth_event(FinderMessengerBase*);
-    void messenger_death_event(FinderMessengerBase*);
-    bool manages(const FinderMessengerBase*) const;
+    protected:
+	/* Methods for FinderMessengerManager interface */
+	void messenger_active_event(FinderMessengerBase*);
+	void messenger_inactive_event(FinderMessengerBase*);
+	void messenger_stopped_event(FinderMessengerBase*);
+	void messenger_birth_event(FinderMessengerBase*);
+	void messenger_death_event(FinderMessengerBase*);
+	bool manages(const FinderMessengerBase*) const;
 
-public:
-    XrlCmdMap& commands();
+    public:
+	XrlCmdMap& commands();
 
-    bool add_target(const string& class_name,
-		    const string& instance_name,
-		    bool 	  singleton,
-		    const string& cookie);
+	bool add_target(const string& class_name,
+		const string& instance_name,
+		bool 	  singleton,
+		const string& cookie);
 
-    bool active_messenger_represents_target(const string& target_name) const;
+	bool active_messenger_represents_target(const string& target_name) const;
 
-    bool remove_target(const string& target_name);
+	bool remove_target(const string& target_name);
 
-    bool remove_target_with_cookie(const string& cookie);
+	bool remove_target_with_cookie(const string& cookie);
 
-    bool set_target_enabled(const string& target_name, bool en);
+	bool set_target_enabled(const string& target_name, bool en);
 
-    bool target_enabled(const string& target_name, bool& is_enabled) const;
+	bool target_enabled(const string& target_name, bool& is_enabled) const;
 
-    bool add_resolution(const string& target,
-			const string& key,
-			const string& value);
+	bool add_resolution(const string& target,
+		const string& key,
+		const string& value);
 
-    bool remove_resolutions(const string& target,
-			    const string& key);
+	bool remove_resolutions(const string& target,
+		const string& key);
 
-    bool add_class_watch(const string& target,
-			 const string& class_to_watch,
-			 string& err_msg);
+	bool add_class_watch(const string& target,
+		const string& class_to_watch,
+		string& err_msg);
 
-    bool remove_class_watch(const string& target,
-			    const string& class_to_watch);
+	bool remove_class_watch(const string& target,
+		const string& class_to_watch);
 
-    bool add_instance_watch(const string& target,
-			    const string& instance_to_watch,
-			    string& err_msg);
+	bool add_instance_watch(const string& target,
+		const string& instance_to_watch,
+		string& err_msg);
 
-    bool remove_instance_watch(const string& target,
-			       const string& instance_to_watch);
+	bool remove_instance_watch(const string& target,
+		const string& instance_to_watch);
 
-    const string& primary_instance(const string& instance_or_class) const;
+	const string& primary_instance(const string& instance_or_class) const;
 
-    const Resolveables* resolve(const string& target, const string& key);
+	const Resolveables* resolve(const string& target, const string& key);
 
-    size_t messengers() const;
+	size_t messengers() const;
 
-    bool fill_target_list(list<string>& target_list) const;
-    bool fill_targets_xrl_list(const string& target,
-			       list<string>& xrl_list) const;
+	bool fill_target_list(list<string>& target_list) const;
+	bool fill_targets_xrl_list(const string& target,
+		list<string>& xrl_list) const;
 
-protected:
-    /**
-     * Buffer event of instance becoming externally visible.
-     */
-    void log_arrival_event(const string& class_name,
-			   const string& instance_name);
+    protected:
+	/**
+	 * Buffer event of instance becoming externally visible.
+	 */
+	void log_arrival_event(const string& class_name,
+		const string& instance_name);
 
-    /**
-     * Buffer event of instance ceasing to be externally visible.
-     */
-    void log_departure_event(const string& class_name,
-			     const string& instance_name);
+	/**
+	 * Buffer event of instance ceasing to be externally visible.
+	 */
+	void log_departure_event(const string& class_name,
+		const string& instance_name);
 
-    void announce_xrl_departure(const string& target, const string& key);
+	void announce_xrl_departure(const string& target, const string& key);
 
-    void announce_events_externally();
+	void announce_events_externally();
 
-    void announce_class_instances(const string& recv_instance_name,
-				  const string& class_name);
+	void announce_class_instances(const string& recv_instance_name,
+		const string& class_name);
 
-    void announce_new_instance(const string& recv_instance_name,
-			       FinderXrlCommandQueue& out_queue,
-			       const string& class_name,
-			       const string& instance_name);
+	void announce_new_instance(const string& recv_instance_name,
+		FinderXrlCommandQueue& out_queue,
+		const string& class_name,
+		const string& instance_name);
 
-    bool hello_timer_running() const { return _hello.scheduled(); }
-    void start_hello_timer();
-    bool send_hello();
+	bool hello_timer_running() const { return _hello.scheduled(); }
+	void start_hello_timer();
+	bool send_hello();
 
-    void remove_target(TargetTable::iterator& i);
+	void remove_target(TargetTable::iterator& i);
 
-    bool add_class_instance(const string& class_name,
-			    const string& instance,
-			    bool	  singleton);
+	bool add_class_instance(const string& class_name,
+		const string& instance,
+		bool	  singleton);
 
-    bool remove_class_instance(const string& class_name,
-			       const string& instance);
+	bool remove_class_instance(const string& class_name,
+		const string& instance);
 
-    bool class_default_instance(const string& class_name,
-				string&	      instance) const;
+	bool class_default_instance(const string& class_name,
+		string&	      instance) const;
 
-    bool class_exists(const string& class_name) const;
+	bool class_exists(const string& class_name) const;
 
 
-protected:
-    XrlCmdMap		 _cmds;
-    FinderMessengerBase* _active_messenger;	// Currently active endpoint
-    FinderMessengerList	 _messengers;		// List of Finder
-    						// communication endpoints
-    TargetTable		 _targets;		// Table of target instances
-    ClassTable		 _classes;		// Table of known classes
-    OutQueueTable	 _out_queues;		// Outbound message queues
-    EventQueue		 _event_queue;		// Queue for externally
-    						// advertised events
-    XorpTimer		 _hello;		// Timer used to send
-    						// keepalive messages to
-    						// FinderMessenger instances
+    protected:
+	XrlCmdMap		 _cmds;
+	FinderMessengerBase* _active_messenger;	// Currently active endpoint
+	FinderMessengerList	 _messengers;		// List of Finder
+	// communication endpoints
+	TargetTable		 _targets;		// Table of target instances
+	ClassTable		 _classes;		// Table of known classes
+	OutQueueTable	 _out_queues;		// Outbound message queues
+	EventQueue		 _event_queue;		// Queue for externally
+	// advertised events
+	XorpTimer		 _hello;		// Timer used to send
+	// keepalive messages to
+	// FinderMessenger instances
 };
 
 #endif // __LIBXIPC_FINDER_HH__

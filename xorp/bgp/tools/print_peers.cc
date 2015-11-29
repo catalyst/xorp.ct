@@ -28,53 +28,57 @@
 
 void usage()
 {
-    fprintf(stderr,
-	    "Usage: print_peer [-v] [-i <repeat_interval>]\n"
-	    "where -v enables verbose output.\n");
+	fprintf(stderr,
+			"Usage: print_peer [-v] [-i <repeat_interval>]\n"
+			"where -v enables verbose output.\n");
 }
 
 
 int main(int argc, char **argv)
 {
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
+	XorpUnexpectedHandler x(xorp_unexpected_handler);
+	//
+	// Initialize and start xlog
+	//
+	xlog_init(argv[0], NULL);
+	xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+	// XXX: verbosity of the error messages temporary increased
+	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+	xlog_add_default_output();
+	xlog_start();
 
-    bool verbose = false;
-    int c;
-    int interval = -1;
-    while ((c = getopt(argc, argv, "i:v")) != -1) {
-	switch (c) {
-	case 'v':
-	    verbose = true;
-	    break;
-	case 'i':
-	    interval = atoi(optarg);
-	    break;
-	default:
-	    usage();
-	    return -1;
+	bool verbose = false;
+	int c;
+	int interval = -1;
+	while ((c = getopt(argc, argv, "i:v")) != -1) 
+	{
+		switch (c) 
+		{
+			case 'v':
+				verbose = true;
+				break;
+			case 'i':
+				interval = atoi(optarg);
+				break;
+			default:
+				usage();
+				return -1;
+		}
 	}
-    }
-    try {
-	PrintPeers peer_printer(verbose, interval);
-    } catch(...) {
-	xorp_catch_standard_exceptions();
-    }
+	try 
+	{
+		PrintPeers peer_printer(verbose, interval);
+	} catch(...) 
+	{
+		xorp_catch_standard_exceptions();
+	}
 
-    //
-    // Gracefully stop and exit xlog
-    //
-    xlog_stop();
-    xlog_exit();
+	//
+	// Gracefully stop and exit xlog
+	//
+	xlog_stop();
+	xlog_exit();
 
-    return 0;
+	return 0;
 }
 

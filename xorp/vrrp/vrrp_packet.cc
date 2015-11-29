@@ -31,7 +31,7 @@
 
 const IPv4 VrrpPacket::mcast_group = IPv4("224.0.0.18");
 
-VrrpHeader&
+    VrrpHeader&
 VrrpHeader::assign(uint8_t* data)
 {
     x_static_assert(sizeof(VrrpHeader) == 8);
@@ -51,7 +51,7 @@ VrrpHeader::assign(uint8_t* data)
     return *vh;
 }
 
-const VrrpHeader&
+    const VrrpHeader&
 VrrpHeader::assign(const PAYLOAD& p)
 {
     const VrrpHeader* vh = reinterpret_cast<const VrrpHeader*>(&p[0]);
@@ -83,7 +83,7 @@ VrrpHeader::assign(const PAYLOAD& p)
     return *vh;
 }
 
-void
+    void
 VrrpHeader::add_ip(const IPv4& ip)
 {
     XLOG_ASSERT(vh_ipcount < 255);
@@ -103,7 +103,7 @@ VrrpHeader::ip(unsigned idx) const
     return ip;
 }
 
-uint32_t
+    uint32_t
 VrrpHeader::finalize()
 {
     uint32_t len = sizeof(*this);
@@ -121,10 +121,10 @@ VrrpHeader::finalize()
     return len;
 }
 
-VrrpPacket::VrrpPacket()
-		: _data(VRRP_MAX_PACKET_SIZE, 0),
-		  _ip(&_data[0]),
-		  _vrrp(VrrpHeader::assign(&_data[IP_HEADER_MIN_SIZE]))
+    VrrpPacket::VrrpPacket()
+: _data(VRRP_MAX_PACKET_SIZE, 0),
+    _ip(&_data[0]),
+    _vrrp(VrrpHeader::assign(&_data[IP_HEADER_MIN_SIZE]))
 {
     _data.resize(VRRP_MAX_PACKET_SIZE);
 
@@ -141,25 +141,25 @@ VrrpPacket::VrrpPacket()
     _ip.set_ip_dst(mcast_group);
 }
 
-void
+    void
 VrrpPacket::set_vrid(uint8_t vrid)
 {
     _vrrp.vh_vrid = vrid;
 }
 
-void
+    void
 VrrpPacket::set_priority(uint8_t priority)
 {
     _vrrp.vh_priority = priority;
 }
 
-void
+    void
 VrrpPacket::set_interval(uint8_t interval)
 {
     _vrrp.vh_interval = interval;
 }
 
-void
+    void
 VrrpPacket::finalize()
 {
     uint32_t size = _vrrp.finalize();
@@ -182,7 +182,7 @@ VrrpPacket::size() const
     return _data.size();
 }
 
-void
+    void
 VrrpPacket::set_size(uint32_t size)
 {
     _data.resize(size);
@@ -194,20 +194,20 @@ VrrpPacket::data() const
     return _data;
 }
 
-void
+    void
 VrrpPacket::clear_ips()
 {
     _vrrp.vh_ipcount = 0;
 }
 
-void
+    void
 VrrpPacket::add_ip(const IPv4& ip)
 {
     _data.resize(VRRP_MAX_PACKET_SIZE);
     _vrrp.add_ip(ip);
 }
 
-void
+    void
 VrrpPacket::set_source(const IPv4& ip)
 {
     _ip.set_ip_src(ip);

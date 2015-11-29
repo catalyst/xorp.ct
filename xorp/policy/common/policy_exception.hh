@@ -36,19 +36,20 @@
  *
  * All policy exceptions have a string representing the error.
  */
-class PolicyException : public XorpReasonedException {
-public:
-    /**
-     * @param reason the error message
-     */
-    PolicyException(const char* file, size_t line, 
-			const string& init_why = "")   
-      : XorpReasonedException("PolicyException", file, line, init_why) {} 
+class PolicyException : public XorpReasonedException 
+{
+    public:
+	/**
+	 * @param reason the error message
+	 */
+	PolicyException(const char* file, size_t line, 
+		const string& init_why = "")   
+	    : XorpReasonedException("PolicyException", file, line, init_why) {} 
 
-    PolicyException(const char* type, const char* file, size_t line, 
-			const string& init_why = "")   
-      : XorpReasonedException(type, file, line, init_why) {} 
-    virtual ~PolicyException() {}
+	PolicyException(const char* type, const char* file, size_t line, 
+		const string& init_why = "")   
+	    : XorpReasonedException(type, file, line, init_why) {} 
+	virtual ~PolicyException() {}
 };
 
 

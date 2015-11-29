@@ -28,39 +28,40 @@
  * invoked at the specified period to remove an entry from the queue.
  */
 template <typename _Entry>
-class DelayQueue {
-public:
-    typedef typename XorpCallback1<void, _Entry>::RefPtr DelayCallback;
+class DelayQueue 
+{
+    public:
+	typedef typename XorpCallback1<void, _Entry>::RefPtr DelayCallback;
 
-    DelayQueue( uint32_t delay, DelayCallback forward)
-	:  _delay(delay), _forward(forward)
-    {}
+	DelayQueue( uint32_t delay, DelayCallback forward)
+	    :  _delay(delay), _forward(forward)
+	{}
 
-    /**
-     * Add an entry to the queue. If the entry is already on the queue
-     * it is not added again.
-     */
-    void add(_Entry entry);
+	/**
+	 * Add an entry to the queue. If the entry is already on the queue
+	 * it is not added again.
+	 */
+	void add(_Entry entry);
 
-    /**
-     * Start the timer running but don't add anything to the queue.
-     */
-    void fire();
+	/**
+	 * Start the timer running but don't add anything to the queue.
+	 */
+	void fire();
 
-private:
-    deque<_Entry> _queue;
-    const uint32_t _delay;	// Delay in seconds.
-    DelayCallback _forward;	// Invoked to forward an entry from the queue.
-    XorpTimer	_timer;		// Timer that services the queue.
+    private:
+	deque<_Entry> _queue;
+	const uint32_t _delay;	// Delay in seconds.
+	DelayCallback _forward;	// Invoked to forward an entry from the queue.
+	XorpTimer	_timer;		// Timer that services the queue.
 
-    /**
-     * Invoked from the timer to take the next entry from the queue.
-     */
-    void next();
+	/**
+	 * Invoked from the timer to take the next entry from the queue.
+	 */
+	void next();
 };
 
 template <typename _Entry>
-void
+    void
 DelayQueue<_Entry>::add(_Entry entry)
 {
     // If this entry is already on the queue just return.
@@ -69,7 +70,8 @@ DelayQueue<_Entry>::add(_Entry entry)
 
     // If the timer is running push this entry to the back of the
     // queue and return.
-    if (_timer.scheduled()) {
+    if (_timer.scheduled()) 
+    {
 	_queue.push_back(entry);
 	return;
     }
@@ -79,32 +81,32 @@ DelayQueue<_Entry>::add(_Entry entry)
     // timer. Start the timer first in case this code is re-entered.
 
     _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
-					 callback(this, &DelayQueue::next));
+	    callback(this, &DelayQueue::next));
 
     _forward->dispatch(entry);
 }
 
 template <typename _Entry>
-void
+    void
 DelayQueue<_Entry>::fire()
 {
     if (_timer.scheduled())
 	return;
-    
+
     _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
-					 callback(this, &DelayQueue::next));
+	    callback(this, &DelayQueue::next));
 }
 
 template <typename _Entry>
-void
+    void
 DelayQueue<_Entry>::next()
 {
     if (_queue.empty())
 	return;
 
     _timer = EventLoop::instance().new_oneoff_after(TimeVal(_delay, 0),
-					 callback(this, &DelayQueue::next));
-    
+	    callback(this, &DelayQueue::next));
+
     _Entry entry = _queue.front();
     _queue.pop_front();
 

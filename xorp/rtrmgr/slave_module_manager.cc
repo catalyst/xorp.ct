@@ -27,43 +27,45 @@
 
 #include "slave_module_manager.hh"
 
-SlaveModuleManager::SlaveModuleManager() 
-    : GenericModuleManager( false)
+	SlaveModuleManager::SlaveModuleManager() 
+: GenericModuleManager( false)
 {
 }
 
-GenericModule*
+	GenericModule*
 SlaveModuleManager::new_module(const string& module_name, string& error_msg)
 {
-    debug_msg("SlaveModuleManager::new_module %s\n", module_name.c_str());
-    GenericModule* module = new GenericModule(module_name);
-    if (store_new_module(module, error_msg) != true) {
-	delete module;
-	return NULL;
-    }
-    return module;
+	debug_msg("SlaveModuleManager::new_module %s\n", module_name.c_str());
+	GenericModule* module = new GenericModule(module_name);
+	if (store_new_module(module, error_msg) != true) 
+	{
+		delete module;
+		return NULL;
+	}
+	return module;
 }
 
 bool
 SlaveModuleManager::module_is_active(const string& module_name) const
 {
-    const GenericModule *module = const_find_module(module_name);
-    if (module == NULL)
-	return false;
-    debug_msg("module_is_active: %s %d\n", 
-	      module_name.c_str(), module->status());
-    switch (module->status()) {
-    case GenericModule::MODULE_STARTUP:
-    case GenericModule::MODULE_INITIALIZING:
-    case GenericModule::MODULE_RUNNING:
+	const GenericModule *module = const_find_module(module_name);
+	if (module == NULL)
+		return false;
+	debug_msg("module_is_active: %s %d\n", 
+			module_name.c_str(), module->status());
+	switch (module->status()) 
+	{
+		case GenericModule::MODULE_STARTUP:
+		case GenericModule::MODULE_INITIALIZING:
+		case GenericModule::MODULE_RUNNING:
+			return true;
+		case GenericModule::MODULE_FAILED:
+		case GenericModule::MODULE_STALLED:
+		case GenericModule::MODULE_SHUTTING_DOWN:
+		case GenericModule::MODULE_NOT_STARTED:
+		case GenericModule::NO_SUCH_MODULE:
+			return false;
+	}
+	//keep stupid compiler happy
 	return true;
-    case GenericModule::MODULE_FAILED:
-    case GenericModule::MODULE_STALLED:
-    case GenericModule::MODULE_SHUTTING_DOWN:
-    case GenericModule::MODULE_NOT_STARTED:
-    case GenericModule::NO_SUCH_MODULE:
-	return false;
-    }
-    //keep stupid compiler happy
-    return true;
 }

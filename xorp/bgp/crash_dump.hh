@@ -29,30 +29,32 @@
 
 class CrashDumper;
 
-class CrashDumpManager {
-public:
-    CrashDumpManager();
-    void register_dumper(CrashDumper *dumper);
-    void unregister_dumper(CrashDumper *dumper);
-    void crash_dump();
+class CrashDumpManager 
+{
+    public:
+	CrashDumpManager();
+	void register_dumper(CrashDumper *dumper);
+	void unregister_dumper(CrashDumper *dumper);
+	void crash_dump();
 
-private:
-    list <CrashDumper*> _dumpers;
+    private:
+	list <CrashDumper*> _dumpers;
 };
 
 
-class CrashDumper {
-public:
-    CrashDumper();
-    virtual ~CrashDumper();
-    virtual void crash_dump() const;
-    virtual string dump_state() const;
-    void log(const string& msg);
-private:
-    static CrashDumpManager _mgr;
-    vector <string> _log;
-    vector <TimeVal> _logtimes;
-    int _logfirst, _loglast;
+class CrashDumper 
+{
+    public:
+	CrashDumper();
+	virtual ~CrashDumper();
+	virtual void crash_dump() const;
+	virtual string dump_state() const;
+	void log(const string& msg);
+    private:
+	static CrashDumpManager _mgr;
+	vector <string> _log;
+	vector <TimeVal> _logtimes;
+	int _logfirst, _loglast;
 };
 
 #endif // __BGP_CRASH_DUMP_HH__

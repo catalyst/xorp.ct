@@ -26,15 +26,15 @@
 #include "source_match_code_generator.hh"
 
 SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,
-						   const VarMap& varmap,
-						   PolicyMap& pmap,
-					map<string, set<uint32_t> > & ptags)
-	   : CodeGenerator(varmap, pmap), _currtag(tagstart),
-	     _protocol_tags(ptags)
+	const VarMap& varmap,
+	PolicyMap& pmap,
+	map<string, set<uint32_t> > & ptags)
+: CodeGenerator(varmap, pmap), _currtag(tagstart),
+    _protocol_tags(ptags)
 {
 }
 
-const Element*
+    const Element*
 SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
@@ -43,7 +43,8 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 
     // go through all the terms
     for (PolicyStatement::TermContainer::iterator i = terms.begin();
-         i != terms.end(); ++i) {
+	    i != terms.end(); ++i) 
+    {
 	Term* term = i->second;
 	term->accept(*this);
     }
@@ -56,13 +57,15 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 	return NULL;
 
     // mark the end for all policies
-    for (CodeMap::iterator i = _codes.begin(); i != _codes.end(); ++i) {
-        Code* c = (*i).second;
-        c->add_code("POLICY_END\n");
+    for (CodeMap::iterator i = _codes.begin(); i != _codes.end(); ++i) 
+    {
+	Code* c = (*i).second;
+	c->add_code("POLICY_END\n");
 
 	// for all subroutines too
 	for (SUBR::const_iterator j = c->subr().begin();
-	     j != c->subr().end();) {
+		j != c->subr().end();) 
+	{
 	    string x = j->second;
 
 	    x += "POLICY_END\n";
@@ -72,13 +75,13 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 	    c->add_subr(p, x);
 	}
 
-        _codes_vect.push_back(c);
+	_codes_vect.push_back(c);
     }
 
     return NULL;
 }
 
-void
+    void
 SourceMatchCodeGenerator::addTerm()
 {
     // copy the code for the term
@@ -95,7 +98,8 @@ SourceMatchCodeGenerator::addTerm()
     CodeMap::iterator i = _codes.find(_protocol);
 
     // if so link it
-    if (i != _codes.end()) {
+    if (i != _codes.end()) 
+    {
 	Code* existing = (*i).second;
 
 	existing->refresh_sm_redistribution_tags(*term);
@@ -103,7 +107,8 @@ SourceMatchCodeGenerator::addTerm()
 	// link "raw" code
 	string s = _os.str();
 
-	if (_subr) {
+	if (_subr) 
+	{
 	    SUBR::const_iterator j = existing->subr().find(_policy);
 	    XLOG_ASSERT(j != existing->subr().end());
 
@@ -114,7 +119,7 @@ SourceMatchCodeGenerator::addTerm()
 	*existing += *term;
 
 	delete term;
-        return;
+	return;
     }
 
     XLOG_ASSERT(!_policy.empty());
@@ -130,7 +135,7 @@ SourceMatchCodeGenerator::addTerm()
     _codes[_protocol] = term;
 }
 
-const Element*
+    const Element*
 SourceMatchCodeGenerator::visit_term(Term& term)
 {
     // reset code and sets
@@ -138,7 +143,8 @@ SourceMatchCodeGenerator::visit_term(Term& term)
     _code.clear_referenced_set_names();
 
     // make sure the source of the term has something [non empty source]
-    if (term.source_nodes().size()) {
+    if (term.source_nodes().size()) 
+    {
 	do_term(term);
 
 	// term may be for a new target, so deal with that.
@@ -149,7 +155,7 @@ SourceMatchCodeGenerator::visit_term(Term& term)
     return NULL;
 }
 
-void
+    void
 SourceMatchCodeGenerator::do_term(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
@@ -165,8 +171,10 @@ SourceMatchCodeGenerator::do_term(Term& term)
     // because the protocol value is needed by the processing of other
     // statements.
     //
-    for(i = source.begin(); i != source.end(); ++i) {
-	if ((i->second)->is_protocol_statement()) {
+    for(i = source.begin(); i != source.end(); ++i) 
+    {
+	if ((i->second)->is_protocol_statement()) 
+	{
 	    (i->second)->accept(*this);
 	    term.set_from_protocol(_protocol);
 	}
@@ -175,8 +183,10 @@ SourceMatchCodeGenerator::do_term(Term& term)
     //
     // Generate the remaining code for the source block
     //
-    for(i = source.begin(); i != source.end(); ++i) {
-	if ((i->second)->is_protocol_statement()) {
+    for(i = source.begin(); i != source.end(); ++i) 
+    {
+	if ((i->second)->is_protocol_statement()) 
+	{
 	    // XXX: the protocol statement was processes above
 	    continue;
 	}
@@ -184,25 +194,27 @@ SourceMatchCodeGenerator::do_term(Term& term)
 	_protocol_statement = false;
 	(i->second)->accept(*this);
 
-        // if it was a protocol statement, no need for "ONFALSE_EXIT", if its
+	// if it was a protocol statement, no need for "ONFALSE_EXIT", if its
 	// any other statement, then yes. The protocol is not read as a variable
 	// by the backend filters... it is only used by the policy manager.
-        if(!_protocol_statement)
-	   _os << "ONFALSE_EXIT" << endl;
+	if(!_protocol_statement)
+	    _os << "ONFALSE_EXIT" << endl;
     }
 
     // XXX: we can assume _protocol = PROTOCOL IN EXPORT STATEMENT
     if(_protocol == "")
-        xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() +
-		                " in export policy source match");
+	xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() +
+		" in export policy source match");
 
     // ignore any destination block [that is dealt with in the export code
     // generator]
 
     // If subroutine, do actions.  Tags are set by caller.
-    if (_subr) {
+    if (_subr) 
+    {
 	for (Term::Nodes::iterator i = term.action_nodes().begin();
-	     i != term.action_nodes().end(); ++i) {
+		i != term.action_nodes().end(); ++i) 
+	{
 
 	    Node* n = i->second;
 
@@ -224,8 +236,9 @@ SourceMatchCodeGenerator::do_term(Term& term)
     ElemSetU32 element_set;
     const set<uint32_t>& protocol_tags = _protocol_tags[_protocol];
     for (set<uint32_t>::const_iterator iter = protocol_tags.begin();
-	 iter != protocol_tags.end();
-	 ++iter) {
+	    iter != protocol_tags.end();
+	    ++iter) 
+    {
 	ElemU32 e(*iter);
 	element_set.insert(e);
     }
@@ -249,15 +262,16 @@ SourceMatchCodeGenerator::do_term(Term& term)
     _currtag++;
 }
 
-const Element*
+    const Element*
 SourceMatchCodeGenerator::visit_proto(NodeProto& node)
 {
     // check for protocol redifinition
-    if(_protocol != "") {
+    if(_protocol != "") 
+    {
 	ostringstream err;
-        err << "PROTOCOL REDEFINED FROM " << _protocol << " TO " <<
+	err << "PROTOCOL REDEFINED FROM " << _protocol << " TO " <<
 	    node.proto() << " AT LINE " << node.line();
-        xorp_throw(ProtoRedefined, err.str());
+	xorp_throw(ProtoRedefined, err.str());
     }
 
     // define protocol
@@ -266,7 +280,7 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node)
     return NULL;
 }
 
-vector<Code*>&
+    vector<Code*>&
 SourceMatchCodeGenerator::codes()
 {
     return _codes_vect;
@@ -284,7 +298,7 @@ SourceMatchCodeGenerator::next_tag() const
     return _currtag;
 }
 
-const string&
+    const string&
 SourceMatchCodeGenerator::protocol()
 {
     return _protocol;

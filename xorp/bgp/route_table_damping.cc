@@ -28,33 +28,33 @@
 #include "bgp.hh"
 #include "route_table_damping.hh"
 
-template<class A>
+    template<class A>
 DampingTable<A>::DampingTable(string tablename, Safi safi,
-			      BGPRouteTable<A>* parent,
-			      const PeerHandler *peer,
-			      Damping& damping)
-    : BGPRouteTable<A>(tablename, safi), _peer(peer), _damping(damping),
-      _damp_count(0)
+	BGPRouteTable<A>* parent,
+	const PeerHandler *peer,
+	Damping& damping)
+: BGPRouteTable<A>(tablename, safi), _peer(peer), _damping(damping),
+    _damp_count(0)
 {
     this->_parent = parent;
 }
 
-template<class A>
+    template<class A>
 DampingTable<A>::~DampingTable()
 {
 }
 
 template<class A>
-int
+    int
 DampingTable<A>::add_route(InternalMessage<A> &rtmsg,
-			   BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      this->tablename().c_str(),
-	      caller ? caller->tablename().c_str() : "NULL",
-	      &rtmsg,
-	      rtmsg.route(),
-	      rtmsg.str().c_str());
+	    this->tablename().c_str(),
+	    caller ? caller->tablename().c_str() : "NULL",
+	    &rtmsg,
+	    rtmsg.route(),
+	    rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
@@ -70,7 +70,8 @@ DampingTable<A>::add_route(InternalMessage<A> &rtmsg,
 
     // The first route for this network.
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(rtmsg.net());
-    if (i == _damp.end()) {
+    if (i == _damp.end()) 
+    {
 	Damp damp(_damping.get_tick(), _damping.get_merit());
 	_damp.insert(rtmsg.net(), damp);
 	return this->_next_table->
@@ -87,25 +88,25 @@ DampingTable<A>::add_route(InternalMessage<A> &rtmsg,
 }
 
 template<class A>
-int
+    int
 DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg, 
-			       InternalMessage<A> &new_rtmsg, 
-			       BGPRouteTable<A> *caller)
+	InternalMessage<A> &new_rtmsg, 
+	BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n"
-	      "caller: %s\n"
-	      "old rtmsg: %p new rtmsg: %p "
-	      "old route: %p"
-	      "new route: %p"
-	      "old: %s\n new: %s\n",
-	      this->tablename().c_str(),
-	      caller ? caller->tablename().c_str() : "NULL",
-	      &old_rtmsg,
-	      &new_rtmsg,
-	      old_rtmsg.route(),
-	      new_rtmsg.route(),
-	      old_rtmsg.str().c_str(),
-	      new_rtmsg.str().c_str());
+	    "caller: %s\n"
+	    "old rtmsg: %p new rtmsg: %p "
+	    "old route: %p"
+	    "new route: %p"
+	    "old: %s\n new: %s\n",
+	    this->tablename().c_str(),
+	    caller ? caller->tablename().c_str() : "NULL",
+	    &old_rtmsg,
+	    &new_rtmsg,
+	    old_rtmsg.route(),
+	    new_rtmsg.route(),
+	    old_rtmsg.str().c_str(),
+	    new_rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
@@ -116,20 +117,22 @@ DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
     if (!damping())
 	return this->_next_table->
 	    replace_route(old_rtmsg, new_rtmsg,
-			  static_cast<BGPRouteTable<A>*>(this));
+		    static_cast<BGPRouteTable<A>*>(this));
 
     // Find the record for this route which must exist. If the route
     // was being damped continue to damp.
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(old_rtmsg.net());
     // An entry should be found, but if damping was enabled after the
     // original route passed through here it won't be found.
-    if (i == _damp.end()) {
+    if (i == _damp.end()) 
+    {
 	return this->_next_table->
 	    replace_route(old_rtmsg, new_rtmsg,
-			  static_cast<BGPRouteTable<A>*>(this));
+		    static_cast<BGPRouteTable<A>*>(this));
     }
     Damp& damp = i.payload();
-    if (damp._damped) {
+    if (damp._damped) 
+    {
 	typename RefTrie<A, DampRoute<A> >::iterator r;
 	r = _damped.lookup_node(old_rtmsg.net());
 	XLOG_ASSERT(r != _damped.end());
@@ -138,17 +141,18 @@ DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 	    XLOG_FATAL("Route is being damped but no timer is scheduled");
 	r.payload().timer().unschedule();
 	_damped.erase(r);
-	if (damping_global()) {
-		DampRoute<A> damproute(new_rtmsg.route(), new_rtmsg.genid());
-		damproute.timer() = EventLoop::instance().
-		    new_oneoff_after(exp,
-				     callback(this,
-					      &DampingTable<A>::undamp,
-					      new_rtmsg.net()));
-		_damped.insert(new_rtmsg.net(), damproute);
+	if (damping_global()) 
+	{
+	    DampRoute<A> damproute(new_rtmsg.route(), new_rtmsg.genid());
+	    damproute.timer() = EventLoop::instance().
+		new_oneoff_after(exp,
+			callback(this,
+			    &DampingTable<A>::undamp,
+			    new_rtmsg.net()));
+	    _damped.insert(new_rtmsg.net(), damproute);
 	    return ADD_UNUSED;
 	}
-	
+
 	// Routes are no longer being damped, but they were previously
 	// send the new route through as an add.
 	damp._damped = false;
@@ -157,7 +161,8 @@ DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 	    add_route(new_rtmsg, static_cast<BGPRouteTable<A>*>(this));
     }
 
-    if (update_figure_of_merit(damp, new_rtmsg)) {
+    if (update_figure_of_merit(damp, new_rtmsg)) 
+    {
 	this->_next_table->
 	    delete_route(old_rtmsg, static_cast<BGPRouteTable<A>*>(this));
 	return ADD_UNUSED;
@@ -165,20 +170,20 @@ DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 
     return this->_next_table->
 	replace_route(old_rtmsg, new_rtmsg,
-		      static_cast<BGPRouteTable<A>*>(this));
+		static_cast<BGPRouteTable<A>*>(this));
 }
 
 template<class A>
-int
+    int
 DampingTable<A>::delete_route(InternalMessage<A> &rtmsg, 
-			      BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      this->tablename().c_str(),
-	      caller ? caller->tablename().c_str() : "NULL",
-	      &rtmsg,
-	      rtmsg.route(),
-	      rtmsg.str().c_str());
+	    this->tablename().c_str(),
+	    caller ? caller->tablename().c_str() : "NULL",
+	    &rtmsg,
+	    rtmsg.route(),
+	    rtmsg.str().c_str());
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
@@ -193,12 +198,14 @@ DampingTable<A>::delete_route(InternalMessage<A> &rtmsg,
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(rtmsg.net());
     // An entry should be found, but if damping was enabled after the
     // original route passed through here it won't be found.
-    if (i == _damp.end()) {
+    if (i == _damp.end()) 
+    {
 	return this->_next_table->
 	    delete_route(rtmsg, static_cast<BGPRouteTable<A>*>(this));
     }
     Damp& damp = i.payload();
-    if (damp._damped) {
+    if (damp._damped) 
+    {
 	typename RefTrie<A, DampRoute<A> >::iterator r;
 	r = _damped.lookup_node(rtmsg.net());
 	XLOG_ASSERT(r != _damped.end());
@@ -216,7 +223,7 @@ DampingTable<A>::delete_route(InternalMessage<A> &rtmsg,
 }
 
 template<class A>
-int
+    int
 DampingTable<A>::push(BGPRouteTable<A> *caller)
 {
     XLOG_ASSERT(caller == this->_parent);
@@ -224,10 +231,10 @@ DampingTable<A>::push(BGPRouteTable<A> *caller)
 }
 
 template<class A>
-int 
+    int 
 DampingTable<A>::route_dump(InternalMessage<A> &rtmsg,
-			    BGPRouteTable<A> *caller,
-			    const PeerHandler *dump_peer)
+	BGPRouteTable<A> *caller,
+	const PeerHandler *dump_peer)
 {
     XLOG_ASSERT(caller == this->_parent);
 
@@ -237,7 +244,7 @@ DampingTable<A>::route_dump(InternalMessage<A> &rtmsg,
 
     if (is_this_route_damped(rtmsg.net()))
 	return ADD_UNUSED;
-    
+
     return this->_next_table->
 	route_dump(rtmsg, static_cast<BGPRouteTable<A>*>(this), dump_peer);
 }
@@ -245,8 +252,8 @@ DampingTable<A>::route_dump(InternalMessage<A> &rtmsg,
 template<class A>
 const SubnetRoute<A>*
 DampingTable<A>::lookup_route(const IPNet<A> &net,
-			      uint32_t& genid,
-			      FPAListRef& pa_list) const
+	uint32_t& genid,
+	FPAListRef& pa_list) const
 {
     if (!damping())
 	return this->_parent->lookup_route(net, genid, pa_list);
@@ -258,7 +265,7 @@ DampingTable<A>::lookup_route(const IPNet<A> &net,
 }
 
 template<class A>
-void
+    void
 DampingTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
     if (!damping())
@@ -271,9 +278,9 @@ DampingTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 }
 
 template<class A>
-bool
+    bool
 DampingTable<A>::update_figure_of_merit(Damp& damp,
-					const InternalMessage<A> &rtmsg)
+	const InternalMessage<A> &rtmsg)
 {
     // If damping has been disabled but some routes are still being
     // damped just return false.
@@ -284,23 +291,24 @@ DampingTable<A>::update_figure_of_merit(Damp& damp,
     damp._time = _damping.get_tick();
 
     debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
-	      this->tablename().c_str(),
-	      &rtmsg,
-	      rtmsg.route(),
-	      rtmsg.str().c_str());
+	    this->tablename().c_str(),
+	    &rtmsg,
+	    rtmsg.route(),
+	    rtmsg.str().c_str());
     debug_msg("Merit %d\n", damp._merit);
 
     // The figure of merit is above the cutoff threshold damp the route.
-    if (_damping.cutoff(damp._merit)) {
+    if (_damping.cutoff(damp._merit)) 
+    {
 	debug_msg("Damped\n");
 	damp._damped = true;
 	_damp_count++;
 	DampRoute<A> damproute(rtmsg.route(), rtmsg.genid());
 	damproute.timer() = EventLoop::instance().
 	    new_oneoff_after(TimeVal(_damping.get_reuse_time(damp._merit), 0),
-			     callback(this,
-				      &DampingTable<A>::undamp,
-				      rtmsg.net()));
+		    callback(this,
+			&DampingTable<A>::undamp,
+			rtmsg.net()));
 	_damped.insert(rtmsg.net(), damproute);
 
 	return true;
@@ -324,7 +332,7 @@ DampingTable<A>::is_this_route_damped(const IPNet<A> &net) const
 }
 
 template<class A>
-void
+    void
 DampingTable<A>::undamp(IPNet<A> net)
 {
     debug_msg("Released net %s\n", cstring(net));
@@ -333,7 +341,7 @@ DampingTable<A>::undamp(IPNet<A> net)
     XLOG_ASSERT(i != _damp.end());
     Damp& damp = i.payload();
     XLOG_ASSERT(damp._damped);
-    
+
     typename RefTrie<A, DampRoute<A> >::iterator r;
     r = _damped.lookup_node(net);
     XLOG_ASSERT(r != _damped.end());
@@ -343,7 +351,7 @@ DampingTable<A>::undamp(IPNet<A> net)
     _damp_count--;
 
     this->_next_table->add_route(rtmsg,
-				 static_cast<BGPRouteTable<A>*>(this));
+	    static_cast<BGPRouteTable<A>*>(this));
     this->_next_table->push(static_cast<BGPRouteTable<A>*>(this));
 }
 

@@ -37,30 +37,30 @@
 //
 
 IfConfigUpdateReporterBase::IfConfigUpdateReporterBase(
-    IfConfigUpdateReplicator& update_replicator)
-    : _update_replicator(update_replicator),
-      _observed_iftree(_update_replicator.observed_iftree())
+		IfConfigUpdateReplicator& update_replicator)
+: _update_replicator(update_replicator),
+	_observed_iftree(_update_replicator.observed_iftree())
 {
 }
 
 IfConfigUpdateReporterBase::IfConfigUpdateReporterBase(
-    IfConfigUpdateReplicator& update_replicator,
-    const IfTree& observed_iftree)
-    : _update_replicator(update_replicator),
-      _observed_iftree(observed_iftree)
+		IfConfigUpdateReplicator& update_replicator,
+		const IfTree& observed_iftree)
+: _update_replicator(update_replicator),
+	_observed_iftree(observed_iftree)
 {
 }
 
-void
+	void
 IfConfigUpdateReporterBase::add_to_replicator()
 {
-    _update_replicator.add_reporter(this);
+	_update_replicator.add_reporter(this);
 }
 
-void
+	void
 IfConfigUpdateReporterBase::remove_from_replicator()
 {
-    _update_replicator.remove_reporter(this);
+	_update_replicator.remove_reporter(this);
 }
 
 
@@ -71,134 +71,143 @@ IfConfigUpdateReplicator::~IfConfigUpdateReplicator()
 {
 }
 
-int
+	int
 IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
 {
-    if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
-	return (XORP_ERROR);
-    _reporters.push_back(rp);
+	if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
+		return (XORP_ERROR);
+	_reporters.push_back(rp);
 
-    //
-    // Propagate all current interface information
-    //
-    Update update = IfConfigUpdateReporterBase::CREATED;
-    IfTree::IfMap::const_iterator if_iter;
+	//
+	// Propagate all current interface information
+	//
+	Update update = IfConfigUpdateReporterBase::CREATED;
+	IfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = observed_iftree().interfaces().begin();
-	 if_iter != observed_iftree().interfaces().end();
-	 ++if_iter) {
-	const IfTreeInterface& iface = *(if_iter->second);
-	rp->interface_update(iface.ifname(), update);
+	for (if_iter = observed_iftree().interfaces().begin();
+			if_iter != observed_iftree().interfaces().end();
+			++if_iter) 
+	{
+		const IfTreeInterface& iface = *(if_iter->second);
+		rp->interface_update(iface.ifname(), update);
 
-	IfTreeInterface::VifMap::const_iterator vif_iter;
-	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
-	    const IfTreeVif& vif = *(vif_iter->second);
-	    rp->vif_update(iface.ifname(), vif.vifname(), update);
+		IfTreeInterface::VifMap::const_iterator vif_iter;
+		for (vif_iter = iface.vifs().begin();
+				vif_iter != iface.vifs().end();
+				++vif_iter) 
+		{
+			const IfTreeVif& vif = *(vif_iter->second);
+			rp->vif_update(iface.ifname(), vif.vifname(), update);
 
-	    IfTreeVif::IPv4Map::const_iterator a4_iter;
-	    for (a4_iter = vif.ipv4addrs().begin();
-		 a4_iter != vif.ipv4addrs().end();
-		 ++a4_iter) {
-		const IfTreeAddr4& a4 = *(a4_iter->second);
-		rp->vifaddr4_update(iface.ifname(), vif.vifname(), a4.addr(),
-				    update);
-	    }
+			IfTreeVif::IPv4Map::const_iterator a4_iter;
+			for (a4_iter = vif.ipv4addrs().begin();
+					a4_iter != vif.ipv4addrs().end();
+					++a4_iter) 
+			{
+				const IfTreeAddr4& a4 = *(a4_iter->second);
+				rp->vifaddr4_update(iface.ifname(), vif.vifname(), a4.addr(),
+						update);
+			}
 
 #ifdef HAVE_IPV6
-	    IfTreeVif::IPv6Map::const_iterator a6_iter;
-	    for (a6_iter = vif.ipv6addrs().begin();
-		 a6_iter != vif.ipv6addrs().end();
-		 ++a6_iter) {
-		const IfTreeAddr6& a6 = *(a6_iter->second);
-		rp->vifaddr6_update(iface.ifname(), vif.vifname(), a6.addr(),
-				    update);
-	    }
+			IfTreeVif::IPv6Map::const_iterator a6_iter;
+			for (a6_iter = vif.ipv6addrs().begin();
+					a6_iter != vif.ipv6addrs().end();
+					++a6_iter) 
+			{
+				const IfTreeAddr6& a6 = *(a6_iter->second);
+				rp->vifaddr6_update(iface.ifname(), vif.vifname(), a6.addr(),
+						update);
+			}
 #endif
+		}
 	}
-    }
-    rp->updates_completed();
+	rp->updates_completed();
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IfConfigUpdateReplicator::remove_reporter(IfConfigUpdateReporterBase* rp)
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = find(_reporters.begin(),
-							 _reporters.end(),
-							 rp);
-    if (i == _reporters.end())
-	return (XORP_ERROR);
-    _reporters.erase(i);
-    return (XORP_OK);
+	list<IfConfigUpdateReporterBase*>::iterator i = find(_reporters.begin(),
+			_reporters.end(),
+			rp);
+	if (i == _reporters.end())
+		return (XORP_ERROR);
+	_reporters.erase(i);
+	return (XORP_OK);
 }
 
-void
+	void
 IfConfigUpdateReplicator::interface_update(const string& ifname,
-					   const Update& update)
+		const Update& update)
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->interface_update(ifname, update);
-	++i;
-    }
+	list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+	while (i != _reporters.end()) 
+	{
+		IfConfigUpdateReporterBase*& r = *i;
+		r->interface_update(ifname, update);
+		++i;
+	}
 }
 
-void
+	void
 IfConfigUpdateReplicator::vif_update(const string& ifname,
-				     const string& vifname,
-				     const Update& update)
+		const string& vifname,
+		const Update& update)
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vif_update(ifname, vifname, update);
-	++i;
-    }
+	list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+	while (i != _reporters.end()) 
+	{
+		IfConfigUpdateReporterBase*& r = *i;
+		r->vif_update(ifname, vifname, update);
+		++i;
+	}
 }
 
-void
+	void
 IfConfigUpdateReplicator::vifaddr4_update(const string& ifname,
-					  const string& vifname,
-					  const IPv4&   addr,
-					  const Update& update)
+		const string& vifname,
+		const IPv4&   addr,
+		const Update& update)
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr4_update(ifname, vifname, addr, update);
-	++i;
-    }
+	list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+	while (i != _reporters.end()) 
+	{
+		IfConfigUpdateReporterBase*& r = *i;
+		r->vifaddr4_update(ifname, vifname, addr, update);
+		++i;
+	}
 }
 
 #ifdef HAVE_IPV6
-void
+	void
 IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
-					  const string& vifname,
-					  const IPv6&   addr,
-					  const Update& update)
+		const string& vifname,
+		const IPv6&   addr,
+		const Update& update)
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr6_update(ifname, vifname, addr, update);
-	++i;
-    }
+	list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+	while (i != _reporters.end()) 
+	{
+		IfConfigUpdateReporterBase*& r = *i;
+		r->vifaddr6_update(ifname, vifname, addr, update);
+		++i;
+	}
 }
 #endif
 
-void
+	void
 IfConfigUpdateReplicator::updates_completed()
 {
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->updates_completed();
-	++i;
-    }
+	list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+	while (i != _reporters.end()) 
+	{
+		IfConfigUpdateReporterBase*& r = *i;
+		r->updates_completed();
+		++i;
+	}
 }
 
 
@@ -210,55 +219,55 @@ IfConfigErrorReporter::IfConfigErrorReporter()
 
 }
 
-void
+	void
 IfConfigErrorReporter::config_error(const string& error_msg)
 {
-    string preamble(c_format("Config error: "));
-    log_error(preamble + error_msg);
+	string preamble(c_format("Config error: "));
+	log_error(preamble + error_msg);
 }
 
-void
+	void
 IfConfigErrorReporter::interface_error(const string& ifname,
-				       const string& error_msg)
+		const string& error_msg)
 {
-    string preamble(c_format("Interface error on %s: ", ifname.c_str()));
-    log_error(preamble + error_msg);
+	string preamble(c_format("Interface error on %s: ", ifname.c_str()));
+	log_error(preamble + error_msg);
 }
 
-void
+	void
 IfConfigErrorReporter::vif_error(const string& ifname,
-				 const string& vifname,
-				 const string& error_msg)
+		const string& vifname,
+		const string& error_msg)
 {
-    string preamble(c_format("Interface/Vif error on %s/%s: ",
-			     ifname.c_str(), vifname.c_str()));
-    log_error(preamble + error_msg);
+	string preamble(c_format("Interface/Vif error on %s/%s: ",
+				ifname.c_str(), vifname.c_str()));
+	log_error(preamble + error_msg);
 }
 
-void
+	void
 IfConfigErrorReporter::vifaddr_error(const string& ifname,
-				     const string& vifname,
-				     const IPv4&   addr,
-				     const string& error_msg)
+		const string& vifname,
+		const IPv4&   addr,
+		const string& error_msg)
 {
-    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
-			     ifname.c_str(),
-			     vifname.c_str(),
-			     addr.str().c_str()));
-    log_error(preamble + error_msg);
+	string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
+				ifname.c_str(),
+				vifname.c_str(),
+				addr.str().c_str()));
+	log_error(preamble + error_msg);
 }
 
 #ifdef HAVE_IPV6
-void
+	void
 IfConfigErrorReporter::vifaddr_error(const string& ifname,
-				     const string& vifname,
-				     const IPv6&   addr,
-				     const string& error_msg)
+		const string& vifname,
+		const IPv6&   addr,
+		const string& error_msg)
 {
-    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
-			     ifname.c_str(),
-			     vifname.c_str(),
-			     addr.str().c_str()));
-    log_error(preamble + error_msg);
+	string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
+				ifname.c_str(),
+				vifname.c_str(),
+				addr.str().c_str()));
+	log_error(preamble + error_msg);
 }
 #endif

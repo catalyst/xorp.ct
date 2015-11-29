@@ -44,7 +44,7 @@ xrlatom_encode_value(const char* val, size_t val_bytes);
  * non-alphanumeric characters are escaped, ie only those that would
  * otherwise interfere with Xrl parsing.
  */
-inline string
+    inline string
 xrlatom_encode_value(const string& val)
 {
     return xrlatom_encode_value(val.c_str(), val.size());
@@ -54,12 +54,12 @@ xrlatom_encode_value(const string& val)
  * Encode string representation of a binary data type XrlAtom value into
  * a value suitable for integrating into a spaceless Xrl representation.
  */
-inline string
+    inline string
 xrlatom_encode_value(const vector<uint8_t>& v)
 {
     const uint8_t* start = &v[0];
     return xrlatom_encode_value(reinterpret_cast<const char*>(start),
-				v.size());
+	    v.size());
 }
 
 /**

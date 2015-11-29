@@ -37,22 +37,23 @@
 // ----------------------------------------------------------------------------
 // XrlRedistManager Implementation
 
-template <typename A>
-XrlRedistManager<A>::XrlRedistManager(System<A>& system)
-    : _rr(system.route_db())
+    template <typename A>
+    XrlRedistManager<A>::XrlRedistManager(System<A>& system)
+: _rr(system.route_db())
 {
 }
 
-template <typename A>
+    template <typename A>
 XrlRedistManager<A>::~XrlRedistManager()
 {
 }
 
 template <typename A>
-int
+    int
 XrlRedistManager<A>::startup()
 {
-    if (status() == SERVICE_READY) {
+    if (status() == SERVICE_READY) 
+    {
 	set_status(SERVICE_RUNNING);
 	return (XORP_OK);
     }
@@ -60,7 +61,7 @@ XrlRedistManager<A>::startup()
 }
 
 template <typename A>
-int
+    int
 XrlRedistManager<A>::shutdown()
 {
     if (status() != SERVICE_RUNNING)
@@ -74,17 +75,17 @@ XrlRedistManager<A>::shutdown()
 }
 
 template <typename A>
-void
+    void
 XrlRedistManager<A>::add_route(const Net&		net,
-			       const Addr&		nh,
-			       const string&		ifname,
-			       const string&		vifname,
-			       uint16_t			cost,
-			       uint16_t			tag,
-			       const PolicyTags&	policytags)
+	const Addr&		nh,
+	const string&		ifname,
+	const string&		vifname,
+	uint16_t			cost,
+	uint16_t			tag,
+	const PolicyTags&	policytags)
 {
     debug_msg("got redist add_route for %s %s\n",
-	      net.str().c_str(), nh.str().c_str());
+	    net.str().c_str(), nh.str().c_str());
 
     // XXX: Ignore link-local routes
     if (net.masked_addr().is_linklocal_unicast())
@@ -94,7 +95,7 @@ XrlRedistManager<A>::add_route(const Net&		net,
 }
 
 template <typename A>
-void
+    void
 XrlRedistManager<A>::delete_route(const Net& net)
 {
     // XXX: Ignore link-local routes

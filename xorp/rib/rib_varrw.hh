@@ -34,46 +34,48 @@
  * policytags being altered.
  */
 template <class A>
-class RIBVarRW : public SingleVarRW {
-public:
-    enum {
-	VAR_NETWORK4 = VAR_PROTOCOL,
-	VAR_NEXTHOP4,
-	VAR_NETWORK6,
-	VAR_NEXTHOP6,
-	VAR_METRIC
-    };
+class RIBVarRW : public SingleVarRW 
+{
+    public:
+	enum 
+	{
+	    VAR_NETWORK4 = VAR_PROTOCOL,
+	    VAR_NEXTHOP4,
+	    VAR_NETWORK6,
+	    VAR_NEXTHOP6,
+	    VAR_METRIC
+	};
 
-    /**
-     * @param route route to filter and possibly modify.
-     */
-    RIBVarRW(IPRouteEntry<A>& route);
+	/**
+	 * @param route route to filter and possibly modify.
+	 */
+	RIBVarRW(IPRouteEntry<A>& route);
 
-    // SingleVarRW interface
-    void start_read();
+	// SingleVarRW interface
+	void start_read();
 
-    /**
-     * Write a variable.
-     *
-     * @param id variablea to write.
-     * @param e value of variable.
-     */
-    void single_write(const Id& id, const Element& e);
+	/**
+	 * Write a variable.
+	 *
+	 * @param id variablea to write.
+	 * @param e value of variable.
+	 */
+	void single_write(const Id& id, const Element& e);
 
-    Element* single_read(const Id& id);
+	Element* single_read(const Id& id);
 
-private:
-    /**
-     * Specialized template to read nexthop and ip address.
-     * If it is a v4 specialization, v6 addresses are set to null
-     * and vice-versa.
-     *
-     * @param r route from which to read addresses.
-     */
-    void read_route_nexthop(IPRouteEntry<A>& r);
+    private:
+	/**
+	 * Specialized template to read nexthop and ip address.
+	 * If it is a v4 specialization, v6 addresses are set to null
+	 * and vice-versa.
+	 *
+	 * @param r route from which to read addresses.
+	 */
+	void read_route_nexthop(IPRouteEntry<A>& r);
 
-    IPRouteEntry<A>&	_route;
-    ElementFactory	_ef;
+	IPRouteEntry<A>&	_route;
+	ElementFactory	_ef;
 };
 
 #endif // __RIB_RIB_VARRW_HH__

@@ -30,13 +30,14 @@ ProtocolMap::ProtocolMap()
 {
 }
 
-const string&
+    const string&
 ProtocolMap::xrl_target(const string& protocol)
 {
     Map::iterator i = _map.find(protocol);
 
     // by default, the protocol has the same XRL target name.
-    if (i == _map.end()) {
+    if (i == _map.end()) 
+    {
 	set_xrl_target(protocol, protocol);
 	i = _map.find(protocol);
 	XLOG_ASSERT(i != _map.end());
@@ -45,17 +46,18 @@ ProtocolMap::xrl_target(const string& protocol)
     return i->second;
 }
 
-void
+    void
 ProtocolMap::set_xrl_target(const string& protocol, const string& target)
 {
     _map[protocol] = target;
 }
 
-const string&
+    const string&
 ProtocolMap::protocol(const string& target)
 {
     // XXX lame
-    for (Map::iterator i = _map.begin(); i != _map.end(); ++i) {
+    for (Map::iterator i = _map.begin(); i != _map.end(); ++i) 
+    {
 	string& t = i->second;
 
 	if (target == t)
@@ -68,5 +70,5 @@ ProtocolMap::protocol(const string& target)
 
     set_xrl_target(target, target);
     return protocol(target); // an assert that item was added would be good, in
-			     // order to avoid infinite recursion...
+    // order to avoid infinite recursion...
 }

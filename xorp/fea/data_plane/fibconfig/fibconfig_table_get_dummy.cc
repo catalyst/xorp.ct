@@ -37,69 +37,72 @@
 //
 
 
-FibConfigTableGetDummy::FibConfigTableGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigTableGet(fea_data_plane_manager)
+	FibConfigTableGetDummy::FibConfigTableGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigTableGet(fea_data_plane_manager)
 {
 }
 
 FibConfigTableGetDummy::~FibConfigTableGetDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to get "
-		   "whole forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to get "
+				"whole forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigTableGetDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigTableGetDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 {
-    Trie4::iterator ti;
-    for (ti = fibconfig().trie4().begin(); ti != fibconfig().trie4().end(); ++ti) {
-	const Fte4& fte = ti.payload();
-	fte_list.push_back(fte);
-    }
-    
-    return (XORP_OK);
+	Trie4::iterator ti;
+	for (ti = fibconfig().trie4().begin(); ti != fibconfig().trie4().end(); ++ti) 
+	{
+		const Fte4& fte = ti.payload();
+		fte_list.push_back(fte);
+	}
+
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 {
-    Trie6::iterator ti;
-    for (ti = fibconfig().trie6().begin(); ti != fibconfig().trie6().end(); ++ti) {
-	const Fte6& fte = ti.payload();
-	fte_list.push_back(fte);
-    }
-    
-    return (XORP_OK);
+	Trie6::iterator ti;
+	for (ti = fibconfig().trie6().begin(); ti != fibconfig().trie6().end(); ++ti) 
+	{
+		const Fte6& fte = ti.payload();
+		fte_list.push_back(fte);
+	}
+
+	return (XORP_OK);
 }

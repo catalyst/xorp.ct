@@ -66,38 +66,38 @@
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-int
+	int
 PimVif::pim_graft_recv(PimNbr *pim_nbr,
-		       const IPvX& src,
-		       const IPvX& , // dst
-		       buffer_t *buffer)
+		const IPvX& src,
+		const IPvX& , // dst
+		buffer_t *buffer)
 {
-    int ret_value;
-    buffer_t *buffer2;
-    string dummy_error_msg;
-    
-    //
-    // Must unicast back a Graft-Ack to the originator of this Graft.
-    //
-    buffer2 = buffer_send_prepare();
-    BUFFER_PUT_DATA(BUFFER_DATA_HEAD(buffer), buffer2,
-		    BUFFER_DATA_SIZE(buffer));
-    ret_value = pim_send(domain_wide_addr(), src, PIM_GRAFT_ACK, buffer2,
-			 dummy_error_msg);
-    
-    UNUSED(pim_nbr);
-    // UNUSED(dst);
-    
-    return (ret_value);
-    
-    // Various error processing
- buflen_error:
-    XLOG_UNREACHABLE();
-    dummy_error_msg = c_format("TX %s from %s to %s: "
-			       "packet cannot fit into sending buffer",
-			       PIMTYPE2ASCII(PIM_GRAFT_ACK),
-			       cstring(domain_wide_addr()), cstring(src));
-    XLOG_ERROR("%s", dummy_error_msg.c_str());
-    return (XORP_ERROR);
+	int ret_value;
+	buffer_t *buffer2;
+	string dummy_error_msg;
+
+	//
+	// Must unicast back a Graft-Ack to the originator of this Graft.
+	//
+	buffer2 = buffer_send_prepare();
+	BUFFER_PUT_DATA(BUFFER_DATA_HEAD(buffer), buffer2,
+			BUFFER_DATA_SIZE(buffer));
+	ret_value = pim_send(domain_wide_addr(), src, PIM_GRAFT_ACK, buffer2,
+			dummy_error_msg);
+
+	UNUSED(pim_nbr);
+	// UNUSED(dst);
+
+	return (ret_value);
+
+	// Various error processing
+buflen_error:
+	XLOG_UNREACHABLE();
+	dummy_error_msg = c_format("TX %s from %s to %s: "
+			"packet cannot fit into sending buffer",
+			PIMTYPE2ASCII(PIM_GRAFT_ACK),
+			cstring(domain_wide_addr()), cstring(src));
+	XLOG_ERROR("%s", dummy_error_msg.c_str());
+	return (XORP_ERROR);
 }
 

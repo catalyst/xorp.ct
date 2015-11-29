@@ -30,35 +30,35 @@
  */
 class FinderClientObserver
 {
-public:
-    virtual ~FinderClientObserver();
+    public:
+	virtual ~FinderClientObserver();
 
-    /**
-     * Finder connection established.
-     *
-     * Called by FinderClient when a connection to the Finder is
-     * established.
-     */
-    virtual void finder_connect_event() = 0;
+	/**
+	 * Finder connection established.
+	 *
+	 * Called by FinderClient when a connection to the Finder is
+	 * established.
+	 */
+	virtual void finder_connect_event() = 0;
 
-    /**
-     * Finder connection terminated.
-     *
-     * Called by FinderClient when the connection to the Finder is lost.
-     */
-    virtual void finder_disconnect_event() = 0;
+	/**
+	 * Finder connection terminated.
+	 *
+	 * Called by FinderClient when the connection to the Finder is lost.
+	 */
+	virtual void finder_disconnect_event() = 0;
 
-    /**
-     * Finder registration of named target is complete and target is
-     * able to send and receive Xrls requests.
-     *
-     * Called by FinderClient after Xrls have been registered and the
-     * the target is enabled with the finder.
-     *
-     * @param target_name the name of the Xrl target transitioning to
-     * ready state.
-     */
-    virtual void finder_ready_event(const string& target_name) = 0;
+	/**
+	 * Finder registration of named target is complete and target is
+	 * able to send and receive Xrls requests.
+	 *
+	 * Called by FinderClient after Xrls have been registered and the
+	 * the target is enabled with the finder.
+	 *
+	 * @param target_name the name of the Xrl target transitioning to
+	 * ready state.
+	 */
+	virtual void finder_ready_event(const string& target_name) = 0;
 };
 
 #endif // __LIBXIPC_FINDER_CLIENT_OBSERVER_HH__

@@ -31,136 +31,152 @@
 
 #include "common.hh"
 
-const char*
+	const char*
 default_xrl_target(uint32_t ip_version)
 {
-    if (ip_version == 6) {
-	return "ripng";
-    } else if (ip_version == 4) {
-	return "rip";
-    } else {
-	return 0;
-    }
+	if (ip_version == 6) 
+	{
+		return "ripng";
+	} else if (ip_version == 4) 
+	{
+		return "rip";
+	} else 
+	{
+		return 0;
+	}
 }
 
-uint32_t
+	uint32_t
 rip_name_to_ip_version(const char* rip_name)
 {
-    static const char m[] = "ripng";
-    size_t n_m = sizeof(m) / sizeof(m[0]);
+	static const char m[] = "ripng";
+	size_t n_m = sizeof(m) / sizeof(m[0]);
 
-    uint16_t i = 0;
-    while (rip_name[i] == m[i]) {
-	i++;
-	if (i == n_m)
-	    break;
-    }
-    if (i == 3) return 4;
-    if (i == n_m) return 6;
-    return 0;
+	uint16_t i = 0;
+	while (rip_name[i] == m[i]) 
+	{
+		i++;
+		if (i == n_m)
+			break;
+	}
+	if (i == 3) return 4;
+	if (i == n_m) return 6;
+	return 0;
 }
 
-bool
+	bool
 parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
 {
-    string::size_type sp = host_colon_port.find(":");
-    if (sp == string::npos) {
-        host = host_colon_port;
-        // Do not set port, by design it has default finder port value.
-    } else {
-        host = string(host_colon_port, 0, sp);
-        string s_port = string(host_colon_port, sp + 1, 14);
-        uint32_t t_port = atoi(s_port.c_str());
-        if (t_port == 0 || t_port > 65535) {
-            XLOG_ERROR("Finder port %u is not in range 1--65535.\n",
-		       XORP_UINT_CAST(t_port));
-            return false;
-        }
-        port = (uint16_t)t_port;
-    }
-    return true;
+	string::size_type sp = host_colon_port.find(":");
+	if (sp == string::npos) 
+	{
+		host = host_colon_port;
+		// Do not set port, by design it has default finder port value.
+	} else 
+	{
+		host = string(host_colon_port, 0, sp);
+		string s_port = string(host_colon_port, sp + 1, 14);
+		uint32_t t_port = atoi(s_port.c_str());
+		if (t_port == 0 || t_port > 65535) 
+		{
+			XLOG_ERROR("Finder port %u is not in range 1--65535.\n",
+					XORP_UINT_CAST(t_port));
+			return false;
+		}
+		port = (uint16_t)t_port;
+	}
+	return true;
 }
 
 /**
  * Xrl Job Queue
  */
 XrlJobQueue::XrlJobQueue( const string& 		finder_host,
-	    uint16_t 			finder_port,
-	    const string& 		tgtname)
-    :  _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
-      _rtr(0), _rtr_poll_cnt(0)
+		uint16_t 			finder_port,
+		const string& 		tgtname)
+:  _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
+	_rtr(0), _rtr_poll_cnt(0)
 {
-    set_status(SERVICE_READY);
+	set_status(SERVICE_READY);
 }
 
 XrlJobQueue::~XrlJobQueue()
 {
-    delete _rtr;
+	delete _rtr;
 }
 
-int
+	int
 XrlJobQueue::startup()
 {
-    string cls = c_format("%s-%u\n", xlog_process_name(),
-			  XORP_UINT_CAST(getpid()));
-    _rtr = new XrlStdRouter( cls.c_str(), _fhost.c_str(), _fport);
-    _rtr->finalize();
-    set_status(SERVICE_STARTING);
-    _rtr_poll = EventLoop::instance().new_periodic_ms(100,
-				   callback(this, &XrlJobQueue::xrl_router_ready_poll));
-    return (XORP_OK);
+	string cls = c_format("%s-%u\n", xlog_process_name(),
+			XORP_UINT_CAST(getpid()));
+	_rtr = new XrlStdRouter( cls.c_str(), _fhost.c_str(), _fport);
+	_rtr->finalize();
+	set_status(SERVICE_STARTING);
+	_rtr_poll = EventLoop::instance().new_periodic_ms(100,
+			callback(this, &XrlJobQueue::xrl_router_ready_poll));
+	return (XORP_OK);
 }
 
-int
+	int
 XrlJobQueue::shutdown()
 {
-    while (_jobs.empty() == false) {
-	_jobs.pop_front();
-    }
-    set_status(SERVICE_SHUTDOWN);
-    return (XORP_OK);
+	while (_jobs.empty() == false) 
+	{
+		_jobs.pop_front();
+	}
+	set_status(SERVICE_SHUTDOWN);
+	return (XORP_OK);
 }
 
-void
+	void
 XrlJobQueue::dispatch_complete(const XrlError& xe, const XrlJobBase* cmd)
 {
-    XLOG_ASSERT(_jobs.empty() == false);
-    XLOG_ASSERT(_jobs.front().get() == cmd);
+	XLOG_ASSERT(_jobs.empty() == false);
+	XLOG_ASSERT(_jobs.front().get() == cmd);
 
-    if (xe != XrlError::OKAY()) {
-	if (xe == XrlError::COMMAND_FAILED()) {
-	    cout << "Error: " << xe.note() << endl;
-	} else {
-	    cout << xe.str() << endl;
+	if (xe != XrlError::OKAY()) 
+	{
+		if (xe == XrlError::COMMAND_FAILED()) 
+		{
+			cout << "Error: " << xe.note() << endl;
+		} else 
+		{
+			cout << xe.str() << endl;
+		}
+		shutdown();
+		return;
 	}
-	shutdown();
-	return;
-    }
-    _jobs.pop_front();
-    if (_jobs.empty() == false) {
-	process_next_job();
-    } else {
-	shutdown();
-    }
+	_jobs.pop_front();
+	if (_jobs.empty() == false) 
+	{
+		process_next_job();
+	} else 
+	{
+		shutdown();
+	}
 }
 
-bool
+	bool
 XrlJobQueue::xrl_router_ready_poll()
 {
-    if (_rtr->ready()) {
-	process_next_job();
-	return false;
-    }
-    if (_rtr_poll_cnt++ > 50) {
-	set_status(SERVICE_FAILED, "Could not contact XORP Finder process");
-    }
-    return true;
+	if (_rtr->ready()) 
+	{
+		process_next_job();
+		return false;
+	}
+	if (_rtr_poll_cnt++ > 50) 
+	{
+		set_status(SERVICE_FAILED, "Could not contact XORP Finder process");
+	}
+	return true;
 }
 
-void
+	void
 XrlJobQueue::process_next_job()
 {
-    if (_jobs.front()->dispatch() == false) {
-	set_status(SERVICE_FAILED, "Could not dispatch xrl");
-    }
+	if (_jobs.front()->dispatch() == false) 
+	{
+		set_status(SERVICE_FAILED, "Could not dispatch xrl");
+	}
 }

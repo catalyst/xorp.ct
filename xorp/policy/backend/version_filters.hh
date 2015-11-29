@@ -40,9 +40,10 @@
  * Say it's a normal route lookup and we do the filtering, and it results to
  * "accepted".  It doesn't imply we need to +1 the reference count.
  */
-class VersionFilters : public PolicyFilters {
-public:
-    VersionFilters();
+class VersionFilters : public PolicyFilters 
+{
+    public:
+	VersionFilters();
 };
 
 #endif // __POLICY_BACKEND_VERSION_FILTERS_HH__

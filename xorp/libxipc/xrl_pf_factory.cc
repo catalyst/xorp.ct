@@ -37,39 +37,44 @@
 // real cost, unlike InProc and SUDP, so we maintain a cache of
 // STCP senders with one per sender destination address.
 
-ref_ptr<XrlPFSender>
+    ref_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(const string& name,
-				  const char*	protocol,
-				  const char*	address)
+	const char*	protocol,
+	const char*	address)
 {
     debug_msg("instantiating sender pf = \"%s\", addr = \"%s\"\n",
-	      protocol, address);
+	    protocol, address);
     ref_ptr<XrlPFSender> rv;
-    try {
-	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
+    try 
+    {
+	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) 
+	{
 	    rv = new XrlPFSTCPSender(name,  address);
 	    return rv;
 	}
-	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
+	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) 
+	{
 	    rv = new XrlPFUNIXSender(name,  address);
 	    return rv;
 	}
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	UNUSED(e);
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
     return rv;
 }
 
-ref_ptr<XrlPFSender>
+    ref_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(const string& name, 
-				  const char* protocol_colon_address)
+	const char* protocol_colon_address)
 {
     char *colon = strstr(const_cast<char*>(protocol_colon_address), ":");
     ref_ptr<XrlPFSender> rv;
-    if (colon == 0) {
+    if (colon == 0) 
+    {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
-		  "combination\n\t\"%s\".\n", protocol_colon_address);
+		"combination\n\t\"%s\".\n", protocol_colon_address);
 	return rv;
     }
 
@@ -77,12 +82,12 @@ XrlPFSenderFactory::create_sender(const string& name,
     return create_sender(name,  protocol.c_str(), colon + 1);
 }
 
-void
+    void
 XrlPFSenderFactory::startup()
 {
 }
 
-void
+    void
 XrlPFSenderFactory::shutdown()
 {
 }

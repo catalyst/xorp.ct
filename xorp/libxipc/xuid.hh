@@ -26,23 +26,24 @@
 
 
 
-class XUID {
-public:
-    class InvalidString {};
-    XUID(const string&) throw (class InvalidString);
+class XUID 
+{
+    public:
+	class InvalidString {};
+	XUID(const string&) throw (class InvalidString);
 
-    // an XUID can be explicitly constructed
-    XUID() { initialize(); }
+	// an XUID can be explicitly constructed
+	XUID() { initialize(); }
 
-    // Or a block of memory can be cast as an XUID and initialized.
-    void initialize();
+	// Or a block of memory can be cast as an XUID and initialized.
+	void initialize();
 
-    bool operator==(const XUID&) const;
-    bool operator<(const XUID&) const;
+	bool operator==(const XUID&) const;
+	bool operator<(const XUID&) const;
 
-    string str() const;
-private:
-    uint32_t _data[4];		// Internal representation is network ordered
+	string str() const;
+    private:
+	uint32_t _data[4];		// Internal representation is network ordered
 };
 
 #endif // __LIBXIPC_XUID_HH__

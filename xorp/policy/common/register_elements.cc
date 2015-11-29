@@ -56,12 +56,13 @@ RegisterElements::RegisterElements()
 
 // I love templates =D [and C++]
 template <class T>
-void
+    void
 RegisterElements::register_element()
 {
     static ElementFactory ef;
 
-    struct Local {
+    struct Local 
+    {
 	static Element* create(const char* x)
 	{
 	    return new T(x);

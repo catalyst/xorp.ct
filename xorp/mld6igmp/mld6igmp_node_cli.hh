@@ -50,68 +50,69 @@ class Mld6igmpNode;
 /**
  * @short The class for @ref Mld6igmpNode CLI access.
  */
-class Mld6igmpNodeCli : public ProtoNodeCli {
-public:
+class Mld6igmpNodeCli : public ProtoNodeCli 
+{
+	public:
 
-    /**
-     * Constructor for a given MLD6IGMP node.
-     * 
-     * @param mld6igmp_node the @ref Mld6igmpNode this node belongs to.
-     */
-    Mld6igmpNodeCli(Mld6igmpNode& mld6igmp_node);
-    
-    /**
-     * Destructor
-     */
-    virtual ~Mld6igmpNodeCli();
-    
-    /**
-     * Start the CLI operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start();
-    
-    /**
-     * Stop the CLI operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop();
-    
-    /**
-     * Enable node operation.
-     * 
-     * If an unit is not enabled, it cannot be start, or pending-start.
-     */
-    void	enable();
-    
-    /**
-     * Disable node operation.
-     * 
-     * If an unit is disabled, it cannot be start or pending-start.
-     * If the unit was runnning, it will be stop first.
-     */
-    void	disable();
-    
-    /**
-     * Install all MLD6IGMP-related CLI commands to the CLI.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		add_all_cli_commands();
-    
-private:
-    
-    Mld6igmpNode& mld6igmp_node() const { return (_mld6igmp_node); }
-    Mld6igmpNode& _mld6igmp_node;
-    
-    //
-    // MLD6IGMP CLI commands
-    //
-    int		cli_show_mld6igmp_interface(const vector<string>& argv);
-    int		cli_show_mld6igmp_interface_address(const vector<string>& argv);
-    int		cli_show_mld6igmp_group(const vector<string>& argv);
+		/**
+		 * Constructor for a given MLD6IGMP node.
+		 * 
+		 * @param mld6igmp_node the @ref Mld6igmpNode this node belongs to.
+		 */
+		Mld6igmpNodeCli(Mld6igmpNode& mld6igmp_node);
+
+		/**
+		 * Destructor
+		 */
+		virtual ~Mld6igmpNodeCli();
+
+		/**
+		 * Start the CLI operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		start();
+
+		/**
+		 * Stop the CLI operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		stop();
+
+		/**
+		 * Enable node operation.
+		 * 
+		 * If an unit is not enabled, it cannot be start, or pending-start.
+		 */
+		void	enable();
+
+		/**
+		 * Disable node operation.
+		 * 
+		 * If an unit is disabled, it cannot be start or pending-start.
+		 * If the unit was runnning, it will be stop first.
+		 */
+		void	disable();
+
+		/**
+		 * Install all MLD6IGMP-related CLI commands to the CLI.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		add_all_cli_commands();
+
+	private:
+
+		Mld6igmpNode& mld6igmp_node() const { return (_mld6igmp_node); }
+		Mld6igmpNode& _mld6igmp_node;
+
+		//
+		// MLD6IGMP CLI commands
+		//
+		int		cli_show_mld6igmp_interface(const vector<string>& argv);
+		int		cli_show_mld6igmp_interface_address(const vector<string>& argv);
+		int		cli_show_mld6igmp_group(const vector<string>& argv);
 };
 
 //

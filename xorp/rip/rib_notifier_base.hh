@@ -37,28 +37,29 @@
  * which derived classes implement according to their needs.
  */
 template <typename A>
-class RibNotifierBase {
-public:
-    static const uint32_t DEFAULT_POLL_MS = 1000;
+class RibNotifierBase 
+{
+	public:
+		static const uint32_t DEFAULT_POLL_MS = 1000;
 
-public:
-    RibNotifierBase( UpdateQueue<A>& update_queue,
-		    uint32_t	    poll_ms = DEFAULT_POLL_MS);
-    virtual ~RibNotifierBase();
+	public:
+		RibNotifierBase( UpdateQueue<A>& update_queue,
+				uint32_t	    poll_ms = DEFAULT_POLL_MS);
+		virtual ~RibNotifierBase();
 
-protected:
-    virtual void updates_available() = 0;
+	protected:
+		virtual void updates_available() = 0;
 
-protected:
-    void start_polling();
-    void stop_polling();
-    bool poll_updates();
+	protected:
+		void start_polling();
+		void stop_polling();
+		bool poll_updates();
 
-protected:
-    UpdateQueue<A>&		  		_uq;
-    typename UpdateQueue<A>::ReadIterator	_ri;
-    uint32_t					_poll_ms;
-    XorpTimer					_t;
+	protected:
+		UpdateQueue<A>&		  		_uq;
+		typename UpdateQueue<A>::ReadIterator	_ri;
+		uint32_t					_poll_ms;
+		XorpTimer					_t;
 };
 
 #endif // __RIP_RIB_NOTIFIER_BASE_HH__

@@ -28,22 +28,22 @@
 
 #include "rt_tab_base.hh"
 
-template <typename A>
+    template <typename A>
 RouteTable<A>::~RouteTable()
 {
 }
 
 template <typename A>
-void
+    void
 RouteTable<A>::set_next_table(RouteTable<A>* next_table)
 {
     _next_table = next_table;
 }
 
 template <typename A>
-void
+    void
 RouteTable<A>::replace_policytags(const IPRouteEntry<A>& route,
-				  const PolicyTags& prevtags)
+	const PolicyTags& prevtags)
 {
     XLOG_ASSERT(_next_table);
     _next_table->replace_policytags(route, prevtags);

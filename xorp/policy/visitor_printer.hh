@@ -33,29 +33,30 @@
  * Useful for debugging and checking what the policy manager thinks polcies look
  * like.
  */
-class VisitorPrinter : public Visitor {
-public:
-    /**
-     * @param out stream which receives the text representation of policy.
-     */
-    VisitorPrinter(ostream& out);
+class VisitorPrinter : public Visitor 
+{
+    public:
+	/**
+	 * @param out stream which receives the text representation of policy.
+	 */
+	VisitorPrinter(ostream& out);
 
-    const Element* visit(NodeUn&);
-    const Element* visit(NodeBin&);
-    const Element* visit(NodeVar&);
-    const Element* visit(NodeAssign&);
-    const Element* visit(NodeSet&);
-    const Element* visit(NodeAccept&);
-    const Element* visit(NodeReject&);
-    const Element* visit(Term&);
-    const Element* visit(PolicyStatement&);
-    const Element* visit(NodeElem&);
-    const Element* visit(NodeProto&);
-    const Element* visit(NodeNext&);
-    const Element* visit(NodeSubr& node);
+	const Element* visit(NodeUn&);
+	const Element* visit(NodeBin&);
+	const Element* visit(NodeVar&);
+	const Element* visit(NodeAssign&);
+	const Element* visit(NodeSet&);
+	const Element* visit(NodeAccept&);
+	const Element* visit(NodeReject&);
+	const Element* visit(Term&);
+	const Element* visit(PolicyStatement&);
+	const Element* visit(NodeElem&);
+	const Element* visit(NodeProto&);
+	const Element* visit(NodeNext&);
+	const Element* visit(NodeSubr& node);
 
-private:
-    ostream& _out;
+    private:
+	ostream& _out;
 };
 
 #endif // __POLICY_VISITOR_PRINTER_HH__

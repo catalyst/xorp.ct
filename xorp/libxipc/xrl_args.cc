@@ -37,14 +37,17 @@
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove XrlAtom
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
 {
-    if (!xa.name().empty()) {
+    if (!xa.name().empty()) 
+    {
 	const_iterator p;
 
-	for (p = _args.begin(); p != _args.end(); ++p) {
-	    if (p->name() == xa.name()) {
+	for (p = _args.begin(); p != _args.end(); ++p) 
+	{
+	    if (p->name() == xa.name()) 
+	    {
 		throw XrlAtomFound();
 	    }
 	}
@@ -56,13 +59,15 @@ XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
     return *this;
 }
 
-const XrlAtom&
+    const XrlAtom&
 XrlArgs::get(const XrlAtom& dataless) const throw (XrlAtomNotFound)
 {
     const_iterator p;
-    for (p = _args.begin(); p != _args.end(); ++p) {
+    for (p = _args.begin(); p != _args.end(); ++p) 
+    {
 	if (p->type() == dataless.type() &&
-	    p->name() == dataless.name()) {
+		p->name() == dataless.name()) 
+	{
 	    return *p;
 	}
     }
@@ -70,13 +75,14 @@ XrlArgs::get(const XrlAtom& dataless) const throw (XrlAtomNotFound)
     return *p;
 }
 
-const XrlAtom&
+    const XrlAtom&
 XrlArgs::get(unsigned idx, const char* name) const throw (XrlAtomNotFound)
 {
     if (!_have_name)
 	return _args[idx];
 
-    for (const_iterator i = _args.begin(); i != _args.end(); ++i) {
+    for (const_iterator i = _args.begin(); i != _args.end(); ++i) 
+    {
 	const XrlAtom& a = *i;
 
 	if (a.name().compare(name) == 0)
@@ -86,16 +92,18 @@ XrlArgs::get(unsigned idx, const char* name) const throw (XrlAtomNotFound)
     throw XrlAtomNotFound();
 }
 
-void
+    void
 XrlArgs::remove(const XrlAtom& dataless) throw (XrlAtomNotFound)
 {
     iterator p;
-    for (p = _args.begin(); p != _args.end(); ++p) {
+    for (p = _args.begin(); p != _args.end(); ++p) 
+    {
 	if (p->type() == dataless.type() &&
-	    p->name() == dataless.name()) {
+		p->name() == dataless.name()) 
+	{
 	    _args.erase(p);
 	    return;
-	    }
+	}
     }
     throw XrlAtomNotFound();
 }
@@ -103,25 +111,28 @@ XrlArgs::remove(const XrlAtom& dataless) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove bool
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_bool(const char* name, bool val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const bool&
+    const bool&
 XrlArgs::get_bool(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_boolean)).boolean();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_bool(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_boolean));
@@ -130,25 +141,28 @@ XrlArgs::remove_bool(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove int32
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_int32(const char* name, int32_t val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const int32_t&
+    const int32_t&
 XrlArgs::get_int32(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_int32)).int32();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_int32(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_int32));
@@ -157,25 +171,28 @@ XrlArgs::remove_int32(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove uint32
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_uint32(const char* name, uint32_t val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const uint32_t&
+    const uint32_t&
 XrlArgs::get_uint32(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_uint32)).uint32();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_uint32(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_uint32));
@@ -184,25 +201,28 @@ XrlArgs::remove_uint32(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove ipv4
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipv4(const char* name, const IPv4& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPv4&
+    const IPv4&
 XrlArgs::get_ipv4(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_ipv4(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_ipv4));
@@ -211,25 +231,28 @@ XrlArgs::remove_ipv4(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove ipv4net
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipv4net(const char* name, const IPv4Net& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPv4Net&
+    const IPv4Net&
 XrlArgs::get_ipv4net(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_ipv4net(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_ipv4net));
@@ -238,25 +261,28 @@ XrlArgs::remove_ipv4net(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove ipv6
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipv6(const char* name, const IPv6& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPv6&
+    const IPv6&
 XrlArgs::get_ipv6(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_ipv6(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_ipv6));
@@ -265,25 +291,28 @@ XrlArgs::remove_ipv6(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove ipv6net
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipv6net(const char* name, const IPv6Net& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPv6Net&
+    const IPv6Net&
 XrlArgs::get_ipv6net(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_ipv6net(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_ipv6net));
@@ -294,23 +323,28 @@ XrlArgs::remove_ipv6net(const char* name) throw (XrlAtomNotFound)
 // for IPvX.  It is just a wrapper for IPv4 and IPv6 and provided as
 // a convenience.
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipvx(const char* name, const IPvX& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPvX
+    const IPvX
 XrlArgs::get_ipvx(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType&) {
-	try {
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType&) 
+    {
+	try 
+	{
 	    return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
-	} catch (const XrlAtom::WrongType& e) {
+	} catch (const XrlAtom::WrongType& e) 
+	{
 	    xorp_throw(BadArgs, e.why());
 	}
     }
@@ -318,12 +352,14 @@ XrlArgs::get_ipvx(const char* name) const throw (BadArgs)
     XLOG_UNREACHABLE();
 }
 
-void
+    void
 XrlArgs::remove_ipvx(const char* name) throw (XrlAtomNotFound)
 {
-    try {
+    try 
+    {
 	remove(XrlAtom(name, xrlatom_ipv4));
-    } catch (const XrlAtomNotFound&) {
+    } catch (const XrlAtomNotFound&) 
+    {
 	remove(XrlAtom(name, xrlatom_ipv6));
     }
 }
@@ -333,23 +369,28 @@ XrlArgs::remove_ipvx(const char* name) throw (XrlAtomNotFound)
 // type for IPvXNet.  It is just a wrapper for IPv4Net and IPv6Net and
 // provided as a convenience.
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const IPvXNet
+    const IPvXNet
 XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType&) {
-	try {
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType&) 
+    {
+	try 
+	{
 	    return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
-	} catch (const XrlAtom::WrongType& e) {
+	} catch (const XrlAtom::WrongType& e) 
+	{
 	    xorp_throw(BadArgs, e.why());
 	}
     }
@@ -357,12 +398,14 @@ XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
     XLOG_UNREACHABLE();
 }
 
-void
+    void
 XrlArgs::remove_ipvxnet(const char* name) throw (XrlAtomNotFound)
 {
-    try {
+    try 
+    {
 	remove(XrlAtom(name, xrlatom_ipv4net));
-    } catch (const XrlAtomNotFound&) {
+    } catch (const XrlAtomNotFound&) 
+    {
 	remove(XrlAtom(name, xrlatom_ipv6net));
     }
 }
@@ -370,25 +413,28 @@ XrlArgs::remove_ipvxnet(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove mac
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_mac(const char* name, const Mac& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const Mac&
+    const Mac&
 XrlArgs::get_mac(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_mac)).mac();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_mac(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_mac));
@@ -397,25 +443,28 @@ XrlArgs::remove_mac(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove string
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_string(const char* name, const string& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const string&
+    const string&
 XrlArgs::get_string(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_text)).text();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_string(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_text));
@@ -424,26 +473,29 @@ XrlArgs::remove_string(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove list
 
-XrlArgs&
-XrlArgs::add_list(const char* name, const XrlAtomList& val)
-    throw (XrlAtomFound)
+    XrlArgs&
+    XrlArgs::add_list(const char* name, const XrlAtomList& val)
+throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const XrlAtomList&
+    const XrlAtomList&
 XrlArgs::get_list(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_list)).list();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_list(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_list));
@@ -452,26 +504,29 @@ XrlArgs::remove_list(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove binary data
 
-XrlArgs&
-XrlArgs::add_binary(const char* name, const vector<uint8_t>& val)
-    throw (XrlAtomFound)
+    XrlArgs&
+    XrlArgs::add_binary(const char* name, const vector<uint8_t>& val)
+throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const vector<uint8_t>&
+    const vector<uint8_t>&
 XrlArgs::get_binary(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_binary)).binary();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_binary(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_binary));
@@ -480,25 +535,28 @@ XrlArgs::remove_binary(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove int64
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_int64(const char* name, int64_t val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const int64_t&
+    const int64_t&
 XrlArgs::get_int64(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_int64)).int64();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_int64(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_int64));
@@ -507,25 +565,28 @@ XrlArgs::remove_int64(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove uint64
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_uint64(const char* name, uint64_t val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const uint64_t&
+    const uint64_t&
 XrlArgs::get_uint64(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_uint64)).uint64();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_uint64(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_uint64));
@@ -535,25 +596,28 @@ XrlArgs::remove_uint64(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // XrlArgs add/get/remove fp64
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add_fp64(const char* name, fp64_t val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
-const fp64_t&
+    const fp64_t&
 XrlArgs::get_fp64(const char* name) const throw (BadArgs)
 {
-    try {
+    try 
+    {
 	return get(XrlAtom(name, xrlatom_fp64)).fp64();
-    } catch (const XrlAtom::NoData& e) {
-        xorp_throw(BadArgs, e.why());
-    } catch (const XrlAtom::WrongType& e) {
-        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::NoData& e) 
+    {
+	xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) 
+    {
+	xorp_throw(BadArgs, e.why());
     }
 }
 
-void
+    void
 XrlArgs::remove_fp64(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_fp64));
@@ -563,7 +627,7 @@ XrlArgs::remove_fp64(const char* name) throw (XrlAtomNotFound)
 // ----------------------------------------------------------------------------
 // Append an existing XrlArgs
 
-XrlArgs&
+    XrlArgs&
 XrlArgs::add(const XrlArgs& args) throw (XrlAtomFound)
 {
     for (const_iterator ci = args.begin(); ci != args.end(); ci++)
@@ -577,17 +641,19 @@ XrlArgs::add(const XrlArgs& args) throw (XrlAtomFound)
 bool
 XrlArgs::matches_template(XrlArgs& t) const
 {
-    if (t._args.size() != _args.size()) {
-        return false;
+    if (t._args.size() != _args.size()) 
+    {
+	return false;
     }
 
     const_iterator ai = _args.begin();
     const_iterator ti = t._args.begin();
     while (ai != _args.end() &&
-           ai->type() == ti->type() &&
-           ai->name() != ti->name()) {
-        ai++;
-        ti++;
+	    ai->type() == ti->type() &&
+	    ai->name() != ti->name()) 
+    {
+	ai++;
+	ti++;
     }
     return (ai == _args.end());
 }
@@ -595,16 +661,18 @@ XrlArgs::matches_template(XrlArgs& t) const
 bool
 XrlArgs::operator==(const XrlArgs& t) const
 {
-    if (t._args.size() != _args.size()) {
-        return false;
+    if (t._args.size() != _args.size()) 
+    {
+	return false;
     }
 
     const_iterator ai = _args.begin();
     const_iterator ti = t._args.begin();
     while (ai != _args.end() &&
-           *ai == *ti) {
-        ai++;
-        ti++;
+	    *ai == *ti) 
+    {
+	ai++;
+	ti++;
     }
     return (ai == _args.end());
 }
@@ -615,10 +683,11 @@ XrlArgs::operator[](uint32_t index) const
     return _args[index];
 }
 
-const XrlAtom&
+    const XrlAtom&
 XrlArgs::operator[](const string& name) const throw (XrlAtomNotFound)
 {
-    for ( const_iterator ai = _args.begin() ; ai != _args.end() ; ai++ ) {
+    for ( const_iterator ai = _args.begin() ; ai != _args.end() ; ai++ ) 
+    {
 	if (ai->name() == name)
 	    return *ai;
     }
@@ -642,27 +711,31 @@ XrlArgs::str() const
     ostringstream oss;
 
     const_iterator ai = _args.begin();
-    while (ai != _args.end()) {
-        oss << ai->str();
-        ai++;
-        if (ai != _args.end())
-            oss << string(XrlToken::ARG_ARG_SEP);
+    while (ai != _args.end()) 
+    {
+	oss << ai->str();
+	ai++;
+	if (ai != _args.end())
+	    oss << string(XrlToken::ARG_ARG_SEP);
     }
     return oss.str();
 }
 
-XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
-		: _have_name(false)
+    XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
+: _have_name(false)
 {
     string s(serialized);
 
-    for (string::iterator start = s.begin(); start < s.end(); start++) {
+    for (string::iterator start = s.begin(); start < s.end(); start++) 
+    {
 	string::iterator end = find(start, s.end(), XrlToken::ARG_ARG_SEP[0]);
-        string tok(start, end);
-	try {
+	string tok(start, end);
+	try 
+	{
 	    XrlAtom xa(tok.c_str());
 	    add(xa);
-	} catch (const XrlAtomFound& /*xaf*/) {
+	} catch (const XrlAtomFound& /*xaf*/) 
+	{
 	    string tmp("Duplicate Atom found: ");
 	    tmp += tok;
 	    xorp_throw(InvalidString, tmp);
@@ -692,7 +765,8 @@ XrlArgs::packed_bytes(XrlAtom* head) const
     if (head)
 	total_bytes += head->packed_bytes();
 
-    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
+    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) 
+    {
 	total_bytes += ci->packed_bytes();
     }
     return total_bytes + 4;
@@ -704,7 +778,8 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     size_t total_bytes = 0;
 
     // Check space exists for header
-    if (buffer_bytes < 4) {
+    if (buffer_bytes < 4) 
+    {
 	return 0;
     }
 
@@ -713,7 +788,8 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     if (head)
 	cnt++;
 
-    if (cnt > PACKING_MAX_COUNT) {
+    if (cnt > PACKING_MAX_COUNT) 
+    {
 	// log a message, bounds hit
 	return 0;
     }
@@ -723,9 +799,10 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     memcpy(buffer, &header, sizeof(header));
     total_bytes += sizeof(header);
 
-    if (head) {
+    if (head) 
+    {
 	size_t atom_bytes = head->pack(buffer + total_bytes,
-				       buffer_bytes - total_bytes);
+		buffer_bytes - total_bytes);
 
 	if (atom_bytes == 0)
 	    return 0;
@@ -734,11 +811,13 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     }
 
     // Pack atoms
-    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
+    for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) 
+    {
 	size_t atom_bytes = ci->pack(buffer + total_bytes,
-				     buffer_bytes - total_bytes);
+		buffer_bytes - total_bytes);
 
-	if (atom_bytes == 0) {
+	if (atom_bytes == 0) 
+	{
 	    return 0;
 	}
 	total_bytes += atom_bytes;
@@ -746,7 +825,7 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     return total_bytes;
 }
 
-size_t
+    size_t
 XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes, XrlAtom* head)
 {
     uint32_t cnt;
@@ -758,18 +837,21 @@ XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes, XrlAtom* head)
     if (!used_bytes)
 	return 0;
 
-    while (cnt != 0) {
-	if (head) {
+    while (cnt != 0) 
+    {
+	if (head) 
+	{
 	    atom = head;
 	    head = NULL;
-	} else {
+	} else 
+	{
 	    _args.push_back(XrlAtom());
 	    atom = &_args.back();
 	    added++;
 	}
 
 	size_t atom_bytes = atom->unpack(buffer + used_bytes,
-					 buffer_bytes - used_bytes);
+		buffer_bytes - used_bytes);
 	if (atom_bytes == 0)
 	    goto __error;
 
@@ -778,7 +860,8 @@ XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes, XrlAtom* head)
 
 	used_bytes += atom_bytes;
 	--cnt;
-	if (used_bytes >= buffer_bytes) {
+	if (used_bytes >= buffer_bytes) 
+	{
 	    // Greater than would be bad...
 	    assert(used_bytes == buffer_bytes);
 	    break;
@@ -797,7 +880,7 @@ __error:
     return 0;
 }
 
-size_t
+    size_t
 XrlArgs::unpack_header(uint32_t& cnt, const uint8_t* in, size_t len)
 {
     // Unpack header
@@ -815,13 +898,14 @@ XrlArgs::unpack_header(uint32_t& cnt, const uint8_t* in, size_t len)
     return sizeof(header);
 }
 
-size_t
+    size_t
 XrlArgs::fill(const uint8_t* in, size_t len)
 {
     size_t tot = len;
     _have_name = false;
 
-    for (ATOMS::iterator i = _args.begin(); i != _args.end(); ++i) {
+    for (ATOMS::iterator i = _args.begin(); i != _args.end(); ++i) 
+    {
 	XrlAtom& atom = *i;
 
 	size_t sz = atom.unpack(in, len);

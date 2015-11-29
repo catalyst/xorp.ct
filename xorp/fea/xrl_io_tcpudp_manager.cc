@@ -35,354 +35,366 @@
 #include "xrl_io_tcpudp_manager.hh"
 
 XrlIoTcpUdpManager::XrlIoTcpUdpManager(IoTcpUdpManager&	io_tcpudp_manager,
-				       XrlRouter&	xrl_router)
-    : IoTcpUdpManagerReceiver(),
-      _io_tcpudp_manager(io_tcpudp_manager),
-      _xrl_router(xrl_router)
+		XrlRouter&	xrl_router)
+: IoTcpUdpManagerReceiver(),
+	_io_tcpudp_manager(io_tcpudp_manager),
+	_xrl_router(xrl_router)
 {
-    _io_tcpudp_manager.set_io_tcpudp_manager_receiver(this);
+	_io_tcpudp_manager.set_io_tcpudp_manager_receiver(this);
 }
 
 XrlIoTcpUdpManager::~XrlIoTcpUdpManager()
 {
-    _io_tcpudp_manager.set_io_tcpudp_manager_receiver(NULL);
+	_io_tcpudp_manager.set_io_tcpudp_manager_receiver(NULL);
 }
 
-void
+	void
 XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
-			       const string&		sockid,
-			       const string&		if_name,
-			       const string&		vif_name,
-			       const IPvX&		src_host,
-			       uint16_t			src_port,
-			       const vector<uint8_t>&	data)
+		const string&		sockid,
+		const string&		if_name,
+		const string&		vif_name,
+		const IPvX&		src_host,
+		uint16_t			src_port,
+		const vector<uint8_t>&	data)
 {
-    if (src_host.is_ipv4()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket4UserV0p1Client cl(&xrl_router());
+	if (src_host.is_ipv4()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket4UserV0p1Client cl(&xrl_router());
 
-	//
-	// Send notification
-	//
-	cl.send_recv_event(receiver_name.c_str(),
-			   sockid,
-			   if_name,
-			   vif_name,
-			   src_host.get_ipv4(),
-			   src_port,
-			   data,
-			   callback(this,
-				    &XrlIoTcpUdpManager::xrl_send_recv_event_cb,
-				    src_host.af(), receiver_name));
-    }
-
-#ifdef HAVE_IPV6
-    if (src_host.is_ipv6()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket6UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_recv_event(receiver_name.c_str(),
-			   sockid,
-			   if_name,
-			   vif_name,
-			   src_host.get_ipv6(),
-			   src_port,
-			   data,
-			   callback(this,
-				    &XrlIoTcpUdpManager::xrl_send_recv_event_cb,
-				    src_host.af(), receiver_name));
-    }
-#endif
-}
-
-void
-XrlIoTcpUdpManager::inbound_connect_event(const string&		receiver_name,
-					  const string&		sockid,
-					  const IPvX&		src_host,
-					  uint16_t		src_port,
-					  const string&		new_sockid)
-{
-    if (src_host.is_ipv4()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket4UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_inbound_connect_event(receiver_name.c_str(),
-				      sockid,
-				      src_host.get_ipv4(),
-				      src_port,
-				      new_sockid,
-				      callback(this,
-					       &XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
-					       src_host.af(), new_sockid,
-					       receiver_name));
-    }
-
-#ifdef HAVE_IPV6
-    if (src_host.is_ipv6()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket6UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_inbound_connect_event(receiver_name.c_str(),
-				      sockid,
-				      src_host.get_ipv6(),
-				      src_port,
-				      new_sockid,
-				      callback(this,
-					       &XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
-				       src_host.af(), new_sockid,
-				       receiver_name));
-    }
-#endif
-}
-
-void
-XrlIoTcpUdpManager::outgoing_connect_event(int			family,
-					   const string&	receiver_name,
-					   const string&	sockid)
-{
-    if (family == IPv4::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket4UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_outgoing_connect_event(receiver_name.c_str(),
-				       sockid,
-				       callback(this,
-						&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
-						family, receiver_name));
-    }
-
-#ifdef HAVE_IPV6
-    if (family == IPv6::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket6UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_outgoing_connect_event(receiver_name.c_str(),
-				       sockid,
-				       callback(this,
-						&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
-						family, receiver_name));
-    }
-#endif
-}
-
-void
-XrlIoTcpUdpManager::error_event(int			family,
-				const string&		receiver_name,
-				const string&		sockid,
-				const string&		error,
-				bool			fatal)
-{
-    if (family == IPv4::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket4UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_error_event(receiver_name.c_str(),
-			    sockid,
-			    error,
-			    fatal,
-			    callback(this,
-				     &XrlIoTcpUdpManager::xrl_send_error_event_cb,
-				     family, receiver_name));
-    }
-
-#ifdef HAVE_IPV6
-    if (family == IPv6::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket6UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_error_event(receiver_name.c_str(),
-			    sockid,
-			    error,
-			    fatal,
-			    callback(this,
-				     &XrlIoTcpUdpManager::xrl_send_error_event_cb,
-				     family, receiver_name));
-    }
-#endif
-}
-
-void
-XrlIoTcpUdpManager::disconnect_event(int			family,
-				     const string&		receiver_name,
-				     const string&		sockid)
-{
-    if (family == IPv4::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket4UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_disconnect_event(receiver_name.c_str(),
-				 sockid,
-				 callback(this,
-					  &XrlIoTcpUdpManager::xrl_send_disconnect_event_cb,
-					  family, receiver_name));
-    }
-
-#ifdef HAVE_IPV6
-    if (family == IPv6::af()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlSocket6UserV0p1Client cl(&xrl_router());
-
-	//
-	// Send notification
-	//
-	cl.send_disconnect_event(receiver_name.c_str(),
-				 sockid,
-				 callback(this,
-					  &XrlIoTcpUdpManager::xrl_send_disconnect_event_cb,
-					  family, receiver_name));
-    }
-#endif
-}
-
-void
-XrlIoTcpUdpManager::xrl_send_recv_event_cb(const XrlError& xrl_error,
-					   int family, string receiver_name)
-{
-    UNUSED(family);
-
-    if (xrl_error == XrlError::OKAY())
-	return;
-
-    debug_msg("xrl_send_recv_event_cb: error %s\n", xrl_error.str().c_str());
-
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all communication handlers associated with this receiver.
-    //
-    _io_tcpudp_manager.instance_death(receiver_name);
-}
-
-void
-XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb(const XrlError& xrl_error,
-						      const bool* accept,
-						      int family,
-						      string sockid,
-						      string receiver_name)
-{
-    if (xrl_error == XrlError::OKAY()) {
-	string error_msg;
-	bool is_accepted = *accept;
-	if (_io_tcpudp_manager.accept_connection(family, sockid, is_accepted,
-						 error_msg)
-	    != XORP_OK) {
-	    XLOG_ERROR("Error with %s a connection: %s",
-		       (is_accepted)? "accept" : "reject", error_msg.c_str());
+		//
+		// Send notification
+		//
+		cl.send_recv_event(receiver_name.c_str(),
+				sockid,
+				if_name,
+				vif_name,
+				src_host.get_ipv4(),
+				src_port,
+				data,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_recv_event_cb,
+					src_host.af(), receiver_name));
 	}
-	return;
-    }
 
-    debug_msg("xrl_send_inbound_connect_event_cb: error %s\n",
-	      xrl_error.str().c_str());
+#ifdef HAVE_IPV6
+	if (src_host.is_ipv6()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket6UserV0p1Client cl(&xrl_router());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all communication handlers associated with this receiver.
-    //
-    _io_tcpudp_manager.instance_death(receiver_name);
+		//
+		// Send notification
+		//
+		cl.send_recv_event(receiver_name.c_str(),
+				sockid,
+				if_name,
+				vif_name,
+				src_host.get_ipv6(),
+				src_port,
+				data,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_recv_event_cb,
+					src_host.af(), receiver_name));
+	}
+#endif
 }
 
-void
+	void
+XrlIoTcpUdpManager::inbound_connect_event(const string&		receiver_name,
+		const string&		sockid,
+		const IPvX&		src_host,
+		uint16_t		src_port,
+		const string&		new_sockid)
+{
+	if (src_host.is_ipv4()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket4UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_inbound_connect_event(receiver_name.c_str(),
+				sockid,
+				src_host.get_ipv4(),
+				src_port,
+				new_sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
+					src_host.af(), new_sockid,
+					receiver_name));
+	}
+
+#ifdef HAVE_IPV6
+	if (src_host.is_ipv6()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket6UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_inbound_connect_event(receiver_name.c_str(),
+				sockid,
+				src_host.get_ipv6(),
+				src_port,
+				new_sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
+					src_host.af(), new_sockid,
+					receiver_name));
+	}
+#endif
+}
+
+	void
+XrlIoTcpUdpManager::outgoing_connect_event(int			family,
+		const string&	receiver_name,
+		const string&	sockid)
+{
+	if (family == IPv4::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket4UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_outgoing_connect_event(receiver_name.c_str(),
+				sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
+					family, receiver_name));
+	}
+
+#ifdef HAVE_IPV6
+	if (family == IPv6::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket6UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_outgoing_connect_event(receiver_name.c_str(),
+				sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
+					family, receiver_name));
+	}
+#endif
+}
+
+	void
+XrlIoTcpUdpManager::error_event(int			family,
+		const string&		receiver_name,
+		const string&		sockid,
+		const string&		error,
+		bool			fatal)
+{
+	if (family == IPv4::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket4UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_error_event(receiver_name.c_str(),
+				sockid,
+				error,
+				fatal,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_error_event_cb,
+					family, receiver_name));
+	}
+
+#ifdef HAVE_IPV6
+	if (family == IPv6::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket6UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_error_event(receiver_name.c_str(),
+				sockid,
+				error,
+				fatal,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_error_event_cb,
+					family, receiver_name));
+	}
+#endif
+}
+
+	void
+XrlIoTcpUdpManager::disconnect_event(int			family,
+		const string&		receiver_name,
+		const string&		sockid)
+{
+	if (family == IPv4::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket4UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_disconnect_event(receiver_name.c_str(),
+				sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_disconnect_event_cb,
+					family, receiver_name));
+	}
+
+#ifdef HAVE_IPV6
+	if (family == IPv6::af()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlSocket6UserV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_disconnect_event(receiver_name.c_str(),
+				sockid,
+				callback(this,
+					&XrlIoTcpUdpManager::xrl_send_disconnect_event_cb,
+					family, receiver_name));
+	}
+#endif
+}
+
+	void
+XrlIoTcpUdpManager::xrl_send_recv_event_cb(const XrlError& xrl_error,
+		int family, string receiver_name)
+{
+	UNUSED(family);
+
+	if (xrl_error == XrlError::OKAY())
+		return;
+
+	debug_msg("xrl_send_recv_event_cb: error %s\n", xrl_error.str().c_str());
+
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all communication handlers associated with this receiver.
+	//
+	_io_tcpudp_manager.instance_death(receiver_name);
+}
+
+	void
+XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb(const XrlError& xrl_error,
+		const bool* accept,
+		int family,
+		string sockid,
+		string receiver_name)
+{
+	if (xrl_error == XrlError::OKAY()) 
+	{
+		string error_msg;
+		bool is_accepted = *accept;
+		if (_io_tcpudp_manager.accept_connection(family, sockid, is_accepted,
+					error_msg)
+				!= XORP_OK) 
+		{
+			XLOG_ERROR("Error with %s a connection: %s",
+					(is_accepted)? "accept" : "reject", error_msg.c_str());
+		}
+		return;
+	}
+
+	debug_msg("xrl_send_inbound_connect_event_cb: error %s\n",
+			xrl_error.str().c_str());
+
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all communication handlers associated with this receiver.
+	//
+	_io_tcpudp_manager.instance_death(receiver_name);
+}
+
+	void
 XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb(const XrlError& xrl_error,
-						       int family,
-						       string receiver_name)
+		int family,
+		string receiver_name)
 {
-    UNUSED(family);
+	UNUSED(family);
 
-    if (xrl_error == XrlError::OKAY())
-	return;
+	if (xrl_error == XrlError::OKAY())
+		return;
 
-    debug_msg("xrl_send_outgoing_connect_event_cb: error %s\n",
-	      xrl_error.str().c_str());
+	debug_msg("xrl_send_outgoing_connect_event_cb: error %s\n",
+			xrl_error.str().c_str());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all communication handlers associated with this receiver.
-    //
-    _io_tcpudp_manager.instance_death(receiver_name);
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all communication handlers associated with this receiver.
+	//
+	_io_tcpudp_manager.instance_death(receiver_name);
 }
 
-void
+	void
 XrlIoTcpUdpManager::xrl_send_error_event_cb(const XrlError& xrl_error,
-					    int family, string receiver_name)
+		int family, string receiver_name)
 {
-    UNUSED(family);
+	UNUSED(family);
 
-    if (xrl_error == XrlError::OKAY())
-	return;
+	if (xrl_error == XrlError::OKAY())
+		return;
 
-    debug_msg("xrl_send_error_event_cb: error %s\n", xrl_error.str().c_str());
+	debug_msg("xrl_send_error_event_cb: error %s\n", xrl_error.str().c_str());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all communication handlers associated with this receiver.
-    //
-    _io_tcpudp_manager.instance_death(receiver_name);
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all communication handlers associated with this receiver.
+	//
+	_io_tcpudp_manager.instance_death(receiver_name);
 }
 
-void
+	void
 XrlIoTcpUdpManager::xrl_send_disconnect_event_cb(const XrlError& xrl_error,
-						 int family, string receiver_name)
+		int family, string receiver_name)
 {
-    UNUSED(family);
+	UNUSED(family);
 
-    if (xrl_error == XrlError::OKAY())
-	return;
+	if (xrl_error == XrlError::OKAY())
+		return;
 
-    debug_msg("xrl_send_disconnect_event_cb: error %s\n",
-	      xrl_error.str().c_str());
+	debug_msg("xrl_send_disconnect_event_cb: error %s\n",
+			xrl_error.str().c_str());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all communication handlers associated with this receiver.
-    //
-    _io_tcpudp_manager.instance_death(receiver_name);
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all communication handlers associated with this receiver.
+	//
+	_io_tcpudp_manager.instance_death(receiver_name);
 }

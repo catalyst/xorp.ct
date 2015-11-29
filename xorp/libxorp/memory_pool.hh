@@ -24,24 +24,25 @@
 #include "xorp.h"
 
 template <class T, size_t EXPANSION_SIZE = 100>
-class MemoryPool : public NONCOPYABLE {
-public:
-    MemoryPool();
-    ~MemoryPool();
+class MemoryPool : public NONCOPYABLE 
+{
+    public:
+	MemoryPool();
+	~MemoryPool();
 
-    //Allocate element of type T from free list
-    void* alloc();
+	//Allocate element of type T from free list
+	void* alloc();
 
-    // Return element to the free list
-    void free(void* doomed);
-private:
-    // next element on the free list
-    MemoryPool<T, EXPANSION_SIZE>* _next;
+	// Return element to the free list
+	void free(void* doomed);
+    private:
+	// next element on the free list
+	MemoryPool<T, EXPANSION_SIZE>* _next;
 
-    // Add free elements to the list
-    void expand_free_list();
+	// Add free elements to the list
+	void expand_free_list();
 
-    size_t _size;
+	size_t _size;
 };
 
 template <class T, size_t EXPANSION_SIZE>
@@ -51,17 +52,18 @@ MemoryPool<T, EXPANSION_SIZE>::MemoryPool() :
     expand_free_list();
 }
 
-template <class T, size_t EXPANSION_SIZE>
+    template <class T, size_t EXPANSION_SIZE>
 MemoryPool<T, EXPANSION_SIZE>::~MemoryPool()
 {
-    for (MemoryPool<T, EXPANSION_SIZE> *nextPtr = _next; nextPtr != NULL; nextPtr = _next) {
+    for (MemoryPool<T, EXPANSION_SIZE> *nextPtr = _next; nextPtr != NULL; nextPtr = _next) 
+    {
 	_next = _next->_next;
 	delete [] reinterpret_cast<char* >(nextPtr);
     }
 }
 
 template <class T, size_t EXPANSION_SIZE>
-inline void*
+    inline void*
 MemoryPool<T, EXPANSION_SIZE>::alloc()
 {
     if (!_next)
@@ -73,7 +75,7 @@ MemoryPool<T, EXPANSION_SIZE>::alloc()
 }
 
 template <class T, size_t EXPANSION_SIZE>
-inline void
+    inline void
 MemoryPool<T, EXPANSION_SIZE>::free(void* doomed)
 {
     MemoryPool<T, EXPANSION_SIZE>* head = reinterpret_cast<MemoryPool<T, EXPANSION_SIZE>* >(doomed);
@@ -83,14 +85,15 @@ MemoryPool<T, EXPANSION_SIZE>::free(void* doomed)
 }
 
 template <class T, size_t EXPANSION_SIZE>
-inline void
+    inline void
 MemoryPool<T, EXPANSION_SIZE>::expand_free_list()
 {
     // We must allocate object large enough to contain the next pointer
     MemoryPool<T, EXPANSION_SIZE>* runner = reinterpret_cast<MemoryPool<T, EXPANSION_SIZE>* >(new char[_size]);
 
     _next = runner;
-    for (size_t i = 0; i < EXPANSION_SIZE; ++i) {
+    for (size_t i = 0; i < EXPANSION_SIZE; ++i) 
+    {
 	runner->_next = reinterpret_cast<MemoryPool<T, EXPANSION_SIZE>* >(new char[_size]);
 	runner = runner->_next;
     }

@@ -44,10 +44,10 @@ static const uint8_t FINDER_PROTOCOL_MINOR_VERSION = 2;
 #define STATIC_BYTES(x) (sizeof(x))
 
 const char* FinderMessageBase::c_msg_template =
-	FMC_PREAMBLE "%1d" FMC_VERSION_SEP "%1d"
-	FMC_MSG_TYPE "%c"
-	FMC_SEQ_NO   "%u"
-	FMC_MSG_DATA;
+FMC_PREAMBLE "%1d" FMC_VERSION_SEP "%1d"
+FMC_MSG_TYPE "%c"
+FMC_SEQ_NO   "%u"
+FMC_MSG_DATA;
 
 // C-String Xrl
 const char* FinderXrlMessage::c_msg_template = "%s";
@@ -63,16 +63,16 @@ const char* FinderXrlResponse::c_msg_template = "%u / %s\n%s";
 FinderMessageBase::FinderMessageBase(uint32_t seqno, char type)
 {
     _rendered = c_format(c_msg_template,
-			 FINDER_PROTOCOL_MAJOR_VERSION,
-			 FINDER_PROTOCOL_MINOR_VERSION,
-			 type, seqno);
+	    FINDER_PROTOCOL_MAJOR_VERSION,
+	    FINDER_PROTOCOL_MINOR_VERSION,
+	    type, seqno);
 }
 
 FinderMessageBase::~FinderMessageBase()
 {
 }
 
-static const char*
+    static const char*
 line_end(const char* c)
 {
     while (*c && *c != '\n')
@@ -80,10 +80,11 @@ line_end(const char* c)
     return c;
 }
 
-static bool
+    static bool
 skip_text(const char*& buf, const char* to_skip)
 {
-    while (*to_skip) {
+    while (*to_skip) 
+    {
 	if (*buf != *to_skip)
 	    return false;
 	buf++;
@@ -92,47 +93,53 @@ skip_text(const char*& buf, const char* to_skip)
     return true;
 }
 
-ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
-    throw (BadFinderMessageFormat, WrongFinderMessageType)
+    ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+throw (BadFinderMessageFormat, WrongFinderMessageType)
 {
     const char* pos = data;
 
     // Version number checking
-    if (skip_text(pos, FMC_PREAMBLE) == false) {
+    if (skip_text(pos, FMC_PREAMBLE) == false) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field label: bad protocol");
+		"Corrupt header field label: bad protocol");
     }
 
     const char* end = line_end(pos);
-    if (end - pos < 3) {
+    if (end - pos < 3) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "bad version number");
+		"bad version number");
     }
-    
+
     int major, minor;
     major = *pos - '0';
     pos ++;
-    if (skip_text(pos, FMC_VERSION_SEP) == false) {
+    if (skip_text(pos, FMC_VERSION_SEP) == false) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field: major/minor separator");
+		"Corrupt header field: major/minor separator");
     }
-    
+
     minor = *pos - '0';
     if (major != FINDER_PROTOCOL_MAJOR_VERSION ||
-	minor != FINDER_PROTOCOL_MINOR_VERSION) {
+	    minor != FINDER_PROTOCOL_MINOR_VERSION) 
+    {
 	xorp_throw(BadFinderMessageFormat, "Mismatched protocol version");
     }
     pos++;
 
     // Msg type checking and extraction
-    if (skip_text(pos, FMC_MSG_TYPE) == false) {
+    if (skip_text(pos, FMC_MSG_TYPE) == false) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field label: message type");
+		"Corrupt header field label: message type");
     }
     end = line_end(pos);
-    if (end - pos != 1) {
+    if (end - pos != 1) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field: fat message type");
+		"Corrupt header field: fat message type");
     }
     _type = *pos;
     if (_type != type) 
@@ -140,31 +147,35 @@ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
     pos++;
 
     // Seq no checking and extraction
-    if (skip_text(pos, FMC_SEQ_NO) == false) {
+    if (skip_text(pos, FMC_SEQ_NO) == false) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field label: sequence number");
+		"Corrupt header field label: sequence number");
     }
     end = line_end(pos);
-    
+
     _seqno = 0;
-    while (xorp_isdigit(*pos)) {
+    while (xorp_isdigit(*pos)) 
+    {
 	_seqno *= 10;
 	_seqno += *pos - '0';
 	pos++;
     }
 
-    if (pos != end) {
+    if (pos != end) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field: sequence number");
+		"Corrupt header field: sequence number");
     }
 
     // Message data checking
-    if (skip_text(pos, FMC_MSG_DATA) == false) {
+    if (skip_text(pos, FMC_MSG_DATA) == false) 
+    {
 	xorp_throw(BadFinderMessageFormat,
-		   "Corrupt header field label: message data");
+		"Corrupt header field label: message data");
     }
     end = line_end(pos);
-    
+
     _bytes_parsed = pos - data;
 }
 
@@ -179,15 +190,15 @@ ParsedFinderMessageBase::~ParsedFinderMessageBase()
 
 uint32_t FinderXrlMessage::c_seqno = 1001;
 
-FinderXrlMessage::FinderXrlMessage(const Xrl& xrl)
-    : FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++)
+    FinderXrlMessage::FinderXrlMessage(const Xrl& xrl)
+: FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++)
 {
     _rendered += c_format(c_msg_template, xrl.str().c_str());
 }
 
-ParsedFinderXrlMessage::ParsedFinderXrlMessage(const char* data)
+    ParsedFinderXrlMessage::ParsedFinderXrlMessage(const char* data)
     throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString)
-    : ParsedFinderMessageBase(data, FinderXrlMessage::c_type)
+: ParsedFinderMessageBase(data, FinderXrlMessage::c_type)
 {
     // The following may throw an invalid string exception
     _xrl = new Xrl(data + bytes_parsed());
@@ -204,51 +215,57 @@ ParsedFinderXrlMessage::~ParsedFinderXrlMessage()
 //
 
 FinderXrlResponse::FinderXrlResponse(uint32_t	     seqno,
-				     const XrlError& e,
-				     const XrlArgs*  args)
-    : FinderMessageBase(seqno, c_type)
+	const XrlError& e,
+	const XrlArgs*  args)
+: FinderMessageBase(seqno, c_type)
 {
     // Protect note associated with XrlError by xrl encoding string.
     string e_note(xrlatom_encode_value(e.note()));
 
-    if (args) {
+    if (args) 
+    {
 	_rendered += c_format(c_msg_template,
-			      e.error_code(),
-			      e_note.c_str(),
-			      args->str().c_str());
-    } else {
+		e.error_code(),
+		e_note.c_str(),
+		args->str().c_str());
+    } else 
+    {
 	_rendered += c_format(c_msg_template,
-			      e.error_code(),
-			      e_note.c_str(),
-			      "");
+		e.error_code(),
+		e_note.c_str(),
+		"");
     }
 }
 
-ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+    ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
     throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString)
-    : ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
+: ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
 {
     data += bytes_parsed();
     char* p0 = strstr(const_cast<char*>(data), "/");
     char* p1 = strstr(const_cast<char*>(data), "\n");
-    if (p0 == 0 || p1 == 0) {
+    if (p0 == 0 || p1 == 0) 
+    {
 	xorp_throw(BadFinderMessageFormat, "XrlError not present");
     }
 
     uint32_t code = 0;
-    while (xorp_isdigit(*data)) {
+    while (xorp_isdigit(*data)) 
+    {
 	code *= 10;
 	code += *data - '0';
 	data++;
     }
 
-    if (XrlError::known_code(code) == false) {
+    if (XrlError::known_code(code) == false) 
+    {
 	xorp_throw(InvalidString, "Unknown Xrl error code");
     }
 
     string note;
     if (p0 + 2 < p1 &&
-	xrlatom_decode_value(p0 + 2, p1 - p0 - 2, note) >= 0) {
+	    xrlatom_decode_value(p0 + 2, p1 - p0 - 2, note) >= 0) 
+    {
 	xorp_throw(InvalidString, "Code not decode XrlError note.");    
     }
 

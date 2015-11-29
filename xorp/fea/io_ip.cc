@@ -33,14 +33,14 @@
 //
 
 IoIp::IoIp(FeaDataPlaneManager& fea_data_plane_manager, const IfTree& iftree,
-	   int family, uint8_t ip_protocol)
-    : _is_running(false),
-      _io_ip_manager(fea_data_plane_manager.io_ip_manager()),
-      _fea_data_plane_manager(fea_data_plane_manager),
-      _iftree(iftree),
-      _family(family),
-      _ip_protocol(ip_protocol),
-      _io_ip_receiver(NULL)
+		int family, uint8_t ip_protocol)
+: _is_running(false),
+	_io_ip_manager(fea_data_plane_manager.io_ip_manager()),
+	_fea_data_plane_manager(fea_data_plane_manager),
+	_iftree(iftree),
+	_family(family),
+	_ip_protocol(ip_protocol),
+	_io_ip_receiver(NULL)
 {
 }
 
@@ -48,49 +48,51 @@ IoIp::~IoIp()
 {
 }
 
-void
+	void
 IoIp::register_io_ip_receiver(IoIpReceiver* io_ip_receiver)
 {
-    _io_ip_receiver = io_ip_receiver;
+	_io_ip_receiver = io_ip_receiver;
 }
 
-void
+	void
 IoIp::unregister_io_ip_receiver()
 {
-    _io_ip_receiver = NULL;
+	_io_ip_receiver = NULL;
 }
 
-void
+	void
 IoIp::recv_packet(const string&	if_name,
-		  const string&	vif_name,
-		  const IPvX&	src_address,
-		  const IPvX&	dst_address,
-		  int32_t	ip_ttl,
-		  int32_t	ip_tos,
-		  bool		ip_router_alert,
-		  bool		ip_internet_control,
-		  const vector<uint8_t>& ext_headers_type,
-		  const vector<vector<uint8_t> >& ext_headers_payload,
-		  const vector<uint8_t>& payload)
+		const string&	vif_name,
+		const IPvX&	src_address,
+		const IPvX&	dst_address,
+		int32_t	ip_ttl,
+		int32_t	ip_tos,
+		bool		ip_router_alert,
+		bool		ip_internet_control,
+		const vector<uint8_t>& ext_headers_type,
+		const vector<vector<uint8_t> >& ext_headers_payload,
+		const vector<uint8_t>& payload)
 {
-    if (_io_ip_receiver == NULL) {
-	// XXX: should happen only during transient setup stage
-	return;
-    }
+	if (_io_ip_receiver == NULL) 
+	{
+		// XXX: should happen only during transient setup stage
+		return;
+	}
 
-    _io_ip_receiver->recv_packet(if_name, vif_name, src_address, dst_address,
-				 ip_ttl, ip_tos, ip_router_alert,
-				 ip_internet_control, ext_headers_type,
-				 ext_headers_payload, payload);
+	_io_ip_receiver->recv_packet(if_name, vif_name, src_address, dst_address,
+			ip_ttl, ip_tos, ip_router_alert,
+			ip_internet_control, ext_headers_type,
+			ext_headers_payload, payload);
 }
 
-void
+	void
 IoIp::recv_system_multicast_upcall(const vector<uint8_t>& payload)
 {
-    if (_io_ip_receiver == NULL) {
-	// XXX: should happen only during transient setup stage
-	return;
-    }
+	if (_io_ip_receiver == NULL) 
+	{
+		// XXX: should happen only during transient setup stage
+		return;
+	}
 
-    _io_ip_receiver->recv_system_multicast_upcall(payload);
+	_io_ip_receiver->recv_system_multicast_upcall(payload);
 }

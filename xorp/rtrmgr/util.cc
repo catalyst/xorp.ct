@@ -47,273 +47,291 @@ static string s_config_file;
  * @return directory name of executable program on success, empty string
  * on failure.
  */
-static string
+	static string
 find_executable_program_dir(const string& program_name)
 {
-    debug_msg("%s\n", program_name.c_str());
+	debug_msg("%s\n", program_name.c_str());
 
-    if (program_name.size() >= MAXPATHLEN)
-	return string("");		// Error: invalid program name
+	if (program_name.size() >= MAXPATHLEN)
+		return string("");		// Error: invalid program name
 
-    //
-    // Look for trailing slash in program_name
-    //
-    string::size_type slash = program_name.rfind(PATH_DELIMITER_CHAR);
-    if (slash != string::npos) {
-	string path = program_name.substr(0, slash);
-	return path;
-    }
-
-    //
-    // Go through the PATH environment variable and find the program location
-    //
-    string slash_progname(PATH_DELIMITER_STRING);
-    slash_progname += program_name;
-    slash_progname += EXECUTABLE_SUFFIX;
-    const char* s = getenv("PATH");
-    while (s != NULL && *s != '\0') {
-	const char* e = strchr(s, PATH_ENV_DELIMITER_CHAR);
-	string path;
-	if (e != NULL) {
-	    path = string(s, e);
-	    s = e + 1;
-	} else {
-	    path = string(s);
-	    s = NULL;
+	//
+	// Look for trailing slash in program_name
+	//
+	string::size_type slash = program_name.rfind(PATH_DELIMITER_CHAR);
+	if (slash != string::npos) 
+	{
+		string path = program_name.substr(0, slash);
+		return path;
 	}
-	string complete_path = path + slash_progname;
-	if (access(complete_path.c_str(), X_OK) == 0) {
-	    return path;
-	}
-    }
 
-    return string("");			// Error: nothing found
+	//
+	// Go through the PATH environment variable and find the program location
+	//
+	string slash_progname(PATH_DELIMITER_STRING);
+	slash_progname += program_name;
+	slash_progname += EXECUTABLE_SUFFIX;
+	const char* s = getenv("PATH");
+	while (s != NULL && *s != '\0') 
+	{
+		const char* e = strchr(s, PATH_ENV_DELIMITER_CHAR);
+		string path;
+		if (e != NULL) 
+		{
+			path = string(s, e);
+			s = e + 1;
+		} else 
+		{
+			path = string(s);
+			s = NULL;
+		}
+		string complete_path = path + slash_progname;
+		if (access(complete_path.c_str(), X_OK) == 0) 
+		{
+			return path;
+		}
+	}
+
+	return string("");			// Error: nothing found
 }
 
-static string
+	static string
 xorp_real_path(const string& path)
 {
-    debug_msg("path: %s\n", path.c_str());
+	debug_msg("path: %s\n", path.c_str());
 
-    char rp[MAXPATHLEN];
+	char rp[MAXPATHLEN];
 
-    const char* prp = realpath(path.c_str(), rp);
-    if (prp != NULL) {
-	debug_msg("return %s\n", prp);
-	return string(prp);
-    }
+	const char* prp = realpath(path.c_str(), rp);
+	if (prp != NULL) 
+	{
+		debug_msg("return %s\n", prp);
+		return string(prp);
+	}
 
-    // XLOG_WARNING("realpath(%s) failed.", path.c_str());
-    debug_msg("return %s\n", path.c_str());
-    return path;
+	// XLOG_WARNING("realpath(%s) failed.", path.c_str());
+	debug_msg("return %s\n", path.c_str());
+	return path;
 }
 
-void
+	void
 xorp_path_init(const char* argv0)
 {
-    const char* xr = getenv("XORP_ROOT");
-    if (xr != NULL) {
-	s_bin_root = xr;
-	s_cfg_root = xr;
-	s_config_file = s_cfg_root + "/etc/xorp.conf";
+	const char* xr = getenv("XORP_ROOT");
+	if (xr != NULL) 
+	{
+		s_bin_root = xr;
+		s_cfg_root = xr;
+		s_config_file = s_cfg_root + "/etc/xorp.conf";
+		s_template_dir = s_cfg_root + "/share/xorp/templates";
+		s_target_dir = s_cfg_root + "/share/xorp/xrl/targets";
+		return;
+	}
+
+	string current_root = find_executable_program_dir(argv0) +
+		PATH_DELIMITER_STRING +
+		PATH_PARENT;
+	current_root = xorp_real_path(current_root);
+
+	debug_msg("current_root: %s\n", current_root.c_str());
+
+	string build_root = xorp_real_path(XORP_BUILD_ROOT);
+	debug_msg("build_root:   %s\n", build_root.c_str());
+	if (current_root == build_root) 
+	{
+		s_bin_root = build_root;
+		s_cfg_root = build_root;
+		s_template_dir = s_cfg_root + "/etc/templates";
+		s_target_dir = s_cfg_root + "/xrl/targets";
+		s_config_file = xorp_real_path(XORP_SRC_ROOT) + "/rtrmgr/config/xorp.conf";
+
+		debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
+		debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
+		debug_msg("s_template_dir:	%s\n",s_template_dir.c_str());
+		debug_msg("s_target_dir:	%s\n",s_target_dir.c_str());
+		debug_msg("s_config_file:  %s\n", s_config_file.c_str());
+
+		return;
+	}
+
+	string install_root = xorp_real_path(XORP_INSTALL_ROOT);
+	s_bin_root = install_root;
+	s_cfg_root = install_root;
 	s_template_dir = s_cfg_root + "/share/xorp/templates";
 	s_target_dir = s_cfg_root + "/share/xorp/xrl/targets";
-	return;
-    }
-
-    string current_root = find_executable_program_dir(argv0) +
-			  PATH_DELIMITER_STRING +
-			  PATH_PARENT;
-    current_root = xorp_real_path(current_root);
-
-    debug_msg("current_root: %s\n", current_root.c_str());
-
-    string build_root = xorp_real_path(XORP_BUILD_ROOT);
-    debug_msg("build_root:   %s\n", build_root.c_str());
-    if (current_root == build_root) {
-	s_bin_root = build_root;
-	s_cfg_root = build_root;
-	s_template_dir = s_cfg_root + "/etc/templates";
-	s_target_dir = s_cfg_root + "/xrl/targets";
-	s_config_file = xorp_real_path(XORP_SRC_ROOT) + "/rtrmgr/config/xorp.conf";
+	s_config_file = s_cfg_root + "/etc/xorp.conf";
 
 	debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
 	debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
 	debug_msg("s_template_dir:	%s\n",s_template_dir.c_str());
 	debug_msg("s_target_dir:	%s\n",s_target_dir.c_str());
 	debug_msg("s_config_file:  %s\n", s_config_file.c_str());
-
-	return;
-    }
-
-    string install_root = xorp_real_path(XORP_INSTALL_ROOT);
-    s_bin_root = install_root;
-    s_cfg_root = install_root;
-    s_template_dir = s_cfg_root + "/share/xorp/templates";
-    s_target_dir = s_cfg_root + "/share/xorp/xrl/targets";
-    s_config_file = s_cfg_root + "/etc/xorp.conf";
-
-    debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
-    debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
-    debug_msg("s_template_dir:	%s\n",s_template_dir.c_str());
-    debug_msg("s_target_dir:	%s\n",s_target_dir.c_str());
-    debug_msg("s_config_file:  %s\n", s_config_file.c_str());
 }
 
-const string&
+	const string&
 xorp_binary_root_dir()
 {
-    return s_bin_root;
+	return s_bin_root;
 }
 
-const string&
+	const string&
 xorp_config_root_dir()
 {
-    return s_cfg_root;
+	return s_cfg_root;
 }
 
-string
+	string
 xorp_module_dir()
 {
-    return s_cfg_root + string("/lib/xorp/sbin");
+	return s_cfg_root + string("/lib/xorp/sbin");
 }
 
-string
+	string
 xorp_command_dir()
 {
-    return s_cfg_root + string("/lib/xorp/bin");
+	return s_cfg_root + string("/lib/xorp/bin");
 }
 
-string
+	string
 xorp_template_dir()
 {
-    return s_template_dir;
+	return s_template_dir;
 }
 
-string
+	string
 xorp_xrl_targets_dir()
 {
-    return s_target_dir;
+	return s_target_dir;
 }
 
-string
+	string
 xorp_config_file()
 {
-    return s_config_file;
+	return s_config_file;
 }
 
-string&
+	string&
 unquote(string& s)
 {
-    if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') {
-	s = s.substr(1, s.size() - 2);
-    }
-    return s;
+	if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') 
+	{
+		s = s.substr(1, s.size() - 2);
+	}
+	return s;
 }
 
-string
+	string
 unquote(const string& s)
 {
-    if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') {
-	return s.substr(1, s.size() - 2);
-    }
-    return s;
+	if (s.length() >= 2 && s[0] == '"' && s[s.size() - 1] == '"') 
+	{
+		return s.substr(1, s.size() - 2);
+	}
+	return s;
 }
 
-bool
+	bool
 is_quotable_string(const string& s)
 {
-    size_t i;
+	size_t i;
 
-    for (i = 0; i < s.size(); i++) {
-	if (! xorp_isalnum(s[i]))
-	    return (true);
-    }
+	for (i = 0; i < s.size(); i++) 
+	{
+		if (! xorp_isalnum(s[i]))
+			return (true);
+	}
 
-    return (false);
+	return (false);
 }
 
-string
+	string
 find_executable_filename(const string& program_filename)
 {
-    string executable_filename;
-    struct stat statbuf;
+	string executable_filename;
+	struct stat statbuf;
 
-    if (program_filename.size() == 0) {
-	return string("");			// Error
-    }
-
-    // Assume the path passed to us is a UNIX-style path.
-    executable_filename = program_filename;
-
-    //
-    // TODO: take care of the commented-out access() calls below (by BMS).
-    //
-    // Comment out the access() calls for now -- xorpsh does not
-    // like them, when running under sudo -u xorp (euid?) and
-    // as a result xorpsh fails to start up.
-    // Consider checking for it in configure.in and shipping
-    // our own if we can't find it on the system.
-    //
-    if (is_absolute_path(executable_filename)) {
-	// Absolute path name
-	if (stat(executable_filename.c_str(), &statbuf) == 0 &&
-	    // access(executable_filename.c_str(), X_OK) == 0 &&
-	    S_ISREG(statbuf.st_mode)) {
-	    return executable_filename;
+	if (program_filename.size() == 0) 
+	{
+		return string("");			// Error
 	}
-	return string("");			// Error
-    }
 
-    // Relative path name
-    string xorp_root_dir = xorp_binary_root_dir();
+	// Assume the path passed to us is a UNIX-style path.
+	executable_filename = program_filename;
 
-    list<string> path;
-    path.push_back(xorp_command_dir());		// XXX FHS
-    path.push_back(xorp_root_dir);
-
-    // Expand path
-    const char* p = getenv("PATH");
-    if (p != NULL) {
-	list<string> l2 = split(p, PATH_ENV_DELIMITER_CHAR);
-	path.splice(path.end(), l2);
-    }
-
-    // Search each path component
-    while (!path.empty()) {
-	// Don't forget to append the executable suffix if needed.
-	string full_path_executable = path.front() + PATH_DELIMITER_STRING +
-				      executable_filename + EXECUTABLE_SUFFIX;
-	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
-	    // access(program_filename.c_str(), X_OK) == 0 &&
-	    S_ISREG(statbuf.st_mode)) {
-	    executable_filename = full_path_executable;
-	    return executable_filename;
+	//
+	// TODO: take care of the commented-out access() calls below (by BMS).
+	//
+	// Comment out the access() calls for now -- xorpsh does not
+	// like them, when running under sudo -u xorp (euid?) and
+	// as a result xorpsh fails to start up.
+	// Consider checking for it in configure.in and shipping
+	// our own if we can't find it on the system.
+	//
+	if (is_absolute_path(executable_filename)) 
+	{
+		// Absolute path name
+		if (stat(executable_filename.c_str(), &statbuf) == 0 &&
+				// access(executable_filename.c_str(), X_OK) == 0 &&
+				S_ISREG(statbuf.st_mode)) 
+		{
+			return executable_filename;
+		}
+		return string("");			// Error
 	}
-	path.pop_front();
-    }
-    return string("");				// Error
+
+	// Relative path name
+	string xorp_root_dir = xorp_binary_root_dir();
+
+	list<string> path;
+	path.push_back(xorp_command_dir());		// XXX FHS
+	path.push_back(xorp_root_dir);
+
+	// Expand path
+	const char* p = getenv("PATH");
+	if (p != NULL) 
+	{
+		list<string> l2 = split(p, PATH_ENV_DELIMITER_CHAR);
+		path.splice(path.end(), l2);
+	}
+
+	// Search each path component
+	while (!path.empty()) 
+	{
+		// Don't forget to append the executable suffix if needed.
+		string full_path_executable = path.front() + PATH_DELIMITER_STRING +
+			executable_filename + EXECUTABLE_SUFFIX;
+		if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
+				// access(program_filename.c_str(), X_OK) == 0 &&
+				S_ISREG(statbuf.st_mode)) 
+		{
+			executable_filename = full_path_executable;
+			return executable_filename;
+		}
+		path.pop_front();
+	}
+	return string("");				// Error
 }
 
-void
+	void
 find_executable_filename_and_arguments(const string& program_request,
-				       string& executable_filename,
-				       string& program_arguments)
+		string& executable_filename,
+		string& program_arguments)
 {
-    executable_filename = strip_empty_spaces(program_request);
-    program_arguments = "";
-
-    string::size_type space;
-    space = executable_filename.find(' ');
-    if (space == string::npos)
-	space = executable_filename.find('\t');
-
-    if (space != string::npos) {
-	program_arguments = executable_filename.substr(space + 1);
-	executable_filename = executable_filename.substr(0, space);
-    }
-
-    executable_filename = find_executable_filename(executable_filename);
-    if (executable_filename.empty())
+	executable_filename = strip_empty_spaces(program_request);
 	program_arguments = "";
+
+	string::size_type space;
+	space = executable_filename.find(' ');
+	if (space == string::npos)
+		space = executable_filename.find('\t');
+
+	if (space != string::npos) 
+	{
+		program_arguments = executable_filename.substr(space + 1);
+		executable_filename = executable_filename.substr(0, space);
+	}
+
+	executable_filename = find_executable_filename(executable_filename);
+	if (executable_filename.empty())
+		program_arguments = "";
 }

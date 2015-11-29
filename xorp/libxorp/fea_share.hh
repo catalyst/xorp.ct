@@ -20,7 +20,8 @@
 #ifndef __LIBXORP_FEA_SHARE_HH__
 #define __LIBXORP_FEA_SHARE_HH__
 
-enum IfStringTypeE {
+enum IfStringTypeE 
+{
     IF_STRING_PARENT_IFNAME,
     IF_STRING_IFTYPE,
     IF_STRING_VID

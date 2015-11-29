@@ -27,26 +27,28 @@
 #include "profile_vars.hh"
 
 
-struct profile_vars {
-    string var;
-    string comment;
-} profile_vars[] = {
-    {profile_message_in, 	"Messages entering BGP"},
-    {profile_route_ribin, 	"Routes entering BGP"},
-    {profile_route_rpc_in, 	"Routes being queued for the RIB"},
-    {profile_route_rpc_out, 	"Routes being sent to the RIB"},
+struct profile_vars 
+{
+	string var;
+	string comment;
+} profile_vars[] = 
+{
+	{profile_message_in, 	"Messages entering BGP"},
+	{profile_route_ribin, 	"Routes entering BGP"},
+	{profile_route_rpc_in, 	"Routes being queued for the RIB"},
+	{profile_route_rpc_out, 	"Routes being sent to the RIB"},
 
-    {trace_message_in, 		"Trace Message entering BGP"},
-    {trace_message_out, 	"Trace Message leaving BGP"},
-    {trace_nexthop_resolution,	"Trace nexthop resolution with RIB"},
-    {trace_policy_configure,	"Trace policy introduction"},
-    {trace_state_change,	"Trace FSM state change"},
+	{trace_message_in, 		"Trace Message entering BGP"},
+	{trace_message_out, 	"Trace Message leaving BGP"},
+	{trace_nexthop_resolution,	"Trace nexthop resolution with RIB"},
+	{trace_policy_configure,	"Trace policy introduction"},
+	{trace_state_change,	"Trace FSM state change"},
 };
 
-void
+	void
 initialize_profiling_variables(Profile& p)
 {
-    for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
-	 i++)
-	p.create(profile_vars[i].var, profile_vars[i].comment);
+	for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
+			i++)
+		p.create(profile_vars[i].var, profile_vars[i].comment);
 }

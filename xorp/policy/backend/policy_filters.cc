@@ -32,8 +32,8 @@ PolicyFilters::PolicyFilters()
 }
 
 PolicyFilters::PolicyFilters(FilterBase* im, FilterBase* sm, FilterBase* ex) :
-			     _import_filter(im), _export_sm_filter(sm),
-			     _export_filter(ex)
+    _import_filter(im), _export_sm_filter(sm),
+    _export_filter(ex)
 {
 }
 
@@ -44,39 +44,40 @@ PolicyFilters::~PolicyFilters()
     delete _export_filter;
 }
 
-bool
+    bool
 PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw)
 {
     FilterBase& pf = whichFilter(ftype);
     return pf.acceptRoute(varrw);
 }
 
-void
+    void
 PolicyFilters::configure(const uint32_t& ftype, const string& conf)
 {
     FilterBase& pf = whichFilter(ftype);
     pf.configure(conf);
 }
 
-void
+    void
 PolicyFilters::reset(const uint32_t& ftype)
 {
     FilterBase& pf = whichFilter(ftype);
     pf.reset();
 }
 
-FilterBase& 
+    FilterBase& 
 PolicyFilters::whichFilter(const uint32_t& ftype)
 {
-    switch(ftype) {
+    switch(ftype) 
+    {
 	case 1:
 	    return *_import_filter;
 	case 2:
 	    return *_export_sm_filter;
 	case 4:
 	    return *_export_filter;
-	
+
     }
     xorp_throw(PolicyFiltersErr, 
-	       "Unknown filter: " + policy_utils::to_str(ftype));
+	    "Unknown filter: " + policy_utils::to_str(ftype));
 }

@@ -41,81 +41,83 @@
  *
  * Very similar / identical to BGP's process watch.
  */
-class ProcessWatch : public ProcessWatchBase {
-public:
-    /**
-     * @short Exception thrown on error, such as Xrl failure.
-     */
-    class PWException : public PolicyException {
+class ProcessWatch : public ProcessWatchBase 
+{
     public:
-        PWException(const char* file, size_t line, const string& init_why = "")   
-            : PolicyException("PWException", file, line, init_why) {} 
+	/**
+	 * @short Exception thrown on error, such as Xrl failure.
+	 */
+	class PWException : public PolicyException 
+    {
+	public:
+	    PWException(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("PWException", file, line, init_why) {} 
     };
 
-    /**
-     * @param rtr Xrl router to use.
-     * @param pmap protocol map.
-     */
-    ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap);
+	/**
+	 * @param rtr Xrl router to use.
+	 * @param pmap protocol map.
+	 */
+	ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap);
 
-    /**
-     * Callback for all Xrl calls.
-     *
-     * @param err possible Xrl error.
-     */
-    void register_cb(const XrlError& err);
+	/**
+	 * Callback for all Xrl calls.
+	 *
+	 * @param err possible Xrl error.
+	 */
+	void register_cb(const XrlError& err);
 
-    /**
-     * Add an interest in a protocol.
-     *
-     * @param proc process of the protocol to add interest for.
-     */
-    void add_interest(const string& proc);
+	/**
+	 * Add an interest in a protocol.
+	 *
+	 * @param proc process of the protocol to add interest for.
+	 */
+	void add_interest(const string& proc);
 
-    /**
-     * Announce birth of a protocol [process].
-     *
-     * @param proto protocol that came to life.
-     */
-    void birth(const string& proto);
-    
-    /**
-     * Announce death of a protocol.
-     *
-     * @param proto protocol that died.
-     */
-    void death(const string& proto);
-   
-    /**
-     * An exception is thrown if the process watch is not watching the requested
-     * protocol.
-     *
-     * @return true if protocol is alive, false otherwise.
-     * @param proto protocol for which status is requested.
-     */
-    bool alive(const string& proto);
+	/**
+	 * Announce birth of a protocol [process].
+	 *
+	 * @param proto protocol that came to life.
+	 */
+	void birth(const string& proto);
 
-    /**
-     * Set an object which will receive birth/death notifications.
-     *
-     * If a previous object was "registered", it will be removed. Only one
-     * object may receive notifications.
-     *
-     * @param notifier object where notifications should be sent.
-     */
-    void set_notifier(PWNotifier& notifier);
+	/**
+	 * Announce death of a protocol.
+	 *
+	 * @param proto protocol that died.
+	 */
+	void death(const string& proto);
 
-private:
-    ProtocolMap&    _pmap;
-    set<string>	    _watching;
-    set<string>	    _alive;
-    XrlFinderEventNotifierV0p1Client _finder;
-    string	    _instance_name;
+	/**
+	 * An exception is thrown if the process watch is not watching the requested
+	 * protocol.
+	 *
+	 * @return true if protocol is alive, false otherwise.
+	 * @param proto protocol for which status is requested.
+	 */
+	bool alive(const string& proto);
 
-    // do not delete, we do not own
-    PWNotifier*	    _notifier;
+	/**
+	 * Set an object which will receive birth/death notifications.
+	 *
+	 * If a previous object was "registered", it will be removed. Only one
+	 * object may receive notifications.
+	 *
+	 * @param notifier object where notifications should be sent.
+	 */
+	void set_notifier(PWNotifier& notifier);
 
-    string	    _finder_name;
+    private:
+	ProtocolMap&    _pmap;
+	set<string>	    _watching;
+	set<string>	    _alive;
+	XrlFinderEventNotifierV0p1Client _finder;
+	string	    _instance_name;
+
+	// do not delete, we do not own
+	PWNotifier*	    _notifier;
+
+	string	    _finder_name;
 };
 
 #endif // __POLICY_PROCESS_WATCH_HH__

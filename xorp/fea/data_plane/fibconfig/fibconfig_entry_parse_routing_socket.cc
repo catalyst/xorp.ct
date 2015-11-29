@@ -47,67 +47,72 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-int
+	int
 FibConfigEntryGetRoutingSocket::parse_buffer_routing_socket(
-    const IfTree& iftree,
-    FteX& fte,
-    const vector<uint8_t>& buffer,
-    FibMsgSet filter)
+		const IfTree& iftree,
+		FteX& fte,
+		const vector<uint8_t>& buffer,
+		FibMsgSet filter)
 {
-    const struct rt_msghdr* rtm;
-    size_t offset;
+	const struct rt_msghdr* rtm;
+	size_t offset;
 
-    rtm = (const struct rt_msghdr*)(&(buffer[0]));
-    for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
-	bool filter_match = false;
+	rtm = (const struct rt_msghdr*)(&(buffer[0]));
+	for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) 
+	{
+		bool filter_match = false;
 
-	rtm = (const struct rt_msghdr*)(&(buffer[offset]));
-	if (rtm->rtm_version != RTM_VERSION) {
-	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
-		       RTM_VERSION,
-		       rtm->rtm_version);
-	    continue;
-	}
+		rtm = (const struct rt_msghdr*)(&(buffer[offset]));
+		if (rtm->rtm_version != RTM_VERSION) 
+		{
+			XLOG_ERROR("RTM version mismatch: expected %d got %d",
+					RTM_VERSION,
+					rtm->rtm_version);
+			continue;
+		}
 
-	// XXX: ignore entries with an error
-	if (rtm->rtm_errno != 0)
-	    continue;
+		// XXX: ignore entries with an error
+		if (rtm->rtm_errno != 0)
+			continue;
 
-	// Caller wants route gets to be parsed.
-	if (filter & FibMsg::GETS) {
+		// Caller wants route gets to be parsed.
+		if (filter & FibMsg::GETS) 
+		{
 #ifdef RTM_GET
-	    if ((rtm->rtm_type == RTM_GET) &&
-	        (rtm->rtm_flags & RTF_UP))
-		filter_match = true;
+			if ((rtm->rtm_type == RTM_GET) &&
+					(rtm->rtm_flags & RTF_UP))
+				filter_match = true;
 #endif
-	}
+		}
 
-	// Caller wants route resolves to be parsed.
-	// Resolves may not be supported in some implementations.
-	if (filter & FibMsg::RESOLVES) {
+		// Caller wants route resolves to be parsed.
+		// Resolves may not be supported in some implementations.
+		if (filter & FibMsg::RESOLVES) 
+		{
 #ifdef RTM_MISS
-	    if (rtm->rtm_type == RTM_MISS)
-		filter_match = true;
+			if (rtm->rtm_type == RTM_MISS)
+				filter_match = true;
 #endif
 #ifdef RTM_RESOLVE
-	    if (rtm->rtm_type == RTM_RESOLVE)
-		filter_match = true;
+			if (rtm->rtm_type == RTM_RESOLVE)
+				filter_match = true;
 #endif
+		}
+
+		// Caller wants routing table updates to be parsed.
+		if (filter & FibMsg::UPDATES) 
+		{
+			if ((rtm->rtm_type == RTM_ADD) ||
+					(rtm->rtm_type == RTM_DELETE) ||
+					(rtm->rtm_type == RTM_CHANGE))
+				filter_match = true;
+		}
+
+		if (filter_match)
+			return (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm));
 	}
 
-	// Caller wants routing table updates to be parsed.
-	if (filter & FibMsg::UPDATES) {
-	    if ((rtm->rtm_type == RTM_ADD) ||
-		(rtm->rtm_type == RTM_DELETE) ||
-		(rtm->rtm_type == RTM_CHANGE))
-		    filter_match = true;
-	}
-
-	if (filter_match)
-	    return (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm));
-    }
-
-    return (XORP_ERROR);
+	return (XORP_ERROR);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

@@ -28,55 +28,58 @@
 #include "fibconfig_transaction.hh"
 
 
-int
+	int
 FibConfigTransactionManager::set_error(const string& error)
 {
-    if (! _first_error.empty())
-	return (XORP_ERROR);
+	if (! _first_error.empty())
+		return (XORP_ERROR);
 
-    _first_error = error;
-    return (XORP_OK);
+	_first_error = error;
+	return (XORP_OK);
 }
 
-void
+	void
 FibConfigTransactionManager::pre_commit(uint32_t /* tid */)
 {
-    string error_msg;
+	string error_msg;
 
-    reset_error();
+	reset_error();
 
-    if (fibconfig().start_configuration(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot start configuration: %s", error_msg.c_str());
-	set_error(error_msg);
-    }
+	if (fibconfig().start_configuration(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot start configuration: %s", error_msg.c_str());
+		set_error(error_msg);
+	}
 }
 
-void
+	void
 FibConfigTransactionManager::post_commit(uint32_t /* tid */)
 {
-    string error_msg;
+	string error_msg;
 
-    if (fibconfig().end_configuration(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot end configuration: %s", error_msg.c_str());
-	set_error(error_msg);
-    }
+	if (fibconfig().end_configuration(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot end configuration: %s", error_msg.c_str());
+		set_error(error_msg);
+	}
 }
 
-void
+	void
 FibConfigTransactionManager::operation_result(bool success,
-					      const TransactionOperation& op)
+		const TransactionOperation& op)
 {
-    if (success)
-	return;
+	if (success)
+		return;
 
-    const FibConfigTransactionOperation* fto;
-    fto = dynamic_cast<const FibConfigTransactionOperation*>(&op);
-    XLOG_ASSERT(fto != NULL);
+	const FibConfigTransactionOperation* fto;
+	fto = dynamic_cast<const FibConfigTransactionOperation*>(&op);
+	XLOG_ASSERT(fto != NULL);
 
-    //
-    // Record error and xlog first error only
-    //
-    if (set_error(fto->str()) == XORP_OK) {
-	XLOG_ERROR("FIB transaction commit failed on %s", fto->str().c_str());
-    }
+	//
+	// Record error and xlog first error only
+	//
+	if (set_error(fto->str()) == XORP_OK) 
+	{
+		XLOG_ERROR("FIB transaction commit failed on %s", fto->str().c_str());
+	}
 }

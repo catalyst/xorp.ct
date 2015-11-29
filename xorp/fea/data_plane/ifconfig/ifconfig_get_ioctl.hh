@@ -29,68 +29,69 @@
 #include "fea/ifconfig_get.hh"
 
 
-class IfConfigGetIoctl : public IfConfigGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigGetIoctl(FeaDataPlaneManager& fea_data_plane_manager);
+class IfConfigGetIoctl : public IfConfigGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigGetIoctl(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigGetIoctl();
-    
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigGetIoctl();
 
-    /**
-     * Pull the network interface information from the underlying system.
-     * 
-     * @param iftree the IfTree storage to store the pulled information.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int pull_config(const IfTree* local_config, IfTree& iftree);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in "struct ifreq" format
-     * (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
-     * 
-     * @param ifconfig the IfConfig instance.
-     * @param iftree the IfTree storage to store the parsed information.
-     * @param family the address family to consider only (e.g., AF_INET
-     * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param buffer the buffer with the data to parse.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see IfTree.
-     */
-    static int parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
-				  int family, const vector<uint8_t>& buffer);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-private:
-    int read_config(IfTree& iftree);
+		/**
+		 * Pull the network interface information from the underlying system.
+		 * 
+		 * @param iftree the IfTree storage to store the pulled information.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int pull_config(const IfTree* local_config, IfTree& iftree);
 
-    int _s4;
-    int _s6;
+		/**
+		 * Parse information about network interface configuration change from
+		 * the underlying system.
+		 * 
+		 * The information to parse is in "struct ifreq" format
+		 * (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
+		 * 
+		 * @param ifconfig the IfConfig instance.
+		 * @param iftree the IfTree storage to store the parsed information.
+		 * @param family the address family to consider only (e.g., AF_INET
+		 * or AF_INET6 for IPv4 and IPv6 respectively).
+		 * @param buffer the buffer with the data to parse.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 * @see IfTree.
+		 */
+		static int parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
+				int family, const vector<uint8_t>& buffer);
+
+	private:
+		int read_config(IfTree& iftree);
+
+		int _s4;
+		int _s6;
 };
 
 #endif

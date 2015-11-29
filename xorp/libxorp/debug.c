@@ -35,10 +35,10 @@ void _xdebug_set_indent(uint32_t n)
     dbg_indent = n;
 }
 
-static const char*
+    static const char*
 _xdebug_preamble(const char*	file, 
-		 int		line, 
-		 const char*	func)
+	int		line, 
+	const char*	func)
 {
     static size_t sbuf_bytes = 256;
     static char*  sbuf = 0;
@@ -46,7 +46,8 @@ _xdebug_preamble(const char*	file,
 
     size_t req_bytes;
 
-    if (sbuf == 0) {
+    if (sbuf == 0) 
+    {
 	sbuf = (char*)malloc(sbuf_bytes);
 	spid = (int)getpid();
     }
@@ -54,7 +55,8 @@ _xdebug_preamble(const char*	file,
     req_bytes = 2 * 20 + strlen(file) + 1;
     if (func)
 	req_bytes += strlen(func);
-    if (req_bytes > sbuf_bytes) {
+    if (req_bytes > sbuf_bytes) 
+    {
 	sbuf_bytes = req_bytes;
 	sbuf = (char*)realloc(sbuf, sbuf_bytes);
     }
@@ -64,16 +66,18 @@ _xdebug_preamble(const char*	file,
     gettimeofday(&tv, NULL);
     unsigned long long us = tv.tv_usec;
     us += (tv.tv_sec * 1000000);
-    
+
     /* Format is <pid> [time-us] +<line> <file> [<function>] <users_debug_message>
      *
      * The <line> and <file> formatting is for cutting and pasting as
      * arguments to emacs, vi, vim, nedit, etc, but not ed :-( 
      */
-    if (func) {
+    if (func) 
+    {
 	snprintf(sbuf, sbuf_bytes, "[ %d %llu %+5d %s %s ] ", spid, us, line, file,
-		 func);
-    } else {
+		func);
+    } else 
+    {
 	snprintf(sbuf, sbuf_bytes, "[ %d %llu %+5d %s ] ", spid, us, line, file);
     }
 #else
@@ -82,10 +86,12 @@ _xdebug_preamble(const char*	file,
      * The <line> and <file> formatting is for cutting and pasting as
      * arguments to emacs, vi, vim, nedit, etc, but not ed :-( 
      */
-    if (func) {
+    if (func) 
+    {
 	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s %s ] ", spid, line, file,
-		 func);
-    } else {
+		func);
+    } else 
+    {
 	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s ] ", spid, line, file);
     }
 #endif    
@@ -93,15 +99,17 @@ _xdebug_preamble(const char*	file,
 }
 
 /** Common printing routine */
-__inline static void
+    __inline static void
 _xdebug_msg_va(const char*	file, 
-	       int		line, 
-	       const char*	func, 
-	       const char* 	fmt, 
-	       va_list 		ap) {
+	int		line, 
+	const char*	func, 
+	const char* 	fmt, 
+	va_list 		ap) 
+{
     uint32_t i;
     fprintf(stderr, "%s", _xdebug_preamble(file, line, func));
-    for (i = 0; i < dbg_indent; i++) {
+    for (i = 0; i < dbg_indent; i++) 
+    {
 	fprintf(stderr, " ");
     }
 
@@ -109,11 +117,12 @@ _xdebug_msg_va(const char*	file,
 }
 
 /** Debug printing function for systems with varargs preprocessors */
-void
+    void
 _xdebug_msg_long(const char*	file, 
-		 int		line, 
-		 const char* 	func,
-		 const char* 	fmt, ...) {
+	int		line, 
+	const char* 	func,
+	const char* 	fmt, ...) 
+{
     va_list ap;
     va_start(ap, fmt);
     _xdebug_msg_va(file, line, func, fmt, ap);
@@ -125,15 +134,17 @@ static const char*	the_file;
 static int		the_line;
 static const char*	the_func;
 
-void
-_xdebug_entry(const char* file, int line, const char* func) {
+    void
+_xdebug_entry(const char* file, int line, const char* func) 
+{
     the_file = file;	
     the_line = line;
     the_func = func;
 }
 
-void 
-_xdebug_msg_short(const char* fmt, ...) {
+    void 
+_xdebug_msg_short(const char* fmt, ...) 
+{
     va_list ap;
 
     va_start(ap, fmt);
@@ -141,8 +152,9 @@ _xdebug_msg_short(const char* fmt, ...) {
     va_end(ap);
 }
 
-void
-_xdebug_null(const char* fmt, ...) {
+    void
+_xdebug_null(const char* fmt, ...) 
+{
     UNUSED(fmt);
 }
 

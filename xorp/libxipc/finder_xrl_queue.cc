@@ -28,13 +28,13 @@
 #include "finder_messenger.hh"
 #include "finder_xrl_queue.hh"
 
-FinderXrlCommandQueue::FinderXrlCommandQueue(FinderMessengerBase* messenger)
-    : _m(messenger), _pending(false)
+    FinderXrlCommandQueue::FinderXrlCommandQueue(FinderMessengerBase* messenger)
+: _m(messenger), _pending(false)
 {
 }
 
-FinderXrlCommandQueue::FinderXrlCommandQueue(const FinderXrlCommandQueue& oq)
-    : _m(oq._m), _pending(oq._pending)
+    FinderXrlCommandQueue::FinderXrlCommandQueue(const FinderXrlCommandQueue& oq)
+: _m(oq._m), _pending(oq._pending)
 {
     XLOG_ASSERT(oq._cmds.empty());
     XLOG_ASSERT(oq._pending == false);
@@ -44,8 +44,10 @@ FinderXrlCommandQueue::~FinderXrlCommandQueue()
 {
 }
 
-FinderXrlCommandQueue& FinderXrlCommandQueue::operator=(const FinderXrlCommandQueue& rhs) {
-    if (&rhs != this) {
+FinderXrlCommandQueue& FinderXrlCommandQueue::operator=(const FinderXrlCommandQueue& rhs) 
+{
+    if (&rhs != this) 
+    {
 	_m = rhs._m;
 	_cmds = rhs._cmds;
 	_pending = rhs._pending;
@@ -54,18 +56,19 @@ FinderXrlCommandQueue& FinderXrlCommandQueue::operator=(const FinderXrlCommandQu
     return *this;
 }
 
-inline void
+    inline void
 FinderXrlCommandQueue::push()
 {
     debug_msg("push\n");
     if (false == _pending && _cmds.empty() == false&&
-	_dispatcher.scheduled() == false) {
+	    _dispatcher.scheduled() == false) 
+    {
 	_dispatcher = EventLoop::instance().new_oneoff_after_ms(0,
-			callback(this, &FinderXrlCommandQueue::dispatch_one));
+		callback(this, &FinderXrlCommandQueue::dispatch_one));
     }
 }
 
-void
+    void
 FinderXrlCommandQueue::dispatch_one()
 {
     debug_msg("dispatch_one\n");
@@ -74,7 +77,7 @@ FinderXrlCommandQueue::dispatch_one()
     _pending = true;
 }
 
-void
+    void
 FinderXrlCommandQueue::enqueue(const FinderXrlCommandQueue::Command& cmd)
 {
     debug_msg("enqueue\n");
@@ -82,7 +85,7 @@ FinderXrlCommandQueue::enqueue(const FinderXrlCommandQueue::Command& cmd)
     push();
 }
 
-void
+    void
 FinderXrlCommandQueue::crank()
 {
     debug_msg("crank\n");
@@ -92,7 +95,7 @@ FinderXrlCommandQueue::crank()
     push();
 }
 
-void
+    void
 FinderXrlCommandQueue::kill_messenger()
 {
     debug_msg("killing messenger\n");

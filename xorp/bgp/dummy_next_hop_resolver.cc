@@ -31,13 +31,13 @@
 #include "dummy_next_hop_resolver.hh"
 
 
-template <class A>
-DummyNextHopResolver<A>::DummyNextHopResolver( BGPMain& bgp)
-    : NextHopResolver<A>(NULL,  bgp)
+	template <class A>
+	DummyNextHopResolver<A>::DummyNextHopResolver( BGPMain& bgp)
+: NextHopResolver<A>(NULL,  bgp)
 {
 }
 
-template <class A>
+	template <class A>
 DummyNextHopResolver<A>::~DummyNextHopResolver()
 {
 }
@@ -45,42 +45,47 @@ DummyNextHopResolver<A>::~DummyNextHopResolver()
 template <class A>
 bool 
 DummyNextHopResolver<A>::lookup(const A nexthop, bool& resolvable, 
-			   uint32_t& metric) const
+		uint32_t& metric) const
 {
-    typename map <A, uint32_t>::const_iterator i;
-    i = _metrics.find(nexthop);
-    if (i == _metrics.end()) {
-	resolvable = false;
-	debug_msg("Lookup: %s, not resolvable\n", nexthop.str().c_str());
+	typename map <A, uint32_t>::const_iterator i;
+	i = _metrics.find(nexthop);
+	if (i == _metrics.end()) 
+	{
+		resolvable = false;
+		debug_msg("Lookup: %s, not resolvable\n", nexthop.str().c_str());
+		return true;
+	} 
+	resolvable = true;
+	metric = i->second;
+	debug_msg("Lookup: %s, metric %d\n", nexthop.str().c_str(), metric);
 	return true;
-    } 
-    resolvable = true;
-    metric = i->second;
-    debug_msg("Lookup: %s, metric %d\n", nexthop.str().c_str(), metric);
-    return true;
 }
 
 template <class A>
-void
+	void
 DummyNextHopResolver<A>::set_nexthop_metric(const A nexthop, 
-					    uint32_t metric) {
-    typename map <A, uint32_t>::const_iterator i;
-    i = _metrics.find(nexthop);
-    if (i != _metrics.end()) {
-	XLOG_FATAL("Can't find nexthop's metric\n");
-    }
-    _metrics[nexthop] = metric;
+		uint32_t metric) 
+{
+	typename map <A, uint32_t>::const_iterator i;
+	i = _metrics.find(nexthop);
+	if (i != _metrics.end()) 
+	{
+		XLOG_FATAL("Can't find nexthop's metric\n");
+	}
+	_metrics[nexthop] = metric;
 }
 
 template <class A>
-void
-DummyNextHopResolver<A>::unset_nexthop_metric(const A nexthop) {
-    typename map <A, uint32_t>::iterator i;
-    i = _metrics.find(nexthop);
-    if (i == _metrics.end()) {
-	XLOG_FATAL("Can't unset nexthop %s\n", nexthop.str().c_str());
-    }
-    _metrics.erase(i);
+	void
+DummyNextHopResolver<A>::unset_nexthop_metric(const A nexthop) 
+{
+	typename map <A, uint32_t>::iterator i;
+	i = _metrics.find(nexthop);
+	if (i == _metrics.end()) 
+	{
+		XLOG_FATAL("Can't unset nexthop %s\n", nexthop.str().c_str());
+	}
+	_metrics.erase(i);
 }
 
 

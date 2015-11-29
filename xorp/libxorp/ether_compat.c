@@ -106,29 +106,30 @@
 
 #ifndef HAVE_ETHER_NTOA
 /* XXX: returns a pointer to static storage. */
-char *
+    char *
 ether_ntoa(const struct ether_addr *e)
 {
-	static const char hex[] = "0123456789abcdef";
-	static char buf[sizeof("00:00:00:00:00:00")];
-	char *cp;
-	const uint8_t *ep;
-	unsigned int i, j;
+    static const char hex[] = "0123456789abcdef";
+    static char buf[sizeof("00:00:00:00:00:00")];
+    char *cp;
+    const uint8_t *ep;
+    unsigned int i, j;
 
-	cp = buf;
-	ep = (const uint8_t *)e->octet;
+    cp = buf;
+    ep = (const uint8_t *)e->octet;
+    if ((j = *ep >> 4) != 0)
+	*cp++ = hex[j];
+    *cp++ = hex[*ep++ & 0xf];
+    for (i = 5; (int)--i >= 0;) 
+    {
+	*cp++ = ':';
 	if ((j = *ep >> 4) != 0)
-		*cp++ = hex[j];
+	    *cp++ = hex[j];
 	*cp++ = hex[*ep++ & 0xf];
-	for (i = 5; (int)--i >= 0;) {
-		*cp++ = ':';
-		if ((j = *ep >> 4) != 0)
-		*cp++ = hex[j];
-	*cp++ = hex[*ep++ & 0xf];
-	}
-	*cp = '\0';
+    }
+    *cp = '\0';
 
-	return (buf);
+    return (buf);
 }
 #endif /* !HAVE_ETHER_NTOA */
 
@@ -138,7 +139,7 @@ ether_ntoa(const struct ether_addr *e)
  * ethernet address.
  * XXX: returns a pointer to static storage.
  */
-struct ether_addr *
+    struct ether_addr *
 ether_aton(const char *s)
 {
     int i;
@@ -146,7 +147,7 @@ ether_aton(const char *s)
     unsigned int od[6];
 
     i = sscanf(s, "%x:%x:%x:%x:%x:%x",
-	       &od[0], &od[1], &od[2], &od[3], &od[4], &od[5]);
+	    &od[0], &od[1], &od[2], &od[3], &od[4], &od[5]);
     if (i != 6)
 	return (NULL);
 

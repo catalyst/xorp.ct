@@ -30,7 +30,8 @@
 #ifndef _SYNC_H_
 #define _SYNC_H_
 
-typedef struct _READ_WRITE_LOCK {
+typedef struct _READ_WRITE_LOCK 
+{
     CRITICAL_SECTION    RWL_ReadWriteBlock;
     LONG                RWL_ReaderCount;
     HANDLE              RWL_ReaderDoneEvent;
@@ -38,27 +39,27 @@ typedef struct _READ_WRITE_LOCK {
 
 DWORD
 CreateReadWriteLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 VOID
 DeleteReadWriteLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 VOID
 AcquireReadLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 VOID
 ReleaseReadLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 VOID
 AcquireWriteLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 VOID
 ReleaseWriteLock(
-    PREAD_WRITE_LOCK pRWL);
+	PREAD_WRITE_LOCK pRWL);
 
 #define CREATE_READ_WRITE_LOCK(pRWL)                                \
     CreateReadWriteLock(pRWL)
@@ -83,7 +84,8 @@ ReleaseWriteLock(
 }
 
 
-typedef struct _LOCKED_LIST {
+typedef struct _LOCKED_LIST 
+{
     CRITICAL_SECTION    lock;
     LIST_ENTRY          head;
     DWORD               created;
@@ -93,32 +95,32 @@ typedef struct _LOCKED_LIST {
 {                                                                   \
     do                                                              \
     {                                                               \
-        __try {                                                     \
-            InitializeCriticalSection(&((pLL)->lock));              \
-        }                                                           \
-        __except (EXCEPTION_EXECUTE_HANDLER) {                      \
-            break;                                                  \
-        }                                                           \
-        InitializeListHead(&((pLL)->head));                         \
-        (pLL)->created = 0x12345678;                                \
+	__try {                                                     \
+	    InitializeCriticalSection(&((pLL)->lock));              \
+	}                                                           \
+	__except (EXCEPTION_EXECUTE_HANDLER) {                      \
+	    break;                                                  \
+	}                                                           \
+	InitializeListHead(&((pLL)->head));                         \
+	(pLL)->created = 0x12345678;                                \
     } while (FALSE);                                                \
 }
 
 #define LOCKED_LIST_INITIALIZED(pLL)                                \
-     ((pLL)->created == 0x12345678)
+    ((pLL)->created == 0x12345678)
 
 #define DELETE_LOCKED_LIST(pLL, FreeFunction)                       \
 {                                                                   \
-     (pLL)->created = 0;                                            \
-     FreeList(&((pLL)->head), FreeFunction);                        \
-     DeleteCriticalSection(&(pLL)->lock);                           \
+    (pLL)->created = 0;                                            \
+    FreeList(&((pLL)->head), FreeFunction);                        \
+    DeleteCriticalSection(&(pLL)->lock);                           \
 }
 
 #define ACQUIRE_LIST_LOCK(pLL)                                      \
-     EnterCriticalSection(&(pLL)->lock)
+    EnterCriticalSection(&(pLL)->lock)
 
 #define RELEASE_LIST_LOCK(pLL)                                      \
-     LeaveCriticalSection(&(pLL)->lock)
+    LeaveCriticalSection(&(pLL)->lock)
 
 
 
@@ -127,15 +129,15 @@ typedef struct _LOCKED_LIST {
 
 
 #define INITIALIZE_LOCKED_QUEUE(pLQ)                                \
-     INITIALIZE_LOCKED_LIST(pLQ)
+    INITIALIZE_LOCKED_LIST(pLQ)
 #define LOCKED_QUEUE_INITIALIZED(pLQ)                               \
-     LOCKED_LIST_INITIALIZED(pLQ)
+    LOCKED_LIST_INITIALIZED(pLQ)
 #define DELETE_LOCKED_QUEUE(pLQ, FreeFunction)                      \
-     DELETE_LOCKED_LIST(pLQ, FreeFunction)
+    DELETE_LOCKED_LIST(pLQ, FreeFunction)
 #define ACQUIRE_QUEUE_LOCK(pLQ)                                     \
-     ACQUIRE_LIST_LOCK(pLQ)
+    ACQUIRE_LIST_LOCK(pLQ)
 #define RELEASE_QUEUE_LOCK(pLQ)                                     \
-     RELEASE_LIST_LOCK(pLQ)
+    RELEASE_LIST_LOCK(pLQ)
 
 
 #endif

@@ -67,7 +67,8 @@ template<> Element::Hash ElemIPv6NextHop::_hash = HASH_ELEM_IPV6NEXTHOP;
 /**
  * @short Well-known communities per RFC1997
  */
-static struct { string text; uint32_t value; } com_aliases[] = {
+static struct { string text; uint32_t value; } com_aliases[] = 
+{
     { "NO_EXPORT", 0xFFFFFF01 },
     { "NO_ADVERTISE", 0xFFFFFF02 },
     { "NO_EXPORT_SUBCONFED", 0xFFFFFF03 },
@@ -81,9 +82,11 @@ static struct { string text; uint32_t value; } com_aliases[] = {
  *  "N:"  -> ((uint16_t) N) << 16
  *  "N:M" -> (((uint16_t) N) << 16) + (uint16_t) M
  */
-ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
+ElemCom32::ElemCom32(const char* c_str) : Element(_hash) 
+{
     // Semantic checker needs this
-    if(c_str == NULL) {
+    if(c_str == NULL) 
+    {
 	_val = 0;
 	return;
     }
@@ -91,20 +94,23 @@ ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
     int len = strlen(c_str);
     char *colon = strstr(const_cast<char*>(c_str), ":");
 
-    if(len > 0 && colon != NULL) {
+    if(len > 0 && colon != NULL) 
+    {
 	uint32_t msw, lsw;
 	msw = strtoul(c_str, NULL, 0);
 	lsw = strtoul(++colon, NULL, 0);
 	if (msw > 0xffff || lsw > 0xffff)
 	    xorp_throw(PolicyException, "uint16_t overflow for community " +
-		       string(c_str));
+		    string(c_str));
 	_val = (msw << 16) + lsw;
-    } else {
+    } else 
+    {
 	string x = string(c_str);
 
 	_val = strtoul(c_str, NULL, 0);
 	for(int i = 0; com_aliases[i].text.length(); i++)
-	    if (com_aliases[i].text == x) {
+	    if (com_aliases[i].text == x) 
+	    {
 		_val = com_aliases[i].value;
 		break;
 	    }
@@ -112,7 +118,8 @@ ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
 }
 
 string
-ElemCom32::str() const {
+ElemCom32::str() const 
+{
     for(int i = 0; com_aliases[i].text.length(); i++)
 	if (com_aliases[i].value == _val)
 	    return com_aliases[i].text;
@@ -121,17 +128,18 @@ ElemCom32::str() const {
     return (oss.str());
 }
 
-template<class A>
+    template<class A>
 ElemNet<A>::ElemNet() : Element(_hash), _net(NULL), _mod(MOD_NONE), _op(NULL)
 {
     _net = new A();
 }
 
-template<class A>
+    template<class A>
 ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
-				       _mod(MOD_NONE), _op(NULL)
+    _mod(MOD_NONE), _op(NULL)
 {
-    if (!str) {
+    if (!str) 
+    {
 	_net = new A();
 
 	return;
@@ -141,16 +149,19 @@ ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
     string in = str;
 
     const char* p = strchr(str, '~');
-    if (p) {
+    if (p) 
+    {
 	in = in.substr(0, p - str);
 
 	_mod = str_to_mod(++p);
     }
 
     // parse net
-    try {
-	    _net = new A(in.c_str());
-    } catch(...) {
+    try 
+    {
+	_net = new A(in.c_str());
+    } catch(...) 
+    {
 	ostringstream oss;
 
 	oss << "Can't init " << id << " using " << in;
@@ -159,24 +170,24 @@ ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
     }
 }
 
-template<class A>
+    template<class A>
 ElemNet<A>::ElemNet(const A& net) : Element(_hash), _net(NULL), _mod(MOD_NONE),
-				    _op(NULL)
+    _op(NULL)
 {
     _net = new A(net);
 }
 
-template<class A>
+    template<class A>
 ElemNet<A>::ElemNet(const ElemNet<A>& net) : Element(_hash),
-					     _net(net._net),
-					     _mod(net._mod),
-					     _op(NULL)
+    _net(net._net),
+    _mod(net._mod),
+    _op(NULL)
 {
     if (_net)
 	_net = new A(*_net);
 }
 
-template<class A>
+    template<class A>
 ElemNet<A>::~ElemNet()
 {
     delete _net;
@@ -188,7 +199,8 @@ ElemNet<A>::str() const
 {
     string str = _net->str();
 
-    if (_mod != MOD_NONE) {
+    if (_mod != MOD_NONE) 
+    {
 	str += "~";
 	str += mod_to_str(_mod);
     }
@@ -225,30 +237,37 @@ ElemNet<A>::operator==(const ElemNet<A>& rhs) const
 }
 
 template<class A>
-typename ElemNet<A>::Mod
+    typename ElemNet<A>::Mod
 ElemNet<A>::str_to_mod(const char* p)
 {
     string in = p;
 
-    if (!in.compare("<=") || !in.compare("orlonger")) {
+    if (!in.compare("<=") || !in.compare("orlonger")) 
+    {
 	return MOD_ORLONGER;
 
-    } else if (!in.compare("<") || !in.compare("longer")) {
+    } else if (!in.compare("<") || !in.compare("longer")) 
+    {
 	return MOD_LONGER;
 
-    } else if (!in.compare(">") || !in.compare("shorter")) {
+    } else if (!in.compare(">") || !in.compare("shorter")) 
+    {
 	return MOD_SHORTER;
 
-    } else if (!in.compare(">=") || !in.compare("orshorter")) {
+    } else if (!in.compare(">=") || !in.compare("orshorter")) 
+    {
 	return MOD_ORSHORTER;
 
-    } else if (!in.compare("!=") || !in.compare("not")) {
+    } else if (!in.compare("!=") || !in.compare("not")) 
+    {
 	return MOD_NOT;
 
-    } else if (!in.compare("==") || !in.compare(":") || !in.compare("exact")) {
+    } else if (!in.compare("==") || !in.compare(":") || !in.compare("exact")) 
+    {
 	return MOD_EXACT;
 
-    } else {
+    } else 
+    {
 	string err = "Can't parse modifier: " + in;
 
 	xorp_throw(PolicyException, err);
@@ -259,30 +278,31 @@ ElemNet<A>::str_to_mod(const char* p)
 }
 
 template<class A>
-string
+    string
 ElemNet<A>::mod_to_str(Mod mod)
 {
-    switch (mod) {
-    case MOD_NONE:
-	return "";
+    switch (mod) 
+    {
+	case MOD_NONE:
+	    return "";
 
-    case MOD_EXACT:
-	return "==";
+	case MOD_EXACT:
+	    return "==";
 
-    case MOD_SHORTER:
-	return ">";
+	case MOD_SHORTER:
+	    return ">";
 
-    case MOD_ORSHORTER:
-	return ">=";
+	case MOD_ORSHORTER:
+	    return ">=";
 
-    case MOD_LONGER:
-	return "<";
+	case MOD_LONGER:
+	    return "<";
 
-    case MOD_ORLONGER:
-	return "<=";
+	case MOD_ORLONGER:
+	    return "<=";
 
-    case MOD_NOT:
-	return "!=";
+	case MOD_NOT:
+	    return "!=";
     }
 
     // unreach
@@ -303,31 +323,32 @@ ElemNet<A>::op() const
     if (_op)
 	return *_op;
 
-    switch (_mod) {
-    case MOD_NONE:
-    case MOD_EXACT:
-	_op = &EQ;
-	break;
+    switch (_mod) 
+    {
+	case MOD_NONE:
+	case MOD_EXACT:
+	    _op = &EQ;
+	    break;
 
-    case MOD_NOT:
-	_op = &NE;
-	break;
+	case MOD_NOT:
+	    _op = &NE;
+	    break;
 
-    case MOD_SHORTER:
-	_op = &GT;
-	break;
+	case MOD_SHORTER:
+	    _op = &GT;
+	    break;
 
-    case MOD_ORSHORTER:
-	_op = &GE;
-	break;
+	case MOD_ORSHORTER:
+	    _op = &GE;
+	    break;
 
-    case MOD_LONGER:
-	_op = &LT;
-	break;
+	case MOD_LONGER:
+	    _op = &LT;
+	    break;
 
-    case MOD_ORLONGER:
-	_op = &LE;
-	break;
+	case MOD_ORLONGER:
+	    _op = &LE;
+	    break;
     }
 
     XLOG_ASSERT(_op);
@@ -335,18 +356,18 @@ ElemNet<A>::op() const
     return op();
 }
 
-template <class A>
+    template <class A>
 ElemNextHop<A>::ElemNextHop() : Element(_hash), _var(VAR_NONE)
 {
 }
 
-template <class A>
+    template <class A>
 ElemNextHop<A>::ElemNextHop(const A& nh) : Element(_hash), _var(VAR_NONE),
-					   _addr(nh)
+    _addr(nh)
 {
 }
 
-template <class A>
+    template <class A>
 ElemNextHop<A>::ElemNextHop(const char* in) : Element(_hash), _var(VAR_NONE)
 {
     if (!in)
@@ -369,7 +390,8 @@ ElemNextHop<A>::ElemNextHop(const char* in) : Element(_hash), _var(VAR_NONE)
     else if (s.compare("self") == 0)
 	_var = VAR_SELF;
 
-    else {
+    else 
+    {
 	_var = VAR_NONE;
 	_addr = A(in);
     }
@@ -379,24 +401,25 @@ template <class A>
 string
 ElemNextHop<A>::str() const
 {
-    switch (_var) {
-    case VAR_NONE:
-	return _addr.str();
+    switch (_var) 
+    {
+	case VAR_NONE:
+	    return _addr.str();
 
-    case VAR_DISCARD:
-	return "discard";
+	case VAR_DISCARD:
+	    return "discard";
 
-    case VAR_NEXT_TABLE:
-	return "next-table";
+	case VAR_NEXT_TABLE:
+	    return "next-table";
 
-    case VAR_PEER_ADDRESS:
-	return "peer-address";
+	case VAR_PEER_ADDRESS:
+	    return "peer-address";
 
-    case VAR_REJECT:
-	return "reject";
+	case VAR_REJECT:
+	    return "reject";
 
-    case VAR_SELF:
-	return "self";
+	case VAR_SELF:
+	    return "self";
     }
 
     // unreach

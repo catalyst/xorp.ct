@@ -40,7 +40,7 @@
 #include "xrl_target3.hh"
 
 
-int
+    int
 main(int /*argc*/, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -56,7 +56,8 @@ main(int /*argc*/, char **argv)
     xlog_add_default_output();
     xlog_start();
 
-    try {
+    try 
+    {
 
 	string feaname = "fea";
 	string ribname = "rib";
@@ -75,7 +76,8 @@ main(int /*argc*/, char **argv)
 	while (xorp_do_run && ospf_ipv6.running())
 	    EventLoop::instance().run();
 
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

@@ -42,10 +42,11 @@ static const char* TCR_MPRS_IN_NAME = "mprs_in";
 static const char* TCR_MPRS_INOUT_NAME = "mprs_inout";
 static const char* TCR_ALL_NAME = "all";
 
-const char*
+    const char*
 tcr_to_str(const OlsrTypes::TcRedundancyType t)
 {
-    switch (t) {
+    switch (t) 
+    {
 	NAME_CASE(TCR_MPRS_IN);
 	NAME_CASE(TCR_MPRS_INOUT);
 	NAME_CASE(TCR_ALL);
@@ -60,10 +61,11 @@ static const char* WILL_DEFAULT_NAME = "default";
 static const char* WILL_HIGH_NAME = "high";
 static const char* WILL_ALWAYS_NAME = "always";
 
-const char*
+    const char*
 will_to_str(const OlsrTypes::WillType t)
 {
-    switch (t) {
+    switch (t) 
+    {
 	NAME_CASE(WILL_NEVER);
 	NUM_CASE(2);
 	NAME_CASE(WILL_LOW);
@@ -84,10 +86,11 @@ static const char* VT_TOPOLOGY_NAME = "TC";
 static const char* VT_MID_NAME = "MID";
 static const char* VT_HNA_NAME = "HNA";
 
-const char*
+    const char*
 vt_to_str(const OlsrTypes::VertexType vt)
 {
-    switch (vt) {
+    switch (vt) 
+    {
 	NAME_CASE(VT_UNKNOWN);
 	NAME_CASE(VT_NEIGHBOR);
 	NAME_CASE(VT_TWOHOP);

@@ -29,7 +29,8 @@
  * These are named exactly as they are in RFC 3626, to avoid
  * any confusion.
  */
-struct OlsrTypes {
+struct OlsrTypes 
+{
     /**
      * @short The default static cost of an OLSR interface.
      */
@@ -116,7 +117,8 @@ struct OlsrTypes {
      */
     typedef uint8_t LinkType;
 
-    enum LinkTypes {
+    enum LinkTypes 
+    {
 	UNSPEC_LINK = 0,
 	ASYM_LINK = 1,
 	SYM_LINK = 2,
@@ -140,7 +142,8 @@ struct OlsrTypes {
      */
     typedef uint8_t MessageType;
 
-    enum MessageTypes {
+    enum MessageTypes 
+    {
 	HELLO_MESSAGE = 1,
 	TC_MESSAGE = 2,
 	MID_MESSAGE = 3,
@@ -168,7 +171,8 @@ struct OlsrTypes {
      */
     typedef uint8_t NeighborType;
 
-    enum NeighborTypes {
+    enum NeighborTypes 
+    {
 	NOT_NEIGH = 0,
 	SYM_NEIGH = 1,
 	MPR_NEIGH = 2,
@@ -189,7 +193,8 @@ struct OlsrTypes {
      */
     typedef uint8_t WillType;
 
-    enum Willingness {
+    enum Willingness 
+    {
 	WILL_NEVER = 0,
 	WILL_LOW = 1,
 	WILL_DEFAULT = 3,
@@ -209,7 +214,8 @@ struct OlsrTypes {
      */
     typedef uint8_t TcRedundancyType;
 
-    enum TcRedundancyMode {
+    enum TcRedundancyMode 
+    {
 	TCR_MPRS_IN = 0,	// MPR selectors only
 	TCR_MPRS_INOUT = 1,	// MPR selectors and MPRs
 	TCR_ALL = 2,		// The full neighbor set.
@@ -257,7 +263,8 @@ struct OlsrTypes {
      * SPT is a meta-class which embeds the Vertex as a POD type,
      * therefore, inheritance cannot be used to represent the vertex type.
      */
-    enum VertexType {
+    enum VertexType 
+    {
 	VT_ORIGINATOR = 0,	// iff origin() is true
 	VT_UNKNOWN = 0,
 	VT_NEIGHBOR = 1,	// Nodes at radius 1.
@@ -273,7 +280,8 @@ struct OlsrTypes {
     /**
      * @short Type fields used when saving OLSR databases.
      */
-    enum TlvType {
+    enum TlvType 
+    {
 	TLV_VERSION = 1,	// Version number (u32)
 	TLV_SYSTEM_INFO = 2,	// Where created (string)
 	TLV_OLSR_VERSION = 3,	// Version of OLSR in use (u32)
@@ -292,11 +300,11 @@ struct OlsrTypes {
  * @return true if the given vertex type maps directly to a single
  * OLSR node.
  */
-inline bool
+    inline bool
 is_node_vertex(const OlsrTypes::VertexType vt)
 {
     if (vt == OlsrTypes::VT_NEIGHBOR || vt == OlsrTypes::VT_TWOHOP ||
-	vt == OlsrTypes::VT_TOPOLOGY || vt == OlsrTypes::VT_MID)
+	    vt == OlsrTypes::VT_TOPOLOGY || vt == OlsrTypes::VT_MID)
 	return true;
     return false;
 }
@@ -305,48 +313,55 @@ is_node_vertex(const OlsrTypes::VertexType vt)
  * @short Helper class to encode a TimeVal as an 8 bit binary
  * floating point value.
  */
-class EightBitTime {
-public:
+class EightBitTime 
+{
+    public:
 	/**
 	 * @short Helper function to convert from a TimeVal
 	 * to the eight-bit floating point format used by OLSR.
 	 */
-	static inline TimeVal to_timeval(const uint8_t byte) {
-		unsigned int mant = byte >> 4;
-		unsigned int exp = byte & 0x0F;
-		double sec = ((16 + mant) << exp) * _scaling_factor / 16.0;
-		return (TimeVal(sec));
+	static inline TimeVal to_timeval(const uint8_t byte) 
+	{
+	    unsigned int mant = byte >> 4;
+	    unsigned int exp = byte & 0x0F;
+	    double sec = ((16 + mant) << exp) * _scaling_factor / 16.0;
+	    return (TimeVal(sec));
 	}
 
 	/**
 	 * @short Helper function to convert the eight-bit floating point
 	 * format used by OLSR to a TimeVal.
 	 */
-	static inline uint8_t from_timeval(const TimeVal& tv) {
-		double sec = tv.get_double();
-		int isec = static_cast<int>(sec / _scaling_factor);
-		int mant = 0;
-		int exp = 0;
-		while (isec >= (1 << exp))
-			exp++;
-		if (exp == 0) {
-			mant = 1;
-		} else {
-			exp--;
-			if (mant > (_mod - 1)) {
-				// ceiling
-				mant = exp = (_mod - 1);
-			} else {
-				mant = static_cast<int>(_mod * sec /
-				    _scaling_factor / (1 << exp) - _mod);
-				exp += mant >> 4;
-				mant &= 0x0F;
-			}
+	static inline uint8_t from_timeval(const TimeVal& tv) 
+	{
+	    double sec = tv.get_double();
+	    int isec = static_cast<int>(sec / _scaling_factor);
+	    int mant = 0;
+	    int exp = 0;
+	    while (isec >= (1 << exp))
+		exp++;
+	    if (exp == 0) 
+	    {
+		mant = 1;
+	    } else 
+	    {
+		exp--;
+		if (mant > (_mod - 1)) 
+		{
+		    // ceiling
+		    mant = exp = (_mod - 1);
+		} else 
+		{
+		    mant = static_cast<int>(_mod * sec /
+			    _scaling_factor / (1 << exp) - _mod);
+		    exp += mant >> 4;
+		    mant &= 0x0F;
 		}
-		return (static_cast<uint8_t>(mant << 4 | (exp & 0x0F)));
+	    }
+	    return (static_cast<uint8_t>(mant << 4 | (exp & 0x0F)));
 	}
 
-private:
+    private:
 	static const int	_mod = 16;
 	static const double	_scaling_factor;
 };
@@ -359,14 +374,14 @@ private:
  * @param seq2 An OLSR sequence number
  * @return true if seq1 is newer than seq2.
  */
-inline bool
+    inline bool
 is_seq_newer(const uint16_t seq1, const uint16_t seq2)
 {
     // UINT16_MAX is defined in C99 stdint.h, however this is not
     // part of the C++ Standard yet.
     static const uint16_t uint16_max = 65535;
     return  (seq1 > seq2 && seq1 - seq2 <= uint16_max/2) ||
-	    (seq2 > seq1 && seq2 - seq1 > uint16_max/2);
+	(seq2 > seq1 && seq2 - seq1 > uint16_max/2);
 }
 
 /**

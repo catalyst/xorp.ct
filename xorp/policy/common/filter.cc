@@ -23,12 +23,14 @@
 
 #include "filter.hh"
 
-const char*
-filter::filter2str(const filter::Filter& f) {
-    switch(f) {
+    const char*
+filter::filter2str(const filter::Filter& f) 
+{
+    switch(f) 
+    {
 	case IMPORT:
 	    return "Import";
-	
+
 	case EXPORT_SOURCEMATCH:
 	    return "Export-SourceMatch";
 

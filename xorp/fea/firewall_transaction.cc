@@ -27,28 +27,29 @@
 
 #include "firewall_transaction.hh"
 
-void
+	void
 FirewallTransactionManager::pre_commit(uint32_t tid)
 {
-    reset_error();
-    _tid_exec = tid;
+	reset_error();
+	_tid_exec = tid;
 }
 
-void
+	void
 FirewallTransactionManager::operation_result(bool success,
-					     const TransactionOperation& op)
+		const TransactionOperation& op)
 {
-    if (success)
-	return;
+	if (success)
+		return;
 
-    const FirewallTransactionOperation* fto;
-    fto = dynamic_cast<const FirewallTransactionOperation*>(&op);
-    XLOG_ASSERT(fto != NULL);
+	const FirewallTransactionOperation* fto;
+	fto = dynamic_cast<const FirewallTransactionOperation*>(&op);
+	XLOG_ASSERT(fto != NULL);
 
-    if (_first_error.empty()) {
-	_first_error = c_format("Failed executing: \"%s\": %s",
+	if (_first_error.empty()) 
+	{
+		_first_error = c_format("Failed executing: \"%s\": %s",
 				fto->str().c_str(),
 				fto->error_reason().c_str());
-	flush(_tid_exec);
-    }
+		flush(_tid_exec);
+	}
 }

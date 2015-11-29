@@ -66,23 +66,24 @@
 
 #define	BAD_XORPFD	(-1)
 
-class XorpFd {
-public:
-    XorpFd() : _filedesc(BAD_XORPFD) {}
+class XorpFd 
+{
+    public:
+	XorpFd() : _filedesc(BAD_XORPFD) {}
 
-    XorpFd(int fd) : _filedesc(fd) {}
+	XorpFd(int fd) : _filedesc(fd) {}
 
-    operator int() const  { return _filedesc; }
-    int getSocket() const { return _filedesc; }
+	operator int() const  { return _filedesc; }
+	int getSocket() const { return _filedesc; }
 
-    string str() const		{ return c_format("%d", _filedesc); }
+	string str() const		{ return c_format("%d", _filedesc); }
 
-    void clear()		{ _filedesc = BAD_XORPFD; }
+	void clear()		{ _filedesc = BAD_XORPFD; }
 
-    bool is_valid() const	{ return (_filedesc != BAD_XORPFD); }
+	bool is_valid() const	{ return (_filedesc != BAD_XORPFD); }
 
-private:
-    int	    _filedesc;
+    private:
+	int	    _filedesc;
 };
 
 

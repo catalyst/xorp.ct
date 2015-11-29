@@ -45,71 +45,73 @@
  *
  * Similar to Dispatcher.
  */
-class ElementFactory {
-public:
-    // Function called to create element
-    typedef Element* (*Callback)(const char*);
-    
-    // Container which maps a key to a callback. May consider using a hash table.
-    typedef map<string,Callback> Map;
-
-    ElementFactory();
-
-    /**
-     * @short Exception thrown if an Unknown element is being created.
-     *
-     * When creating an element of a type which has no registered creation
-     * callback with the factory.
-     */
-    class UnknownElement : public PolicyException {
+class ElementFactory 
+{
     public:
-	UnknownElement(const char* file, size_t line, 
-		       const string& init_why = "")   
-            : PolicyException("UnknownElement", file, line, 
-			      "ElementFactory: unable to create unknown element: " + init_why) {}  
+	// Function called to create element
+	typedef Element* (*Callback)(const char*);
+
+	// Container which maps a key to a callback. May consider using a hash table.
+	typedef map<string,Callback> Map;
+
+	ElementFactory();
+
+	/**
+	 * @short Exception thrown if an Unknown element is being created.
+	 *
+	 * When creating an element of a type which has no registered creation
+	 * callback with the factory.
+	 */
+	class UnknownElement : public PolicyException 
+    {
+	public:
+	    UnknownElement(const char* file, size_t line, 
+		    const string& init_why = "")   
+		: PolicyException("UnknownElement", file, line, 
+			"ElementFactory: unable to create unknown element: " + init_why) {}  
     };
 
-    /**
-     * Register a callback with the factory.
-     *
-     * @param key the element id/type. Must be unique.
-     * @param cb function to be called when the element must be created.
-     */
-    void add(const string& key, Callback cb); 
+	/**
+	 * Register a callback with the factory.
+	 *
+	 * @param key the element id/type. Must be unique.
+	 * @param cb function to be called when the element must be created.
+	 */
+	void add(const string& key, Callback cb); 
 
-    /**
-     * Create an element.
-     *
-     * @return the requested element. Caller is responsible for deletion.
-     * @param key the type of element that needs to be created.
-     * @param arg initial value of element. If null, a default is assigned.
-     */
-    Element* create(const string& key, const char* arg);
+	/**
+	 * Create an element.
+	 *
+	 * @return the requested element. Caller is responsible for deletion.
+	 * @param key the type of element that needs to be created.
+	 * @param arg initial value of element. If null, a default is assigned.
+	 */
+	Element* create(const string& key, const char* arg);
 
-    /**
-     * Checks whether a type exists.
-     *
-     * @param key the element to check for.
-     * @return true if the element can be create via the factory.
-     */
-    static bool can_create(const string& key);
+	/**
+	 * Checks whether a type exists.
+	 *
+	 * @param key the element to check for.
+	 * @return true if the element can be create via the factory.
+	 */
+	static bool can_create(const string& key);
 
-private:
-    /**
-     * There is only one factory map.
-     *
-     * Creating additional factory objects is therefore safe. No need to pass a
-     * global factory around in the various classes.
-     */
-    static Map _map;
+    private:
+	/**
+	 * There is only one factory map.
+	 *
+	 * Creating additional factory objects is therefore safe. No need to pass a
+	 * global factory around in the various classes.
+	 */
+	static Map _map;
 
-    /**
-     * A class which registers defined callbacks upon creation.
-     *
-     * Callbacks are thus registered once [static] and before the factory is
-     * actually used.
-     */
-    static RegisterElements _regelems;
+	/**
+	 * A class which registers defined callbacks upon creation.
+	 *
+	 * Callbacks are thus registered once [static] and before the factory is
+	 * actually used.
+	 */
+	static RegisterElements _regelems;
 };
 
 #endif // __POLICY_COMMON_ELEMENT_FACTORY_HH__

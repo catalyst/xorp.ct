@@ -42,34 +42,36 @@
  * ie # <num>  "file" <line> directives.
  */
 
-class XrlParserInput {
-public:
-    /** Retrieves 1 line of input from source.
-     *
-     *  @param lineout string that is set if line of text is available.
-     *  @return true if line was read into lineout, false otherwise.
-     */
-    virtual bool getline(string& lineout) = 0;
+class XrlParserInput 
+{
+    public:
+	/** Retrieves 1 line of input from source.
+	 *
+	 *  @param lineout string that is set if line of text is available.
+	 *  @return true if line was read into lineout, false otherwise.
+	 */
+	virtual bool getline(string& lineout) = 0;
 
-    /**
-     * @return true if no more data is available for reading.
-     */
-    virtual bool eof() const = 0;
+	/**
+	 * @return true if no more data is available for reading.
+	 */
+	virtual bool eof() const = 0;
 
-    /**
-     * @return string containing stack trace to be used for tracking
-     * errors in the input.
-     */
-    virtual string stack_trace() const = 0;
+	/**
+	 * @return string containing stack trace to be used for tracking
+	 * errors in the input.
+	 */
+	virtual string stack_trace() const = 0;
 
-    virtual ~XrlParserInput() {};
+	virtual ~XrlParserInput() {};
 };
 
 /**
  * @short Exception class used by @ref XrlParserInput difficulties.
  */
 
-struct XrlParserInputException : public XorpReasonedException {
+struct XrlParserInputException : public XorpReasonedException 
+{
     XrlParserInputException(const char* file, int line, const string& reason)
 	: XorpReasonedException("XrlParserInputException", file, line, reason) {}
 };
@@ -80,78 +82,81 @@ struct XrlParserInputException : public XorpReasonedException {
  *  #include directives.
  */
 
-class XrlParserFileInput : public XrlParserInput {
-public:
-    /** Constructor
-     *
-     * @param input input file stream.
-     * @param fname filename.
-     * @throws XrlParserInputException if input file stream is not good().
-     */
-    XrlParserFileInput(istream* input, const char* fname = "")
-	throw (XrlParserInputException);
+class XrlParserFileInput : public XrlParserInput 
+{
+    public:
+	/** Constructor
+	 *
+	 * @param input input file stream.
+	 * @param fname filename.
+	 * @throws XrlParserInputException if input file stream is not good().
+	 */
+	XrlParserFileInput(istream* input, const char* fname = "")
+	    throw (XrlParserInputException);
 
-    XrlParserFileInput(const char* filename)
-	throw (XrlParserInputException);
+	XrlParserFileInput(const char* filename)
+	    throw (XrlParserInputException);
 
-    ~XrlParserFileInput();
+	~XrlParserFileInput();
 
-    bool eof() const;
-    bool getline(string& line) throw (XrlParserInputException);
-    string stack_trace() const;
+	bool eof() const;
+	bool getline(string& line) throw (XrlParserInputException);
+	string stack_trace() const;
 
-    /** @return include path preprocessor looks for files in. */
-    list<string>& path() { return _path; }
+	/** @return include path preprocessor looks for files in. */
+	list<string>& path() { return _path; }
 
-protected:
-    bool slurp_line(string& line) throw (XrlParserInputException);
+    protected:
+	bool slurp_line(string& line) throw (XrlParserInputException);
 
-    struct FileState {
-	FileState(istream* input, const char* fname) :
-	    _input(input), _fname(fname), _line(0) {}
-	FileState() { _input = NULL; _fname = NULL; } // for uSTL
+	struct FileState 
+	{
+	    FileState(istream* input, const char* fname) :
+		_input(input), _fname(fname), _line(0) {}
+	    FileState() { _input = NULL; _fname = NULL; } // for uSTL
 
-	// Accessors
-	istream*	input() const { return _input; }
-	const char* 	filename() const { return _fname; }
-	int 		line() const { return _line; }
-	void 		incr_line() { _line++; }
-    private:
-	istream*   _input;
-	const char* _fname;
-	int	    _line;
-    };
-    /** Push FileState onto stack
-     * @throws XrlParserInputException if input file stream is not good();
-     */
-    void push_stack(const FileState& fs)
-	throw (XrlParserInputException);
+	    // Accessors
+	    istream*	input() const { return _input; }
+	    const char* 	filename() const { return _fname; }
+	    int 		line() const { return _line; }
+	    void 		incr_line() { _line++; }
+	    private:
+	    istream*   _input;
+	    const char* _fname;
+	    int	    _line;
+	};
+	/** Push FileState onto stack
+	 * @throws XrlParserInputException if input file stream is not good();
+	 */
+	void push_stack(const FileState& fs)
+	    throw (XrlParserInputException);
 
-    void pop_stack();
-    FileState& stack_top();
-    size_t stack_depth() const;
+	void pop_stack();
+	FileState& stack_top();
+	size_t stack_depth() const;
 
-    ifstream* path_open_input(const char* filename)
-	throw (XrlParserInputException);
-    void close_input(istream* pif);
+	ifstream* path_open_input(const char* filename)
+	    throw (XrlParserInputException);
+	void close_input(istream* pif);
 
-    string try_include(string::const_iterator& begin,
-		       const string::const_iterator& end)
-	throw (XrlParserInputException);
-    void initialize_path();
+	string try_include(string::const_iterator& begin,
+		const string::const_iterator& end)
+	    throw (XrlParserInputException);
+	void initialize_path();
 
-    vector<FileState>	_stack;
-    list<string>	_path;
-    bool		_own_bottom;	 // We alloced stack bottom istream
-    list<string>	_inserted_lines;
+	vector<FileState>	_stack;
+	list<string>	_path;
+	bool		_own_bottom;	 // We alloced stack bottom istream
+	list<string>	_inserted_lines;
 
-    bool filter_line(string& output, const string& input);
-    enum Mode {
-	NORMAL		= 0x00,
-	IN_SQUOTE	= 0x01,
-	IN_DQUOTE	= 0x02,
-	IN_C_COMMENT	= 0x04
-    } _current_mode;
+	bool filter_line(string& output, const string& input);
+	enum Mode 
+	{
+	    NORMAL		= 0x00,
+	    IN_SQUOTE	= 0x01,
+	    IN_DQUOTE	= 0x02,
+	    IN_C_COMMENT	= 0x04
+	} _current_mode;
 };
 
 #endif // __LIBXIPC_XRL_PARSER_INPUT_HH__

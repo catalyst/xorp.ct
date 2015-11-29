@@ -33,16 +33,16 @@
 #include "route_table_ribin.hh"
 
 
-template <class A>
+    template <class A>
 PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
-			    BGPRouteTable<A>* parent,
-			    PolicyFilters& pfs, 
-			    const filter::Filter& type)
-    : BGPRouteTable<A>(tablename, safi),
-      _filter_type(type),
-      _varrw(NULL),
-      _policy_filters(pfs),
-      _enable_filtering(true)
+	BGPRouteTable<A>* parent,
+	PolicyFilters& pfs, 
+	const filter::Filter& type)
+: BGPRouteTable<A>(tablename, safi),
+    _filter_type(type),
+    _varrw(NULL),
+    _policy_filters(pfs),
+    _enable_filtering(true)
 {
     this->_parent = parent;
     // XXX: For clarity, explicitly call the local virtual init_varrw()
@@ -50,14 +50,14 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
     XLOG_ASSERT(_varrw != NULL);
 }
 
-template <class A>
+    template <class A>
 PolicyTable<A>::~PolicyTable()
 {
     delete _varrw;
 }
 
 template <class A>
-void
+    void
 PolicyTable<A>::enable_filtering(bool on)
 {
     _enable_filtering = on;
@@ -66,20 +66,23 @@ PolicyTable<A>::enable_filtering(bool on)
 template <class A>
 bool
 PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg, 
-			     bool no_modify) const
+	bool no_modify) const
 {
-    if (!_enable_filtering) {
+    if (!_enable_filtering) 
+    {
 	return &rtmsg;
     }
 
     _varrw->attach_route(rtmsg, no_modify);
 
-    try {
+    try 
+    {
 	bool accepted = true;
 
 	void* pf = NULL;
 	int pfi = 0;
-	switch (_filter_type) {
+	switch (_filter_type) 
+	{
 	    case filter::IMPORT:
 		pfi = 0;
 		break;
@@ -87,15 +90,15 @@ PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg,
 	    case filter::EXPORT_SOURCEMATCH:
 		pfi = 1;
 		break;
-	
+
 	    case filter::EXPORT:
 		pfi = 2;
 		break;
 	}
 	pf = rtmsg.route()->policyfilter(pfi).get();
 	debug_msg("[BGP] running filter %s on route: %s (filter=%p)\n",
-		  filter::filter2str(_filter_type),
-		  rtmsg.str().c_str(), pf);
+		filter::filter2str(_filter_type),
+		rtmsg.str().c_str(), pf);
 
 	accepted = _policy_filters.run_filter(_filter_type, *_varrw);
 
@@ -103,26 +106,29 @@ PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg,
 	debug_msg("[BGP] filter after filtering=%p\n", pf);
 
 	// we just did a filtering, so a filter must be assigned to this route!
-	if (!no_modify) {
+	if (!no_modify) 
+	{
 	    XLOG_ASSERT(pf);
 	}
 	_varrw->detach_route(rtmsg);
 
-	if (!accepted) {
+	if (!accepted) 
+	{
 	    return false;
 	}
 	return true;
 
-    } catch(const PolicyException& e) {
+    } catch(const PolicyException& e) 
+    {
 	XLOG_FATAL("Policy filter error %s", e.str().c_str());
 	XLOG_UNFINISHED();
     }
 }
 
 template <class A>
-int
+    int
 PolicyTable<A>::add_route(InternalMessage<A> &rtmsg,
-			  BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {
     XLOG_ASSERT(caller == this->_parent);
 
@@ -131,14 +137,14 @@ PolicyTable<A>::add_route(InternalMessage<A> &rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s add_route: %s\n",
-	      filter::filter2str(_filter_type),
-	      rtmsg.str().c_str());
+	    filter::filter2str(_filter_type),
+	    rtmsg.str().c_str());
     debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
 
     bool accepted = do_filtering(rtmsg, false);
 
-    
+
     if (!accepted)
 	return ADD_FILTERED;
 
@@ -149,10 +155,10 @@ PolicyTable<A>::add_route(InternalMessage<A> &rtmsg,
 }
 
 template <class A>
-int
+    int
 PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
-			      InternalMessage<A>& new_rtmsg,
-			      BGPRouteTable<A>* caller)
+	InternalMessage<A>& new_rtmsg,
+	BGPRouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == this->_parent);
 
@@ -162,9 +168,9 @@ PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s replace_route: %s\nWith: %s\n",
-	      filter::filter2str(_filter_type),
-	      old_rtmsg.str().c_str(),
-	      new_rtmsg.str().c_str());
+	    filter::filter2str(_filter_type),
+	    old_rtmsg.str().c_str(),
+	    new_rtmsg.str().c_str());
 
 
     bool old_accepted = do_filtering(old_rtmsg, false);
@@ -174,17 +180,21 @@ PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
     int res;
 
     // we didn't pass the old one, we don't want the new one
-    if (!old_accepted  && !new_accepted) {
+    if (!old_accepted  && !new_accepted) 
+    {
 	return ADD_FILTERED;
-    // we passed the old one, but we filtered the new one...
-    } else if (old_accepted && !new_accepted) {
+	// we passed the old one, but we filtered the new one...
+    } else if (old_accepted && !new_accepted) 
+    {
 	next->delete_route(old_rtmsg, this);
 	res = ADD_FILTERED;
-    // we didn't pass the old one, we like the new one
-    } else if (!old_accepted && new_accepted) {
+	// we didn't pass the old one, we like the new one
+    } else if (!old_accepted && new_accepted) 
+    {
 	res = next->add_route(new_rtmsg, this);
-    // we passed tthe old one, we like the new one
-    } else {
+	// we passed tthe old one, we like the new one
+    } else 
+    {
 	res = next->replace_route(old_rtmsg, new_rtmsg, this);
     }
 
@@ -192,9 +202,9 @@ PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
 }
 
 template <class A>
-int
+    int
 PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
-			     BGPRouteTable<A>* caller)
+	BGPRouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == this->_parent);
 
@@ -203,8 +213,8 @@ PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s delete_route: %s\n",
-	      filter::filter2str(_filter_type),
-	      rtmsg.str().c_str());
+	    filter::filter2str(_filter_type),
+	    rtmsg.str().c_str());
     debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
 
@@ -212,7 +222,7 @@ PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
 
     if (!accepted)
 	return 0;
-    
+
     debug_msg("atts after: %s\n", rtmsg.attributes()->str().c_str());
     int res = next->delete_route(rtmsg, this);
 
@@ -220,10 +230,10 @@ PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
 }			     
 
 template <class A>
-int
+    int
 PolicyTable<A>::route_dump(InternalMessage<A>& rtmsg,
-			   BGPRouteTable<A>* caller,
-			   const PeerHandler* dump_peer)
+	BGPRouteTable<A>* caller,
+	const PeerHandler* dump_peer)
 {
     XLOG_ASSERT(caller == this->_parent);
 
@@ -232,12 +242,12 @@ PolicyTable<A>::route_dump(InternalMessage<A>& rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s route_dump: %s\n",
-	      filter::filter2str(_filter_type),
-	      rtmsg.str().c_str());
+	    filter::filter2str(_filter_type),
+	    rtmsg.str().c_str());
 
 
     bool accepted = do_filtering(rtmsg, false);
-    
+
     if (!accepted)
 	return ADD_FILTERED;
 
@@ -247,7 +257,7 @@ PolicyTable<A>::route_dump(InternalMessage<A>& rtmsg,
 }			   
 
 template <class A>
-int
+    int
 PolicyTable<A>::push(BGPRouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == this->_parent);
@@ -262,8 +272,8 @@ PolicyTable<A>::push(BGPRouteTable<A>* caller)
 template <class A>
 const SubnetRoute<A>*
 PolicyTable<A>::lookup_route(const IPNet<A> &net, 
-			     uint32_t& genid,
-			     FPAListRef& pa_list) const
+	uint32_t& genid,
+	FPAListRef& pa_list) const
 {
     BGPRouteTable<A>* parent = this->_parent;
 
@@ -282,7 +292,7 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     XLOG_ASSERT(root);
 
     while (root->parent() != NULL)
-        root = root->parent();
+	root = root->parent();
 
     RibInTable<A>* ribin = dynamic_cast<RibInTable<A>* >(root);
     XLOG_ASSERT(ribin);
@@ -290,17 +300,18 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     InternalMessage<A> rtmsg(found, pa_list, ribin->peer_handler(), genid);
 
     debug_msg("[BGP] PolicyTable %s lookup_route: %s\n",
-	      filter::filter2str(_filter_type),
-	      rtmsg.str().c_str());
+	    filter::filter2str(_filter_type),
+	    rtmsg.str().c_str());
 
 
     bool accepted = do_filtering(rtmsg, false);
-    
-    
-    if (!accepted) {
+
+
+    if (!accepted) 
+    {
 	return NULL;
     }
-  
+
     return found;
 }
 
@@ -312,7 +323,7 @@ PolicyTable<A>::str() const
 }
 
 template <class A>
-bool
+    bool
 PolicyTable<A>::get_next_message(BGPRouteTable<A>* next_table)
 {
     BGPRouteTable<A>* parent = this->_parent;
@@ -324,7 +335,7 @@ PolicyTable<A>::get_next_message(BGPRouteTable<A>* next_table)
 }
 
 template <class A>
-void
+    void
 PolicyTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
     BGPRouteTable<A>* parent = this->_parent;
@@ -335,7 +346,7 @@ PolicyTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 }
 
 template <class A>
-void
+    void
 PolicyTable<A>::init_varrw()
 {
     if (_varrw != NULL)

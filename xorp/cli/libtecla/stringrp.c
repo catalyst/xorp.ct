@@ -42,19 +42,21 @@
  * called string-segments are used.
  */
 typedef struct StringSegment StringSegment;
-struct StringSegment {
-  StringSegment *next; /* A pointer to the next segment in the list */
-  char *block;         /* An array of characters to be shared between strings */
-  int unused;          /* The amount of unused space at the end of block[] */
+struct StringSegment 
+{
+	StringSegment *next; /* A pointer to the next segment in the list */
+	char *block;         /* An array of characters to be shared between strings */
+	int unused;          /* The amount of unused space at the end of block[] */
 };
 
 /*
  * StringGroup is typedef'd in stringrp.h.
  */
-struct StringGroup {
-  FreeList *node_mem;  /* The StringSegment free-list */
-  int block_size;      /* The dimension of each character array block */
-  StringSegment *head; /* The list of character arrays */
+struct StringGroup 
+{
+	FreeList *node_mem;  /* The StringSegment free-list */
+	int block_size;      /* The dimension of each character array block */
+	StringSegment *head; /* The list of character arrays */
 };
 
 /*
@@ -77,38 +79,40 @@ struct StringGroup {
  */
 StringGroup *_new_StringGroup(int segment_size)
 {
-  StringGroup *sg;    /* The object to be returned */
-/*
- * Check the arguments.
- */
-  if(segment_size < 1) {
-    fprintf(stderr, "_new_StringGroup: Invalid segment_size argument.\n");
-    return NULL;
-  };
-/*
- * Allocate the container.
- */
-  sg = (StringGroup *) malloc(sizeof(StringGroup));
-  if(!sg) {
-    fprintf(stderr, "_new_StringGroup: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to _del_StringGroup().
- */
-  sg->node_mem = NULL;
-  sg->head = NULL;
-  sg->block_size = segment_size;
-/*
- * Allocate the free list that is used to allocate list nodes.
- */
-  sg->node_mem = _new_FreeList("_new_StringGroup", sizeof(StringSegment),
-			       STR_SEG_BLK);
-  if(!sg->node_mem)
-    return _del_StringGroup(sg);
-  return sg;
+	StringGroup *sg;    /* The object to be returned */
+	/*
+	 * Check the arguments.
+	 */
+	if(segment_size < 1) 
+	{
+		fprintf(stderr, "_new_StringGroup: Invalid segment_size argument.\n");
+		return NULL;
+	};
+	/*
+	 * Allocate the container.
+	 */
+	sg = (StringGroup *) malloc(sizeof(StringGroup));
+	if(!sg) 
+	{
+		fprintf(stderr, "_new_StringGroup: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to _del_StringGroup().
+	 */
+	sg->node_mem = NULL;
+	sg->head = NULL;
+	sg->block_size = segment_size;
+	/*
+	 * Allocate the free list that is used to allocate list nodes.
+	 */
+	sg->node_mem = _new_FreeList("_new_StringGroup", sizeof(StringSegment),
+			STR_SEG_BLK);
+	if(!sg->node_mem)
+		return _del_StringGroup(sg);
+	return sg;
 }
 
 /*.......................................................................
@@ -121,27 +125,29 @@ StringGroup *_new_StringGroup(int segment_size)
  */
 StringGroup *_del_StringGroup(StringGroup *sg)
 {
-  if(sg) {
-    StringSegment *node;
-/*
- * Delete the character arrays.
- */
-    for(node=sg->head; node; node=node->next) {
-      if(node->block)
-	free(node->block);
-      node->block = NULL;
-    };
-/*
- * Delete the list nodes that contained the string segments.
- */
-    sg->node_mem = _del_FreeList("_del_StringGroup", sg->node_mem, 1);
-    sg->head = NULL; /* Already deleted by deleting sg->node_mem */
-/*
- * Delete the container.
- */
-    free(sg);
-  };
-  return NULL;
+	if(sg) 
+	{
+		StringSegment *node;
+		/*
+		 * Delete the character arrays.
+		 */
+		for(node=sg->head; node; node=node->next) 
+		{
+			if(node->block)
+				free(node->block);
+			node->block = NULL;
+		};
+		/*
+		 * Delete the list nodes that contained the string segments.
+		 */
+		sg->node_mem = _del_FreeList("_del_StringGroup", sg->node_mem, 1);
+		sg->head = NULL; /* Already deleted by deleting sg->node_mem */
+		/*
+		 * Delete the container.
+		 */
+		free(sg);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -159,50 +165,56 @@ StringGroup *_del_StringGroup(StringGroup *sg)
  */
 char *_sg_store_string(StringGroup *sg, const char *string, int remove_escapes)
 {
-  char *copy;           /* The recorded copy of string[] */
-/*
- * Check the arguments.
- */
-  if(!sg || !string)
-    return NULL;
-/*
- * Get memory for the string.
- */
-  copy = _sg_alloc_string(sg, strlen(string));
-  if(copy) {
-/*
- * If needed, remove backslash escapes while copying the input string
- * into the cache string.
- */
-    if(remove_escapes) {
-      int escaped = 0;             /* True if the next character should be */
-                                   /*  escaped. */
-      const char *src = string;    /* A pointer into the input string */
-      char *dst = copy;            /* A pointer into the cached copy of the */
-                                   /*  string. */
-      while(*src) {
-	if(!escaped && *src == '\\') {
-	  escaped = 1;
-	  src++;
-	} else {
-	  escaped = 0;
-	  *dst++ = *src++;
+	char *copy;           /* The recorded copy of string[] */
+	/*
+	 * Check the arguments.
+	 */
+	if(!sg || !string)
+		return NULL;
+	/*
+	 * Get memory for the string.
+	 */
+	copy = _sg_alloc_string(sg, strlen(string));
+	if(copy) 
+	{
+		/*
+		 * If needed, remove backslash escapes while copying the input string
+		 * into the cache string.
+		 */
+		if(remove_escapes) 
+		{
+			int escaped = 0;             /* True if the next character should be */
+			/*  escaped. */
+			const char *src = string;    /* A pointer into the input string */
+			char *dst = copy;            /* A pointer into the cached copy of the */
+			/*  string. */
+			while(*src) 
+			{
+				if(!escaped && *src == '\\') 
+				{
+					escaped = 1;
+					src++;
+				} else 
+				{
+					escaped = 0;
+					*dst++ = *src++;
+				};
+			};
+			*dst = '\0';
+			/*
+			 * If escapes have already been removed, copy the input string directly
+			 * into the cache.
+			 */
+		} else 
+		{
+			strncpy(copy, string, strlen(string));
+		};
 	};
-      };
-      *dst = '\0';
-/*
- * If escapes have already been removed, copy the input string directly
- * into the cache.
- */
-    } else {
-      strncpy(copy, string, strlen(string));
-    };
-  };
-/*
- * Return a pointer to the copy of the string (or NULL if the allocation
- * failed).
- */
-  return copy;
+	/*
+	 * Return a pointer to the copy of the string (or NULL if the allocation
+	 * failed).
+	 */
+	return copy;
 }
 
 /*.......................................................................
@@ -217,53 +229,54 @@ char *_sg_store_string(StringGroup *sg, const char *string, int remove_escapes)
  */
 char *_sg_alloc_string(StringGroup *sg, int length)
 {
-  StringSegment *node;  /* A node of the list of string segments */
-  char *copy;           /* The allocated string */
-/*
- * If the string is longer than block_size, then we can't record it.
- */
-  if(length > sg->block_size || length < 0)
-    return NULL;
-/*
- * See if there is room to record the string in one of the existing
- * string segments.
- */
-  for(node=sg->head; node && node->unused <= length; node=node->next)
-    ;
-/*
- * If there wasn't room, allocate a new string segment.
- */
-  if(!node) {
-    node = (StringSegment *) _new_FreeListNode(sg->node_mem);
-    if(!node)
-      return NULL;
-/*
- * Initialize the segment.
- */
-    node->next = NULL;
-    node->block = NULL;
-    node->unused = sg->block_size;
-/*
- * Attempt to allocate the string segment character array.
- */
-    node->block = (char *) malloc(sg->block_size);
-    if(!node->block)
-      return NULL;
-/*
- * Prepend the node to the list.
- */
-    node->next = sg->head;
-    sg->head = node;
-  };
-/*
- * Get memory for the string.
- */
-  copy = node->block + sg->block_size - node->unused;
-  node->unused -= length + 1;
-/*
- * Return a pointer to the string memory.
- */
-  return copy;
+	StringSegment *node;  /* A node of the list of string segments */
+	char *copy;           /* The allocated string */
+	/*
+	 * If the string is longer than block_size, then we can't record it.
+	 */
+	if(length > sg->block_size || length < 0)
+		return NULL;
+	/*
+	 * See if there is room to record the string in one of the existing
+	 * string segments.
+	 */
+	for(node=sg->head; node && node->unused <= length; node=node->next)
+		;
+	/*
+	 * If there wasn't room, allocate a new string segment.
+	 */
+	if(!node) 
+	{
+		node = (StringSegment *) _new_FreeListNode(sg->node_mem);
+		if(!node)
+			return NULL;
+		/*
+		 * Initialize the segment.
+		 */
+		node->next = NULL;
+		node->block = NULL;
+		node->unused = sg->block_size;
+		/*
+		 * Attempt to allocate the string segment character array.
+		 */
+		node->block = (char *) malloc(sg->block_size);
+		if(!node->block)
+			return NULL;
+		/*
+		 * Prepend the node to the list.
+		 */
+		node->next = sg->head;
+		sg->head = node;
+	};
+	/*
+	 * Get memory for the string.
+	 */
+	copy = node->block + sg->block_size - node->unused;
+	node->unused -= length + 1;
+	/*
+	 * Return a pointer to the string memory.
+	 */
+	return copy;
 }
 
 /*.......................................................................
@@ -275,11 +288,11 @@ char *_sg_alloc_string(StringGroup *sg, int length)
  */
 void _clr_StringGroup(StringGroup *sg)
 {
-  StringSegment *node;   /* A node in the list of string segments */
-/*
- * Mark all of the string segments as unoccupied.
- */
-  for(node=sg->head; node; node=node->next)
-    node->unused = sg->block_size;
-  return;
+	StringSegment *node;   /* A node in the list of string segments */
+	/*
+	 * Mark all of the string segments as unoccupied.
+	 */
+	for(node=sg->head; node; node=node->next)
+		node->unused = sg->block_size;
+	return;
 }

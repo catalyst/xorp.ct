@@ -49,67 +49,68 @@ class SemanticVarRW :
     public NONCOPYABLE,
     public VarRW
 {
-public:
-    /**
-     * @short Exception thrown on illegal variable use.
-     */
-    class var_error : public PolicyException {
     public:
-        var_error(const char* file, size_t line, const string& init_why = "")   
-            : PolicyException("var_error", file, line, init_why) {}  
+	/**
+	 * @short Exception thrown on illegal variable use.
+	 */
+	class var_error : public PolicyException 
+    {
+	public:
+	    var_error(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("var_error", file, line, init_why) {}  
     };
-   
-    /**
-     * @param vars the VarMap to use.
-     */
-    SemanticVarRW(VarMap& vars);
-    ~SemanticVarRW();
 
-    /**
-     * VarRW read interface.
-     *
-     * Checks if a variable may be read.
-     *
-     * Throws exception on error.
-     *
-     * @return dummy element initialized to a default value.
-     * @param id name of variable.
-     */
-    const Element& read(const Id& id);
+	/**
+	 * @param vars the VarMap to use.
+	 */
+	SemanticVarRW(VarMap& vars);
+	~SemanticVarRW();
 
-    /**
-     * VarRW write interface.
-     *
-     * Checks if a variable may be written to, and if the type is correct.
-     *
-     * Throws exception on error.
-     *
-     * @param id name of variable.
-     * @param elem value of variable.
-     */
-    void write(const Id& id, const Element& elem);
+	/**
+	 * VarRW read interface.
+	 *
+	 * Checks if a variable may be read.
+	 *
+	 * Throws exception on error.
+	 *
+	 * @return dummy element initialized to a default value.
+	 * @param id name of variable.
+	 */
+	const Element& read(const Id& id);
 
-    /**
-     * VarRW sync interface.
-     *
-     * Does garbage collection.
-     */
-    void sync();
+	/**
+	 * VarRW write interface.
+	 *
+	 * Checks if a variable may be written to, and if the type is correct.
+	 *
+	 * Throws exception on error.
+	 *
+	 * @param id name of variable.
+	 * @param elem value of variable.
+	 */
+	void write(const Id& id, const Element& elem);
 
-    /**
-     * Change the protocol being simulated.
-     *
-     * @param proto protocol to simulate.
-     */
-    void set_protocol(const string& proto);
+	/**
+	 * VarRW sync interface.
+	 *
+	 * Does garbage collection.
+	 */
+	void sync();
 
-private:
-    string _protocol;
-    
-    VarMap& _vars;
-    ElementFactory _ef;
+	/**
+	 * Change the protocol being simulated.
+	 *
+	 * @param proto protocol to simulate.
+	 */
+	void set_protocol(const string& proto);
 
-    set<Element*> _trash;
+    private:
+	string _protocol;
+
+	VarMap& _vars;
+	ElementFactory _ef;
+
+	set<Element*> _trash;
 };
 
 #endif // __POLICY_SEMANTIC_VARRW_HH__

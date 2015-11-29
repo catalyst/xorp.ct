@@ -43,53 +43,58 @@
 
 #include "daemon.h"
 
-int
+    int
 xorp_daemonize(int nochdir, int noclose)
 {
-	struct sigaction osa, sa;
-	int fd;
-	pid_t newgrp, newpid;
-	int oerrno;
-	int osa_ok;
+    struct sigaction osa, sa;
+    int fd;
+    pid_t newgrp, newpid;
+    int oerrno;
+    int osa_ok;
 
-	/* A SIGHUP may be thrown when the parent exits below. */
-	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = SIG_IGN;
-	sa.sa_flags = 0;
-	osa_ok = sigaction(SIGHUP, &sa, &osa);
+    /* A SIGHUP may be thrown when the parent exits below. */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = SIG_IGN;
+    sa.sa_flags = 0;
+    osa_ok = sigaction(SIGHUP, &sa, &osa);
 
-	switch (newpid = fork()) {
+    switch (newpid = fork()) 
+    {
 	case -1:
-		return (-1);
+	    return (-1);
 	case 0:
-		break;
+	    break;
 	default:
-		return (newpid);
+	    return (newpid);
+    }
+
+    newgrp = setsid();
+    oerrno = errno;
+    if (osa_ok != -1)
+	sigaction(SIGHUP, &osa, NULL);
+
+    if (newgrp == -1) 
+    {
+	errno = oerrno;
+	return (-1);
+    }
+
+    if (!nochdir) 
+    {
+	if (chdir("/") < 0) 
+	{
+	    perror("chdir");
 	}
+    }
 
-	newgrp = setsid();
-	oerrno = errno;
-	if (osa_ok != -1)
-		sigaction(SIGHUP, &osa, NULL);
+    if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) 
+    {
+	(void)dup2(fd, STDIN_FILENO);
+	(void)dup2(fd, STDOUT_FILENO);
+	(void)dup2(fd, STDERR_FILENO);
+	if (fd > 2)
+	    (void)close(fd);
+    }
 
-	if (newgrp == -1) {
-		errno = oerrno;
-		return (-1);
-	}
-
-	if (!nochdir) {
-           if (chdir("/") < 0) {
-              perror("chdir");
-           }
-        }
-
-	if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
-		(void)dup2(fd, STDIN_FILENO);
-		(void)dup2(fd, STDOUT_FILENO);
-		(void)dup2(fd, STDERR_FILENO);
-		if (fd > 2)
-			(void)close(fd);
-	}
-
-	return (0);
+    return (0);
 }

@@ -21,10 +21,10 @@
  */
 void libtecla_version(int *major, int *minor, int *micro)
 {
-  if(major)
-    *major = TECLA_MAJOR_VER;
-  if(minor)
-    *minor = TECLA_MINOR_VER;
-  if(micro)
-    *micro = TECLA_MICRO_VER;
+	if(major)
+		*major = TECLA_MAJOR_VER;
+	if(minor)
+		*minor = TECLA_MINOR_VER;
+	if(micro)
+		*micro = TECLA_MICRO_VER;
 }

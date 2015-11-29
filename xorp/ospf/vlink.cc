@@ -39,10 +39,11 @@
 #include "vlink.hh"
 
 template <typename A>
-bool
+    bool
 Vlink<A>::create_vlink(OspfTypes::RouterID rid)
 {
-    if (0 != _vlinks.count(rid)) {
+    if (0 != _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s already exists", pr_id(rid).c_str());
 	return false;
     }
@@ -54,10 +55,11 @@ Vlink<A>::create_vlink(OspfTypes::RouterID rid)
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::delete_vlink(OspfTypes::RouterID rid)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -68,11 +70,12 @@ Vlink<A>::delete_vlink(OspfTypes::RouterID rid)
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::set_transit_area(OspfTypes::RouterID rid,
-			   OspfTypes::AreaID transit_area)
+	OspfTypes::AreaID transit_area)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -88,9 +91,10 @@ Vlink<A>::set_transit_area(OspfTypes::RouterID rid,
 template <typename A>
 bool
 Vlink<A>::get_transit_area(OspfTypes::RouterID rid,
-			   OspfTypes::AreaID& transit_area) const
+	OspfTypes::AreaID& transit_area) const
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -105,11 +109,12 @@ Vlink<A>::get_transit_area(OspfTypes::RouterID rid,
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::set_transit_area_notified(OspfTypes::RouterID rid,
-				    bool notified)
+	bool notified)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -126,7 +131,8 @@ template <typename A>
 bool
 Vlink<A>::get_transit_area_notified(OspfTypes::RouterID rid) const
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -139,10 +145,11 @@ Vlink<A>::get_transit_area_notified(OspfTypes::RouterID rid) const
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::add_address(OspfTypes::RouterID rid, A source, A destination)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -157,10 +164,11 @@ Vlink<A>::add_address(OspfTypes::RouterID rid, A source, A destination)
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::get_address(OspfTypes::RouterID rid, A& source, A& destination)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -177,9 +185,10 @@ Vlink<A>::get_address(OspfTypes::RouterID rid, A& source, A& destination)
 template <typename A>
 bool
 Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
-			    string& vif) const
+	string& vif) const
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -188,8 +197,8 @@ Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
 	_vlinks.find(rid);
     XLOG_ASSERT(_vlinks.end() != i);
 
-//     XLOG_ASSERT(A::ZERO() != i->second._source);
-//     XLOG_ASSERT(A::ZERO() != i->second._destination);
+    //     XLOG_ASSERT(A::ZERO() != i->second._source);
+    //     XLOG_ASSERT(A::ZERO() != i->second._destination);
 
     interface = VLINK;
     vif = pr_id(rid);
@@ -198,10 +207,11 @@ Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::add_peerid(OspfTypes::RouterID rid, OspfTypes::PeerID peerid)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -218,7 +228,8 @@ template <typename A>
 OspfTypes::PeerID
 Vlink<A>::get_peerid(OspfTypes::RouterID rid) const
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return OspfTypes::ALLPEERS;
     }
@@ -231,12 +242,13 @@ Vlink<A>::get_peerid(OspfTypes::RouterID rid) const
 }
 
 template <typename A>
-bool
+    bool
 Vlink<A>::set_physical_interface_vif(OspfTypes::RouterID rid,
-				     string& interface,
-				     string& vif)
+	string& interface,
+	string& vif)
 {
-    if (0 == _vlinks.count(rid)) {
+    if (0 == _vlinks.count(rid)) 
+    {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
 	return false;
     }
@@ -253,13 +265,15 @@ Vlink<A>::set_physical_interface_vif(OspfTypes::RouterID rid,
 template <typename A>
 bool
 Vlink<A>::get_physical_interface_vif(A source, A destination,
-				     string& interface,
-				     string& vif) const
+	string& interface,
+	string& vif) const
 {
     typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
-    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) 
+    {
 	if (i->second._source == source &&
-	    i->second._destination == destination) {
+		i->second._destination == destination) 
+	{
 	    interface = i->second._physical_interface; 
 	    vif = i->second._physical_vif;
 	    return true;
@@ -274,9 +288,11 @@ OspfTypes::PeerID
 Vlink<A>::get_peerid(A source, A destination) const
 {
     typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
-    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) 
+    {
 	if (i->second._source == source &&
-	    i->second._destination == destination) {
+		i->second._destination == destination) 
+	{
 	    return i->second._peerid; 
 	}
     }
@@ -287,23 +303,27 @@ Vlink<A>::get_peerid(A source, A destination) const
 template <typename A>
 void
 Vlink<A>::get_router_ids(OspfTypes::AreaID transit_area,
-			 list<OspfTypes::RouterID>& rids) const
+	list<OspfTypes::RouterID>& rids) const
 {
     typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
-    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
-	if (i->second._transit_area == transit_area) {
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) 
+    {
+	if (i->second._transit_area == transit_area) 
+	{
 	    rids.push_back(i->first);
 	}
     }
 }
 
 template <typename A>
-void
+    void
 Vlink<A>::area_removed(OspfTypes::AreaID area)
 {
     typename map<OspfTypes::RouterID, Vstate>::iterator i;
-    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
-	if (i->second._transit_area == area) {
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) 
+    {
+	if (i->second._transit_area == area) 
+	{
 	    i->second._notified = false;
 	}
     }

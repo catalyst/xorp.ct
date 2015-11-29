@@ -40,8 +40,9 @@ class RedistPolicy;
  * Comparitor to allow nets to be stored in a sorted container.
  */
 template <typename A>
-struct RedistNetCmp {
-    bool operator() (const IPNet<A>& l, const IPNet<A>& r) const;
+struct RedistNetCmp 
+{
+	bool operator() (const IPNet<A>& l, const IPNet<A>& r) const;
 };
 #endif
 
@@ -63,79 +64,80 @@ struct RedistNetCmp {
  * value based).
  */
 template<class A>
-class RedistTable : public RouteTable<A> {
-public:
+class RedistTable : public RouteTable<A> 
+{
+	public:
 #ifdef XORP_USE_USTL
-    typedef set<IPNet<A> > RouteIndex;
+		typedef set<IPNet<A> > RouteIndex;
 #else
-    typedef set<IPNet<A>,RedistNetCmp<A> > RouteIndex;
+		typedef set<IPNet<A>,RedistNetCmp<A> > RouteIndex;
 #endif
 
-public:
-    /**
-     * Constructor.
-     *
-     * Plumbs RedistTable in RIB graph after from_table.
-     *
-     * @param from_table table to redistribute routes from.
-     */
-    RedistTable(const string&	tablename,
-		RouteTable<A>*	from_table);
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * Plumbs RedistTable in RIB graph after from_table.
+		 *
+		 * @param from_table table to redistribute routes from.
+		 */
+		RedistTable(const string&	tablename,
+				RouteTable<A>*	from_table);
 
-    /**
-     * Destructor.
-     *
-     * Unplumbs table and deletes Redistributor object instances previously
-     * added with add_redistributor and not previously removed with
-     * remove_redistributor.
-     */
-    ~RedistTable();
+		/**
+		 * Destructor.
+		 *
+		 * Unplumbs table and deletes Redistributor object instances previously
+		 * added with add_redistributor and not previously removed with
+		 * remove_redistributor.
+		 */
+		~RedistTable();
 
-    /**
-     * Add a redistributor to announce existing routes and future updates
-     * to.
-     */
-    void add_redistributor(Redistributor<A>* r);
+		/**
+		 * Add a redistributor to announce existing routes and future updates
+		 * to.
+		 */
+		void add_redistributor(Redistributor<A>* r);
 
-    /**
-     * Remove a redistributor.
-     */
-    void remove_redistributor(Redistributor<A>* r);
+		/**
+		 * Remove a redistributor.
+		 */
+		void remove_redistributor(Redistributor<A>* r);
 
-    /**
-     * Find redistributor with given name attribute.
-     */
-    Redistributor<A>* redistributor(const string& name);
+		/**
+		 * Find redistributor with given name attribute.
+		 */
+		Redistributor<A>* redistributor(const string& name);
 
-    //
-    // Standard RouteTable methods
-    //
-    int add_igp_route(const IPRouteEntry<A>& route);
-    int add_egp_route(const IPRouteEntry<A>& route);
-    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
-    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
+		//
+		// Standard RouteTable methods
+		//
+		int add_igp_route(const IPRouteEntry<A>& route);
+		int add_egp_route(const IPRouteEntry<A>& route);
+		int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+		int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
-    const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
+		const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
 
-    TableType type() const { return REDIST_TABLE; }
+		TableType type() const { return REDIST_TABLE; }
 
-    string str() const;
+		string str() const;
 
-    /**
-     * Get nets of live routes seen by RedistTable since it was
-     * instantiated.
-     */
-    const RouteIndex& route_index() const { return _rt_index; }
+		/**
+		 * Get nets of live routes seen by RedistTable since it was
+		 * instantiated.
+		 */
+		const RouteIndex& route_index() const { return _rt_index; }
 
-protected:
-    typedef Trie<A, const IPRouteEntry<A>* > IPRouteTrie;
+	protected:
+		typedef Trie<A, const IPRouteEntry<A>* > IPRouteTrie;
 
-    RouteIndex		_rt_index;
-    list<Redistributor<A>*> _outputs;
-    IPRouteTrie		_ip_route_table;
+		RouteIndex		_rt_index;
+		list<Redistributor<A>*> _outputs;
+		IPRouteTrie		_ip_route_table;
 
-    void generic_add_route(const IPRouteEntry<A>& route);
-    void generic_delete_route(const IPRouteEntry<A>* route);
+		void generic_add_route(const IPRouteEntry<A>& route);
+		void generic_delete_route(const IPRouteEntry<A>* route);
 };
 
 
@@ -153,137 +155,139 @@ protected:
  */
 template <typename A>
 class Redistributor :
-    public NONCOPYABLE
+	public NONCOPYABLE
 {
-public:
-    class RedistEventInterface {
-	// Methods only available to RedistTable.
-	void did_add(const IPRouteEntry<A>& ipr);
-	void will_delete(const IPRouteEntry<A>& ipr);
-	void did_delete(const IPRouteEntry<A>& ipr);
+	public:
+		class RedistEventInterface 
+		{
+			// Methods only available to RedistTable.
+			void did_add(const IPRouteEntry<A>& ipr);
+			void will_delete(const IPRouteEntry<A>& ipr);
+			void did_delete(const IPRouteEntry<A>& ipr);
 
-	friend class RedistTable<A>;
-	friend class Redistributor<A>;
+			friend class RedistTable<A>;
+			friend class Redistributor<A>;
 
-    public:
-	RedistEventInterface(Redistributor<A>* r) : _r(r) {}
+			public:
+			RedistEventInterface(Redistributor<A>* r) : _r(r) {}
 
-    private:
-	Redistributor<A>* _r;
-    };
+			private:
+			Redistributor<A>* _r;
+		};
 
-    class OutputEventInterface {
-	// Methods only available to RedistOutput.  These are
-	// events it can tell us about.
-	void low_water();
-	void high_water();
-	void fatal_error();
+		class OutputEventInterface 
+		{
+			// Methods only available to RedistOutput.  These are
+			// events it can tell us about.
+			void low_water();
+			void high_water();
+			void fatal_error();
 
-	friend class RedistOutput<A>;
-	friend class Redistributor<A>;
+			friend class RedistOutput<A>;
+			friend class Redistributor<A>;
 
-    public:
-	OutputEventInterface(Redistributor<A>* r) : _r(r) {}
+			public:
+			OutputEventInterface(Redistributor<A>* r) : _r(r) {}
 
-    private:
-	Redistributor<A>* _r;
-    };
+			private:
+			Redistributor<A>* _r;
+		};
 
-public:
-    Redistributor( const string& name);
-    virtual ~Redistributor();
+	public:
+		Redistributor( const string& name);
+		virtual ~Redistributor();
 
-    const string& name() const;
+		const string& name() const;
 
-    void set_redist_table(RedistTable<A>* rt);
+		void set_redist_table(RedistTable<A>* rt);
 
-    /**
-     * Bind RedistOutput to Redistributor instance.  The output
-     * should be dynamically allocated with new.  When a new
-     * redistributor output is set, the existing output is removed via
-     * delete.  The RedistOutput is deleted by the
-     * Redistributor when the Redistributor is destructed.
-     */
-    void set_output(RedistOutput<A>* output);
+		/**
+		 * Bind RedistOutput to Redistributor instance.  The output
+		 * should be dynamically allocated with new.  When a new
+		 * redistributor output is set, the existing output is removed via
+		 * delete.  The RedistOutput is deleted by the
+		 * Redistributor when the Redistributor is destructed.
+		 */
+		void set_output(RedistOutput<A>* output);
 
-    /**
-     * Bind policy object to Redistributor instance.  The policy
-     * should be dynamically allocated with new.  When a new policy is
-     * set, the existing policy is removed via delete.  The policy is
-     * deleted by the Redistributor when the Redistributor is
-     * destructed.
-     */
-    void set_policy(RedistPolicy<A>* policy);
+		/**
+		 * Bind policy object to Redistributor instance.  The policy
+		 * should be dynamically allocated with new.  When a new policy is
+		 * set, the existing policy is removed via delete.  The policy is
+		 * deleted by the Redistributor when the Redistributor is
+		 * destructed.
+		 */
+		void set_policy(RedistPolicy<A>* policy);
 
-    /**
-     * Determine if policy accepts updates to route.
-     *
-     * @return true if associated property accepts update to route or
-     * if no policy is enforced, false otherwise.
-     */
-    bool policy_accepts(const IPRouteEntry<A>& ipr) const;
+		/**
+		 * Determine if policy accepts updates to route.
+		 *
+		 * @return true if associated property accepts update to route or
+		 * if no policy is enforced, false otherwise.
+		 */
+		bool policy_accepts(const IPRouteEntry<A>& ipr) const;
 
-    /**
-     * Method available to instances of RedistTable to announce events
-     * to the Redistributor instance.
-     */
-    RedistEventInterface& redist_event()		{ return _rei; }
+		/**
+		 * Method available to instances of RedistTable to announce events
+		 * to the Redistributor instance.
+		 */
+		RedistEventInterface& redist_event()		{ return _rei; }
 
-    /**
-     * Method available to instances of RedistOutput to
-     * announce transport events to the Redistributor instance.
-     */
-    OutputEventInterface& output_event()		{ return _oei; }
+		/**
+		 * Method available to instances of RedistOutput to
+		 * announce transport events to the Redistributor instance.
+		 */
+		OutputEventInterface& output_event()		{ return _oei; }
 
-    /**
-     * Indicate dump status.  When Redistributor is first connected it dumps
-     * existing routes to it's RedistOutput.
-     *
-     * @return true if route dump is in process, false if route dump is
-     * either not started or finished.
-     */
-    bool dumping() const				{ return _dumping; }
+		/**
+		 * Indicate dump status.  When Redistributor is first connected it dumps
+		 * existing routes to it's RedistOutput.
+		 *
+		 * @return true if route dump is in process, false if route dump is
+		 * either not started or finished.
+		 */
+		bool dumping() const				{ return _dumping; }
 
-private:
-    /**
-     * Start initial route dump when a RedistTable is associated with instance
-     * through set_redist_table().
-     */
-    void start_dump();
-    void finish_dump();
+	private:
+		/**
+		 * Start initial route dump when a RedistTable is associated with instance
+		 * through set_redist_table().
+		 */
+		void start_dump();
+		void finish_dump();
 
-    void schedule_dump_timer();
-    void unschedule_dump_timer();
-    void dump_a_route();
+		void schedule_dump_timer();
+		void unschedule_dump_timer();
+		void dump_a_route();
 
-    const IPNet<A>& last_dumped_net() const	{ return _last_net; }
-    RedistTable<A>* redist_table()		{ return _table; }
-    RedistOutput<A>* output()			{ return _output; }
+		const IPNet<A>& last_dumped_net() const	{ return _last_net; }
+		RedistTable<A>* redist_table()		{ return _table; }
+		RedistOutput<A>* output()			{ return _output; }
 
-private:
-    // These are nested classes and need to be friends to invoke methods in
-    // enclosing class.
-    friend class RedistEventInterface;
-    friend class OutputEventInterface;
+	private:
+		// These are nested classes and need to be friends to invoke methods in
+		// enclosing class.
+		friend class RedistEventInterface;
+		friend class OutputEventInterface;
 
-private:
+	private:
 
-    string			_name;
-    RedistTable<A>*		_table;
-    RedistOutput<A>*		_output;
-    RedistPolicy<A>*		_policy;
+		string			_name;
+		RedistTable<A>*		_table;
+		RedistOutput<A>*		_output;
+		RedistPolicy<A>*		_policy;
 
-    RedistEventInterface	_rei;
-    OutputEventInterface	_oei;
+		RedistEventInterface	_rei;
+		OutputEventInterface	_oei;
 
-    bool 			_dumping;	// Announcing existing routes
-    bool			_blocked;	// Output above high water
-    IPNet<A>			_last_net;	// Last net announced
-    XorpTimer			_dtimer;
+		bool 			_dumping;	// Announcing existing routes
+		bool			_blocked;	// Output above high water
+		IPNet<A>			_last_net;	// Last net announced
+		XorpTimer			_dtimer;
 
-    static const IPNet<A> NO_LAST_NET;		// Indicator for last net inval
+		static const IPNet<A> NO_LAST_NET;		// Indicator for last net inval
 #ifndef XORP_USE_USTL
-    static const RedistNetCmp<A> redist_net_cmp;
+		static const RedistNetCmp<A> redist_net_cmp;
 #endif
 };
 
@@ -294,36 +298,36 @@ private:
  */
 template <typename A>
 class RedistOutput :
-    public NONCOPYABLE
+	public NONCOPYABLE
 {
-public:
-    RedistOutput(Redistributor<A>* r);
-    virtual ~RedistOutput();
+	public:
+		RedistOutput(Redistributor<A>* r);
+		virtual ~RedistOutput();
 
-    virtual void add_route(const IPRouteEntry<A>& ipr)		= 0;
-    virtual void delete_route(const IPRouteEntry<A>& ipr)	= 0;
+		virtual void add_route(const IPRouteEntry<A>& ipr)		= 0;
+		virtual void delete_route(const IPRouteEntry<A>& ipr)	= 0;
 
-    /**
-     * Method called by Redistributor to indicate start of initial
-     * route dump.  This occurs when an output is first attached to
-     * the redistributor to announce the existing routes.
-     */
-    virtual void starting_route_dump()				= 0;
+		/**
+		 * Method called by Redistributor to indicate start of initial
+		 * route dump.  This occurs when an output is first attached to
+		 * the redistributor to announce the existing routes.
+		 */
+		virtual void starting_route_dump()				= 0;
 
-    /**
-     * Method called by Redistributor to indicate end of initial
-     * route dump.  This occurs when an output is first attached to
-     * the redistributor to announce the existing routes.
-     */
-    virtual void finishing_route_dump()				= 0;
+		/**
+		 * Method called by Redistributor to indicate end of initial
+		 * route dump.  This occurs when an output is first attached to
+		 * the redistributor to announce the existing routes.
+		 */
+		virtual void finishing_route_dump()				= 0;
 
-protected:
-    void announce_low_water()		{ _r->output_event().low_water(); }
-    void announce_high_water()		{ _r->output_event().high_water(); }
-    void announce_fatal_error()		{ _r->output_event().fatal_error(); }
+	protected:
+		void announce_low_water()		{ _r->output_event().low_water(); }
+		void announce_high_water()		{ _r->output_event().high_water(); }
+		void announce_fatal_error()		{ _r->output_event().fatal_error(); }
 
-private:
-    Redistributor<A>* _r;
+	private:
+		Redistributor<A>* _r;
 };
 
 
@@ -335,9 +339,9 @@ template <typename A>
 inline bool
 RedistNetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
 {
-    if (l.prefix_len() != r.prefix_len())
-	return l.prefix_len() < r.prefix_len();
-    return l.masked_addr() < r.masked_addr();
+	if (l.prefix_len() != r.prefix_len())
+		return l.prefix_len() < r.prefix_len();
+	return l.masked_addr() < r.masked_addr();
 }
 #endif
 

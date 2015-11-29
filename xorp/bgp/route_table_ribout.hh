@@ -34,64 +34,66 @@
 
 
 template<class A>
-class RibOutTable : public BGPRouteTable<A>  {
-public:
-    RibOutTable(string tablename,
-		Safi safi,
-		BGPRouteTable<A> *parent,
-		PeerHandler *peer);
-    ~RibOutTable();
-    void print_queue(const list<const RouteQueueEntry<A> *>& queue) const;
-    int add_route(InternalMessage<A> &rtmsg,
-		  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-		      InternalMessage<A> &new_rtmsg,
-		      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg, 
-		     BGPRouteTable<A> *caller);
+class RibOutTable : public BGPRouteTable<A>  
+{
+	public:
+		RibOutTable(string tablename,
+				Safi safi,
+				BGPRouteTable<A> *parent,
+				PeerHandler *peer);
+		~RibOutTable();
+		void print_queue(const list<const RouteQueueEntry<A> *>& queue) const;
+		int add_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller);
+		int delete_route(InternalMessage<A> &rtmsg, 
+				BGPRouteTable<A> *caller);
 
-    int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
+		int push(BGPRouteTable<A> *caller);
+		const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				uint32_t& genid,
+				FPAListRef& pa_list) const;
 
-    RouteTableType type() const {return RIB_OUT_TABLE;}
-    string str() const;
-    int dump_entire_table() { abort(); return 0; }
+		RouteTableType type() const {return RIB_OUT_TABLE;}
+		string str() const;
+		int dump_entire_table() { abort(); return 0; }
 
-    /* mechanisms to implement flow control in the output plumbing */
-    void wakeup();
-    bool pull_next_route();
+		/* mechanisms to implement flow control in the output plumbing */
+		void wakeup();
+		bool pull_next_route();
 
-    /* output_no_longer_busy is called asynchronously by the peer
-       handler when the state of the output queue goes from busy to
-       non-busy.  When the output queue has been busy we will have
-       signalled back upstream to stop further routes arriving, so we
-       need to go and retrieve the queued routes */
-    void output_no_longer_busy();
+		/* output_no_longer_busy is called asynchronously by the peer
+		   handler when the state of the output queue goes from busy to
+		   non-busy.  When the output queue has been busy we will have
+		   signalled back upstream to stop further routes arriving, so we
+		   need to go and retrieve the queued routes */
+		void output_no_longer_busy();
 
-    bool get_next_message(BGPRouteTable<A> */*next_table*/) {
-	abort();
-	return false;
-    }
+		bool get_next_message(BGPRouteTable<A> */*next_table*/) 
+		{
+			abort();
+			return false;
+		}
 
-    void reschedule_self();
+		void reschedule_self();
 
-    void peering_went_down(const PeerHandler *peer, uint32_t genid,
-			   BGPRouteTable<A> *caller);
-    void peering_down_complete(const PeerHandler *peer, uint32_t genid,
-			       BGPRouteTable<A> *caller);
-    void peering_came_up(const PeerHandler *peer, uint32_t genid,
-			 BGPRouteTable<A> *caller);
-private:
-    //the queue that builds, prior to receiving a push, so we can
-    //send updates to our peers atomically
-    list <const RouteQueueEntry<A> *> _queue;
+		void peering_went_down(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		void peering_came_up(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+	private:
+		//the queue that builds, prior to receiving a push, so we can
+		//send updates to our peers atomically
+		list <const RouteQueueEntry<A> *> _queue;
 
-    PeerHandler *_peer;
-    bool _peer_busy;
-    bool _peer_is_up;
-    XorpTask _pull_routes_task;
+		PeerHandler *_peer;
+		bool _peer_busy;
+		bool _peer_is_up;
+		XorpTask _pull_routes_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBOUT_HH__

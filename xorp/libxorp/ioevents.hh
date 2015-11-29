@@ -31,7 +31,8 @@
  *
  * Enumeration of various event types supported by the I/O callback facade.
  */
-enum IoEventType {
+enum IoEventType 
+{
     IOT_READ,		// Object is ready to read
     IOT_WRITE,		// Object is ready to write
     IOT_EXCEPTION,	// Object has exceptional condition

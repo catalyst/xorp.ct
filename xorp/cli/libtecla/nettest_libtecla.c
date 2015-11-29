@@ -110,359 +110,387 @@ void client_read(int fd);
 int command_line_character(const char *line, int word_end, uint8_t val);
 
 
-int
+	int
 main(int argc, char *argv[])
 {
-    struct sockaddr_in sin_addr;
-    struct sockaddr_in cli_addr;
-    int addrlen;
-    fd_set read_fds, write_fds;
-    int sock = -1;
-    int max_sock;
-    int reuse = 1;
-    
-    _serv_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (setsockopt(_serv_socket, SOL_SOCKET, SO_REUSEADDR,
-		   (void *)&reuse, sizeof(reuse)) < 0) {
-	perror("setsockopt(SO_REUSEADDR)");
-	exit (1);
-    }
-    /* TODO: comment-out sin_len setup if the OS doesn't have it */
-    memset(&sin_addr, 0, sizeof(sin_addr));
-    sin_addr.sin_len = sizeof(sin_addr);
-    sin_addr.sin_family = AF_INET;
-    sin_addr.sin_port = htons(12000);		/* XXX: fixed port 12000 */
-    sin_addr.sin_addr.s_addr = INADDR_ANY;
-    if (bind(_serv_socket, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
-	perror("Error binding");
-	exit (1);
-    }
-    if (listen(_serv_socket, 5) < 0) {
-	perror("Error listen");
-	exit (1);
-    }
-    cli_setup();
-    
-    for ( ;; ) {
-	struct timeval my_timeval;
-	
-	max_sock = _serv_socket;
-	FD_ZERO(&read_fds);
-	FD_ZERO(&write_fds);
-	FD_SET(_serv_socket, &read_fds);
-	/* FD_SET(_serv_socket, &write_fds); */
-	if (sock >= 0) {
-	    FD_SET(sock, &read_fds);
-	    /* FD_SET(sock, &write_fds); */
-	    if (max_sock < sock)
-		max_sock = sock;
-	}
-	max_sock++;
-	
-	my_timeval.tv_sec = 1;
-	my_timeval.tv_usec = 0;
-	select(max_sock, &read_fds, &write_fds, NULL, &my_timeval);
-	
-	if (FD_ISSET(_serv_socket, &read_fds)) {
-	    memset(&cli_addr, 0, sizeof(cli_addr));
-	    cli_addr.sin_len = sizeof(cli_addr);
-	    cli_addr.sin_family = AF_INET;
-	    sock = accept(_serv_socket, (struct sockaddr *)&cli_addr,
-			  &addrlen);
-	    if (sock < 0) {
-		perror("Error accepting connection");
+	struct sockaddr_in sin_addr;
+	struct sockaddr_in cli_addr;
+	int addrlen;
+	fd_set read_fds, write_fds;
+	int sock = -1;
+	int max_sock;
+	int reuse = 1;
+
+	_serv_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (setsockopt(_serv_socket, SOL_SOCKET, SO_REUSEADDR,
+				(void *)&reuse, sizeof(reuse)) < 0) 
+	{
+		perror("setsockopt(SO_REUSEADDR)");
 		exit (1);
-	    }
-	    start_connection(sock);
-	    continue;
 	}
-	if ((sock >= 0) && FD_ISSET(sock, &read_fds)) {
-	    client_read(sock);
+	/* TODO: comment-out sin_len setup if the OS doesn't have it */
+	memset(&sin_addr, 0, sizeof(sin_addr));
+	sin_addr.sin_len = sizeof(sin_addr);
+	sin_addr.sin_family = AF_INET;
+	sin_addr.sin_port = htons(12000);		/* XXX: fixed port 12000 */
+	sin_addr.sin_addr.s_addr = INADDR_ANY;
+	if (bind(_serv_socket, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) 
+	{
+		perror("Error binding");
+		exit (1);
 	}
-	printf("Tick...\n");
-    }
+	if (listen(_serv_socket, 5) < 0) 
+	{
+		perror("Error listen");
+		exit (1);
+	}
+	cli_setup();
+
+	for ( ;; ) 
+	{
+		struct timeval my_timeval;
+
+		max_sock = _serv_socket;
+		FD_ZERO(&read_fds);
+		FD_ZERO(&write_fds);
+		FD_SET(_serv_socket, &read_fds);
+		/* FD_SET(_serv_socket, &write_fds); */
+		if (sock >= 0) 
+		{
+			FD_SET(sock, &read_fds);
+			/* FD_SET(sock, &write_fds); */
+			if (max_sock < sock)
+				max_sock = sock;
+		}
+		max_sock++;
+
+		my_timeval.tv_sec = 1;
+		my_timeval.tv_usec = 0;
+		select(max_sock, &read_fds, &write_fds, NULL, &my_timeval);
+
+		if (FD_ISSET(_serv_socket, &read_fds)) 
+		{
+			memset(&cli_addr, 0, sizeof(cli_addr));
+			cli_addr.sin_len = sizeof(cli_addr);
+			cli_addr.sin_family = AF_INET;
+			sock = accept(_serv_socket, (struct sockaddr *)&cli_addr,
+					&addrlen);
+			if (sock < 0) 
+			{
+				perror("Error accepting connection");
+				exit (1);
+			}
+			start_connection(sock);
+			continue;
+		}
+		if ((sock >= 0) && FD_ISSET(sock, &read_fds)) 
+		{
+			client_read(sock);
+		}
+		printf("Tick...\n");
+	}
 }
 
-void
+	void
 cli_setup()
 {
-    _fd_file_read = NULL;
-    _fd_file_write = NULL;
-    _client_type = CLIENT_TERMINAL;	/* XXX: default is terminal */
-    
-    _gl = NULL;
-    
-    _telnet_iac = 0;
-    _telnet_sb = 0;
-    /* TODO: those should be read in the beginning */
-    _window_width = 80;
-    _window_height = 25;
+	_fd_file_read = NULL;
+	_fd_file_write = NULL;
+	_client_type = CLIENT_TERMINAL;	/* XXX: default is terminal */
+
+	_gl = NULL;
+
+	_telnet_iac = 0;
+	_telnet_sb = 0;
+	/* TODO: those should be read in the beginning */
+	_window_width = 80;
+	_window_height = 25;
 }
 
-const char *
+	const char *
 newline()
 {
-    if (_client_type == CLIENT_TERMINAL)
-	return ("\r\n");
-    
-    return ("\n");
+	if (_client_type == CLIENT_TERMINAL)
+		return ("\r\n");
+
+	return ("\n");
 }
 
-void
+	void
 start_connection(int fd)
 {
-    char cli_welcome[] = CLI_WELCOME;
-    char cli_prompt[] = CLI_PROMPT;
-    char buf[128];
-    
-    /* Setup the telnet options */
-    {
-	char will_echo_cmd[] = { IAC, WILL, TELOPT_ECHO, '\0' };
-	char will_sga_cmd[]  = { IAC, WILL, TELOPT_SGA, '\0'  };
-	char dont_linemode_cmd[] = { IAC, DONT, TELOPT_LINEMODE, '\0' };
-	char do_window_size_cmd[] = { IAC, DO, TELOPT_NAWS, '\0' };
-	char do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
-	
-	write(fd, will_echo_cmd, sizeof(will_echo_cmd));
-	write(fd, will_sga_cmd, sizeof(will_sga_cmd));
-	write(fd, dont_linemode_cmd, sizeof(dont_linemode_cmd));
-	write(fd, do_window_size_cmd, sizeof(do_window_size_cmd));
-	write(fd, do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd));
-    }
-    
-    snprintf(buf, sizeof(buf), "%s%s", cli_welcome, newline());
-    write(fd, buf, strlen(buf));
-    snprintf(buf, sizeof(buf), "%s", cli_prompt);
-    write(fd, buf, strlen(buf));
-    
-    
-    _fd_file_read = fdopen(fd, "r");
-    _fd_file_write = fdopen(fd, "w");
-    _gl = new_GetLine(1024, 2048);
-    if (_gl == NULL)
-	exit (1);
-    
-    /* Change the input and output streams for libtecla */
-    if (gl_change_terminal(_gl, _fd_file_read, _fd_file_write, NULL) != 0) {
-	_gl = del_GetLine(_gl);
-	exit (1);
-    }
+	char cli_welcome[] = CLI_WELCOME;
+	char cli_prompt[] = CLI_PROMPT;
+	char buf[128];
+
+	/* Setup the telnet options */
+	{
+		char will_echo_cmd[] = { IAC, WILL, TELOPT_ECHO, '\0' };
+		char will_sga_cmd[]  = { IAC, WILL, TELOPT_SGA, '\0'  };
+		char dont_linemode_cmd[] = { IAC, DONT, TELOPT_LINEMODE, '\0' };
+		char do_window_size_cmd[] = { IAC, DO, TELOPT_NAWS, '\0' };
+		char do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
+
+		write(fd, will_echo_cmd, sizeof(will_echo_cmd));
+		write(fd, will_sga_cmd, sizeof(will_sga_cmd));
+		write(fd, dont_linemode_cmd, sizeof(dont_linemode_cmd));
+		write(fd, do_window_size_cmd, sizeof(do_window_size_cmd));
+		write(fd, do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd));
+	}
+
+	snprintf(buf, sizeof(buf), "%s%s", cli_welcome, newline());
+	write(fd, buf, strlen(buf));
+	snprintf(buf, sizeof(buf), "%s", cli_prompt);
+	write(fd, buf, strlen(buf));
+
+
+	_fd_file_read = fdopen(fd, "r");
+	_fd_file_write = fdopen(fd, "w");
+	_gl = new_GetLine(1024, 2048);
+	if (_gl == NULL)
+		exit (1);
+
+	/* Change the input and output streams for libtecla */
+	if (gl_change_terminal(_gl, _fd_file_read, _fd_file_write, NULL) != 0) 
+	{
+		_gl = del_GetLine(_gl);
+		exit (1);
+	}
 }
 
-void
+	void
 client_read(int fd)
 {
-    char *line = NULL;
-    char buf[1024];
-    int i, n, ret_value;
+	char *line = NULL;
+	char buf[1024];
+	int i, n, ret_value;
 
-    /*
-     * XXX: Peek at the data, and later it will be read
-     * by the command-line processing library
-     */
-    n = recv(fd, buf, sizeof(buf), MSG_PEEK);
-    for (i = 0; i < n; i++)
-	printf("VAL = %d\n", buf[i]);
-    
-    printf("client_read %d octets\n", n);
-    if (n <= 0) {
-	exit (0);
-    }
-    
-    /* Scan the input data and filter-out the Telnet commands */
-    for (i = 0; i < n; i++) {
-	uint8_t val = buf[i];
-	
-	if (val == IAC) {
-	    /* Probably a telnet command */
-	    if (! _telnet_iac) {
-		_telnet_iac = 1;
-		goto post_process_telnet_label;
-	    }
-	    _telnet_iac = 0;
-	}
-	if (_telnet_iac) {
-	    switch (val) {
-	    case SB:
-		/* Begin subnegotiation of the indicated option. */
-		_telnet_sb_buffer_size = 0;
-		_telnet_sb = 1;
-		break;
-	    case SE:
-		/* End subnegotiation of the indicated option. */
-		if (! _telnet_sb)
-		    break;
-		switch(_telnet_sb_buffer[0]) {
-		case TELOPT_NAWS:
-		    /* Telnet Window Size Option */
-		    if (_telnet_sb_buffer_size < 5)
-			break;
-		    {
-			_window_width
-			    = 256 * _telnet_sb_buffer[1];
-			_window_width
-			    += _telnet_sb_buffer[2];
-			_window_height
-			    = 256 * _telnet_sb_buffer[3];
-			_window_height
-			    += _telnet_sb_buffer[4];
-			printf("Client window size changed to width = %d "
-			       "height = %d\n",
-			       _window_width, _window_height);
-		    }
-		    break;
-		default:
-		    break;
-		}
-		_telnet_sb_buffer_size = 0;
-		_telnet_sb = 0;
-		break;
-	    case DONT:
-		/* you are not to use option */
-		_telnet_dont = 1;
-		break;
-	    case DO:
-		/* please, you use option */
-		_telnet_do = 1;
-		break;
-	    case WONT:
-		/* I won't use option */
-		_telnet_wont = 1;
-		break;
-	    case WILL:
-		/* I will use option */
-		_telnet_will = 1;
-		break;
-	    case GA:
-		/* you may reverse the line */
-		break;
-	    case EL:
-		/* erase the current line */
-		break;
-	    case EC:
-		/* erase the current character */
-		break;
-	    case AYT:
-		/* are you there */
-		break;
-	    case AO:
-		/* abort output--but let prog finish */
-		break;
-	    case IP:
-		/* interrupt process--permanently */
-		break;
-	    case BREAK:
-		/* break */
-		break;
-	    case DM:
-		/* data mark--for connect. cleaning */
-		break;
-	    case NOP:
-		/* nop */
-		break;
-	    case EOR:
-		/* end of record (transparent mode) */
-		break;
-	    case ABORT:
-		/* Abort process */
-		break;
-	    case SUSP:
-		/* Suspend process */
-		break;
-	    case xEOF:
-		/* End of file: EOF is already used... */
-		break;
-	    default:
-		break;
-	    }
-	    _telnet_iac = 0;
-	    goto post_process_telnet_label;
-	}
-	if (_telnet_sb) {
-	    /* A negotiated option value */
-	    _telnet_sb_buffer[_telnet_sb_buffer_size] = val;
-	    if ( ++_telnet_sb_buffer_size >= sizeof(_telnet_sb_buffer)) {
-		/* This client is sending too much options. Kick it out! */
-		printf("Removing client!\n");
-		exit (1);
-	    }
-	    goto post_process_telnet_label;
-	}
-	if (_telnet_dont) {
-	    /* Telnet DONT option code */
-	    _telnet_dont = 0;
-	    goto post_process_telnet_label;
-	}
-	if (_telnet_do) {
-	    /* Telnet DO option code */
-	    _telnet_do = 0;
-	    goto post_process_telnet_label;
-	}
-	if (_telnet_wont) {
-	    /* Telnet WONT option code */
-	    _telnet_wont = 0;
-	    goto post_process_telnet_label;
-	}
-	if (_telnet_will) {
-	    /* Telnet WILL option code */
-	    _telnet_will = 0;
-	    goto post_process_telnet_label;
-	}
-	
-	line = gl_get_line_net(_gl,
-			       CLI_PROMPT,
-			       _command_buffer,
-			       _buff_curpos);
-	fflush(_fd_file_write);
-	
+	/*
+	 * XXX: Peek at the data, and later it will be read
+	 * by the command-line processing library
+	 */
+	n = recv(fd, buf, sizeof(buf), MSG_PEEK);
+	for (i = 0; i < n; i++)
+		printf("VAL = %d\n", buf[i]);
 
-	/* Store the line in the command buffer */
-	if (line != NULL) {
-	    if ((val == '\n') || (val == '\r')) {
-		/* New command */
-		fprintf(_fd_file_write, "Your command is: %s%s",
-			line, newline());
-		fflush(_fd_file_write);
-		fprintf(_fd_file_write, "%s", CLI_PROMPT);
-		fflush(_fd_file_write);
-		_command_buffer_size = 0;
-		_command_buffer[0] = '\0';
-	    } else {
-		/* Same-line character */
-		int gl_buff_curpos = gl_get_buff_curpos(_gl);
-		if (command_line_character(line, gl_buff_curpos, val)) {
-		    int i;
-		    /* We need to print this character */
-		    _command_buffer_size = 0;
-		    _command_buffer[0] = '\0';
-		    ret_value = 0;
-		    for (i = 0; line[i] != '\0'; i++) {
-			_command_buffer[_command_buffer_size] = line[i];
-			if (++_command_buffer_size >= sizeof(_command_buffer))
-			    ret_value = -1;
-			if (ret_value < 0)
-			    break;
-		    }
-		    if (ret_value == 0)
-			_command_buffer[_command_buffer_size] = '\0';
-		    if (++_command_buffer_size >= sizeof(_command_buffer))
-			ret_value = -1;
-		    if (ret_value != 0) {
-			/* This client is sending too much data. Kick it out!*/
-			printf("Removing client!\n");
-			exit (1);
-		    }
-		    _buff_curpos = gl_buff_curpos;
-		}
-	    }
+	printf("client_read %d octets\n", n);
+	if (n <= 0) 
+	{
+		exit (0);
 	}
-	fflush(_fd_file_write);
-	continue;
-	
-    post_process_telnet_label:
-	recv(fd, buf, 1, 0); /* Read-out this octet */
-	continue;
-    }
+
+	/* Scan the input data and filter-out the Telnet commands */
+	for (i = 0; i < n; i++) 
+	{
+		uint8_t val = buf[i];
+
+		if (val == IAC) 
+		{
+			/* Probably a telnet command */
+			if (! _telnet_iac) 
+			{
+				_telnet_iac = 1;
+				goto post_process_telnet_label;
+			}
+			_telnet_iac = 0;
+		}
+		if (_telnet_iac) 
+		{
+			switch (val) 
+			{
+				case SB:
+					/* Begin subnegotiation of the indicated option. */
+					_telnet_sb_buffer_size = 0;
+					_telnet_sb = 1;
+					break;
+				case SE:
+					/* End subnegotiation of the indicated option. */
+					if (! _telnet_sb)
+						break;
+					switch(_telnet_sb_buffer[0]) 
+					{
+						case TELOPT_NAWS:
+							/* Telnet Window Size Option */
+							if (_telnet_sb_buffer_size < 5)
+								break;
+							{
+								_window_width
+									= 256 * _telnet_sb_buffer[1];
+								_window_width
+									+= _telnet_sb_buffer[2];
+								_window_height
+									= 256 * _telnet_sb_buffer[3];
+								_window_height
+									+= _telnet_sb_buffer[4];
+								printf("Client window size changed to width = %d "
+										"height = %d\n",
+										_window_width, _window_height);
+							}
+							break;
+						default:
+							break;
+					}
+					_telnet_sb_buffer_size = 0;
+					_telnet_sb = 0;
+					break;
+				case DONT:
+					/* you are not to use option */
+					_telnet_dont = 1;
+					break;
+				case DO:
+					/* please, you use option */
+					_telnet_do = 1;
+					break;
+				case WONT:
+					/* I won't use option */
+					_telnet_wont = 1;
+					break;
+				case WILL:
+					/* I will use option */
+					_telnet_will = 1;
+					break;
+				case GA:
+					/* you may reverse the line */
+					break;
+				case EL:
+					/* erase the current line */
+					break;
+				case EC:
+					/* erase the current character */
+					break;
+				case AYT:
+					/* are you there */
+					break;
+				case AO:
+					/* abort output--but let prog finish */
+					break;
+				case IP:
+					/* interrupt process--permanently */
+					break;
+				case BREAK:
+					/* break */
+					break;
+				case DM:
+					/* data mark--for connect. cleaning */
+					break;
+				case NOP:
+					/* nop */
+					break;
+				case EOR:
+					/* end of record (transparent mode) */
+					break;
+				case ABORT:
+					/* Abort process */
+					break;
+				case SUSP:
+					/* Suspend process */
+					break;
+				case xEOF:
+					/* End of file: EOF is already used... */
+					break;
+				default:
+					break;
+			}
+			_telnet_iac = 0;
+			goto post_process_telnet_label;
+		}
+		if (_telnet_sb) 
+		{
+			/* A negotiated option value */
+			_telnet_sb_buffer[_telnet_sb_buffer_size] = val;
+			if ( ++_telnet_sb_buffer_size >= sizeof(_telnet_sb_buffer)) 
+			{
+				/* This client is sending too much options. Kick it out! */
+				printf("Removing client!\n");
+				exit (1);
+			}
+			goto post_process_telnet_label;
+		}
+		if (_telnet_dont) 
+		{
+			/* Telnet DONT option code */
+			_telnet_dont = 0;
+			goto post_process_telnet_label;
+		}
+		if (_telnet_do) 
+		{
+			/* Telnet DO option code */
+			_telnet_do = 0;
+			goto post_process_telnet_label;
+		}
+		if (_telnet_wont) 
+		{
+			/* Telnet WONT option code */
+			_telnet_wont = 0;
+			goto post_process_telnet_label;
+		}
+		if (_telnet_will) 
+		{
+			/* Telnet WILL option code */
+			_telnet_will = 0;
+			goto post_process_telnet_label;
+		}
+
+		line = gl_get_line_net(_gl,
+				CLI_PROMPT,
+				_command_buffer,
+				_buff_curpos);
+		fflush(_fd_file_write);
+
+
+		/* Store the line in the command buffer */
+		if (line != NULL) 
+		{
+			if ((val == '\n') || (val == '\r')) 
+			{
+				/* New command */
+				fprintf(_fd_file_write, "Your command is: %s%s",
+						line, newline());
+				fflush(_fd_file_write);
+				fprintf(_fd_file_write, "%s", CLI_PROMPT);
+				fflush(_fd_file_write);
+				_command_buffer_size = 0;
+				_command_buffer[0] = '\0';
+			} else 
+			{
+				/* Same-line character */
+				int gl_buff_curpos = gl_get_buff_curpos(_gl);
+				if (command_line_character(line, gl_buff_curpos, val)) 
+				{
+					int i;
+					/* We need to print this character */
+					_command_buffer_size = 0;
+					_command_buffer[0] = '\0';
+					ret_value = 0;
+					for (i = 0; line[i] != '\0'; i++) 
+					{
+						_command_buffer[_command_buffer_size] = line[i];
+						if (++_command_buffer_size >= sizeof(_command_buffer))
+							ret_value = -1;
+						if (ret_value < 0)
+							break;
+					}
+					if (ret_value == 0)
+						_command_buffer[_command_buffer_size] = '\0';
+					if (++_command_buffer_size >= sizeof(_command_buffer))
+						ret_value = -1;
+					if (ret_value != 0) 
+					{
+						/* This client is sending too much data. Kick it out!*/
+						printf("Removing client!\n");
+						exit (1);
+					}
+					_buff_curpos = gl_buff_curpos;
+				}
+			}
+		}
+		fflush(_fd_file_write);
+		continue;
+
+post_process_telnet_label:
+		recv(fd, buf, 1, 0); /* Read-out this octet */
+		continue;
+	}
 }
 
 /**
@@ -476,19 +504,20 @@ client_read(int fd)
  * 
  * Return value: 1 to output this character, otherwise 0
  **/
-int
+	int
 command_line_character(const char *line, int word_end, uint8_t val)
 {
-    if (val == '?') {
-	
-	fprintf(_fd_file_write, "%sThis is a help!%s", newline(), newline());
-	fflush(_fd_file_write);
-	fprintf(_fd_file_write, "%s", CLI_PROMPT);
-	fflush(_fd_file_write);
-	fprintf(_fd_file_write, "%s", _command_buffer);
-	fflush(_fd_file_write);
-	return (0);
-    }
-    return (1);
+	if (val == '?') 
+	{
+
+		fprintf(_fd_file_write, "%sThis is a help!%s", newline(), newline());
+		fflush(_fd_file_write);
+		fprintf(_fd_file_write, "%s", CLI_PROMPT);
+		fflush(_fd_file_write);
+		fprintf(_fd_file_write, "%s", _command_buffer);
+		fflush(_fd_file_write);
+		return (0);
+	}
+	return (1);
 }
 

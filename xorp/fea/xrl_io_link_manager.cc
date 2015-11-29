@@ -32,56 +32,56 @@
 #include "xrl_io_link_manager.hh"
 
 XrlIoLinkManager::XrlIoLinkManager(IoLinkManager&	io_link_manager,
-				   XrlRouter&		xrl_router)
-    : IoLinkManagerReceiver(),
-      _io_link_manager(io_link_manager),
-      _xrl_router(xrl_router)
+		XrlRouter&		xrl_router)
+: IoLinkManagerReceiver(),
+	_io_link_manager(io_link_manager),
+	_xrl_router(xrl_router)
 {
-    _io_link_manager.set_io_link_manager_receiver(this);
+	_io_link_manager.set_io_link_manager_receiver(this);
 }
 
 XrlIoLinkManager::~XrlIoLinkManager()
 {
-    _io_link_manager.set_io_link_manager_receiver(NULL);
+	_io_link_manager.set_io_link_manager_receiver(NULL);
 }
 
-void
+	void
 XrlIoLinkManager::recv_event(const string& receiver_name,
-			     const struct MacHeaderInfo& header,
-			     const vector<uint8_t>& payload)
+		const struct MacHeaderInfo& header,
+		const vector<uint8_t>& payload)
 {
-    //
-    // Instantiate client sending interface
-    //
-    XrlRawLinkClientV0p1Client cl(&xrl_router());
+	//
+	// Instantiate client sending interface
+	//
+	XrlRawLinkClientV0p1Client cl(&xrl_router());
 
-    //
-    // Send notification
-    //
-    cl.send_recv(receiver_name.c_str(),
-		 header.if_name,
-		 header.vif_name,
-		 header.src_address,
-		 header.dst_address,
-		 header.ether_type,
-		 payload,
-		 callback(this,
-			  &XrlIoLinkManager::xrl_send_recv_cb, receiver_name));
+	//
+	// Send notification
+	//
+	cl.send_recv(receiver_name.c_str(),
+			header.if_name,
+			header.vif_name,
+			header.src_address,
+			header.dst_address,
+			header.ether_type,
+			payload,
+			callback(this,
+				&XrlIoLinkManager::xrl_send_recv_cb, receiver_name));
 }
 
-void
+	void
 XrlIoLinkManager::xrl_send_recv_cb(const XrlError& xrl_error,
-				   string receiver_name)
+		string receiver_name)
 {
-    if (xrl_error == XrlError::OKAY())
-	return;
+	if (xrl_error == XrlError::OKAY())
+		return;
 
-    debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
+	debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all filters associated with this receiver.
-    //
-    _io_link_manager.instance_death(receiver_name);
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all filters associated with this receiver.
+	//
+	_io_link_manager.instance_death(receiver_name);
 }

@@ -65,240 +65,254 @@
  */
 
 template <class A, class Payload>
-class TrieNode {
-public:
-    typedef IPNet<A> Key;
-    typedef typename MiniTraits<Payload>::NonConst PPayload;
+class TrieNode 
+{
+    public:
+	typedef IPNet<A> Key;
+	typedef typename MiniTraits<Payload>::NonConst PPayload;
 
-    /**
-     * Constructors
-     */
-    TrieNode() : _up(0), _left(0), _right(0), _k(Key()), _p(0) {}
-    TrieNode(const Key& key, const Payload& p, TrieNode* up = 0) :
-	_up(up), _left(0), _right(0), _k(key), _p(new PPayload(p)) {}
+	/**
+	 * Constructors
+	 */
+	TrieNode() : _up(0), _left(0), _right(0), _k(Key()), _p(0) {}
+	TrieNode(const Key& key, const Payload& p, TrieNode* up = 0) :
+	    _up(up), _left(0), _right(0), _k(key), _p(new PPayload(p)) {}
 
-    explicit TrieNode(const Key& key, TrieNode* up = 0) :
-	_up(up), _left(0), _right(0), _k(key), _p(0) {}
+	explicit TrieNode(const Key& key, TrieNode* up = 0) :
+	    _up(up), _left(0), _right(0), _k(key), _p(0) {}
 
-    ~TrieNode()
-    {
-	if (_p)
-	    delete_payload(_p);
-    }
+	~TrieNode()
+	{
+	    if (_p)
+		delete_payload(_p);
+	}
 
-    /**
-     * add a node to a subtree
-     * @return a pointer to the node.
-     */
-    static TrieNode *insert(TrieNode **root,
-			    const Key& key,
-			    const Payload& p,
-			    bool& replaced);
+	/**
+	 * add a node to a subtree
+	 * @return a pointer to the node.
+	 */
+	static TrieNode *insert(TrieNode **root,
+		const Key& key,
+		const Payload& p,
+		bool& replaced);
 
-    /**
-     * erase current node, replumb. Returns the new root.
-     */
-    TrieNode *erase();
+	/**
+	 * erase current node, replumb. Returns the new root.
+	 */
+	TrieNode *erase();
 
-    /**
-     * main search routine. Given a key, returns a node.
-     */
-    TrieNode *find(const Key& key) ;
-    const TrieNode *const_find(const Key& key) const {
-	return const_cast<TrieNode*>(this)->find(key);
-    }
+	/**
+	 * main search routine. Given a key, returns a node.
+	 */
+	TrieNode *find(const Key& key) ;
+	const TrieNode *const_find(const Key& key) const 
+	{
+	    return const_cast<TrieNode*>(this)->find(key);
+	}
 
-    /**
-     * aux search routine.
-     * Given a key, returns a subtree contained in the key, irrespective
-     * of the presence of a payload in the node.
-     */
-    TrieNode *find_subtree(const Key &key);
+	/**
+	 * aux search routine.
+	 * Given a key, returns a subtree contained in the key, irrespective
+	 * of the presence of a payload in the node.
+	 */
+	TrieNode *find_subtree(const Key &key);
 
-    /**
-     * Given a key, find the node with that key and a payload.
-     * If the next doesn't exist or does not have a payload, find
-     * the next node in the iterator sequence. XXX check the description.
-     */
-    TrieNode* lower_bound(const Key &key);
+	/**
+	 * Given a key, find the node with that key and a payload.
+	 * If the next doesn't exist or does not have a payload, find
+	 * the next node in the iterator sequence. XXX check the description.
+	 */
+	TrieNode* lower_bound(const Key &key);
 
-    TrieNode* get_left()			{ return this->_left;   }
-    TrieNode* get_right()			{ return this->_right;  }
-    TrieNode* get_parent()			{ return this->_up;   }
-    bool has_payload() const			{ return _p != NULL;	}
-    const Payload &p() const			{ return *_p;		}
-    Payload &p()    				{ return *_p;		}
+	TrieNode* get_left()			{ return this->_left;   }
+	TrieNode* get_right()			{ return this->_right;  }
+	TrieNode* get_parent()			{ return this->_up;   }
+	bool has_payload() const			{ return _p != NULL;	}
+	const Payload &p() const			{ return *_p;		}
+	Payload &p()    				{ return *_p;		}
 
-    void set_payload(const Payload& p) {
-	if (_p)
-	    delete_payload(_p);
-	_p = new PPayload(p);
-    }
+	void set_payload(const Payload& p) 
+	{
+	    if (_p)
+		delete_payload(_p);
+	    _p = new PPayload(p);
+	}
 
-    const Key &k() const			{ return _k;		}
+	const Key &k() const			{ return _k;		}
 
-    void print(int indent, const char *msg) const;
-    string str() const;
+	void print(int indent, const char *msg) const;
+	string str() const;
 
-    /**
-     * helper function to delete an entire subtree (including the root).
-     */
-    void delete_subtree()			{
-	if (_left)
-	    _left->delete_subtree();
-	if (_right)
-	    _right->delete_subtree();
-	delete this;	/* and we are gone too */
-    }
+	/**
+	 * helper function to delete an entire subtree (including the root).
+	 */
+	void delete_subtree()			
+	{
+	    if (_left)
+		_left->delete_subtree();
+	    if (_right)
+		_right->delete_subtree();
+	    delete this;	/* and we are gone too */
+	}
 
-    /**
-     * debugging, validates a node by checking pointers and Key invariants.
-     */
-    void validate(const TrieNode *parent) const	{
-	UNUSED(parent);
+	/**
+	 * debugging, validates a node by checking pointers and Key invariants.
+	 */
+	void validate(const TrieNode *parent) const	
+	{
+	    UNUSED(parent);
 #ifdef VALIDATE_XORP_TRIE
-	if (_up != parent) {
-	    fprintf(stderr, "bad parent _up %x vs %x",
-		    (int)_up, (int)parent);
-	    abort();
-	}
-	if (_up && _k.contains(_up->_k)) {
-	    fprintf(stderr, "bad subnet order");
-	    abort();
-	}
-	if (_p == NULL && (!_left || !_right)) {
-	    fprintf(stderr, "useless internal node");
-	    abort();
-	}
-	if (_left)
-	    _left->validate(this);
-	if (_right)
-	    _right->validate(this);
+	    if (_up != parent) 
+	    {
+		fprintf(stderr, "bad parent _up %x vs %x",
+			(int)_up, (int)parent);
+		abort();
+	    }
+	    if (_up && _k.contains(_up->_k)) 
+	    {
+		fprintf(stderr, "bad subnet order");
+		abort();
+	    }
+	    if (_p == NULL && (!_left || !_right)) 
+	    {
+		fprintf(stderr, "useless internal node");
+		abort();
+	    }
+	    if (_left)
+		_left->validate(this);
+	    if (_right)
+		_right->validate(this);
 #endif
-    }
-
-    /**
-     * @return the leftmost node under this node
-     */
-
-    TrieNode * leftmost() {
-	TrieNode *n = this;
-	while (n->_left || n->_right)
-	    n = (n->_left ? n->_left : n->_right);
-	return n;
-    }
-
-    /**
-     * @return the boundaries ("lo" and "hi") of the largest range that
-     * contains 'a' and maps to the same route entry.
-     *
-     * Algorithm:
-     * <PRE>
-     *		n = find(a);
-     * 		if we have no route (hence no default), provide a fake 0/0;
-     *		set lo and hi to the boundaries of the current node.
-     *
-     * if n.is_a_leaf() we are done (results are the extremes of the entry)
-     * Otherwise: we are in an intermediate node, and a can be in positions
-     * 1..5 if the node has 2 children, or 1'..3' if it has 1 child.
-     *
-     *	n:		|---------------.----------------|
-     *  a:                1    2        3      4     5
-     *                       |--X--|         |--Y--|
-     *
-     *  a:                1'    2'        3'
-     *                       |--X--|
-     *
-     * Behaviour is the following:
-     *  case 1 and 1':	lo already set, hi = (lowest address in X)-1
-     *  case 2 and 2': set n = X and repeat
-     *  case 3: lo = (highest addr in X)+1, hi = (lowest addr in Y)-1
-     *  case 3': lo = (highest addr in X)+1, hi is already set
-     *  case 4: set n = Y and repeat
-     *  case 5:	lo = (highest addr in Y)+1, hi is already set
-     * </PRE>
-     */
-    void find_bounds(const A& a, A &lo, A &hi) const	{
-	TrieNode def = TrieNode();
-	const TrieNode *n = const_find(Key(a, a.addr_bitlen()));
-
-	if (n == NULL) {	// create a fake default entry
-	    def._left = const_cast<TrieNode *>(this);
-	    def._right = NULL;
-	    n = &def;
 	}
-	lo = n->_k.masked_addr();
-	hi = n->_k.top_addr();
-	for (const TrieNode *prev = NULL; prev != n;) {
-	    prev = n;
-	    TrieNode *x = (n->_left ? n->_left : n->_right);
-	    if (x == NULL)
-		break;
-	    if (a < x->_k.masked_addr()) {		// case 1 and 1'
-		hi = x->low(); --hi;
-	    } else if (a <= x->_k.top_addr()) {		// case 2 and 2'
-		n = x; // and continue
-	    } else if (n->_left == NULL || n->_right == NULL) { // case 3'
-		lo = x->high(); ++lo;
-	    } else if (a < n->_right->_k.masked_addr()) {	// case 3
-		lo = x->high(); ++lo;
-		hi = n->_right->low(); --hi;
-	    } else if (a <= n->_right->_k.top_addr()) {	// case 4:
-		if (n->_left && a > n->_left->_k.top_addr())
-		    lo = n->_left->high(); ++lo;
-		n = n->_right; // and continue
-	    } else {					// case 5:
-		lo = n->_right->high(); ++lo;
+
+	/**
+	 * @return the leftmost node under this node
+	 */
+
+	TrieNode * leftmost() 
+	{
+	    TrieNode *n = this;
+	    while (n->_left || n->_right)
+		n = (n->_left ? n->_left : n->_right);
+	    return n;
+	}
+
+	/**
+	 * @return the boundaries ("lo" and "hi") of the largest range that
+	 * contains 'a' and maps to the same route entry.
+	 *
+	 * Algorithm:
+	 * <PRE>
+	 *		n = find(a);
+	 * 		if we have no route (hence no default), provide a fake 0/0;
+	 *		set lo and hi to the boundaries of the current node.
+	 *
+	 * if n.is_a_leaf() we are done (results are the extremes of the entry)
+	 * Otherwise: we are in an intermediate node, and a can be in positions
+	 * 1..5 if the node has 2 children, or 1'..3' if it has 1 child.
+	 *
+	 *	n:		|---------------.----------------|
+	 *  a:                1    2        3      4     5
+	 *                       |--X--|         |--Y--|
+	 *
+	 *  a:                1'    2'        3'
+	 *                       |--X--|
+	 *
+	 * Behaviour is the following:
+	 *  case 1 and 1':	lo already set, hi = (lowest address in X)-1
+	 *  case 2 and 2': set n = X and repeat
+	 *  case 3: lo = (highest addr in X)+1, hi = (lowest addr in Y)-1
+	 *  case 3': lo = (highest addr in X)+1, hi is already set
+	 *  case 4: set n = Y and repeat
+	 *  case 5:	lo = (highest addr in Y)+1, hi is already set
+	 * </PRE>
+	 */
+	void find_bounds(const A& a, A &lo, A &hi) const	
+	{
+	    TrieNode def = TrieNode();
+	    const TrieNode *n = const_find(Key(a, a.addr_bitlen()));
+
+	    if (n == NULL) {	// create a fake default entry
+		def._left = const_cast<TrieNode *>(this);
+		def._right = NULL;
+		n = &def;
+	    }
+	    lo = n->_k.masked_addr();
+	    hi = n->_k.top_addr();
+	    for (const TrieNode *prev = NULL; prev != n;) 
+	    {
+		prev = n;
+		TrieNode *x = (n->_left ? n->_left : n->_right);
+		if (x == NULL)
+		    break;
+		if (a < x->_k.masked_addr()) {		// case 1 and 1'
+		    hi = x->low(); --hi;
+		} else if (a <= x->_k.top_addr()) {		// case 2 and 2'
+		    n = x; // and continue
+		} else if (n->_left == NULL || n->_right == NULL) { // case 3'
+		    lo = x->high(); ++lo;
+		} else if (a < n->_right->_k.masked_addr()) {	// case 3
+		    lo = x->high(); ++lo;
+		    hi = n->_right->low(); --hi;
+		} else if (a <= n->_right->_k.top_addr()) {	// case 4:
+		    if (n->_left && a > n->_left->_k.top_addr())
+			lo = n->_left->high(); ++lo;
+		    n = n->_right; // and continue
+		} else {					// case 5:
+		    lo = n->_right->high(); ++lo;
+		}
 	    }
 	}
-    }
 
-    /**
-     * @return the lowest address in a subtree which has a route.
-     * Search starting from left or right until a full node is found.
-     */
-    A low() const 					{
-	const TrieNode *n = this;
-	while (!(n->has_payload()) && (n->_left || n->_right))
-	    n = (n->_left ? n->_left : n->_right);
-	return n->_k.masked_addr();
-    }
+	/**
+	 * @return the lowest address in a subtree which has a route.
+	 * Search starting from left or right until a full node is found.
+	 */
+	A low() const 					
+	{
+	    const TrieNode *n = this;
+	    while (!(n->has_payload()) && (n->_left || n->_right))
+		n = (n->_left ? n->_left : n->_right);
+	    return n->_k.masked_addr();
+	}
 
-    /**
-     * @return the highest address in a subtree which has a route.
-     * Search starting from right or left until a full node is found.
-     */
-    A high() const		 			{
-	const TrieNode *n = this;
-	while (!(n->has_payload()) && (n->_right || n->_left))
-	    n = (n->_right ? n->_right : n->_left);
-	return n->_k.top_addr();
-    }
+	/**
+	 * @return the highest address in a subtree which has a route.
+	 * Search starting from right or left until a full node is found.
+	 */
+	A high() const		 			
+	{
+	    const TrieNode *n = this;
+	    while (!(n->has_payload()) && (n->_right || n->_left))
+		n = (n->_right ? n->_right : n->_left);
+	    return n->_k.top_addr();
+	}
 
-private:
-    /* delete_payload is a separate method to allow specialization */
-    void delete_payload(Payload* p) {
-	delete p;
-    }
+    private:
+	/* delete_payload is a separate method to allow specialization */
+	void delete_payload(Payload* p) 
+	{
+	    delete p;
+	}
 
-    void dump(const char *msg) const
-    {
-	UNUSED(msg);
-	trie_debug_msg(" %s %s %s\n",
-		       msg,
-		       _k.str().c_str(), _p ? "PL" : "[]");
-	trie_debug_msg("  U   %s\n",
-		       _up ? _up->_k.str().c_str() : "NULL");
-	trie_debug_msg("  L   %s\n",
-		       _left ? _left->_k.str().c_str() : "NULL");
-	trie_debug_msg("  R   %s\n",
-		       _right ? _right->_k.str().c_str() : "NULL");
+	void dump(const char *msg) const
+	{
+	    UNUSED(msg);
+	    trie_debug_msg(" %s %s %s\n",
+		    msg,
+		    _k.str().c_str(), _p ? "PL" : "[]");
+	    trie_debug_msg("  U   %s\n",
+		    _up ? _up->_k.str().c_str() : "NULL");
+	    trie_debug_msg("  L   %s\n",
+		    _left ? _left->_k.str().c_str() : "NULL");
+	    trie_debug_msg("  R   %s\n",
+		    _right ? _right->_k.str().c_str() : "NULL");
 
-    }
+	}
 
-    TrieNode	*_up, *_left, *_right;
-    Key		_k;
-    PPayload 	*_p;
+	TrieNode	*_up, *_left, *_right;
+	Key		_k;
+	PPayload 	*_p;
 };
 
 /**
@@ -310,98 +324,104 @@ private:
  * The keys returned by this iterator are not sorted by prefix length.
  */
 template <class A, class Payload>
-class TriePostOrderIterator {
-public:
-    typedef IPNet<A> Key;
-    typedef TrieNode<A, Payload> Node;
+class TriePostOrderIterator 
+{
+    public:
+	typedef IPNet<A> Key;
+	typedef TrieNode<A, Payload> Node;
 
-    /**
-     * Constructors
-     */
-    TriePostOrderIterator()				{}
+	/**
+	 * Constructors
+	 */
+	TriePostOrderIterator()				{}
 
-    /**
-     * constructor for exact searches: both the current node and the search
-     * key are taken from n, so the iterator will only loop once.
-     */
-    explicit TriePostOrderIterator(Node *n)			{
-	_cur = n;
-	if (n)
-	    _root = n->k();
-    }
+	/**
+	 * constructor for exact searches: both the current node and the search
+	 * key are taken from n, so the iterator will only loop once.
+	 */
+	explicit TriePostOrderIterator(Node *n)			
+	{
+	    _cur = n;
+	    if (n)
+		_root = n->k();
+	}
 
-    /**
-     * construct for subtree scanning: the root key is set explicitly,
-     * and the current node is set according to the search order.
-     */
-    TriePostOrderIterator(Node *n, const Key &k)		{
+	/**
+	 * construct for subtree scanning: the root key is set explicitly,
+	 * and the current node is set according to the search order.
+	 */
+	TriePostOrderIterator(Node *n, const Key &k)		
+    {
 	_root = k;
 	_cur = n;
 	if (_cur) begin();
     }
 
-    /**
-     * move to the starting position according to the visiting order
-     */
-    TriePostOrderIterator * begin() {
-	Node * n = _cur;
-	while (n->get_parent() && _root.contains(n->get_parent()->k()))
-	    n = n->get_parent();
-	_cur =  n->leftmost();
-	return this;
-    }
+	/**
+	 * move to the starting position according to the visiting order
+	 */
+	TriePostOrderIterator * begin() 
+	{
+	    Node * n = _cur;
+	    while (n->get_parent() && _root.contains(n->get_parent()->k()))
+		n = n->get_parent();
+	    _cur =  n->leftmost();
+	    return this;
+	}
 
-    /**
-     * Postfix increment
-     *
-     * Updates position of iterator in tree.
-     * @return position of iterator before increment.
-     */
-    TriePostOrderIterator operator ++(int)		{ // postfix
-	TriePostOrderIterator x = *this;
-	next();
-	return x;
-    }
+	/**
+	 * Postfix increment
+	 *
+	 * Updates position of iterator in tree.
+	 * @return position of iterator before increment.
+	 */
+	TriePostOrderIterator operator ++(int)		{ // postfix
+	    TriePostOrderIterator x = *this;
+	    next();
+	    return x;
+	}
 
-    /**
-     * Prefix increment
-     *
-     * Updates position of iterator in tree.
-     * @return position of iterator after increment.
-     */
-    TriePostOrderIterator& operator ++()		{ // prefix
-	next();
-	return *this;
-    }
+	/**
+	 * Prefix increment
+	 *
+	 * Updates position of iterator in tree.
+	 * @return position of iterator after increment.
+	 */
+	TriePostOrderIterator& operator ++()		{ // prefix
+	    next();
+	    return *this;
+	}
 
-    Payload& operator*()		{ return payload(); }
-    const Payload& operator*() const	{ return payload(); }
+	Payload& operator*()		{ return payload(); }
+	const Payload& operator*() const	{ return payload(); }
 
-    Payload* operator->()		{ return &payload(); }
-    const Payload* operator->() const	{ return &payload(); }
+	Payload* operator->()		{ return &payload(); }
+	const Payload* operator->() const	{ return &payload(); }
 
-    Node *cur() const			{ return _cur;		};
+	Node *cur() const			{ return _cur;		};
 
-    bool operator==(const TriePostOrderIterator & x) const {
-	return (_cur == x._cur);
-    }
+	bool operator==(const TriePostOrderIterator & x) const 
+	{
+	    return (_cur == x._cur);
+	}
 
-    bool operator!=(const TriePostOrderIterator & x) const {
-	return (_cur != x._cur);
-    }
+	bool operator!=(const TriePostOrderIterator & x) const 
+	{
+	    return (_cur != x._cur);
+	}
 
-    bool has_payload() const		{ return _cur->has_payload(); }
-    Payload & payload()			{ return _cur->p(); };
-    const Payload & payload() const	{ return _cur->p(); };
-    const Key & key() const		{ return _cur->k(); };
+	bool has_payload() const		{ return _cur->has_payload(); }
+	Payload & payload()			{ return _cur->p(); };
+	const Payload & payload() const	{ return _cur->p(); };
+	const Key & key() const		{ return _cur->k(); };
 
-private:
+    private:
 
-    bool node_is_left(Node * n) const;
-    void next();
+	bool node_is_left(Node * n) const;
+	void next();
 
-    Node	*_cur;
-    Key		_root;
+	Node	*_cur;
+	Key		_root;
 };
 
 /**
@@ -413,100 +433,106 @@ private:
  * keys returned are sorted by prefix length.
  */
 template <class A, class Payload>
-class TriePreOrderIterator {
-public:
-    typedef IPNet<A> Key;
-    typedef TrieNode<A, Payload> Node;
+class TriePreOrderIterator 
+{
+    public:
+	typedef IPNet<A> Key;
+	typedef TrieNode<A, Payload> Node;
 
-    /**
-     * Constructors
-     */
-    TriePreOrderIterator()				{}
+	/**
+	 * Constructors
+	 */
+	TriePreOrderIterator()				{}
 
-    /**
-     * constructor for exact searches: both the current node and the search
-     * key are taken from n, so the iterator will only loop once.
-     */
-    explicit TriePreOrderIterator(Node *n)			{
-	_cur = n;
-	if (_cur) _root = n->k();
-    }
+	/**
+	 * constructor for exact searches: both the current node and the search
+	 * key are taken from n, so the iterator will only loop once.
+	 */
+	explicit TriePreOrderIterator(Node *n)			
+	{
+	    _cur = n;
+	    if (_cur) _root = n->k();
+	}
 
-    /**
-     * construct for subtree scanning: the root key is set explicitly,
-     * and the current node is set according to the search order.
-     */
-    TriePreOrderIterator(Node *n, const Key &k)		{
+	/**
+	 * construct for subtree scanning: the root key is set explicitly,
+	 * and the current node is set according to the search order.
+	 */
+	TriePreOrderIterator(Node *n, const Key &k)		
+    {
 	_root = k;
 	_cur = n;
 	if (_cur) begin();
     }
 
-    /**
-     * move to the starting position according to the visiting order
-     */
-    TriePreOrderIterator * begin() {
-	while (!_stack.empty()) _stack.pop();
-	while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
-	    _cur = _cur->get_parent();
-	_stack.push(_cur);
-	next();
-	return this;
-    }
+	/**
+	 * move to the starting position according to the visiting order
+	 */
+	TriePreOrderIterator * begin() 
+	{
+	    while (!_stack.empty()) _stack.pop();
+	    while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
+		_cur = _cur->get_parent();
+	    _stack.push(_cur);
+	    next();
+	    return this;
+	}
 
-    /**
-     * Postfix increment
-     *
-     * Updates position of iterator in tree.
-     * @return position of iterator before increment.
-     */
-    TriePreOrderIterator operator ++(int)		{ // postfix
-	TriePreOrderIterator x = *this;
-	next();
-	return x;
-    }
+	/**
+	 * Postfix increment
+	 *
+	 * Updates position of iterator in tree.
+	 * @return position of iterator before increment.
+	 */
+	TriePreOrderIterator operator ++(int)		{ // postfix
+	    TriePreOrderIterator x = *this;
+	    next();
+	    return x;
+	}
 
-    /**
-     * Prefix increment
-     *
-     * Updates position of iterator in tree.
-     * @return position of iterator after increment.
-     */
-    TriePreOrderIterator& operator ++()		{ // prefix
-	next();
-	return *this;
-    }
+	/**
+	 * Prefix increment
+	 *
+	 * Updates position of iterator in tree.
+	 * @return position of iterator after increment.
+	 */
+	TriePreOrderIterator& operator ++()		{ // prefix
+	    next();
+	    return *this;
+	}
 
-    Payload& operator*()		{ return payload(); }
-    const Payload& operator*() const	{ return payload(); }
+	Payload& operator*()		{ return payload(); }
+	const Payload& operator*() const	{ return payload(); }
 
-    Payload* operator->()		{ return &payload(); }
-    const Payload* operator->() const	{ return &payload(); }
+	Payload* operator->()		{ return &payload(); }
+	const Payload* operator->() const	{ return &payload(); }
 
-    Node *cur() const			{ return _cur;		};
+	Node *cur() const			{ return _cur;		};
 
-    bool operator==(const TriePreOrderIterator & x) const {
-	return (_cur == x._cur);
-    }
+	bool operator==(const TriePreOrderIterator & x) const 
+	{
+	    return (_cur == x._cur);
+	}
 
-    bool operator!=(const TriePreOrderIterator & x) const {
-	return (_cur != x._cur);
-    }
+	bool operator!=(const TriePreOrderIterator & x) const 
+	{
+	    return (_cur != x._cur);
+	}
 
-    bool has_payload() const		{ return _cur->has_payload(); }
-    Payload & payload()			{ return _cur->p(); };
-    const Payload & payload() const	{ return _cur->p(); };
-    const Key & key() const		{ return _cur->k(); };
+	bool has_payload() const		{ return _cur->has_payload(); }
+	Payload & payload()			{ return _cur->p(); };
+	const Payload & payload() const	{ return _cur->p(); };
+	const Key & key() const		{ return _cur->k(); };
 
-private:
+    private:
 
 
-    bool node_is_left(Node * n) const;
-    void next();
+	bool node_is_left(Node * n) const;
+	void next();
 
-    Node	 *_cur;
-    Key		 _root;
-    stack<Node*> _stack;
+	Node	 *_cur;
+	Key		 _root;
+	stack<Node*> _stack;
 };
 
 /**
@@ -519,159 +545,175 @@ private:
  */
 
 template <class A, class Payload, class __Iterator =
-    TriePostOrderIterator<A,Payload> >
-class Trie {
-public:
-    typedef IPNet<A> Key;
-    typedef TrieNode<A,Payload> Node;
-    typedef __Iterator iterator;
+TriePostOrderIterator<A,Payload> >
+class Trie 
+{
+    public:
+	typedef IPNet<A> Key;
+	typedef TrieNode<A,Payload> Node;
+	typedef __Iterator iterator;
 
-    /**
-     * stl map interface
-     */
-    Trie() : _root(0), _payload_count(0)	{}
+	/**
+	 * stl map interface
+	 */
+	Trie() : _root(0), _payload_count(0)	{}
 
-    ~Trie()					{ delete_all_nodes(); }
+	~Trie()					{ delete_all_nodes(); }
 
-    /**
-     * insert a key,payload pair, returns an iterator
-     * to the newly inserted node.
-     * Prints a warning message if the new entry overwrites an
-     * existing full node.
-     */
-    iterator insert(const Key & net, const Payload& p) {
-	bool replaced = false;
-	Node *out = Node::insert(&_root, net, p, replaced);
-	if (!replaced) {
-	    _payload_count++;
-	}
+	/**
+	 * insert a key,payload pair, returns an iterator
+	 * to the newly inserted node.
+	 * Prints a warning message if the new entry overwrites an
+	 * existing full node.
+	 */
+	iterator insert(const Key & net, const Payload& p) 
+	{
+	    bool replaced = false;
+	    Node *out = Node::insert(&_root, net, p, replaced);
+	    if (!replaced) 
+	    {
+		_payload_count++;
+	    }
 #ifdef DEBUG_LOGGING
-	else {
-	    fprintf(stderr, "overwriting a full node"); //XXX
-	}
+	    else 
+	    {
+		fprintf(stderr, "overwriting a full node"); //XXX
+	    }
 #endif
-	return iterator(out);
-    }
-
-    /**
-     * delete the node with the given key.
-     */
-
-    void erase(const Key &k)			{ erase(find(k)); }
-
-    /**
-     * delete the node pointed by the iterator.
-     */
-    void erase(iterator i)			{
-	if (_root && i.cur() && i.cur()->has_payload()) {
-	    _payload_count--;
-	    _root = const_cast<Node *>(i.cur())->erase();
-	    // XXX should invalidate i ?
+	    return iterator(out);
 	}
-    }
 
-    /**
-     * Set root node associated with iterator to the root node of the
-     * trie.  Needed whilst trie iterators have concept of root nodes
-     * find methods return iterators with root bound to key and
-     * means they can never continue iteration beyond of root.
-     *
-     * @return iterator with non-restricted root node.
-     */
-    iterator unbind_root(iterator i) const	{
-	return iterator(i.cur(), _root->k());
-    }
+	/**
+	 * delete the node with the given key.
+	 */
 
-    /**
-     * given a key, returns an iterator to the entry with the
-     * longest matching prefix.
-     */
-    iterator find(const Key &k) const		{
-	return iterator(_root->find(k));
-    }
+	void erase(const Key &k)			{ erase(find(k)); }
 
-    /**
-     * given an address, returns an iterator to the entry with the
-     * longest matching prefix.
-     */
-    iterator find(const A& a) const		{
-	return find(Key(a, a.addr_bitlen()));
-    }
+	/**
+	 * delete the node pointed by the iterator.
+	 */
+	void erase(iterator i)			
+	{
+	    if (_root && i.cur() && i.cur()->has_payload()) 
+	    {
+		_payload_count--;
+		_root = const_cast<Node *>(i.cur())->erase();
+		// XXX should invalidate i ?
+	    }
+	}
 
-    iterator lower_bound(const Key &k) const {
+	/**
+	 * Set root node associated with iterator to the root node of the
+	 * trie.  Needed whilst trie iterators have concept of root nodes
+	 * find methods return iterators with root bound to key and
+	 * means they can never continue iteration beyond of root.
+	 *
+	 * @return iterator with non-restricted root node.
+	 */
+	iterator unbind_root(iterator i) const	
+	{
+	    return iterator(i.cur(), _root->k());
+	}
+
+	/**
+	 * given a key, returns an iterator to the entry with the
+	 * longest matching prefix.
+	 */
+	iterator find(const Key &k) const		
+	{
+	    return iterator(_root->find(k));
+	}
+
+	/**
+	 * given an address, returns an iterator to the entry with the
+	 * longest matching prefix.
+	 */
+	iterator find(const A& a) const		
+	{
+	    return find(Key(a, a.addr_bitlen()));
+	}
+
+	iterator lower_bound(const Key &k) const 
+	{
 #ifdef NOTDEF
-	iterator i = lookup_node(k);
-	if (i != end())
-	    return i;
+	    iterator i = lookup_node(k);
+	    if (i != end())
+		return i;
 #endif
-	return iterator(_root->lower_bound(k));
-    }
+	    return iterator(_root->lower_bound(k));
+	}
 
-    iterator begin() const		{ return iterator(_root, IPNet<A>()); }
-    const iterator end() const			{ return iterator(0); }
+	iterator begin() const		{ return iterator(_root, IPNet<A>()); }
+	const iterator end() const			{ return iterator(0); }
 
-    void delete_all_nodes()			{
-	if (_root)
-	    _root->delete_subtree();
-	_root = NULL;
-	_payload_count = 0;
-    }
+	void delete_all_nodes()			
+	{
+	    if (_root)
+		_root->delete_subtree();
+	    _root = NULL;
+	    _payload_count = 0;
+	}
 
-    /**
-     * lookup a subnet, must return exact match if found, end() if not.
-     *
-     */
-    iterator lookup_node(const Key & k) const	{
-	Node *n = _root->find(k);
-	return (n && n->k() == k) ? iterator(n) : end();
-    }
+	/**
+	 * lookup a subnet, must return exact match if found, end() if not.
+	 *
+	 */
+	iterator lookup_node(const Key & k) const	
+	{
+	    Node *n = _root->find(k);
+	    return (n && n->k() == k) ? iterator(n) : end();
+	}
 
-    /**
-     * returns an iterator to the subtree rooted at or below
-     * the key passed as parameter.
-     */
-    iterator search_subtree(const Key &key) const {
-	return iterator(_root->find_subtree(key), key);
-    }
+	/**
+	 * returns an iterator to the subtree rooted at or below
+	 * the key passed as parameter.
+	 */
+	iterator search_subtree(const Key &key) const 
+	{
+	    return iterator(_root->find_subtree(key), key);
+	}
 
-    /**
-     * find_less_specific asks the question: if I were to add this
-     * net to the trie, what would be its parent node?
-     * net may or may not already be in the trie.
-     * Implemented as a find() with a less specific key.
-     */
-    iterator find_less_specific(const Key &key)	const {
-	// there are no less specific routes than the default route
-	if (key.prefix_len() == 0)
-	    return end();
+	/**
+	 * find_less_specific asks the question: if I were to add this
+	 * net to the trie, what would be its parent node?
+	 * net may or may not already be in the trie.
+	 * Implemented as a find() with a less specific key.
+	 */
+	iterator find_less_specific(const Key &key)	const 
+	{
+	    // there are no less specific routes than the default route
+	    if (key.prefix_len() == 0)
+		return end();
 
-	Key x(key.masked_addr(), key.prefix_len() - 1);
+	    Key x(key.masked_addr(), key.prefix_len() - 1);
 
-	return iterator(_root->find(x));
-    }
+	    return iterator(_root->find(x));
+	}
 
-    /**
-     * return the lower and higher address in the range that contains a
-     * and would map to the same route.
-     */
-    void find_bounds(const A& a, A &lo, A &hi) const	{
-	_root->find_bounds(a, lo, hi);
-    }
-    int route_count() const			{ return static_cast<int>(_payload_count); }
-    size_t size() const				{ return _payload_count; }
+	/**
+	 * return the lower and higher address in the range that contains a
+	 * and would map to the same route.
+	 */
+	void find_bounds(const A& a, A &lo, A &hi) const	
+	{
+	    _root->find_bounds(a, lo, hi);
+	}
+	int route_count() const			{ return static_cast<int>(_payload_count); }
+	size_t size() const				{ return _payload_count; }
 
-    bool empty() const				{ return (_payload_count == 0); }
+	bool empty() const				{ return (_payload_count == 0); }
 
-    void print() const;
+	void print() const;
 
-private:
-    void validate()				{
-	if (_root)
-	    _root->validate(NULL);
-    }
+    private:
+	void validate()				
+	{
+	    if (_root)
+		_root->validate(NULL);
+	}
 
-    Node	*_root;
-    size_t	_payload_count;
+	Node	*_root;
+	size_t	_payload_count;
 };
 
 
@@ -681,11 +723,11 @@ private:
  * @return a pointer to the newly inserted node.
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+    TrieNode<A, Payload> *
 TrieNode<A, Payload>::insert(TrieNode **root,
-			     const Key& x,
-			     const Payload& p,
-			     bool& replaced)
+	const Key& x,
+	const Payload& p,
+	bool& replaced)
 {
     /*
      * Loop until done in the following:
@@ -722,9 +764,11 @@ TrieNode<A, Payload>::insert(TrieNode **root,
     TrieNode *newroot = NULL, *parent = NULL, *me = NULL;
 
     trie_debug_msg("++ insert %s\n", x.str().c_str());
-    for (;;) {
+    for (;;) 
+    {
 	newroot = *root;
-	if (newroot == NULL) {
+	if (newroot == NULL) 
+	{
 	    me = newroot = new TrieNode(x, p, parent);
 	    break;
 	}
@@ -735,7 +779,7 @@ TrieNode<A, Payload>::insert(TrieNode **root,
 	    newroot->set_payload(p);
 	    me = newroot;
 	    break;
-        }
+	}
 
 	// boundaries of x and y, and their midpoints.
 
@@ -799,12 +843,13 @@ TrieNode<A, Payload>::insert(TrieNode **root,
  * @return a pointer to the root of the trie.
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+    TrieNode<A, Payload> *
 TrieNode<A, Payload>::erase()
 {
     TrieNode *me, *parent, *child;
 
-    if (_p) {
+    if (_p) 
+    {
 	delete_payload(_p);
 	_p = NULL;
     }
@@ -817,7 +862,8 @@ TrieNode<A, Payload>::erase()
      * to repeat the process up.
      */
     for (me = this; me && me->_p == NULL &&
-	     (me->_left == NULL || me->_right == NULL); ) {
+	    (me->_left == NULL || me->_right == NULL); ) 
+    {
 
 	// me->dump("erase");			// debugging
 
@@ -850,13 +896,14 @@ TrieNode<A, Payload>::erase()
  * that contains the desired key and has a Payload
  */
 template <class A, class Payload>
-inline TrieNode<A, Payload> *
+    inline TrieNode<A, Payload> *
 TrieNode<A,Payload>::find(const Key &key)
 {
     TrieNode * cand = NULL;
     TrieNode * r = this;
 
-    while(r && r->_k.contains(key)) {
+    while(r && r->_k.contains(key)) 
+    {
 	if (r->_p)
 	    cand = r;		// we have a candidate.
 	if (r->_left && r->_left->_k.contains(key))
@@ -871,13 +918,14 @@ TrieNode<A,Payload>::find(const Key &key)
  * See the comment in the class definition.
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+    TrieNode<A, Payload> *
 TrieNode<A,Payload>::lower_bound(const Key &key)
 {
     TrieNode * cand = NULL;
     TrieNode * r = this;
     //printf("lower bound: %s\n", key.str().c_str());
-    for ( ; r && r->_k.contains(key) ; ) {
+    for ( ; r && r->_k.contains(key) ; ) 
+    {
 	cand = r;		// any node is good, irrespective of payload.
 	if (r->_left && r->_left->_k.contains(key))
 	    r = r->_left;
@@ -892,7 +940,7 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
 	    // printf("exact match\n");
 	    return cand;
 	} else {		// no payload, skip to the next (in postorder)
-				// node in the entire tree (null Key as root)
+	    // node in the entire tree (null Key as root)
 	    // printf("exact match on empty node - calling next\n");
 	    TriePostOrderIterator<A,Payload> iterator(cand, Key());
 	    ++iterator;
@@ -903,12 +951,15 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
     // printf("no exact match\n");
     // No exact match exists.
     // cand holds what would be the parent of the node, if it existed.
-    while (cand != NULL) {
+    while (cand != NULL) 
+    {
 	// printf("cand = %s\n", cand->str().c_str());
-	if (cand->_left && (key < cand->_left->_k)) {
+	if (cand->_left && (key < cand->_left->_k)) 
+	{
 	    return cand->_left->leftmost();
 	}
-	if (cand->_right && (key < cand->_right->_k)) {
+	if (cand->_right && (key < cand->_right->_k)) 
+	{
 	    return cand->_right->leftmost();
 	}
 	cand = cand->_up;
@@ -920,14 +971,16 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
  * Finds the subtree of key.
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+    TrieNode<A, Payload> *
 TrieNode<A,Payload>::find_subtree(const Key &key)
 {
     TrieNode *r = this;
     TrieNode *cand = r && key.contains(r->_k) ? r : NULL;
 
-    for ( ; r && r->_k.contains(key) ; ) {
-	if (key.contains(r->_k)) {
+    for ( ; r && r->_k.contains(key) ; ) 
+    {
+	if (key.contains(r->_k)) 
+	{
 	    cand = r;			// we have a candidate.
 	    break;			// and we don't need to search any more!
 	}
@@ -935,10 +988,12 @@ TrieNode<A,Payload>::find_subtree(const Key &key)
 	    r = r->_left;
 	else if (r->_right && r->_right->_k.contains(key))
 	    r = r->_right;
-	else if (r->_left && key.contains(r->_left->_k)) {
+	else if (r->_left && key.contains(r->_left->_k)) 
+	{
 	    cand = r->_left;
 	    break;
-	} else if (r->_right && key.contains(r->_right->_k)) {
+	} else if (r->_right && key.contains(r->_right->_k)) 
+	{
 	    cand = r->_right;
 	    break;
 	} else
@@ -955,12 +1010,13 @@ TrieNode<A,Payload>::print(int indent, const char *msg) const
 #ifdef DEBUG_LOGGING
     trie_debug_msg_indent(indent);
 
-    if (this == NULL) {
+    if (this == NULL) 
+    {
 	trie_debug_msg("%sNULL\n", msg);
 	return;
     }
     trie_debug_msg("%skey: %s %s\n",
-		   msg, _k.str().c_str(), _p ? "PL" : "[]");
+	    msg, _k.str().c_str(), _p ? "PL" : "[]");
     trie_debug_msg("    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
     _left->print(indent+4, "L: ");
     _right->print(indent+4, "R: ");
@@ -975,7 +1031,8 @@ string
 TrieNode<A,Payload>::str() const
 {
     string s;
-    if (this == NULL) {
+    if (this == NULL) 
+    {
 	s = "NULL";
 	return s;
     }
@@ -994,8 +1051,8 @@ Trie<A,Payload,__Iterator>::print() const
     iterator ti;
     for (ti = begin() ; ti != end() ; ti++)
 	printf("*** node: %-26s %s\n",
-	       ti.cur()->k().str().c_str(),
-	       ti.cur()->has_payload() ? "PL" : "[]");
+		ti.cur()->k().str().c_str(),
+		ti.cur()->has_payload() ? "PL" : "[]");
     printf("---------------\n");
 }
 
@@ -1007,12 +1064,14 @@ TriePostOrderIterator<A,Payload>::node_is_left(Node* n) const
 }
 
 template <class A, class Payload>
-void
+    void
 TriePostOrderIterator<A,Payload>::next()
 {
     Node * n = _cur;
-    do {
-	if (n->get_parent() == NULL) {
+    do 
+    {
+	if (n->get_parent() == NULL) 
+	{
 	    _cur = NULL;
 	    return;		// cannot backtrack, finished
 	}
@@ -1020,10 +1079,12 @@ TriePostOrderIterator<A,Payload>::next()
 	n = n->get_parent();
 	// backtrack one level, then explore the leftmost path
 	// on the right branch if not done already.
-	if (was_left_child && n->get_right()) {
+	if (was_left_child && n->get_right()) 
+	{
 	    n = n->get_right()->leftmost();
 	}
-	if (_root.contains(n->k()) == false) {
+	if (_root.contains(n->k()) == false) 
+	{
 	    _cur = NULL;
 	    return;
 	}
@@ -1033,15 +1094,17 @@ TriePostOrderIterator<A,Payload>::next()
 
 
 template <class A, class Payload>
-void
+    void
 TriePreOrderIterator<A,Payload>::next()
 {
-    if (_stack.empty()) {
+    if (_stack.empty()) 
+    {
 	_cur = NULL;
 	return;
     }
 
-    do {
+    do 
+    {
 	_cur = _stack.top();
 	_stack.pop();
 	if( _cur->get_right( ) != NULL )

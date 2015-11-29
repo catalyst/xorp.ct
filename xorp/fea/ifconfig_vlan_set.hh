@@ -27,99 +27,100 @@
 class IfConfig;
 
 
-class IfConfigVlanSet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigVlanSet(FeaDataPlaneManager& fea_data_plane_manager)
-	: _is_running(false),
-	  _ifconfig(fea_data_plane_manager.ifconfig()),
-	  _fea_data_plane_manager(fea_data_plane_manager)
-    {}
+class IfConfigVlanSet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigVlanSet(FeaDataPlaneManager& fea_data_plane_manager)
+			: _is_running(false),
+			_ifconfig(fea_data_plane_manager.ifconfig()),
+			_fea_data_plane_manager(fea_data_plane_manager)
+	{}
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigVlanSet() {}
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigVlanSet() {}
 
-    /**
-     * Get the @ref IfConfig instance.
-     *
-     * @return the @ref IfConfig instance.
-     */
-    IfConfig&	ifconfig() { return _ifconfig; }
+		/**
+		 * Get the @ref IfConfig instance.
+		 *
+		 * @return the @ref IfConfig instance.
+		 */
+		IfConfig&	ifconfig() { return _ifconfig; }
 
-    /**
-     * Get the @ref FeaDataPlaneManager instance.
-     *
-     * @return the @ref FeaDataPlaneManager instance.
-     */
-    FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+		/**
+		 * Get the @ref FeaDataPlaneManager instance.
+		 *
+		 * @return the @ref FeaDataPlaneManager instance.
+		 */
+		FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
 
-    /**
-     * Test whether this instance is running.
-     *
-     * @return true if the instance is running, otherwise false.
-     */
-    virtual bool is_running() const { return _is_running; }
+		/**
+		 * Test whether this instance is running.
+		 *
+		 * @return true if the instance is running, otherwise false.
+		 */
+		virtual bool is_running() const { return _is_running; }
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg) = 0;
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg) = 0;
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg) = 0;
 
-    /**
-     * Add a VLAN.
-     *
-     * If an entry for the same VLAN already exists, is is overwritten
-     * with the new information.
-     *
-     * @param pulled_ifp pointer to the interface information pulled from
-     * the system.
-     * @param config_iface reference to the interface with the information
-     * to configure.
-     * @param created_if Did we actually create a new interface in the OS?
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int config_add_vlan(const IfTreeInterface* pulled_ifp,
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg) = 0;
+
+		/**
+		 * Add a VLAN.
+		 *
+		 * If an entry for the same VLAN already exists, is is overwritten
+		 * with the new information.
+		 *
+		 * @param pulled_ifp pointer to the interface information pulled from
+		 * the system.
+		 * @param config_iface reference to the interface with the information
+		 * to configure.
+		 * @param created_if Did we actually create a new interface in the OS?
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int config_add_vlan(const IfTreeInterface* pulled_ifp,
 				const IfTreeInterface& config_iface,
 				bool& created_if,
 				string& error_msg) = 0;
 
-    /**
-     * Delete a VLAN.
-     *
-     * @param config_iface reference to the interface with the information
-     * to configure.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int config_delete_vlan(const IfTreeInterface& config_iface,
-				   string& error_msg) = 0;
+		/**
+		 * Delete a VLAN.
+		 *
+		 * @param config_iface reference to the interface with the information
+		 * to configure.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int config_delete_vlan(const IfTreeInterface& config_iface,
+				string& error_msg) = 0;
 
-protected:
-    // Misc other state
-    bool	_is_running;
+	protected:
+		// Misc other state
+		bool	_is_running;
 
-private:
-    IfConfig&		_ifconfig;
-    FeaDataPlaneManager& _fea_data_plane_manager;
+	private:
+		IfConfig&		_ifconfig;
+		FeaDataPlaneManager& _fea_data_plane_manager;
 };
 
 #endif // __FEA_IFCONFIG_VLAN_SET_HH__

@@ -79,8 +79,8 @@ CompleteFile *_del_CompleteFile(CompleteFile *cf);
  *                                     acquired by calling cf_last_error(cf).
  */
 int _cf_complete_file(WordCompletion *cpl, CompleteFile *cf,
-		     const char *line, int word_start, int word_end,
-		     int escaped, CplCheckFn *check_fn, void *check_data);
+		const char *line, int word_start, int word_end,
+		int escaped, CplCheckFn *check_fn, void *check_data);
 
 /*.......................................................................
  * Return a description of the error that occurred on the last call to

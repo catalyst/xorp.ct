@@ -54,26 +54,26 @@ class Push :
     public NONCOPYABLE,
     public Instruction
 {
-public:
-    /**
-     * Element is owned by Push.
-     * Caller must not delete element.
-     *
-     * @param e element associated with push.
-     */
-    Push(Element* e) : _elem(e) {}
-    ~Push() { delete _elem; }
+    public:
+	/**
+	 * Element is owned by Push.
+	 * Caller must not delete element.
+	 *
+	 * @param e element associated with push.
+	 */
+	Push(Element* e) : _elem(e) {}
+	~Push() { delete _elem; }
 
-    // semicolon for kdoc
-    INSTR_VISITABLE();
+	// semicolon for kdoc
+	INSTR_VISITABLE();
 
-    /**
-     * @return element associated with push.
-     */
-    const Element& elem() const { return *_elem; }
+	/**
+	 * @return element associated with push.
+	 */
+	const Element& elem() const { return *_elem; }
 
-private:
-    Element* _elem;
+    private:
+	Element* _elem;
 };
 
 /**
@@ -86,22 +86,23 @@ private:
  *
  * SetManager acts similar to VarRW [almost like a symbol-table].
  */
-class PushSet : public Instruction {
-public:
-    /**
-     * @param setid name of the set.
-     */
-    PushSet(const string& setid) : _setid(setid) {}
+class PushSet : public Instruction 
+{
+    public:
+	/**
+	 * @param setid name of the set.
+	 */
+	PushSet(const string& setid) : _setid(setid) {}
 
-    INSTR_VISITABLE();
+	INSTR_VISITABLE();
 
-    /**
-     * @return name of the set.
-     */
-    const string& setid() const { return _setid; }
+	/**
+	 * @return name of the set.
+	 */
+	const string& setid() const { return _setid; }
 
-private:
-    string _setid;
+    private:
+	string _setid;
 };
 
 /**
@@ -111,32 +112,34 @@ private:
  * is false, the current term is exited [execution continues at next term]. If
  * not, normal execution continues.
  */
-class OnFalseExit : public Instruction {
-public:
-    
-    INSTR_VISITABLE();
+class OnFalseExit : public Instruction 
+{
+    public:
+
+	INSTR_VISITABLE();
 };
 
 /**
  * @short Instruction to read a variable via VarRW interface.
  */
-class Load : public Instruction {
-public:
+class Load : public Instruction 
+{
+    public:
 
-    /**
-     * @param var identifier of variable to load.
-     */
-    Load(const VarRW::Id& var) : _var(var) {}
+	/**
+	 * @param var identifier of variable to load.
+	 */
+	Load(const VarRW::Id& var) : _var(var) {}
 
-    INSTR_VISITABLE();
-    
-    /**
-     * @return identifier of variable to read.
-     */
-    const VarRW::Id& var() const { return _var; }
+	INSTR_VISITABLE();
 
-private:
-    VarRW::Id _var;
+	/**
+	 * @return identifier of variable to read.
+	 */
+	const VarRW::Id& var() const { return _var; }
+
+    private:
+	VarRW::Id _var;
 };
 
 /**
@@ -145,67 +148,73 @@ private:
  * Argument is top most element on stack.
  * 1 element popped from stack.
  */
-class Store : public Instruction {
-public:
-    /**
-     * @param var identifier of variable to store.
-     */
-    Store(const VarRW::Id& var) : _var(var) {}
+class Store : public Instruction 
+{
+    public:
+	/**
+	 * @param var identifier of variable to store.
+	 */
+	Store(const VarRW::Id& var) : _var(var) {}
 
-    INSTR_VISITABLE();
+	INSTR_VISITABLE();
 
-    /**
-     * @return identifier of variable to write.
-     */
-    const VarRW::Id& var() const { return _var; }
+	/**
+	 * @return identifier of variable to write.
+	 */
+	const VarRW::Id& var() const { return _var; }
 
-private:
-    VarRW::Id _var;
+    private:
+	VarRW::Id _var;
 };
 
 /**
  * @short Instruction to accept a route.
  */
-class Accept : public Instruction  {
-public:
-    INSTR_VISITABLE();
+class Accept : public Instruction  
+{
+    public:
+	INSTR_VISITABLE();
 };
 
 /**
  * @short Instruction to reject a route.
  */
-class Reject : public Instruction  {
-public:
-    INSTR_VISITABLE();
+class Reject : public Instruction  
+{
+    public:
+	INSTR_VISITABLE();
 };
 
-class Next : public Instruction {
-public:
-    enum Flow {
-	TERM,
-	POLICY
-    };
+class Next : public Instruction 
+{
+    public:
+	enum Flow 
+	{
+	    TERM,
+	    POLICY
+	};
 
-    Next(Flow f) : _flow(f) {}
+	Next(Flow f) : _flow(f) {}
 
-    Flow flow() { return _flow; }
+	Flow flow() { return _flow; }
 
-    INSTR_VISITABLE();
+	INSTR_VISITABLE();
 
-private:
-    Flow    _flow;
+    private:
+	Flow    _flow;
 };
 
-class Subr : public Instruction {
-public:
-    Subr(string target) : _target(target) {}
+class Subr : public Instruction 
+{
+    public:
+	Subr(string target) : _target(target) {}
 
-    string target() { return _target; }
+	string target() { return _target; }
 
-    INSTR_VISITABLE();
+	INSTR_VISITABLE();
 
-private:
-    string  _target;
+    private:
+	string  _target;
 };
 
 /**
@@ -221,25 +230,25 @@ class NaryInstr :
     public NONCOPYABLE,
     public Instruction
 {
-public:
-    /**
-     * Caller must not delete / modify operation.
-     *
-     * @param op operation of this instruction
-     */
-    NaryInstr(Oper* op) : _op(op) {}
-    ~NaryInstr() { delete _op; }
+    public:
+	/**
+	 * Caller must not delete / modify operation.
+	 *
+	 * @param op operation of this instruction
+	 */
+	NaryInstr(Oper* op) : _op(op) {}
+	~NaryInstr() { delete _op; }
 
-    INSTR_VISITABLE();
+	INSTR_VISITABLE();
 
 
-    /**
-     * @return operation associated with this instruction.
-     */
-    const Oper& op() const { return *_op; }
+	/**
+	 * @return operation associated with this instruction.
+	 */
+	const Oper& op() const { return *_op; }
 
-private:
-    Oper* _op;
+    private:
+	Oper* _op;
 };
 
 #endif // __POLICY_BACKEND_INSTRUCTION_HH__

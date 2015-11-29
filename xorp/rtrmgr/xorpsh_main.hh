@@ -42,134 +42,135 @@ class RouterCLI;
 class SlaveConfigTree;
 class TemplateTree;
 
-class XorpShell : public XorpShellBase, XrlStdRouter {
-public:
-    XorpShell( const string& IPCname, 
-	      const string& xorp_root_dir,
-	      const string& config_template_dir, 
-	      bool verbose) throw (InitError);
-    ~XorpShell();
+class XorpShell : public XorpShellBase, XrlStdRouter 
+{
+	public:
+		XorpShell( const string& IPCname, 
+				const string& xorp_root_dir,
+				const string& config_template_dir, 
+				bool verbose) throw (InitError);
+		~XorpShell();
 
-    void run(const string& command, bool exit_on_error);
-    bool done() const;
+		void run(const string& command, bool exit_on_error);
+		bool done() const;
 
 
-    void set_mode(Mode mode) { _mode = mode; }
-    
-    void register_done(const XrlError& e, const string* token,
-		       const uint32_t* pid, const uint32_t* clientid);
-    void generic_done(const XrlError& e);
+		void set_mode(Mode mode) { _mode = mode; }
 
-    bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
+		void register_done(const XrlError& e, const string* token,
+				const uint32_t* pid, const uint32_t* clientid);
+		void generic_done(const XrlError& e);
 
-    bool leave_config_mode(GENERIC_CALLBACK cb);
+		bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
 
-    bool lock_config(LOCK_CALLBACK cb);
+		bool leave_config_mode(GENERIC_CALLBACK cb);
 
-    void config_saved_done(bool success, const string& error_msg);
-    bool commit_changes(const string& deltas, const string& deletions,
-			GENERIC_CALLBACK cb,
-			CallBack final_cb);
-    void commit_done(bool success, const string& error_msg);
+		bool lock_config(LOCK_CALLBACK cb);
 
-    bool unlock_config(GENERIC_CALLBACK cb);
+		void config_saved_done(bool success, const string& error_msg);
+		bool commit_changes(const string& deltas, const string& deletions,
+				GENERIC_CALLBACK cb,
+				CallBack final_cb);
+		void commit_done(bool success, const string& error_msg);
 
-    bool get_config_users(GET_USERS_CALLBACK cb);
+		bool unlock_config(GENERIC_CALLBACK cb);
 
-    void new_config_user(uid_t user_id);
+		bool get_config_users(GET_USERS_CALLBACK cb);
 
-    bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
-		      CallBack final_cb);
+		void new_config_user(uid_t user_id);
 
-    void save_lock_achieved(const XrlError& e, const bool* locked,
-			    const uint32_t* lock_holder,
-			    const string filename,
-			    GENERIC_CALLBACK cb);
+		bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
+				CallBack final_cb);
 
-    bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
-			CallBack final_cb);
+		void save_lock_achieved(const XrlError& e, const bool* locked,
+				const uint32_t* lock_holder,
+				const string filename,
+				GENERIC_CALLBACK cb);
 
-    void load_lock_achieved(const XrlError& e, const bool* locked,
-			    const uint32_t* lock_holder,
-			    const string filename,
-			    GENERIC_CALLBACK cb);
+		bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
+				CallBack final_cb);
 
-    void config_changed(uid_t user_id, const string& deltas, 
-			const string& deletions);
+		void load_lock_achieved(const XrlError& e, const bool* locked,
+				const uint32_t* lock_holder,
+				const string filename,
+				GENERIC_CALLBACK cb);
 
-    void module_status_change(const string& module_name, 
-			      GenericModule::ModuleStatus status);
+		void config_changed(uid_t user_id, const string& deltas, 
+				const string& deletions);
 
-    bool get_rtrmgr_pid(PID_CALLBACK cb);
+		void module_status_change(const string& module_name, 
+				GenericModule::ModuleStatus status);
 
-    OpCommandList* op_cmd_list()	{ return _ocl; }
-    SlaveConfigTree* config_tree()	{ return _ct; }
-    TemplateTree* template_tree()	{ return _tt; }
-    uint32_t clientid() const		{ return _clientid; }
-    uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
-    XorpClient& xorp_client()		{ return _xclient; }
-    const string& xorp_root_dir() const	{ return _xorp_root_dir; }
-    bool verbose() const		{ return _verbose; }
+		bool get_rtrmgr_pid(PID_CALLBACK cb);
 
-private:
-    /**
-     * Called when Finder connection is established.
-     *
-     * Note that this method overwrites an XrlRouter virtual method.
-     */
-    virtual void finder_connect_event();
+		OpCommandList* op_cmd_list()	{ return _ocl; }
+		SlaveConfigTree* config_tree()	{ return _ct; }
+		TemplateTree* template_tree()	{ return _tt; }
+		uint32_t clientid() const		{ return _clientid; }
+		uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
+		XorpClient& xorp_client()		{ return _xclient; }
+		const string& xorp_root_dir() const	{ return _xorp_root_dir; }
+		bool verbose() const		{ return _verbose; }
 
-    /**
-     * Called when Finder disconnect occurs.
-     *
-     * Note that this method overwrites an XrlRouter virtual method.
-     */
-    virtual void finder_disconnect_event();
+	private:
+		/**
+		 * Called when Finder connection is established.
+		 *
+		 * Note that this method overwrites an XrlRouter virtual method.
+		 */
+		virtual void finder_connect_event();
 
-    XrlStdRouter&	_xrl_router;
-    XorpClient		_xclient;
-    XrlRtrmgrV0p1Client	_rtrmgr_client;
-    SlaveModuleManager	_mmgr;
-    bool		_is_connected_to_finder;
+		/**
+		 * Called when Finder disconnect occurs.
+		 *
+		 * Note that this method overwrites an XrlRouter virtual method.
+		 */
+		virtual void finder_disconnect_event();
 
-    TemplateTree*	_tt;
-    SlaveConfigTree*	_ct;
-    OpCommandList*	_ocl;
-    CliNode		_cli_node;
-    RouterCLI*		_router_cli;
-    string		_xorp_root_dir;	// The root of the XORP tree
-    bool		_verbose;	// Set to true if output is verbose
-    string		_ipc_name;
-    string		_authfile;
-    string		_authtoken;
-    bool		_got_config;
-    bool		_got_modules;
-    string		_configuration;
+		XrlStdRouter&	_xrl_router;
+		XorpClient		_xclient;
+		XrlRtrmgrV0p1Client	_rtrmgr_client;
+		SlaveModuleManager	_mmgr;
+		bool		_is_connected_to_finder;
 
-    bool		_xrl_generic_done;	// XRL startup/shutdown flag
-    Mode		_mode;
+		TemplateTree*	_tt;
+		SlaveConfigTree*	_ct;
+		OpCommandList*	_ocl;
+		CliNode		_cli_node;
+		RouterCLI*		_router_cli;
+		string		_xorp_root_dir;	// The root of the XORP tree
+		bool		_verbose;	// Set to true if output is verbose
+		string		_ipc_name;
+		string		_authfile;
+		string		_authtoken;
+		bool		_got_config;
+		bool		_got_modules;
+		string		_configuration;
 
-    // Used to store the callback during a commit until we get called
-    // with the response
-    CallBack		_commit_callback;
-    string		_commit_status;	// Used for transient storage of error
-					// messages from commit
+		bool		_xrl_generic_done;	// XRL startup/shutdown flag
+		Mode		_mode;
 
-    // Used to store the callback during saving a file until we get called
-    // with the response
-    CallBack		_config_save_callback;
-    string		_save_status;	// Used for transient storage of error
-					// messages from saving the config
+		// Used to store the callback during a commit until we get called
+		// with the response
+		CallBack		_commit_callback;
+		string		_commit_status;	// Used for transient storage of error
+		// messages from commit
 
-    uint32_t		_rtrmgr_pid;
-    uint32_t            _clientid;
+		// Used to store the callback during saving a file until we get called
+		// with the response
+		CallBack		_config_save_callback;
+		string		_save_status;	// Used for transient storage of error
+		// messages from saving the config
 
-    XorpTimer           _repeat_request_timer;
+		uint32_t		_rtrmgr_pid;
+		uint32_t            _clientid;
 
-    XorpFd		_fddesc[2];
+		XorpTimer           _repeat_request_timer;
 
-    // XXX: must be last
-    XrlXorpshInterface	_xorpsh_interface;
+		XorpFd		_fddesc[2];
+
+		// XXX: must be last
+		XrlXorpshInterface	_xorpsh_interface;
 };
 
 #endif // __RTRMGR_XORPSH_MAIN_HH__

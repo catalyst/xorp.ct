@@ -32,543 +32,578 @@
 #include "register_server.hh"
 
 template<class A>
-int
+	int
 RouteRegister<A>::delete_registrant(const ModuleData& module)
 {
-    debug_msg("delete_registrant: this: %p, Module: %s\n", this,
-	   module.str().c_str());
-    map<string, ModuleData>::iterator mod_iter;
-    mod_iter = _modules.find(module.name());
+	debug_msg("delete_registrant: this: %p, Module: %s\n", this,
+			module.str().c_str());
+	map<string, ModuleData>::iterator mod_iter;
+	mod_iter = _modules.find(module.name());
 
-    if (mod_iter == _modules.end()) {
-	return XORP_ERROR;
-    }
-    _modules.erase(mod_iter);
-    debug_msg("new Value:\n%s\n", str().c_str());
-    return XORP_OK;
+	if (mod_iter == _modules.end()) 
+	{
+		return XORP_ERROR;
+	}
+	_modules.erase(mod_iter);
+	debug_msg("new Value:\n%s\n", str().c_str());
+	return XORP_OK;
 }
 
 template<class A>
 string
 RouteRegister<A>::str() const
 {
-    ostringstream oss;
+	ostringstream oss;
 
-    oss << "RR***********************\nRR RouteRegister: "
-	<< _valid_subnet.str() << "\n";
+	oss << "RR***********************\nRR RouteRegister: "
+		<< _valid_subnet.str() << "\n";
 
-    if (_route != NULL)
-	oss << "RR Route: " << _route->str() << "\n";
-    else
-	oss << "RR Route: NONE \n";
+	if (_route != NULL)
+		oss << "RR Route: " << _route->str() << "\n";
+	else
+		oss << "RR Route: NONE \n";
 
-    map<string, ModuleData>::const_iterator mod_iter;
-    mod_iter = _modules.begin();
-    while (mod_iter != _modules.end()) {
-	oss << "RR Module: " << mod_iter->second.str() << "\n";
-	++mod_iter;
-    }
-    oss << "RR***********************\n";
-    return oss.str();
+	map<string, ModuleData>::const_iterator mod_iter;
+	mod_iter = _modules.begin();
+	while (mod_iter != _modules.end()) 
+	{
+		oss << "RR Module: " << mod_iter->second.str() << "\n";
+		++mod_iter;
+	}
+	oss << "RR***********************\n";
+	return oss.str();
 }
 
-template<class A>
+	template<class A>
 RegisterTable<A>::RegisterTable(const string& tablename,
-			     RegisterServer& register_server,
-			     bool multicast)
-    : RouteTable<A>(tablename),
-      _parent(NULL),
-      _register_server(register_server),
-      _multicast(multicast)
+		RegisterServer& register_server,
+		bool multicast)
+: RouteTable<A>(tablename),
+	_parent(NULL),
+	_register_server(register_server),
+	_multicast(multicast)
 {
 }
 
-template<class A>
+	template<class A>
 RegisterTable<A>::~RegisterTable()
 {
-    while (!_ipregistry.empty()) {
-	delete (*_ipregistry.begin());
-	_ipregistry.erase(_ipregistry.begin());
-    }
+	while (!_ipregistry.empty()) 
+	{
+		delete (*_ipregistry.begin());
+		_ipregistry.erase(_ipregistry.begin());
+	}
 }
 
 template<class A>
-void
+	void
 RegisterTable<A>::set_parent(ExtIntTable<A>* new_parent)
 {
-    _parent = new_parent;
+	_parent = new_parent;
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
 {
-    bool matches = false;
+	bool matches = false;
 
-    //
-    // Note that the _ipregistry trie contains no overlapping routes,
-    // so if we find an exact match or a less specific match then we're
-    // done.
-    //
+	//
+	// Note that the _ipregistry trie contains no overlapping routes,
+	// so if we find an exact match or a less specific match then we're
+	// done.
+	//
 
-    debug_msg("FM: %s\n", route.net().str().c_str());
-    // Find any exact matches
-    typename Trie<A, RouteRegister<A>* >::iterator iter;
-    iter = _ipregistry.lookup_node(route.net());
-    if (iter != _ipregistry.end()) {
-	debug_msg("FM: exact match\n");
-	(*iter)->mark_modules();
-	return XORP_OK;
-    }
-    debug_msg("FM: no exact match\n");
+	debug_msg("FM: %s\n", route.net().str().c_str());
+	// Find any exact matches
+	typename Trie<A, RouteRegister<A>* >::iterator iter;
+	iter = _ipregistry.lookup_node(route.net());
+	if (iter != _ipregistry.end()) 
+	{
+		debug_msg("FM: exact match\n");
+		(*iter)->mark_modules();
+		return XORP_OK;
+	}
+	debug_msg("FM: no exact match\n");
 
-    //
-    // Find the parent.
-    // This is the case when a new more specific route appears.
-    //
-    iter = _ipregistry.find_less_specific(route.net());
-    if (iter != _ipregistry.end()) {
-	debug_msg("FM: less specific match\n");
-	(*iter)->mark_modules();
-	return XORP_OK;
-    }
-    debug_msg("FM: no less specific match\n");
+	//
+	// Find the parent.
+	// This is the case when a new more specific route appears.
+	//
+	iter = _ipregistry.find_less_specific(route.net());
+	if (iter != _ipregistry.end()) 
+	{
+		debug_msg("FM: less specific match\n");
+		(*iter)->mark_modules();
+		return XORP_OK;
+	}
+	debug_msg("FM: no less specific match\n");
 
-    // Find any children.
-    iter = _ipregistry.search_subtree(route.net());
-    while (iter != _ipregistry.end()) {
-	debug_msg("FM: found child\n");
-	(*iter)->mark_modules();
-	matches = true;
-	++iter;
-    }
-    if (matches == false)
-	debug_msg("FM:  no children found\n");
+	// Find any children.
+	iter = _ipregistry.search_subtree(route.net());
+	while (iter != _ipregistry.end()) 
+	{
+		debug_msg("FM: found child\n");
+		(*iter)->mark_modules();
+		matches = true;
+		++iter;
+	}
+	if (matches == false)
+		debug_msg("FM:  no children found\n");
 
-    if (matches)
-	return XORP_OK;
-    else
-	return XORP_ERROR;
+	if (matches)
+		return XORP_OK;
+	else
+		return XORP_ERROR;
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::notify_relevant_modules(bool add,
-					  const IPRouteEntry<A>& changed_route)
+		const IPRouteEntry<A>& changed_route)
 {
-    bool matches = false;
-    IPNet<A> changed_net = changed_route.net();
+	bool matches = false;
+	IPNet<A> changed_net = changed_route.net();
 
-    //
-    // Note that the _ipregistry trie contains no overlapping routes,
-    // so if we find an exact match or a less specific match then we're
-    // done.
-    //
+	//
+	// Note that the _ipregistry trie contains no overlapping routes,
+	// so if we find an exact match or a less specific match then we're
+	// done.
+	//
 
-    debug_msg("NRM: %s\n", changed_net.str().c_str());
-    // Find any exact matches
-    typename Trie<A, RouteRegister<A>* >::iterator iter, nextiter;
-    iter = _ipregistry.lookup_node(changed_net);
-    if (iter != _ipregistry.end()) {
-	debug_msg("NRM: exact match\n");
-	if (add) {
-	    notify_route_changed(iter, changed_route);
-	} else {
-	    // Delete
-	    notify_invalidated(iter);
+	debug_msg("NRM: %s\n", changed_net.str().c_str());
+	// Find any exact matches
+	typename Trie<A, RouteRegister<A>* >::iterator iter, nextiter;
+	iter = _ipregistry.lookup_node(changed_net);
+	if (iter != _ipregistry.end()) 
+	{
+		debug_msg("NRM: exact match\n");
+		if (add) 
+		{
+			notify_route_changed(iter, changed_route);
+		} else 
+		{
+			// Delete
+			notify_invalidated(iter);
+		}
+		return XORP_OK;
 	}
-	return XORP_OK;
-    }
-    debug_msg("NRM: no exact match\n");
+	debug_msg("NRM: no exact match\n");
 
-    //
-    // Find the parent.
-    // This is the case when a new more specific route appears.
-    //
-    iter = _ipregistry.find_less_specific(changed_net);
-    if (iter != _ipregistry.end()) {
-	debug_msg("NRM: less specific match: %s\n",
-		  (*iter)->str().c_str());
-	if (add) {
-	    notify_invalidated(iter);
-	} else {
-	    // This can't happen because registrations can't be
-	    // overlapped by more specific routes.
-	    XLOG_UNREACHABLE();
+	//
+	// Find the parent.
+	// This is the case when a new more specific route appears.
+	//
+	iter = _ipregistry.find_less_specific(changed_net);
+	if (iter != _ipregistry.end()) 
+	{
+		debug_msg("NRM: less specific match: %s\n",
+				(*iter)->str().c_str());
+		if (add) 
+		{
+			notify_invalidated(iter);
+		} else 
+		{
+			// This can't happen because registrations can't be
+			// overlapped by more specific routes.
+			XLOG_UNREACHABLE();
+		}
+		return XORP_OK;
 	}
-	return XORP_OK;
-    }
-    debug_msg("NRM: no less specific match\n");
+	debug_msg("NRM: no less specific match\n");
 
-    //
-    // Find any children.
-    // Example:
-    // we have routes 1.0.0.0/20,  1.0.0.0/24, and 1.0.2/24
-    // use registers 1.0.1.1.
-    // this maps to 1.0.1.0/24 on route 1.0.0.0/20.
-    // now either of the following can happen:
-    // - route 1.0.0.0/22 arrives, which needs to update the info on
-    //   the registered route.
-    // - route 1.0.0.0/20 is deleted.
-    // in either case the registration should be invalidated and the
-    // client should re-register
-    //
-    iter = _ipregistry.search_subtree(changed_net);
-    while (iter != _ipregistry.end()) {
-	debug_msg("NRM: found child\n");
-	// Move the iterator on, because otherwise a deletion may invalidate it
-	nextiter = iter;
-	++nextiter;
+	//
+	// Find any children.
+	// Example:
+	// we have routes 1.0.0.0/20,  1.0.0.0/24, and 1.0.2/24
+	// use registers 1.0.1.1.
+	// this maps to 1.0.1.0/24 on route 1.0.0.0/20.
+	// now either of the following can happen:
+	// - route 1.0.0.0/22 arrives, which needs to update the info on
+	//   the registered route.
+	// - route 1.0.0.0/20 is deleted.
+	// in either case the registration should be invalidated and the
+	// client should re-register
+	//
+	iter = _ipregistry.search_subtree(changed_net);
+	while (iter != _ipregistry.end()) 
+	{
+		debug_msg("NRM: found child\n");
+		// Move the iterator on, because otherwise a deletion may invalidate it
+		nextiter = iter;
+		++nextiter;
 
-	const IPRouteEntry<A>* ipregistry_route = (*iter)->route();
-	if (add) {
-	    debug_msg("NRM:   add\n");
-	    if (changed_net.contains((*iter)->valid_subnet())
-		&& ((ipregistry_route == NULL)
-		    || ipregistry_route->net().contains(changed_net))) {
-		debug_msg("NRM:   child_matches\n");
-		notify_invalidated(iter);
-		matches = true;
-	    }
-	} else {
-	    if ((ipregistry_route != NULL)
-		&& (ipregistry_route->net() == changed_net)) {
-		notify_invalidated(iter);
-		matches = true;
-	    }
+		const IPRouteEntry<A>* ipregistry_route = (*iter)->route();
+		if (add) 
+		{
+			debug_msg("NRM:   add\n");
+			if (changed_net.contains((*iter)->valid_subnet())
+					&& ((ipregistry_route == NULL)
+						|| ipregistry_route->net().contains(changed_net))) 
+			{
+				debug_msg("NRM:   child_matches\n");
+				notify_invalidated(iter);
+				matches = true;
+			}
+		} else 
+		{
+			if ((ipregistry_route != NULL)
+					&& (ipregistry_route->net() == changed_net)) 
+			{
+				notify_invalidated(iter);
+				matches = true;
+			}
+		}
+		iter = nextiter;
 	}
-	iter = nextiter;
-    }
-    if (matches == false)
-	debug_msg("NRM:  no children found\n");
+	if (matches == false)
+		debug_msg("NRM:  no children found\n");
 
-    if (matches)
-	return XORP_OK;
-    else
-	return XORP_ERROR;
+	if (matches)
+		return XORP_OK;
+	else
+		return XORP_ERROR;
 }
 
 template<class A>
-void
+	void
 RegisterTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
-    notify_relevant_modules(true /* it's an add */, route);
+	notify_relevant_modules(true /* it's an add */, route);
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 {
-    debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
-    XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->add_igp_route(route);
+	debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
+	XLOG_ASSERT(this->next_table() != NULL);
+	this->next_table()->add_igp_route(route);
 
-    this->generic_add_route(route);
-    return XORP_OK;
+	this->generic_add_route(route);
+	return XORP_OK;
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 {
-    debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
-    XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->add_egp_route(route);
+	debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
+	XLOG_ASSERT(this->next_table() != NULL);
+	this->next_table()->add_egp_route(route);
 
-    this->generic_add_route(route);
-    return XORP_OK;
+	this->generic_add_route(route);
+	return XORP_OK;
 }
 
 template<class A>
-void
+	void
 RegisterTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
-    notify_relevant_modules(false /* it's a delete */, *route);
+	notify_relevant_modules(false /* it's a delete */, *route);
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
-    XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->delete_igp_route(route, b);
+	XLOG_ASSERT(this->next_table() != NULL);
+	this->next_table()->delete_igp_route(route, b);
 
-    this->generic_delete_route(route);
-    return XORP_OK;
+	this->generic_delete_route(route);
+	return XORP_OK;
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
-    XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->delete_egp_route(route, b);
+	XLOG_ASSERT(this->next_table() != NULL);
+	this->next_table()->delete_egp_route(route, b);
 
-    this->generic_delete_route(route);
-    return XORP_OK;
+	this->generic_delete_route(route);
+	return XORP_OK;
 }
 
 template<class A>
-RouteRegister<A>*
+	RouteRegister<A>*
 RegisterTable<A>::add_registration(const IPNet<A>& net,
-				   const IPRouteEntry<A>* route,
-				   const string& module)
+		const IPRouteEntry<A>* route,
+		const string& module)
 {
-    map<string, ModuleData>::const_iterator mod_iter;
-    //
-    // Add the registered module name to the list of module names if
-    // it's not there already.
-    //
-    mod_iter = _module_names.find(module);
-    if (mod_iter == _module_names.end()) {
-	_module_names[module] = ModuleData(module);
-    }
-
-    // Do we have an existing registry for this subnet?
-    typename Trie<A, RouteRegister<A>* >::iterator iter, next_iter;
-    iter = _ipregistry.lookup_node(net);
-    RouteRegister<A>* rr;
-    if (iter == _ipregistry.end()) {
-	// No existing registry for this subnet
-#ifdef DEBUG_LOGGING
-	print();
-#endif
-	if (route != NULL) {
-	    debug_msg("[REGT] Add registration for net %s "
-		      "route %s module %s\n",
-		      net.str().c_str(), route->str().c_str(), module.c_str());
-	} else {
-	    debug_msg("[REGT] Add registration for net %s, "
-		      "NULL route, module %s\n",
-		      net.str().c_str(), module.c_str());
+	map<string, ModuleData>::const_iterator mod_iter;
+	//
+	// Add the registered module name to the list of module names if
+	// it's not there already.
+	//
+	mod_iter = _module_names.find(module);
+	if (mod_iter == _module_names.end()) 
+	{
+		_module_names[module] = ModuleData(module);
 	}
 
-	//
-	// We might have some old registrations for more specific
-	// subsets of this subnet.  If we do, we must invalidate them
-	//   now.  This might happen if the following occurs:
-	//   We have two routes:  1.0.0.0/16 and 1.0.0.0/24.
-	//   We have two addresses that register interest: 1.0.0.1 and 1.0.1.0
-	// This causes us to create registrations:
-	//       a)  1.0.0.0/24 on route 1.0.0.0/24
-	//       b)  1.0.1.0/24 on route 1.0.0.0/16
-	// Now the route for 1.0.0.0/24 is deleted, and (a) is invalidated.
-	// 1.0.0.1 re-registers, and this entry will be created:
-	//       c) 1.0.0.0/16 on 1.0.0.0/16.
-	// But (b) is still registered.  So we need to detect this here,
-	// and invalidate it, so it can pick up the new entry.
-	//
-	iter = _ipregistry.search_subtree(net);
-	while (iter != _ipregistry.end()) {
-	    next_iter = iter;
-	    ++next_iter;
-	    notify_invalidated(iter);
-	    iter = next_iter;
-	}
+	// Do we have an existing registry for this subnet?
+	typename Trie<A, RouteRegister<A>* >::iterator iter, next_iter;
+	iter = _ipregistry.lookup_node(net);
+	RouteRegister<A>* rr;
+	if (iter == _ipregistry.end()) 
+	{
+		// No existing registry for this subnet
+#ifdef DEBUG_LOGGING
+		print();
+#endif
+		if (route != NULL) 
+		{
+			debug_msg("[REGT] Add registration for net %s "
+					"route %s module %s\n",
+					net.str().c_str(), route->str().c_str(), module.c_str());
+		} else 
+		{
+			debug_msg("[REGT] Add registration for net %s, "
+					"NULL route, module %s\n",
+					net.str().c_str(), module.c_str());
+		}
 
-	rr = new RouteRegister<A>(net, route, module);
-	_ipregistry.insert(net, rr);
+		//
+		// We might have some old registrations for more specific
+		// subsets of this subnet.  If we do, we must invalidate them
+		//   now.  This might happen if the following occurs:
+		//   We have two routes:  1.0.0.0/16 and 1.0.0.0/24.
+		//   We have two addresses that register interest: 1.0.0.1 and 1.0.1.0
+		// This causes us to create registrations:
+		//       a)  1.0.0.0/24 on route 1.0.0.0/24
+		//       b)  1.0.1.0/24 on route 1.0.0.0/16
+		// Now the route for 1.0.0.0/24 is deleted, and (a) is invalidated.
+		// 1.0.0.1 re-registers, and this entry will be created:
+		//       c) 1.0.0.0/16 on 1.0.0.0/16.
+		// But (b) is still registered.  So we need to detect this here,
+		// and invalidate it, so it can pick up the new entry.
+		//
+		iter = _ipregistry.search_subtree(net);
+		while (iter != _ipregistry.end()) 
+		{
+			next_iter = iter;
+			++next_iter;
+			notify_invalidated(iter);
+			iter = next_iter;
+		}
+
+		rr = new RouteRegister<A>(net, route, module);
+		_ipregistry.insert(net, rr);
 #ifdef DEBUG_LOGGING
-	print();
+		print();
 #endif
-    } else {
-	rr = *iter;
-	rr->add_registrant(module);
-    }
-    debug_msg("added registration: to %p\n%s", rr, rr->str().c_str());
+	} else 
+	{
+		rr = *iter;
+		rr->add_registrant(module);
+	}
+	debug_msg("added registration: to %p\n%s", rr, rr->str().c_str());
 #ifdef DEBUG_LOGGING
-    _ipregistry.print();
+	_ipregistry.print();
 #endif
-    debug_msg("\n");
-    return rr;
+	debug_msg("\n");
+	return rr;
 }
 
 template<class A>
-int
+	int
 RegisterTable<A>::delete_registration(const IPNet<A>& net,
-				      const string& module)
+		const string& module)
 {
-    map<string, ModuleData>::iterator mod_iter;
+	map<string, ModuleData>::iterator mod_iter;
 
-    mod_iter = _module_names.find(module);
-    if (mod_iter == _module_names.end()) {
-	XLOG_ERROR("delete_registration called for unregistered module: %s",
-		   module.c_str());
-	return XORP_ERROR;
-    }
+	mod_iter = _module_names.find(module);
+	if (mod_iter == _module_names.end()) 
+	{
+		XLOG_ERROR("delete_registration called for unregistered module: %s",
+				module.c_str());
+		return XORP_ERROR;
+	}
 
-    typename Trie<A, RouteRegister<A>* >::iterator iter;
-    iter = _ipregistry.lookup_node(net);
-    if (iter == _ipregistry.end()) {
-	// If a route is deleted and a client such as BGP has
-	// registered interest in this then it will be sent an invalidate.
-	// Occasionally at the moment the invalidate is being sent the
-	// client may be deleting its registration.
-	// Thus this error will occassionally be seen in correctly
-	// running code.
-	XLOG_ERROR("delete_registration called for unregisted net: %s",
-		   net.str().c_str());
-	return XORP_ERROR;
-    }
+	typename Trie<A, RouteRegister<A>* >::iterator iter;
+	iter = _ipregistry.lookup_node(net);
+	if (iter == _ipregistry.end()) 
+	{
+		// If a route is deleted and a client such as BGP has
+		// registered interest in this then it will be sent an invalidate.
+		// Occasionally at the moment the invalidate is being sent the
+		// client may be deleting its registration.
+		// Thus this error will occassionally be seen in correctly
+		// running code.
+		XLOG_ERROR("delete_registration called for unregisted net: %s",
+				net.str().c_str());
+		return XORP_ERROR;
+	}
 
-    RouteRegister<A>* rr = *iter;
-    debug_msg("found registration %p\n", rr);
-    if (rr->delete_registrant(module) != XORP_OK) {
-	XLOG_ERROR("delete_registration failed: %s\n", net.str().c_str());
-	return XORP_ERROR;
-    }
-    if (rr->size() > 0) {
-	debug_msg("retaining RouteRegister %p\n", rr);
+	RouteRegister<A>* rr = *iter;
+	debug_msg("found registration %p\n", rr);
+	if (rr->delete_registrant(module) != XORP_OK) 
+	{
+		XLOG_ERROR("delete_registration failed: %s\n", net.str().c_str());
+		return XORP_ERROR;
+	}
+	if (rr->size() > 0) 
+	{
+		debug_msg("retaining RouteRegister %p\n", rr);
+#ifdef DEBUG_LOGGING
+		_ipregistry.print();
+#endif
+		return XORP_OK;
+	}
+
+	_ipregistry.erase(net);
+	debug_msg("deleting RouteRegister %p\n", rr);
+	delete rr;
 #ifdef DEBUG_LOGGING
 	_ipregistry.print();
 #endif
 	return XORP_OK;
-    }
-
-    _ipregistry.erase(net);
-    debug_msg("deleting RouteRegister %p\n", rr);
-    delete rr;
-#ifdef DEBUG_LOGGING
-    _ipregistry.print();
-#endif
-    return XORP_OK;
 }
 
 //
 // This is the method to be called to register a route.
 //
 template<class A>
-RouteRegister<A>*
+	RouteRegister<A>*
 RegisterTable<A>::register_route_range(const A& addr,
-				       const string& module)
+		const string& module)
 {
-    debug_msg("*****\nRRR: register_route_range: %s\n", addr.str().c_str());
-    RouteRange<A>* rrange;
-    RouteRegister<A>* rreg;
-    IPNet<A> subnet;
+	debug_msg("*****\nRRR: register_route_range: %s\n", addr.str().c_str());
+	RouteRange<A>* rrange;
+	RouteRegister<A>* rreg;
+	IPNet<A> subnet;
 
-    rrange = lookup_route_range(addr);
+	rrange = lookup_route_range(addr);
 
-    if (rrange->route() == NULL) {
-	subnet = IPNet<A>(addr, (uint8_t)addr.addr_bitlen());
-	debug_msg("RRR: no matching route\n");
-    } else {
-	subnet = rrange->minimal_subnet();
-	debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
-    }
+	if (rrange->route() == NULL) 
+	{
+		subnet = IPNet<A>(addr, (uint8_t)addr.addr_bitlen());
+		debug_msg("RRR: no matching route\n");
+	} else 
+	{
+		subnet = rrange->minimal_subnet();
+		debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
+	}
 
-    debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
-    rreg = add_registration(subnet, rrange->route(), module);
-    delete rrange;
-    return rreg;
+	debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
+	rreg = add_registration(subnet, rrange->route(), module);
+	delete rrange;
+	return rreg;
 }
 
 //
 // This is the method to be called to deregister a route.
 //
 template<class A>
-int
+	int
 RegisterTable<A>::deregister_route_range(const IPNet<A>& subnet,
-					 const string& module)
+		const string& module)
 {
-    return delete_registration(subnet, module);
+	return delete_registration(subnet, module);
 }
 
 template<class A>
 string
 RegisterTable<A>::str() const
 {
-    ostringstream oss;
+	ostringstream oss;
 
-    oss << "-------\nRegisterTable: " << this->tablename() << "\n";
-    oss << "parent = " << _parent->tablename() << "\n";
-    if (this->next_table() == NULL)
-	oss << "no next table\n";
-    else
-	oss << "next table = " << this->next_table()->tablename() << "\n";
-    return oss.str();
+	oss << "-------\nRegisterTable: " << this->tablename() << "\n";
+	oss << "parent = " << _parent->tablename() << "\n";
+	if (this->next_table() == NULL)
+		oss << "no next table\n";
+	else
+		oss << "next table = " << this->next_table()->tablename() << "\n";
+	return oss.str();
 }
 
 #ifdef DEBUG_LOGGING
 template<class A>
-inline void
+	inline void
 RegisterTable<A>::print()
 {
-    debug_msg("%s\n", str().c_str());
-    typename Trie<A, RouteRegister<A>* >::iterator iter;
-    for (iter = _ipregistry.begin(); iter != _ipregistry.end(); ++iter) {
-	debug_msg("----\n");
-	debug_msg("%s\n", (*iter)->str().c_str());
-    }
+	debug_msg("%s\n", str().c_str());
+	typename Trie<A, RouteRegister<A>* >::iterator iter;
+	for (iter = _ipregistry.begin(); iter != _ipregistry.end(); ++iter) 
+	{
+		debug_msg("----\n");
+		debug_msg("%s\n", (*iter)->str().c_str());
+	}
 }
 #endif
 
 template<class A>
-void
+	void
 RegisterTable<A>::notify_route_changed(
-    typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
-    const IPRouteEntry<A>& changed_route)
+		typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
+		const IPRouteEntry<A>& changed_route)
 {
-    list<string> module_names	= (*trie_iter)->module_names();
-    IPNextHop<A>* nexthop		= changed_route.nexthop();
-    bool resolves		= false;;
-    A nexthop_addr;
+	list<string> module_names	= (*trie_iter)->module_names();
+	IPNextHop<A>* nexthop		= changed_route.nexthop();
+	bool resolves		= false;;
+	A nexthop_addr;
 
-    switch (nexthop->type()) {
-    case GENERIC_NEXTHOP:
-	// This shouldn't be possible
-	XLOG_UNREACHABLE();
-    case PEER_NEXTHOP:
-    case ENCAPS_NEXTHOP:
-	resolves = true;
-	nexthop_addr = nexthop->addr();
-	break;
-    case EXTERNAL_NEXTHOP:
-    case DISCARD_NEXTHOP:
-    case UNREACHABLE_NEXTHOP:
-	resolves = false;
-	break;
-    }
-    if (false == resolves) {
-	notify_invalidated(trie_iter);
-    } else {
-	uint32_t metric = changed_route.metric();
-	uint32_t admin_distance = changed_route.admin_distance();
-	const string& protocol_origin = changed_route.protocol()->name();
-	list<string>::const_iterator iter;
-	for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
-	    _register_server.send_route_changed(
-		*iter,
-		(*trie_iter)->valid_subnet(),
-		nexthop_addr, metric, admin_distance,
-		protocol_origin, _multicast);
+	switch (nexthop->type()) 
+	{
+		case GENERIC_NEXTHOP:
+			// This shouldn't be possible
+			XLOG_UNREACHABLE();
+		case PEER_NEXTHOP:
+		case ENCAPS_NEXTHOP:
+			resolves = true;
+			nexthop_addr = nexthop->addr();
+			break;
+		case EXTERNAL_NEXTHOP:
+		case DISCARD_NEXTHOP:
+		case UNREACHABLE_NEXTHOP:
+			resolves = false;
+			break;
 	}
-    }
+	if (false == resolves) 
+	{
+		notify_invalidated(trie_iter);
+	} else 
+	{
+		uint32_t metric = changed_route.metric();
+		uint32_t admin_distance = changed_route.admin_distance();
+		const string& protocol_origin = changed_route.protocol()->name();
+		list<string>::const_iterator iter;
+		for (iter = module_names.begin(); iter != module_names.end(); ++iter) 
+		{
+			_register_server.send_route_changed(
+					*iter,
+					(*trie_iter)->valid_subnet(),
+					nexthop_addr, metric, admin_distance,
+					protocol_origin, _multicast);
+		}
+	}
 }
 
 template<class A>
-void
+	void
 RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>* >::iterator trie_iter)
 {
-    list<string> module_names = (*trie_iter)->module_names();
-    IPNet<A> valid_subnet = (*trie_iter)->valid_subnet();
+	list<string> module_names = (*trie_iter)->module_names();
+	IPNet<A> valid_subnet = (*trie_iter)->valid_subnet();
 
-    debug_msg("notify_invalidated: %s\n", valid_subnet.str().c_str());
+	debug_msg("notify_invalidated: %s\n", valid_subnet.str().c_str());
 
-    list<string>::const_iterator iter;
-    for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
-	debug_msg("we will send an invalidate to %s\n", (*iter).c_str());
-	_register_server.send_invalidate(*iter, valid_subnet, _multicast);
-    }
-    delete *trie_iter;
-    _ipregistry.erase(trie_iter);
+	list<string>::const_iterator iter;
+	for (iter = module_names.begin(); iter != module_names.end(); ++iter) 
+	{
+		debug_msg("we will send an invalidate to %s\n", (*iter).c_str());
+		_register_server.send_invalidate(*iter, valid_subnet, _multicast);
+	}
+	delete *trie_iter;
+	_ipregistry.erase(trie_iter);
 }
 
 template<class A>
-void
+	void
 RegisterTable<A>::flush()
 {
-    _register_server.flush();
+	_register_server.flush();
 }
 
 

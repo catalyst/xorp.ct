@@ -25,16 +25,16 @@
 #include "code_generator.hh"
 #include "policy_map.hh"
 
-CodeGenerator::CodeGenerator(const VarMap& varmap, PolicyMap& pmap) 
-	: _varmap(varmap), _pmap(pmap), _subr(false)
+    CodeGenerator::CodeGenerator(const VarMap& varmap, PolicyMap& pmap) 
+: _varmap(varmap), _pmap(pmap), _subr(false)
 {
 }
 
 CodeGenerator::CodeGenerator(const string& proto,
-			     const filter::Filter& filter,
-			     const VarMap& varmap,
-			     PolicyMap& pmap)
-	: _varmap(varmap), _pmap(pmap), _subr(false)
+	const filter::Filter& filter,
+	const VarMap& varmap,
+	PolicyMap& pmap)
+: _varmap(varmap), _pmap(pmap), _subr(false)
 {
     _protocol = proto;
     _code.set_target_protocol(proto);
@@ -43,8 +43,8 @@ CodeGenerator::CodeGenerator(const string& proto,
 
 // constructor for import policies
 CodeGenerator::CodeGenerator(const string& proto, const VarMap& varmap,
-			     PolicyMap& pmap) : _varmap(varmap), _pmap(pmap),
-			     _subr(false)
+	PolicyMap& pmap) : _varmap(varmap), _pmap(pmap),
+    _subr(false)
 {
     _protocol = proto;
     _code.set_target_protocol(proto);
@@ -55,15 +55,16 @@ CodeGenerator::~CodeGenerator()
 {
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit_policy(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
 
     // go through all the terms
     for (PolicyStatement::TermContainer::iterator i = terms.begin(); 
-	 i != terms.end(); ++i) {
-	
+	    i != terms.end(); ++i) 
+    {
+
 	(i->second)->accept(*this);
     }	    
 
@@ -78,7 +79,7 @@ CodeGenerator::visit_policy(PolicyStatement& policy)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit_term(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
@@ -90,13 +91,15 @@ CodeGenerator::visit_term(Term& term)
     _os << "TERM_START " << term.name() << endl ;
 
     // do the source block
-    for(i = source.begin(); i != source.end(); ++i) {
+    for(i = source.begin(); i != source.end(); ++i) 
+    {
 	(i->second)->accept(*this);
-        _os << "ONFALSE_EXIT" << endl;
+	_os << "ONFALSE_EXIT" << endl;
     }
 
     // Import policies should not have a dest block
-    if(!dest.empty()) {
+    if(!dest.empty()) 
+    {
 	xorp_throw(CodeGeneratorErr, "Term " + term.name() + " has a dest part!");
     }
 
@@ -104,12 +107,14 @@ CodeGenerator::visit_term(Term& term)
     // Do the action block.
     // XXX: We generate last the code for the "accept" or "reject" statements.
     //
-    for(i = actions.begin(); i != actions.end(); ++i) {
+    for(i = actions.begin(); i != actions.end(); ++i) 
+    {
 	if ((i->second)->is_accept_or_reject())
 	    continue;
-        (i->second)->accept(*this);
+	(i->second)->accept(*this);
     }
-    for(i = actions.begin(); i != actions.end(); ++i) {
+    for(i = actions.begin(); i != actions.end(); ++i) 
+    {
 	if ((i->second)->is_accept_or_reject())
 	    (i->second)->accept(*this);
     }
@@ -118,8 +123,8 @@ CodeGenerator::visit_term(Term& term)
     return NULL;
 
 }
-    
-const Element* 
+
+    const Element* 
 CodeGenerator::visit(NodeUn& node)
 {
     node.node().accept(*this);
@@ -128,7 +133,7 @@ CodeGenerator::visit(NodeUn& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeBin& node)
 {
     // reverse order, so they can be popped in correct order
@@ -139,7 +144,7 @@ CodeGenerator::visit(NodeBin& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeAssign& node)
 {
     node.rvalue().accept(*this);
@@ -150,7 +155,8 @@ CodeGenerator::visit(NodeAssign& node)
     // For now we just expand expressions such as "a += b" into "a = a + b" in
     // the frontend. 
     //  -sorbo
-    if (node.mod()) {
+    if (node.mod()) 
+    {
 	_os << "LOAD " << id << endl;
 	_os << node.mod()->str() << endl;
     }
@@ -159,7 +165,7 @@ CodeGenerator::visit(NodeAssign& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeElem& node)
 {
     _os << "PUSH " << node.val().type() << " " << 
@@ -167,7 +173,7 @@ CodeGenerator::visit(NodeElem& node)
     return NULL;	
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeVar& node)
 {
     VarRW::Id id = _varmap.var2id(protocol(), node.val());
@@ -176,7 +182,7 @@ CodeGenerator::visit(NodeVar& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeSet& node)
 {
     _os << "PUSH_SET " << node.setid() << endl;
@@ -184,21 +190,21 @@ CodeGenerator::visit(NodeSet& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeAccept& /* node */)
 {
     _os << "ACCEPT" << endl;
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit(NodeReject& /* node */)
 {
     _os << "REJECT" << endl;
     return NULL;
 }
 
-const Element* 
+    const Element* 
 CodeGenerator::visit_proto(NodeProto& node)
 {
     ostringstream err;
@@ -208,49 +214,50 @@ CodeGenerator::visit_proto(NodeProto& node)
     xorp_throw(CodeGeneratorErr, err.str());
 }
 
-const Code&
+    const Code&
 CodeGenerator::code()
 { 
     return _code; 
 }
 
-const Element*
+    const Element*
 CodeGenerator::visit(PolicyStatement& ps)
 {
     return visit_policy(ps);
 }
 
-const Element*
+    const Element*
 CodeGenerator::visit(Term& term)
 {
     return visit_term(term);
 }
 
-const Element*
+    const Element*
 CodeGenerator::visit(NodeProto& proto)
 {
     return visit_proto(proto);
 }
 
-const string&
+    const string&
 CodeGenerator::protocol()
 {
     return _protocol;
 }
 
-const Element*
+    const Element*
 CodeGenerator::visit(NodeNext& next)
 {
     _os << "NEXT ";
 
-    switch (next.flow()) {
-    case NodeNext::POLICY:
-	_os << "POLICY";
-	break;
+    switch (next.flow()) 
+    {
+	case NodeNext::POLICY:
+	    _os << "POLICY";
+	    break;
 
-    case NodeNext::TERM:
-	_os << "TERM";
-	break;
+	case NodeNext::TERM:
+	    _os << "TERM";
+	    break;
     }
 
     _os << endl;
@@ -258,7 +265,7 @@ CodeGenerator::visit(NodeNext& next)
     return NULL;
 }
 
-const Element*
+    const Element*
 CodeGenerator::visit(NodeSubr& node)
 {
     string policy       = node.policy();

@@ -29,60 +29,61 @@
 
 class XorpShell;
 
-class XrlXorpshInterface : public XrlXorpshTargetBase {
-public:
-    XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh);
+class XrlXorpshInterface : public XrlXorpshTargetBase 
+{
+	public:
+		XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh);
 
-    XrlCmdError common_0_1_get_target_name(
-	// Output values, 
-	string&	name);
+		XrlCmdError common_0_1_get_target_name(
+				// Output values, 
+				string&	name);
 
-    XrlCmdError common_0_1_get_version(
-	// Output values, 
-	string&	version);
+		XrlCmdError common_0_1_get_version(
+				// Output values, 
+				string&	version);
 
-    /**
-     *  Get status from Xrl Target
-     */
-    XrlCmdError common_0_1_get_status(// Output values,
-				      uint32_t& status,
-				      string&	reason);
-    
-    /**
-     * Shutdown cleanly
-     */
-    XrlCmdError common_0_1_shutdown();
-    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+		/**
+		 *  Get status from Xrl Target
+		 */
+		XrlCmdError common_0_1_get_status(// Output values,
+				uint32_t& status,
+				string&	reason);
 
-    XrlCmdError rtrmgr_client_0_2_new_config_user(
-	// Input values, 
-	const uint32_t&	user_id);
+		/**
+		 * Shutdown cleanly
+		 */
+		XrlCmdError common_0_1_shutdown();
+		XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
 
-    XrlCmdError rtrmgr_client_0_2_config_saved_done(
-	// Input values,
-	const bool&	success,
-	const string&	errmsg);
+		XrlCmdError rtrmgr_client_0_2_new_config_user(
+				// Input values, 
+				const uint32_t&	user_id);
 
-    XrlCmdError rtrmgr_client_0_2_config_change_done(
-	// Input values, 
-	const bool&	success, 
-	const string&	errmsg);
+		XrlCmdError rtrmgr_client_0_2_config_saved_done(
+				// Input values,
+				const bool&	success,
+				const string&	errmsg);
 
-    XrlCmdError rtrmgr_client_0_2_config_changed(
-	// Input values, 
-	const uint32_t&	user_id, 
-	const string&	deltas, 
-	const string&	deletions);
+		XrlCmdError rtrmgr_client_0_2_config_change_done(
+				// Input values, 
+				const bool&	success, 
+				const string&	errmsg);
 
-    XrlCmdError rtrmgr_client_0_2_module_status(
-	// Input values,
-        const string&   modname,
-        const uint32_t& status);
+		XrlCmdError rtrmgr_client_0_2_config_changed(
+				// Input values, 
+				const uint32_t&	user_id, 
+				const string&	deltas, 
+				const string&	deletions);
 
-private:
-    XorpShell&	_xorpsh;
+		XrlCmdError rtrmgr_client_0_2_module_status(
+				// Input values,
+				const string&   modname,
+				const uint32_t& status);
 
-    bool	_verbose;		// Set to true if output is verbose
+	private:
+		XorpShell&	_xorpsh;
+
+		bool	_verbose;		// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_XRL_XORPSH_INTERFACE_HH__

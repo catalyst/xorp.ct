@@ -30,30 +30,32 @@
 /**
  * @short Allows variables to be written and read from static routes.
  */
-class StaticRoutesVarRW : public SingleVarRW {
-public:
-    enum {
-	VAR_NETWORK4 = VAR_PROTOCOL,
-	VAR_NEXTHOP4,
-	VAR_NETWORK6,
-	VAR_NEXTHOP6,
-	VAR_METRIC
-    };
-    /**
-     * @param route route to read/write values from.
-     */
-    StaticRoutesVarRW(StaticRoute& route);
+class StaticRoutesVarRW : public SingleVarRW 
+{
+    public:
+	enum 
+	{
+	    VAR_NETWORK4 = VAR_PROTOCOL,
+	    VAR_NEXTHOP4,
+	    VAR_NETWORK6,
+	    VAR_NEXTHOP6,
+	    VAR_METRIC
+	};
+	/**
+	 * @param route route to read/write values from.
+	 */
+	StaticRoutesVarRW(StaticRoute& route);
 
-    // SingleVarRW inteface:
-    void start_read();
-    Element* single_read(const Id& id);
-    void single_write(const Id& id, const Element& e);
+	// SingleVarRW inteface:
+	void start_read();
+	Element* single_read(const Id& id);
+	void single_write(const Id& id, const Element& e);
 
-private:
-    StaticRoute&	_route;
-    ElementFactory	_ef;
-    bool		_is_ipv4;
-    bool		_is_ipv6;
+    private:
+	StaticRoute&	_route;
+	ElementFactory	_ef;
+	bool		_is_ipv4;
+	bool		_is_ipv6;
 };
 
 #endif // __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__

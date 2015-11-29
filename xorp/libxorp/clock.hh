@@ -26,38 +26,40 @@
 
 class TimeVal;
 
-class ClockBase {
-public:
-    virtual ~ClockBase();
+class ClockBase 
+{
+    public:
+	virtual ~ClockBase();
 
-    /**
-     * Update internal concept of time.
-     */
-    virtual void advance_time() = 0;
+	/**
+	 * Update internal concept of time.
+	 */
+	virtual void advance_time() = 0;
 
-    /**
-     * Get time it was when advance_time() was last called.  Successive calls
-     * to current_time return the same value.  Time only advances when
-     * advance_time() is called.
-     *
-     * @param tv TimeVal to be filled in with current time.
-     */
-    virtual void current_time(TimeVal& tv) = 0;
+	/**
+	 * Get time it was when advance_time() was last called.  Successive calls
+	 * to current_time return the same value.  Time only advances when
+	 * advance_time() is called.
+	 *
+	 * @param tv TimeVal to be filled in with current time.
+	 */
+	virtual void current_time(TimeVal& tv) = 0;
 };
 
 /**
  * An implementation of ClockBase that uses the underlying system's
  * 'get current system time' function as it's clock source.
  */
-class SystemClock : public ClockBase, NONCOPYABLE {
-public:
-    SystemClock();
-    virtual ~SystemClock();
-    void advance_time();
-    void current_time(TimeVal& tv);
+class SystemClock : public ClockBase, NONCOPYABLE 
+{
+    public:
+	SystemClock();
+	virtual ~SystemClock();
+	void advance_time();
+	void current_time(TimeVal& tv);
 
-private:
-    TimeVal* _tv;
+    private:
+	TimeVal* _tv;
 
 };
 

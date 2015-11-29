@@ -28,30 +28,31 @@
 
 #include "xrl_cmd_map.hh"
 
-void
+    void
 XrlCmdEntry::invoke_sync(const XrlArgs& in, XrlRespCallback out,
-			 XrlRecvSyncCallback impl)
+	XrlRecvSyncCallback impl)
 {
     XrlArgs out_args;
     XrlCmdError e = impl->dispatch(in, &out_args);
     out->dispatch(e, &out_args);
 }
 
-bool
+    bool
 XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
 {
-    if (get_handler(cmd.name())) {
+    if (get_handler(cmd.name())) 
+    {
 	debug_msg("XrlCmdMap::add_handler for \"%s\" failed"
-		  ": a handler already exists\n", cmd.name().c_str());
+		": a handler already exists\n", cmd.name().c_str());
 	return false;
     }
     _cmd_map.insert(CmdMap::value_type(cmd.name(), cmd));
     return true;
 }
 
-bool
+    bool
 XrlCmdMap::add_handler_internal(const string& cmd,
-				const XrlRecvAsyncCallback& rcb)
+	const XrlRecvAsyncCallback& rcb)
 {
     return add_handler(XrlCmdEntry(cmd, rcb));
 }
@@ -65,7 +66,7 @@ XrlCmdMap::get_handler(const string& name) const
     return &c->second;
 }
 
-bool
+    bool
 XrlCmdMap::remove_handler(const string& name)
 {
     CmdMap::iterator c = _cmd_map.find(name);
@@ -79,8 +80,10 @@ const XrlCmdEntry*
 XrlCmdMap::get_handler(uint32_t index) const
 {
     CmdMap::const_iterator c;
-    for (c = _cmd_map.begin(); c != _cmd_map.end(); c++, index--) {
-	if (index == 0) {
+    for (c = _cmd_map.begin(); c != _cmd_map.end(); c++, index--) 
+    {
+	if (index == 0) 
+	{
 	    return &c->second;
 	}
     }
@@ -97,12 +100,13 @@ void
 XrlCmdMap::get_command_names(list<string>& out) const
 {
     CmdMap::const_iterator ci;
-    for (ci = _cmd_map.begin(); ci != _cmd_map.end(); ++ci) {
+    for (ci = _cmd_map.begin(); ci != _cmd_map.end(); ++ci) 
+    {
 	out.push_back(ci->first);
     }
 }
 
-void
+    void
 XrlCmdMap::finalize()
 {
 }

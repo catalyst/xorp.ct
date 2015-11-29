@@ -54,54 +54,58 @@ Configuration::~Configuration()
     _policies.clear();
 }
 
-Term&
+    Term&
 Configuration::find_term(const string& policy, const string& term)
 {
     const PolicyStatement& ps = _policies.find(policy);
     return ps.find_term(term);
 }
 
-void
+    void
 Configuration::delete_term(const string& policy, const string& term)
 {
     PolicyStatement& ps = _policies.find(policy);
 
-    if (ps.delete_term(term)) {
+    if (ps.delete_term(term)) 
+    {
 	// policy needs to be re-compiled [will do so on commit]
 	policy_modified(policy);
 
-        return;
+	return;
     }
 
     xorp_throw(ConfError, "TERM NOT FOUND " + policy + " " + term);
 }
 
-void
+    void
 Configuration::update_term_block(const string& policy,
-                                 const string& term,
-	                         const uint32_t& block,
-				 const ConfigNodeId& order,
-		                 const string& statement)
+	const string& term,
+	const uint32_t& block,
+	const ConfigNodeId& order,
+	const string& statement)
 {
     Term& t = find_term(policy,term);
-    try {
+    try 
+    {
 	t.set_block(block, order, statement);
 	policy_modified(policy);
-    } catch (const Term::term_syntax_error& e) {
-        string err = "In policy " + policy + ": " + e.why();
-        xorp_throw(ConfError, err);
+    } catch (const Term::term_syntax_error& e) 
+    {
+	string err = "In policy " + policy + ": " + e.why();
+	xorp_throw(ConfError, err);
     }
 }
 
-void
+    void
 Configuration::create_term(const string& policy, const ConfigNodeId& order,
-			   const string& term)
+	const string& term)
 {
     PolicyStatement& ps = _policies.find(policy);
 
-    if (ps.term_exists(term)) {
+    if (ps.term_exists(term)) 
+    {
 	xorp_throw(ConfError,
-		   "Term " + term + " exists already in policy " + policy);
+		"Term " + term + " exists already in policy " + policy);
     }
 
     Term* t = new Term(term);
@@ -110,14 +114,14 @@ Configuration::create_term(const string& policy, const ConfigNodeId& order,
     policy_modified(policy);
 }
 
-void
+    void
 Configuration::create_policy(const string&   policy)
 {
     _policies.create(policy,_sets);
     _modified_policies.insert(policy);
 }
 
-void
+    void
 Configuration::delete_policy(const string&   policy)
 {
     _policies.delete_policy(policy);
@@ -126,21 +130,21 @@ Configuration::delete_policy(const string&   policy)
     _modified_policies.erase(policy);
 }
 
-void
+    void
 Configuration::create_set(const string& set)
 {
     _sets.create(set);
 }
 
-void
+    void
 Configuration::update_set(const string& type, const string& set,
-			  const string& elements)
+	const string& elements)
 {
     // policies affected will be marked as modified.
     _sets.update_set(type, set, elements, _modified_policies);
 }
 
-void
+    void
 Configuration::delete_set(const string& set)
 {
     // if we manage to delete a set, it is not in use, so no updates are
@@ -148,25 +152,25 @@ Configuration::delete_set(const string& set)
     _sets.delete_set(set);
 }
 
-void
+    void
 Configuration::add_to_set(const string& type, const string& set,
-			  const string& element)
+	const string& element)
 {
     // policies affected will be marked as modified.
     _sets.add_to_set(type, set, element, _modified_policies);
 }
 
-void
+    void
 Configuration::delete_from_set(const string& type, const string& set,
-			       const string& element)
+	const string& element)
 {
     // policies affected will be marked as modified.
     _sets.delete_from_set(type, set, element, _modified_policies);
 }
 
-void
+    void
 Configuration::update_imports(const string& protocol, const POLICIES& imports,
-			      const string& mod)
+	const string& mod)
 {
     // check if protocol exists
     if (!_varmap.protocol_known(protocol))
@@ -176,10 +180,10 @@ Configuration::update_imports(const string& protocol, const POLICIES& imports,
     _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
 }
 
-void
+    void
 Configuration::update_exports(const string& protocol,
-			      const POLICIES& exports,
-			      const string& mod)
+	const POLICIES& exports,
+	const string& mod)
 {
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
@@ -187,13 +191,14 @@ Configuration::update_exports(const string& protocol,
 
     // XXX: if conf fails we lost tagmap
     TagMap::iterator i = _tagmap.find(protocol);
-    if(i != _tagmap.end()) {
-        TagSet* ts = (*i).second;
-        _tagmap.erase(i);
+    if(i != _tagmap.end()) 
+    {
+	TagSet* ts = (*i).second;
+	_tagmap.erase(i);
 
-        clear_protocol_tags(*ts);
+	clear_protocol_tags(*ts);
 
-        delete ts;
+	delete ts;
     }
 
     update_ie(protocol, exports, _exports, PolicyList::EXPORT, mod);
@@ -203,25 +208,30 @@ Configuration::update_exports(const string& protocol,
     _modified_targets.insert(Code::Target(protocol,filter::EXPORT));
 }
 
-void
+    void
 Configuration::clear_protocol_tags(const TagSet& ts)
 {
     // check if some ts element already exists in _tagmap
     // if they do, don't remove them from the _protocol_tags
     TagSet::const_iterator ts_iter;
-    for (ts_iter = ts.begin(); ts_iter != ts.end(); ts_iter++) {
+    for (ts_iter = ts.begin(); ts_iter != ts.end(); ts_iter++) 
+    {
 	bool skip = false;
 
-	for (TagMap::const_iterator iter = _tagmap.begin(); iter != _tagmap.end(); ++iter) {
-	    if (iter->second->find(*ts_iter) != iter->second->end()) {
+	for (TagMap::const_iterator iter = _tagmap.begin(); iter != _tagmap.end(); ++iter) 
+	{
+	    if (iter->second->find(*ts_iter) != iter->second->end()) 
+	    {
 		skip = true;
 		break;
 	    }
 	}
 
-	if (!skip) {
+	if (!skip) 
+	{
 	    map<string, set<uint32_t> >::iterator pt_iter;
-	    for (pt_iter = _protocol_tags.begin(); pt_iter != _protocol_tags.end(); pt_iter++) {
+	    for (pt_iter = _protocol_tags.begin(); pt_iter != _protocol_tags.end(); pt_iter++) 
+	    {
 		pt_iter->second.erase(*ts_iter);
 		if (pt_iter->second.empty())
 		    _protocol_tags.erase(pt_iter);
@@ -230,7 +240,7 @@ Configuration::clear_protocol_tags(const TagSet& ts)
     }
 }
 
-void
+    void
 Configuration::clear_imports(const string& protocol)
 {
     // check if protocol exists
@@ -241,7 +251,7 @@ Configuration::clear_imports(const string& protocol)
     _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
 }
 
-void
+    void
 Configuration::clear_exports(const string& protocol)
 {
     // check if protocol exists
@@ -252,34 +262,37 @@ Configuration::clear_exports(const string& protocol)
     _modified_targets.insert(Code::Target(protocol, filter::EXPORT));
 }
 
-string
+    string
 Configuration::str()
 {
     ostringstream conf;
-/*
-for(PolicyMap::iterator i = _policies.begin();
-    i != _policies.end(); ++i) {
+    /*
+       for(PolicyMap::iterator i = _policies.begin();
+       i != _policies.end(); ++i) 
+       {
 
-    conf += ((*i).second)->str();
-}
+       conf += ((*i).second)->str();
+       }
 
-for(SetMap::iterator i = _sets.begin();
-    i != _sets.end(); ++i) {
+       for(SetMap::iterator i = _sets.begin();
+       i != _sets.end(); ++i) 
+       {
 
-    conf += "set " + (*i).first + " {\n";
-    conf += ((*i).second)->str();
-    conf += "\n}\n";
-}
+       conf += "set " + (*i).first + " {\n";
+       conf += ((*i).second)->str();
+       conf += "\n}\n";
+       }
 
-for(IEMap::iterator i = _imports.begin();
-    i != _imports.end(); ++i) {
+       for(IEMap::iterator i = _imports.begin();
+       i != _imports.end(); ++i) 
+       {
 
-    conf += "import " + (*i).first;
+       conf += "import " + (*i).first;
 
-    conf += "\n";
-}
-return conf;
-*/
+       conf += "\n";
+       }
+       return conf;
+       */
     conf << "IMPORTS:\n";
     conf << codemap_str(_import_filters);
 
@@ -290,17 +303,19 @@ return conf;
     conf << codemap_str(_export_filters);
 
     conf << "TAGS:\n";
-    for(TagMap::iterator i = _tagmap.begin(); i != _tagmap.end(); ++i) {
-        const string& protocol = (*i).first;
-        const TagSet& tagset = *((*i).second);
+    for(TagMap::iterator i = _tagmap.begin(); i != _tagmap.end(); ++i) 
+    {
+	const string& protocol = (*i).first;
+	const TagSet& tagset = *((*i).second);
 
-        conf << protocol << ":";
+	conf << protocol << ":";
 
-        for(TagSet::const_iterator j = tagset.begin(); j != tagset.end(); ++j) {
-	   conf << " " << *j;
+	for(TagSet::const_iterator j = tagset.begin(); j != tagset.end(); ++j) 
+	{
+	    conf << " " << *j;
 	}
 
-        conf << "\n";
+	conf << "\n";
     }
 
     conf << "CURRTAG: " << _currtag << endl;
@@ -308,7 +323,7 @@ return conf;
     return conf.str();
 }
 
-void
+    void
 Configuration::update_dependencies(PolicyStatement& policy)
 {
     // check if used sets & policies exist, and mark dependencies.
@@ -317,7 +332,7 @@ Configuration::update_dependencies(PolicyStatement& policy)
     policy.accept(dep);
 }
 
-void
+    void
 Configuration::compile_policy(const string& name)
 {
     PolicyStatement& policy = _policies.find(name);
@@ -343,7 +358,7 @@ Configuration::compile_policy(const string& name)
 	XLOG_FATAL("The un-avoidable occurred: We ran out of policy tags");
 }
 
-void
+    void
 Configuration::compile_policies()
 {
     // integer overflow check
@@ -351,9 +366,10 @@ Configuration::compile_policies()
 
     // compile all modified policies
     for (PolicySet::iterator i = _modified_policies.begin();
-	i != _modified_policies.end(); ++i) {
+	    i != _modified_policies.end(); ++i) 
+    {
 
-        compile_policy(*i);
+	compile_policy(*i);
     }
     _modified_policies.clear();
 
@@ -366,14 +382,15 @@ Configuration::compile_policies()
     _exports.compile(_modified_targets, _currtag, _protocol_tags);
 
     // integer overflow.
-    if (_currtag < old_currtag) {
+    if (_currtag < old_currtag) 
+    {
 	// FIXME
 	XLOG_FATAL("The un-avoidable occurred: We ran out of policy tags");
 	abort();
     }
 }
 
-void
+    void
 Configuration::link_sourcematch_code(const Code::Target& target)
 {
     // create empty code but only with target set.
@@ -391,7 +408,8 @@ Configuration::link_sourcematch_code(const Code::Target& target)
 
     // kill previous
     CodeMap::iterator i = _sourcematch_filters.find(target.protocol());
-    if(i != _sourcematch_filters.end()) {
+    if(i != _sourcematch_filters.end()) 
+    {
 	delete (*i).second;
 	_sourcematch_filters.erase(i);
     }
@@ -399,18 +417,20 @@ Configuration::link_sourcematch_code(const Code::Target& target)
 
     // if there is nothing, keep it deleted and empty.
     if(code->code() == "")
-        delete code;
-    else {
-        _sourcematch_filters[target.protocol()] = code;
+	delete code;
+    else 
+    {
+	_sourcematch_filters[target.protocol()] = code;
     }
 }
 
-void
+    void
 Configuration::update_tagmap(const string& protocol)
 {
     // delete previous tags if present
     TagMap::iterator tmi = _tagmap.find(protocol);
-    if (tmi != _tagmap.end()) {
+    if (tmi != _tagmap.end()) 
+    {
 	delete (*tmi).second;
 	_tagmap.erase(tmi);
     }
@@ -428,16 +448,18 @@ Configuration::update_tagmap(const string& protocol)
 	delete tagset;
 }
 
-void
+    void
 Configuration::link_code()
 {
     // go through all modified targets and relink them.
     for(Code::TargetSet::iterator i = _modified_targets.begin();
-	i != _modified_targets.end(); ++i) {
+	    i != _modified_targets.end(); ++i) 
+    {
 
-        const Code::Target& t = *i;
+	const Code::Target& t = *i;
 
-        switch(t.filter()) {
+	switch(t.filter()) 
+	{
 	    case filter::IMPORT:
 		link_code(t,_imports,_import_filters);
 		break;
@@ -463,7 +485,7 @@ Configuration::link_code()
 
 }
 
-void
+    void
 Configuration::commit(uint32_t msec)
 {
     // recompile and link
@@ -477,10 +499,10 @@ Configuration::commit(uint32_t msec)
     _filter_manager->flush_updates(msec);
 }
 
-void
+    void
 Configuration::add_varmap(const string& protocol, const string& variable,
-			  const string& type, const string& access,
-			  const VarRW::Id& id)
+	const string& type, const string& access,
+	const VarRW::Id& id)
 {
     // figure out access...
     VarMap::Access acc = VarMap::READ;
@@ -493,14 +515,14 @@ Configuration::add_varmap(const string& protocol, const string& variable,
 	acc = VarMap::WRITE;
     else
 	xorp_throw(PolicyException,
-		   "Unknown access (" + access + ") for protocol: "
-		   + protocol + " variable: " + variable);
+		"Unknown access (" + access + ") for protocol: "
+		+ protocol + " variable: " + variable);
 
     _varmap.add_protocol_variable(protocol,
-		  new VarMap::Variable(variable, type, acc, id));
+	    new VarMap::Variable(variable, type, acc, id));
 }
 
-void
+    void
 Configuration::set_filter_manager(FilterManagerBase& fm)
 {
     // cannot reassign
@@ -509,22 +531,23 @@ Configuration::set_filter_manager(FilterManagerBase& fm)
     _filter_manager = &fm;
 }
 
-void
+    void
 Configuration::update_ie(const string& protocol,
-			 const POLICIES& policies,
-			 IEMap& iemap,
-			 PolicyList::PolicyType pt,
-			 const string& mod)
+	const POLICIES& policies,
+	IEMap& iemap,
+	PolicyList::PolicyType pt,
+	const string& mod)
 {
     // create a new policy list
     PolicyList* pl = new PolicyList(protocol, pt, _policies, _sets, _varmap,
-				    mod);
+	    mod);
 
     // add the policy names to the policy list
     for (POLICIES::const_iterator i = policies.begin();
-	i != policies.end(); ++i) {
+	    i != policies.end(); ++i) 
+    {
 
-        pl->push_back(*i);
+	pl->push_back(*i);
     }
 
     // if there were policies, get their targets [no longer have policies]
@@ -534,10 +557,10 @@ Configuration::update_ie(const string& protocol,
     iemap.insert(protocol, mod, pl);
 }
 
-void
+    void
 Configuration::link_code(const Code::Target& target,
-			 IEMap& iemap,
-			 CodeMap& codemap)
+	IEMap& iemap,
+	CodeMap& codemap)
 {
     // create new code and set target, so code may be linked properly
     Code* code = new Code();
@@ -551,49 +574,52 @@ Configuration::link_code(const Code::Target& target,
 
     // erase previous code
     CodeMap::iterator iter = codemap.find(target.protocol());
-    if(iter != codemap.end()) {
+    if(iter != codemap.end()) 
+    {
 	delete (*iter).second;
 	codemap.erase(iter);
     }
 
     // if code is empty [no-op filter] just erase it, and keep no entry.
     if(code->code() == "")
-        delete code;
+	delete code;
     else
 	codemap[target.protocol()] = code;
 }
 
-string
+    string
 Configuration::codemap_str(CodeMap& cm)
 {
     string ret = "";
     for(CodeMap::iterator i = cm.begin();
-	i != cm.end(); ++i) {
+	    i != cm.end(); ++i) 
+    {
 
 
-        Code* c= (*i).second;
+	Code* c= (*i).second;
 
-        ret += "PROTO: " + (*i).first + "\n";
-        ret += "CODE: " + c->str() + "\n";
+	ret += "PROTO: " + (*i).first + "\n";
+	ret += "CODE: " + c->str() + "\n";
     }
     return ret;
 }
 
-string
+    string
 Configuration::dump_state(uint32_t id)
 {
-    switch(id) {
+    switch(id) 
+    {
 	// dump policies
 	case 0:
 	    return _policies.str();
 	    break;
 
-	// dump varmap
+	    // dump varmap
 	case 1:
 	    return _varmap.str();
 	    break;
 
-	// dump sets
+	    // dump sets
 	case 2:
 	    return _sets.str();
 	    break;
@@ -603,7 +629,7 @@ Configuration::dump_state(uint32_t id)
     }
 }
 
-void
+    void
 Configuration::policy_modified(const string& policy)
 {
     _modified_policies.insert(policy);
@@ -611,7 +637,7 @@ Configuration::policy_modified(const string& policy)
     _policies.policy_deps(policy, _modified_policies);
 }
 
-bool
+    bool
 Configuration::test_policy(const string& policy, const RATTR& attr, RATTR& mods)
 {
     PolicyStatement& ps = _policies.find(policy);
@@ -623,7 +649,7 @@ Configuration::test_policy(const string& policy, const RATTR& attr, RATTR& mods)
     return test.accepted();
 }
 
-void
+    void
 Configuration::show(const string& type, const string& name, RESOURCES& res)
 {
     if (type == "policy-statement")
@@ -632,14 +658,15 @@ Configuration::show(const string& type, const string& name, RESOURCES& res)
 	show_sets(type, name, res);
 }
 
-void
+    void
 Configuration::show_policies(const string& name, RESOURCES& res)
 {
     PolicyMap::KEYS p;
 
     _policies.policies(p);
 
-    for (PolicyMap::KEYS::iterator i = p.begin(); i != p.end(); ++i) {
+    for (PolicyMap::KEYS::iterator i = p.begin(); i != p.end(); ++i) 
+    {
 	string n = *i;
 
 	if (!name.empty() && name.compare(n) != 0)
@@ -656,14 +683,15 @@ Configuration::show_policies(const string& name, RESOURCES& res)
     }
 }
 
-void
+    void
 Configuration::show_sets(const string& type, const string& name, RESOURCES& res)
 {
     SETS s;
 
     _sets.sets_by_type(s, type);
 
-    for (SETS::iterator i = s.begin(); i != s.end(); ++i) {
+    for (SETS::iterator i = s.begin(); i != s.end(); ++i) 
+    {
 	string n = *i;
 
 	if (!name.empty() && name.compare(n) != 0)
@@ -684,7 +712,7 @@ IEMap::~IEMap()
     clear();
 }
 
-IEMap::POLICY*
+    IEMap::POLICY*
 IEMap::find_policy(const string& protocol)
 {
     PROTOCOL::iterator i = _protocols.find(protocol);
@@ -695,7 +723,7 @@ IEMap::find_policy(const string& protocol)
     return i->second;
 }
 
-PolicyList*
+    PolicyList*
 IEMap::find(const string& protocol, const string& mod)
 {
     POLICY* p = find_policy(protocol);
@@ -710,12 +738,13 @@ IEMap::find(const string& protocol, const string& mod)
     return i->second;
 }
 
-void
+    void
 IEMap::insert(const string& protocol, const string& mod, PolicyList* pl)
 {
     POLICY* p = find_policy(protocol);
 
-    if (!p) {
+    if (!p) 
+    {
 	p = new POLICY;
 
 	_protocols[protocol] = p;
@@ -729,11 +758,12 @@ IEMap::insert(const string& protocol, const string& mod, PolicyList* pl)
     (*p)[mod] = pl;
 }
 
-void
+    void
 IEMap::clear()
 {
     for (PROTOCOL::iterator i = _protocols.begin();
-         i != _protocols.end(); ++i) {
+	    i != _protocols.end(); ++i) 
+    {
 
 	POLICY* p = i->second;
 
@@ -744,7 +774,7 @@ IEMap::clear()
     _protocols.clear();
 }
 
-void
+    void
 IEMap::clear(POLICY* p)
 {
     for (POLICY::iterator i = p->begin(); i != p->end(); ++i)
@@ -753,7 +783,7 @@ IEMap::clear(POLICY* p)
     p->clear();
 }
 
-void
+    void
 IEMap::get_targets(const string& proto, const string& mod, TARGETSET& ts)
 {
     PolicyList* pl = find(proto, mod);
@@ -764,50 +794,54 @@ IEMap::get_targets(const string& proto, const string& mod, TARGETSET& ts)
     pl->get_targets(ts);
 }
 
-void
+    void
 IEMap::compile(PolicyStatement& ps, TARGETSET& ts, tag_t& tag, map<string, set<uint32_t> >& ptags)
 {
-    FOR_ALL_POLICIES(j) {
+    FOR_ALL_POLICIES(j) 
+    {
 	PolicyList* p = j->second;
 
 	p->compile_policy(ps, ts, tag, ptags);
     }
 }
 
-void
+    void
 IEMap::compile(TARGETSET& ts, tag_t& tag, map<string, set<uint32_t> >& ptags)
 {
-    FOR_ALL_POLICIES(j) {
+    FOR_ALL_POLICIES(j) 
+    {
 	PolicyList* p = j->second;
 
 	p->compile(ts, tag, ptags);
     }
 }
 
-void
+    void
 IEMap::link_code(Code& code)
 {
-    FOR_ALL_POLICIES(j) {
+    FOR_ALL_POLICIES(j) 
+    {
 	PolicyList* p = j->second;
 
 	p->link_code(code);
     }
 }
 
-void
+    void
 IEMap::link_code(const string& proto, Code& code)
 {
     POLICY* p = find_policy(proto);
     XLOG_ASSERT(p);
 
-    for (POLICY::reverse_iterator i = p->rbegin(); i != p->rend(); ++i) {
+    for (POLICY::reverse_iterator i = p->rbegin(); i != p->rend(); ++i) 
+    {
 	PolicyList* pl = i->second;
 
 	pl->link_code(code);
     }
 }
 
-void
+    void
 IEMap::get_redist_tags(const string& proto, TagSet& ts)
 {
     POLICY* p = find_policy(proto);
@@ -815,17 +849,19 @@ IEMap::get_redist_tags(const string& proto, TagSet& ts)
     if (!p)
 	return;
 
-    for (POLICY::iterator i = p->begin(); i != p->end(); i++) {
+    for (POLICY::iterator i = p->begin(); i != p->end(); i++) 
+    {
 	PolicyList* pl = i->second;
 
 	pl->get_redist_tags(proto, ts);
     }
 }
 
-void
+    void
 IEMap::clear(TARGETSET& ts)
 {
-    FOR_ALL_POLICIES(j) {
+    FOR_ALL_POLICIES(j) 
+    {
 	PolicyList* p = j->second;
 
 	p->get_targets(ts);

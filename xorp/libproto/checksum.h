@@ -33,31 +33,32 @@
  */
 
 # ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 # endif
 
 
-/**
- * Checksum computation for Internet Protocol family headers.
- *
- * @param addr the address with the data.
- * @param len the length of the data.
- * @return the calculated checksum (in network order).
- */
-extern uint16_t inet_checksum(const uint8_t *addr, size_t len);
+    /**
+     * Checksum computation for Internet Protocol family headers.
+     *
+     * @param addr the address with the data.
+     * @param len the length of the data.
+     * @return the calculated checksum (in network order).
+     */
+    extern uint16_t inet_checksum(const uint8_t *addr, size_t len);
 
-/**
- * Add two previously computed checksums for Internet Protocol family header.
- *
- * Note that if both checksums to add are in host order, the result is also in
- * host order. Similarly, if both checksums to add are in network order, the
- * result is also in network order.
- *
- * @param sum1 the first sum to add.
- * @param sum2 the second sum to add.
- * @return the sum of the two checksums.
- */
-extern uint16_t inet_checksum_add(uint16_t sum1, uint16_t sum2);
+    /**
+     * Add two previously computed checksums for Internet Protocol family header.
+     *
+     * Note that if both checksums to add are in host order, the result is also in
+     * host order. Similarly, if both checksums to add are in network order, the
+     * result is also in network order.
+     *
+     * @param sum1 the first sum to add.
+     * @param sum2 the second sum to add.
+     * @return the sum of the two checksums.
+     */
+    extern uint16_t inet_checksum_add(uint16_t sum1, uint16_t sum2);
 
 # ifdef __cplusplus
 }

@@ -25,9 +25,9 @@
 #include "finder_server.hh"
 
 FinderServer::FinderServer( IPv4	      default_interface,
-			   uint16_t   default_port)
+	uint16_t   default_port)
     throw (InvalidAddress, InvalidPort)
-    : _fxt(_f)
+: _fxt(_f)
 {
     char* value;
     IPv4 finder_addr = default_interface;
@@ -35,29 +35,37 @@ FinderServer::FinderServer( IPv4	      default_interface,
 
     // Set the finder server address from the environment variable if it is set
     value = getenv("XORP_FINDER_SERVER_ADDRESS");
-    if (value != NULL) {
-	try {
+    if (value != NULL) 
+    {
+	try 
+	{
 	    IPv4 ipv4(value);
-	    if (! ipv4.is_unicast()) {
+	    if (! ipv4.is_unicast()) 
+	    {
 		XLOG_ERROR("Failed to change the Finder server address to %s",
-			   ipv4.str().c_str());
-	    } else {
+			ipv4.str().c_str());
+	    } else 
+	    {
 		finder_addr = ipv4;
 	    }
-	} catch (const InvalidString& e) {
+	} catch (const InvalidString& e) 
+	{
 	    UNUSED(e);
 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
-		       e.str().c_str());
+		    e.str().c_str());
 	}
     }
 
     // Set the finder server port from the environment variable if it is set
     value = getenv("XORP_FINDER_SERVER_PORT");
-    if (value != NULL) {
+    if (value != NULL) 
+    {
 	int port = atoi(value);
-	if (port <= 0 || port > 65535) {
+	if (port <= 0 || port > 65535) 
+	{
 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_PORT\": %s", value);
-	} else {
+	} else 
+	{
 	    finder_port = port;
 	}
     }
@@ -75,35 +83,40 @@ FinderServer::FinderServer( IPv4	      default_interface,
     vector<IPv4> addrs;
     get_active_ipv4_addrs(addrs);
     vector<IPv4>::const_iterator i;
-    for (i = addrs.begin(); i != addrs.end(); i++) {
+    for (i = addrs.begin(); i != addrs.end(); i++) 
+    {
 	add_permitted_host(*i);
     }
 }
 
 FinderServer::~FinderServer()
 {
-    while (_listeners.empty() == false) {
+    while (_listeners.empty() == false) 
+    {
 	delete _listeners.front();
 	_listeners.pop_front();
     }
 }
 
-bool
-FinderServer::add_binding(IPv4 addr, uint16_t port)
-    throw (InvalidAddress, InvalidPort)
+    bool
+    FinderServer::add_binding(IPv4 addr, uint16_t port)
+throw (InvalidAddress, InvalidPort)
 {
     Listeners::const_iterator i = _listeners.begin();
-    while (i != _listeners.end()) {
+    while (i != _listeners.end()) 
+    {
 	FinderTcpListener* pl = *i;
 	if (pl->address() == addr && pl->port() == port)
 	    return false;
 	i++;
     }
-    try {
-        _listeners.push_back(
-	    new FinderTcpListener( _f, _f.commands(), addr, port)
-	    );
-    } catch (const bad_alloc&) {
+    try 
+    {
+	_listeners.push_back(
+		new FinderTcpListener( _f, _f.commands(), addr, port)
+		);
+    } catch (const bad_alloc&) 
+    {
 	return false;
     }
     // XXX we'd probably be better to leave permits alone here
@@ -111,13 +124,15 @@ FinderServer::add_binding(IPv4 addr, uint16_t port)
     return true;
 }
 
-bool
+    bool
 FinderServer::remove_binding(IPv4 addr, uint16_t port)
 {
     Listeners::iterator i = _listeners.begin();
-    while (i != _listeners.end()) {
+    while (i != _listeners.end()) 
+    {
 	FinderTcpListener* pl = *i;
-	if (pl->address() == addr && pl->port() == port) {
+	if (pl->address() == addr && pl->port() == port) 
+	{
 	    delete *i;
 	    _listeners.erase(i);
 	    return true;

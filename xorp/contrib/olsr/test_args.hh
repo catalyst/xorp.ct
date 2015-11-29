@@ -28,38 +28,43 @@
 /**
  * Break a string into a sequence of space separated words.
  */
-class Args {
- public:
-    Args(string& line) : _line(line), _pos(0) {
+class Args 
+{
+    public:
+	Args(string& line) : _line(line), _pos(0) 
+    {
 	tokenize(line, _words);
     }
 
-    /**
-     * @param word if a word is available it is placed here.
-     * @return true if a word has been returned.
-     */
-    bool get_next(string& word) {
-	if (_pos >= _words.size())
-	    return false;
+	/**
+	 * @param word if a word is available it is placed here.
+	 * @return true if a word has been returned.
+	 */
+	bool get_next(string& word) 
+	{
+	    if (_pos >= _words.size())
+		return false;
 
-	word = _words[_pos++];
+	    word = _words[_pos++];
 
-	return true;
-    }
+	    return true;
+	}
 
-    void push_back() {
-	if (_pos > 1)
-	    _pos--;
-    }
+	void push_back() 
+	{
+	    if (_pos > 1)
+		_pos--;
+	}
 
-    const string& original_line() const {
-	return _line;
-    }
+	const string& original_line() const 
+	{
+	    return _line;
+	}
 
- private:
-    const string _line;
-    vector<string> _words;
-    size_t _pos;
+    private:
+	const string _line;
+	vector<string> _words;
+	size_t _pos;
 };
 
 
@@ -71,16 +76,16 @@ class Args {
  * @throw InvalidString if invalid syntax.
  */
 inline
-uint32_t
-get_number(const string& word)
-    throw(InvalidString)
+    uint32_t
+    get_number(const string& word)
+throw(InvalidString)
 {
     char *endptr;
-    
+
     uint32_t number = strtoul(word.c_str(), &endptr, 0);
     if (0 != *endptr)
 	xorp_throw(InvalidString,
-		   c_format("<%s> is not a number", word.c_str()));
+		c_format("<%s> is not a number", word.c_str()));
 
     return number;
 }
@@ -93,16 +98,18 @@ get_number(const string& word)
  * @throw InvalidString if invalid syntax.
  */
 inline
-IPv4
-get_ipv4(const string& word)
-    throw(InvalidString)
+    IPv4
+    get_ipv4(const string& word)
+throw(InvalidString)
 {
     IPv4 addr;
-    try {
+    try 
+    {
 	addr = IPv4(word.c_str());
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_throw(InvalidString,
-		   c_format("<%s> is not an IPv4 address", word.c_str()));
+		c_format("<%s> is not an IPv4 address", word.c_str()));
     }
 
     return addr;
@@ -116,17 +123,19 @@ get_ipv4(const string& word)
  * @throw InvalidString if invalid syntax.
  */
 inline
-IPv4Net
-get_ipv4_net(const string& word)
-    throw(InvalidString)
+    IPv4Net
+    get_ipv4_net(const string& word)
+throw(InvalidString)
 {
     IPv4Net v4net;
-    try {
+    try 
+    {
 	v4net = IPv4Net(word.c_str());
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_throw(InvalidString,
-		   c_format("<%s> is not an IPv4 network address",
-			    word.c_str()));
+		c_format("<%s> is not an IPv4 network address",
+		    word.c_str()));
     }
 
     return v4net;
@@ -140,28 +149,35 @@ get_ipv4_net(const string& word)
  * @throw InvalidString if invalid syntax.
  */
 inline
-bool
-get_bool(const string& word)
-    throw(InvalidString)
+    bool
+    get_bool(const string& word)
+throw(InvalidString)
 {
     bool value = false;
 
-    try {
+    try 
+    {
 	int i_value = get_number(word);
-	if (i_value == 1) {
+	if (i_value == 1) 
+	{
 	    value = true;
-	} else if (i_value == 1) {
+	} else if (i_value == 1) 
+	{
 	    value = false;
 	}
-    } catch (InvalidString is) {
-	if (0 == strcasecmp(word.c_str(), "true")) {
+    } catch (InvalidString is) 
+    {
+	if (0 == strcasecmp(word.c_str(), "true")) 
+	{
 	    value = true;
-	} else if (0 == strcasecmp(word.c_str(), "false")) {
+	} else if (0 == strcasecmp(word.c_str(), "false")) 
+	{
 	    value = false;
-	} else {
+	} else 
+	{
 	    // re-throw exception with appropriate error message
 	    xorp_throw(InvalidString,
-		       c_format("<%s> is not a boolean", word.c_str()));
+		    c_format("<%s> is not a boolean", word.c_str()));
 	}
     }
 
@@ -177,48 +193,48 @@ get_bool(const string& word)
  * @throw InvalidString if invalid syntax.
  */
 inline
-string
-get_next_word(Args& args, const string& varname)
-    throw(InvalidString)
+    string
+    get_next_word(Args& args, const string& varname)
+throw(InvalidString)
 {
     string var;
     if (!args.get_next(var))
 	xorp_throw(InvalidString,
-		   c_format("No argument to %s. [%s]",
-			    varname.c_str(),
-			    args.original_line().c_str()));
+		c_format("No argument to %s. [%s]",
+		    varname.c_str(),
+		    args.original_line().c_str()));
 
     return var;
 }
 
 inline
-uint32_t
-get_next_number(Args& args, const string& varname)
-    throw(InvalidString)
+    uint32_t
+    get_next_number(Args& args, const string& varname)
+throw(InvalidString)
 {
     return get_number(get_next_word(args, varname));
 }
 
 inline
-IPv4
-get_next_ipv4(Args& args, const string& varname)
-    throw(InvalidString)
+    IPv4
+    get_next_ipv4(Args& args, const string& varname)
+throw(InvalidString)
 {
     return get_ipv4(get_next_word(args, varname));
 }
 
 inline
-IPv4Net
-get_next_ipv4_net(Args& args, const string& varname)
-    throw(InvalidString)
+    IPv4Net
+    get_next_ipv4_net(Args& args, const string& varname)
+throw(InvalidString)
 {
     return get_ipv4_net(get_next_word(args, varname));
 }
 
 inline
-bool
-get_next_bool(Args& args, const string& varname)
-    throw(InvalidString)
+    bool
+    get_next_bool(Args& args, const string& varname)
+throw(InvalidString)
 {
     return get_bool(get_next_word(args, varname));
 }

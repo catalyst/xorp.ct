@@ -29,21 +29,22 @@
 #define __LIBXORP_RANDOM_H__
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
-/*
- * Define the maximum bound of the random() function
- * as per 4.2BSD / SUSV2:
- * http://www.opengroup.org/onlinepubs/007908799/xsh/initstate.html
- */
+    /*
+     * Define the maximum bound of the random() function
+     * as per 4.2BSD / SUSV2:
+     * http://www.opengroup.org/onlinepubs/007908799/xsh/initstate.html
+     */
 #define XORP_RANDOM_MAX		0x7FFFFFFF  /* 2^31 - 1 in 2's complement */
 
-long	xorp_random(void);
-void	xorp_srandom(unsigned long);
-char*	xorp_initstate(unsigned long, char *, long);
-char*	xorp_setstate(char *);
-void	xorp_srandomdev(void);
+    long	xorp_random(void);
+    void	xorp_srandom(unsigned long);
+    char*	xorp_initstate(unsigned long, char *, long);
+    char*	xorp_setstate(char *);
+    void	xorp_srandomdev(void);
 
 #ifdef __cplusplus
 }

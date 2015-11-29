@@ -57,38 +57,40 @@
  */
 PathName *_new_PathName(void)
 {
-  PathName *path;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  path = (PathName *)malloc(sizeof(PathName));
-  if(!path) {
-    fprintf(stderr, "_new_PathName: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to _del_PathName().
- */
-  path->name = NULL;
-  path->dim = 0;
-/*
- * Figure out the maximum length of an expanded pathname.
- */
-  path->dim = _pu_pathname_dim();
-  if(path->dim == 0)
-    return _del_PathName(path);
-/*
- * Allocate the pathname buffer.
- */
-  path->name = (char *)malloc(path->dim * sizeof(char));
-  if(!path->name) {
-    fprintf(stderr,
-	  "_new_PathName: Insufficient memory to allocate pathname buffer.\n");
-    return _del_PathName(path);
-  };
-  return path;
+	PathName *path;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	path = (PathName *)malloc(sizeof(PathName));
+	if(!path) 
+	{
+		fprintf(stderr, "_new_PathName: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to _del_PathName().
+	 */
+	path->name = NULL;
+	path->dim = 0;
+	/*
+	 * Figure out the maximum length of an expanded pathname.
+	 */
+	path->dim = _pu_pathname_dim();
+	if(path->dim == 0)
+		return _del_PathName(path);
+	/*
+	 * Allocate the pathname buffer.
+	 */
+	path->name = (char *)malloc(path->dim * sizeof(char));
+	if(!path->name) 
+	{
+		fprintf(stderr,
+				"_new_PathName: Insufficient memory to allocate pathname buffer.\n");
+		return _del_PathName(path);
+	};
+	return path;
 }
 
 /*.......................................................................
@@ -101,12 +103,13 @@ PathName *_new_PathName(void)
  */
 PathName *_del_PathName(PathName *path)
 {
-  if(path) {
-    if(path->name)
-      free(path->name);
-    free(path);
-  };
-  return NULL;
+	if(path) 
+	{
+		if(path->name)
+			free(path->name);
+		free(path);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -119,15 +122,16 @@ PathName *_del_PathName(PathName *path)
  */
 char *_pn_clear_path(PathName *path)
 {
-/*
- * Check the arguments.
- */
-  if(!path) {
-    fprintf(stderr, "_pn_clear_path: NULL argument.\n");
-    return NULL;
-  };
-  path->name[0] = '\0';
-  return path->name;
+	/*
+	 * Check the arguments.
+	 */
+	if(!path) 
+	{
+		fprintf(stderr, "_pn_clear_path: NULL argument.\n");
+		return NULL;
+	};
+	path->name[0] = '\0';
+	return path->name;
 }
 
 /*.......................................................................
@@ -150,54 +154,58 @@ char *_pn_clear_path(PathName *path)
  *                          insufficient memory to extend the pathname.
  */
 char *_pn_append_to_path(PathName *path, const char *string, int slen,
-			int remove_escapes)
+		int remove_escapes)
 {
-  int pathlen;     /* The length of the pathname */
-  int i;
-/*
- * Check the arguments.
- */
-  if(!path || !string) {
-    fprintf(stderr, "_pn_append_to_path: NULL argument(s).\n");
-    return NULL;
-  };
-/*
- * Get the current length of the pathname.
- */
-  pathlen = strlen(path->name);
-/*
- * How many characters should be appended?
- */
-  if(slen < 0 || slen > strlen(string))
-    slen = strlen(string);
-/*
- * Resize the pathname if needed.
- */
-  if(!_pn_resize_path(path, pathlen + slen))
-    return NULL;
-/*
- * Append the string to the output pathname, removing any escape
- * characters found therein.
- */
-  if(remove_escapes) {
-    int is_escape = 0;
-    for(i=0; i<slen; i++) {
-      is_escape = !is_escape && string[i] == '\\';
-      if(!is_escape)
-	path->name[pathlen++] = string[i];
-    };
-/*
- * Terminate the string.
- */
-    path->name[pathlen] = '\0';
-  } else {
-/*
- * Append the string directly to the pathname.
- */
-    memcpy(path->name + pathlen, string, slen);
-    path->name[pathlen + slen] = '\0';
-  };
-  return path->name;
+	int pathlen;     /* The length of the pathname */
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!path || !string) 
+	{
+		fprintf(stderr, "_pn_append_to_path: NULL argument(s).\n");
+		return NULL;
+	};
+	/*
+	 * Get the current length of the pathname.
+	 */
+	pathlen = strlen(path->name);
+	/*
+	 * How many characters should be appended?
+	 */
+	if(slen < 0 || slen > strlen(string))
+		slen = strlen(string);
+	/*
+	 * Resize the pathname if needed.
+	 */
+	if(!_pn_resize_path(path, pathlen + slen))
+		return NULL;
+	/*
+	 * Append the string to the output pathname, removing any escape
+	 * characters found therein.
+	 */
+	if(remove_escapes) 
+	{
+		int is_escape = 0;
+		for(i=0; i<slen; i++) 
+		{
+			is_escape = !is_escape && string[i] == '\\';
+			if(!is_escape)
+				path->name[pathlen++] = string[i];
+		};
+		/*
+		 * Terminate the string.
+		 */
+		path->name[pathlen] = '\0';
+	} else 
+	{
+		/*
+		 * Append the string directly to the pathname.
+		 */
+		memcpy(path->name + pathlen, string, slen);
+		path->name[pathlen + slen] = '\0';
+	};
+	return path->name;
 }
 
 /*.......................................................................
@@ -220,67 +228,74 @@ char *_pn_append_to_path(PathName *path, const char *string, int slen,
  *                          insufficient memory to extend the pathname.
  */
 char *_pn_prepend_to_path(PathName *path, const char *string, int slen,
-			  int remove_escapes)
+		int remove_escapes)
 {
-  int pathlen;     /* The length of the pathname */
-  int shift;       /* The number of characters to shift the suffix by */
-  int i,j;
-/*
- * Check the arguments.
- */
-  if(!path || !string) {
-    fprintf(stderr, "_pn_prepend_to_path: NULL argument(s).\n");
-    return NULL;
-  };
-/*
- * Get the current length of the pathname.
- */
-  pathlen = strlen(path->name);
-/*
- * How many characters should be appended?
- */
-  if(slen < 0 || slen > strlen(string))
-    slen = strlen(string);
-/*
- * Work out how far we need to shift the original path string to make
- * way for the new prefix. When removing escape characters, we need
- * final length of the new prefix, after unescaped backslashes have
- * been removed.
- */
-  if(remove_escapes) {
-    int is_escape = 0;
-    for(shift=0,i=0; i<slen; i++) {
-      is_escape = !is_escape && string[i] == '\\';
-      if(!is_escape)
-	shift++;
-    };
-  } else {
-    shift = slen;
-  };
-/*
- * Resize the pathname if needed.
- */
-  if(!_pn_resize_path(path, pathlen + shift))
-    return NULL;
-/*
- * Make room for the prefix at the beginning of the string.
- */
-  memmove(path->name + shift, path->name, pathlen+1);
-/*
- * Copy the new prefix into the vacated space at the beginning of the
- * output pathname, removing any escape characters if needed.
- */
-  if(remove_escapes) {
-    int is_escape = 0;
-    for(i=j=0; i<slen; i++) {
-      is_escape = !is_escape && string[i] == '\\';
-      if(!is_escape)
-	path->name[j++] = string[i];
-    };
-  } else {
-    memcpy(path->name, string, slen);
-  };
-  return path->name;
+	int pathlen;     /* The length of the pathname */
+	int shift;       /* The number of characters to shift the suffix by */
+	int i,j;
+	/*
+	 * Check the arguments.
+	 */
+	if(!path || !string) 
+	{
+		fprintf(stderr, "_pn_prepend_to_path: NULL argument(s).\n");
+		return NULL;
+	};
+	/*
+	 * Get the current length of the pathname.
+	 */
+	pathlen = strlen(path->name);
+	/*
+	 * How many characters should be appended?
+	 */
+	if(slen < 0 || slen > strlen(string))
+		slen = strlen(string);
+	/*
+	 * Work out how far we need to shift the original path string to make
+	 * way for the new prefix. When removing escape characters, we need
+	 * final length of the new prefix, after unescaped backslashes have
+	 * been removed.
+	 */
+	if(remove_escapes) 
+	{
+		int is_escape = 0;
+		for(shift=0,i=0; i<slen; i++) 
+		{
+			is_escape = !is_escape && string[i] == '\\';
+			if(!is_escape)
+				shift++;
+		};
+	} else 
+	{
+		shift = slen;
+	};
+	/*
+	 * Resize the pathname if needed.
+	 */
+	if(!_pn_resize_path(path, pathlen + shift))
+		return NULL;
+	/*
+	 * Make room for the prefix at the beginning of the string.
+	 */
+	memmove(path->name + shift, path->name, pathlen+1);
+	/*
+	 * Copy the new prefix into the vacated space at the beginning of the
+	 * output pathname, removing any escape characters if needed.
+	 */
+	if(remove_escapes) 
+	{
+		int is_escape = 0;
+		for(i=j=0; i<slen; i++) 
+		{
+			is_escape = !is_escape && string[i] == '\\';
+			if(!is_escape)
+				path->name[j++] = string[i];
+		};
+	} else 
+	{
+		memcpy(path->name, string, slen);
+	};
+	return path->name;
 }
 
 /*.......................................................................
@@ -298,29 +313,31 @@ char *_pn_prepend_to_path(PathName *path, const char *string, int slen,
  */
 char *_pn_resize_path(PathName *path, size_t length)
 {
-/*
- * Check the arguments.
- */
-  if(!path) {
-    fprintf(stderr, "_pn_resize_path: NULL argument(s).\n");
-    return NULL;
-  };
-/*
- * If the pathname buffer isn't large enough to accomodate a string
- * of the specified length, attempt to reallocate it with the new
- * size, plus space for a terminating '\0'. Also add a bit of
- * head room to prevent too many reallocations if the initial length
- * turned out to be very optimistic.
- */
-  if(length + 1 > path->dim) {
-    size_t dim =  length + 1 + PN_PATHNAME_INC;
-    char *name = (char *) realloc(path->name, dim);
-    if(!name)
-      return NULL;
-    path->name = name;
-    path->dim = dim;
-  };
-  return path->name;
+	/*
+	 * Check the arguments.
+	 */
+	if(!path) 
+	{
+		fprintf(stderr, "_pn_resize_path: NULL argument(s).\n");
+		return NULL;
+	};
+	/*
+	 * If the pathname buffer isn't large enough to accomodate a string
+	 * of the specified length, attempt to reallocate it with the new
+	 * size, plus space for a terminating '\0'. Also add a bit of
+	 * head room to prevent too many reallocations if the initial length
+	 * turned out to be very optimistic.
+	 */
+	if(length + 1 > path->dim) 
+	{
+		size_t dim =  length + 1 + PN_PATHNAME_INC;
+		char *name = (char *) realloc(path->name, dim);
+		if(!name)
+			return NULL;
+		path->name = name;
+		path->dim = dim;
+	};
+	return path->name;
 }
 
 /*.......................................................................
@@ -332,41 +349,43 @@ char *_pn_resize_path(PathName *path, size_t length)
  */
 size_t _pu_pathname_dim(void)
 {
-  int maxlen;   /* The return value excluding space for the '\0' */
-/*
- * If the POSIX PATH_MAX macro is defined in limits.h, use it.
- */
+	int maxlen;   /* The return value excluding space for the '\0' */
+	/*
+	 * If the POSIX PATH_MAX macro is defined in limits.h, use it.
+	 */
 #ifdef PATH_MAX
-  maxlen = PATH_MAX;
-/*
- * If we have pathconf, use it.
- */
+	maxlen = PATH_MAX;
+	/*
+	 * If we have pathconf, use it.
+	 */
 #elif defined(_PC_PATH_MAX)
-  maxlen = pathconf(FS_ROOT_DIR, _PC_PATH_MAX);
-  if(maxlen < 0) {
-    if(errno) {
-      fprintf(stderr, "pathconf error: %s\n", strerror(errno));
-      return 0;
-    };
-/*
- * If errno wasn't set then pathconf is telling us that the
- * pathlength is effectively infinite. We will thus have to
- * substitute a reasonable guess.
- */
-    maxlen = MAX_PATHLEN_FALLBACK;
-  };
-/*
- * None of the above approaches worked, so substitute our fallback
- * guess.
- */
+	maxlen = pathconf(FS_ROOT_DIR, _PC_PATH_MAX);
+	if(maxlen < 0) 
+	{
+		if(errno) 
+		{
+			fprintf(stderr, "pathconf error: %s\n", strerror(errno));
+			return 0;
+		};
+		/*
+		 * If errno wasn't set then pathconf is telling us that the
+		 * pathlength is effectively infinite. We will thus have to
+		 * substitute a reasonable guess.
+		 */
+		maxlen = MAX_PATHLEN_FALLBACK;
+	};
+	/*
+	 * None of the above approaches worked, so substitute our fallback
+	 * guess.
+	 */
 #else
-    maxlen = MAX_PATHLEN_FALLBACK;
+	maxlen = MAX_PATHLEN_FALLBACK;
 #endif
-/*
- * Return the amount of space needed to accomodate a pathname plus
- * a terminating '\0'.
- */
-  return maxlen + 1;
+	/*
+	 * Return the amount of space needed to accomodate a pathname plus
+	 * a terminating '\0'.
+	 */
+	return maxlen + 1;
 }
 
 /*.......................................................................
@@ -380,16 +399,16 @@ size_t _pu_pathname_dim(void)
  */
 int _pu_path_is_dir(const char *pathname)
 {
-  struct stat statbuf;    /* The file-statistics return buffer */
-/*
- * Look up the file attributes.
- */
-  if(stat(pathname, &statbuf) < 0)
-    return 0;
-/*
- * Is the file a directory?
- */
-  return S_ISDIR(statbuf.st_mode) != 0;
+	struct stat statbuf;    /* The file-statistics return buffer */
+	/*
+	 * Look up the file attributes.
+	 */
+	if(stat(pathname, &statbuf) < 0)
+		return 0;
+	/*
+	 * Is the file a directory?
+	 */
+	return S_ISDIR(statbuf.st_mode) != 0;
 }
 
 /*.......................................................................
@@ -403,16 +422,16 @@ int _pu_path_is_dir(const char *pathname)
  */
 int _pu_path_is_file(const char *pathname)
 {
-  struct stat statbuf;    /* The file-statistics return buffer */
-/*
- * Look up the file attributes.
- */
-  if(stat(pathname, &statbuf) < 0)
-    return 0;
-/*
- * Is the file a regular file?
- */
-  return S_ISREG(statbuf.st_mode) != 0;
+	struct stat statbuf;    /* The file-statistics return buffer */
+	/*
+	 * Look up the file attributes.
+	 */
+	if(stat(pathname, &statbuf) < 0)
+		return 0;
+	/*
+	 * Is the file a regular file?
+	 */
+	return S_ISREG(statbuf.st_mode) != 0;
 }
 
 /*.......................................................................
@@ -426,21 +445,21 @@ int _pu_path_is_file(const char *pathname)
  */
 int _pu_path_is_exe(const char *pathname)
 {
-  struct stat statbuf;    /* The file-statistics return buffer */
-/*
- * Look up the file attributes.
- */
-  if(stat(pathname, &statbuf) < 0)
-    return 0;
-/*
- * Is the file a regular file which is executable by the current user.
- */
-  return S_ISREG(statbuf.st_mode) != 0 &&
+	struct stat statbuf;    /* The file-statistics return buffer */
+	/*
+	 * Look up the file attributes.
+	 */
+	if(stat(pathname, &statbuf) < 0)
+		return 0;
+	/*
+	 * Is the file a regular file which is executable by the current user.
+	 */
+	return S_ISREG(statbuf.st_mode) != 0 &&
 #ifdef __MINGW32__
-    1;
+		1;
 #else
-    (statbuf.st_mode & (S_IXOTH | S_IXGRP | S_IXUSR)) &&
-    access(pathname, X_OK) == 0;
+	(statbuf.st_mode & (S_IXOTH | S_IXGRP | S_IXUSR)) &&
+		access(pathname, X_OK) == 0;
 #endif
 }
 
@@ -459,42 +478,45 @@ int _pu_path_is_exe(const char *pathname)
  */
 char *_pu_start_of_path(const char *string, int back_from)
 {
-  int i, j;
-/*
- * Check the arguments.
- */
-  if(!string || back_from < 0) {
-    fprintf(stderr, "_pu_start_path: Invalid argument(s).\n");
-    return NULL;
-  };
-/*
- * Search backwards from the specified index.
- */
-  for(i=back_from-1; i>=0; i--) {
-    int c = string[i];
-/*
- * Stop on unescaped spaces.
- */
-    if(isspace((int)(unsigned char)c)) {
-/*
- * The space can't be escaped if we are at the start of the line.
- */
-      if(i==0)
-        break;
-/*
- * Find the extent of the escape characters which precedes the space.
- */
-      for(j=i-1; j>=0 && string[j]=='\\'; j--)
-	;
-/*
- * If there isn't an odd number of escape characters before the space,
- * then the space isn't escaped.
- */
-      if((i - 1 - j) % 2 == 0)
-	break;
-    };
-  };
-  return (char *)string + i + 1;
+	int i, j;
+	/*
+	 * Check the arguments.
+	 */
+	if(!string || back_from < 0) 
+	{
+		fprintf(stderr, "_pu_start_path: Invalid argument(s).\n");
+		return NULL;
+	};
+	/*
+	 * Search backwards from the specified index.
+	 */
+	for(i=back_from-1; i>=0; i--) 
+	{
+		int c = string[i];
+		/*
+		 * Stop on unescaped spaces.
+		 */
+		if(isspace((int)(unsigned char)c)) 
+		{
+			/*
+			 * The space can't be escaped if we are at the start of the line.
+			 */
+			if(i==0)
+				break;
+			/*
+			 * Find the extent of the escape characters which precedes the space.
+			 */
+			for(j=i-1; j>=0 && string[j]=='\\'; j--)
+				;
+			/*
+			 * If there isn't an odd number of escape characters before the space,
+			 * then the space isn't escaped.
+			 */
+			if((i - 1 - j) % 2 == 0)
+				break;
+		};
+	};
+	return (char *)string + i + 1;
 }
 
 /*.......................................................................
@@ -512,29 +534,34 @@ char *_pu_start_of_path(const char *string, int back_from)
  */
 char *_pu_end_of_path(const char *string, int start_from)
 {
-  int c;             /* The character being examined */
-  int escaped = 0;   /* True when the next character is escaped */
-  int i;
-/*
- * Check the arguments.
- */
-  if(!string || start_from < 0) {
-    fprintf(stderr, "_pu_end_path: Invalid argument(s).\n");
-    return NULL;
-  };
-/*
- * Search forwards from the specified index.
- */
-  for(i=start_from; (c=string[i]) != '\0'; i++) {
-    if(escaped) {
-      escaped = 0;
-    } else if(isspace((int)(unsigned char) c)) {
-      break;
-    } else if(c == '\\') {
-      escaped = 1;
-    };
-  };
-  return (char *)string + i;
+	int c;             /* The character being examined */
+	int escaped = 0;   /* True when the next character is escaped */
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!string || start_from < 0) 
+	{
+		fprintf(stderr, "_pu_end_path: Invalid argument(s).\n");
+		return NULL;
+	};
+	/*
+	 * Search forwards from the specified index.
+	 */
+	for(i=start_from; (c=string[i]) != '\0'; i++) 
+	{
+		if(escaped) 
+		{
+			escaped = 0;
+		} else if(isspace((int)(unsigned char) c)) 
+		{
+			break;
+		} else if(c == '\\') 
+		{
+			escaped = 1;
+		};
+	};
+	return (char *)string + i;
 }
 
 /*.......................................................................
@@ -548,6 +575,6 @@ char *_pu_end_of_path(const char *string, int start_from)
  */
 int _pu_file_exists(const char *pathname)
 {
-  struct stat statbuf;
-  return stat(pathname, &statbuf) == 0;
+	struct stat statbuf;
+	return stat(pathname, &statbuf) == 0;
 }

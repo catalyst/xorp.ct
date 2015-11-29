@@ -54,225 +54,235 @@
 
 
 IoIpDummy::IoIpDummy(FeaDataPlaneManager& fea_data_plane_manager,
-		     const IfTree& iftree, int family, uint8_t ip_protocol)
-    : IoIp(fea_data_plane_manager, iftree, family, ip_protocol),
-      _multicast_ttl(MINTTL),
-      _multicast_loopback(true)
+		const IfTree& iftree, int family, uint8_t ip_protocol)
+: IoIp(fea_data_plane_manager, iftree, family, ip_protocol),
+	_multicast_ttl(MINTTL),
+	_multicast_loopback(true)
 {
 }
 
 IoIpDummy::~IoIpDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy I/O IP raw communication mechanism: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy I/O IP raw communication mechanism: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IoIpDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::set_multicast_ttl(int ttl, string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    _multicast_ttl = ttl;
+	_multicast_ttl = ttl;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::enable_multicast_loopback(bool is_enabled, string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    _multicast_loopback = is_enabled;
+	_multicast_loopback = is_enabled;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::set_default_multicast_interface(const string& if_name,
-					   const string& vif_name,
-					   string& error_msg)
+		const string& vif_name,
+		string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name, vif_name);
-    if (vifp == NULL) {
-	error_msg = c_format("Setting the default multicast interface failed:"
-			     "interface %s vif %s not found",
-			     if_name.c_str(), vif_name.c_str());
-	return (XORP_ERROR);
-    }
+	// Find the vif
+	vifp = iftree().find_vif(if_name, vif_name);
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Setting the default multicast interface failed:"
+				"interface %s vif %s not found",
+				if_name.c_str(), vif_name.c_str());
+		return (XORP_ERROR);
+	}
 
-    _default_multicast_interface = if_name;
-    _default_multicast_vif = vif_name;
+	_default_multicast_interface = if_name;
+	_default_multicast_vif = vif_name;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::create_input_socket(const string& if_name,
-				const string& vif_name,
-				string& error_msg)
+		const string& vif_name,
+		string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name, vif_name);
-    if (vifp == NULL) {
-	error_msg = c_format("Creating input socket failed: "
-			     "interface %s vif %s not found",
-			     if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
-    return (XORP_OK);
+	// Find the vif
+	vifp = iftree().find_vif(if_name, vif_name);
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Creating input socket failed: "
+				"interface %s vif %s not found",
+				if_name.c_str(),
+				vif_name.c_str());
+		return (XORP_ERROR);
+	}
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::join_multicast_group(const string& if_name,
-				const string& vif_name,
-				const IPvX& group,
-				string& error_msg)
+		const string& vif_name,
+		const IPvX& group,
+		string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name, vif_name);
-    if (vifp == NULL) {
-	error_msg = c_format("Joining multicast group %s failed: "
-			     "interface %s vif %s not found",
-			     cstring(group),
-			     if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
+	// Find the vif
+	vifp = iftree().find_vif(if_name, vif_name);
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Joining multicast group %s failed: "
+				"interface %s vif %s not found",
+				cstring(group),
+				if_name.c_str(),
+				vif_name.c_str());
+		return (XORP_ERROR);
+	}
 
 
-    // Add the group to the set of joined groups
-    IoIpComm::JoinedMulticastGroup joined_group(if_name, vif_name, group);
-    _joined_groups_table.insert(joined_group);
+	// Add the group to the set of joined groups
+	IoIpComm::JoinedMulticastGroup joined_group(if_name, vif_name, group);
+	_joined_groups_table.insert(joined_group);
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::leave_multicast_group(const string& if_name,
-				 const string& vif_name,
-				 const IPvX& group,
-				 string& error_msg)
+		const string& vif_name,
+		const IPvX& group,
+		string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name, vif_name);
-    if (vifp == NULL) {
-	error_msg = c_format("Leaving multicast group %s failed: "
-			     "interface %s vif %s not found",
-			     cstring(group),
-			     if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
+	// Find the vif
+	vifp = iftree().find_vif(if_name, vif_name);
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Leaving multicast group %s failed: "
+				"interface %s vif %s not found",
+				cstring(group),
+				if_name.c_str(),
+				vif_name.c_str());
+		return (XORP_ERROR);
+	}
 
 
-    // Remove the group from the set of joined groups
-    set<IoIpComm::JoinedMulticastGroup>::iterator iter;
-    IoIpComm::JoinedMulticastGroup joined_group(if_name, vif_name, group);
-    iter = find(_joined_groups_table.begin(), _joined_groups_table.end(),
-		joined_group);
-    if (iter == _joined_groups_table.end()) {
-	error_msg = c_format("Multicast group %s is not joined on "
-			     "interface %s vif %s",
-			     group.str().c_str(), if_name.c_str(),
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
-    _joined_groups_table.erase(iter);
+	// Remove the group from the set of joined groups
+	set<IoIpComm::JoinedMulticastGroup>::iterator iter;
+	IoIpComm::JoinedMulticastGroup joined_group(if_name, vif_name, group);
+	iter = find(_joined_groups_table.begin(), _joined_groups_table.end(),
+			joined_group);
+	if (iter == _joined_groups_table.end()) 
+	{
+		error_msg = c_format("Multicast group %s is not joined on "
+				"interface %s vif %s",
+				group.str().c_str(), if_name.c_str(),
+				vif_name.c_str());
+		return (XORP_ERROR);
+	}
+	_joined_groups_table.erase(iter);
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoIpDummy::send_packet(const string& if_name,
-		       const string& vif_name,
-		       const IPvX& src_address,
-		       const IPvX& dst_address,
-		       int32_t ip_ttl,
-		       int32_t ip_tos,
-		       bool ip_router_alert,
-		       bool ip_internet_control,
-		       const vector<uint8_t>& ext_headers_type,
-		       const vector<vector<uint8_t> >& ext_headers_payload,
-		       const vector<uint8_t>& payload,
-		       string& error_msg)
+		const string& vif_name,
+		const IPvX& src_address,
+		const IPvX& dst_address,
+		int32_t ip_ttl,
+		int32_t ip_tos,
+		bool ip_router_alert,
+		bool ip_internet_control,
+		const vector<uint8_t>& ext_headers_type,
+		const vector<vector<uint8_t> >& ext_headers_payload,
+		const vector<uint8_t>& payload,
+		string& error_msg)
 {
-    const IfTreeInterface* ifp = NULL;
-    const IfTreeVif* vifp = NULL;
+	const IfTreeInterface* ifp = NULL;
+	const IfTreeVif* vifp = NULL;
 
-    XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
+	XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
-    ifp = iftree().find_interface(if_name);
-    if (ifp == NULL) {
-	error_msg = c_format("No interface %s", if_name.c_str());
-	return (XORP_ERROR);
-    }
-    vifp = ifp->find_vif(vif_name);
-    if (vifp == NULL) {
-	error_msg = c_format("No interface %s vif %s",
-			     if_name.c_str(), vif_name.c_str());
-	return (XORP_ERROR);
-    }
-    if (! ifp->enabled()) {
-	error_msg = c_format("Interface %s is down",
-			     ifp->ifname().c_str());
-	return (XORP_ERROR);
-    }
-    if (! vifp->enabled()) {
-	error_msg = c_format("Interface %s vif %s is down",
-			     ifp->ifname().c_str(),
-			     vifp->vifname().c_str());
-	return (XORP_ERROR);
-    }
+	ifp = iftree().find_interface(if_name);
+	if (ifp == NULL) 
+	{
+		error_msg = c_format("No interface %s", if_name.c_str());
+		return (XORP_ERROR);
+	}
+	vifp = ifp->find_vif(vif_name);
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("No interface %s vif %s",
+				if_name.c_str(), vif_name.c_str());
+		return (XORP_ERROR);
+	}
+	if (! ifp->enabled()) 
+	{
+		error_msg = c_format("Interface %s is down",
+				ifp->ifname().c_str());
+		return (XORP_ERROR);
+	}
+	if (! vifp->enabled()) 
+	{
+		error_msg = c_format("Interface %s vif %s is down",
+				ifp->ifname().c_str(),
+				vifp->vifname().c_str());
+		return (XORP_ERROR);
+	}
 
-    UNUSED(src_address);
-    UNUSED(dst_address);
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(ip_router_alert);
-    UNUSED(ip_internet_control);
-    UNUSED(ext_headers_type);
-    UNUSED(ext_headers_payload);
-    UNUSED(payload);
+	UNUSED(src_address);
+	UNUSED(dst_address);
+	UNUSED(ip_ttl);
+	UNUSED(ip_tos);
+	UNUSED(ip_router_alert);
+	UNUSED(ip_internet_control);
+	UNUSED(ext_headers_type);
+	UNUSED(ext_headers_payload);
+	UNUSED(payload);
 
-    return (XORP_OK);
+	return (XORP_OK);
 }

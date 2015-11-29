@@ -47,13 +47,14 @@
 /*
  * Constants definitions
  */
-enum action_jp_t {
+enum action_jp_t 
+{
     ACTION_JOIN	= 0,
     ACTION_PRUNE
 };
 #define ACTION_JP2ASCII(action_flag)			\
-	(((action_flag) == ACTION_JOIN) ? 		\
-		"JOIN" : "PRUNE")
+    (((action_flag) == ACTION_JOIN) ? 		\
+     "JOIN" : "PRUNE")
 
 #ifndef MINTTL
 #define MINTTL		1

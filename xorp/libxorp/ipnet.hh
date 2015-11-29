@@ -38,419 +38,433 @@
  * A "subnet" is specified by a base "address" and a "prefix length".
  */
 template <class A>
-class IPNet {
-public:
-    /**
-     * Default constructor taking no parameters.
-     *
-     * Default value has INADDR_ANY/0.
-     */
-    IPNet() : _prefix_len(0) {}
+class IPNet 
+{
+    public:
+	/**
+	 * Default constructor taking no parameters.
+	 *
+	 * Default value has INADDR_ANY/0.
+	 */
+	IPNet() : _prefix_len(0) {}
 
-    /**
-     * Constructor from a given base address and a prefix length.
-     *
-     * @param a base address for the subnet.
-     * @param prefix_len length of subnet mask (e.g., class C nets would have
-     * prefix_len=24).
-     */
-    IPNet(const A& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
-	: _masked_addr(a), _prefix_len(prefix_len)
-    {
-	if (prefix_len > A::addr_bitlen())
-	    xorp_throw(InvalidNetmaskLength, prefix_len);
-	_masked_addr = a.mask_by_prefix_len(prefix_len);
-    }
+	/**
+	 * Constructor from a given base address and a prefix length.
+	 *
+	 * @param a base address for the subnet.
+	 * @param prefix_len length of subnet mask (e.g., class C nets would have
+	 * prefix_len=24).
+	 */
+	IPNet(const A& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
+	    : _masked_addr(a), _prefix_len(prefix_len)
+	{
+	    if (prefix_len > A::addr_bitlen())
+		xorp_throw(InvalidNetmaskLength, prefix_len);
+	    _masked_addr = a.mask_by_prefix_len(prefix_len);
+	}
 
-    /**
-     * Constructor from a string.
-     *
-     * @param from_cstring C-style string with slash separated address
-     * and prefix length.
-     */
-    IPNet(const char *from_cstring)
-	throw (InvalidString, InvalidNetmaskLength)
-    {
-	initialize_from_string(from_cstring);
-    }
+	/**
+	 * Constructor from a string.
+	 *
+	 * @param from_cstring C-style string with slash separated address
+	 * and prefix length.
+	 */
+	IPNet(const char *from_cstring)
+	    throw (InvalidString, InvalidNetmaskLength)
+	    {
+		initialize_from_string(from_cstring);
+	    }
 
-    /**
-     * Copy constructor
-     *
-     * @param n the subnet to copy from.
-     */
-    IPNet(const IPNet& n) {
-	_masked_addr	= n.masked_addr();
-	_prefix_len	= n.prefix_len();
-    }
+	/**
+	 * Copy constructor
+	 *
+	 * @param n the subnet to copy from.
+	 */
+	IPNet(const IPNet& n) 
+	{
+	    _masked_addr	= n.masked_addr();
+	    _prefix_len	= n.prefix_len();
+	}
 
-    /**
-     * Assignment operator
-     *
-     * @param n the subnet to assign from.
-     * @return the subnet after the assignment.
-     */
-    IPNet& operator=(const IPNet& n) {
-	_masked_addr	= n.masked_addr();
-	_prefix_len	= n.prefix_len();
-	return *this;
-    }
+	/**
+	 * Assignment operator
+	 *
+	 * @param n the subnet to assign from.
+	 * @return the subnet after the assignment.
+	 */
+	IPNet& operator=(const IPNet& n) 
+	{
+	    _masked_addr	= n.masked_addr();
+	    _prefix_len	= n.prefix_len();
+	    return *this;
+	}
 
-    /**
-     * Equality Operator
-     *
-     * @param other the right-hand operand to compare against.
-     * @return true if the left-hand operand is numerically same as the
-     * right-hand operand.
-     */
-    bool operator==(const IPNet& other) const {
-	return ((_prefix_len == other._prefix_len) &&
-		(_masked_addr == other._masked_addr));
-    }
+	/**
+	 * Equality Operator
+	 *
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically same as the
+	 * right-hand operand.
+	 */
+	bool operator==(const IPNet& other) const 
+	{
+	    return ((_prefix_len == other._prefix_len) &&
+		    (_masked_addr == other._masked_addr));
+	}
 
-    /**
-     * Less-than comparison for subnets (see body for description).
-     *
-     * @param other the right-hand side of the comparison.
-     * @return true if the left-hand side is "smaller" than the right-hand
-     * side according to the chosen order.
-     */
-    bool operator<(const IPNet& other) const;
+	/**
+	 * Less-than comparison for subnets (see body for description).
+	 *
+	 * @param other the right-hand side of the comparison.
+	 * @return true if the left-hand side is "smaller" than the right-hand
+	 * side according to the chosen order.
+	 */
+	bool operator<(const IPNet& other) const;
 
-    /**
-     * Decrement Operator
-     *
-     * The numerical value of the prefix address is decrement by one.
-     * Example: decrementing 128.2.0.0/16 results in 128.1.0.0/16.
-     *
-     * @return a reference to this subnet after the decrement
-     */
-    IPNet& operator--();
+	/**
+	 * Decrement Operator
+	 *
+	 * The numerical value of the prefix address is decrement by one.
+	 * Example: decrementing 128.2.0.0/16 results in 128.1.0.0/16.
+	 *
+	 * @return a reference to this subnet after the decrement
+	 */
+	IPNet& operator--();
 
-    /**
-     * Increment Operator
-     *
-     * The numerical value of the prefix address is incremented by one.
-     * Example: incrementing 128.2.0.0/16 results in 128.3.0.0/16.
-     *
-     * @return a reference to this subnet after the increment
-     */
-    IPNet& operator++();
+	/**
+	 * Increment Operator
+	 *
+	 * The numerical value of the prefix address is incremented by one.
+	 * Example: incrementing 128.2.0.0/16 results in 128.3.0.0/16.
+	 *
+	 * @return a reference to this subnet after the increment
+	 */
+	IPNet& operator++();
 
-    /**
-     * Equality Operator for @ref U32Range operand.
-     *
-     * @param range the right-hand operand to compare against.
-     * @return true if the prefix length falls inside the range defined
-     * by the right-hand operand.
-     */
-    bool operator==(const U32Range& range) const {
-	return (prefix_len() == range);
-    }
+	/**
+	 * Equality Operator for @ref U32Range operand.
+	 *
+	 * @param range the right-hand operand to compare against.
+	 * @return true if the prefix length falls inside the range defined
+	 * by the right-hand operand.
+	 */
+	bool operator==(const U32Range& range) const 
+	{
+	    return (prefix_len() == range);
+	}
 
-    /**
-     * Non-equality Operator for @ref U32Range operand.
-     *
-     * @param range the right-hand operand to compare against.
-     * @return true if the prefix length falls outside the range defined
-     * by the right-hand operand.
-     */
-    bool operator!=(const U32Range& range) const {
-	return (prefix_len() != range);
-    }
+	/**
+	 * Non-equality Operator for @ref U32Range operand.
+	 *
+	 * @param range the right-hand operand to compare against.
+	 * @return true if the prefix length falls outside the range defined
+	 * by the right-hand operand.
+	 */
+	bool operator!=(const U32Range& range) const 
+	{
+	    return (prefix_len() != range);
+	}
 
-    /**
-     * Less-than comparison for prefix lengths for @ref U32Range operand.
-     *
-     * @param range the right-hand side of the comparison.
-     * @return true if the prefix length is bellow the range defined
-     * by the right-hand operand.
-     */
-    bool operator<(const U32Range& range) const {
-	return (prefix_len() < range);
-    };
+	/**
+	 * Less-than comparison for prefix lengths for @ref U32Range operand.
+	 *
+	 * @param range the right-hand side of the comparison.
+	 * @return true if the prefix length is bellow the range defined
+	 * by the right-hand operand.
+	 */
+	bool operator<(const U32Range& range) const 
+	{
+	    return (prefix_len() < range);
+	};
 
-    /**
-     * Less-than or equal comparison for prefix lengths for @ref U32Range
-     * operand.
-     *
-     * @param range the right-hand side of the comparison.
-     * @return true if the prefix length is bellow or within the range
-     * defined by the right-hand operand.
-     */
-    bool operator<=(const U32Range& range) const {
-	return (prefix_len() <= range);
-    };
+	/**
+	 * Less-than or equal comparison for prefix lengths for @ref U32Range
+	 * operand.
+	 *
+	 * @param range the right-hand side of the comparison.
+	 * @return true if the prefix length is bellow or within the range
+	 * defined by the right-hand operand.
+	 */
+	bool operator<=(const U32Range& range) const 
+	{
+	    return (prefix_len() <= range);
+	};
 
-    /**
-     * Greater-than comparison for prefix lengths for @ref U32Range operand.
-     *
-     * @param range the right-hand side of the comparison.
-     * @return true if the prefix length is above the range defined
-     * by the right-hand operand.
-     */
-    bool operator>(const U32Range& range) const {
-	return (prefix_len() > range);
-    };
+	/**
+	 * Greater-than comparison for prefix lengths for @ref U32Range operand.
+	 *
+	 * @param range the right-hand side of the comparison.
+	 * @return true if the prefix length is above the range defined
+	 * by the right-hand operand.
+	 */
+	bool operator>(const U32Range& range) const 
+	{
+	    return (prefix_len() > range);
+	};
 
-    /**
-     * Greater-than or equal comparison for prefix lengths for @ref U32Range
-     * operand.
-     *
-     * @param range the right-hand side of the comparison.
-     * @return true if the prefix length is above or within the range
-     * defined by the right-hand operand.
-     */
-    bool operator>=(const U32Range& range) const {
-	return (prefix_len() >= range);
-    };
+	/**
+	 * Greater-than or equal comparison for prefix lengths for @ref U32Range
+	 * operand.
+	 *
+	 * @param range the right-hand side of the comparison.
+	 * @return true if the prefix length is above or within the range
+	 * defined by the right-hand operand.
+	 */
+	bool operator>=(const U32Range& range) const 
+	{
+	    return (prefix_len() >= range);
+	};
 
-    /**
-     * Convert this address from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the address.
-     */
-    string str() const;
+	/**
+	 * Convert this address from binary form to presentation format.
+	 *
+	 * @return C++ string with the human-readable ASCII representation
+	 * of the address.
+	 */
+	string str() const;
 
-    /**
-     * Test if the object contains a real (non-default) value.
-     *
-     * @return true if the object stores a real (non-default) value.
-     */
-     bool is_valid() const { return _prefix_len != 0; }
+	/**
+	 * Test if the object contains a real (non-default) value.
+	 *
+	 * @return true if the object stores a real (non-default) value.
+	 */
+	bool is_valid() const { return _prefix_len != 0; }
 
-    /**
-     * Test if subnets overlap.
-     *
-     * @param other the subnet to compare against.
-     * @return true if there is some overlap between the two subnets.
-     */
-    bool is_overlap(const IPNet& other) const;
+	/**
+	 * Test if subnets overlap.
+	 *
+	 * @param other the subnet to compare against.
+	 * @return true if there is some overlap between the two subnets.
+	 */
+	bool is_overlap(const IPNet& other) const;
 
-    /**
-     * Test if a subnet contains (or is equal to) another subnet.
-     *
-     * in LaTeX, x.contains(y) would be   $x \superseteq y$
-     *
-     * @param other the subnet to test against.
-     * @return true if this subnet contains or is equal to @ref other.
-     */
-    bool contains(const IPNet& other) const;
+	/**
+	 * Test if a subnet contains (or is equal to) another subnet.
+	 *
+	 * in LaTeX, x.contains(y) would be   $x \superseteq y$
+	 *
+	 * @param other the subnet to test against.
+	 * @return true if this subnet contains or is equal to @ref other.
+	 */
+	bool contains(const IPNet& other) const;
 
-    /**
-     * Test if an address is within a subnet.
-     *
-     * @param addr the address to test against.
-     * @return true if @ref addr is within this subnet.
-     */
-    bool contains(const A& addr) const {
-	return addr.mask_by_prefix_len(_prefix_len) == _masked_addr;
-    }
+	/**
+	 * Test if an address is within a subnet.
+	 *
+	 * @param addr the address to test against.
+	 * @return true if @ref addr is within this subnet.
+	 */
+	bool contains(const A& addr) const 
+	{
+	    return addr.mask_by_prefix_len(_prefix_len) == _masked_addr;
+	}
 
-    /**
-     * Determine the number of the most significant bits overlapping with
-     * another subnet.
-     *
-     * @param other the subnet to test against.
-     * @return the number of bits overlapping between @ref other and
-     * this subnet.
-     */
-    uint32_t overlap(const IPNet& other) const;
+	/**
+	 * Determine the number of the most significant bits overlapping with
+	 * another subnet.
+	 *
+	 * @param other the subnet to test against.
+	 * @return the number of bits overlapping between @ref other and
+	 * this subnet.
+	 */
+	uint32_t overlap(const IPNet& other) const;
 
-    /**
-     * Get the address family.
-     *
-     * @return the address family of this address.
-     */
-    static int af() { return A::af(); }
+	/**
+	 * Get the address family.
+	 *
+	 * @return the address family of this address.
+	 */
+	static int af() { return A::af(); }
 
-    /**
-     * Get the base address.
-     *
-     * @return the base address for this subnet.
-     */
-    const A& masked_addr() const { return _masked_addr; }
+	/**
+	 * Get the base address.
+	 *
+	 * @return the base address for this subnet.
+	 */
+	const A& masked_addr() const { return _masked_addr; }
 
-    A& masked_addr_nc() { return _masked_addr; }
+	A& masked_addr_nc() { return _masked_addr; }
 
-    /**
-     * Get the prefix length.
-     *
-     * @return the prefix length for this subnet.
-     */
-    uint8_t prefix_len() const { return _prefix_len; }
+	/**
+	 * Get the prefix length.
+	 *
+	 * @return the prefix length for this subnet.
+	 */
+	uint8_t prefix_len() const { return _prefix_len; }
 
-    void set_prefix_len(uint8_t v) { _prefix_len = v; }
+	void set_prefix_len(uint8_t v) { _prefix_len = v; }
 
-    /**
-     * Get the network mask.
-     *
-     * @return the netmask associated with this subnet.
-     */
-    A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
+	/**
+	 * Get the network mask.
+	 *
+	 * @return the netmask associated with this subnet.
+	 */
+	A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
 
-    /**
-     * Test if this subnet is a unicast prefix.
-     *
-     * In case of IPv4 all prefixes that fall within the Class A, Class B or
-     * Class C address space are unicast.
-     * In case of IPv6 all prefixes that don't contain the multicast
-     * address space are unicast.
-     * Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
-     * is also considered an unicast prefix.
-     *
-     * @return true if this subnet is a unicast prefix.
-     */
-    bool is_unicast() const;
+	/**
+	 * Test if this subnet is a unicast prefix.
+	 *
+	 * In case of IPv4 all prefixes that fall within the Class A, Class B or
+	 * Class C address space are unicast.
+	 * In case of IPv6 all prefixes that don't contain the multicast
+	 * address space are unicast.
+	 * Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
+	 * is also considered an unicast prefix.
+	 *
+	 * @return true if this subnet is a unicast prefix.
+	 */
+	bool is_unicast() const;
 
-    /**
-     * Return the subnet containing all multicast addresses.
-     *
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_multicast_base_prefix();
-     *   IPv4Net my_prefix = ipv4net.ip_multicast_base_prefix();
-     *
-     * @return the subnet containing multicast addresses.
-     */
-    static const IPNet<A> ip_multicast_base_prefix() {
-	return IPNet(A::MULTICAST_BASE(),
-		     A::ip_multicast_base_address_mask_len());
-    }
+	/**
+	 * Return the subnet containing all multicast addresses.
+	 *
+	 * Note that this is a static function and can be used without
+	 * a particular object. Example:
+	 *   IPv4Net my_prefix = IPv4Net::ip_multicast_base_prefix();
+	 *   IPv4Net my_prefix = ipv4net.ip_multicast_base_prefix();
+	 *
+	 * @return the subnet containing multicast addresses.
+	 */
+	static const IPNet<A> ip_multicast_base_prefix() 
+	{
+	    return IPNet(A::MULTICAST_BASE(),
+		    A::ip_multicast_base_address_mask_len());
+	}
 
-    /**
-     * Return the subnet containing all IPv4 Class A addresses
-     * (0.0.0.0/1).
-     *
-     * This method applies only for IPv4.
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_class_a_base_prefix();
-     *   IPv4Net my_prefix = ipv4net.ip_class_a_base_prefix();
-     *
-     * @return the subnet containing Class A addresses.
-     */
-    static const IPNet<A> ip_class_a_base_prefix();
+	/**
+	 * Return the subnet containing all IPv4 Class A addresses
+	 * (0.0.0.0/1).
+	 *
+	 * This method applies only for IPv4.
+	 * Note that this is a static function and can be used without
+	 * a particular object. Example:
+	 *   IPv4Net my_prefix = IPv4Net::ip_class_a_base_prefix();
+	 *   IPv4Net my_prefix = ipv4net.ip_class_a_base_prefix();
+	 *
+	 * @return the subnet containing Class A addresses.
+	 */
+	static const IPNet<A> ip_class_a_base_prefix();
 
-    /**
-     * Return the subnet containing all IPv4 Class B addresses
-     * (128.0.0.0/2).
-     *
-     * This method applies only for IPv4.
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_class_b_base_prefix();
-     *   IPv4Net my_prefix = ipv4net.ip_class_b_base_prefix();
-     *
-     * @return the subnet containing Class B addresses.
-     */
-    static const IPNet<A> ip_class_b_base_prefix();
+	/**
+	 * Return the subnet containing all IPv4 Class B addresses
+	 * (128.0.0.0/2).
+	 *
+	 * This method applies only for IPv4.
+	 * Note that this is a static function and can be used without
+	 * a particular object. Example:
+	 *   IPv4Net my_prefix = IPv4Net::ip_class_b_base_prefix();
+	 *   IPv4Net my_prefix = ipv4net.ip_class_b_base_prefix();
+	 *
+	 * @return the subnet containing Class B addresses.
+	 */
+	static const IPNet<A> ip_class_b_base_prefix();
 
-    /**
-     * Return the subnet containing all IPv4 Class C addresses
-     * (192.0.0.0/3).
-     *
-     * This method applies only for IPv4.
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_class_c_base_prefix();
-     *   IPv4Net my_prefix = ipv4net.ip_class_c_base_prefix();
-     *
-     * @return the subnet containing Class C addresses.
-     */
-    static const IPNet<A> ip_class_c_base_prefix();
+	/**
+	 * Return the subnet containing all IPv4 Class C addresses
+	 * (192.0.0.0/3).
+	 *
+	 * This method applies only for IPv4.
+	 * Note that this is a static function and can be used without
+	 * a particular object. Example:
+	 *   IPv4Net my_prefix = IPv4Net::ip_class_c_base_prefix();
+	 *   IPv4Net my_prefix = ipv4net.ip_class_c_base_prefix();
+	 *
+	 * @return the subnet containing Class C addresses.
+	 */
+	static const IPNet<A> ip_class_c_base_prefix();
 
-    /**
-     * Return the subnet containing all IPv4 experimental Class E addresses
-     * (240.0.0.0/4).
-     *
-     * This method applies only for IPv4.
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix();
-     *   IPv4Net my_prefix = ipv4net.ip_experimental_base_prefix();
-     *
-     * @return the subnet containing experimental addresses.
-     */
-    static const IPNet<A> ip_experimental_base_prefix();
+	/**
+	 * Return the subnet containing all IPv4 experimental Class E addresses
+	 * (240.0.0.0/4).
+	 *
+	 * This method applies only for IPv4.
+	 * Note that this is a static function and can be used without
+	 * a particular object. Example:
+	 *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix();
+	 *   IPv4Net my_prefix = ipv4net.ip_experimental_base_prefix();
+	 *
+	 * @return the subnet containing experimental addresses.
+	 */
+	static const IPNet<A> ip_experimental_base_prefix();
 
-    /**
-     * Test if this subnet is within the multicast address range.
-     *
-     * @return true if this subnet is within the multicast address range.
-     */
-    bool is_multicast() const {
-	return (ip_multicast_base_prefix().contains(*this));
-    }
+	/**
+	 * Test if this subnet is within the multicast address range.
+	 *
+	 * @return true if this subnet is within the multicast address range.
+	 */
+	bool is_multicast() const 
+	{
+	    return (ip_multicast_base_prefix().contains(*this));
+	}
 
-    /**
-     * Test if this subnet is within the IPv4 Class A
-     * address range (0.0.0.0/1).
-     *
-     * This method applies only for IPv4.
-     *
-     * @return true if this subnet is within the IPv4 Class A address
-     * range.
-     */
-    bool is_class_a() const;
+	/**
+	 * Test if this subnet is within the IPv4 Class A
+	 * address range (0.0.0.0/1).
+	 *
+	 * This method applies only for IPv4.
+	 *
+	 * @return true if this subnet is within the IPv4 Class A address
+	 * range.
+	 */
+	bool is_class_a() const;
 
-    /**
-     * Test if this subnet is within the IPv4 Class B
-     * address range (128.0.0.0/2).
-     *
-     * This method applies only for IPv4.
-     *
-     * @return true if this subnet is within the IPv4 Class B address
-     * range.
-     */
-    bool is_class_b() const;
+	/**
+	 * Test if this subnet is within the IPv4 Class B
+	 * address range (128.0.0.0/2).
+	 *
+	 * This method applies only for IPv4.
+	 *
+	 * @return true if this subnet is within the IPv4 Class B address
+	 * range.
+	 */
+	bool is_class_b() const;
 
-    /**
-     * Test if this subnet is within the IPv4 Class C
-     * address range (192.0.0.0/3).
-     *
-     * This method applies only for IPv4.
-     *
-     * @return true if this subnet is within the IPv4 Class C address
-     * range.
-     */
-    bool is_class_c() const;
+	/**
+	 * Test if this subnet is within the IPv4 Class C
+	 * address range (192.0.0.0/3).
+	 *
+	 * This method applies only for IPv4.
+	 *
+	 * @return true if this subnet is within the IPv4 Class C address
+	 * range.
+	 */
+	bool is_class_c() const;
 
-    /**
-     * Test if this subnet is within the IPv4 experimental Class E
-     * address range (240.0.0.0/4).
-     *
-     * This method applies only for IPv4.
-     *
-     * @return true if this subnet is within the IPv4 experimental address
-     * range.
-     */
-    bool is_experimental() const;
+	/**
+	 * Test if this subnet is within the IPv4 experimental Class E
+	 * address range (240.0.0.0/4).
+	 *
+	 * This method applies only for IPv4.
+	 *
+	 * @return true if this subnet is within the IPv4 experimental address
+	 * range.
+	 */
+	bool is_experimental() const;
 
-    /**
-     * Get the highest address within this subnet.
-     *
-     * @return the highest address within this subnet.
-     */
-    A top_addr() const { return _masked_addr | ~netmask(); }
+	/**
+	 * Get the highest address within this subnet.
+	 *
+	 * @return the highest address within this subnet.
+	 */
+	A top_addr() const { return _masked_addr | ~netmask(); }
 
-    /**
-     * Get the smallest subnet containing both subnets.
-     *
-     * @return the smallest subnet containing both subnets passed
-     * as arguments.
-     */
-    static IPNet<A> common_subnet(const IPNet<A> x, const IPNet<A> y) {
-	return IPNet<A>(x.masked_addr(), x.overlap(y));
-    }
+	/**
+	 * Get the smallest subnet containing both subnets.
+	 *
+	 * @return the smallest subnet containing both subnets passed
+	 * as arguments.
+	 */
+	static IPNet<A> common_subnet(const IPNet<A> x, const IPNet<A> y) 
+	{
+	    return IPNet<A>(x.masked_addr(), x.overlap(y));
+	}
 
-private:
-    void initialize_from_string(const char *s)
-	throw (InvalidString, InvalidNetmaskLength);
+    private:
+	void initialize_from_string(const char *s)
+	    throw (InvalidString, InvalidNetmaskLength);
 
-    A		_masked_addr;
-    uint8_t	_prefix_len;
+	A		_masked_addr;
+	uint8_t	_prefix_len;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -503,12 +517,14 @@ IPNet<A>::is_overlap(const IPNet<A>& other) const
     if (masked_addr().af() != other.masked_addr().af())
 	return (false);
 
-    if (prefix_len() > other.prefix_len()) {
+    if (prefix_len() > other.prefix_len()) 
+    {
 	// I have smaller prefix size
 	IPNet other_masked(masked_addr(), other.prefix_len());
 	return (other_masked.masked_addr() == other.masked_addr());
     }
-    if (prefix_len() < other.prefix_len()) {
+    if (prefix_len() < other.prefix_len()) 
+    {
 	// I have bigger prefix size
 	IPNet other_masked(other.masked_addr(), prefix_len());
 	return (other_masked.masked_addr() == masked_addr());
@@ -551,9 +567,9 @@ IPNet<A>::contains(const IPNet<A>& other) const
     return (contains(other._masked_addr));
 }
 
-template <class A> void
-IPNet<A>::initialize_from_string(const char *cp)
-    throw (InvalidString, InvalidNetmaskLength)
+    template <class A> void
+    IPNet<A>::initialize_from_string(const char *cp)
+throw (InvalidString, InvalidNetmaskLength)
 {
     char *slash = strrchr(const_cast<char*>(cp), '/');
     if (slash == 0)
@@ -562,8 +578,10 @@ IPNet<A>::initialize_from_string(const char *cp)
     if (*(slash + 1) == 0)
 	xorp_throw(InvalidString, "Missing prefix length");
     char *n = slash + 1;
-    while (*n != 0) {
-	if (*n < '0' || *n > '9') {
+    while (*n != 0) 
+    {
+	if (*n < '0' || *n > '9') 
+	{
 	    xorp_throw(InvalidString, "Bad prefix length");
 	}
 	n++;
@@ -576,7 +594,7 @@ IPNet<A>::initialize_from_string(const char *cp)
 }
 
 template <class A>
-inline IPNet<A>&
+    inline IPNet<A>&
 IPNet<A>::operator--()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);
@@ -586,7 +604,7 @@ IPNet<A>::operator--()
 }
 
 template <class A>
-inline IPNet<A>&
+    inline IPNet<A>&
 IPNet<A>::operator++()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);
@@ -620,7 +638,7 @@ IPNet<A>::overlap(const IPNet<A>& other) const
  * @param a2 the subnet.
  * @return the number of bits overlapping between @ref a1 and @ref a2.
  */
-template <class A> uint32_t
+    template <class A> uint32_t
 overlap(const IPNet<A>& a1, const IPNet<A>& a2)
 {
     return a1.overlap(a2);

@@ -38,132 +38,137 @@
 
 
 IoLinkDummy::IoLinkDummy(FeaDataPlaneManager& fea_data_plane_manager,
-			 const IfTree& iftree, const string& if_name,
-			 const string& vif_name, uint16_t ether_type,
-			 const string& filter_program)
-    : IoLink(fea_data_plane_manager, iftree, if_name, vif_name, ether_type,
-	     filter_program)
+		const IfTree& iftree, const string& if_name,
+		const string& vif_name, uint16_t ether_type,
+		const string& filter_program)
+: IoLink(fea_data_plane_manager, iftree, if_name, vif_name, ether_type,
+		filter_program)
 {
 }
 
 IoLinkDummy::~IoLinkDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy I/O Link raw communication mechanism: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy I/O Link raw communication mechanism: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IoLinkDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IoLinkDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IoLinkDummy::join_multicast_group(const Mac& group, string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name(), vif_name());
-    if (vifp == NULL) {
-	error_msg = c_format("Joining multicast group %s failed: "
-			     "interface %s vif %s not found",
-			     cstring(group),
-			     if_name().c_str(),
-			     vif_name().c_str());
-	return (XORP_ERROR);
-    }
+	// Find the vif
+	vifp = iftree().find_vif(if_name(), vif_name());
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Joining multicast group %s failed: "
+				"interface %s vif %s not found",
+				cstring(group),
+				if_name().c_str(),
+				vif_name().c_str());
+		return (XORP_ERROR);
+	}
 
 
-    // Add the group to the set of joined groups
-    IoLinkComm::JoinedMulticastGroup joined_group(group);
-    _joined_groups_table.insert(joined_group);
+	// Add the group to the set of joined groups
+	IoLinkComm::JoinedMulticastGroup joined_group(group);
+	_joined_groups_table.insert(joined_group);
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoLinkDummy::leave_multicast_group(const Mac& group, string& error_msg)
 {
-    const IfTreeVif* vifp;
+	const IfTreeVif* vifp;
 
-    // Find the vif
-    vifp = iftree().find_vif(if_name(), vif_name());
-    if (vifp == NULL) {
-	error_msg = c_format("Leaving multicast group %s failed: "
-			     "interface %s vif %s not found",
-			     cstring(group),
-			     if_name().c_str(),
-			     vif_name().c_str());
-	return (XORP_ERROR);
-    }
+	// Find the vif
+	vifp = iftree().find_vif(if_name(), vif_name());
+	if (vifp == NULL) 
+	{
+		error_msg = c_format("Leaving multicast group %s failed: "
+				"interface %s vif %s not found",
+				cstring(group),
+				if_name().c_str(),
+				vif_name().c_str());
+		return (XORP_ERROR);
+	}
 
 
-    // Remove the group from the set of joined groups
-    set<IoLinkComm::JoinedMulticastGroup>::iterator iter;
-    IoLinkComm::JoinedMulticastGroup joined_group(group);
-    iter = find(_joined_groups_table.begin(), _joined_groups_table.end(),
-		joined_group);
-    if (iter == _joined_groups_table.end()) {
-	error_msg = c_format("Multicast group %s is not joined on "
-			     "interface %s vif %s",
-			     group.str().c_str(), if_name().c_str(),
-			     vif_name().c_str());
-	return (XORP_ERROR);
-    }
-    _joined_groups_table.erase(iter);
+	// Remove the group from the set of joined groups
+	set<IoLinkComm::JoinedMulticastGroup>::iterator iter;
+	IoLinkComm::JoinedMulticastGroup joined_group(group);
+	iter = find(_joined_groups_table.begin(), _joined_groups_table.end(),
+			joined_group);
+	if (iter == _joined_groups_table.end()) 
+	{
+		error_msg = c_format("Multicast group %s is not joined on "
+				"interface %s vif %s",
+				group.str().c_str(), if_name().c_str(),
+				vif_name().c_str());
+		return (XORP_ERROR);
+	}
+	_joined_groups_table.erase(iter);
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IoLinkDummy::send_packet(const Mac& src_address,
-			const Mac& dst_address,
-			uint16_t ether_type,
-			const vector<uint8_t>& payload,
-			string& error_msg)
+		const Mac& dst_address,
+		uint16_t ether_type,
+		const vector<uint8_t>& payload,
+		string& error_msg)
 {
-    vector<uint8_t> packet;
+	vector<uint8_t> packet;
 
-    //
-    // Prepare the packet for transmission
-    //
-    // XXX: Assume this is an Ethernet packet
-    if (prepare_ethernet_packet(src_address, dst_address, ether_type,
+	//
+	// Prepare the packet for transmission
+	//
+	// XXX: Assume this is an Ethernet packet
+	if (prepare_ethernet_packet(src_address, dst_address, ether_type,
 				payload, packet, error_msg)
-	!= XORP_OK) {
-	return (XORP_ERROR);
-    }
+			!= XORP_OK) 
+	{
+		return (XORP_ERROR);
+	}
 
-    //
-    // Transmit the packet
-    //
-    // TODO: XXX: Nothing to do
-    // transmit_packet(port, &packet[0], packet.size());
+	//
+	// Transmit the packet
+	//
+	// TODO: XXX: Nothing to do
+	// transmit_packet(port, &packet[0], packet.size());
 
-    return (XORP_OK);
+	return (XORP_OK);
 }

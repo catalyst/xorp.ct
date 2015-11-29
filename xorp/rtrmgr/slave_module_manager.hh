@@ -26,12 +26,13 @@
 #include "libxorp/eventloop.hh"
 #include "generic_module_manager.hh"
 
-class SlaveModuleManager : public GenericModuleManager {
-public:
-    SlaveModuleManager();
-    GenericModule* new_module(const string& module_name, string& error_msg);
-    bool module_is_active(const string& module_name) const;
-private:
+class SlaveModuleManager : public GenericModuleManager 
+{
+	public:
+		SlaveModuleManager();
+		GenericModule* new_module(const string& module_name, string& error_msg);
+		bool module_is_active(const string& module_name) const;
+	private:
 };
 
 #endif // __RTRMGR_SLAVE_MODULE_MANAGER_HH__

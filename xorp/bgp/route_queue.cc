@@ -30,35 +30,37 @@
 
 template<class A>
 string
-RouteQueueEntry<A>::str() const {
-    string s;
-    switch(_op) {
-    case RTQUEUE_OP_ADD:
-	s = "RTQUEUE_OP_ADD";
-	break;
-    case RTQUEUE_OP_DELETE:
-	s = "RTQUEUE_OP_DELETE";
-	break;
-    case RTQUEUE_OP_REPLACE_OLD:
-	s = "RTQUEUE_OP_REPLACE_OLD";
-	break;
-    case RTQUEUE_OP_REPLACE_NEW:
-	s = "RTQUEUE_OP_REPLACE_NEW";
-	break;
-    case RTQUEUE_OP_PUSH:
-	s = "RTQUEUE_OP_PUSH";
-	break;
-    }
-    if (_route_ref.route() != NULL)
-	s += "\n" + _route_ref.route()->str();
-    else
-	s += "\n_route is NULL";
-    if (_origin_peer != NULL)
-	s += "\nOrigin Peer: " + _origin_peer->peername();
-    else
-	s += "\n_origin_peer is NULL";
-    return s;
+RouteQueueEntry<A>::str() const 
+{
+	string s;
+	switch(_op) 
+	{
+		case RTQUEUE_OP_ADD:
+			s = "RTQUEUE_OP_ADD";
+			break;
+		case RTQUEUE_OP_DELETE:
+			s = "RTQUEUE_OP_DELETE";
+			break;
+		case RTQUEUE_OP_REPLACE_OLD:
+			s = "RTQUEUE_OP_REPLACE_OLD";
+			break;
+		case RTQUEUE_OP_REPLACE_NEW:
+			s = "RTQUEUE_OP_REPLACE_NEW";
+			break;
+		case RTQUEUE_OP_PUSH:
+			s = "RTQUEUE_OP_PUSH";
+			break;
+	}
+	if (_route_ref.route() != NULL)
+		s += "\n" + _route_ref.route()->str();
+	else
+		s += "\n_route is NULL";
+	if (_origin_peer != NULL)
+		s += "\nOrigin Peer: " + _origin_peer->peername();
+	else
+		s += "\n_origin_peer is NULL";
+	return s;
 }
- 
+
 template class RouteQueueEntry<IPv4>;
 template class RouteQueueEntry<IPv6>;

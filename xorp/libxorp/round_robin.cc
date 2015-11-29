@@ -31,98 +31,105 @@
 
 #include "round_robin.hh"
 
-RoundRobinObjBase::RoundRobinObjBase()
-    : _weight(0), _next(NULL), _prev(NULL)
+	RoundRobinObjBase::RoundRobinObjBase()
+: _weight(0), _next(NULL), _prev(NULL)
 {
 }
 
 bool
 RoundRobinObjBase::scheduled() const
 {
-    return (_next != NULL);
+	return (_next != NULL);
 }
 
-RoundRobinQueue::RoundRobinQueue()
-    : _next_to_run(NULL), _run_count(0), _elements(0)
+	RoundRobinQueue::RoundRobinQueue()
+: _next_to_run(NULL), _run_count(0), _elements(0)
 {
 }
 
-void
+	void
 RoundRobinQueue::push(RoundRobinObjBase* obj, int weight)
 {
-    XLOG_ASSERT(obj != NULL);
-    XLOG_ASSERT(weight > 0);
-    link_object(obj, weight);
+	XLOG_ASSERT(obj != NULL);
+	XLOG_ASSERT(weight > 0);
+	link_object(obj, weight);
 }
 
-void
+	void
 RoundRobinQueue::pop_obj(RoundRobinObjBase* obj)
 {
-    XLOG_ASSERT(obj != NULL);
-    unlink_object(obj);
+	XLOG_ASSERT(obj != NULL);
+	unlink_object(obj);
 }
 
-void
+	void
 RoundRobinQueue::pop()
 {
-    XLOG_ASSERT(_next_to_run != NULL);
-    pop_obj(_next_to_run);
+	XLOG_ASSERT(_next_to_run != NULL);
+	pop_obj(_next_to_run);
 }
 
-RoundRobinObjBase*
+	RoundRobinObjBase*
 RoundRobinQueue::get_next_entry()
 {
-    RoundRobinObjBase* top = _next_to_run;
-    if (top != NULL) {
-	XLOG_ASSERT(_run_count < top->weight());
-	_run_count++;
-	if (_run_count == top->weight()) {
-	    _next_to_run = _next_to_run->next();
-	    _run_count = 0;
+	RoundRobinObjBase* top = _next_to_run;
+	if (top != NULL) 
+	{
+		XLOG_ASSERT(_run_count < top->weight());
+		_run_count++;
+		if (_run_count == top->weight()) 
+		{
+			_next_to_run = _next_to_run->next();
+			_run_count = 0;
+		}
 	}
-    }
-    return top;
+	return top;
 }
 
-void
+	void
 RoundRobinQueue::link_object(RoundRobinObjBase* obj, int weight)
 {
-    obj->set_weight(weight);
+	obj->set_weight(weight);
 
-    if (_next_to_run == NULL) {
-	// This is the first element
-	_next_to_run = obj;
-	_run_count = 0;
-	obj->set_next(obj);
-	obj->set_prev(obj);
-    } else {
-	//
-	// Insert just before the next entry to be run, so this is at the
-	// end of the queue.
-	//
-	obj->set_next(_next_to_run);
-	obj->set_prev(_next_to_run->prev());
-	obj->prev()->set_next(obj);
-	obj->next()->set_prev(obj);
-    }
-    _elements++;
+	if (_next_to_run == NULL) 
+	{
+		// This is the first element
+		_next_to_run = obj;
+		_run_count = 0;
+		obj->set_next(obj);
+		obj->set_prev(obj);
+	} else 
+	{
+		//
+		// Insert just before the next entry to be run, so this is at the
+		// end of the queue.
+		//
+		obj->set_next(_next_to_run);
+		obj->set_prev(_next_to_run->prev());
+		obj->prev()->set_next(obj);
+		obj->next()->set_prev(obj);
+	}
+	_elements++;
 }
 
-void
+	void
 RoundRobinQueue::unlink_object(RoundRobinObjBase* obj)
 {
-    if (obj->next() == obj) {
-	// This is the only item in the list
-	_next_to_run = NULL;
-    } else {
-	if (_next_to_run == obj) {
-	    _next_to_run = obj->next();
-	    _run_count = 0;
+	if (obj->next() == obj) 
+	{
+		// This is the only item in the list
+		_next_to_run = NULL;
+	} else 
+	{
+		if (_next_to_run == obj) 
+		{
+			_next_to_run = obj->next();
+			_run_count = 0;
+		}
+		obj->prev()->set_next(obj->next());
+		obj->next()->set_prev(obj->prev());
 	}
-	obj->prev()->set_next(obj->next());
-	obj->next()->set_prev(obj->prev());
-    }
-    obj->set_prev(NULL);
-    obj->set_next(NULL);
-    _elements--;
+	obj->set_prev(NULL);
+	obj->set_next(NULL);
+	_elements--;
 }

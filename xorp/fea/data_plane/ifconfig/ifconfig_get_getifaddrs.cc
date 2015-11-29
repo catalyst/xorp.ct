@@ -41,81 +41,84 @@
 //
 
 #ifdef HAVE_GETIFADDRS
-IfConfigGetGetifaddrs::IfConfigGetGetifaddrs(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigGet(fea_data_plane_manager)
+	IfConfigGetGetifaddrs::IfConfigGetGetifaddrs(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigGet(fea_data_plane_manager)
 {
 }
 
 IfConfigGetGetifaddrs::~IfConfigGetGetifaddrs()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the getifaddrs(3) mechanism to get "
-		   "information about network interfaces from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the getifaddrs(3) mechanism to get "
+				"information about network interfaces from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IfConfigGetGetifaddrs::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigGetGetifaddrs::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigGetGetifaddrs::pull_config(const IfTree* local_config, IfTree& iftree)
 {
-    UNUSED(local_config);
-    return read_config(iftree);
+	UNUSED(local_config);
+	return read_config(iftree);
 }
 
-int
+	int
 IfConfigGetGetifaddrs::read_config(IfTree& iftree)
 {
-    struct ifaddrs *ifap;
-    
-    if (getifaddrs(&ifap) != 0) {
-	XLOG_ERROR("getifaddrs() failed: %s", strerror(errno));
-	return (XORP_ERROR);
-    }
+	struct ifaddrs *ifap;
 
-    parse_buffer_getifaddrs(ifconfig(), iftree, ifap);
-    freeifaddrs(ifap);
+	if (getifaddrs(&ifap) != 0) 
+	{
+		XLOG_ERROR("getifaddrs() failed: %s", strerror(errno));
+		return (XORP_ERROR);
+	}
 
-    //
-    // Get the VLAN vif info
-    //
-    bool modified = false;
-    IfConfigVlanGet* ifconfig_vlan_get;
-    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
-    if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
-	    return (XORP_ERROR);
-    }
+	parse_buffer_getifaddrs(ifconfig(), iftree, ifap);
+	freeifaddrs(ifap);
 
-    return (XORP_OK);
+	//
+	// Get the VLAN vif info
+	//
+	bool modified = false;
+	IfConfigVlanGet* ifconfig_vlan_get;
+	ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+	if (ifconfig_vlan_get != NULL) 
+	{
+		if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
+			return (XORP_ERROR);
+	}
+
+	return (XORP_OK);
 }
 
 #endif // HAVE_GETIFADDRS

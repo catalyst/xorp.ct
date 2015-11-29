@@ -43,96 +43,101 @@
 // The mechanism to observe the information is routing sockets.
 //
 
-FibConfigTableObserverRoutingSocket::FibConfigTableObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigTableObserver(fea_data_plane_manager),
-      RoutingSocketObserver(*(RoutingSocket *)this)
+	FibConfigTableObserverRoutingSocket::FibConfigTableObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigTableObserver(fea_data_plane_manager),
+	RoutingSocketObserver(*(RoutingSocket *)this)
 {
 }
 
 FibConfigTableObserverRoutingSocket::~FibConfigTableObserverRoutingSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
-		   "whole forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
+				"whole forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigTableObserverRoutingSocket::start(string& error_msg)
 {
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigTableObserverRoutingSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 FibConfigTableObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
-    list<FteX> fte_list;
-    FibConfigTableGetSysctl::FibMsgSet filter;
-    filter = FibConfigTableGetSysctl::FibMsg::UPDATES | FibConfigTableGetSysctl::FibMsg::GETS | FibConfigTableGetSysctl::FibMsg::RESOLVES;
+	list<FteX> fte_list;
+	FibConfigTableGetSysctl::FibMsgSet filter;
+	filter = FibConfigTableGetSysctl::FibMsg::UPDATES | FibConfigTableGetSysctl::FibMsg::GETS | FibConfigTableGetSysctl::FibMsg::RESOLVES;
 
-    //
-    // Get the IPv4 routes
-    //
-    if (fea_data_plane_manager().have_ipv4()) {
-	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET,
-							     fibconfig().system_config_iftree(),
-							     fte_list,
-							     buffer,
-							     filter);
-	if (! fte_list.empty()) {
-	    fibconfig().propagate_fib_changes(fte_list, this);
-	    fte_list.clear();
+	//
+	// Get the IPv4 routes
+	//
+	if (fea_data_plane_manager().have_ipv4()) 
+	{
+		FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET,
+				fibconfig().system_config_iftree(),
+				fte_list,
+				buffer,
+				filter);
+		if (! fte_list.empty()) 
+		{
+			fibconfig().propagate_fib_changes(fte_list, this);
+			fte_list.clear();
+		}
 	}
-    }
 
 #ifdef HAVE_IPV6
-    //
-    // Get the IPv6 routes
-    //
-    if (fea_data_plane_manager().have_ipv6()) {
-	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET6,
-							     fibconfig().system_config_iftree(),
-							     fte_list,
-							     buffer,
-							     filter);
-	if (! fte_list.empty()) {
-	    fibconfig().propagate_fib_changes(fte_list, this);
-	    fte_list.clear();
+	//
+	// Get the IPv6 routes
+	//
+	if (fea_data_plane_manager().have_ipv6()) 
+	{
+		FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET6,
+				fibconfig().system_config_iftree(),
+				fte_list,
+				buffer,
+				filter);
+		if (! fte_list.empty()) 
+		{
+			fibconfig().propagate_fib_changes(fte_list, this);
+			fte_list.clear();
+		}
 	}
-    }
 #endif // HAVE_IPV6
 }
 
-void
+	void
 FibConfigTableObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

@@ -28,20 +28,21 @@
 
 /* **************** BGPPacket *********************** */
 
-const uint8_t BGPPacket::Marker[BGPPacket::MARKER_SIZE] = {
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+const uint8_t BGPPacket::Marker[BGPPacket::MARKER_SIZE] = 
+{
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
 uint8_t *
 BGPPacket::basic_encode(size_t len, uint8_t *buf) const
 {
-    if (buf == 0)
-	buf = new uint8_t[len];
-    XLOG_ASSERT(len >= BGPPacket::MARKER_SIZE + 3);
-    memcpy(buf, Marker, BGPPacket::MARKER_SIZE);
-    buf[BGPPacket::MARKER_SIZE] = (len >> 8) & 0xff;
-    buf[BGPPacket::MARKER_SIZE + 1] = len & 0xff;
-    buf[BGPPacket::MARKER_SIZE + 2] = _Type;
-    return buf;
+	if (buf == 0)
+		buf = new uint8_t[len];
+	XLOG_ASSERT(len >= BGPPacket::MARKER_SIZE + 3);
+	memcpy(buf, Marker, BGPPacket::MARKER_SIZE);
+	buf[BGPPacket::MARKER_SIZE] = (len >> 8) & 0xff;
+	buf[BGPPacket::MARKER_SIZE + 1] = len & 0xff;
+	buf[BGPPacket::MARKER_SIZE + 2] = _Type;
+	return buf;
 }

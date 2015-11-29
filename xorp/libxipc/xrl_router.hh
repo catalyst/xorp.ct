@@ -45,182 +45,182 @@ class XrlRouter :
     public XrlSender,
     public FinderClientObserver
 {
-public:
-    typedef XrlSender::Callback XrlCallback;
-    typedef XrlRouterDispatchState DispatchState;
+    public:
+	typedef XrlSender::Callback XrlCallback;
+	typedef XrlRouterDispatchState DispatchState;
 
-public:
-    XrlRouter( const char*	class_name,
-	      const char*	finder_address,
-	      uint16_t		finder_port)
-	throw (InvalidAddress);
+    public:
+	XrlRouter( const char*	class_name,
+		const char*	finder_address,
+		uint16_t		finder_port)
+	    throw (InvalidAddress);
 
-    XrlRouter( const char*	class_name,
-	      IPv4		finder_address,
-	      uint16_t		finder_port)
-	throw (InvalidAddress);
+	XrlRouter( const char*	class_name,
+		IPv4		finder_address,
+		uint16_t		finder_port)
+	    throw (InvalidAddress);
 
-    virtual ~XrlRouter();
+	virtual ~XrlRouter();
 
-    /**
-     * Add a protocol family listener.  When XRLs are
-     * registered through XrlRouter::finalize() they will register
-     * support for each protocol family listener added.
-     */
-    bool add_listener(XrlPFListener* listener);
+	/**
+	 * Add a protocol family listener.  When XRLs are
+	 * registered through XrlRouter::finalize() they will register
+	 * support for each protocol family listener added.
+	 */
+	bool add_listener(XrlPFListener* listener);
 
-    /**
-     * Start registration of XRLs that have been registered via
-     * add_handler with the Finder.
-     */
-    void finalize();
+	/**
+	 * Start registration of XRLs that have been registered via
+	 * add_handler with the Finder.
+	 */
+	void finalize();
 
-    /**
-     * @return true when XRLs
-     */
-    bool finalized() const		{ return _finalized; }
+	/**
+	 * @return true when XRLs
+	 */
+	bool finalized() const		{ return _finalized; }
 
-    /**
-     * @return true if instance has established a connection to the Finder.
-     */
-    bool connected() const;
+	/**
+	 * @return true if instance has established a connection to the Finder.
+	 */
+	bool connected() const;
 
-    /**
-     * @return true if instance has encountered a connection error to the
-     * Finder.
-     */
-    bool connect_failed() const;
+	/**
+	 * @return true if instance has encountered a connection error to the
+	 * Finder.
+	 */
+	bool connect_failed() const;
 
-    /**
-     * @return true if instance has established a connection to the Finder,
-     * registered own XRLs, and should be considered operational.
-     */
-    bool ready() const;
+	/**
+	 * @return true if instance has established a connection to the Finder,
+	 * registered own XRLs, and should be considered operational.
+	 */
+	bool ready() const;
 
-    /**
-     * @return true if instance has experienced an unrecoverable error.
-     */
-    bool failed() const;
+	/**
+	 * @return true if instance has experienced an unrecoverable error.
+	 */
+	bool failed() const;
 
-    virtual string toString() const;
+	virtual string toString() const;
 
-    /**
-     * Send XRL.
-     *
-     * @param xrl XRL to be sent.
-     * @param cb callback to be dispatched with XRL result and return values.
-     *
-     * @return true if XRL accepted for sending, false if insufficient
-     * resources are available.
-     */
-    bool send(const Xrl& xrl, const XrlCallback& cb);
+	/**
+	 * Send XRL.
+	 *
+	 * @param xrl XRL to be sent.
+	 * @param cb callback to be dispatched with XRL result and return values.
+	 *
+	 * @return true if XRL accepted for sending, false if insufficient
+	 * resources are available.
+	 */
+	bool send(const Xrl& xrl, const XrlCallback& cb);
 
-    /**
-     * @return true if at least one XrlRouter::send() call is still pending
-     * a result.
-     */
-    bool pending() const;
+	/**
+	 * @return true if at least one XrlRouter::send() call is still pending
+	 * a result.
+	 */
+	bool pending() const;
 
-    /**
-     * Add an XRL method handler.
-     *
-     * @param cmd XRL method path name.
-     * @param rcb callback to be dispatched when XRL method is received for
-     * invocation.
-     */
-    bool add_handler_internal(const string& cmd,
-			      const XrlRecvAsyncCallback& rcb);
+	/**
+	 * Add an XRL method handler.
+	 *
+	 * @param cmd XRL method path name.
+	 * @param rcb callback to be dispatched when XRL method is received for
+	 * invocation.
+	 */
+	bool add_handler_internal(const string& cmd,
+		const XrlRecvAsyncCallback& rcb);
 
-    const string& instance_name() const	{ return _instance_name; }
+	const string& instance_name() const	{ return _instance_name; }
 
-    const string& class_name() const	{ return XrlCmdMap::name(); }
+	const string& class_name() const	{ return XrlCmdMap::name(); }
 
-    IPv4     finder_address() const;
+	IPv4     finder_address() const;
 
-    uint16_t finder_port() const;
+	uint16_t finder_port() const;
 
-    XI* lookup_xrl(const string& name) const;
+	XI* lookup_xrl(const string& name) const;
 
-protected:
-    /**
-     * Called when Finder connection is established.
-     */
-    virtual void finder_connect_event();
+    protected:
+	/**
+	 * Called when Finder connection is established.
+	 */
+	virtual void finder_connect_event();
 
-    /**
-     * Called when Finder disconnect occurs.
-     */
-    virtual void finder_disconnect_event();
+	/**
+	 * Called when Finder disconnect occurs.
+	 */
+	virtual void finder_disconnect_event();
 
-    /**
-     * Called when an Xrl Target becomes visible to other processes.
-     * Implementers of this method should check @ref tgt_name
-     * corresponds to the @ref XrlRouter::instance_name as other
-     * targets within same process may cause this method to be
-     * invoked.
-     *
-     * Default implementation is a no-op.
-     *
-     * @param tgt_name name of Xrl Target becoming ready.
-     */
-    virtual void finder_ready_event(const string& tgt_name);
+	/**
+	 * Called when an Xrl Target becomes visible to other processes.
+	 * Implementers of this method should check @ref tgt_name
+	 * corresponds to the @ref XrlRouter::instance_name as other
+	 * targets within same process may cause this method to be
+	 * invoked.
+	 *
+	 * Default implementation is a no-op.
+	 *
+	 * @param tgt_name name of Xrl Target becoming ready.
+	 */
+	virtual void finder_ready_event(const string& tgt_name);
 
-    void dispatch_xrl(const string&	    method_name,
-		      const XrlArgs&        inputs,
-		      XrlDispatcherCallback outputs) const;
+	void dispatch_xrl(const string&	    method_name,
+		const XrlArgs&        inputs,
+		XrlDispatcherCallback outputs) const;
 
-    /**
-     * Resolve callback (slow path).
-     *
-     * Called with results from asynchronous FinderClient Xrl queries.
-     */
-    void resolve_callback(const XrlError&	  e,
-			  const FinderDBEntry*	  dbe,
-			  XrlRouterDispatchState* ds);
+	/**
+	 * Resolve callback (slow path).
+	 *
+	 * Called with results from asynchronous FinderClient Xrl queries.
+	 */
+	void resolve_callback(const XrlError&	  e,
+		const FinderDBEntry*	  dbe,
+		XrlRouterDispatchState* ds);
 
-    /**
-     * Send callback (fast path).
-     * FIXME: use smart ptr.
-     */
-    void send_callback(const XrlError&	e,
-		       XrlArgs*		reply,
-		       XrlPFSender*	sender, // un-used, should be ref-ptr if we ever actually use this.
-		       XrlCallback	user_callback);
+	/**
+	 * Send callback (fast path).
+	 * FIXME: use smart ptr.
+	 */
+	void send_callback(const XrlError&	e,
+		XrlArgs*		reply,
+		XrlPFSender*	sender, // un-used, should be ref-ptr if we ever actually use this.
+		XrlCallback	user_callback);
 
-    /**
-     * Choose appropriate XrlPFSender and execute Xrl dispatch.
-     *
-     * @return true on success, false otherwise.
-     */
-    bool send_resolved(const Xrl&		xrl,
-		       const FinderDBEntry*	dbe,
-		       const XrlCallback&	dispatch_cb,
-		       bool  direct_call);
+	/**
+	 * Choose appropriate XrlPFSender and execute Xrl dispatch.
+	 *
+	 * @return true on success, false otherwise.
+	 */
+	bool send_resolved(const Xrl&		xrl,
+		const FinderDBEntry*	dbe,
+		const XrlCallback&	dispatch_cb,
+		bool  direct_call);
 
-    void initialize(const char* class_name,
-		    IPv4	finder_addr,
-		    uint16_t	finder_port);
+	void initialize(const char* class_name,
+		IPv4	finder_addr,
+		uint16_t	finder_port);
 
-private:
-    ref_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
+    private:
+	ref_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
 
-protected:
-    FinderClient*		_fc;
-    FinderClientXrlTarget*	_fxt;
-    FinderTcpAutoConnector*	_fac;
-    string			_instance_name;
-    bool			_finalized;
+    protected:
+	FinderClient*		_fc;
+	FinderClientXrlTarget*	_fxt;
+	FinderTcpAutoConnector*	_fac;
+	string			_instance_name;
+	bool			_finalized;
 
-    list<XrlPFListener*>	_listeners;		// listeners
-    list<XrlRouterDispatchState*> _dsl;			// dispatch state
-    list< ref_ptr<XrlPFSender> > _senders;		// active senders
+	list<XrlPFListener*>	_listeners;		// listeners
+	list<XrlRouterDispatchState*> _dsl;			// dispatch state
+	list< ref_ptr<XrlPFSender> > _senders;		// active senders
 
-    static uint32_t		_icnt;			// instance count
+	static uint32_t		_icnt;			// instance count
 
-private:
-    typedef map<string, XI*>		XIM;
+    private:
+	typedef map<string, XI*>		XIM;
 
-    mutable XIM			_xi_cache;
+	mutable XIM			_xi_cache;
 };
 
 /**

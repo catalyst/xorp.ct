@@ -45,8 +45,8 @@ const string FibConfigForwardingProcLinux::PROC_LINUX_FORWARDING_FILE_V6 = "/pro
 #ifdef HAVE_PROC_LINUX
 
 FibConfigForwardingProcLinux::FibConfigForwardingProcLinux(
-    FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigForwarding(fea_data_plane_manager)
+	FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigForwarding(fea_data_plane_manager)
 {
 }
 
@@ -56,15 +56,16 @@ FibConfigForwardingProcLinux::~FibConfigForwardingProcLinux()
 
 int
 FibConfigForwardingProcLinux::unicast_forwarding_enabled4(bool& ret_value,
-							  string& error_msg) const
+	string& error_msg) const
 {
     int enabled = 0;
     FILE* fh;
-    
-    if (! fea_data_plane_manager().have_ipv4()) {
+
+    if (! fea_data_plane_manager().have_ipv4()) 
+    {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv4 unicast forwarding "
-			     "is enabled: IPv4 is not supported");
+		"is enabled: IPv4 is not supported");
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -73,17 +74,19 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled4(bool& ret_value,
     // Read the value from the corresponding "/proc" file system entry
     //
     fh = fopen(PROC_LINUX_FORWARDING_FILE_V4.c_str(), "r");
-    if (fh == NULL) {
+    if (fh == NULL) 
+    {
 	error_msg = c_format("Cannot open file %s for reading: %s",
-			     PROC_LINUX_FORWARDING_FILE_V4.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V4.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (fscanf(fh, "%d", &enabled) != 1) {
+    if (fscanf(fh, "%d", &enabled) != 1) 
+    {
 	error_msg = c_format("Error reading file %s: %s",
-			     PROC_LINUX_FORWARDING_FILE_V4.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V4.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	fclose(fh);
 	return (XORP_ERROR);
@@ -100,15 +103,16 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled4(bool& ret_value,
 
 int
 FibConfigForwardingProcLinux::unicast_forwarding_enabled6(bool& ret_value,
-							  string& error_msg) const
+	string& error_msg) const
 {
     int enabled = 0;
     FILE* fh;
-    
-    if (! fea_data_plane_manager().have_ipv6()) {
+
+    if (! fea_data_plane_manager().have_ipv6()) 
+    {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
-			     "is enabled: IPv6 is not supported");
+		"is enabled: IPv6 is not supported");
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -117,17 +121,19 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled6(bool& ret_value,
     // Read the value from the corresponding "/proc" file system entry
     //
     fh = fopen(PROC_LINUX_FORWARDING_FILE_V6.c_str(), "r");
-    if (fh == NULL) {
+    if (fh == NULL) 
+    {
 	error_msg = c_format("Cannot open file %s for reading: %s",
-			     PROC_LINUX_FORWARDING_FILE_V6.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V6.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (fscanf(fh, "%d", &enabled) != 1) {
+    if (fscanf(fh, "%d", &enabled) != 1) 
+    {
 	error_msg = c_format("Error reading file %s: %s",
-			     PROC_LINUX_FORWARDING_FILE_V6.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V6.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	fclose(fh);
 	return (XORP_ERROR);
@@ -138,21 +144,22 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled6(bool& ret_value,
 	ret_value = true;
     else
 	ret_value = false;
-    
+
     return (XORP_OK);
 }
 
 int
 FibConfigForwardingProcLinux::accept_rtadv_enabled6(bool& ret_value,
-						    string& error_msg) const
+	string& error_msg) const
 {
     int enabled = 0;
-    
-    if (! fea_data_plane_manager().have_ipv6()) {
+
+    if (! fea_data_plane_manager().have_ipv6()) 
+    {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether the acceptance of IPv6 "
-			     "Router Advertisement messages is enabled: "
-			     "IPv6 is not supported");
+		"Router Advertisement messages is enabled: "
+		"IPv6 is not supported");
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -167,16 +174,18 @@ FibConfigForwardingProcLinux::accept_rtadv_enabled6(bool& ret_value,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
-							      string& error_msg)
+	string& error_msg)
 {
     int enable = (v) ? 1 : 0;
     bool old_value;
     FILE* fh;
-    
-    if (! fea_data_plane_manager().have_ipv4()) {
-	if (! v) {
+
+    if (! fea_data_plane_manager().have_ipv4()) 
+    {
+	if (! v) 
+	{
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence
 	    // return OK.
@@ -184,7 +193,7 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
 	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: "
-			     "IPv4 is not supported", bool_c_str(v));
+		"IPv4 is not supported", bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -201,18 +210,20 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
     // Write the value to the corresponding "/proc" file system entry
     //
     fh = fopen(PROC_LINUX_FORWARDING_FILE_V4.c_str(), "w");
-    if (fh == NULL) {
+    if (fh == NULL) 
+    {
 	error_msg = c_format("Cannot open file %s for writing: %s",
-			     PROC_LINUX_FORWARDING_FILE_V4.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V4.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (fprintf(fh, "%d", enable) != 1) {
+    if (fprintf(fh, "%d", enable) != 1) 
+    {
 	error_msg = c_format("Error writing %d to file %s: %s",
-			     enable,
-			     PROC_LINUX_FORWARDING_FILE_V4.c_str(),
-			     strerror(errno));
+		enable,
+		PROC_LINUX_FORWARDING_FILE_V4.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	fclose(fh);
 	return (XORP_ERROR);
@@ -222,16 +233,18 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingProcLinux::set_unicast_forwarding_enabled6(bool v,
-							      string& error_msg)
+	string& error_msg)
 {
     int enable = (v) ? 1 : 0;
     bool old_value, old_value_accept_rtadv;
     FILE* fh;
-    
-    if (! fea_data_plane_manager().have_ipv6()) {
-	if (! v) {
+
+    if (! fea_data_plane_manager().have_ipv6()) 
+    {
+	if (! v) 
+	{
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence
 	    // return OK.
@@ -240,7 +253,7 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled6(bool v,
 	}
 
 	error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
-			     "IPv6 is not supported", bool_c_str(v));
+		"IPv6 is not supported", bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -265,24 +278,27 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled6(bool v,
     // Write the value to the corresponding "/proc" file system entry
     //
     fh = fopen(PROC_LINUX_FORWARDING_FILE_V6.c_str(), "w");
-    if (fh == NULL) {
+    if (fh == NULL) 
+    {
 	error_msg = c_format("Cannot open file %s for writing: %s",
-			     PROC_LINUX_FORWARDING_FILE_V6.c_str(),
-			     strerror(errno));
+		PROC_LINUX_FORWARDING_FILE_V6.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (fprintf(fh, "%d", enable) != 1) {
+    if (fprintf(fh, "%d", enable) != 1) 
+    {
 	error_msg = c_format("Error writing %d to file %s: %s",
-			     enable,
-			     PROC_LINUX_FORWARDING_FILE_V6.c_str(),
-			     strerror(errno));
+		enable,
+		PROC_LINUX_FORWARDING_FILE_V6.c_str(),
+		strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	// Restore the old accept_rtadv value
-	if (old_value_accept_rtadv != !v) {
+	if (old_value_accept_rtadv != !v) 
+	{
 	    string dummy_error_msg;
 	    set_accept_rtadv_enabled6(old_value_accept_rtadv,
-				      dummy_error_msg);
+		    dummy_error_msg);
 	}
 	fclose(fh);
 	return (XORP_ERROR);
@@ -292,15 +308,17 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled6(bool v,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingProcLinux::set_accept_rtadv_enabled6(bool v,
-							string& error_msg)
+	string& error_msg)
 {
     int enable = (v) ? 1 : 0;
     bool old_value;
-    
-    if (! fea_data_plane_manager().have_ipv6()) {
-	if (! v) {
+
+    if (! fea_data_plane_manager().have_ipv6()) 
+    {
+	if (! v) 
+	{
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence
 	    // return OK.
@@ -308,9 +326,9 @@ FibConfigForwardingProcLinux::set_accept_rtadv_enabled6(bool v,
 	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot set the acceptance of IPv6 "
-			     "Router Advertisement messages to %s: "
-			     "IPv6 is not supported",
-			     bool_c_str(v));
+		"Router Advertisement messages to %s: "
+		"IPv6 is not supported",
+		bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -321,7 +339,7 @@ FibConfigForwardingProcLinux::set_accept_rtadv_enabled6(bool v,
 	return (XORP_ERROR);
     if (old_value == v)
 	return (XORP_OK);	// Nothing changed
-    
+
     // XXX: nothing to do in case of Linux
     UNUSED(enable);
 

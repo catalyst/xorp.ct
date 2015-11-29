@@ -31,13 +31,14 @@
 #ifndef __XORP_NONCOPYABLE__INC_
 #define __XORP_NONCOPYABLE__INC_
 
-class xorp_noncopyable {
-private:
-   xorp_noncopyable(const xorp_noncopyable& rhs);
-   xorp_noncopyable& operator=(const xorp_noncopyable& rhs);
+class xorp_noncopyable 
+{
+    private:
+	xorp_noncopyable(const xorp_noncopyable& rhs);
+	xorp_noncopyable& operator=(const xorp_noncopyable& rhs);
 
-public:
-   xorp_noncopyable() { }
+    public:
+	xorp_noncopyable() { }
 
 };
 

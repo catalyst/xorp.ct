@@ -30,10 +30,11 @@
  *
  * All VRRP errors are encapsulated with this class.
  */
-class VrrpException : public XorpReasonedException {
-public:
-    VrrpException(const char* file, size_t line, const string& why = "")
-	: XorpReasonedException("VrrpException", file, line, why) {}
+class VrrpException : public XorpReasonedException 
+{
+    public:
+	VrrpException(const char* file, size_t line, const string& why = "")
+	    : XorpReasonedException("VrrpException", file, line, why) {}
 };
 
 #endif // __VRRP_VRRP_EXCEPTION_HH__

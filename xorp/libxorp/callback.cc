@@ -56,47 +56,51 @@ static const TimeVal MAX_CALLBACK_DURATION(5, 0);
  * structures can be deleted so we can't rely on file and line stored
  * there.
  */
-struct CBStackElement {
-    TimeVal	start;
-    const char* file;
-    int 	line;
+struct CBStackElement 
+{
+	TimeVal	start;
+	const char* file;
+	int 	line;
 
-    CBStackElement(const TimeVal& now, const char* f, int l)
-	: start(now), file(f), line(l)
-    {}
+	CBStackElement(const TimeVal& now, const char* f, int l)
+		: start(now), file(f), line(l)
+	{}
 };
 static stack<CBStackElement> cb_stack;
 
-void
+	void
 trace_dispatch_enter(const char* file, int line)
 {
-    TimeVal now;
-    TimerList::system_gettimeofday(&now);
-    cb_stack.push(CBStackElement(now, file, line));
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
+	cb_stack.push(CBStackElement(now, file, line));
 }
 
-void
+	void
 trace_dispatch_leave()
 {
-    XLOG_ASSERT(cb_stack.empty() == false);
+	XLOG_ASSERT(cb_stack.empty() == false);
 
-    TimeVal now;
-    TimerList::system_gettimeofday(&now);
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
 
-    const CBStackElement& e     = cb_stack.top();
-    TimeVal 		  delta = now - e.start;
+	const CBStackElement& e     = cb_stack.top();
+	TimeVal 		  delta = now - e.start;
 
-    if (delta >= MAX_CALLBACK_DURATION) {
-	string s = c_format("Callback originating at %s:%d took "
-			    "%d.%06d seconds\n",
-			    e.file, e.line, delta.sec(), delta.usec());
-	if (xlog_is_running()) {
-	    XLOG_ERROR("%s", s.c_str());
-	} else {
-	    fprintf(stderr, "ERROR: %s\n", s.c_str());
+	if (delta >= MAX_CALLBACK_DURATION) 
+	{
+		string s = c_format("Callback originating at %s:%d took "
+				"%d.%06d seconds\n",
+				e.file, e.line, delta.sec(), delta.usec());
+		if (xlog_is_running()) 
+		{
+			XLOG_ERROR("%s", s.c_str());
+		} else 
+		{
+			fprintf(stderr, "ERROR: %s\n", s.c_str());
+		}
 	}
-    }
-    cb_stack.pop();
+	cb_stack.pop();
 }
 
 #endif /* DEBUG_CALLBACKS */

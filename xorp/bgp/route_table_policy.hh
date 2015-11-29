@@ -37,69 +37,70 @@
  * table for the source match and import filter tables.
  */
 template <class A>
-class PolicyTable : public BGPRouteTable<A> {
-public:
-    /**
-     * @param tablename name of the table.
-     * @param safi the safi.
-     * @param parent the parent table.
-     * @param pfs a reference to the global policy filters.
-     * @param type the type of policy filter used in this table.
-     */
-    PolicyTable(const string& tablename, const Safi& safi, 
+class PolicyTable : public BGPRouteTable<A> 
+{
+    public:
+	/**
+	 * @param tablename name of the table.
+	 * @param safi the safi.
+	 * @param parent the parent table.
+	 * @param pfs a reference to the global policy filters.
+	 * @param type the type of policy filter used in this table.
+	 */
+	PolicyTable(const string& tablename, const Safi& safi, 
 		BGPRouteTable<A>* parent,
 		PolicyFilters& pfs,
 		const filter::Filter& type);
 
-    virtual ~PolicyTable();
+	virtual ~PolicyTable();
 
-    int add_route(InternalMessage<A> &rtmsg,
-                  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-                      InternalMessage<A> &new_rtmsg,
-                      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg,
-                     BGPRouteTable<A> *caller);
-    virtual int route_dump(InternalMessage<A> &rtmsg,
-                   BGPRouteTable<A> *caller,
-                   const PeerHandler *dump_peer);
-    int push(BGPRouteTable<A> *caller);
+	int add_route(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller);
+	int replace_route(InternalMessage<A> &old_rtmsg,
+		InternalMessage<A> &new_rtmsg,
+		BGPRouteTable<A> *caller);
+	int delete_route(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller);
+	virtual int route_dump(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller,
+		const PeerHandler *dump_peer);
+	int push(BGPRouteTable<A> *caller);
 
-    void route_used(const SubnetRoute<A>* route, bool in_use);
-    bool get_next_message(BGPRouteTable<A> *next_table);
+	void route_used(const SubnetRoute<A>* route, bool in_use);
+	bool get_next_message(BGPRouteTable<A> *next_table);
 
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
+	const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+		uint32_t& genid,
+		FPAListRef& pa_list) const;
 
-    // XXX: keep one table type for now
-    RouteTableType type() const { return POLICY_TABLE; }
-   
-    string str() const;
+	// XXX: keep one table type for now
+	RouteTableType type() const { return POLICY_TABLE; }
 
-    /**
-     * Performs policy filtering on a route.
-     *
-     * If false is returned, then the route is rejected, otherwise it
-     * was accepted and may have been modified.
-     *
-     * @param rtmsg the route message to filter.
-     * @param no_modify if true, the filter will not modify the route.
-     * @return whether the route was accepted by the filter.
-     */
-    bool do_filtering(InternalMessage<A>& rtmsg, 
-		      bool no_modify) const;
+	string str() const;
 
-    void enable_filtering(bool on);
-protected:
-    virtual void init_varrw();
+	/**
+	 * Performs policy filtering on a route.
+	 *
+	 * If false is returned, then the route is rejected, otherwise it
+	 * was accepted and may have been modified.
+	 *
+	 * @param rtmsg the route message to filter.
+	 * @param no_modify if true, the filter will not modify the route.
+	 * @return whether the route was accepted by the filter.
+	 */
+	bool do_filtering(InternalMessage<A>& rtmsg, 
+		bool no_modify) const;
 
-    const filter::Filter	_filter_type;
-    BGPVarRW<A>*		_varrw;
+	void enable_filtering(bool on);
+    protected:
+	virtual void init_varrw();
 
-private:
-    PolicyFilters&		_policy_filters;
-    bool _enable_filtering;
+	const filter::Filter	_filter_type;
+	BGPVarRW<A>*		_varrw;
+
+    private:
+	PolicyFilters&		_policy_filters;
+	bool _enable_filtering;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_HH__

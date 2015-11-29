@@ -39,29 +39,30 @@ template <class A>
 const string PolicyConnectedTable<A>::table_name = "policy-connected-table";
 
 
-template <class A>
+    template <class A>
 PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
-					       PolicyFilters& pfs)
-    : RouteTable<A>(table_name), _policy_filters(pfs)
+	PolicyFilters& pfs)
+: RouteTable<A>(table_name), _policy_filters(pfs)
 {
-    if (parent->next_table()) {
+    if (parent->next_table()) 
+    {
 	this->set_next_table(parent->next_table());
     }
     parent->set_next_table(this);
 }
 
-template <class A>
+    template <class A>
 PolicyConnectedTable<A>::~PolicyConnectedTable ()
 {
     _route_table.delete_all_nodes();
 }
 
 template <class A>
-void
+    void
 PolicyConnectedTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n",
-	      route.str().c_str());
+	    route.str().c_str());
 
     // store original
     IPRouteEntry<A>* original = const_cast<IPRouteEntry<A>* >(&route);
@@ -71,7 +72,7 @@ PolicyConnectedTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-int
+    int
 PolicyConnectedTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 {
     this->generic_add_route(route);
@@ -83,7 +84,7 @@ PolicyConnectedTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-int
+    int
 PolicyConnectedTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 {
     this->generic_add_route(route);
@@ -95,13 +96,13 @@ PolicyConnectedTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-void
+    void
 PolicyConnectedTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyConnectedTable DELETE ROUTE: %s\n",
-	      route->str().c_str());
+	    route->str().c_str());
 
     XLOG_ASSERT(_route_table.lookup_node(route->net()) != _route_table.end());
 
@@ -111,7 +112,7 @@ PolicyConnectedTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 }
 
 template <class A>
-int
+    int
 PolicyConnectedTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
@@ -122,7 +123,7 @@ PolicyConnectedTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 }
 
 template <class A>
-int
+    int
 PolicyConnectedTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
@@ -147,7 +148,7 @@ PolicyConnectedTable<A>::str() const
 }
 
 template <class A>
-void
+    void
 PolicyConnectedTable<A>::push_routes()
 {
     debug_msg("[RIB] PolicyConnectedTable PUSH ROUTES\n");
@@ -158,7 +159,8 @@ PolicyConnectedTable<A>::push_routes()
     // XXX: not a background task
     // go through original routes and refilter them
     for (typename RouteContainer::iterator i = _route_table.begin();
-	i != _route_table.end(); ++i) {
+	    i != _route_table.end(); ++i) 
+    {
 
 	IPRouteEntry<A>* prev = *i;
 
@@ -171,19 +173,21 @@ PolicyConnectedTable<A>::push_routes()
 
 
 template <class A>
-void
+    void
 PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
 {
-    try {
+    try 
+    {
 	debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
-		  route.str().c_str());
+		route.str().c_str());
 
 	RIBVarRW<A> varrw(route);
 
 	// only source match filtering!
 	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw);
 
-    } catch(const PolicyException& e) {
+    } catch(const PolicyException& e) 
+    {
 	XLOG_FATAL("PolicyException: %s", e.str().c_str());
 	XLOG_UNFINISHED();
     }

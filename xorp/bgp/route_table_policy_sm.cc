@@ -29,19 +29,19 @@
 #include "route_table_decision.hh"
 
 
-template <class A>
+    template <class A>
 PolicyTableSourceMatch<A>::PolicyTableSourceMatch(const string& tablename, 
-						  const Safi& safi,
-						  BGPRouteTable<A>* parent,
-						  PolicyFilters& pfs)
-    : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT_SOURCEMATCH),
-      _pushing_routes(false), _dump_iter(NULL) 
+	const Safi& safi,
+	BGPRouteTable<A>* parent,
+	PolicyFilters& pfs)
+: PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT_SOURCEMATCH),
+    _pushing_routes(false), _dump_iter(NULL) 
 {
     this->_parent = parent;		
 }
 
 
-template <class A>
+    template <class A>
 PolicyTableSourceMatch<A>::~PolicyTableSourceMatch()
 {
     if (_dump_iter)
@@ -50,25 +50,26 @@ PolicyTableSourceMatch<A>::~PolicyTableSourceMatch()
 
 
 template <class A>
-void
+    void
 PolicyTableSourceMatch<A>::push_routes(list<const PeerTableInfo<A>*>& peer_list)
 {
     _pushing_routes = true;
-    
+
     _dump_iter = new DumpIterator<A>(NULL, peer_list);
 
     debug_msg("[BGP] Push routes\n");
 
     _dump_task = EventLoop::instance().new_task(
-	callback(this, &PolicyTableSourceMatch<A>::do_background_dump),
-	XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
+	    callback(this, &PolicyTableSourceMatch<A>::do_background_dump),
+	    XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
 }
 
 template <class A>
-void
+    void
 PolicyTableSourceMatch<A>::do_next_route_dump()
 {
-    if (!_dump_iter->is_valid()) {
+    if (!_dump_iter->is_valid()) 
+    {
 	end_route_dump();
 	return;
     }
@@ -79,8 +80,10 @@ PolicyTableSourceMatch<A>::do_next_route_dump()
     DecisionTable<A>* dt = dynamic_cast<DecisionTable<A>*>(parent);
     XLOG_ASSERT(dt != NULL);
 
-    if (!dt->dump_next_route(*_dump_iter)) {
-	if (!_dump_iter->next_peer()) {
+    if (!dt->dump_next_route(*_dump_iter)) 
+    {
+	if (!_dump_iter->next_peer()) 
+	{
 	    end_route_dump();
 	    return;
 	}    
@@ -88,7 +91,7 @@ PolicyTableSourceMatch<A>::do_next_route_dump()
 }
 
 template <class A>
-void
+    void
 PolicyTableSourceMatch<A>::end_route_dump()
 {
     debug_msg("[BGP] End of push routes\n");
@@ -99,7 +102,7 @@ PolicyTableSourceMatch<A>::end_route_dump()
 }
 
 template <class A>
-bool
+    bool
 PolicyTableSourceMatch<A>::do_background_dump()
 {
     debug_msg("[BGP] doing a background dump step\n");
@@ -116,40 +119,40 @@ PolicyTableSourceMatch<A>::do_background_dump()
 }
 
 template<class A>
-void
+    void
 PolicyTableSourceMatch<A>::peering_is_down(const PeerHandler *peer, 
-					   uint32_t genid)
+	uint32_t genid)
 {
     if (pushing_routes())
-        _dump_iter->peering_is_down(peer, genid);
+	_dump_iter->peering_is_down(peer, genid);
 }
 
 template<class A>
-void
+    void
 PolicyTableSourceMatch<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-                                BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {
     if (pushing_routes())
-        _dump_iter->peering_went_down(peer, genid);
-    
+	_dump_iter->peering_went_down(peer, genid);
+
     BGPRouteTable<A>::peering_went_down(peer, genid, caller);
 }
 
 template<class A>
-void
+    void
 PolicyTableSourceMatch<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
-                                    BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {
     if (pushing_routes())
 	_dump_iter->peering_down_complete(peer, genid);
-    
+
     BGPRouteTable<A>::peering_down_complete(peer, genid, caller);
 }
 
 template<class A>
-void
+    void
 PolicyTableSourceMatch<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
-                              BGPRouteTable<A> *caller)
+	BGPRouteTable<A> *caller)
 {       
     if (pushing_routes())
 	_dump_iter->peering_came_up(peer, genid);
@@ -158,7 +161,7 @@ PolicyTableSourceMatch<A>::peering_came_up(const PeerHandler *peer, uint32_t gen
 }
 
 template<class A>
-bool
+    bool
 PolicyTableSourceMatch<A>::pushing_routes()
 {
     return _pushing_routes;

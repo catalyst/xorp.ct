@@ -31,14 +31,18 @@ typedef vector<uint8_t> PAYLOAD;
 /**
  * @short The VRRP header.
  */
-struct VrrpHeader {
-    enum Versions {
+struct VrrpHeader 
+{
+    enum Versions 
+    {
 	VRRP_VERSION = 2
     };
-    enum PktTypes {
+    enum PktTypes 
+    {
 	VRRP_TYPE_ADVERTISEMENT = 1
     };
-    enum AuthTypes {
+    enum AuthTypes 
+    {
 	VRRP_AUTH_NONE = 0
     };
 
@@ -104,107 +108,109 @@ struct VrrpHeader {
 /**
  * @short VRRP authentication data.  Unused in RFC 3768.
  */
-struct VrrpAuth {
+struct VrrpAuth 
+{
     uint8_t	    va_data[8];
 };
 
 #define IP_HEADER_MIN_SIZE	20
 #define VRRP_MAX_PACKET_SIZE	(IP_HEADER_MIN_SIZE			    \
-			         + sizeof(VrrpHeader) + sizeof(VrrpAuth)    \
-				 + sizeof(struct in_addr) * 255)
+	+ sizeof(VrrpHeader) + sizeof(VrrpAuth)    \
+	+ sizeof(struct in_addr) * 255)
 
 /**
  * @short A VRRP packet including the IP header.
  */
-class VrrpPacket {
-public:
-    static const IPv4 mcast_group;
+class VrrpPacket 
+{
+    public:
+	static const IPv4 mcast_group;
 
-    VrrpPacket();
+	VrrpPacket();
 
-    /**
-     * Set the source IP address in the IP header.
-     *
-     * @param ip source IP address in IP header.
-     */
-    void	    set_source(const IPv4& ip);
+	/**
+	 * Set the source IP address in the IP header.
+	 *
+	 * @param ip source IP address in IP header.
+	 */
+	void	    set_source(const IPv4& ip);
 
-    /**
-     * Set the virtual router ID in the VRRP header.
-     *
-     * @param vrid the virtual router ID in the VRRP header.
-     */
-    void	    set_vrid(uint8_t vrid);
+	/**
+	 * Set the virtual router ID in the VRRP header.
+	 *
+	 * @param vrid the virtual router ID in the VRRP header.
+	 */
+	void	    set_vrid(uint8_t vrid);
 
-    /**
-     * Set the priority in the VRRP header.
-     *
-     * @param priority the router priority in the VRRP header.
-     */
-    void	    set_priority(uint8_t priority);
+	/**
+	 * Set the priority in the VRRP header.
+	 *
+	 * @param priority the router priority in the VRRP header.
+	 */
+	void	    set_priority(uint8_t priority);
 
-    /**
-     * Set the advertisement interval in VRRP's header.
-     *
-     * @param interval the advertisement interval in VRRP's header.
-     */
-    void	    set_interval(uint8_t interval);
+	/**
+	 * Set the advertisement interval in VRRP's header.
+	 *
+	 * @param interval the advertisement interval in VRRP's header.
+	 */
+	void	    set_interval(uint8_t interval);
 
-    /**
-     * Remove all IPs from the VRRP advertisement.
-     */
-    void	    clear_ips();
+	/**
+	 * Remove all IPs from the VRRP advertisement.
+	 */
+	void	    clear_ips();
 
-    /**
-     * Add an IP to the VRRP header.
-     *
-     * @param ip IP to add to the virtual router in the VRRP header.
-     */
-    void	    add_ip(const IPv4& ip);
+	/**
+	 * Add an IP to the VRRP header.
+	 *
+	 * @param ip IP to add to the virtual router in the VRRP header.
+	 */
+	void	    add_ip(const IPv4& ip);
 
-    /**
-     * Must be called when all fields are set.  This method will finalize any
-     * remaining fields such as checksums.
-     */
-    void	    finalize();
+	/**
+	 * Must be called when all fields are set.  This method will finalize any
+	 * remaining fields such as checksums.
+	 */
+	void	    finalize();
 
-    /**
-     * Get the packet data.
-     *
-     * @return the packet data (IP and VRRP).
-     */
-    const PAYLOAD&  data() const;
+	/**
+	 * Get the packet data.
+	 *
+	 * @return the packet data (IP and VRRP).
+	 */
+	const PAYLOAD&  data() const;
 
-    /**
-     * Get the packet size.
-     *
-     * @return packet size.
-     */
-    uint32_t	    size() const;
+	/**
+	 * Get the packet size.
+	 *
+	 * @return packet size.
+	 */
+	uint32_t	    size() const;
 
-     /**
-     * Set the packet size.
-     *
-     * @param packet size.
-     */
-    void set_size(uint32_t size);
+	/**
+	 * Set the packet size.
+	 *
+	 * @param packet size.
+	 */
+	void set_size(uint32_t size);
 
-    /**
-     * Set multiple IPs from a container into the VRRP header.
-     *
-     * @param ips collection of IP addresses to add to the VRRP header.
-     */
-    template<class T> void set_ips(const T& ips)
-    {
-	clear_ips();
-	for (typename T::const_iterator i = ips.begin(); i != ips.end(); ++i)
-	    add_ip(*i);
-    }
+	/**
+	 * Set multiple IPs from a container into the VRRP header.
+	 *
+	 * @param ips collection of IP addresses to add to the VRRP header.
+	 */
+	template<class T> void set_ips(const T& ips)
+	{
+	    clear_ips();
+	    for (typename T::const_iterator i = ips.begin(); i != ips.end(); ++i)
+		add_ip(*i);
+	}
 
-private:
-    PAYLOAD		_data;
-    IpHeader4Writer	_ip;
-    VrrpHeader&		_vrrp;
+    private:
+	PAYLOAD		_data;
+	IpHeader4Writer	_ip;
+	VrrpHeader&		_vrrp;
 };
 
 #endif // __VRRP_VRRP_PACKET_HH__

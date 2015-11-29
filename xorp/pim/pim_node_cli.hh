@@ -46,84 +46,87 @@
 
 class PimNode;
 
-class PimNodeCli : public ProtoNodeCli {
-public:
-    PimNodeCli(PimNode& pim_node);
-    virtual ~PimNodeCli();
+class PimNodeCli : public ProtoNodeCli 
+{
+	public:
+		PimNodeCli(PimNode& pim_node);
+		virtual ~PimNodeCli();
 
-    /**
-     * Start the node operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start();
+		/**
+		 * Start the node operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		start();
 
-    /**
-     * Stop the node operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop();
+		/**
+		 * Stop the node operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		stop();
 
-    /**
-     * Enable node operation.
-     * 
-     * If an unit is not enabled, it cannot be start, or pending-start.
-     */
-    void	enable();
-    
-    /**
-     * Disable node operation.
-     * 
-     * If an unit is disabled, it cannot be start or pending-start.
-     * If the unit was runnning, it will be stop first.
-     */
-    void	disable();
+		/**
+		 * Enable node operation.
+		 * 
+		 * If an unit is not enabled, it cannot be start, or pending-start.
+		 */
+		void	enable();
 
-    int		add_all_cli_commands();
-    
-private:
-    
-    PimNode& pim_node() const { return (_pim_node); }
-    PimNode& _pim_node;
+		/**
+		 * Disable node operation.
+		 * 
+		 * If an unit is disabled, it cannot be start or pending-start.
+		 * If the unit was runnning, it will be stop first.
+		 */
+		void	disable();
 
-    //
-    // Misc. other methods
-    //
-    string	mifset_str(const Mifset& mifset) const {
-	string res;
-	for (uint32_t i = 0; i < _pim_node.maxvifs(); i++) {
-	    if (mifset.test(i))
-		res += "O";
-	    else
-		res += ".";
-	}
-	return res;
-    }
-    
-    //
-    // PIM CLI commands
-    //
-    int		cli_show_pim_bootstrap(const vector<string>& argv);
-    int		cli_show_pim_bootstrap_rps(const vector<string>& argv);
-    int		cli_show_pim_interface(const vector<string>& argv);
-    int		cli_show_pim_interface_address(const vector<string>& argv);
-    int		cli_show_pim_join(const vector<string>& argv);
-    int		cli_show_pim_join_all(const vector<string>& argv);
-    int		cli_show_pim_mfc(const vector<string>& argv);
-    int		cli_show_pim_neighbors(const vector<string>& argv);
-    int		cli_show_pim_mrib(const vector<string>& argv);
-    int		cli_show_pim_rps(const vector<string>& argv);
-    int		cli_show_pim_scope(const vector<string>& argv);
-    
-    //
-    // Methods used by the PIM CLI commands
-    //
-    void	cli_print_pim_mre_entries(const IPvXNet& group_range,
-					  bool is_print_all);
-    void	cli_print_pim_mfc_entries(const IPvXNet& group_range);
-    void	cli_print_pim_mre(const PimMre *pim_mre);
-    void	cli_print_pim_mfc(const PimMfc *pim_mfc);
+		int		add_all_cli_commands();
+
+	private:
+
+		PimNode& pim_node() const { return (_pim_node); }
+		PimNode& _pim_node;
+
+		//
+		// Misc. other methods
+		//
+		string	mifset_str(const Mifset& mifset) const 
+		{
+			string res;
+			for (uint32_t i = 0; i < _pim_node.maxvifs(); i++) 
+			{
+				if (mifset.test(i))
+					res += "O";
+				else
+					res += ".";
+			}
+			return res;
+		}
+
+		//
+		// PIM CLI commands
+		//
+		int		cli_show_pim_bootstrap(const vector<string>& argv);
+		int		cli_show_pim_bootstrap_rps(const vector<string>& argv);
+		int		cli_show_pim_interface(const vector<string>& argv);
+		int		cli_show_pim_interface_address(const vector<string>& argv);
+		int		cli_show_pim_join(const vector<string>& argv);
+		int		cli_show_pim_join_all(const vector<string>& argv);
+		int		cli_show_pim_mfc(const vector<string>& argv);
+		int		cli_show_pim_neighbors(const vector<string>& argv);
+		int		cli_show_pim_mrib(const vector<string>& argv);
+		int		cli_show_pim_rps(const vector<string>& argv);
+		int		cli_show_pim_scope(const vector<string>& argv);
+
+		//
+		// Methods used by the PIM CLI commands
+		//
+		void	cli_print_pim_mre_entries(const IPvXNet& group_range,
+				bool is_print_all);
+		void	cli_print_pim_mfc_entries(const IPvXNet& group_range);
+		void	cli_print_pim_mre(const PimMre *pim_mre);
+		void	cli_print_pim_mfc(const PimMfc *pim_mfc);
 };
 
 //

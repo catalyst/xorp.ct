@@ -28,73 +28,75 @@
 #include "libxorp/timer.hh"
 #include "libxipc/xrl_std_router.hh"
 
-class ProcessWatch {
-public:
-    typedef XorpCallback0<void>::RefPtr TerminateCallback;
+class ProcessWatch 
+{
+	public:
+		typedef XorpCallback0<void>::RefPtr TerminateCallback;
 
-    ProcessWatch(XrlStdRouter *xrl_router, 
-		 const char *bgp_mib_name,
-		 TerminateCallback cb);
+		ProcessWatch(XrlStdRouter *xrl_router, 
+				const char *bgp_mib_name,
+				TerminateCallback cb);
 
-    /**
-     * Method to call when the birth of a process has been detected.
-     */
-    void birth(const string& target_class, const string& target_instance);
+		/**
+		 * Method to call when the birth of a process has been detected.
+		 */
+		void birth(const string& target_class, const string& target_instance);
 
-    /**
-     * Method to call when the death of a process has been detected.
-     */
-    void death(const string& target_class, const string& target_instance);
+		/**
+		 * Method to call when the death of a process has been detected.
+		 */
+		void death(const string& target_class, const string& target_instance);
 
-    /**
-     * Method to call if the finder dies.
-     */
-    void finder_death(const char *file, const int lineno);
+		/**
+		 * Method to call if the finder dies.
+		 */
+		void finder_death(const char *file, const int lineno);
 
-    /**
-     * Start a timer to kill this process if for some reason we get
-     * hung up.
-     */
-    void start_kill_timer();
+		/**
+		 * Start a timer to kill this process if for some reason we get
+		 * hung up.
+		 */
+		void start_kill_timer();
 
-    /**
-     * @return Return true when all the processes that BGP requires
-     * for correct operation are running.
-     */
-    bool ready() const;
+		/**
+		 * @return Return true when all the processes that BGP requires
+		 * for correct operation are running.
+		 */
+		bool ready() const;
 
-    /**
-     * @return true if the target process exists.
-     */
-    bool target_exists(const string& target) const;
+		/**
+		 * @return true if the target process exists.
+		 */
+		bool target_exists(const string& target) const;
 
-protected:
-    void interest_callback(const XrlError& error);
-    void add_target(const string& target_class,
-		     const string& target_instance);
-    void remove_target(const string& target_class,
-			const string& target_instance);
+	protected:
+		void interest_callback(const XrlError& error);
+		void add_target(const string& target_class,
+				const string& target_instance);
+		void remove_target(const string& target_class,
+				const string& target_instance);
 
-private:
-    TerminateCallback _shutdown;
+	private:
+		TerminateCallback _shutdown;
 
-    bool _fea;
-    bool _rib;
+		bool _fea;
+		bool _rib;
 
-    string _fea_instance;
-    string _rib_instance;
+		string _fea_instance;
+		string _rib_instance;
 
-    XorpTimer _shutdown_timer;
+		XorpTimer _shutdown_timer;
 
-    class Process {
-    public:
-	Process(string c, string i) : _target_class(c), _target_instance(i)
-	{}
-	string _target_class;
-	string _target_instance;
-    };
+		class Process 
+		{
+			public:
+				Process(string c, string i) : _target_class(c), _target_instance(i)
+			{}
+				string _target_class;
+				string _target_instance;
+		};
 
-    list<Process> _processes;
+		list<Process> _processes;
 };
 
 #endif // __BGP_PROCESS_WATCH_HH__

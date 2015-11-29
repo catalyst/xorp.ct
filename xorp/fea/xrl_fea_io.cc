@@ -39,108 +39,112 @@
 
 
 XrlFeaIo::XrlFeaIo( XrlRouter& xrl_router,
-		   const string& xrl_finder_targetname)
-    : _xrl_router(xrl_router),
-      _xrl_finder_targetname(xrl_finder_targetname)
+		const string& xrl_finder_targetname)
+: _xrl_router(xrl_router),
+	_xrl_finder_targetname(xrl_finder_targetname)
 {
 }
 
 XrlFeaIo::~XrlFeaIo()
 {
-    shutdown();
+	shutdown();
 }
 
-int
+	int
 XrlFeaIo::startup()
 {
-    return (FeaIo::startup());
+	return (FeaIo::startup());
 }
 
-int
+	int
 XrlFeaIo::shutdown()
 {
-    return (FeaIo::shutdown());
+	return (FeaIo::shutdown());
 }
 
 bool
 XrlFeaIo::is_running() const
 {
-    return (FeaIo::is_running());
+	return (FeaIo::is_running());
 }
 
-int
+	int
 XrlFeaIo::register_instance_event_interest(const string& instance_name,
-					   string& error_msg)
+		string& error_msg)
 {
-    XrlFinderEventNotifierV0p1Client client(&_xrl_router);
-    bool success;
+	XrlFinderEventNotifierV0p1Client client(&_xrl_router);
+	bool success;
 
-    success = client.send_register_instance_event_interest(
-	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
-	instance_name,
-	callback(this, &XrlFeaIo::register_instance_event_interest_cb,
-		 instance_name));
-    if (success != true) {
-	error_msg = c_format("Failed to register event interest in "
-			     "instance %s: could not transmit the request",
-			     instance_name.c_str());
-	// XXX: If an error, then assume the target is dead
-	instance_death(instance_name);
-	return (XORP_ERROR);
-    }
+	success = client.send_register_instance_event_interest(
+			_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
+			instance_name,
+			callback(this, &XrlFeaIo::register_instance_event_interest_cb,
+				instance_name));
+	if (success != true) 
+	{
+		error_msg = c_format("Failed to register event interest in "
+				"instance %s: could not transmit the request",
+				instance_name.c_str());
+		// XXX: If an error, then assume the target is dead
+		instance_death(instance_name);
+		return (XORP_ERROR);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 XrlFeaIo::deregister_instance_event_interest(const string& instance_name,
-					     string& error_msg)
+		string& error_msg)
 {
-    XrlFinderEventNotifierV0p1Client client(&_xrl_router);
-    bool success;
+	XrlFinderEventNotifierV0p1Client client(&_xrl_router);
+	bool success;
 
-    success = client.send_deregister_instance_event_interest(
-	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
-	instance_name,
-	callback(this, &XrlFeaIo::deregister_instance_event_interest_cb,
-		 instance_name));
-    if (success != true) {
-	error_msg = c_format("Failed to deregister event interest in "
-			     "instance %s: could not transmit the request",
-			     instance_name.c_str());
-	//
-	// XXX: If we are deregistering, then we don't care whether the
-	// target is dead.
-	//
-	return (XORP_ERROR);
-    }
+	success = client.send_deregister_instance_event_interest(
+			_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
+			instance_name,
+			callback(this, &XrlFeaIo::deregister_instance_event_interest_cb,
+				instance_name));
+	if (success != true) 
+	{
+		error_msg = c_format("Failed to deregister event interest in "
+				"instance %s: could not transmit the request",
+				instance_name.c_str());
+		//
+		// XXX: If we are deregistering, then we don't care whether the
+		// target is dead.
+		//
+		return (XORP_ERROR);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-void
+	void
 XrlFeaIo::register_instance_event_interest_cb(const XrlError& xrl_error,
-					      string instance_name)
+		string instance_name)
 {
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to register event interest in instance %s: %s",
-		   instance_name.c_str(), xrl_error.str().c_str());
-	// XXX: If an error, then assume the target is dead
-	instance_death(instance_name);
-    }
+	if (xrl_error != XrlError::OKAY()) 
+	{
+		XLOG_ERROR("Failed to register event interest in instance %s: %s",
+				instance_name.c_str(), xrl_error.str().c_str());
+		// XXX: If an error, then assume the target is dead
+		instance_death(instance_name);
+	}
 }
 
-void
+	void
 XrlFeaIo::deregister_instance_event_interest_cb(const XrlError& xrl_error,
-						string instance_name)
+		string instance_name)
 {
-    UNUSED(instance_name);
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to deregister event interest in instance %s: %s",
-		   instance_name.c_str(), xrl_error.str().c_str());
-	//
-	// XXX: If we are deregistering, then we don't care whether the
-	// target is dead.
-	//
-    }
+	UNUSED(instance_name);
+	if (xrl_error != XrlError::OKAY()) 
+	{
+		XLOG_ERROR("Failed to deregister event interest in instance %s: %s",
+				instance_name.c_str(), xrl_error.str().c_str());
+		//
+		// XXX: If we are deregistering, then we don't care whether the
+		// target is dead.
+		//
+	}
 }

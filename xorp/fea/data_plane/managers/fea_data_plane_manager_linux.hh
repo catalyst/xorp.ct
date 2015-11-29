@@ -30,99 +30,100 @@ class IfConfigGetIoctl;
 /**
  * FEA data plane manager class for Linux.
  */
-class FeaDataPlaneManagerLinux : public FeaDataPlaneManager {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_node the @ref FeaNode this manager belongs to.
-     */
-    FeaDataPlaneManagerLinux(FeaNode& fea_node);
+class FeaDataPlaneManagerLinux : public FeaDataPlaneManager 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_node the @ref FeaNode this manager belongs to.
+		 */
+		FeaDataPlaneManagerLinux(FeaNode& fea_node);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FeaDataPlaneManagerLinux();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FeaDataPlaneManagerLinux();
 
-    /**
-     * Load the plugins.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int load_plugins(string& error_msg);
+		/**
+		 * Load the plugins.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int load_plugins(string& error_msg);
 
-    /**
-     * Unload the plugins.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int unload_plugins(string& error_msg);
+		/**
+		 * Unload the plugins.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int unload_plugins(string& error_msg);
 
-    /**
-     * Register the plugins.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int register_plugins(string& error_msg);
+		/**
+		 * Register the plugins.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int register_plugins(string& error_msg);
 
-    /**
-     * Allocate IoLink plugin instance.
-     *
-     * @param iftree the interface tree to use.
-     * @param if_name the interface name.
-     * @param vif_name the vif name.
-     * @param ether_type the EtherType protocol number. If it is 0 then
-     * it is unused.
-     * @param filter_program the option filter program to be applied on the
-     * received packets. The program uses tcpdump(1) style expression.
-     * @return a new instance of @ref IoLink plugin on success, otherwise NULL.
-     */
-    IoLink* allocate_io_link(const IfTree& iftree,
-			     const string& if_name,
-			     const string& vif_name,
-			     uint16_t ether_type,
-			     const string& filter_program);
+		/**
+		 * Allocate IoLink plugin instance.
+		 *
+		 * @param iftree the interface tree to use.
+		 * @param if_name the interface name.
+		 * @param vif_name the vif name.
+		 * @param ether_type the EtherType protocol number. If it is 0 then
+		 * it is unused.
+		 * @param filter_program the option filter program to be applied on the
+		 * received packets. The program uses tcpdump(1) style expression.
+		 * @return a new instance of @ref IoLink plugin on success, otherwise NULL.
+		 */
+		IoLink* allocate_io_link(const IfTree& iftree,
+				const string& if_name,
+				const string& vif_name,
+				uint16_t ether_type,
+				const string& filter_program);
 
-    /**
-     * Allocate IoIp plugin instance.
-     *
-     * @param iftree the interface tree to use.
-     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
-     * respectively).
-     * @param ip_protocol the IP protocol number (IPPROTO_*).
-     * @return a new instance of @ref IoIp plugin on success, otherwise NULL.
-     */
-    IoIp* allocate_io_ip(const IfTree& iftree, int family,
-			 uint8_t ip_protocol);
+		/**
+		 * Allocate IoIp plugin instance.
+		 *
+		 * @param iftree the interface tree to use.
+		 * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+		 * respectively).
+		 * @param ip_protocol the IP protocol number (IPPROTO_*).
+		 * @return a new instance of @ref IoIp plugin on success, otherwise NULL.
+		 */
+		IoIp* allocate_io_ip(const IfTree& iftree, int family,
+				uint8_t ip_protocol);
 
-    /**
-     * Allocate IoTcpUdp plugin instance.
-     *
-     * @param iftree the interface tree to use.
-     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
-     * respectively).
-     * @param is_tcp if true allocate a TCP entry, otherwise UDP.
-     * @return a new instance of @ref IoTcpUdp plugin on success,
-     * otherwise NULL.
-     */
-    IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family,
-				 bool is_tcp);
+		/**
+		 * Allocate IoTcpUdp plugin instance.
+		 *
+		 * @param iftree the interface tree to use.
+		 * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+		 * respectively).
+		 * @param is_tcp if true allocate a TCP entry, otherwise UDP.
+		 * @return a new instance of @ref IoTcpUdp plugin on success,
+		 * otherwise NULL.
+		 */
+		IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family,
+				bool is_tcp);
 
 #if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF) and !defined(HAVE_NETLINK_SOCKETS)
-    /**
-     * Get the IfConfigGetIoctl plugin.
-     *
-     * @return the @ref IfConfigGetIoctl plugin.
-     */
-    IfConfigGetIoctl* ifconfig_get_ioctl() { return (_ifconfig_get_ioctl); }
+		/**
+		 * Get the IfConfigGetIoctl plugin.
+		 *
+		 * @return the @ref IfConfigGetIoctl plugin.
+		 */
+		IfConfigGetIoctl* ifconfig_get_ioctl() { return (_ifconfig_get_ioctl); }
 #endif
 
-private:
+	private:
 #if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF)
-    IfConfigGetIoctl*	_ifconfig_get_ioctl;
+		IfConfigGetIoctl*	_ifconfig_get_ioctl;
 #endif
 };
 

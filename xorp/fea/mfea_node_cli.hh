@@ -48,67 +48,68 @@ class MfeaNode;
 /**
  * @short The class for @ref MfeaNode CLI access.
  */
-class MfeaNodeCli : public ProtoNodeCli {
-public:
-    /**
-     * Constructor for a given MFEA node.
-     * 
-     * @param mfea_node the @ref MfeaNode this node belongs to.
-     */
-    MfeaNodeCli(MfeaNode& mfea_node);
-    
-    /**
-     * Destructor
-     */
-    virtual ~MfeaNodeCli();
-    
-    /**
-     * Start the CLI operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start();
+class MfeaNodeCli : public ProtoNodeCli 
+{
+	public:
+		/**
+		 * Constructor for a given MFEA node.
+		 * 
+		 * @param mfea_node the @ref MfeaNode this node belongs to.
+		 */
+		MfeaNodeCli(MfeaNode& mfea_node);
 
-    /**
-     * Stop the CLI operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop();
-    
-    /**
-     * Enable node operation.
-     * 
-     * If an unit is not enabled, it cannot be start, or pending-start.
-     */
-    void	enable();
-    
-    /**
-     * Disable node operation.
-     * 
-     * If an unit is disabled, it cannot be start or pending-start.
-     * If the unit was runnning, it will be stop first.
-     */
-    void	disable();
-    
-    /**
-     * Install all MFEA-related CLI commands to the CLI.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		add_all_cli_commands();
-    
-private:
-    
-    MfeaNode& mfea_node() const { return (_mfea_node); }
-    MfeaNode& _mfea_node;
-    
-    //
-    // MFEA CLI commands
-    //
-    int		cli_show_mfea_dataflow(const vector<string>& argv);
-    int		cli_show_mfea_interface(const vector<string>& argv);
-    int		cli_show_mfea_interface_address(const vector<string>& argv);
+		/**
+		 * Destructor
+		 */
+		virtual ~MfeaNodeCli();
+
+		/**
+		 * Start the CLI operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		start();
+
+		/**
+		 * Stop the CLI operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		stop();
+
+		/**
+		 * Enable node operation.
+		 * 
+		 * If an unit is not enabled, it cannot be start, or pending-start.
+		 */
+		void	enable();
+
+		/**
+		 * Disable node operation.
+		 * 
+		 * If an unit is disabled, it cannot be start or pending-start.
+		 * If the unit was runnning, it will be stop first.
+		 */
+		void	disable();
+
+		/**
+		 * Install all MFEA-related CLI commands to the CLI.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		add_all_cli_commands();
+
+	private:
+
+		MfeaNode& mfea_node() const { return (_mfea_node); }
+		MfeaNode& _mfea_node;
+
+		//
+		// MFEA CLI commands
+		//
+		int		cli_show_mfea_dataflow(const vector<string>& argv);
+		int		cli_show_mfea_interface(const vector<string>& argv);
+		int		cli_show_mfea_interface_address(const vector<string>& argv);
 };
 
 //

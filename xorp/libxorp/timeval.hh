@@ -42,295 +42,297 @@
  * TimeVal class is used for storing time value. Similar to "struct timeval",
  * the time value is in seconds and microseconds.
  */
-class TimeVal {
-public:
-    static const int32_t ONE_MILLION = 1000000;
-    static const int32_t ONE_THOUSAND = 1000;
+class TimeVal 
+{
+    public:
+	static const int32_t ONE_MILLION = 1000000;
+	static const int32_t ONE_THOUSAND = 1000;
 
-public:
-    /**
-     * Default constructor
-     */
-    TimeVal() : _sec(0), _usec(0) {}
+    public:
+	/**
+	 * Default constructor
+	 */
+	TimeVal() : _sec(0), _usec(0) {}
 
-    /**
-     * Constructor for given seconds and microseconds.
-     *
-     * @param sec the number of seconds.
-     * @param usec the number of microseconds.
-     */
-    TimeVal(int32_t sec, int32_t usec) : _sec(sec), _usec(usec) {}
+	/**
+	 * Constructor for given seconds and microseconds.
+	 *
+	 * @param sec the number of seconds.
+	 * @param usec the number of microseconds.
+	 */
+	TimeVal(int32_t sec, int32_t usec) : _sec(sec), _usec(usec) {}
 
 
-    /**
-     * Constructor for given "struct timeval".
-     *
-     * @param timeval the "struct timeval" time value to initialize this
-     * object with.
-     */
-    explicit TimeVal(const timeval& timeval)
-	: _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
+	/**
+	 * Constructor for given "struct timeval".
+	 *
+	 * @param timeval the "struct timeval" time value to initialize this
+	 * object with.
+	 */
+	explicit TimeVal(const timeval& timeval)
+	    : _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
 
 #ifdef HAVE_STRUCT_TIMESPEC
-    /**
-     * Constructor for given POSIX "struct timespec".
-     *
-     * @param timespec the "struct timespec" time value to initialize this
-     * object with.
-     */
-    explicit TimeVal(const timespec& timespec)
-	: _sec(timespec.tv_sec), _usec(timespec.tv_nsec / 1000) {}
+	/**
+	 * Constructor for given POSIX "struct timespec".
+	 *
+	 * @param timespec the "struct timespec" time value to initialize this
+	 * object with.
+	 */
+	explicit TimeVal(const timespec& timespec)
+	    : _sec(timespec.tv_sec), _usec(timespec.tv_nsec / 1000) {}
 #endif
 
 
-    /**
-     * Constructor for given double-float time value.
-     *
-     * @param d the double-float time value to initialize this object with.
-     */
-    explicit TimeVal(const double& d);
+	/**
+	 * Constructor for given double-float time value.
+	 *
+	 * @param d the double-float time value to initialize this object with.
+	 */
+	explicit TimeVal(const double& d);
 
-    /**
-     * Get the number of seconds.
-     *
-     * @return the number of seconds.
-     */
-    int32_t sec() const		{ return _sec; }
+	/**
+	 * Get the number of seconds.
+	 *
+	 * @return the number of seconds.
+	 */
+	int32_t sec() const		{ return _sec; }
 
-    /**
-     * Get the number of microseconds.
-     *
-     * @return the number of microseconds.
-     */
-    int32_t usec() const	{ return _usec; }
+	/**
+	 * Get the number of microseconds.
+	 *
+	 * @return the number of microseconds.
+	 */
+	int32_t usec() const	{ return _usec; }
 
-    /**
-     * @return seconds and microseconds as a string.
-     */
-    string str() const;
+	/**
+	 * @return seconds and microseconds as a string.
+	 */
+	string str() const;
 
-    /**
-     * Pretty print the time
-     *
-     * @return the time as formated by ctime(3) without the newline.
-     */
-    string pretty_print() const;
+	/**
+	 * Pretty print the time
+	 *
+	 * @return the time as formated by ctime(3) without the newline.
+	 */
+	string pretty_print() const;
 
-    /**
-     * Get zero value.
-     */
-    static TimeVal ZERO();
+	/**
+	 * Get zero value.
+	 */
+	static TimeVal ZERO();
 
-    /**
-     * Get the maximum permitted value.
-     */
-    static TimeVal MAXIMUM();
+	/**
+	 * Get the maximum permitted value.
+	 */
+	static TimeVal MAXIMUM();
 
-    /**
-     * Get the minimum permitted value.
-     */
-    static TimeVal MINIMUM();
+	/**
+	 * Get the minimum permitted value.
+	 */
+	static TimeVal MINIMUM();
 
-    /**
-     * Copy the time value from a timeval structure.
-     *
-     * @param timeval the storage to copy the time from.
-     * @return the number of copied octets.
-     */
-    size_t copy_in(const timeval& timeval);
+	/**
+	 * Copy the time value from a timeval structure.
+	 *
+	 * @param timeval the storage to copy the time from.
+	 * @return the number of copied octets.
+	 */
+	size_t copy_in(const timeval& timeval);
 
-    /**
-     * Copy the time value to a timeval structure.
-     *
-     * @param timeval the storage to copy the time to.
-     * @return the number of copied octets.
-     */
-    size_t copy_out(timeval& timeval) const;
+	/**
+	 * Copy the time value to a timeval structure.
+	 *
+	 * @param timeval the storage to copy the time to.
+	 * @return the number of copied octets.
+	 */
+	size_t copy_out(timeval& timeval) const;
 
 #ifdef HAVE_STRUCT_TIMESPEC
-    /**
-     * Copy the time value from a POSIX timespec structure.
-     *
-     * @param timespec the storage to copy the time from.
-     * @return the number of copied octets.
-     */
-    size_t copy_in(const timespec& timespec);
+	/**
+	 * Copy the time value from a POSIX timespec structure.
+	 *
+	 * @param timespec the storage to copy the time from.
+	 * @return the number of copied octets.
+	 */
+	size_t copy_in(const timespec& timespec);
 
-    /**
-     * Copy the time value to a POSIX timespec structure.
-     *
-     * @param timespec the storage to copy the time to.
-     * @return the number of copied octets.
-     */
-    size_t copy_out(timespec& timespec) const;
+	/**
+	 * Copy the time value to a POSIX timespec structure.
+	 *
+	 * @param timespec the storage to copy the time to.
+	 * @return the number of copied octets.
+	 */
+	size_t copy_out(timespec& timespec) const;
 #endif
 
-    /**
-     * Return an int64_t containing the total number of milliseconds
-     * in the underlying structure.
-     * This is intended for convenience when working with Win32 APIs.
-     * XXX: This may overflow if _sec is too big.
-     *
-     * @return the number of milliseconds in total.
-     */
-    int64_t to_ms() const;
+	/**
+	 * Return an int64_t containing the total number of milliseconds
+	 * in the underlying structure.
+	 * This is intended for convenience when working with Win32 APIs.
+	 * XXX: This may overflow if _sec is too big.
+	 *
+	 * @return the number of milliseconds in total.
+	 */
+	int64_t to_ms() const;
 
-    void set_ms(int64_t ms);
+	void set_ms(int64_t ms);
 
 
-    /**
-     * Convert a TimeVal value to a double-float value.
-     *
-     * @return the double-float value of this TimeVal time.
-     */
-    double get_double() const { return (_sec * 1.0 + _usec * 1.0e-6); }
+	/**
+	 * Convert a TimeVal value to a double-float value.
+	 *
+	 * @return the double-float value of this TimeVal time.
+	 */
+	double get_double() const { return (_sec * 1.0 + _usec * 1.0e-6); }
 
-    /**
-     * Assignment Operator
-     */
-    TimeVal& operator=(const TimeVal& other);
+	/**
+	 * Assignment Operator
+	 */
+	TimeVal& operator=(const TimeVal& other);
 
-    /**
-     * Equality Operator
-     *
-     * @param other the right-hand operand to compare against.
-     * @return true if the left-hand operand is numerically same as the
-     * right-hand operand.
-     */
-    bool operator==(const TimeVal& other) const;
+	/**
+	 * Equality Operator
+	 *
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically same as the
+	 * right-hand operand.
+	 */
+	bool operator==(const TimeVal& other) const;
 
-    /**
-     * Less-Than Operator
-     *
-     * @param other the right-hand operand to compare against.
-     * @return true if the left-hand operand is numerically smaller than the
-     * right-hand operand.
-     */
-    bool operator<(const TimeVal& other) const;
+	/**
+	 * Less-Than Operator
+	 *
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically smaller than the
+	 * right-hand operand.
+	 */
+	bool operator<(const TimeVal& other) const;
 
-    /**
-     * Assign-Sum Operator
-     *
-     * @param delta the TimeVal value to add to this TimeVal object.
-     * @return the TimeVal value after the addition of @ref delta.
-     */
-    const TimeVal& operator+=(const TimeVal& delta);
+	/**
+	 * Assign-Sum Operator
+	 *
+	 * @param delta the TimeVal value to add to this TimeVal object.
+	 * @return the TimeVal value after the addition of @ref delta.
+	 */
+	const TimeVal& operator+=(const TimeVal& delta);
 
-    /**
-     * Addition Operator
-     *
-     * @param other the TimeVal value to add to the value of this
-     * TimeVal object.
-     * @return the TimeVal value after the addition of @ref other.
-     */
-    TimeVal operator+(const TimeVal& other) const;
+	/**
+	 * Addition Operator
+	 *
+	 * @param other the TimeVal value to add to the value of this
+	 * TimeVal object.
+	 * @return the TimeVal value after the addition of @ref other.
+	 */
+	TimeVal operator+(const TimeVal& other) const;
 
-    /**
-     * Assign-Difference Operator
-     *
-     * @param delta the TimeVal value to substract from this TimeVal object.
-     * @return the TimeVal value after the substraction of @ref delta.
-     */
-    const TimeVal& operator-=(const TimeVal& delta);
+	/**
+	 * Assign-Difference Operator
+	 *
+	 * @param delta the TimeVal value to substract from this TimeVal object.
+	 * @return the TimeVal value after the substraction of @ref delta.
+	 */
+	const TimeVal& operator-=(const TimeVal& delta);
 
-    /**
-     * Substraction Operator
-     *
-     * @param other the TimeVal value to substract from the value of this
-     * TimeVal object.
-     * @return the TimeVal value after the substraction of @ref other.
-     */
-    TimeVal operator-(const TimeVal& other) const;
+	/**
+	 * Substraction Operator
+	 *
+	 * @param other the TimeVal value to substract from the value of this
+	 * TimeVal object.
+	 * @return the TimeVal value after the substraction of @ref other.
+	 */
+	TimeVal operator-(const TimeVal& other) const;
 
-    /**
-     * Multiplication Operator for integer operand
-     *
-     * @param n the integer value used in multiplying the value of this
-     * object with.
-     * @return the TimeVal value of multiplying the value of this object
-     * by @ref n.
-     */
-    TimeVal operator*(int n) const;
+	/**
+	 * Multiplication Operator for integer operand
+	 *
+	 * @param n the integer value used in multiplying the value of this
+	 * object with.
+	 * @return the TimeVal value of multiplying the value of this object
+	 * by @ref n.
+	 */
+	TimeVal operator*(int n) const;
 
-    /**
-     * Multiplication Operator for unsigned integer operand
-     *
-     * @param n the unsigned integer value used in multiplying the value of
-     * this object with.
-     * @return the TimeVal value of multiplying the value of this object
-     * by @ref n.
-     */
-    TimeVal operator*(unsigned int n) const;
+	/**
+	 * Multiplication Operator for unsigned integer operand
+	 *
+	 * @param n the unsigned integer value used in multiplying the value of
+	 * this object with.
+	 * @return the TimeVal value of multiplying the value of this object
+	 * by @ref n.
+	 */
+	TimeVal operator*(unsigned int n) const;
 
-    /**
-     * Multiplication Operator for double float operand
-     *
-     * @param d the double float value used in multiplying the value of this
-     * object with.
-     * @return the TimeVal value of multiplying the value of this object
-     * by @ref d.
-     */
-    TimeVal operator*(const double& d) const;
+	/**
+	 * Multiplication Operator for double float operand
+	 *
+	 * @param d the double float value used in multiplying the value of this
+	 * object with.
+	 * @return the TimeVal value of multiplying the value of this object
+	 * by @ref d.
+	 */
+	TimeVal operator*(const double& d) const;
 
-    /**
-     * Division Operator for integer operand
-     *
-     * @param n the integer value used in dividing the value of this
-     * object with.
-     * @return the TimeVal value of dividing the value of this object
-     * by @ref n.
-     */
-    TimeVal operator/(int n) const;
+	/**
+	 * Division Operator for integer operand
+	 *
+	 * @param n the integer value used in dividing the value of this
+	 * object with.
+	 * @return the TimeVal value of dividing the value of this object
+	 * by @ref n.
+	 */
+	TimeVal operator/(int n) const;
 
-    /**
-     * Division Operator for unsigned integer operand
-     *
-     * @param n the unsigned integer value used in dividing the value of this
-     * object with.
-     * @return the TimeVal value of dividing the value of this object
-     * by @ref n.
-     */
-    TimeVal operator/(unsigned int n) const;
+	/**
+	 * Division Operator for unsigned integer operand
+	 *
+	 * @param n the unsigned integer value used in dividing the value of this
+	 * object with.
+	 * @return the TimeVal value of dividing the value of this object
+	 * by @ref n.
+	 */
+	TimeVal operator/(unsigned int n) const;
 
-    /**
-     * Division Operator for double-float operand
-     *
-     * @param d the double-float value used in dividing the value of this
-     * object with.
-     * @return the TimeVal value of dividing the value of this object
-     * by @ref d.
-     */
-    TimeVal operator/(const double& d) const;
+	/**
+	 * Division Operator for double-float operand
+	 *
+	 * @param d the double-float value used in dividing the value of this
+	 * object with.
+	 * @return the TimeVal value of dividing the value of this object
+	 * by @ref d.
+	 */
+	TimeVal operator/(const double& d) const;
 
-    /**
-     * Test if this time value is numerically zero.
-     *
-     * @return true if the address is numerically zero.
-     */
-    bool is_zero() const	{ return ((_sec == 0) && (_usec == 0)); }
+	/**
+	 * Test if this time value is numerically zero.
+	 *
+	 * @return true if the address is numerically zero.
+	 */
+	bool is_zero() const	{ return ((_sec == 0) && (_usec == 0)); }
 
-private:
-    TimeVal(int i);		// Not implemented
+    private:
+	TimeVal(int i);		// Not implemented
 
-    int32_t _sec;		// The number of seconds
-    int32_t _usec;		// The number of microseconds
+	int32_t _sec;		// The number of seconds
+	int32_t _usec;		// The number of microseconds
 };
 
-inline
-TimeVal::TimeVal(const double& d)
-    : _sec((int32_t)d),
-      _usec((int32_t)((d - ((double)_sec)) * ONE_MILLION + 0.5e-6))
+    inline
+    TimeVal::TimeVal(const double& d)
+: _sec((int32_t)d),
+    _usec((int32_t)((d - ((double)_sec)) * ONE_MILLION + 0.5e-6))
 {
     //
     // Adjust
     //
-    if (_usec >= ONE_MILLION) {
+    if (_usec >= ONE_MILLION) 
+    {
 	_sec += _usec / ONE_MILLION;
 	_usec %= ONE_MILLION;
     }
 }
 
-inline size_t
+    inline size_t
 TimeVal::copy_in(const timeval& timeval)
 {
     _sec = timeval.tv_sec;
@@ -348,7 +350,7 @@ TimeVal::copy_out(timeval& timeval) const
 
 #ifdef HAVE_STRUCT_TIMESPEC
 
-inline size_t
+    inline size_t
 TimeVal::copy_in(const timespec& timespec)
 {
     _sec = timespec.tv_sec;
@@ -367,7 +369,7 @@ TimeVal::copy_out(timespec& timespec) const
 #endif
 
 
-inline TimeVal&
+    inline TimeVal&
 TimeVal::operator=(const TimeVal& other)
 {
     _sec = other.sec();
@@ -387,12 +389,13 @@ TimeVal::operator<(const TimeVal& other) const
     return (_sec == other.sec()) ? _usec < other.usec() : _sec < other.sec();
 }
 
-inline const TimeVal&
+    inline const TimeVal&
 TimeVal::operator+=(const TimeVal& delta)
 {
     _sec += delta.sec();
     _usec += delta.usec();
-    if (_usec >= ONE_MILLION) {
+    if (_usec >= ONE_MILLION) 
+    {
 	_sec++;
 	_usec -= ONE_MILLION;
     }
@@ -406,11 +409,12 @@ TimeVal::operator+(const TimeVal& other) const
     return tmp_tv += other;
 }
 
-inline const TimeVal&
+    inline const TimeVal&
 TimeVal::operator-=(const TimeVal& delta)
 {
     _sec -= delta.sec();
-    if (_usec < delta.usec()) {
+    if (_usec < delta.usec()) 
+    {
 	// Compensate
 	_sec--;
 	_usec += ONE_MILLION;
@@ -468,19 +472,19 @@ TimeVal::operator/(const double& d) const
     return TimeVal(get_double() / d);
 }
 
-inline TimeVal
+    inline TimeVal
 TimeVal::ZERO()
 {
     return TimeVal(0, 0);
 }
 
-inline TimeVal
+    inline TimeVal
 TimeVal::MAXIMUM()
 {
     return TimeVal(0x7fffffff, ONE_MILLION - 1);
 }
 
-inline TimeVal
+    inline TimeVal
 TimeVal::MINIMUM()
 {
     return TimeVal(- 0x7fffffff - 1, - (ONE_MILLION - 1));
@@ -489,7 +493,7 @@ TimeVal::MINIMUM()
 /**
  * Prefix unary minus.
  */
-inline TimeVal
+    inline TimeVal
 operator-(const TimeVal& v)
 {
     return TimeVal(-v.sec(), -v.usec());
@@ -498,7 +502,7 @@ operator-(const TimeVal& v)
 /**
  * Multiply TimeVal by integer.
  */
-inline TimeVal
+    inline TimeVal
 operator*(int n, const TimeVal& t)
 {
     return t * n;
@@ -507,7 +511,7 @@ operator*(int n, const TimeVal& t)
 /**
  * Multiply TimeVal by double.
  */
-inline TimeVal
+    inline TimeVal
 operator*(const double& d, const TimeVal& t)
 {
     return t * d;
@@ -520,7 +524,7 @@ operator*(const double& d, const TimeVal& t)
  * @param upper upper bound of generated value.
  * @return value chosen from uniform random distribution.
  */
-inline TimeVal
+    inline TimeVal
 random_uniform(const TimeVal& lower, const TimeVal& upper)
 {
     double d = (upper - lower).get_double();
@@ -534,7 +538,7 @@ random_uniform(const TimeVal& lower, const TimeVal& upper)
  * @param upper upper bound of generated value.
  * @return value chosen from uniform random distribution.
  */
-inline TimeVal
+    inline TimeVal
 random_uniform(const TimeVal& upper)
 {
     double d = upper.get_double();
@@ -552,7 +556,7 @@ random_uniform(const TimeVal& upper)
  * @param factor the spread of the uniform random distribution.
  * @return value chosen from uniform random distribution.
  */
-inline TimeVal
+    inline TimeVal
 random_uniform(const TimeVal& center, const double& factor)
 {
     TimeVal l = max(center - center * factor, TimeVal::ZERO());

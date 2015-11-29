@@ -38,11 +38,11 @@
 
 #define RemoveHeadList(ListHead)                                \
     (ListHead)->Flink;                                          \
-    {RemoveEntryList((ListHead)->Flink)}
+{RemoveEntryList((ListHead)->Flink)}
 
 #define RemoveTailList(ListHead)                                \
     (ListHead)->Blink;                                          \
-    {RemoveEntryList((ListHead)->Blink)}
+{RemoveEntryList((ListHead)->Blink)}
 
 #define RemoveEntryList(Entry)                                  \
 {                                                               \
@@ -83,10 +83,10 @@
     PLIST_ENTRY _EX_Entry;                                      \
     PLIST_ENTRY _EX_Blink;                                      \
     for (_EX_Entry = (ListHead)->Flink;                         \
-         _EX_Entry != (ListHead);                               \
-         _EX_Entry = _EX_Entry->Flink)                          \
-        if ((*(CompareFunction))((Entry), _EX_Entry) <= 0)      \
-            break;                                              \
+	    _EX_Entry != (ListHead);                               \
+	    _EX_Entry = _EX_Entry->Flink)                          \
+    if ((*(CompareFunction))((Entry), _EX_Entry) <= 0)      \
+    break;                                              \
     _EX_Blink = _EX_Entry->Blink;                               \
     _EX_Blink->Flink = (Entry);                                 \
     _EX_Entry->Blink = (Entry);                                 \
@@ -99,13 +99,13 @@
     PLIST_ENTRY _EX_Entry;                                      \
     *(Entry) = NULL;                                            \
     for (_EX_Entry = (ListHead)->Flink;                         \
-         _EX_Entry != (ListHead);                               \
-         _EX_Entry = _EX_Entry->Flink)                          \
-        if ((*(CompareFunction))((Key), _EX_Entry) == 0)        \
-        {                                                       \
-            *(Entry) = _EX_Entry;                               \
-            break;                                              \
-        }                                                       \
+	    _EX_Entry != (ListHead);                               \
+	    _EX_Entry = _EX_Entry->Flink)                          \
+    if ((*(CompareFunction))((Key), _EX_Entry) == 0)        \
+    {                                                       \
+	*(Entry) = _EX_Entry;                               \
+	break;                                              \
+    }                                                       \
 }
 
 #define FindSortedList(ListHead, Key, Entry, CompareFunction)   \
@@ -113,22 +113,22 @@
     PLIST_ENTRY _EX_Entry;                                      \
     *(Entry) = NULL;                                            \
     for (_EX_Entry = (ListHead)->Flink;                         \
-         _EX_Entry != (ListHead);                               \
-         _EX_Entry = _EX_Entry->Flink)                          \
-        if ((*(CompareFunction))((Key), _EX_Entry) <= 0)        \
-        {                                                       \
-            *(Entry) = _EX_Entry;                               \
-            break;                                              \
-        }                                                       \
+	    _EX_Entry != (ListHead);                               \
+	    _EX_Entry = _EX_Entry->Flink)                          \
+    if ((*(CompareFunction))((Key), _EX_Entry) <= 0)        \
+    {                                                       \
+	*(Entry) = _EX_Entry;                               \
+	break;                                              \
+    }                                                       \
 }
 
 #define MapCarList(ListHead, VoidFunction)                      \
 {                                                               \
     PLIST_ENTRY _EX_Entry;                                      \
     for (_EX_Entry = (ListHead)->Flink;                         \
-         _EX_Entry != (ListHead);                               \
-         _EX_Entry = _EX_Entry->Flink)                          \
-        (*(VoidFunction))(_EX_Entry);                           \
+	    _EX_Entry != (ListHead);                               \
+	    _EX_Entry = _EX_Entry->Flink)                          \
+    (*(VoidFunction))(_EX_Entry);                           \
 }
 
 #define FreeList(ListHead, FreeFunction)                        \
@@ -136,8 +136,8 @@
     PLIST_ENTRY _EX_Head;                                       \
     while (!IsListEmpty(ListHead))                              \
     {                                                           \
-        _EX_Head = RemoveHeadList(ListHead);                    \
-        (*(FreeFunction))(_EX_Head);                            \
+	_EX_Head = RemoveHeadList(ListHead);                    \
+	(*(FreeFunction))(_EX_Head);                            \
     }                                                           \
 }
 

@@ -26,18 +26,20 @@
 /**
  * All the trace variables in one place.
  */
-struct Trace {
+struct Trace 
+{
     Trace() :
-	      _routes(false),
-	      _packets(false)
-	      // Don't forget to add new variables to the all() method.
-	{}
+	_routes(false),
+	_packets(false)
+	// Don't forget to add new variables to the all() method.
+    {}
 
     /*
      * Set all flags
      */
-    void all(bool val) {
-	 _routes = _packets = val;
+    void all(bool val) 
+    {
+	_routes = _packets = val;
     }
 
     bool _routes;	// add,replace,delete route.

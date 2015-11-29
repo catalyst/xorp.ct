@@ -40,33 +40,33 @@ extern int rtm_newaddr(DWORD ifindex, PIP_ADAPTER_BINDING_INFO pbind);
 #endif
 
 DWORD
-WINAPI
+    WINAPI
 StartProtocol (
-    HANDLE              NotificationEvent,
-    PSUPPORT_FUNCTIONS   SupportFunctions,
-    LPVOID               GlobalInfo,
-    ULONG                StructureVersion,
-    ULONG                StructureSize,
-    ULONG                StructureCount
-    )
+	HANDLE              NotificationEvent,
+	PSUPPORT_FUNCTIONS   SupportFunctions,
+	LPVOID               GlobalInfo,
+	ULONG                StructureVersion,
+	ULONG                StructureSize,
+	ULONG                StructureCount
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE3(ENTER, "Entering StartProtocol 0x%08x 0x%08x 0x%08x",
-           NotificationEvent, SupportFunctions, GlobalInfo);
+	    NotificationEvent, SupportFunctions, GlobalInfo);
 
     do                          /* breakout loop */
     {
-        /* validate parameters */
-        if (!NotificationEvent || !SupportFunctions  || !GlobalInfo)
-        {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	/* validate parameters */
+	if (!NotificationEvent || !SupportFunctions  || !GlobalInfo)
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = CM_StartProtocol(NotificationEvent,
-                                 SupportFunctions,
-                                 GlobalInfo);
+	dwErr = CM_StartProtocol(NotificationEvent,
+		SupportFunctions,
+		GlobalInfo);
     } while(FALSE);
 
     TRACE1(LEAVE, "Leaving  StartProtocol: %u", dwErr);
@@ -75,10 +75,10 @@ StartProtocol (
 }
 
 DWORD
-WINAPI
+    WINAPI
 StartComplete (
-    VOID
-    )
+	VOID
+	)
 {
     TRACE0(ENTER, "Entering StartComplete");
     TRACE0(LEAVE, "Leaving  StartComplete");
@@ -88,10 +88,10 @@ StartComplete (
 
 
 DWORD
-WINAPI
+    WINAPI
 StopProtocol (
-    VOID
-    )
+	VOID
+	)
 {
     DWORD dwErr = NO_ERROR;
 
@@ -105,30 +105,31 @@ StopProtocol (
 }
 
 DWORD
-WINAPI
+    WINAPI
 GetGlobalInfo (
-        PVOID  GlobalInfo,
-    PULONG   BufferSize,
-       PULONG StructureVersion,
-       PULONG   StructureSize,
-       PULONG   StructureCount
-    )
+	PVOID  GlobalInfo,
+	PULONG   BufferSize,
+	PULONG StructureVersion,
+	PULONG   StructureSize,
+	PULONG   StructureCount
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE2(ENTER, "Entering GetGlobalInfo: 0x%08x 0x%08x",
-           GlobalInfo, BufferSize);
+	    GlobalInfo, BufferSize);
     do
     {
-        if (!BufferSize) {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
-        dwErr = CM_GetGlobalInfo(GlobalInfo,
-                                 BufferSize,
-                                 StructureVersion,
-                                 StructureSize,
-                                 StructureCount);
+	if (!BufferSize) 
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
+	dwErr = CM_GetGlobalInfo(GlobalInfo,
+		BufferSize,
+		StructureVersion,
+		StructureSize,
+		StructureCount);
     } while(FALSE);
 
     TRACE1(LEAVE, "Leaving  GetGlobalInfo: %u", dwErr);
@@ -139,13 +140,13 @@ GetGlobalInfo (
 
 
 DWORD
-WINAPI
+    WINAPI
 SetGlobalInfo (
-     PVOID  GlobalInfo,
-     ULONG StructureVersion,
-     ULONG   StructureSize,
-     ULONG   StructureCount
-    )
+	PVOID  GlobalInfo,
+	ULONG StructureVersion,
+	ULONG   StructureSize,
+	ULONG   StructureCount
+	)
 {
     TRACE1(ENTER, "Entering SetGlobalInfo: 0x%08x", GlobalInfo);
     TRACE0(LEAVE, "Leaving  SetGlobalInfo");
@@ -153,24 +154,24 @@ SetGlobalInfo (
 }
 
 DWORD
-WINAPI
+    WINAPI
 AddInterface (
-    LPWSTR               InterfaceName,
-    ULONG             InterfaceIndex,
-    NET_INTERFACE_TYPE   InterfaceType,
-    DWORD                MediaType,
-    WORD                 AccessType,
-    WORD                 ConnectionType,
-    PVOID             InterfaceInfo,
-    ULONG                StructureVersion,
-    ULONG                StructureSize,
-    ULONG                StructureCount
-    )
+	LPWSTR               InterfaceName,
+	ULONG             InterfaceIndex,
+	NET_INTERFACE_TYPE   InterfaceType,
+	DWORD                MediaType,
+	WORD                 AccessType,
+	WORD                 ConnectionType,
+	PVOID             InterfaceInfo,
+	ULONG                StructureVersion,
+	ULONG                StructureSize,
+	ULONG                StructureCount
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE4(ENTER, "Entering AddInterface: %S %u %u 0x%08x",
-           InterfaceName, InterfaceIndex, AccessType, InterfaceInfo);
+	    InterfaceName, InterfaceIndex, AccessType, InterfaceInfo);
 
     rtm_ifannounce(InterfaceName, InterfaceIndex, IFAN_ARRIVAL);
 
@@ -182,10 +183,10 @@ AddInterface (
 
 
 DWORD
-WINAPI
+    WINAPI
 DeleteInterface (
-    ULONG InterfaceIndex
-    )
+	ULONG InterfaceIndex
+	)
 {
     DWORD dwErr = NO_ERROR;
 
@@ -201,13 +202,13 @@ DeleteInterface (
 
 
 DWORD
-WINAPI
+    WINAPI
 InterfaceStatus (
-    ULONG InterfaceIndex,
-    BOOL     InterfaceActive,
-    DWORD    StatusType,
-    PVOID StatusInfo
-    )
+	ULONG InterfaceIndex,
+	BOOL     InterfaceActive,
+	DWORD    StatusType,
+	PVOID StatusInfo
+	)
 {
 #ifdef IPV6_DLL
     PIPV6_ADAPTER_BINDING_INFO pbind = NULL;
@@ -217,38 +218,39 @@ InterfaceStatus (
     DWORD dwErr = NO_ERROR;
 
     TRACE4(ENTER, "Entering InterfaceStatus: %u %u %u %p",
-           InterfaceIndex, InterfaceActive, StatusType, StatusInfo);
+	    InterfaceIndex, InterfaceActive, StatusType, StatusInfo);
     TRACE1(ANY, "interface is %sactive", InterfaceActive ? "" : "in");
 
-    switch (StatusType) {
-    case RIS_INTERFACE_ADDRESS_CHANGE:
-	TRACE0(ANY, "interface address has changed");
+    switch (StatusType) 
+    {
+	case RIS_INTERFACE_ADDRESS_CHANGE:
+	    TRACE0(ANY, "interface address has changed");
 #ifdef IPV6_DLL
-	pbind6 = (PIPV6_ADAPTER_BINDING_INFO) StatusInfo;
-	TRACE1(ANY, "%d addresses associated with this adapter",
-	       pbind6->AddressCount);
+	    pbind6 = (PIPV6_ADAPTER_BINDING_INFO) StatusInfo;
+	    TRACE1(ANY, "%d addresses associated with this adapter",
+		    pbind6->AddressCount);
 #else
-	pbind = (PIP_ADAPTER_BINDING_INFO) StatusInfo;
-	TRACE1(ANY, "%d addresses associated with this adapter",
-	       pbind->AddressCount);
+	    pbind = (PIP_ADAPTER_BINDING_INFO) StatusInfo;
+	    TRACE1(ANY, "%d addresses associated with this adapter",
+		    pbind->AddressCount);
 #endif
-	break;
-    case RIS_INTERFACE_ENABLED:
-	TRACE0(ANY, "interface is enabled");
-	break;
-    case RIS_INTERFACE_DISABLED:
-	TRACE0(ANY, "interface is disabled");
-	break;
-    case RIS_INTERFACE_MEDIA_PRESENT:
-    case RIS_INTERFACE_MEDIA_ABSENT:
-	TRACE1(ANY, "interface link is %s",
-	       StatusType == RIS_INTERFACE_MEDIA_PRESENT ? "up" : "down");
-	rtm_ifinfo(InterfaceIndex,
-		   StatusType == RIS_INTERFACE_MEDIA_PRESENT ? 1 : 0);
-	break;
-    default:
-	TRACE1(ANY, "unknown StatusType", StatusType);
-	break;
+	    break;
+	case RIS_INTERFACE_ENABLED:
+	    TRACE0(ANY, "interface is enabled");
+	    break;
+	case RIS_INTERFACE_DISABLED:
+	    TRACE0(ANY, "interface is disabled");
+	    break;
+	case RIS_INTERFACE_MEDIA_PRESENT:
+	case RIS_INTERFACE_MEDIA_ABSENT:
+	    TRACE1(ANY, "interface link is %s",
+		    StatusType == RIS_INTERFACE_MEDIA_PRESENT ? "up" : "down");
+	    rtm_ifinfo(InterfaceIndex,
+		    StatusType == RIS_INTERFACE_MEDIA_PRESENT ? 1 : 0);
+	    break;
+	default:
+	    TRACE1(ANY, "unknown StatusType", StatusType);
+	    break;
     }
 
     TRACE1(LEAVE, "Leaving  InterfaceStatus: %u", dwErr);
@@ -257,22 +259,22 @@ InterfaceStatus (
 }
 
 DWORD
-WINAPI
+    WINAPI
 GetInterfaceConfigInfo (
-         ULONG InterfaceIndex,
-         PVOID   InterfaceInfo,
-     PULONG  BufferSize,
-        PULONG StructureVersion,
-        PULONG StructureSize,
-        PULONG StructureCount
-    )
+	ULONG InterfaceIndex,
+	PVOID   InterfaceInfo,
+	PULONG  BufferSize,
+	PULONG StructureVersion,
+	PULONG StructureSize,
+	PULONG StructureCount
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE3(ENTER, "Entering GetInterfaceConfigInfo: %u 0x%08x 0x%08x",
-           InterfaceIndex, InterfaceInfo, BufferSize);
+	    InterfaceIndex, InterfaceInfo, BufferSize);
     TRACE1(LEAVE, "Leaving  GetInterfaceConfigInfo: %u",
-           dwErr);
+	    dwErr);
 
     return dwErr;
 }
@@ -280,19 +282,19 @@ GetInterfaceConfigInfo (
 
 
 DWORD
-WINAPI
+    WINAPI
 SetInterfaceConfigInfo (
-    ULONG InterfaceIndex,
-    PVOID InterfaceInfo,
-    ULONG    StructureVersion,
-    ULONG    StructureSize,
-    ULONG    StructureCount
-    )
+	ULONG InterfaceIndex,
+	PVOID InterfaceInfo,
+	ULONG    StructureVersion,
+	ULONG    StructureSize,
+	ULONG    StructureCount
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE2(ENTER, "Entering SetInterfaceConfigInfo: %u 0x%08x",
-           InterfaceIndex, InterfaceInfo);
+	    InterfaceIndex, InterfaceInfo);
     TRACE1(LEAVE, "Leaving  SetInterfaceConfigInfo: %u", dwErr);
 
     return dwErr;
@@ -303,24 +305,25 @@ SetInterfaceConfigInfo (
  * know when we've stopped.
  */
 DWORD
-WINAPI
+    WINAPI
 GetEventMessage (
-    ROUTING_PROTOCOL_EVENTS  *Event,
-    MESSAGE                  *Result
-    )
+	ROUTING_PROTOCOL_EVENTS  *Event,
+	MESSAGE                  *Result
+	)
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE2(ENTER, "Entering GetEventMessage: 0x%08x 0x%08x",
-           Event, Result);
+	    Event, Result);
     do
     {
-        if (!Event || !Result) {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	if (!Event || !Result) 
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = CM_GetEventMessage(Event, Result);
+	dwErr = CM_GetEventMessage(Event, Result);
     } while(FALSE);
 
     TRACE1(LEAVE, "Leaving  GetEventMessage: %u", dwErr);
@@ -330,10 +333,10 @@ GetEventMessage (
 
 /* Only used for demand dial interfaces; stub. */
 DWORD
-WINAPI
+    WINAPI
 DoUpdateRoutes (
-    ULONG InterfaceIndex
-    )
+	ULONG InterfaceIndex
+	)
 {
     DWORD dwErr = NO_ERROR;
 
@@ -344,16 +347,16 @@ DoUpdateRoutes (
 }
 
 DWORD
-WINAPI
+    WINAPI
 MibCreate (
-    ULONG  InputDataSize,
-    PVOID  InputData
-    )
+	ULONG  InputDataSize,
+	PVOID  InputData
+	)
 {
     DWORD dwErr = ERROR_CAN_NOT_COMPLETE;
 
     TRACE2(ENTER, "Entering MibCreate: %u 0x%08x",
-           InputDataSize, InputData);
+	    InputDataSize, InputData);
     TRACE1(LEAVE, "Leaving  MibCreate: %u", dwErr);
 
     return dwErr;
@@ -362,16 +365,16 @@ MibCreate (
 
 
 DWORD
-WINAPI
+    WINAPI
 MibDelete (
-    ULONG  InputDataSize,
-    PVOID  InputData
-    )
+	ULONG  InputDataSize,
+	PVOID  InputData
+	)
 {
     DWORD dwErr = ERROR_CAN_NOT_COMPLETE;
 
     TRACE2(ENTER, "Entering MibDelete: %u 0x%08x",
-           InputDataSize, InputData);
+	    InputDataSize, InputData);
     TRACE1(LEAVE, "Leaving  MibDelete: %u", dwErr);
 
     return dwErr;
@@ -380,42 +383,42 @@ MibDelete (
 
 /* XXX: Not sure if this is really needed */
 DWORD
-WINAPI
+    WINAPI
 MibSet (
-    ULONG  InputDataSize,
-    PVOID InputData
-    )
-/*++
+	ULONG  InputDataSize,
+	PVOID InputData
+       )
+    /*++
 
-Routine Description
-    This function sets XORPRTM's global or interface configuration.
+      Routine Description
+      This function sets XORPRTM's global or interface configuration.
 
-Arguments
-    InputData           Relevant input, struct XORPRTM_MIB_SET_INPUT_DATA
-    InputDataSize       Size of the input
+      Arguments
+      InputData           Relevant input, struct XORPRTM_MIB_SET_INPUT_DATA
+      InputDataSize       Size of the input
 
-Return Value
-    NO_ERROR            success
-    Error Code          o/w
+      Return Value
+      NO_ERROR            success
+      Error Code          o/w
 
---*/
+      --*/
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE2(ENTER, "Entering MibSet: %u 0x%08x",
-           InputDataSize, InputData);
+	    InputDataSize, InputData);
 
     do                          /* breakout loop */
     {
-        /* validate parameters */
-        if ((!InputData) ||
-            (InputDataSize < sizeof(XORPRTM_MIB_SET_INPUT_DATA)))
-        {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	/* validate parameters */
+	if ((!InputData) ||
+		(InputDataSize < sizeof(XORPRTM_MIB_SET_INPUT_DATA)))
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = MM_MibSet((PXORPRTM_MIB_SET_INPUT_DATA) InputData);
+	dwErr = MM_MibSet((PXORPRTM_MIB_SET_INPUT_DATA) InputData);
 
     } while(FALSE);
 
@@ -428,60 +431,60 @@ Return Value
 /* XXX: Not sure if this is really needed */
 
 DWORD
-WINAPI
+    WINAPI
 MibGet (
-         ULONG InputDataSize,
-         PVOID InputData,
-     PULONG OutputDataSize,
-        PVOID OutputData
-    )
-/*++
+	ULONG InputDataSize,
+	PVOID InputData,
+	PULONG OutputDataSize,
+	PVOID OutputData
+       )
+    /*++
 
-Routine Description
-    This function retrieves one of...
-    . global configuration
-    . interface configuration
-    . global stats
-    . interface stats
-    . interface binding
+      Routine Description
+      This function retrieves one of...
+      . global configuration
+      . interface configuration
+      . global stats
+      . interface stats
+      . interface binding
 
-    Called by an admin (SNMP) utility.  It actually passes through the IP
-    Router Manager, but all that does is demux the call to the desired
-    routing protocol.
+      Called by an admin (SNMP) utility.  It actually passes through the IP
+      Router Manager, but all that does is demux the call to the desired
+      routing protocol.
 
-Arguments
-    InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
-    InputDataSize       Size of the input
-    OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
-    OutputDataSize       size of output buffer received
-                        size of output buffer required
+      Arguments
+      InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
+      InputDataSize       Size of the input
+      OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
+      OutputDataSize       size of output buffer received
+      size of output buffer required
 
-Return Value
-    NO_ERROR            success
-    Error Code          o/w
+      Return Value
+      NO_ERROR            success
+      Error Code          o/w
 
---*/
+      --*/
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE4(ENTER, "Entering MibGet: %u 0x%08x 0x%08x 0x%08x",
-           InputDataSize, InputData, OutputDataSize, OutputData);
+	    InputDataSize, InputData, OutputDataSize, OutputData);
 
     do                          /* breakout loop */
     {
-        /* validate parameters */
-        if ((!InputData) ||
-            (InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
-            (!OutputDataSize))
-        {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	/* validate parameters */
+	if ((!InputData) ||
+		(InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
+		(!OutputDataSize))
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
-                          (PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
-                          OutputDataSize,
-                          GET_EXACT);
+	dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
+		(PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
+		OutputDataSize,
+		GET_EXACT);
 
     } while(FALSE);
 
@@ -494,62 +497,62 @@ Return Value
 /* XXX: Not sure if this is really needed */
 
 DWORD
-WINAPI
+    WINAPI
 MibGetFirst (
-         ULONG InputDataSize,
-         PVOID InputData,
-     PULONG  OutputDataSize,
-        PVOID   OutputData
-    )
-/*++
+	ULONG InputDataSize,
+	PVOID InputData,
+	PULONG  OutputDataSize,
+	PVOID   OutputData
+	)
+    /*++
 
-Routine Description
-    This function retrieves one of...
-    . global configuration
-    . interface configuration
-    . global stats
-    . interface stats
-    . interface binding
+      Routine Description
+      This function retrieves one of...
+      . global configuration
+      . interface configuration
+      . global stats
+      . interface stats
+      . interface binding
 
-    It differs from MibGet() in that it always returns the FIRST entry in
-    whichever table is being queried.  There is only one entry in the
-    global configuration and global stats tables, but the interface
-    configuration, interface stats, and interface binding tables are sorted
-    by IP address; this function returns the first entry from these.
+      It differs from MibGet() in that it always returns the FIRST entry in
+      whichever table is being queried.  There is only one entry in the
+      global configuration and global stats tables, but the interface
+      configuration, interface stats, and interface binding tables are sorted
+      by IP address; this function returns the first entry from these.
 
-Arguments
-    InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
-    InputDataSize       Size of the input
-    OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
-    OutputDataSize       size of output buffer received
-                        size of output buffer required
+      Arguments
+      InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
+      InputDataSize       Size of the input
+      OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
+      OutputDataSize       size of output buffer received
+      size of output buffer required
 
-Return Value
-    NO_ERROR            success
-    Error Code          o/w
+      Return Value
+      NO_ERROR            success
+      Error Code          o/w
 
---*/
+      --*/
 {
     DWORD dwErr = NO_ERROR;
 
     TRACE4(ENTER, "Entering MibGetFirst: %u 0x%08x 0x%08x 0x%08x",
-           InputDataSize, InputData, OutputDataSize, OutputData);
+	    InputDataSize, InputData, OutputDataSize, OutputData);
 
     do                          /* breakout loop */
     {
-        /* validate parameters */
-        if ((!InputData) ||
-            (InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
-            (!OutputDataSize))
-        {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	/* validate parameters */
+	if ((!InputData) ||
+		(InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
+		(!OutputDataSize))
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
-                          (PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
-                          OutputDataSize,
-                          GET_FIRST);
+	dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
+		(PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
+		OutputDataSize,
+		GET_FIRST);
 
     } while(FALSE);
 
@@ -562,67 +565,67 @@ Return Value
 /* XXX: Not sure if this is really needed */
 
 DWORD
-WINAPI
+    WINAPI
 MibGetNext (
-         ULONG   InputDataSize,
-         PVOID InputData,
-     PULONG  OutputDataSize,
-        PVOID OutputData
-    )
-/*++
+	ULONG   InputDataSize,
+	PVOID InputData,
+	PULONG  OutputDataSize,
+	PVOID OutputData
+	)
+    /*++
 
-Routine Description
-    This function retrieves one of...
-    . global configuration
-    . interface configuration
-    . global stats
-    . interface stats
-    . interface binding
+      Routine Description
+      This function retrieves one of...
+      . global configuration
+      . interface configuration
+      . global stats
+      . interface stats
+      . interface binding
 
-    It differs from both MibGet() and MibGetFirst() in that it returns the
-    entry AFTER the one specified in the indicated table.  Thus, in the
-    interface configuration, interface stats, and interface binding tables,
-    this function supplies the entry after the one with the input address.
+      It differs from both MibGet() and MibGetFirst() in that it returns the
+      entry AFTER the one specified in the indicated table.  Thus, in the
+      interface configuration, interface stats, and interface binding tables,
+      this function supplies the entry after the one with the input address.
 
-    If there are no more entries in the table being queried we return
-    ERROR_NO_MORE_ITEMS.  Unlike SNMP we don't walk to the next table.
-    This does not take away any functionality since the NT SNMP agent
-    will try the next variable (having ID one greater than the ID passed
-    in) automatically on getting this error.
+      If there are no more entries in the table being queried we return
+      ERROR_NO_MORE_ITEMS.  Unlike SNMP we don't walk to the next table.
+      This does not take away any functionality since the NT SNMP agent
+      will try the next variable (having ID one greater than the ID passed
+      in) automatically on getting this error.
 
-Arguments
-    InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
-    InputDataSize       Size of the input
-    OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
-    OutputDataSize       size of output buffer received
-                        size of output buffer required
+      Arguments
+      InputData           Relevant input, struct XORPRTM_MIB_GET_INPUT_DATA
+      InputDataSize       Size of the input
+      OutputData          Buffer for struct XORPRTM_MIB_GET_OUTPUT_DATA
+      OutputDataSize       size of output buffer received
+      size of output buffer required
 
-Return Value
-    NO_ERROR            success
-    Error Code          o/w
+      Return Value
+      NO_ERROR            success
+      Error Code          o/w
 
---*/
+      --*/
 {
     DWORD                           dwErr   = NO_ERROR;
 
     TRACE4(ENTER, "Entering MibGetFirst: %u 0x%08x 0x%08x 0x%08x",
-           InputDataSize, InputData, OutputDataSize, OutputData);
+	    InputDataSize, InputData, OutputDataSize, OutputData);
 
     do                          /* breakout loop */
     {
-        /* validate parameters */
-        if ((!InputData) ||
-            (InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
-            (!OutputDataSize))
-        {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	/* validate parameters */
+	if ((!InputData) ||
+		(InputDataSize < sizeof(XORPRTM_MIB_GET_INPUT_DATA)) ||
+		(!OutputDataSize))
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
 
-        dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
-                          (PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
-                          OutputDataSize,
-                          GET_NEXT);
+	dwErr = MM_MibGet((PXORPRTM_MIB_GET_INPUT_DATA) InputData,
+		(PXORPRTM_MIB_GET_OUTPUT_DATA) OutputData,
+		OutputDataSize,
+		GET_NEXT);
 
     } while(FALSE);
 
@@ -634,14 +637,14 @@ Return Value
 
 
 DWORD
-WINAPI
+    WINAPI
 MibSetTrapInfo (
-     HANDLE  Event,
-     ULONG   InputDataSize,
-     PVOID InputData,
-    PULONG OutputDataSize,
-    PVOID OutputData
-    )
+	HANDLE  Event,
+	ULONG   InputDataSize,
+	PVOID InputData,
+	PULONG OutputDataSize,
+	PVOID OutputData
+	)
 {
     DWORD dwErr = ERROR_CAN_NOT_COMPLETE;
 
@@ -654,13 +657,13 @@ MibSetTrapInfo (
 
 
 DWORD
-WINAPI
+    WINAPI
 MibGetTrapInfo (
-     ULONG InputDataSize,
-     PVOID InputData,
-    PULONG  OutputDataSize,
-    PVOID OutputData
-    )
+	ULONG InputDataSize,
+	PVOID InputData,
+	PULONG  OutputDataSize,
+	PVOID OutputData
+	)
 {
     DWORD dwErr = ERROR_CAN_NOT_COMPLETE;
 
@@ -679,67 +682,70 @@ MibGetTrapInfo (
 #define RF_FUNC_FLAGS (RF_ROUTING | RF_ADD_ALL_INTERFACES)
 
 DWORD
-APIENTRY
+    APIENTRY
 RegisterProtocol(
-    PMPR_ROUTING_CHARACTERISTICS pRoutingChar,
-    PMPR_SERVICE_CHARACTERISTICS pServiceChar
-    )
+	PMPR_ROUTING_CHARACTERISTICS pRoutingChar,
+	PMPR_SERVICE_CHARACTERISTICS pServiceChar
+	)
 {
     DWORD   dwErr = NO_ERROR;
 
     TRACE0(ENTER, "Entering RegisterProtocol");
 
-    do {
-        if (pRoutingChar->dwProtocolId != XORPRTM_PROTOCOL_ID) {
-            dwErr = ERROR_NOT_SUPPORTED;
-            break;
-        }
+    do 
+    {
+	if (pRoutingChar->dwProtocolId != XORPRTM_PROTOCOL_ID) 
+	{
+	    dwErr = ERROR_NOT_SUPPORTED;
+	    break;
+	}
 
 
 	TRACE1(CONFIGURATION, "fSupportedFunctionality is: %08lx",
-	       pRoutingChar->fSupportedFunctionality);
+		pRoutingChar->fSupportedFunctionality);
 
-        if  ((pRoutingChar->fSupportedFunctionality & RF_FUNC_FLAGS) !=
-	     RF_FUNC_FLAGS) {
-            dwErr = ERROR_NOT_SUPPORTED;
-            break;
-        }
+	if  ((pRoutingChar->fSupportedFunctionality & RF_FUNC_FLAGS) !=
+		RF_FUNC_FLAGS) 
+	{
+	    dwErr = ERROR_NOT_SUPPORTED;
+	    break;
+	}
 
-        pRoutingChar->fSupportedFunctionality = RF_FUNC_FLAGS;
-        pServiceChar->fSupportedFunctionality = 0;
+	pRoutingChar->fSupportedFunctionality = RF_FUNC_FLAGS;
+	pServiceChar->fSupportedFunctionality = 0;
 
-        pRoutingChar->pfnStartProtocol      = StartProtocol;
-        pRoutingChar->pfnStartComplete      = StartComplete;
-        pRoutingChar->pfnStopProtocol       = StopProtocol;
-        pRoutingChar->pfnGetGlobalInfo      = GetGlobalInfo;
-        pRoutingChar->pfnSetGlobalInfo      = SetGlobalInfo;
-        pRoutingChar->pfnQueryPower         = NULL;
-        pRoutingChar->pfnSetPower           = NULL;
+	pRoutingChar->pfnStartProtocol      = StartProtocol;
+	pRoutingChar->pfnStartComplete      = StartComplete;
+	pRoutingChar->pfnStopProtocol       = StopProtocol;
+	pRoutingChar->pfnGetGlobalInfo      = GetGlobalInfo;
+	pRoutingChar->pfnSetGlobalInfo      = SetGlobalInfo;
+	pRoutingChar->pfnQueryPower         = NULL;
+	pRoutingChar->pfnSetPower           = NULL;
 
-        pRoutingChar->pfnAddInterface       = AddInterface;
-        pRoutingChar->pfnDeleteInterface    = DeleteInterface;
-        pRoutingChar->pfnInterfaceStatus    = InterfaceStatus;
-        pRoutingChar->pfnGetInterfaceInfo   = GetInterfaceConfigInfo;
-        pRoutingChar->pfnSetInterfaceInfo   = SetInterfaceConfigInfo;
+	pRoutingChar->pfnAddInterface       = AddInterface;
+	pRoutingChar->pfnDeleteInterface    = DeleteInterface;
+	pRoutingChar->pfnInterfaceStatus    = InterfaceStatus;
+	pRoutingChar->pfnGetInterfaceInfo   = GetInterfaceConfigInfo;
+	pRoutingChar->pfnSetInterfaceInfo   = SetInterfaceConfigInfo;
 
-        pRoutingChar->pfnGetEventMessage    = GetEventMessage;
+	pRoutingChar->pfnGetEventMessage    = GetEventMessage;
 
-        pRoutingChar->pfnUpdateRoutes       = DoUpdateRoutes;
+	pRoutingChar->pfnUpdateRoutes       = DoUpdateRoutes;
 
-        pRoutingChar->pfnConnectClient      = NULL;
-        pRoutingChar->pfnDisconnectClient   = NULL;
+	pRoutingChar->pfnConnectClient      = NULL;
+	pRoutingChar->pfnDisconnectClient   = NULL;
 
-        pRoutingChar->pfnGetNeighbors       = NULL;
-        pRoutingChar->pfnGetMfeStatus       = NULL; /* XXX multicast */
+	pRoutingChar->pfnGetNeighbors       = NULL;
+	pRoutingChar->pfnGetMfeStatus       = NULL; /* XXX multicast */
 
-        pRoutingChar->pfnMibCreateEntry     = MibCreate;
-        pRoutingChar->pfnMibDeleteEntry     = MibDelete;
-        pRoutingChar->pfnMibGetEntry        = MibGet;
-        pRoutingChar->pfnMibSetEntry        = MibSet;
-        pRoutingChar->pfnMibGetFirstEntry   = MibGetFirst;
-        pRoutingChar->pfnMibGetNextEntry    = MibGetNext;
-        pRoutingChar->pfnMibSetTrapInfo     = MibSetTrapInfo;
-        pRoutingChar->pfnMibGetTrapInfo     = MibGetTrapInfo;
+	pRoutingChar->pfnMibCreateEntry     = MibCreate;
+	pRoutingChar->pfnMibDeleteEntry     = MibDelete;
+	pRoutingChar->pfnMibGetEntry        = MibGet;
+	pRoutingChar->pfnMibSetEntry        = MibSet;
+	pRoutingChar->pfnMibGetFirstEntry   = MibGetFirst;
+	pRoutingChar->pfnMibGetNextEntry    = MibGetNext;
+	pRoutingChar->pfnMibSetTrapInfo     = MibSetTrapInfo;
+	pRoutingChar->pfnMibGetTrapInfo     = MibGetTrapInfo;
     } while (FALSE);
 
     TRACE1(LEAVE, "Leaving RegisterProtocol: %u", dwErr);

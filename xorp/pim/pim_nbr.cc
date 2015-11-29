@@ -64,15 +64,15 @@
  * 
  * PIM neighbor constructor.
  **/
-PimNbr::PimNbr(PimVif* pim_vif, const IPvX& primary_addr, int proto_version)
-    : _pim_node(pim_vif->pim_node()),
-      _pim_vif(pim_vif),
-      _primary_addr(primary_addr),
-      _proto_version(proto_version),
-      _jp_header(pim_vif->pim_node()),
-      _startup_time(TimeVal::MAXIMUM())
+	PimNbr::PimNbr(PimVif* pim_vif, const IPvX& primary_addr, int proto_version)
+: _pim_node(pim_vif->pim_node()),
+	_pim_vif(pim_vif),
+	_primary_addr(primary_addr),
+	_proto_version(proto_version),
+	_jp_header(pim_vif->pim_node()),
+	_startup_time(TimeVal::MAXIMUM())
 {
-    reset_received_options();
+	reset_received_options();
 }
 
 /**
@@ -83,7 +83,7 @@ PimNbr::PimNbr(PimVif* pim_vif, const IPvX& primary_addr, int proto_version)
  **/
 PimNbr::~PimNbr()
 {
-    // TODO: do we need to do anything special about _jp_list ??
+	// TODO: do we need to do anything special about _jp_list ??
 }
 
 /**
@@ -92,23 +92,23 @@ PimNbr::~PimNbr()
  * 
  * Reset received options from this PIM neighbor.
  **/
-void
+	void
 PimNbr::reset_received_options()
 {
-    _proto_version = _pim_vif->proto_version();
-    // TODO: 0xffffffffU for _genid should be #define
-    _genid = 0xffffffffU;
-    _is_genid_present = false;
-    set_dr_priority(PIM_HELLO_DR_PRIORITY_DEFAULT);
-    set_is_dr_priority_present(false);
-    _hello_holdtime = PIM_HELLO_HELLO_HOLDTIME_DEFAULT;
-    _neighbor_liveness_timer.unschedule();
-    _is_lan_prune_delay_present = false;
-    _is_tracking_support_disabled = false;
-    _propagation_delay = 0;
-    _override_interval = 0;
-    _is_nohello_neighbor = false;
-    _secondary_addr_list.clear();
+	_proto_version = _pim_vif->proto_version();
+	// TODO: 0xffffffffU for _genid should be #define
+	_genid = 0xffffffffU;
+	_is_genid_present = false;
+	set_dr_priority(PIM_HELLO_DR_PRIORITY_DEFAULT);
+	set_is_dr_priority_present(false);
+	_hello_holdtime = PIM_HELLO_HELLO_HOLDTIME_DEFAULT;
+	_neighbor_liveness_timer.unschedule();
+	_is_lan_prune_delay_present = false;
+	_is_tracking_support_disabled = false;
+	_propagation_delay = 0;
+	_override_interval = 0;
+	_is_nohello_neighbor = false;
+	_secondary_addr_list.clear();
 }
 
 /**
@@ -122,76 +122,77 @@ PimNbr::reset_received_options()
 uint32_t
 PimNbr::vif_index() const
 {
-    return (pim_vif()->vif_index());
+	return (pim_vif()->vif_index());
 }
 
-void
+	void
 PimNbr::add_secondary_addr(const IPvX& v)
 {
-    if (find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v)
-	!= _secondary_addr_list.end()) {
-	return;		// The address is already added
-    }
+	if (find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v)
+			!= _secondary_addr_list.end()) 
+	{
+		return;		// The address is already added
+	}
 
-    _secondary_addr_list.push_back(v);
+	_secondary_addr_list.push_back(v);
 }
 
-void
+	void
 PimNbr::delete_secondary_addr(const IPvX& v)
 {
-    list<IPvX>::iterator iter;
+	list<IPvX>::iterator iter;
 
-    iter = find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v);
-    if (iter != _secondary_addr_list.end())
-	_secondary_addr_list.erase(iter);
+	iter = find(_secondary_addr_list.begin(), _secondary_addr_list.end(), v);
+	if (iter != _secondary_addr_list.end())
+		_secondary_addr_list.erase(iter);
 }
 
 bool
 PimNbr::has_secondary_addr(const IPvX& secondary_addr) const
 {
-    return (find(_secondary_addr_list.begin(), _secondary_addr_list.end(),
-		 secondary_addr)
-	    != _secondary_addr_list.end());
+	return (find(_secondary_addr_list.begin(), _secondary_addr_list.end(),
+				secondary_addr)
+			!= _secondary_addr_list.end());
 }
 
 bool
 PimNbr::is_my_addr(const IPvX& addr) const
 {
-    if (addr == _primary_addr)
-	return true;
+	if (addr == _primary_addr)
+		return true;
 
-    return (has_secondary_addr(addr));
+	return (has_secondary_addr(addr));
 }
 
-int
+	int
 PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-		     uint8_t group_mask_len,
-		     mrt_entry_type_t mrt_entry_type,
-		     action_jp_t action_jp, uint16_t holdtime,
-		     bool is_new_group)
+		uint8_t group_mask_len,
+		mrt_entry_type_t mrt_entry_type,
+		action_jp_t action_jp, uint16_t holdtime,
+		bool is_new_group)
 {
-    int ret_value;
-    
-    ret_value = _jp_header.jp_entry_add(source_addr, group_addr,
-					group_mask_len, mrt_entry_type,
-					action_jp, holdtime, is_new_group);
-    
-    // (Re)start the timer to send the J/P message after time 0.
-    // XXX: the automatic restarting will postpone the sending of
-    // the message until we have no more entries to add to that message.
-    _jp_send_timer = EventLoop::instance().new_oneoff_after(
-	TimeVal(0, 0),
-	callback(this, &PimNbr::jp_send_timer_timeout));
-    
-    return (ret_value);
+	int ret_value;
+
+	ret_value = _jp_header.jp_entry_add(source_addr, group_addr,
+			group_mask_len, mrt_entry_type,
+			action_jp, holdtime, is_new_group);
+
+	// (Re)start the timer to send the J/P message after time 0.
+	// XXX: the automatic restarting will postpone the sending of
+	// the message until we have no more entries to add to that message.
+	_jp_send_timer = EventLoop::instance().new_oneoff_after(
+			TimeVal(0, 0),
+			callback(this, &PimNbr::jp_send_timer_timeout));
+
+	return (ret_value);
 }
 
-void
+	void
 PimNbr::jp_send_timer_timeout()
 {
-    string dummy_error_msg;
+	string dummy_error_msg;
 
-    pim_vif()->pim_join_prune_send(this, &_jp_header, dummy_error_msg);
+	pim_vif()->pim_join_prune_send(this, &_jp_header, dummy_error_msg);
 }
 
 /**
@@ -199,53 +200,55 @@ PimNbr::jp_send_timer_timeout()
  * 
  * Timeout: expire a PIM neighbor.
  **/
-void
+	void
 PimNbr::neighbor_liveness_timer_timeout()
 {
-    pim_vif()->delete_pim_nbr_from_nbr_list(this);
-    
-    if (pim_vif()->dr_addr() == primary_addr()) {
-	// The neighbor to expire is the DR. Select a new DR.
-	pim_vif()->pim_dr_elect();
-    }
-    
-    if (pim_vif()->pim_nbrs_number() <= 1) {
-	// XXX: the last neighbor on this vif: take any actions if necessary
-    }
-    
-    pim_vif()->delete_pim_nbr(this);
+	pim_vif()->delete_pim_nbr_from_nbr_list(this);
+
+	if (pim_vif()->dr_addr() == primary_addr()) 
+	{
+		// The neighbor to expire is the DR. Select a new DR.
+		pim_vif()->pim_dr_elect();
+	}
+
+	if (pim_vif()->pim_nbrs_number() <= 1) 
+	{
+		// XXX: the last neighbor on this vif: take any actions if necessary
+	}
+
+	pim_vif()->delete_pim_nbr(this);
 }
 
-void
+	void
 PimNbr::init_processing_pim_mre_rp()
 {
-    _processing_pim_mre_rp_list.splice(
-	_processing_pim_mre_rp_list.end(),
-	_pim_mre_rp_list);
+	_processing_pim_mre_rp_list.splice(
+			_processing_pim_mre_rp_list.end(),
+			_pim_mre_rp_list);
 }
 
-void
+	void
 PimNbr::init_processing_pim_mre_wc()
 {
-    _processing_pim_mre_wc_list.splice(
-	_processing_pim_mre_wc_list.end(),
-	_pim_mre_wc_list);
+	_processing_pim_mre_wc_list.splice(
+			_processing_pim_mre_wc_list.end(),
+			_pim_mre_wc_list);
 }
 
-void
+	void
 PimNbr::init_processing_pim_mre_sg()
 {
-    _processing_pim_mre_sg_list.splice(
-	_processing_pim_mre_sg_list.end(),
-	_pim_mre_sg_list);
+	_processing_pim_mre_sg_list.splice(
+			_processing_pim_mre_sg_list.end(),
+			_pim_mre_sg_list);
 }
 
-void
+	void
 PimNbr::init_processing_pim_mre_sg_rpt()
 {
-    _processing_pim_mre_sg_rpt_list.splice(
-	_processing_pim_mre_sg_rpt_list.end(),
-	_pim_mre_sg_rpt_list);
+	_processing_pim_mre_sg_rpt_list.splice(
+			_processing_pim_mre_sg_rpt_list.end(),
+			_pim_mre_sg_rpt_list);
 }
 
 //
@@ -261,191 +264,210 @@ PimNbr::init_processing_pim_mre_sg_rpt()
 // Note that (S,G) and (S,G,rpt) entries are always added, regardless whether
 // they have (*,G) entry. This is needed to take care of source-related RPF
 // neighbors.
-void
+	void
 PimNbr::add_pim_mre(PimMre *pim_mre)
 {
-    // TODO: completely remove?
-    // if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
-    //	if ((pim_mre->wc_entry() != NULL) && (! ignore_wc_entry))
-    //	    return;	// XXX: we don't add (S,G) or (S,G,rpt) that have (*,G)
-    // }
-    
-    if (pim_mre->is_rp()) {
-	if (find(_pim_mre_rp_list.begin(),
-		 _pim_mre_rp_list.end(),
-		 pim_mre)
-	    != _pim_mre_rp_list.end()) {
-	    return;	// Entry is already on the list
+
+	if (pim_mre->is_rp()) 
+	{
+		if (find(_pim_mre_rp_list.begin(),
+					_pim_mre_rp_list.end(),
+					pim_mre)
+				!= _pim_mre_rp_list.end()) 
+		{
+			return;	// Entry is already on the list
+		}
+		_pim_mre_rp_list.push_back(pim_mre);
+		return;
 	}
-	_pim_mre_rp_list.push_back(pim_mre);
-	return;
-    }
-    if (pim_mre->is_wc()) {
-	if (find(_pim_mre_wc_list.begin(),
-		 _pim_mre_wc_list.end(),
-		 pim_mre)
-	    != _pim_mre_wc_list.end()) {
-	    return;	// Entry is already on the list
+	if (pim_mre->is_wc()) 
+	{
+		if (find(_pim_mre_wc_list.begin(),
+					_pim_mre_wc_list.end(),
+					pim_mre)
+				!= _pim_mre_wc_list.end()) 
+		{
+			return;	// Entry is already on the list
+		}
+		_pim_mre_wc_list.push_back(pim_mre);
+		return;
 	}
-	_pim_mre_wc_list.push_back(pim_mre);
-	return;
-    }
-    if (pim_mre->is_sg()) {
-	if (find(_pim_mre_sg_list.begin(),
-		 _pim_mre_sg_list.end(),
-		 pim_mre)
-	    != _pim_mre_sg_list.end()) {
-	    return;	// Entry is already on the list
+	if (pim_mre->is_sg()) 
+	{
+		if (find(_pim_mre_sg_list.begin(),
+					_pim_mre_sg_list.end(),
+					pim_mre)
+				!= _pim_mre_sg_list.end()) 
+		{
+			return;	// Entry is already on the list
+		}
+		_pim_mre_sg_list.push_back(pim_mre);
+		return;
 	}
-	_pim_mre_sg_list.push_back(pim_mre);
-	return;
-    }
-    if (pim_mre->is_sg_rpt()) {
-	if (find(_pim_mre_sg_rpt_list.begin(),
-		 _pim_mre_sg_rpt_list.end(),
-		 pim_mre)
-	    != _pim_mre_sg_rpt_list.end()) {
-	    return;	// Entry is already on the list
+	if (pim_mre->is_sg_rpt()) 
+	{
+		if (find(_pim_mre_sg_rpt_list.begin(),
+					_pim_mre_sg_rpt_list.end(),
+					pim_mre)
+				!= _pim_mre_sg_rpt_list.end()) 
+		{
+			return;	// Entry is already on the list
+		}
+		_pim_mre_sg_rpt_list.push_back(pim_mre);
+		return;
 	}
-	_pim_mre_sg_rpt_list.push_back(pim_mre);
-	return;
-    }
 }
 
-void
+	void
 PimNbr::delete_pim_mre(PimMre *pim_mre)
 {
-    list<PimMre *>::iterator pim_mre_iter;
-    
-    do {
-	if (pim_mre->is_rp()) {
-	    //
-	    // (*,*,RP) entry
-	    //
-	    
-	    //
-	    // Try the pim_mre_rp_list
-	    //
-	    pim_mre_iter = find(_pim_mre_rp_list.begin(),
-				_pim_mre_rp_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _pim_mre_rp_list.end()) {
-		_pim_mre_rp_list.erase(pim_mre_iter);
-		break;
-	    }
-	    //
-	    // Try the processing_pim_mre_rp_list
-	    //
-	    pim_mre_iter = find(_processing_pim_mre_rp_list.begin(),
-				_processing_pim_mre_rp_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _processing_pim_mre_rp_list.end()) {
-		_processing_pim_mre_rp_list.erase(pim_mre_iter);
-		break;
-	    }
-	}
-	if (pim_mre->is_wc()) {
-	    //
-	    // (*,G) entry
-	    //
-	    
-	    //
-	    // Try the pim_mre_wc_list
-	    //
-	    pim_mre_iter = find(_pim_mre_wc_list.begin(),
-				_pim_mre_wc_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _pim_mre_wc_list.end()) {
-		_pim_mre_wc_list.erase(pim_mre_iter);
-		break;
-	    }
-	    //
-	    // Try the processing_pim_mre_wc_list
-	    //
-	    pim_mre_iter = find(_processing_pim_mre_wc_list.begin(),
-				_processing_pim_mre_wc_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _processing_pim_mre_wc_list.end()) {
-		_processing_pim_mre_wc_list.erase(pim_mre_iter);
-		break;
-	    }
-	}
-	if (pim_mre->is_sg()) {
-	    //
-	    // (S,G) entry
-	    //
-	    
-	    //
-	    // Try the pim_mre_sg_list
-	    //
-	    pim_mre_iter = find(_pim_mre_sg_list.begin(),
-				_pim_mre_sg_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _pim_mre_sg_list.end()) {
-		_pim_mre_sg_list.erase(pim_mre_iter);
-		break;
-	    }
-	    //
-	    // Try the processing_pim_mre_sg_list
-	    //
-	    pim_mre_iter = find(_processing_pim_mre_sg_list.begin(),
-				_processing_pim_mre_sg_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _processing_pim_mre_sg_list.end()) {
-		_processing_pim_mre_sg_list.erase(pim_mre_iter);
-		break;
-	    }
-	}
-	if (pim_mre->is_sg_rpt()) {
-	    //
-	    // (S,G,rpt) entry
-	    //
-	    
-	    //
-	    // Try the pim_mre_sg_rpt_list
-	    //
-	    pim_mre_iter = find(_pim_mre_sg_rpt_list.begin(),
-				_pim_mre_sg_rpt_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _pim_mre_sg_rpt_list.end()) {
-		_pim_mre_sg_rpt_list.erase(pim_mre_iter);
-		break;
-	    }
-	    //
-	    // Try the processing_pim_mre_sg_rpt_list
-	    //
-	    pim_mre_iter = find(_processing_pim_mre_sg_rpt_list.begin(),
-				_processing_pim_mre_sg_rpt_list.end(),
-				pim_mre);
-	    if (pim_mre_iter != _processing_pim_mre_sg_rpt_list.end()) {
-		_processing_pim_mre_sg_rpt_list.erase(pim_mre_iter);
-		break;
-	    }
-	}
-    } while (false);
-    
-    // If the PimNbr was pending deletion and if this was the
-    // lastest PimMre entry, delete the PimNbr entry.
-    do {
-	if ( ! (_pim_mre_rp_list.empty()
-		&& _processing_pim_mre_rp_list.empty()
-		&& _pim_mre_wc_list.empty()
-		&& _processing_pim_mre_wc_list.empty()
-		&& _pim_mre_sg_list.empty()
-		&& _processing_pim_mre_sg_list.empty()
-		&& _pim_mre_sg_rpt_list.empty()
-		&& _processing_pim_mre_sg_rpt_list.empty())) {
-	    break;	// There are still more entries
-	}
-	
-	list<PimNbr *>::iterator pim_nbr_iter;
-	pim_nbr_iter = find(pim_node()->processing_pim_nbr_list().begin(),
-			    pim_node()->processing_pim_nbr_list().end(),
-			    this);
-	if (pim_nbr_iter != pim_node()->processing_pim_nbr_list().end()) {
-	    pim_node()->processing_pim_nbr_list().erase(pim_nbr_iter);
-	    delete this;
-	    return;
-	}
-    } while (false);
+	list<PimMre *>::iterator pim_mre_iter;
+
+	do 
+	{
+		if (pim_mre->is_rp()) 
+		{
+			//
+			// (*,*,RP) entry
+			//
+
+			//
+			// Try the pim_mre_rp_list
+			//
+			pim_mre_iter = find(_pim_mre_rp_list.begin(),
+					_pim_mre_rp_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _pim_mre_rp_list.end()) 
+			{
+				_pim_mre_rp_list.erase(pim_mre_iter);
+				break;
+			}
+			//
+			// Try the processing_pim_mre_rp_list
+			//
+			pim_mre_iter = find(_processing_pim_mre_rp_list.begin(),
+					_processing_pim_mre_rp_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _processing_pim_mre_rp_list.end()) 
+			{
+				_processing_pim_mre_rp_list.erase(pim_mre_iter);
+				break;
+			}
+		}
+		if (pim_mre->is_wc()) 
+		{
+			//
+			// (*,G) entry
+			//
+
+			//
+			// Try the pim_mre_wc_list
+			//
+			pim_mre_iter = find(_pim_mre_wc_list.begin(),
+					_pim_mre_wc_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _pim_mre_wc_list.end()) 
+			{
+				_pim_mre_wc_list.erase(pim_mre_iter);
+				break;
+			}
+			//
+			// Try the processing_pim_mre_wc_list
+			//
+			pim_mre_iter = find(_processing_pim_mre_wc_list.begin(),
+					_processing_pim_mre_wc_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _processing_pim_mre_wc_list.end()) 
+			{
+				_processing_pim_mre_wc_list.erase(pim_mre_iter);
+				break;
+			}
+		}
+		if (pim_mre->is_sg()) 
+		{
+			//
+			// (S,G) entry
+			//
+
+			//
+			// Try the pim_mre_sg_list
+			//
+			pim_mre_iter = find(_pim_mre_sg_list.begin(),
+					_pim_mre_sg_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _pim_mre_sg_list.end()) 
+			{
+				_pim_mre_sg_list.erase(pim_mre_iter);
+				break;
+			}
+			//
+			// Try the processing_pim_mre_sg_list
+			//
+			pim_mre_iter = find(_processing_pim_mre_sg_list.begin(),
+					_processing_pim_mre_sg_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _processing_pim_mre_sg_list.end()) 
+			{
+				_processing_pim_mre_sg_list.erase(pim_mre_iter);
+				break;
+			}
+		}
+		if (pim_mre->is_sg_rpt()) 
+		{
+			//
+			// (S,G,rpt) entry
+			//
+
+			//
+			// Try the pim_mre_sg_rpt_list
+			//
+			pim_mre_iter = find(_pim_mre_sg_rpt_list.begin(),
+					_pim_mre_sg_rpt_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _pim_mre_sg_rpt_list.end()) 
+			{
+				_pim_mre_sg_rpt_list.erase(pim_mre_iter);
+				break;
+			}
+			//
+			// Try the processing_pim_mre_sg_rpt_list
+			//
+			pim_mre_iter = find(_processing_pim_mre_sg_rpt_list.begin(),
+					_processing_pim_mre_sg_rpt_list.end(),
+					pim_mre);
+			if (pim_mre_iter != _processing_pim_mre_sg_rpt_list.end()) 
+			{
+				_processing_pim_mre_sg_rpt_list.erase(pim_mre_iter);
+				break;
+			}
+		}
+	} while (false);
+
+	// If the PimNbr was pending deletion and if this was the
+	// lastest PimMre entry, delete the PimNbr entry.
+	do 
+	{
+		if ( ! (_pim_mre_rp_list.empty()
+					&& _processing_pim_mre_rp_list.empty()
+					&& _pim_mre_wc_list.empty()
+					&& _processing_pim_mre_wc_list.empty()
+					&& _pim_mre_sg_list.empty()
+					&& _processing_pim_mre_sg_list.empty()
+					&& _pim_mre_sg_rpt_list.empty()
+					&& _processing_pim_mre_sg_rpt_list.empty())) 
+		{
+			break;	// There are still more entries
+		}
+
+		list<PimNbr *>::iterator pim_nbr_iter;
+		pim_nbr_iter = find(pim_node()->processing_pim_nbr_list().begin(),
+				pim_node()->processing_pim_nbr_list().end(),
+				this);
+		if (pim_nbr_iter != pim_node()->processing_pim_nbr_list().end()) 
+		{
+			pim_node()->processing_pim_nbr_list().erase(pim_nbr_iter);
+			delete this;
+			return;
+		}
+	} while (false);
 }

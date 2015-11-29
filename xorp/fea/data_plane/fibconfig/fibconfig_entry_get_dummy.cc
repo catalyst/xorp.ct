@@ -38,93 +38,98 @@
 //
 
 
-FibConfigEntryGetDummy::FibConfigEntryGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntryGet(fea_data_plane_manager)
+	FibConfigEntryGetDummy::FibConfigEntryGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigEntryGet(fea_data_plane_manager)
 {
 }
 
 FibConfigEntryGetDummy::~FibConfigEntryGetDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to get "
-		   "information about forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to get "
+				"information about forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigEntryGetDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigEntryGetDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
-    Trie4::iterator ti = fibconfig().trie4().find(dst);
-    if (ti != fibconfig().trie4().end()) {
-	fte = ti.payload();
-	return (XORP_OK);
-    }
-    
-    return (XORP_ERROR);
+	Trie4::iterator ti = fibconfig().trie4().find(dst);
+	if (ti != fibconfig().trie4().end()) 
+	{
+		fte = ti.payload();
+		return (XORP_OK);
+	}
+
+	return (XORP_ERROR);
 }
 
-int
+	int
 FibConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
-    Trie4::iterator ti = fibconfig().trie4().find(dst);
-    if (ti != fibconfig().trie4().end()) {
-	fte = ti.payload();
-	return (XORP_OK);
-    }
-    
-    return (XORP_ERROR);
+	Trie4::iterator ti = fibconfig().trie4().find(dst);
+	if (ti != fibconfig().trie4().end()) 
+	{
+		fte = ti.payload();
+		return (XORP_OK);
+	}
+
+	return (XORP_ERROR);
 }
 
-int
+	int
 FibConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
-    Trie6::iterator ti = fibconfig().trie6().find(dst);
-    if (ti != fibconfig().trie6().end()) {
-	fte = ti.payload();
-	return (XORP_OK);
-    }
-    
-    return (XORP_ERROR);
+	Trie6::iterator ti = fibconfig().trie6().find(dst);
+	if (ti != fibconfig().trie6().end()) 
+	{
+		fte = ti.payload();
+		return (XORP_OK);
+	}
+
+	return (XORP_ERROR);
 }
 
-int
+	int
 FibConfigEntryGetDummy::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
-    Trie6::iterator ti = fibconfig().trie6().find(dst);
-    if (ti != fibconfig().trie6().end()) {
-	fte = ti.payload();
-	return (XORP_OK);
-    }
-    
-    return (XORP_ERROR);
+	Trie6::iterator ti = fibconfig().trie6().find(dst);
+	if (ti != fibconfig().trie6().end()) 
+	{
+		fte = ti.payload();
+		return (XORP_OK);
+	}
+
+	return (XORP_ERROR);
 }

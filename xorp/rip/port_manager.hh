@@ -40,67 +40,68 @@ class System;
  * associated IO systems attached.
  */
 template <typename A>
-class PortManagerBase {
-public:
-    typedef list<Port<A>*>	PortList;
-    typedef System<A>		SystemType;
+class PortManagerBase 
+{
+	public:
+		typedef list<Port<A>*>	PortList;
+		typedef System<A>		SystemType;
 
-public:
-    PortManagerBase(SystemType& system, const IfMgrIfTree& iftree)
-	: _system(system), _iftree(iftree) {}
+	public:
+		PortManagerBase(SystemType& system, const IfMgrIfTree& iftree)
+			: _system(system), _iftree(iftree) {}
 
-    /**
-     * Destructor
-     *
-     * It is important that all the routes stored in the associated
-     * @ref System<A> Route database and it's update queue are flushed
-     * before destructor is invoked.
-     */
-    virtual ~PortManagerBase();
+		/**
+		 * Destructor
+		 *
+		 * It is important that all the routes stored in the associated
+		 * @ref System<A> Route database and it's update queue are flushed
+		 * before destructor is invoked.
+		 */
+		virtual ~PortManagerBase();
 
-    /**
-     * Get parent @ref System<A> instance.
-     */
-    SystemType& system()		{ return _system; }
+		/**
+		 * Get parent @ref System<A> instance.
+		 */
+		SystemType& system()		{ return _system; }
 
-    /**
-     * Get parent @ref System<A> instance.
-     */
-    const SystemType& system() const	{ return _system; }
+		/**
+		 * Get parent @ref System<A> instance.
+		 */
+		const SystemType& system() const	{ return _system; }
 
-    /**
-     * Get list of managed RIP Ports.
-     */
-    const PortList& const_ports() const	{ return _ports; }
+		/**
+		 * Get list of managed RIP Ports.
+		 */
+		const PortList& const_ports() const	{ return _ports; }
 
-    
-    /**
-     * Get IfMgrIfTree.
-     */
-    const IfMgrIfTree& iftree() const	{ return _iftree; }
 
-protected:
-    /**
-     * Get list of managed RIP Ports.
-     */
-    PortList& ports()			{ return _ports; }
+		/**
+		 * Get IfMgrIfTree.
+		 */
+		const IfMgrIfTree& iftree() const	{ return _iftree; }
 
-    /**
-     * Get list of managed RIP Ports.
-     */
-    const PortList& ports() const	{ return _ports; }
+	protected:
+		/**
+		 * Get list of managed RIP Ports.
+		 */
+		PortList& ports()			{ return _ports; }
 
-protected:
-    SystemType&	_system;
-    PortList	_ports;
-    const IfMgrIfTree& _iftree;
+		/**
+		 * Get list of managed RIP Ports.
+		 */
+		const PortList& ports() const	{ return _ports; }
+
+	protected:
+		SystemType&	_system;
+		PortList	_ports;
+		const IfMgrIfTree& _iftree;
 };
 
 // ----------------------------------------------------------------------------
 // Inline PortManagerBase methods
 //
 
-template <typename A>
+	template <typename A>
 PortManagerBase<A>::~PortManagerBase()
 {
 }

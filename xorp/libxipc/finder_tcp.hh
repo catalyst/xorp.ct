@@ -38,158 +38,158 @@
 
 
 #define MAX_XRL_INPUT_SIZE	65536	// maximum total XRL input buffer
-					// size on the network.
+// size on the network.
 
 class FinderTcpBase :
     public NONCOPYABLE
 {
-public:
-    FinderTcpBase( XorpFd fd);
+    public:
+	FinderTcpBase( XorpFd fd);
 
-    virtual ~FinderTcpBase();
+	virtual ~FinderTcpBase();
 
-    /**
-     * Method to be implemented by derived classes that is called when
-     * data arrives or an error occurs when processing when data arrives.
-     *
-     * @param errval error code, values are equivalent to errno.
-     * @param data pointer to data
-     * @param data_bytes size of data.
-     * @return true if the data was processed without an error and the
-     * connection was kept, otherwise false. 
-     */
-    virtual bool read_event(int		   errval,
-			    const uint8_t* data,
-			    uint32_t	   data_bytes) = 0;
+	/**
+	 * Method to be implemented by derived classes that is called when
+	 * data arrives or an error occurs when processing when data arrives.
+	 *
+	 * @param errval error code, values are equivalent to errno.
+	 * @param data pointer to data
+	 * @param data_bytes size of data.
+	 * @return true if the data was processed without an error and the
+	 * connection was kept, otherwise false. 
+	 */
+	virtual bool read_event(int		   errval,
+		const uint8_t* data,
+		uint32_t	   data_bytes) = 0;
 
-    /**
-     * Control whether read events can occur.
-     * @param en boolean value with true corresponding to read enabled.
-     */
-    void set_read_enabled(bool en);
+	/**
+	 * Control whether read events can occur.
+	 * @param en boolean value with true corresponding to read enabled.
+	 */
+	void set_read_enabled(bool en);
 
-    /**
-     * Determine whether read events can occur.
-     * @return true if read events are enabled.
-     */
-    bool read_enabled() const;
+	/**
+	 * Determine whether read events can occur.
+	 * @return true if read events are enabled.
+	 */
+	bool read_enabled() const;
 
-    /**
-     * Write data on TCP connection.  To avoid an unnecessary data
-     * copy, the client is expected to ensure the data is valid until
-     * departure_event is called with the corresponding data pointer.
-     *
-     * @param data pointer to data.
-     * @param data_bytes size data pointed to in bytes.
-     *
-     * @return true if data accepted for writing, false if no buffer
-     * space is available at this time.
-     */
-    bool write_data(const uint8_t* data, uint32_t data_bytes);
+	/**
+	 * Write data on TCP connection.  To avoid an unnecessary data
+	 * copy, the client is expected to ensure the data is valid until
+	 * departure_event is called with the corresponding data pointer.
+	 *
+	 * @param data pointer to data.
+	 * @param data_bytes size data pointed to in bytes.
+	 *
+	 * @return true if data accepted for writing, false if no buffer
+	 * space is available at this time.
+	 */
+	bool write_data(const uint8_t* data, uint32_t data_bytes);
 
-    bool write_data(const iovec* iov, uint32_t iovcnt);
+	bool write_data(const iovec* iov, uint32_t iovcnt);
 
-    /**
-     * Method to be implemented by derived classes that is called when
-     * data writing completes or an error occurs when processing when write.
-     *
-     * @param errval error code, values are equivalent to errno.
-     */
-    virtual void write_event(int	    errval,
-			     const uint8_t* data,
-			     uint32_t	    data_bytes) = 0;
+	/**
+	 * Method to be implemented by derived classes that is called when
+	 * data writing completes or an error occurs when processing when write.
+	 *
+	 * @param errval error code, values are equivalent to errno.
+	 */
+	virtual void write_event(int	    errval,
+		const uint8_t* data,
+		uint32_t	    data_bytes) = 0;
 
-    /**
-     * Method that may be implemented by derived classes for detecting when
-     * the underlying socket is closed.
-     */
-    virtual void close_event();
+	/**
+	 * Method that may be implemented by derived classes for detecting when
+	 * the underlying socket is closed.
+	 */
+	virtual void close_event();
 
-    virtual void error_event();
+	virtual void error_event();
 
-    void close();
-    bool closed() const;
+	void close();
+	bool closed() const;
 
-protected:
-    void read_callback(AsyncFileOperator::Event,
-		       const uint8_t*, size_t, size_t);
-    void write_callback(AsyncFileOperator::Event,
-			const uint8_t*, size_t, size_t);
+    protected:
+	void read_callback(AsyncFileOperator::Event,
+		const uint8_t*, size_t, size_t);
+	void write_callback(AsyncFileOperator::Event,
+		const uint8_t*, size_t, size_t);
 
-protected:
-    XorpFd _sock;
-    vector<uint8_t> _input_buffer;
+    protected:
+	XorpFd _sock;
+	vector<uint8_t> _input_buffer;
 
-    AsyncFileReader _reader;
-    AsyncFileWriter _writer;
+	AsyncFileReader _reader;
+	AsyncFileWriter _writer;
 
-    uint32_t _isize;	// input buffer size as received.
-    uint32_t _osize;	// output buffer size as advertised.
+	uint32_t _isize;	// input buffer size as received.
+	uint32_t _osize;	// output buffer size as advertised.
 };
 
 class FinderTcpListenerBase :
     public NONCOPYABLE
 {
-public:
-    typedef vector<IPv4> AddrList;
-    typedef vector<IPv4Net> NetList;
+    public:
+	typedef vector<IPv4> AddrList;
+	typedef vector<IPv4Net> NetList;
 
-public:
-    FinderTcpListenerBase( IPv4		iface,
-			  uint16_t	port,
-			  bool		en = true)
-	throw (InvalidAddress, InvalidPort);
+    public:
+	FinderTcpListenerBase( IPv4		iface,
+		uint16_t	port,
+		bool		en = true)
+	    throw (InvalidAddress, InvalidPort);
 
-    virtual ~FinderTcpListenerBase();
+	virtual ~FinderTcpListenerBase();
 
-    /**
-     * Method called when a connection is accepted and matches permitted
-     * access conditions.
-     *
-     * @param fd file descriptor associated with new connection.
-     *
-     * @return true if instance agrees to take responsibility for file
-     * descriptor, false otherwise.
-     */
-    virtual bool connection_event(XorpFd fd) = 0;
+	/**
+	 * Method called when a connection is accepted and matches permitted
+	 * access conditions.
+	 *
+	 * @param fd file descriptor associated with new connection.
+	 *
+	 * @return true if instance agrees to take responsibility for file
+	 * descriptor, false otherwise.
+	 */
+	virtual bool connection_event(XorpFd fd) = 0;
 
-    /**
-     * Determine whether listener is enabled.
-     */
-    bool enabled() const;
+	/**
+	 * Determine whether listener is enabled.
+	 */
+	bool enabled() const;
 
-    /**
-     * Control whether listener is enabled.
-     */
-    void set_enabled(bool en);
+	/**
+	 * Control whether listener is enabled.
+	 */
+	void set_enabled(bool en);
 
-    /**
-     * Get interface address listener is operating on.
-     */
-    IPv4 address() const		{ return _addr; }
+	/**
+	 * Get interface address listener is operating on.
+	 */
+	IPv4 address() const		{ return _addr; }
 
-    /**
-     * Get port listener is bound to.
-     */
-    uint16_t port() const		{ return _port; }
+	/**
+	 * Get port listener is bound to.
+	 */
+	uint16_t port() const		{ return _port; }
 
-protected:
-    /**
-     * Accepts connection, checks source address, and then calls
-     * connection_event() if source is valid.
-     */
-    void connect_hook(XorpFd fd, IoEventType type);
+    protected:
+	/**
+	 * Accepts connection, checks source address, and then calls
+	 * connection_event() if source is valid.
+	 */
+	void connect_hook(XorpFd fd, IoEventType type);
 
 
-protected:
-    XorpFd	_lsock;
-    bool	_en;
+    protected:
+	XorpFd	_lsock;
+	bool	_en;
 
-    IPv4	_addr;
-    uint16_t	_port;
+	IPv4	_addr;
+	uint16_t	_port;
 
-    AddrList	_ok_addrs;
-    NetList	_ok_nets;
+	AddrList	_ok_addrs;
+	NetList	_ok_nets;
 };
 
 #endif // __LIBXIPC_FINDER_TCP_HH__

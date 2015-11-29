@@ -48,137 +48,139 @@ class IvExec :
     public NONCOPYABLE,
     public InstrVisitor
 {
-public:
-    /**
-     * A FlowAction is what has to be done with the route. DEFAULT is the
-     * default action which is normally "go to the next term", or if the last
-     * term, ACCEPT.
-     */
-    enum FlowAction {
-	ACCEPT,
-	REJ,
-	DEFAULT
-    };
-
-    /**
-     * @short Run time errors, such as doing unsupported operations.
-     *
-     * The semantic check should get rid of these.
-     */
-    class RuntimeError : public PolicyException {
     public:
-	RuntimeError(const char* file, size_t line, const string& init_why = "")
-	    : PolicyException("RuntimeError", file, line, init_why) {}  
+	/**
+	 * A FlowAction is what has to be done with the route. DEFAULT is the
+	 * default action which is normally "go to the next term", or if the last
+	 * term, ACCEPT.
+	 */
+	enum FlowAction 
+	{
+	    ACCEPT,
+	    REJ,
+	    DEFAULT
+	};
+
+	/**
+	 * @short Run time errors, such as doing unsupported operations.
+	 *
+	 * The semantic check should get rid of these.
+	 */
+	class RuntimeError : public PolicyException 
+    {
+	public:
+	    RuntimeError(const char* file, size_t line, const string& init_why = "")
+		: PolicyException("RuntimeError", file, line, init_why) {}  
     };
 
-    IvExec();
-    ~IvExec();
-   
-    void set_policies(vector<PolicyInstr*>* policies);
-    void set_set_manager(SetManager* sman);
-   
-    /**
-     * Execute the policies.
-     */
-    FlowAction run(VarRW* varrw);
+	IvExec();
+	~IvExec();
 
-    /**
-     * Execute a policy.
-     *
-     * @param pi policy to execute
-     */
-    FlowAction runPolicy(PolicyInstr& pi);
+	void set_policies(vector<PolicyInstr*>* policies);
+	void set_set_manager(SetManager* sman);
 
-    /**
-     * Execute a term.
-     *
-     * @param ti term to execute.
-     */
-    FlowAction runTerm(TermInstr& ti);
+	/**
+	 * Execute the policies.
+	 */
+	FlowAction run(VarRW* varrw);
 
-    /**
-     * @param p push to execute.
-     */
-    void visit(Push& p);
+	/**
+	 * Execute a policy.
+	 *
+	 * @param pi policy to execute
+	 */
+	FlowAction runPolicy(PolicyInstr& pi);
 
-    /**
-     * @param ps push of a set to execute.
-     */
-    void visit(PushSet& ps);
-    
-    /**
-     * @param x OnFalseExit to execute.
-     */
-    void visit(OnFalseExit& x);
+	/**
+	 * Execute a term.
+	 *
+	 * @param ti term to execute.
+	 */
+	FlowAction runTerm(TermInstr& ti);
 
-    /**
-     * @param l Load to execute.
-     */
-    void visit(Load& l);
+	/**
+	 * @param p push to execute.
+	 */
+	void visit(Push& p);
 
-    /**
-     * @param s Store to execute.
-     */
-    void visit(Store& s);
+	/**
+	 * @param ps push of a set to execute.
+	 */
+	void visit(PushSet& ps);
 
-    /**
-     * @param a accept the route.
-     */
-    void visit(Accept& a);
-    
-    /**
-     * @param r reject the route.
-     */
-    void visit(Reject& r);
+	/**
+	 * @param x OnFalseExit to execute.
+	 */
+	void visit(OnFalseExit& x);
 
-    /**
-     * @param nary N-ary instruction to execute.
-     */
-    void visit(NaryInstr& nary);
+	/**
+	 * @param l Load to execute.
+	 */
+	void visit(Load& l);
 
-    void visit(Next& next);
-    void visit(Subr& sub);
+	/**
+	 * @param s Store to execute.
+	 */
+	void visit(Store& s);
 
-    /**
-     * @return String representation of flow action.
-     * @param fa Flow action to convert.
-     */
-    static string fa2str(const FlowAction& fa);
+	/**
+	 * @param a accept the route.
+	 */
+	void visit(Accept& a);
+
+	/**
+	 * @param r reject the route.
+	 */
+	void visit(Reject& r);
+
+	/**
+	 * @param nary N-ary instruction to execute.
+	 */
+	void visit(NaryInstr& nary);
+
+	void visit(Next& next);
+	void visit(Subr& sub);
+
+	/**
+	 * @return String representation of flow action.
+	 * @param fa Flow action to convert.
+	 */
+	static string fa2str(const FlowAction& fa);
 
 #ifndef XORP_DISABLE_PROFILE
-    void    set_profiler(PolicyProfiler*);
+	void    set_profiler(PolicyProfiler*);
 #endif
-    string  tracelog();
-    void    set_subr(SUBR* subr);
+	string  tracelog();
+	void    set_subr(SUBR* subr);
 
-private:
-    /**
-     * Do garbage collection.
-     */
-    void clear_trash();
+    private:
+	/**
+	 * Do garbage collection.
+	 */
+	void clear_trash();
 
-    PolicyInstr**   _policies;
-    unsigned	    _policy_count;
-    const Element** _stack_bottom;
-    const Element** _stack;
-    const Element** _stackend;
-    const Element** _stackptr;
-    SetManager*	    _sman;
-    VarRW*	    _varrw;
-    bool	    _finished;
-    Dispatcher	    _disp;
-    FlowAction	    _fa;
-    Element**	    _trash;
-    unsigned	    _trashc;
-    unsigned	    _trashs;
-    ostringstream   _os;
+	PolicyInstr**   _policies;
+	unsigned	    _policy_count;
+	const Element** _stack_bottom;
+	const Element** _stack;
+	const Element** _stackend;
+	const Element** _stackptr;
+	SetManager*	    _sman;
+	VarRW*	    _varrw;
+	bool	    _finished;
+	Dispatcher	    _disp;
+	FlowAction	    _fa;
+	Element**	    _trash;
+	unsigned	    _trashc;
+	unsigned	    _trashs;
+	ostringstream   _os;
 #ifndef XORP_DISABLE_PROFILE
-    PolicyProfiler* _profiler;
+	PolicyProfiler* _profiler;
 #endif
-    bool	    _do_trace;
-    bool	    _did_trace;
-    Next::Flow	    _ctr_flow;
-    SUBR*	    _subr;
+	bool	    _do_trace;
+	bool	    _did_trace;
+	Next::Flow	    _ctr_flow;
+	SUBR*	    _subr;
 };
 
 #endif // __POLICY_BACKEND_IV_EXEC_HH__

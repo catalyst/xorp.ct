@@ -39,9 +39,10 @@
  * if this turns out to be pessimistic, the pathname can be reallocated
  * via calls to pb_append_to_path() and/or pb_resize_path().
  */
-typedef struct {
-  char *name;         /* The path buffer */
-  size_t dim;         /* The current allocated size of buffer[] */
+typedef struct 
+{
+	char *name;         /* The path buffer */
+	size_t dim;         /* The current allocated size of buffer[] */
 } PathName;
 
 PathName *_new_PathName(void);
@@ -49,9 +50,9 @@ PathName *_del_PathName(PathName *path);
 
 char *_pn_clear_path(PathName *path);
 char *_pn_append_to_path(PathName *path, const char *string, int slen,
-			int remove_escapes);
+		int remove_escapes);
 char *_pn_prepend_to_path(PathName *path, const char *string, int slen,
-			  int remove_escapes);
+		int remove_escapes);
 char *_pn_resize_path(PathName *path, size_t length);
 
 /*

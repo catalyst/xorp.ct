@@ -40,37 +40,37 @@
  */
 template <typename A>
 class OutputUpdates :
-    public OutputBase<A>
+	public OutputBase<A>
 {
-public:
-    OutputUpdates( Port<A>&	  port,
-		  PacketQueue<A>& pkt_queue,
-		  RouteDB<A>&	  rdb,
-		  const A&	  ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
-		  uint16_t	  ip_port = RIP_AF_CONSTANTS<A>::IP_PORT);
+	public:
+		OutputUpdates( Port<A>&	  port,
+				PacketQueue<A>& pkt_queue,
+				RouteDB<A>&	  rdb,
+				const A&	  ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
+				uint16_t	  ip_port = RIP_AF_CONSTANTS<A>::IP_PORT);
 
-    ~OutputUpdates();
+		~OutputUpdates();
 
-    /**
-     * Fast forward iterator doing triggered up reading.
-     *
-     * Triggered updates do not run during periodic route table dumps.  This
-     * method should be called immediately before halting for periodic update
-     * as it will effectively stop the output of updates that are already
-     * covered in table dump.
-     */
-    void ffwd();
+		/**
+		 * Fast forward iterator doing triggered up reading.
+		 *
+		 * Triggered updates do not run during periodic route table dumps.  This
+		 * method should be called immediately before halting for periodic update
+		 * as it will effectively stop the output of updates that are already
+		 * covered in table dump.
+		 */
+		void ffwd();
 
-protected:
-    void output_packet();
+	protected:
+		void output_packet();
 
-    void start_output_processing();
+		void start_output_processing();
 
-    void stop_output_processing();
+		void stop_output_processing();
 
-private:
-    UpdateQueue<A>&		 	  _uq;
-    typename UpdateQueue<A>::ReadIterator _uq_iter;
+	private:
+		UpdateQueue<A>&		 	  _uq;
+		typename UpdateQueue<A>::ReadIterator _uq_iter;
 };
 
 #endif // __RIP_OUTPUT_UPDATES_HH__

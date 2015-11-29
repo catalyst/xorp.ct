@@ -27,20 +27,22 @@
  * @short The exception thrown when an operation on an external
  *        route fails.
  */
-class BadExternalRoute : public XorpReasonedException {
-public:
-    BadExternalRoute(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadExternalRoute", file, line, init_why) {}
+class BadExternalRoute : public XorpReasonedException 
+{
+    public:
+	BadExternalRoute(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadExternalRoute", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on an OLSR
  *        interface fails.
  */
-class BadFace : public XorpReasonedException {
-public:
-    BadFace(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadFace", file, line, init_why) {}
+class BadFace : public XorpReasonedException 
+{
+    public:
+	BadFace(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadFace", file, line, init_why) {}
 };
 
 /**
@@ -48,59 +50,65 @@ public:
  *
  * Usually this means the fields provided were invalid.
  */
-class BadLinkCode : public XorpReasonedException {
-public:
-    BadLinkCode(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadLinkCode", file, line, init_why) {}
+class BadLinkCode : public XorpReasonedException 
+{
+    public:
+	BadLinkCode(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadLinkCode", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a logical link fails.
  */
-class BadLogicalLink : public XorpReasonedException {
-public:
-    BadLogicalLink(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadLogicalLink", file, line, init_why) {}
+class BadLogicalLink : public XorpReasonedException 
+{
+    public:
+	BadLogicalLink(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadLogicalLink", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when no suitable link to a one-hop
  *        neighbor exists.
  */
-class BadLinkCoverage : public XorpReasonedException {
-public:
-    BadLinkCoverage(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadLinkCoverage", file, line, init_why) {}
+class BadLinkCoverage : public XorpReasonedException 
+{
+    public:
+	BadLinkCoverage(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadLinkCoverage", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a MID entry fails.
  */
-class BadMidEntry : public XorpReasonedException {
-public:
-    BadMidEntry(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadMidEntry", file, line, init_why) {}
+class BadMidEntry : public XorpReasonedException 
+{
+    public:
+	BadMidEntry(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadMidEntry", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a one-hop
  *        neighbor fails.
  */
-class BadNeighbor : public XorpReasonedException {
-public:
-    BadNeighbor(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadNeighbor", file, line, init_why) {}
+class BadNeighbor : public XorpReasonedException 
+{
+    public:
+	BadNeighbor(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadNeighbor", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a topology control
  *        entry fails.
  */
-class BadTopologyEntry : public XorpReasonedException {
-public:
-    BadTopologyEntry(const char* file, size_t line,
-		      const string& init_why = "")
-     : XorpReasonedException("OlsrBadTopologyEntry", file, line, init_why) {}
+class BadTopologyEntry : public XorpReasonedException 
+{
+    public:
+	BadTopologyEntry(const char* file, size_t line,
+		const string& init_why = "")
+	    : XorpReasonedException("OlsrBadTopologyEntry", file, line, init_why) {}
 };
 
 /**
@@ -111,53 +119,58 @@ public:
  * inconsistency is detected in the set of MPRs covering a two-hop neighbor
  * which was calculated to be reachable.
  */
-class BadTwoHopCoverage : public XorpReasonedException {
-public:
-    BadTwoHopCoverage(const char* file, size_t line,
-			  const string& init_why = "")
-     : XorpReasonedException("OlsrBadTwoHopCoverage", file, line, init_why) {}
+class BadTwoHopCoverage : public XorpReasonedException 
+{
+    public:
+	BadTwoHopCoverage(const char* file, size_t line,
+		const string& init_why = "")
+	    : XorpReasonedException("OlsrBadTwoHopCoverage", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a link in the
  *        two-hop neighborhood fails.
  */
-class BadTwoHopLink : public XorpReasonedException {
-public:
-    BadTwoHopLink(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadTwoHopLink", file, line, init_why) {}
+class BadTwoHopLink : public XorpReasonedException 
+{
+    public:
+	BadTwoHopLink(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadTwoHopLink", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when an operation on a two-hop
  *        neighbor fails.
  */
-class BadTwoHopNode : public XorpReasonedException {
-public:
-    BadTwoHopNode(const char* file, size_t line, const string& init_why = "")
-     : XorpReasonedException("OlsrBadTwoHopNode", file, line, init_why) {}
+class BadTwoHopNode : public XorpReasonedException 
+{
+    public:
+	BadTwoHopNode(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrBadTwoHopNode", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when the decoding or encoding of
  *        a Message fails.
  */
-class InvalidMessage : public XorpReasonedException {
-public:
-    InvalidMessage(const char* file, size_t line, const string& init_why = "")
-	: XorpReasonedException("OlsrInvalidMessage", file, line, init_why) {}
+class InvalidMessage : public XorpReasonedException 
+{
+    public:
+	InvalidMessage(const char* file, size_t line, const string& init_why = "")
+	    : XorpReasonedException("OlsrInvalidMessage", file, line, init_why) {}
 };
 
 /**
  * @short The exception thrown when the decoding or encoding of
  * a LinkTuple inside a HelloMessage fails.
  */
-class InvalidLinkTuple : public XorpReasonedException {
-public:
-    InvalidLinkTuple(const char* file, size_t line,
-		     const string& init_why = "")
-	: XorpReasonedException("OlsrInvalidLinkTuple", file, line, init_why)
-    {}
+class InvalidLinkTuple : public XorpReasonedException 
+{
+    public:
+	InvalidLinkTuple(const char* file, size_t line,
+		const string& init_why = "")
+	    : XorpReasonedException("OlsrInvalidLinkTuple", file, line, init_why)
+	    {}
 };
 
 #endif // __OLSR_EXCEPTIONS_HH__

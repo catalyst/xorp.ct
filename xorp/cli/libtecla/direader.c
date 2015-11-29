@@ -68,13 +68,14 @@
  * Objects of the following type are used to maintain the resources
  * needed to read directories.
  */
-struct DirReader {
-  DIR *dir;              /* The directory stream (if open, NULL otherwise) */
-  struct dirent *file;   /* The latest directory entry */
-  char errmsg[ERRLEN+1]; /* Error-report buffer */
+struct DirReader 
+{
+	DIR *dir;              /* The directory stream (if open, NULL otherwise) */
+	struct dirent *file;   /* The latest directory entry */
+	char errmsg[ERRLEN+1]; /* Error-report buffer */
 #ifdef USE_READDIR_R
-  struct dirent *buffer; /* A buffer used by the threaded version of readdir */
-  int buffer_dim;        /* The allocated size of buffer[] */
+	struct dirent *buffer; /* A buffer used by the threaded version of readdir */
+	int buffer_dim;        /* The allocated size of buffer[] */
 #endif
 };
 
@@ -88,28 +89,29 @@ static int _dr_path_is_dir(const char *pathname);
  */
 DirReader *_new_DirReader(void)
 {
-  DirReader *dr;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  dr = (DirReader *) malloc(sizeof(DirReader));
-  if(!dr) {
-    fprintf(stderr, "_new_DirReader: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to _del_DirReader().
- */
-  dr->dir = NULL;
-  dr->file = NULL;
-  dr->errmsg[0] = '\0';
+	DirReader *dr;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	dr = (DirReader *) malloc(sizeof(DirReader));
+	if(!dr) 
+	{
+		fprintf(stderr, "_new_DirReader: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to _del_DirReader().
+	 */
+	dr->dir = NULL;
+	dr->file = NULL;
+	dr->errmsg[0] = '\0';
 #ifdef USE_READDIR_R
-  dr->buffer = NULL;
-  dr->buffer_dim = 0;
+	dr->buffer = NULL;
+	dr->buffer_dim = 0;
 #endif
-  return dr;
+	return dr;
 }
 
 /*.......................................................................
@@ -122,14 +124,15 @@ DirReader *_new_DirReader(void)
  */
 DirReader *_del_DirReader(DirReader *dr)
 {
-  if(dr) {
-    _dr_close_dir(dr);
+	if(dr) 
+	{
+		_dr_close_dir(dr);
 #ifdef USE_READDIR_R
-    free(dr->buffer);
+		free(dr->buffer);
 #endif
-    free(dr);
-  };
-  return NULL;
+		free(dr);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -148,84 +151,93 @@ DirReader *_del_DirReader(DirReader *dr)
  */
 int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
 {
-  DIR *dir = NULL;   /* The directory stream */
-/*
- * If a directory is already open, close it first.
- */
-  (void) _dr_close_dir(dr);
-/*
- * Is the path a directory?
- */
-  if(!_dr_path_is_dir(path)) {
-    if(errmsg) {
-      const char *fmt = "Can't open directory: %.*s\n";
-      snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
-	       path);
-      *errmsg = dr->errmsg;
-    };
-    return 1;
-  };
-/*
- * Attempt to open the directory.
- */
-  dir = opendir(path);
-  if(!dir) {
-    if(errmsg) {
-      const char *fmt = "Can't open directory: %.*s\n";
-      snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
-	       path);
-      *errmsg = dr->errmsg;
-    };
-    return 1;
-  };
-/*
- * If using POSIX threads, allocate a buffer for readdir_r().
- */
-#ifdef USE_READDIR_R
-  {
-    size_t size;
-    int name_max = pathconf(path, _PC_NAME_MAX);
-#ifdef NAME_MAX
-    if(name_max < 0)
-      name_max = NAME_MAX;
-#endif
-    if(name_max < 0) {
-      if(errmsg) {
-	strncpy(dr->errmsg, "Unable to deduce readdir() buffer size.", sizeof(dr->errmsg));
-	*errmsg = dr->errmsg;
-      };
-      closedir(dir);
-      return 1;
-    };
-/*
- * How big a buffer do we need to allocate?
- */
-    size = sizeof(struct dirent) + name_max;
-/*
- * Extend the buffer?
- */
-    if(size > dr->buffer_dim || !dr->buffer) {
-      struct dirent *buffer = (struct dirent *) (dr->buffer ?
-						 realloc(dr->buffer, size) :
-						 malloc(size));
-      if(!buffer) {
-	if(errmsg) {
-	  strncpy(dr->errmsg, "Insufficient memory for readdir() buffer.", sizeof(dr->errmsg));
-	  *errmsg = dr->errmsg;
+	DIR *dir = NULL;   /* The directory stream */
+	/*
+	 * If a directory is already open, close it first.
+	 */
+	(void) _dr_close_dir(dr);
+	/*
+	 * Is the path a directory?
+	 */
+	if(!_dr_path_is_dir(path)) 
+	{
+		if(errmsg) 
+		{
+			const char *fmt = "Can't open directory: %.*s\n";
+			snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
+					path);
+			*errmsg = dr->errmsg;
+		};
+		return 1;
 	};
-	closedir(dir);
-	return 1;
-      };
-      dr->buffer = buffer;
-      dr->buffer_dim = size;
-    };
-  };
+	/*
+	 * Attempt to open the directory.
+	 */
+	dir = opendir(path);
+	if(!dir) 
+	{
+		if(errmsg) 
+		{
+			const char *fmt = "Can't open directory: %.*s\n";
+			snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
+					path);
+			*errmsg = dr->errmsg;
+		};
+		return 1;
+	};
+	/*
+	 * If using POSIX threads, allocate a buffer for readdir_r().
+	 */
+#ifdef USE_READDIR_R
+	{
+		size_t size;
+		int name_max = pathconf(path, _PC_NAME_MAX);
+#ifdef NAME_MAX
+		if(name_max < 0)
+			name_max = NAME_MAX;
 #endif
-/*
- * Record the successfully opened directory.
- */
-  dr->dir = dir;
-  return 0;
+		if(name_max < 0) 
+		{
+			if(errmsg) 
+			{
+				strncpy(dr->errmsg, "Unable to deduce readdir() buffer size.", sizeof(dr->errmsg));
+				*errmsg = dr->errmsg;
+			};
+			closedir(dir);
+			return 1;
+		};
+		/*
+		 * How big a buffer do we need to allocate?
+		 */
+		size = sizeof(struct dirent) + name_max;
+		/*
+		 * Extend the buffer?
+		 */
+		if(size > dr->buffer_dim || !dr->buffer) 
+		{
+			struct dirent *buffer = (struct dirent *) (dr->buffer ?
+					realloc(dr->buffer, size) :
+					malloc(size));
+			if(!buffer) 
+			{
+				if(errmsg) 
+				{
+					strncpy(dr->errmsg, "Insufficient memory for readdir() buffer.", sizeof(dr->errmsg));
+					*errmsg = dr->errmsg;
+				};
+				closedir(dir);
+				return 1;
+			};
+			dr->buffer = buffer;
+			dr->buffer_dim = size;
+		};
+	};
+#endif
+	/*
+	 * Record the successfully opened directory.
+	 */
+	dr->dir = dir;
+	return 0;
 }
 
 /*.......................................................................
@@ -237,12 +249,13 @@ int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
  */
 void _dr_close_dir(DirReader *dr)
 {
-  if(dr && dr->dir) {
-    closedir(dr->dir);
-    dr->dir = NULL;
-    dr->file = NULL;
-    dr->errmsg[0] = '\0';
-  };
+	if(dr && dr->dir) 
+	{
+		closedir(dr->dir);
+		dr->dir = NULL;
+		dr->file = NULL;
+		dr->errmsg[0] = '\0';
+	};
 }
 
 /*.......................................................................
@@ -256,27 +269,28 @@ void _dr_close_dir(DirReader *dr)
  */
 char *_dr_next_file(DirReader *dr)
 {
-/*
- * Are we currently reading a directory?
- */
-  if(dr->dir) {
-/*
- * Read the next directory entry.
- */
+	/*
+	 * Are we currently reading a directory?
+	 */
+	if(dr->dir) 
+	{
+		/*
+		 * Read the next directory entry.
+		 */
 #ifdef USE_READDIR_R 
-    if(readdir_r(dr->dir, dr->buffer, &dr->file) == 0 && dr->file)
-      return dr->file->d_name;
+		if(readdir_r(dr->dir, dr->buffer, &dr->file) == 0 && dr->file)
+			return dr->file->d_name;
 #else
-    dr->file = readdir(dr->dir);
-    if(dr->file)
-      return dr->file->d_name;
+		dr->file = readdir(dr->dir);
+		if(dr->file)
+			return dr->file->d_name;
 #endif
-  };
-/*
- * When the end of a directory is reached, close it.
- */
-  _dr_close_dir(dr);
-  return NULL;
+	};
+	/*
+	 * When the end of a directory is reached, close it.
+	 */
+	_dr_close_dir(dr);
+	return NULL;
 }
 
 /*.......................................................................
@@ -290,14 +304,14 @@ char *_dr_next_file(DirReader *dr)
  */
 static int _dr_path_is_dir(const char *pathname)
 {
-  struct stat statbuf;    /* The file-statistics return buffer */
-/*
- * Look up the file attributes.
- */
-  if(stat(pathname, &statbuf) < 0)
-    return 0;
-/*
- * Is the file a directory?
- */
-  return S_ISDIR(statbuf.st_mode) != 0;
+	struct stat statbuf;    /* The file-statistics return buffer */
+	/*
+	 * Look up the file attributes.
+	 */
+	if(stat(pathname, &statbuf) < 0)
+		return 0;
+	/*
+	 * Is the file a directory?
+	 */
+	return S_ISDIR(statbuf.st_mode) != 0;
 }

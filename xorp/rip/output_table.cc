@@ -28,10 +28,11 @@
 #include "route_db.hh"
 
 template <typename A>
-void
+    void
 OutputTable<A>::output_packet()
 {
-    if (_rw_valid == false) {
+    if (_rw_valid == false) 
+    {
 	_rw.reset();
 	_rw_valid = true;
     }
@@ -43,7 +44,8 @@ OutputTable<A>::output_packet()
 
     uint32_t done = 0;
     const RouteEntry<A>* r = 0;
-    for (r = _rw.current_route(); r != 0; r = _rw.next_route()) {
+    for (r = _rw.current_route(); r != 0; r = _rw.next_route()) 
+    {
 
 	//
 	// We may either "drop the packet..."
@@ -61,11 +63,11 @@ OutputTable<A>::output_packet()
 	RouteEntryOrigin<A>* origin = NULL;	// XXX
 	string ifname, vifname;		// XXX: not set, because not needed
 	RouteEntry<A>* copy = new RouteEntry<A>(r->net(), p.first,
-						ifname, vifname,
-						p.second,
-					        origin, r->tag(),
-						r->policytags());
-	
+		ifname, vifname,
+		p.second,
+		origin, r->tag(),
+		r->policytags());
+
 	// Policy EXPORT filtering was done here.
 	// It's moved to RouteDB<A>::do_filtering.
 	// This was done because EXPORT filter could possibly change route metric,
@@ -77,25 +79,31 @@ OutputTable<A>::output_packet()
 
 	// XXX: packet_add_route stores args
 	delete copy;
-	
+
 	done++;
-	if (rpa.packet_full()) {
+	if (rpa.packet_full()) 
+	{
 	    _rw.next_route();
 	    break;
 	}
     }
 
     list<RipPacket<A>*> auth_packets;
-    if (done == 0 || rpa.packet_finish(auth_packets) == false) {
+    if (done == 0 || rpa.packet_finish(auth_packets) == false) 
+    {
 	// No routes added to packet or error finishing packet off.
-    } else {
+    } else 
+    {
 	typename list<RipPacket<A>*>::iterator iter;
-	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) 
+	{
 	    RipPacket<A>* auth_pkt = *iter;
 	    this->_pkt_queue.enqueue_packet(auth_pkt);
-	    if (this->ip_port() == RIP_AF_CONSTANTS<A>::IP_PORT) {
+	    if (this->ip_port() == RIP_AF_CONSTANTS<A>::IP_PORT) 
+	    {
 		this->_port.counters().incr_unsolicited_updates();
-	    } else {
+	    } else 
+	    {
 		this->_port.counters().incr_non_rip_updates_sent();
 	    }
 	    this->incr_packets_sent();
@@ -104,28 +112,30 @@ OutputTable<A>::output_packet()
     }
     delete pkt;
 
-    if (r == 0) {
+    if (r == 0) 
+    {
 	// Reached null route so note route walker is now invalid.
 	_rw_valid = false;
-    } else {
+    } else 
+    {
 	// Not finished so set time to reschedule self and pause
 	// route walker.
 	this->_op_timer 
 	    = EventLoop::instance().new_oneoff_after_ms(this->interpacket_gap_ms(),
-                          callback(this, &OutputTable<A>::output_packet));
+		    callback(this, &OutputTable<A>::output_packet));
 	_rw.pause(this->interpacket_gap_ms());
     }
 }
 
 template <typename A>
-void
+    void
 OutputTable<A>::start_output_processing()
 {
     output_packet();		// starts timer
 }
 
 template <typename A>
-void
+    void
 OutputTable<A>::stop_output_processing()
 {
     this->_op_timer.unschedule();	// stop timer

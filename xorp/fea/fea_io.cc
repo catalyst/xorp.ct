@@ -35,162 +35,169 @@
 #include "fea_io.hh"
 
 
-FeaIo::FeaIo()
-    : _is_running(false)
+	FeaIo::FeaIo()
+: _is_running(false)
 {
 }
 
 FeaIo::~FeaIo()
 {
-    shutdown();
+	shutdown();
 }
 
-int
+	int
 FeaIo::startup()
 {
-    _is_running = true;
+	_is_running = true;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 FeaIo::shutdown()
 {
-    _is_running = false;
+	_is_running = false;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
 bool
 FeaIo::is_running() const
 {
-    return (_is_running);
+	return (_is_running);
 }
 
-int
+	int
 FeaIo::add_instance_watch(const string& instance_name,
-			  InstanceWatcher* instance_watcher,
-			  string& error_msg)
+		InstanceWatcher* instance_watcher,
+		string& error_msg)
 {
-    list<pair<string, InstanceWatcher *> >::iterator iter;
-    bool is_watched = false;
+	list<pair<string, InstanceWatcher *> >::iterator iter;
+	bool is_watched = false;
 
-    for (iter = _instance_watchers.begin();
-	 iter != _instance_watchers.end();
-	 ++iter) {
-	const string& name = iter->first;
-	InstanceWatcher* watcher = iter->second;
+	for (iter = _instance_watchers.begin();
+			iter != _instance_watchers.end();
+			++iter) 
+	{
+		const string& name = iter->first;
+		InstanceWatcher* watcher = iter->second;
 
-	if (name != instance_name)
-	    continue;
+		if (name != instance_name)
+			continue;
 
-	if (watcher == instance_watcher)
-	    return (XORP_OK);		// Exact match found
+		if (watcher == instance_watcher)
+			return (XORP_OK);		// Exact match found
 
-	// The instance is watched by somebody else
-	is_watched = true;
-    }
-
-    // Add the new watcher
-    _instance_watchers.push_back(make_pair(instance_name, instance_watcher));
-
-    if (is_watched)
-	return (XORP_OK);	// Somebody else registered for the instance
-
-    if (register_instance_event_interest(instance_name, error_msg)
-	!= XORP_OK) {
-	_instance_watchers.pop_back();
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FeaIo::delete_instance_watch(const string& instance_name,
-			     InstanceWatcher* instance_watcher,
-			     string& error_msg)
-{
-    list<pair<string, InstanceWatcher *> >::iterator iter, delete_iter;
-    bool is_watched = false;
-
-    delete_iter = _instance_watchers.end();
-    for (iter = _instance_watchers.begin();
-	 iter != _instance_watchers.end();
-	++iter) {
-	const string& name = iter->first;
-	InstanceWatcher* watcher = iter->second;
-
-	if (name != instance_name)
-	    continue;
-
-	if (watcher == instance_watcher) {
-	    delete_iter = iter;		// Exact match found
-	    continue;
+		// The instance is watched by somebody else
+		is_watched = true;
 	}
 
-	// The instance is watched by somebody else
-	is_watched = true;
-    }
+	// Add the new watcher
+	_instance_watchers.push_back(make_pair(instance_name, instance_watcher));
 
-    if (delete_iter == _instance_watchers.end()) {
-	// Entry not found
-	error_msg = c_format("Instance watcher for %s not found",
-			     instance_name.c_str());
-	return (XORP_ERROR);
-    }
+	if (is_watched)
+		return (XORP_OK);	// Somebody else registered for the instance
 
-    // Delete the watcher
-    _instance_watchers.erase(delete_iter);
+	if (register_instance_event_interest(instance_name, error_msg)
+			!= XORP_OK) 
+	{
+		_instance_watchers.pop_back();
+		return (XORP_ERROR);
+	}
 
-    if (is_watched)
-	return (XORP_OK);	// Somebody else registered for the instance
-
-    return (deregister_instance_event_interest(instance_name, error_msg));
+	return (XORP_OK);
 }
 
-void
+	int
+FeaIo::delete_instance_watch(const string& instance_name,
+		InstanceWatcher* instance_watcher,
+		string& error_msg)
+{
+	list<pair<string, InstanceWatcher *> >::iterator iter, delete_iter;
+	bool is_watched = false;
+
+	delete_iter = _instance_watchers.end();
+	for (iter = _instance_watchers.begin();
+			iter != _instance_watchers.end();
+			++iter) 
+	{
+		const string& name = iter->first;
+		InstanceWatcher* watcher = iter->second;
+
+		if (name != instance_name)
+			continue;
+
+		if (watcher == instance_watcher) 
+		{
+			delete_iter = iter;		// Exact match found
+			continue;
+		}
+
+		// The instance is watched by somebody else
+		is_watched = true;
+	}
+
+	if (delete_iter == _instance_watchers.end()) 
+	{
+		// Entry not found
+		error_msg = c_format("Instance watcher for %s not found",
+				instance_name.c_str());
+		return (XORP_ERROR);
+	}
+
+	// Delete the watcher
+	_instance_watchers.erase(delete_iter);
+
+	if (is_watched)
+		return (XORP_OK);	// Somebody else registered for the instance
+
+	return (deregister_instance_event_interest(instance_name, error_msg));
+}
+
+	void
 FeaIo::instance_birth(const string& instance_name)
 {
-    list<pair<string, InstanceWatcher *> >::iterator iter;
+	list<pair<string, InstanceWatcher *> >::iterator iter;
 
-    for (iter = _instance_watchers.begin();
-	 iter != _instance_watchers.end();
-	 ) {
-	const string& name = iter->first;
-	InstanceWatcher* watcher = iter->second;
+	for (iter = _instance_watchers.begin();
+			iter != _instance_watchers.end();
+		) 
+	{
+		const string& name = iter->first;
+		InstanceWatcher* watcher = iter->second;
 
-	//
-	// XXX: We need to increment the iterator in advance, in case
-	// the watcher that is informed about the change decides to delete
-	// the entry the iterator points to.
-	//
-	++iter;
+		//
+		// XXX: We need to increment the iterator in advance, in case
+		// the watcher that is informed about the change decides to delete
+		// the entry the iterator points to.
+		//
+		++iter;
 
-	if (name == instance_name)
-	    watcher->instance_birth(instance_name);
-    }
+		if (name == instance_name)
+			watcher->instance_birth(instance_name);
+	}
 }
 
-void
+	void
 FeaIo::instance_death(const string& instance_name)
 {
-    list<pair<string, InstanceWatcher *> >::iterator iter;
+	list<pair<string, InstanceWatcher *> >::iterator iter;
 
-    for (iter = _instance_watchers.begin();
-	 iter != _instance_watchers.end();
-	 ) {
-	const string& name = iter->first;
-	InstanceWatcher* watcher = iter->second;
+	for (iter = _instance_watchers.begin();
+			iter != _instance_watchers.end();
+		) 
+	{
+		const string& name = iter->first;
+		InstanceWatcher* watcher = iter->second;
 
-	//
-	// XXX: We need to increment the iterator in advance, in case
-	// the watcher that is informed about the change decides to delete
-	// the entry the iterator points to.
-	//
-	++iter;
+		//
+		// XXX: We need to increment the iterator in advance, in case
+		// the watcher that is informed about the change decides to delete
+		// the entry the iterator points to.
+		//
+		++iter;
 
-	if (name == instance_name)
-	    watcher->instance_death(instance_name);
-    }
+		if (name == instance_name)
+			watcher->instance_death(instance_name);
+	}
 }

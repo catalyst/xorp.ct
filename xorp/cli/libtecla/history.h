@@ -87,14 +87,14 @@ char *_glh_recall_line(GlHistory *glh, GlhLineID id, char *line, size_t dim);
  * ~ and $ expansion are not performed on the filename.
  */
 int _glh_save_history(GlHistory *glh, const char *filename,
-		      const char *comment, int max_lines);
+		const char *comment, int max_lines);
 
 /*
  * Restore the contents of the history buffer from a given file.
  * Note that ~ and $ expansion are not performed on the filename.
  */
 int _glh_load_history(GlHistory *glh, const char *filename, const char *comment,
-		      char *line, size_t dim);
+		char *line, size_t dim);
 
 /*
  * Set and query the current history group.
@@ -107,7 +107,7 @@ int _glh_get_group(GlHistory *glh);
  * output group.
  */
 int _glh_show_history(GlHistory *glh, FILE *fp, const char *fmt,
-		      int all_groups, int max_lines);
+		int all_groups, int max_lines);
 
 /*
  * Change the size of the history buffer.
@@ -136,19 +136,19 @@ void _glh_toggle_history(GlHistory *glh, int enable);
  * history buffer.
  */
 int _glh_lookup_history(GlHistory *glh, GlhLineID id, const char **line,
-			unsigned *group, time_t *timestamp);
+		unsigned *group, time_t *timestamp);
 
 /*
  * Query the state of the history list.
  */
 void _glh_state_of_history(GlHistory *glh, int *enabled, unsigned *group,
-			   int *max_lines);
+		int *max_lines);
 
 /*
  * Get the range of lines in the history buffer.
  */
 void _glh_range_of_history(GlHistory *glh, unsigned long *oldest,
-			   unsigned long *newest, int *nlines);
+		unsigned long *newest, int *nlines);
 
 /*
  * Return the size of the history buffer and the amount of the

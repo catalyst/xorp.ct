@@ -24,6 +24,6 @@
 
 extern int
 ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
-			       uint64_t& baudrate, string& error_msg);
+		uint64_t& baudrate, string& error_msg);
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_MEDIA_HH__

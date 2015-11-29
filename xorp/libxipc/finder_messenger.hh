@@ -35,44 +35,45 @@ class FinderMessengerBase;
 /**
  * Base class for classes managing descendents of FinderMessengerBase.
  */
-class FinderMessengerManager {
-public:
-    /**
-     * Empty virtual destructor.
-     */
-    virtual ~FinderMessengerManager() {}
+class FinderMessengerManager 
+{
+    public:
+	/**
+	 * Empty virtual destructor.
+	 */
+	virtual ~FinderMessengerManager() {}
 
-    /**
-     * Method called by messenger constructor.
-     */
-    virtual void messenger_birth_event(FinderMessengerBase*) = 0;
+	/**
+	 * Method called by messenger constructor.
+	 */
+	virtual void messenger_birth_event(FinderMessengerBase*) = 0;
 
-    /**
-     * Method called by messenger destructor.
-     */
-    virtual void messenger_death_event(FinderMessengerBase*) = 0;
+	/**
+	 * Method called by messenger destructor.
+	 */
+	virtual void messenger_death_event(FinderMessengerBase*) = 0;
 
-    /**
-     * Method called before Xrl is dispatched.
-     */
-    virtual void messenger_active_event(FinderMessengerBase*) = 0;
+	/**
+	 * Method called before Xrl is dispatched.
+	 */
+	virtual void messenger_active_event(FinderMessengerBase*) = 0;
 
-    /**
-     * Method called immediately after Xrl is dispatched.
-     */
-    virtual void messenger_inactive_event(FinderMessengerBase*) = 0;
+	/**
+	 * Method called immediately after Xrl is dispatched.
+	 */
+	virtual void messenger_inactive_event(FinderMessengerBase*) = 0;
 
-    /**
-     * Method called when Messenger is unable to continue.  For instance,
-     * network connection lost.
-     */
-    virtual void messenger_stopped_event(FinderMessengerBase*) = 0;
+	/**
+	 * Method called when Messenger is unable to continue.  For instance,
+	 * network connection lost.
+	 */
+	virtual void messenger_stopped_event(FinderMessengerBase*) = 0;
 
-    /**
-     * Method called to tell if FinderMessengerManager instance manages
-     * a particular messenger.
-     */
-    virtual bool manages(const FinderMessengerBase*) const = 0;
+	/**
+	 * Method called to tell if FinderMessengerManager instance manages
+	 * a particular messenger.
+	 */
+	virtual bool manages(const FinderMessengerBase*) const = 0;
 };
 
 /**
@@ -85,89 +86,90 @@ public:
  */
 class FinderMessengerBase : public XrlSender
 {
-public:
-    typedef XrlSender::Callback SendCallback;
+    public:
+	typedef XrlSender::Callback SendCallback;
 
-public:
-    FinderMessengerBase( FinderMessengerManager* fmm,
-			XrlCmdMap& cmds);
-    
-    virtual ~FinderMessengerBase();
+    public:
+	FinderMessengerBase( FinderMessengerManager* fmm,
+		XrlCmdMap& cmds);
 
-    virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
-    virtual bool pending() const = 0;
+	virtual ~FinderMessengerBase();
 
-    XrlCmdMap& command_map();
+	virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
+	virtual bool pending() const = 0;
 
-    void unhook_manager();
-    FinderMessengerManager* manager();
-    
-protected:
-    /**
-     * Find command associated with Xrl and dispatch it.
-     */
-    void dispatch_xrl(uint32_t seqno, const Xrl& x);
-    
-    bool dispatch_xrl_response(uint32_t seqno,
-			       const XrlError& e,
-			       XrlArgs*);
+	XrlCmdMap& command_map();
 
-    bool store_xrl_response(uint32_t seqno, const SendCallback& scb);
-    
-    virtual void reply(uint32_t seqno,
-		       const XrlError& e,
-		       const XrlArgs* reply_args) = 0;
+	void unhook_manager();
+	FinderMessengerManager* manager();
 
-    void response_timeout(uint32_t seqno);
+    protected:
+	/**
+	 * Find command associated with Xrl and dispatch it.
+	 */
+	void dispatch_xrl(uint32_t seqno, const Xrl& x);
 
-private:
-    void
-    dispatch_xrl_cb(const XrlCmdError &e,
+	bool dispatch_xrl_response(uint32_t seqno,
+		const XrlError& e,
+		XrlArgs*);
+
+	bool store_xrl_response(uint32_t seqno, const SendCallback& scb);
+
+	virtual void reply(uint32_t seqno,
+		const XrlError& e,
+		const XrlArgs* reply_args) = 0;
+
+	void response_timeout(uint32_t seqno);
+
+    private:
+	void
+	    dispatch_xrl_cb(const XrlCmdError &e,
 		    const XrlArgs *reply_args,
 		    uint32_t seqno);
 
-    class ResponseState {
-    public:
-	ResponseState(uint32_t		   seqno,
-		      const SendCallback&  cb,
-		      FinderMessengerBase* fmb)
-	    : scb(cb)
+	class ResponseState 
 	{
-	    expiry = EventLoop::instance().new_oneoff_after_ms(RESPONSE_TIMEOUT_MS,
-			callback(fmb,  &FinderMessengerBase::response_timeout,
-				 seqno));
-	}
+	    public:
+		ResponseState(uint32_t		   seqno,
+			const SendCallback&  cb,
+			FinderMessengerBase* fmb)
+		    : scb(cb)
+		{
+		    expiry = EventLoop::instance().new_oneoff_after_ms(RESPONSE_TIMEOUT_MS,
+			    callback(fmb,  &FinderMessengerBase::response_timeout,
+				seqno));
+		}
 #ifdef XORP_USE_USTL
-	ResponseState() { }
+		ResponseState() { }
 #endif
 
-	SendCallback scb;
-	XorpTimer    expiry;
+		SendCallback scb;
+		XorpTimer    expiry;
 
-	static const uint32_t RESPONSE_TIMEOUT_MS = 30000;
-    };
-    typedef map<uint32_t, ResponseState> SeqNoResponseMap;
+		static const uint32_t RESPONSE_TIMEOUT_MS = 30000;
+	};
+	typedef map<uint32_t, ResponseState> SeqNoResponseMap;
 
-    friend class ResponseState;
+	friend class ResponseState;
 
-private:
-    FinderMessengerManager*		_manager;
-    SeqNoResponseMap		 	_expected_responses;
-    XrlCmdMap&			 	_cmds;
+    private:
+	FinderMessengerManager*		_manager;
+	SeqNoResponseMap		 	_expected_responses;
+	XrlCmdMap&			 	_cmds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Inline methods
 
-inline XrlCmdMap&
+    inline XrlCmdMap&
 FinderMessengerBase::command_map()
 {
     return _cmds;
 }
 
 
-inline FinderMessengerManager*
+    inline FinderMessengerManager*
 FinderMessengerBase::manager()
 {
     return _manager;

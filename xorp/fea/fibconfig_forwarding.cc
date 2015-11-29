@@ -36,14 +36,14 @@
 
 
 FibConfigForwarding::FibConfigForwarding(
-    FeaDataPlaneManager& fea_data_plane_manager)
-    : _is_running(false),
-      _fibconfig(fea_data_plane_manager.fibconfig()),
-      _fea_data_plane_manager(fea_data_plane_manager),
-      _orig_unicast_forwarding_enabled4(false),
-      _orig_unicast_forwarding_enabled6(false),
-      _orig_accept_rtadv_enabled6(false),
-      _first_start(true)
+	FeaDataPlaneManager& fea_data_plane_manager)
+: _is_running(false),
+    _fibconfig(fea_data_plane_manager.fibconfig()),
+    _fea_data_plane_manager(fea_data_plane_manager),
+    _orig_unicast_forwarding_enabled4(false),
+    _orig_unicast_forwarding_enabled6(false),
+    _orig_accept_rtadv_enabled6(false),
+    _first_start(true)
 {
 }
 
@@ -51,39 +51,46 @@ FibConfigForwarding::~FibConfigForwarding()
 {
     string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
+    if (stop(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Cannot stop the mechanism for manipulating "
-		   "the forwarding table information: %s",
-		   error_msg.c_str());
+		"the forwarding table information: %s",
+		error_msg.c_str());
     }
 }
 
-int
+    int
 FibConfigForwarding::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (_first_start) {
+    if (_first_start) 
+    {
 	//
 	// Get the old state from the underlying system
 	//
-	if (fea_data_plane_manager().have_ipv4()) {
+	if (fea_data_plane_manager().have_ipv4()) 
+	{
 	    if (unicast_forwarding_enabled4(_orig_unicast_forwarding_enabled4,
-					    error_msg)
-		!= XORP_OK) {
+			error_msg)
+		    != XORP_OK) 
+	    {
 		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
 #ifdef HAVE_IPV6
-	if (fea_data_plane_manager().have_ipv6()) {
+	if (fea_data_plane_manager().have_ipv6()) 
+	{
 	    if (unicast_forwarding_enabled6(_orig_unicast_forwarding_enabled6,
-					    error_msg)
-		!= XORP_OK) {
+			error_msg)
+		    != XORP_OK) 
+	    {
 		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	    if (accept_rtadv_enabled6(_orig_accept_rtadv_enabled6, error_msg)
-		!= XORP_OK) {
+		    != XORP_OK) 
+	    {
 		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
@@ -97,7 +104,7 @@ FibConfigForwarding::start(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwarding::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -114,11 +121,14 @@ FibConfigForwarding::stop(string& error_msg)
     // XXX: Note that if the XORP forwarding entries are retained on shutdown,
     // then we don't restore the state.
     //
-    if (fea_data_plane_manager().have_ipv4()) {
-	if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown4()) {
+    if (fea_data_plane_manager().have_ipv4()) 
+    {
+	if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown4()) 
+	{
 	    if (set_unicast_forwarding_enabled4(_orig_unicast_forwarding_enabled4,
-						error_msg2)
-		!= XORP_OK) {
+			error_msg2)
+		    != XORP_OK) 
+	    {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
 		    error_msg += " ";
@@ -127,19 +137,23 @@ FibConfigForwarding::stop(string& error_msg)
 	}
     }
 #ifdef HAVE_IPV6
-    if (fea_data_plane_manager().have_ipv6()) {
-	if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown6()) {
+    if (fea_data_plane_manager().have_ipv6()) 
+    {
+	if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown6()) 
+	{
 	    if (set_unicast_forwarding_enabled6(_orig_unicast_forwarding_enabled6,
-						error_msg2)
-		!= XORP_OK) {
+			error_msg2)
+		    != XORP_OK) 
+	    {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
 		    error_msg += " ";
 		error_msg += error_msg2;
 	    }
 	    if (set_accept_rtadv_enabled6(_orig_accept_rtadv_enabled6,
-					  error_msg2)
-		!= XORP_OK) {
+			error_msg2)
+		    != XORP_OK) 
+	    {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
 		    error_msg += " ";

@@ -29,7 +29,7 @@
 
 const string Xrl::_finder_protocol = "finder";
 
-const char*
+    const char*
 Xrl::parse_xrl_path(const char* c_str)
 {
     const char *sep, *start;
@@ -40,10 +40,12 @@ Xrl::parse_xrl_path(const char* c_str)
     // Extract protocol
     start = c_str;
     sep = strstr(start, XrlToken::PROTO_TGT_SEP);
-    if (0 == sep) {
+    if (0 == sep) 
+    {
 	// Not found, assume finder protocol
 	_protocol = _finder_protocol;
-    } else {
+    } else 
+    {
 	_protocol = string(start, sep - start);
 	start = sep + TOKEN_BYTES(XrlToken::PROTO_TGT_SEP) - 1;
     }
@@ -57,9 +59,11 @@ Xrl::parse_xrl_path(const char* c_str)
 
     // Extract Command
     sep = strstr(start, XrlToken::CMD_ARGS_SEP);
-    if (sep == 0) {
+    if (sep == 0) 
+    {
 	_command = string(start);
-	if (_command.size() == 0) {
+	if (_command.size() == 0) 
+	{
 	    xorp_throw0(InvalidString);
 	}
 	return 0;
@@ -71,52 +75,52 @@ Xrl::parse_xrl_path(const char* c_str)
 }
 
 Xrl::Xrl(const string&	protocol,
-	 const string&	protocol_target,
-	 const string&	command,
-	 const XrlArgs&	args)
-    : _protocol(protocol), _target(protocol_target), _command(command),
-      _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-      _to_finder(-1), _resolved(false)
+	const string&	protocol_target,
+	const string&	command,
+	const XrlArgs&	args)
+: _protocol(protocol), _target(protocol_target), _command(command),
+    _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+    _to_finder(-1), _resolved(false)
 {
 }
 
 Xrl::Xrl(const string&	target,
-	 const string&	command,
-	 const XrlArgs&	args)
-    : _protocol(_finder_protocol), _target(target), _command(command),
-      _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-      _to_finder(-1), _resolved(false)
+	const string&	command,
+	const XrlArgs&	args)
+: _protocol(_finder_protocol), _target(target), _command(command),
+    _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+    _to_finder(-1), _resolved(false)
 {
 }
 
 Xrl::Xrl(const string& protocol,
-	 const string& protocol_target,
-	 const string& command)
-    : _protocol(protocol), _target(protocol_target), _command(command),
-      _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false)
+	const string& protocol_target,
+	const string& command)
+: _protocol(protocol), _target(protocol_target), _command(command),
+    _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+    _resolved(false)
 {
 }
 
 Xrl::Xrl(const string& target,
-	 const string& command)
-    : _protocol(_finder_protocol), _target(target), _command(command),
-      _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false)
+	const string& command)
+: _protocol(_finder_protocol), _target(target), _command(command),
+    _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+    _resolved(false)
 {
 }
 
 Xrl::Xrl(const char* target,
-	 const char* command)
-	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(false)
+	const char* command)
+: _protocol(_finder_protocol), _target(target), _command(command),
+    _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+    _resolved(false)
 {
 }
 
-Xrl::Xrl(const char* c_str) throw (InvalidString) 
-        : _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(false)
+    Xrl::Xrl(const char* c_str) throw (InvalidString) 
+: _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+    _to_finder(-1), _resolved(false)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -124,19 +128,22 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
     const char* start = parse_xrl_path(c_str);
 
     // Extract Arguments and pass to XrlArgs string constructor
-    if (0 != start && *start != '\0') {
-	try {
+    if (0 != start && *start != '\0') 
+    {
+	try 
+	{
 	    _args = XrlArgs(start);
-	} catch (const InvalidString& is) {
+	} catch (const InvalidString& is) 
+	{
 	    debug_msg("Failed to restore xrl args:\n\t\"%s\"", start);
 	    throw is;
 	}
     }
 }
 
-Xrl::Xrl() 
-    : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false)
+    Xrl::Xrl() 
+: _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+    _resolved(false)
 {
 }
 
@@ -145,7 +152,7 @@ Xrl::Xrl(const Xrl& x)
     copy(x);
 }
 
-Xrl&
+    Xrl&
 Xrl::operator=(const Xrl& rhs)
 {
     copy(rhs);
@@ -153,7 +160,7 @@ Xrl::operator=(const Xrl& rhs)
     return *this;
 }
 
-void
+    void
 Xrl::copy(const Xrl& x)
 {
     _protocol	    = x._protocol;
@@ -178,7 +185,8 @@ string
 Xrl::str() const
 {
     string s = string_no_args();
-    if (args().size()) {
+    if (args().size()) 
+    {
 	return s + string(XrlToken::CMD_ARGS_SEP) + args().str();
     }
     return s;
@@ -201,11 +209,12 @@ Xrl::is_resolved() const
 size_t
 Xrl::packed_bytes() const
 {
-    if (!_packed_bytes) {
-	    if (!_sna_atom)
-		_sna_atom = new XrlAtom(this->string_no_args());
+    if (!_packed_bytes) 
+    {
+	if (!_sna_atom)
+	    _sna_atom = new XrlAtom(this->string_no_args());
 
-	    _packed_bytes = args().packed_bytes(_sna_atom);
+	_packed_bytes = args().packed_bytes(_sna_atom);
     }
 
     return _packed_bytes;
@@ -219,7 +228,7 @@ Xrl::pack(uint8_t* buffer, size_t buffer_bytes) const
     return args().pack(buffer, buffer_bytes, _sna_atom);
 }
 
-size_t
+    size_t
 Xrl::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
     args().clear();
@@ -245,7 +254,7 @@ Xrl::set_args(const Xrl& xrl) const
     _argp = &xrl._args;
 }
 
-size_t
+    size_t
 Xrl::unpack_command(string& cmd, const uint8_t* in, size_t len)
 {
     size_t rc, used = 0;
@@ -274,13 +283,16 @@ Xrl::unpack_command(string& cmd, const uint8_t* in, size_t len)
     // OK now we parse out the command.  We can't use libc functions because the
     // string aint 0 terminated.
     cnt = 0;
-    for (uint32_t i = 0; i < tl; i++) {
-	if (cnt == 3) {
+    for (uint32_t i = 0; i < tl; i++) 
+    {
+	if (cnt == 3) 
+	{
 	    p = t;
 	    cnt++;
 	}
 
-	if (cnt == 4) {
+	if (cnt == 4) 
+	{
 	    if (*p++ == '?') // end of command
 		break;
 
@@ -297,7 +309,7 @@ Xrl::unpack_command(string& cmd, const uint8_t* in, size_t len)
     return used;
 }
 
-size_t
+    size_t
 Xrl::fill(const uint8_t* in, size_t len)
 {
     _packed_bytes = 0;
@@ -308,15 +320,16 @@ Xrl::fill(const uint8_t* in, size_t len)
 bool
 Xrl::to_finder() const
 {
-    if (_to_finder == -1) {
+    if (_to_finder == -1) 
+    {
 	_to_finder = (protocol() == _finder_protocol 
-	              && target().substr(0, 6) == _finder_protocol);
+		&& target().substr(0, 6) == _finder_protocol);
     }
 
     return _to_finder;
 }
 
-void
+    void
 Xrl::set_target(const char* target)
 {
     // XXX slowish - maybe we can use pointer value in some cases.
@@ -328,7 +341,7 @@ Xrl::set_target(const char* target)
     _target.assign(target);
 }
 
-void
+    void
 Xrl::clear_cache()
 {
     _string_no_args = "";

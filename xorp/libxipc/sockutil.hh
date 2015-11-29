@@ -86,7 +86,7 @@ string address_slash_port(const string& addr, uint16_t port);
  * @return true if address_slash_port was split successfully.
  */
 bool split_address_slash_port(const string& address_slash_port,
-			      string& address, uint16_t& port);
+	string& address, uint16_t& port);
 
 /**
  * Lookup an IPv4 address by name.

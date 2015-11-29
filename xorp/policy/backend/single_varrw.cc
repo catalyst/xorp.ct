@@ -35,10 +35,10 @@ SingleVarRW::SingleVarRW() : _trashc(0), _did_first_read(false), _pt(NULL)
 SingleVarRW::~SingleVarRW()
 {
     for (unsigned i = 0; i < _trashc; i++)
-        delete _trash[i];
+	delete _trash[i];
 }
 
-const Element&
+    const Element&
 SingleVarRW::read(const Id& id)
 {
     // Maybe there was a write before a read for this variable, if so, just
@@ -46,10 +46,12 @@ SingleVarRW::read(const Id& id)
     const Element* e = _elems[id];
 
     // nope... no value found.
-    if(!e) {
+    if(!e) 
+    {
 
 	// if it's the first read, inform the client.
-	if(!_did_first_read) {
+	if(!_did_first_read) 
+	{
 	    start_read();
 	    _did_first_read = true;
 
@@ -62,7 +64,7 @@ SingleVarRW::read(const Id& id)
 	}
 	// client already had chance to initialize... but apparently didn't...
 	else
-	   initialize(id, single_read(id));
+	    initialize(id, single_read(id));
 
 	// the client may have initialized the variables after the start_read
 	// marker, so try reading again...
@@ -76,7 +78,7 @@ SingleVarRW::read(const Id& id)
     return *e;
 }
 
-void
+    void
 SingleVarRW::write(const Id& id, const Element& e)
 {
     // XXX no paranoid checks on what we write
@@ -85,13 +87,14 @@ SingleVarRW::write(const Id& id, const Element& e)
     _modified[id] = true;
 }
 
-void
+    void
 SingleVarRW::sync()
 {
     bool first = true;
 
     // it's faster doing it this way rather than STL set if VAR_MAX is small...
-    for (unsigned i = 0; i < VAR_MAX; i++) {
+    for (unsigned i = 0; i < VAR_MAX; i++) 
+    {
 	if (!_modified[i])
 	    continue;
 
@@ -99,21 +102,24 @@ SingleVarRW::sync()
 	XLOG_ASSERT(e);
 	_modified[i] = false;
 
-	if (first) {
+	if (first) 
+	{
 	    // alert derived class we are committing
 	    start_write();
 	    first = false;
 	}
 
-	if (_pt) {
-	    switch (i) {
-	    case VAR_POLICYTAGS:
-		_pt->set_ptags(*e);
-		continue;
+	if (_pt) 
+	{
+	    switch (i) 
+	    {
+		case VAR_POLICYTAGS:
+		    _pt->set_ptags(*e);
+		    continue;
 
-	    case VAR_TAG:
-		_pt->set_tag(*e);
-		continue;
+		case VAR_TAG:
+		    _pt->set_tag(*e);
+		    continue;
 	    }
 	}
 
@@ -128,11 +134,11 @@ SingleVarRW::sync()
 
     // delete all garbage
     for (unsigned i = 0; i < _trashc; i++)
-        delete _trash[i];
+	delete _trash[i];
     _trashc = 0;
 }
 
-void
+    void
 SingleVarRW::initialize(const Id& id, Element* e)
 {
     // check if we already have a value for a variable.
@@ -142,7 +148,8 @@ SingleVarRW::initialize(const Id& id, Element* e)
     // Consider a variable being written to before any reads. In such a case, the
     // SingleVarRW will already have the correct value for that variable, so we
     // need to ignore any initialize() called for that variable.
-    if(_elems[id]) {
+    if(_elems[id]) 
+    {
 	if(e)
 	    delete e;
 	return;
@@ -161,7 +168,7 @@ SingleVarRW::initialize(const Id& id, Element* e)
     _trashc++;
 }
 
-void
+    void
 SingleVarRW::initialize(PolicyTags& pt)
 {
     _pt = &pt;

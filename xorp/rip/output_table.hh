@@ -39,26 +39,26 @@
  */
 template <typename A>
 class OutputTable :
-    public OutputBase<A>
+	public OutputBase<A>
 {
-public:
-    OutputTable( Port<A>&	port,
-		PacketQueue<A>&	pkt_queue,
-		RouteDB<A>&	rdb,
-		const A&	ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
-		uint16_t	ip_port = RIP_AF_CONSTANTS<A>::IP_PORT)
-	: OutputBase<A>( port, pkt_queue, ip_addr, ip_port),
-	  _rw(rdb), _rw_valid(false)
-    {}
+	public:
+		OutputTable( Port<A>&	port,
+				PacketQueue<A>&	pkt_queue,
+				RouteDB<A>&	rdb,
+				const A&	ip_addr = RIP_AF_CONSTANTS<A>::IP_GROUP(),
+				uint16_t	ip_port = RIP_AF_CONSTANTS<A>::IP_PORT)
+			: OutputBase<A>( port, pkt_queue, ip_addr, ip_port),
+			_rw(rdb), _rw_valid(false)
+	{}
 
-protected:
-    void output_packet();
-    void start_output_processing();
-    void stop_output_processing();
+	protected:
+		void output_packet();
+		void start_output_processing();
+		void stop_output_processing();
 
-private:
-    RouteWalker<A>	_rw;		// RouteWalker
-    bool		_rw_valid;	// RouteWalker is valid (no reset req).
+	private:
+		RouteWalker<A>	_rw;		// RouteWalker
+		bool		_rw_valid;	// RouteWalker is valid (no reset req).
 };
 
 #endif // __RIP_OUTPUT_TABLE_HH__

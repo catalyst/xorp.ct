@@ -44,7 +44,8 @@
 // XXX: must be consistent with xorp_module_id definition
 // (TODO: a temp. solution)
 // TODO: the _4/6 suffix is a temp. solution
-static const char *_xorp_module_name[][2] = {
+static const char *_xorp_module_name[][2] = 
+{
     { "XORP_MODULE_NULL",	"XORP_MODULE_NULL" },	// 0
     { "fea",			"fea"		},	// 1
     { "MFEA_4",			"MFEA_6"	},	// 2
@@ -85,22 +86,23 @@ static const char *_xorp_module_name[][2] = {
  * 
  * Return value: C string with the module name.
  **/
-const char *
+    const char *
 xorp_module_name(int family, xorp_module_id module_id)
 {
-    if (! is_valid_module_id(module_id)) {
+    if (! is_valid_module_id(module_id)) 
+    {
 	XLOG_ERROR("Invalid module_id = %d", module_id);
 	return (NULL);
     }
-    
+
     if (family == AF_INET)
 	return (_xorp_module_name[module_id][0]);
-    
+
 #ifdef HAVE_IPV6
     if (family == AF_INET6)
 	return (_xorp_module_name[module_id][1]);
 #endif // HAVE_IPV6
-    
+
     XLOG_ERROR("Invalid address family = %d", family);
     return (NULL);
 }
@@ -114,15 +116,16 @@ xorp_module_name(int family, xorp_module_id module_id)
  * Return value: The module ID if @module_name is a valid module name,
  * otherwise %XORP_MODULE_NULL.
  **/
-xorp_module_id
+    xorp_module_id
 xorp_module_name2id(const char *module_name)
 {
-    for (int i = XORP_MODULE_MIN; i < XORP_MODULE_MAX; i++) {
+    for (int i = XORP_MODULE_MIN; i < XORP_MODULE_MAX; i++) 
+    {
 	if ((strcmp(module_name, _xorp_module_name[i][0]) == 0)
-	    || (strcmp(module_name, _xorp_module_name[i][1]) == 0))
+		|| (strcmp(module_name, _xorp_module_name[i][1]) == 0))
 	    return (static_cast<xorp_module_id>(i));
     }
-    
+
     return (XORP_MODULE_NULL);
 }
 
@@ -134,12 +137,12 @@ xorp_module_name2id(const char *module_name)
  * 
  * Return value: true if @module_id is valid, otherwise false.
  **/
-bool
+    bool
 is_valid_module_id(xorp_module_id module_id)
 {
     if ((XORP_MODULE_MIN <= module_id) && (module_id < XORP_MODULE_MAX))
 	return (true);
-    
+
     return (false);
 }
 
@@ -151,14 +154,15 @@ is_valid_module_id(xorp_module_id module_id)
  * 
  * Proto unit constructor.
  **/
-ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
-    : _family(init_family),
-      _module_id(init_module_id)
+    ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
+: _family(init_family),
+    _module_id(init_module_id)
 {
-    if (! is_valid_module_id(init_module_id)) {
+    if (! is_valid_module_id(init_module_id)) 
+    {
 	XLOG_FATAL("Invalid module_id = %d", init_module_id);
     }
-    
+
     _comm_handler	= -1;
     _proto_version	= 0;
     _proto_version_default = 0;
@@ -167,5 +171,5 @@ ProtoUnit::ProtoUnit(int init_family, xorp_module_id init_module_id)
 
 ProtoUnit::~ProtoUnit()
 {
-    
+
 }

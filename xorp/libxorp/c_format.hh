@@ -74,57 +74,57 @@ template <class A, class B, class C, class D, class E, class F, class G>
 inline int arg_count(A,B,C,D,E,F,G) { return 7; }
 
 template <class A, class B, class C, class D, class E, class F, class G,
-	  class H>
-inline int arg_count(A,B,C,D,E,F,G,H) { return 8; }
+	 class H>
+	 inline int arg_count(A,B,C,D,E,F,G,H) { return 8; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I>
-inline int arg_count(A,B,C,D,E,F,G,H,I) { return 9; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I) { return 9; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J) { return 10; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J) { return 10; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K) { return 11; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K) { return 11; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L) { return 12; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L) { return 12; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L, class M>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M) { return 13; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L, class M>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M) { return 13; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L, class M, class N>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N) { return 14; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L, class M, class N>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N) { return 14; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L, class M, class N,
-	  class O>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O) { return 15; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L, class M, class N,
+	 class O>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O) { return 15; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L, class M, class N,
-	  class O, class P>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P) { return 16; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L, class M, class N,
+	 class O, class P>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P) { return 16; }
 
-template <class A, class B, class C, class D, class E, class F, class G,
-	  class H, class I, class J, class K, class L, class M, class N,
-	  class O, class P, class Q>
-inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q) { return 17; }
+	 template <class A, class B, class C, class D, class E, class F, class G,
+	 class H, class I, class J, class K, class L, class M, class N,
+	 class O, class P, class Q>
+	 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q) { return 17; }
 
-void c_format_validate(const char* fmt, int n);
+	 void c_format_validate(const char* fmt, int n);
 
 #if defined(__printflike)
-string do_c_format(const char* fmt, ...) __printflike(1,2);
+	 string do_c_format(const char* fmt, ...) __printflike(1,2);
 #elif (defined(__GNUC__))
 string do_c_format(const char* fmt, ...)
     __attribute__((__format__(printf, 1, 2)));
 #else
-string do_c_format(const char* fmt, ...);
+    string do_c_format(const char* fmt, ...);
 #endif
 
 #endif // __LIBXORP_C_FORMAT_HH__

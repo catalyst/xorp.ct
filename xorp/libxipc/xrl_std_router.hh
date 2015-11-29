@@ -39,40 +39,41 @@
  * for simple use of XrlRouter for common cases.
  * for entities in a XORP Router.  A single process may have multiple
  */
-class XrlStdRouter : public XrlRouter {
-public:
-    XrlStdRouter( const char* class_name,
-		 bool unix_socket = UNIX_SOCKET_DEFAULT);
+class XrlStdRouter : public XrlRouter 
+{
+    public:
+	XrlStdRouter( const char* class_name,
+		bool unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter( const char*	class_name,
-		 IPv4		finder_address,
-		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
+	XrlStdRouter( const char*	class_name,
+		IPv4		finder_address,
+		bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter( const char*	class_name,
-		 IPv4		finder_address,
-		 uint16_t	finder_port,
-		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
+	XrlStdRouter( const char*	class_name,
+		IPv4		finder_address,
+		uint16_t	finder_port,
+		bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter( const char*	class_name,
-		 const char*	finder_address,
-		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
+	XrlStdRouter( const char*	class_name,
+		const char*	finder_address,
+		bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    XrlStdRouter( const char*	class_name,
-		 const char*	finder_address,
-		 uint16_t	finder_port,
-		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
+	XrlStdRouter( const char*	class_name,
+		const char*	finder_address,
+		uint16_t	finder_port,
+		bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    virtual ~XrlStdRouter();
+	virtual ~XrlStdRouter();
 
-    virtual string toString() const;
+	virtual string toString() const;
 
-private:
-    void	   construct(bool unix_socket);
-    void	   create_unix_listener();
-    XrlPFListener* create_listener();
+    private:
+	void	   construct(bool unix_socket);
+	void	   create_unix_listener();
+	XrlPFListener* create_listener();
 
-    XrlPFListener* _unix;
-    XrlPFListener* _l;
+	XrlPFListener* _unix;
+	XrlPFListener* _l;
 };
 
 #endif // __LIBXIPC_XRL_STD_ROUTER_HH__

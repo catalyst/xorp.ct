@@ -29,18 +29,20 @@
 
 #include "profile_vars.hh"
 
-struct profile_vars {
+struct profile_vars 
+{
     string var;
     string comment;
-} profile_vars[] = {
+} profile_vars[] = 
+{
     { profile_route_in, 	"Routes entering FEA" },
     { profile_route_out,	"Routes being sent to the KERNEL" }
 };
 
-void
+    void
 initialize_profiling_variables(Profile& p)
 {
     for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
-	 i++)
+	    i++)
 	p.create(profile_vars[i].var, profile_vars[i].comment);
 }

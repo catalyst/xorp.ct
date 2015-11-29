@@ -48,44 +48,50 @@
 #include "olsr/olsr.hh"
 #include "olsr/test_common.hh"
 
-class ClearDatabase {
-public:
-    ClearDatabase(XrlStdRouter& xrl_router)
-	: _xrl_router(xrl_router),
-	_done(false), _fail(false)
+class ClearDatabase 
+{
+    public:
+	ClearDatabase(XrlStdRouter& xrl_router)
+	    : _xrl_router(xrl_router),
+	    _done(false), _fail(false)
     {
     }
 
-    void start() {
-	XrlOlsr4V0p1Client olsr4(&_xrl_router);
-	olsr4.send_clear_database("olsr4",
-				  callback(this, &ClearDatabase::response));
-    }
+	void start() 
+	{
+	    XrlOlsr4V0p1Client olsr4(&_xrl_router);
+	    olsr4.send_clear_database("olsr4",
+		    callback(this, &ClearDatabase::response));
+	}
 
-    bool busy() {
-	return !_done;
-    }
+	bool busy() 
+	{
+	    return !_done;
+	}
 
-    bool fail() {
-	return _fail;
-    }
+	bool fail() 
+	{
+	    return _fail;
+	}
 
-private:
-    void response(const XrlError& error) {
-	_done = true;
-	if (XrlError::OKAY() != error) {
+    private:
+	void response(const XrlError& error) 
+	{
+	    _done = true;
+	    if (XrlError::OKAY() != error) 
+	    {
 		XLOG_WARNING("Attempt to clear database");
 		_fail = true;
 		return;
+	    }
 	}
-    }
-private:
-    XrlStdRouter &_xrl_router;
-    bool _done;
-    bool _fail;
+    private:
+	XrlStdRouter &_xrl_router;
+	bool _done;
+	bool _fail;
 };
 
-int
+    int
 usage(const char *myname)
 {
     fprintf(stderr, "usage: %s\n", myname);
@@ -93,7 +99,7 @@ usage(const char *myname)
     return -1;
 }
 
-int 
+    int 
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -107,7 +113,8 @@ main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
-    try {
+    try 
+    {
 	XrlStdRouter xrl_router( "clear_database");
 
 	debug_msg("Waiting for router\n");
@@ -120,12 +127,14 @@ main(int argc, char **argv)
 	while (clear_database.busy())
 	    EventLoop::instance().run();
 
-	if (clear_database.fail()) {
+	if (clear_database.fail()) 
+	{
 	    XLOG_ERROR("Failed to clear database");
 	    return -1;
 	}
 
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

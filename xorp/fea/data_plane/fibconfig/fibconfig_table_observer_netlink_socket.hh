@@ -30,55 +30,57 @@
 
 
 class FibConfigTableObserverNetlinkSocket : public FibConfigTableObserver,
-					    public NetlinkSocket,
-					    public NetlinkSocketObserver {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigTableObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public NetlinkSocket,
+	public NetlinkSocketObserver 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigTableObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigTableObserverNetlinkSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigTableObserverNetlinkSocket();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(vector<uint8_t>& buffer);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    // TODO:  Remove this..it just calls receive_data
-    void netlink_socket_data(vector<uint8_t>& buffer);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl) {
-	return NetlinkSocket::notify_table_id_change(new_tbl);
-    }
-    
-private:
+		/**
+		 * Receive data from the underlying system.
+		 * 
+		 * @param buffer the buffer with the received data.
+		 */
+		virtual void receive_data(vector<uint8_t>& buffer);
+
+		// TODO:  Remove this..it just calls receive_data
+		void netlink_socket_data(vector<uint8_t>& buffer);
+
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl) 
+		{
+			return NetlinkSocket::notify_table_id_change(new_tbl);
+		}
+
+	private:
 };
 
 #endif

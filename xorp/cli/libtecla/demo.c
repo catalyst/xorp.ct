@@ -43,67 +43,69 @@
 
 int main(int argc, char *argv[])
 {
-  char *line;             /* A line of input */
-  GetLine *gl;            /* The line editor */
-  int major,minor,micro;  /* The version number of the library */
-/*
- * Create the line editor, specifying a max line length of 500 bytes,
- * and 10000 bytes to allocate to storage of historical input lines.
- */
-  gl = new_GetLine(500, 5000);
-  if(!gl)
-    return 1;
-/*
- * If the user has the LC_CTYPE or LC_ALL environment variables set,
- * enable display of characters corresponding to the specified locale.
- */
-  (void) setlocale(LC_CTYPE, "");
-/*
- * Lookup and display the version number of the library.
- */
-  libtecla_version(&major, &minor, &micro);
-  printf("Welcome to the demo program of libtecla version %d.%d.%d\n",
-	 major, minor, micro);
-/*
- * Load history.
- */
-  (void) gl_load_history(gl, "~/.demo_history", "#");
-/*
- * Read lines of input from the user and print them to stdout.
- */
-  do {
-/*
- * Get a new line from the user.
- */
-    line = gl_get_line(gl, "$ ", NULL, 0);
-    if(!line)
-      break;
-/*
- * Display what was entered.
- */
-    if(printf("You entered: %s", line) < 0 || fflush(stdout))
-      break;
-/*
- * If the user types "exit", quit the program.
- */
-    if(strcmp(line, "exit\n")==0)
-      break;
-    else if(strcmp(line, "history\n")==0)
-      gl_show_history(gl, stdout, "%N  %T   %H\n", 0, -1);
-    else if(strcmp(line, "size\n")==0) {
-      GlTerminalSize size = gl_terminal_size(gl, 80, 24);
-      printf("Terminal size = %d columns x %d lines.\n", size.ncolumn,
-	     size.nline);
-    };
-  } while(1);
-/*
- * Save historical command lines.
- */
-  (void) gl_save_history(gl, "~/.demo_history", "#", -1);
-/*
- * Clean up.
- */
-  gl = del_GetLine(gl);
-  return 0;
+	char *line;             /* A line of input */
+	GetLine *gl;            /* The line editor */
+	int major,minor,micro;  /* The version number of the library */
+	/*
+	 * Create the line editor, specifying a max line length of 500 bytes,
+	 * and 10000 bytes to allocate to storage of historical input lines.
+	 */
+	gl = new_GetLine(500, 5000);
+	if(!gl)
+		return 1;
+	/*
+	 * If the user has the LC_CTYPE or LC_ALL environment variables set,
+	 * enable display of characters corresponding to the specified locale.
+	 */
+	(void) setlocale(LC_CTYPE, "");
+	/*
+	 * Lookup and display the version number of the library.
+	 */
+	libtecla_version(&major, &minor, &micro);
+	printf("Welcome to the demo program of libtecla version %d.%d.%d\n",
+			major, minor, micro);
+	/*
+	 * Load history.
+	 */
+	(void) gl_load_history(gl, "~/.demo_history", "#");
+	/*
+	 * Read lines of input from the user and print them to stdout.
+	 */
+	do 
+	{
+		/*
+		 * Get a new line from the user.
+		 */
+		line = gl_get_line(gl, "$ ", NULL, 0);
+		if(!line)
+			break;
+		/*
+		 * Display what was entered.
+		 */
+		if(printf("You entered: %s", line) < 0 || fflush(stdout))
+			break;
+		/*
+		 * If the user types "exit", quit the program.
+		 */
+		if(strcmp(line, "exit\n")==0)
+			break;
+		else if(strcmp(line, "history\n")==0)
+			gl_show_history(gl, stdout, "%N  %T   %H\n", 0, -1);
+		else if(strcmp(line, "size\n")==0) 
+		{
+			GlTerminalSize size = gl_terminal_size(gl, 80, 24);
+			printf("Terminal size = %d columns x %d lines.\n", size.ncolumn,
+					size.nline);
+		};
+	} while(1);
+	/*
+	 * Save historical command lines.
+	 */
+	(void) gl_save_history(gl, "~/.demo_history", "#", -1);
+	/*
+	 * Clean up.
+	 */
+	gl = del_GetLine(gl);
+	return 0;
 }
 

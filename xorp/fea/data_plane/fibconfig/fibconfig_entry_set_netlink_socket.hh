@@ -30,86 +30,87 @@
 
 
 class FibConfigEntrySetNetlinkSocket : public FibConfigEntrySet,
-				       public NetlinkSocket {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigEntrySetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public NetlinkSocket 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigEntrySetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigEntrySetNetlinkSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigEntrySetNetlinkSocket();
 
-    /**
-     * Start operation.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
+		/**
+		 * Start operation.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Stop operation.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Stop operation.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /**
-     * Add a single IPv4 forwarding entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param fte the entry to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_entry4(const Fte4& fte);
+		/**
+		 * Add a single IPv4 forwarding entry.
+		 *
+		 * Must be within a configuration interval.
+		 *
+		 * @param fte the entry to add.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int add_entry4(const Fte4& fte);
 
-    /**
-     * Delete a single IPv4 forwarding entry.
-     *
-     * Must be with a configuration interval.
-     *
-     * @param fte the entry to delete. Only destination and netmask are used.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_entry4(const Fte4& fte);
+		/**
+		 * Delete a single IPv4 forwarding entry.
+		 *
+		 * Must be with a configuration interval.
+		 *
+		 * @param fte the entry to delete. Only destination and netmask are used.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_entry4(const Fte4& fte);
 
-    /**
-     * Add a single IPv6 forwarding entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param fte the entry to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_entry6(const Fte6& fte);
+		/**
+		 * Add a single IPv6 forwarding entry.
+		 *
+		 * Must be within a configuration interval.
+		 *
+		 * @param fte the entry to add.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int add_entry6(const Fte6& fte);
 
-    /**
-     * Delete a single IPv6 forwarding entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param fte the entry to delete. Only destination and netmask are used.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_entry6(const Fte6& fte);
+		/**
+		 * Delete a single IPv6 forwarding entry.
+		 *
+		 * Must be within a configuration interval.
+		 *
+		 * @param fte the entry to delete. Only destination and netmask are used.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_entry6(const Fte6& fte);
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl);
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl);
 
-private:
-    int add_entry(const FteX& fte);
-    int delete_entry(const FteX& fte);
+	private:
+		int add_entry(const FteX& fte);
+		int delete_entry(const FteX& fte);
 
-    NetlinkSocketReader _ns_reader;
+		NetlinkSocketReader _ns_reader;
 };
 
 #endif

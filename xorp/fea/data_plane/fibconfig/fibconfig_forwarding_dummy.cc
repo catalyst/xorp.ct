@@ -38,11 +38,11 @@
 
 
 FibConfigForwardingDummy::FibConfigForwardingDummy(
-    FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigForwarding(fea_data_plane_manager),
-      _unicast_forwarding_enabled4(false),
-      _unicast_forwarding_enabled6(false),
-      _accept_rtadv_enabled6(false)
+	FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigForwarding(fea_data_plane_manager),
+    _unicast_forwarding_enabled4(false),
+    _unicast_forwarding_enabled6(false),
+    _accept_rtadv_enabled6(false)
 {
 }
 
@@ -52,7 +52,7 @@ FibConfigForwardingDummy::~FibConfigForwardingDummy()
 
 int
 FibConfigForwardingDummy::unicast_forwarding_enabled4(bool& ret_value,
-						      string& error_msg) const
+	string& error_msg) const
 {
     UNUSED(error_msg);
     ret_value = _unicast_forwarding_enabled4;
@@ -62,7 +62,7 @@ FibConfigForwardingDummy::unicast_forwarding_enabled4(bool& ret_value,
 
 int
 FibConfigForwardingDummy::unicast_forwarding_enabled6(bool& ret_value,
-						      string& error_msg) const
+	string& error_msg) const
 {
     UNUSED(error_msg);
     ret_value = _unicast_forwarding_enabled6;
@@ -72,7 +72,7 @@ FibConfigForwardingDummy::unicast_forwarding_enabled6(bool& ret_value,
 
 int
 FibConfigForwardingDummy::accept_rtadv_enabled6(bool& ret_value,
-						string& error_msg) const
+	string& error_msg) const
 {
     UNUSED(error_msg);
     ret_value = _accept_rtadv_enabled6;
@@ -80,9 +80,9 @@ FibConfigForwardingDummy::accept_rtadv_enabled6(bool& ret_value,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingDummy::set_unicast_forwarding_enabled4(bool v,
-							  string& error_msg)
+	string& error_msg)
 {
     UNUSED(error_msg);
     _unicast_forwarding_enabled4 = v;
@@ -90,9 +90,9 @@ FibConfigForwardingDummy::set_unicast_forwarding_enabled4(bool v,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingDummy::set_unicast_forwarding_enabled6(bool v,
-							  string& error_msg)
+	string& error_msg)
 {
     UNUSED(error_msg);
     _unicast_forwarding_enabled6 = v;
@@ -100,7 +100,7 @@ FibConfigForwardingDummy::set_unicast_forwarding_enabled6(bool v,
     return (XORP_OK);
 }
 
-int
+    int
 FibConfigForwardingDummy::set_accept_rtadv_enabled6(bool v, string& error_msg)
 {
     UNUSED(error_msg);

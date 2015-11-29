@@ -40,209 +40,212 @@
  * class.
  */
 template<class A>
-class OriginTable : public RouteTable<A> {
-public:
-    typedef Trie<A, const IPRouteEntry<A>*> RouteTrie;
+class OriginTable : public RouteTable<A> 
+{
+	public:
+		typedef Trie<A, const IPRouteEntry<A>*> RouteTrie;
 
-public:
-    /**
-     * OriginTable constructor.
-     *
-     * @param tablename typically the name of the routing protocol that
-     * supplies routes to this origin table, or "connected" for the
-     * OriginTable that holds directly connected routes, or "static"
-     * for the OriginTable that holds locally configured static
-     * routes.
-     * @param admin_distance the default administrative distance for
-     * routes in this table.
-     * @param protocol_type the routing protocol type (@ref ProtocolType).
-     */
-    OriginTable(const string& tablename, uint16_t admin_distance);
+	public:
+		/**
+		 * OriginTable constructor.
+		 *
+		 * @param tablename typically the name of the routing protocol that
+		 * supplies routes to this origin table, or "connected" for the
+		 * OriginTable that holds directly connected routes, or "static"
+		 * for the OriginTable that holds locally configured static
+		 * routes.
+		 * @param admin_distance the default administrative distance for
+		 * routes in this table.
+		 * @param protocol_type the routing protocol type (@ref ProtocolType).
+		 */
+		OriginTable(const string& tablename, uint16_t admin_distance);
 
-    /**
-     * OriginTable destructor.
-     */
-    virtual ~OriginTable();
+		/**
+		 * OriginTable destructor.
+		 */
+		virtual ~OriginTable();
 
-    /**
-     * Add a route to the OriginTable.  The route must not already be
-     * in the OriginTable.
-     * Route is passed to add_route as pointer to avoid unnecessary
-     * calling of IPRouteEntry<A> constructors.
-     * OriginTable IS RESPONSIBLE for freeing the memory of the passed pointer.
-     * Callers MUST NOT free, or change the memory of pointer after it was passed to this function!
-     *
-     * @param route the pointer to route entry to be added.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_route(IPRouteEntry<A>* route);
+		/**
+		 * Add a route to the OriginTable.  The route must not already be
+		 * in the OriginTable.
+		 * Route is passed to add_route as pointer to avoid unnecessary
+		 * calling of IPRouteEntry<A> constructors.
+		 * OriginTable IS RESPONSIBLE for freeing the memory of the passed pointer.
+		 * Callers MUST NOT free, or change the memory of pointer after it was passed to this function!
+		 *
+		 * @param route the pointer to route entry to be added.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int add_route(IPRouteEntry<A>* route);
 
-    int add_egp_route(const IPRouteEntry<A>&) { return XORP_ERROR; };
-    int add_igp_route(const IPRouteEntry<A>&) { return XORP_ERROR; };
+		int add_egp_route(const IPRouteEntry<A>&) { return XORP_ERROR; };
+		int add_igp_route(const IPRouteEntry<A>&) { return XORP_ERROR; };
 
-    /**
-     * Delete a route from the OriginTable.
-     *
-     * @param net the subnet of the route entry to be deleted.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_route(const IPNet<A>& net, bool b = false);
+		/**
+		 * Delete a route from the OriginTable.
+		 *
+		 * @param net the subnet of the route entry to be deleted.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_route(const IPNet<A>& net, bool b = false);
 
-    int delete_igp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
-    int delete_egp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
+		int delete_igp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
+		int delete_egp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
 
-    /**
-     * Delete all the routes that are in this OriginTable.  The
-     * deletion is not propagated downstream, so this is only useful
-     * when shutting down the RIB.
-     */
-    void delete_all_routes();
+		/**
+		 * Delete all the routes that are in this OriginTable.  The
+		 * deletion is not propagated downstream, so this is only useful
+		 * when shutting down the RIB.
+		 */
+		void delete_all_routes();
 
-    /**
-     * Delete all the routes that are in this OriginTable, and
-     * propagate the deletions downstream.
-     */
-    void routing_protocol_shutdown();
+		/**
+		 * Delete all the routes that are in this OriginTable, and
+		 * propagate the deletions downstream.
+		 */
+		void routing_protocol_shutdown();
 
-    /**
-     * Lookup a specific subnet to see if it is in this OriginTable.
-     *
-     * @param net the subnet to look up.
-     * @return a pointer to the route entry if it exists, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
+		/**
+		 * Lookup a specific subnet to see if it is in this OriginTable.
+		 *
+		 * @param net the subnet to look up.
+		 * @return a pointer to the route entry if it exists, NULL otherwise.
+		 */
+		const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
 
-    /**
-     * Lookup an IP address to get the most specific (longest prefix
-     * length) route in the OriginTable that matches this address.
-     *
-     * @param addr the IP address to look up.
-     * @return a pointer to the most specific route entry if any entry
-     * matches, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_ip_route(const A& addr) const;
+		/**
+		 * Lookup an IP address to get the most specific (longest prefix
+		 * length) route in the OriginTable that matches this address.
+		 *
+		 * @param addr the IP address to look up.
+		 * @return a pointer to the most specific route entry if any entry
+		 * matches, NULL otherwise.
+		 */
+		const IPRouteEntry<A>* lookup_ip_route(const A& addr) const;
 
-    /**
-    * Changes the admin distance
-    **/
-    void change_admin_distance( uint32_t ad ){ _admin_distance = ad; }
+		/**
+		 * Changes the admin distance
+		 **/
+		void change_admin_distance( uint32_t ad ){ _admin_distance = ad; }
 
-    /**
-     * @return the default administrative distance for this OriginTable
-     */
-    uint16_t admin_distance() const	{ return _admin_distance; }
+		/**
+		 * @return the default administrative distance for this OriginTable
+		 */
+		uint16_t admin_distance() const	{ return _admin_distance; }
 
-    /**
-     * @return the routing protocol type (@ref ProtocolType).
-     */
-    virtual int protocol_type() const = 0;
-    virtual const Protocol& protocol() const = 0;
-    virtual Protocol& protocol() = 0;
+		/**
+		 * @return the routing protocol type (@ref ProtocolType).
+		 */
+		virtual int protocol_type() const = 0;
+		virtual const Protocol& protocol() const = 0;
+		virtual Protocol& protocol() = 0;
 
-    /**
-     * @return the table type (@ref TableType).
-     */
-    TableType type() const		{ return ORIGIN_TABLE; }
+		/**
+		 * @return the table type (@ref TableType).
+		 */
+		TableType type() const		{ return ORIGIN_TABLE; }
 
-    /**
-     * Render the OriginTable as a string for debugging purposes
-     */
-    string str() const;
+		/**
+		 * Render the OriginTable as a string for debugging purposes
+		 */
+		string str() const;
 
-    /**
-     * Get the number of times routing protocol has been shutdown and
-     * restarted.
-     */
-    uint32_t generation() const;
+		/**
+		 * Get the number of times routing protocol has been shutdown and
+		 * restarted.
+		 */
+		uint32_t generation() const;
 
-    /**
-     * Get the number of routes held internally.
-     */
-    uint32_t route_count() const;
+		/**
+		 * Get the number of routes held internally.
+		 */
+		uint32_t route_count() const;
 
-    /**
-     * Get the trie.
-     */
-    const RouteTrie& route_container() const;
+		/**
+		 * Get the trie.
+		 */
+		const RouteTrie& route_container() const;
 
-protected:
-    uint16_t		_admin_distance;	// 0 .. 255
-    //
-    RouteTrie*		_ip_route_table;
-    uint32_t	 	_gen;
+	protected:
+		uint16_t		_admin_distance;	// 0 .. 255
+		//
+		RouteTrie*		_ip_route_table;
+		uint32_t	 	_gen;
 
-    virtual int generic_delete_route(const IPRouteEntry<A>*, bool) = 0;
-    virtual int generic_add_route(const IPRouteEntry<A>&) = 0;
-    virtual void allocate_deletion_table(RouteTrie* ip_route_trie) = 0;
+		virtual int generic_delete_route(const IPRouteEntry<A>*, bool) = 0;
+		virtual int generic_add_route(const IPRouteEntry<A>&) = 0;
+		virtual void allocate_deletion_table(RouteTrie* ip_route_trie) = 0;
 };
 
 template <class A, ProtocolType PROTOCOL_TYPE>
 class TypedOriginTable { };
 
 template <class A>
-class TypedOriginTable<A, IGP> : public OriginTable<A> {
-public:
-    TypedOriginTable(const string& tablename, uint16_t admin_distance) :
-	OriginTable<A>(tablename, admin_distance), _protocol(tablename, IGP) {}
-    ~TypedOriginTable() {}
+class TypedOriginTable<A, IGP> : public OriginTable<A> 
+{
+	public:
+		TypedOriginTable(const string& tablename, uint16_t admin_distance) :
+			OriginTable<A>(tablename, admin_distance), _protocol(tablename, IGP) {}
+		~TypedOriginTable() {}
 
-    int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route, bool b)
-    {
-	return this->next_table()->delete_igp_route(route, b);
-    }
+		int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
+		int generic_delete_route(const IPRouteEntry<A>* route, bool b)
+		{
+			return this->next_table()->delete_igp_route(route, b);
+		}
 
-    int protocol_type() const { return _protocol.protocol_type();}
-    const Protocol& protocol() const { return _protocol;}
-    Protocol& protocol() { return _protocol;}
+		int protocol_type() const { return _protocol.protocol_type();}
+		const Protocol& protocol() const { return _protocol;}
+		Protocol& protocol() { return _protocol;}
 
-protected:
-    void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
+	protected:
+		void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
 
-    Protocol	_protocol;	// IGP or EGP
+		Protocol	_protocol;	// IGP or EGP
 };
 
 template <class A>
-class TypedOriginTable<A, EGP> : public OriginTable<A> {
-public:
-    TypedOriginTable(const string& tablename, uint16_t admin_distance) :
-	OriginTable<A>(tablename, admin_distance), _protocol(tablename, EGP) {}
-    ~TypedOriginTable() {}
+class TypedOriginTable<A, EGP> : public OriginTable<A> 
+{
+	public:
+		TypedOriginTable(const string& tablename, uint16_t admin_distance) :
+			OriginTable<A>(tablename, admin_distance), _protocol(tablename, EGP) {}
+		~TypedOriginTable() {}
 
-    int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route, bool b)
-    {
-	return this->next_table()->delete_egp_route(route, b);
-    }
+		int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
+		int generic_delete_route(const IPRouteEntry<A>* route, bool b)
+		{
+			return this->next_table()->delete_egp_route(route, b);
+		}
 
-    int protocol_type() const { return _protocol.protocol_type();}
-    const Protocol& protocol() const { return _protocol;}
-    Protocol& protocol() { return _protocol;}
-protected:
-    void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
+		int protocol_type() const { return _protocol.protocol_type();}
+		const Protocol& protocol() const { return _protocol;}
+		Protocol& protocol() { return _protocol;}
+	protected:
+		void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
 
-    Protocol	_protocol;	// IGP or EGP
+		Protocol	_protocol;	// IGP or EGP
 };
 
 template <class A>
 inline uint32_t
 OriginTable<A>::generation() const
 {
-    return _gen;
+	return _gen;
 }
 
 template <class A>
 inline uint32_t
 OriginTable<A>::route_count() const
 {
-    return _ip_route_table->route_count();
+	return _ip_route_table->route_count();
 }
 
 template <class A>
 inline const typename OriginTable<A>::RouteTrie&
 OriginTable<A>::route_container() const
 {
-    return *_ip_route_table;
+	return *_ip_route_table;
 }
 
 #endif // __RIB_RT_TAB_ORIGIN_HH__

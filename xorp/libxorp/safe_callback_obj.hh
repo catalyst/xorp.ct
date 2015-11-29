@@ -47,15 +47,15 @@ class SafeCallbackBase;
 class CallbackSafeObject :
     public NONCOPYABLE
 {
-public:
-    CallbackSafeObject() {}
-    virtual ~CallbackSafeObject();
+    public:
+	CallbackSafeObject() {}
+	virtual ~CallbackSafeObject();
 
-    void ref_cb(SafeCallbackBase* scb);
-    void unref_cb(SafeCallbackBase* scb);
+	void ref_cb(SafeCallbackBase* scb);
+	void unref_cb(SafeCallbackBase* scb);
 
-protected:
-    vector<SafeCallbackBase*> _cbs;
+    protected:
+	vector<SafeCallbackBase*> _cbs;
 };
 
 /**
@@ -67,44 +67,44 @@ protected:
 class SafeCallbackBase :
     public NONCOPYABLE
 {
-public:
-    /**
-     * Constructor.
-     *
-     * Informs CallbackSafeObject that this callback operates on it.
-     */
-    SafeCallbackBase(CallbackSafeObject* o);
+    public:
+	/**
+	 * Constructor.
+	 *
+	 * Informs CallbackSafeObject that this callback operates on it.
+	 */
+	SafeCallbackBase(CallbackSafeObject* o);
 
-    /**
-     * Destructor.
-     *
-     * Informs CallbackSafeObject that is tracking callback
-     * instances that this callback no longer exists.
-     */
-    ~SafeCallbackBase();
+	/**
+	 * Destructor.
+	 *
+	 * Informs CallbackSafeObject that is tracking callback
+	 * instances that this callback no longer exists.
+	 */
+	~SafeCallbackBase();
 
-    void invalidate();
+	void invalidate();
 
-    bool valid() const;
+	bool valid() const;
 
-protected:
-    SafeCallbackBase();			  // Not directly constructible
+    protected:
+	SafeCallbackBase();			  // Not directly constructible
 
-protected:
-    CallbackSafeObject* _cso;
+    protected:
+	CallbackSafeObject* _cso;
 };
 
 
 // ----------------------------------------------------------------------------
 // Inline CallbackSafeObject methods
 
-inline void
+    inline void
 CallbackSafeObject::ref_cb(SafeCallbackBase* scb)
 {
     _cbs.push_back(scb);
 }
 
-inline void
+    inline void
 CallbackSafeObject::unref_cb(SafeCallbackBase* scb)
 {
     vector<SafeCallbackBase*>::iterator i =

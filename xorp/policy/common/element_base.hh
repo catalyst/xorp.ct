@@ -30,40 +30,41 @@
  * This element hierarchy is similar to XrlAtom's but exclusive to policy
  * components.
  */
-class Element {
-public:
-    typedef unsigned char Hash;
+class Element 
+{
+    public:
+	typedef unsigned char Hash;
 
-    Element(Hash hash);
-    virtual ~Element();
+	Element(Hash hash);
+	virtual ~Element();
 
-    /**
-     * Every element must be representable by a string. This is a requirement
-     * to enable the policy manager to send elements to the backend filters via
-     * XRL calls for example.
-     *
-     * @return string representation of the element.
-     */
-    virtual string str() const = 0;
+	/**
+	 * Every element must be representable by a string. This is a requirement
+	 * to enable the policy manager to send elements to the backend filters via
+	 * XRL calls for example.
+	 *
+	 * @return string representation of the element.
+	 */
+	virtual string str() const = 0;
 
-    /* Print out debugging info for this element. */
-    virtual string dbgstr() const = 0;
+	/* Print out debugging info for this element. */
+	virtual string dbgstr() const = 0;
 
-    /**
-     * @return string representation of element type.
-     */
-    virtual const char* type() const = 0;
+	/**
+	 * @return string representation of element type.
+	 */
+	virtual const char* type() const = 0;
 
-    Hash hash() const;
+	Hash hash() const;
 
-    // XXX don't use for now... not implemented
-    void	ref() const;
-    void	unref();
-    uint32_t	refcount() const;
+	// XXX don't use for now... not implemented
+	void	ref() const;
+	void	unref();
+	uint32_t	refcount() const;
 
-private:
-    mutable uint32_t	_refcount;
-    Hash		_hash;
+    private:
+	mutable uint32_t	_refcount;
+	Hash		_hash;
 };
 
 #endif // __POLICY_COMMON_ELEMENT_BASE_HH__

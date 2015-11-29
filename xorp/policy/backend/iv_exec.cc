@@ -28,11 +28,11 @@
 #include "iv_exec.hh"
 
 IvExec::IvExec() : 
-	       _policies(NULL), _policy_count(0), _stack_bottom(NULL), 
-	       _sman(NULL), _varrw(NULL), _finished(false), _fa(DEFAULT),
-	       _trash(NULL), _trashc(0), _trashs(2000)
+    _policies(NULL), _policy_count(0), _stack_bottom(NULL), 
+    _sman(NULL), _varrw(NULL), _finished(false), _fa(DEFAULT),
+    _trash(NULL), _trashc(0), _trashs(2000)
 #ifndef XORP_DISABLE_PROFILE
-	       , _profiler(NULL)
+    , _profiler(NULL)
 #endif
 {
     unsigned ss = 128;
@@ -53,7 +53,7 @@ IvExec::~IvExec()
     delete [] _stack_bottom;
 }
 
-IvExec::FlowAction 
+    IvExec::FlowAction 
 IvExec::run(VarRW* varrw)
 {
     _varrw     = varrw;
@@ -72,11 +72,13 @@ IvExec::run(VarRW* varrw)
     _stackptr--;
 
     // execute all policies
-    for (int i = _policy_count-1; i>= 0; --i) {
+    for (int i = _policy_count-1; i>= 0; --i) 
+    {
 	FlowAction fa = runPolicy(*_policies[i]);
 
 	// if a policy rejected/accepted a route then terminate.
-	if (fa != DEFAULT) {
+	if (fa != DEFAULT) 
+	{
 	    ret = fa;
 	    break;
 	}
@@ -93,7 +95,7 @@ IvExec::run(VarRW* varrw)
     return ret;
 }
 
-IvExec::FlowAction 
+    IvExec::FlowAction 
 IvExec::runPolicy(PolicyInstr& pi)
 {
     TermInstr** terms  = pi.terms();
@@ -123,11 +125,13 @@ IvExec::runPolicy(PolicyInstr& pi)
     _ctr_flow = Next::TERM;
 
     // run all terms
-    for (int i = 0; i < termc ; ++i) {
+    for (int i = 0; i < termc ; ++i) 
+    {
 	FlowAction fa = runTerm(*terms[i]);
 
 	// if term accepted/rejected route, then terminate.
-	if (fa != DEFAULT) {
+	if (fa != DEFAULT) 
+	{
 	    outcome = fa;
 	    break;
 	}
@@ -146,7 +150,7 @@ IvExec::runPolicy(PolicyInstr& pi)
     return outcome;
 }
 
-IvExec::FlowAction 
+    IvExec::FlowAction 
 IvExec::runTerm(TermInstr& ti)
 {
 
@@ -165,7 +169,8 @@ IvExec::runTerm(TermInstr& ti)
 	_os << "Running term: " << ti.name() << endl;
 
     // run all instructions
-    for (int i = 0; i < instrc; ++i) {
+    for (int i = 0; i < instrc; ++i) 
+    {
 #ifndef XORP_DISABLE_PROFILE
 	if (_profiler)
 	    _profiler->start();
@@ -188,7 +193,7 @@ IvExec::runTerm(TermInstr& ti)
     return _fa;
 }
 
-void 
+    void 
 IvExec::visit(Push& p)
 {
     const Element& e = p.elem();
@@ -196,12 +201,12 @@ IvExec::visit(Push& p)
     _stackptr++;
     XLOG_ASSERT(_stackptr < _stackend);
     *_stackptr = &e;
-    
+
     if(_do_trace)
 	_os << "PUSH " << e.type() << " " << e.str() << endl;
 }
 
-void 
+    void 
 IvExec::visit(PushSet& ps)
 {
     string name = ps.setid();
@@ -214,10 +219,10 @@ IvExec::visit(PushSet& ps)
 
     if(_do_trace)
 	_os << "PUSH_SET " << s.type() << " " << name
-	     << ": " << s.str() << endl;
+	    << ": " << s.str() << endl;
 }
 
-void 
+    void 
 IvExec::visit(OnFalseExit& /* x */)
 {
     if (_stackptr < _stack)
@@ -225,21 +230,24 @@ IvExec::visit(OnFalseExit& /* x */)
 
     // we expect a bool at the top.
     const ElemBool* t = dynamic_cast<const ElemBool*>(*_stackptr);
-    if(!t) {
+    if(!t) 
+    {
 	// but maybe it is a ElemNull... in which case its a NOP
 	const Element* e = *_stackptr;
-	if(e->hash() == ElemNull::_hash) {
+	if(e->hash() == ElemNull::_hash) 
+	{
 	    if(_do_trace)
 		_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
 	    _finished = true;
 	    return;
-        }
+	}
 
 	// if it is anything else, its an error
-        else {
-	   xorp_throw(RuntimeError, "Expected bool on top of stack instead: ");
+	else 
+	{
+	    xorp_throw(RuntimeError, "Expected bool on top of stack instead: ");
 	}
-	    
+
     }
 
     // we do not pop the element!!!
@@ -257,7 +265,7 @@ IvExec::visit(OnFalseExit& /* x */)
 	_os << "ONFALSE_EXIT: " << t->str() << endl;
 }
 
-void 
+    void 
 IvExec::visit(Load& l)
 {
     const Element& x = _varrw->read_trace(l.var());
@@ -271,7 +279,7 @@ IvExec::visit(Load& l)
     *_stackptr = &x;
 }
 
-void 
+    void 
 IvExec::visit(Store& s)
 {
     if (_stackptr < _stack)
@@ -281,7 +289,8 @@ IvExec::visit(Store& s)
     _stackptr--;
     XLOG_ASSERT(_stackptr >= (_stack-1));
 
-    if (arg->hash() == ElemNull::_hash) {
+    if (arg->hash() == ElemNull::_hash) 
+    {
 	if (_do_trace)
 	    _os << "STORE NULL [treated as NOP]" << endl;
 
@@ -298,7 +307,7 @@ IvExec::visit(Store& s)
 	_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
 
-void 
+    void 
 IvExec::visit(Accept& /* a */)
 {
     // ok we like the route, so exit all execution
@@ -308,28 +317,30 @@ IvExec::visit(Accept& /* a */)
 	_os << "ACCEPT" << endl;
 }
 
-void
+    void
 IvExec::visit(Next& next)
 {
     _finished = true;
     _ctr_flow = next.flow();
 
-    if (_do_trace) {
+    if (_do_trace) 
+    {
 	_os << "NEXT ";
 
-	switch (_ctr_flow) {
-	case Next::TERM:
-	    _os << "TERM";
-	    break;
+	switch (_ctr_flow) 
+	{
+	    case Next::TERM:
+		_os << "TERM";
+		break;
 
-	case Next::POLICY:
-	    _os << "POLICY";
-	    break;
+	    case Next::POLICY:
+		_os << "POLICY";
+		break;
 	}
     }
 }
 
-void 
+    void 
 IvExec::visit(Reject& /* r */)
 {
     // we don't like it, get out of here.
@@ -340,7 +351,7 @@ IvExec::visit(Reject& /* r */)
 	_os << "REJECT" << endl;
 }
 
-void
+    void
 IvExec::visit(NaryInstr& nary)
 {
     unsigned arity = nary.op().arity();
@@ -356,7 +367,8 @@ IvExec::visit(NaryInstr& nary)
 
     // trash the result.
     // XXX only if it's a new element.
-    if (r->refcount() == 1) {
+    if (r->refcount() == 1) 
+    {
 	_trash[_trashc] = r;
 	_trashc++;
 
@@ -372,7 +384,7 @@ IvExec::visit(NaryInstr& nary)
 	_os << nary.op().str() << endl;
 }
 
-void
+    void
 IvExec::clear_trash()
 {
     for (unsigned i = 0; i< _trashc; i++)
@@ -381,16 +393,17 @@ IvExec::clear_trash()
     _trashc = 0;
 }
 
-string
+    string
 IvExec::fa2str(const FlowAction& fa)
 {
-    switch(fa) {
+    switch(fa) 
+    {
 	case ACCEPT:
 	    return "Accept";
-	
+
 	case REJ:
 	    return "Reject";
-	
+
 	case DEFAULT:
 	    return "Default action";
     }
@@ -398,16 +411,18 @@ IvExec::fa2str(const FlowAction& fa)
     return "Unknown";
 }
 
-void
+    void
 IvExec::set_policies(vector<PolicyInstr*>* policies)
 {
-    if (_policies) {
+    if (_policies) 
+    {
 	delete [] _policies;
 	_policies = NULL;
     }
 
     // resetting...
-    if (!policies) {
+    if (!policies) 
+    {
 	_policy_count = 0;
 	return;
     }
@@ -419,33 +434,34 @@ IvExec::set_policies(vector<PolicyInstr*>* policies)
     vector<PolicyInstr*>::iterator iter;
 
     unsigned i = 0;
-    for (iter = policies->begin(); iter != policies->end(); ++iter) {
+    for (iter = policies->begin(); iter != policies->end(); ++iter) 
+    {
 	_policies[i] = *iter;
 	i++;
     }
 }
 
-void
+    void
 IvExec::set_set_manager(SetManager* sman)
 {
     _sman = sman;
 }
 
 #ifndef XORP_DISABLE_PROFILE
-void
+    void
 IvExec::set_profiler(PolicyProfiler* pp)
 {
     _profiler = pp;
 }
 #endif
 
-string
+    string
 IvExec::tracelog()
 {
     return _os.str();
 }
 
-void
+    void
 IvExec::visit(Subr& sub)
 {
     SUBR::iterator i = _subr->find(sub.target());
@@ -466,15 +482,16 @@ IvExec::visit(Subr& sub)
 
     bool result = true;
 
-    switch (fa) {
-    case DEFAULT:
-    case ACCEPT:
-	result = true;
-	break;
+    switch (fa) 
+    {
+	case DEFAULT:
+	case ACCEPT:
+	    result = true;
+	    break;
 
-    case REJ:
-	result = false;
-	break;
+	case REJ:
+	    result = false;
+	    break;
     }
 
     Element* e = new ElemBool(result);
@@ -488,7 +505,7 @@ IvExec::visit(Subr& sub)
     XLOG_ASSERT(_trashc < _trashs);
 }
 
-void
+    void
 IvExec::set_subr(SUBR* subr)
 {
     _subr = subr;

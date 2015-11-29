@@ -216,24 +216,25 @@ static const int seps [MAX_TYPES] =	{ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
  *	MAX_TYPES * (rptr - state) + TYPE_3 == TYPE_3.
  */
 
-static uint32_t randtbl[DEG_3 + 1] = {
-	TYPE_3,
+static uint32_t randtbl[DEG_3 + 1] = 
+{
+    TYPE_3,
 #ifdef  USE_WEAK_SEEDING
-/* Historic implementation compatibility */
-/* The random sequences do not vary much with the seed */
-	0x9a319039, 0x32d9c024, 0x9b663182, 0x5da1f342, 0xde3b81e0, 0xdf0a6fb5,
-	0xf103bc02, 0x48f340fb, 0x7449e56b, 0xbeb1dbb0, 0xab5c5918, 0x946554fd,
-	0x8c2e680f, 0xeb3d799f, 0xb11ee0b7, 0x2d436b86, 0xda672e2a, 0x1588ca88,
-	0xe369735d, 0x904f35f7, 0xd7158fd6, 0x6fa6f051, 0x616e6b96, 0xac94efdc,
-	0x36413f93, 0xc622c298, 0xf5a42ab8, 0x8a88d77b, 0xf5ad9d0e, 0x8999220b,
-	0x27fb47b9,
+    /* Historic implementation compatibility */
+    /* The random sequences do not vary much with the seed */
+    0x9a319039, 0x32d9c024, 0x9b663182, 0x5da1f342, 0xde3b81e0, 0xdf0a6fb5,
+    0xf103bc02, 0x48f340fb, 0x7449e56b, 0xbeb1dbb0, 0xab5c5918, 0x946554fd,
+    0x8c2e680f, 0xeb3d799f, 0xb11ee0b7, 0x2d436b86, 0xda672e2a, 0x1588ca88,
+    0xe369735d, 0x904f35f7, 0xd7158fd6, 0x6fa6f051, 0x616e6b96, 0xac94efdc,
+    0x36413f93, 0xc622c298, 0xf5a42ab8, 0x8a88d77b, 0xf5ad9d0e, 0x8999220b,
+    0x27fb47b9,
 #else   /* !USE_WEAK_SEEDING */
-	0x991539b1, 0x16a5bce3, 0x6774a4cd, 0x3e01511e, 0x4e508aaa, 0x61048c05,
-	0xf5500617, 0x846b7115, 0x6a19892c, 0x896a97af, 0xdb48f936, 0x14898454,
-	0x37ffd106, 0xb58bff9c, 0x59e17104, 0xcf918a49, 0x09378c83, 0x52c7a471,
-	0x8d293ea9, 0x1f4fc301, 0xc3db71be, 0x39b44e1c, 0xf8a44ef9, 0x4c8b80b1,
-	0x19edc328, 0x87bf4bdd, 0xc9b240e5, 0xe9ee4b1b, 0x4382aee7, 0x535b6b41,
-	0xf3bec5da
+    0x991539b1, 0x16a5bce3, 0x6774a4cd, 0x3e01511e, 0x4e508aaa, 0x61048c05,
+    0xf5500617, 0x846b7115, 0x6a19892c, 0x896a97af, 0xdb48f936, 0x14898454,
+    0x37ffd106, 0xb58bff9c, 0x59e17104, 0xcf918a49, 0x09378c83, 0x52c7a471,
+    0x8d293ea9, 0x1f4fc301, 0xc3db71be, 0x39b44e1c, 0xf8a44ef9, 0x4c8b80b1,
+    0x19edc328, 0x87bf4bdd, 0xc9b240e5, 0xe9ee4b1b, 0x4382aee7, 0x535b6b41,
+    0xf3bec5da
 #endif  /* !USE_WEAK_SEEDING */
 };
 
@@ -273,35 +274,35 @@ static uint32_t *end_ptr = &randtbl[DEG_3 + 1];
 static inline uint32_t good_rand(int32_t);
 
 static inline uint32_t good_rand (x)
-	int32_t x;
+    int32_t x;
 {
 #ifdef  USE_WEAK_SEEDING
-/*
- * Historic implementation compatibility.
- * The random sequences do not vary much with the seed,
- * even with overflowing.
- */
-	return (1103515245 * x + 12345);
+    /*
+     * Historic implementation compatibility.
+     * The random sequences do not vary much with the seed,
+     * even with overflowing.
+     */
+    return (1103515245 * x + 12345);
 #else   /* !USE_WEAK_SEEDING */
-/*
- * Compute x = (7^5 * x) mod (2^31 - 1)
- * wihout overflowing 31 bits:
- *      (2^31 - 1) = 127773 * (7^5) + 2836
- * From "Random number generators: good ones are hard to find",
- * Park and Miller, Communications of the ACM, vol. 31, no. 10,
- * October 1988, p. 1195.
- */
-	int32_t hi, lo;
+    /*
+     * Compute x = (7^5 * x) mod (2^31 - 1)
+     * wihout overflowing 31 bits:
+     *      (2^31 - 1) = 127773 * (7^5) + 2836
+     * From "Random number generators: good ones are hard to find",
+     * Park and Miller, Communications of the ACM, vol. 31, no. 10,
+     * October 1988, p. 1195.
+     */
+    int32_t hi, lo;
 
-	/* Can't be initialized with 0, so use another value. */
-	if (x == 0)
-		x = 123459876;
-	hi = x / 127773;
-	lo = x % 127773;
-	x = 16807 * lo - 2836 * hi;
-	if (x < 0)
-		x += 0x7fffffff;
-	return (x);
+    /* Can't be initialized with 0, so use another value. */
+    if (x == 0)
+	x = 123459876;
+    hi = x / 127773;
+    lo = x % 127773;
+    x = 16807 * lo - 2836 * hi;
+    if (x < 0)
+	x += 0x7fffffff;
+    return (x);
 #endif  /* !USE_WEAK_SEEDING */
 }
 
@@ -317,24 +318,25 @@ static inline uint32_t good_rand (x)
  * introduced by the L.C.R.N.G.  Note that the initialization of randtbl[]
  * for default usage relies on values produced by this routine.
  */
-void
+    void
 xorp_srandom(x)
-	unsigned long x;
+    unsigned long x;
 {
-	int i, lim;
+    int i, lim;
 
-	state[0] = (uint32_t)x;
-	if (rand_type == TYPE_0)
-		lim = NSHUFF;
-	else {
-		for (i = 1; i < rand_deg; i++)
-			state[i] = good_rand(state[i - 1]);
-		fptr = &state[rand_sep];
-		rptr = &state[0];
-		lim = 10 * rand_deg;
-	}
-	for (i = 0; i < lim; i++)
-		(void)xorp_random();
+    state[0] = (uint32_t)x;
+    if (rand_type == TYPE_0)
+	lim = NSHUFF;
+    else 
+    {
+	for (i = 1; i < rand_deg; i++)
+	    state[i] = good_rand(state[i - 1]);
+	fptr = &state[rand_sep];
+	rptr = &state[0];
+	lim = 10 * rand_deg;
+    }
+    for (i = 0; i < lim; i++)
+	(void)xorp_random();
 }
 
 /*
@@ -348,42 +350,45 @@ xorp_srandom(x)
  * state buffer are no longer derived from the LC algorithm applied to
  * a fixed seed.
  */
-void
+    void
 xorp_srandomdev()
 {
-	int fd, done;
-	size_t len;
+    int fd, done;
+    size_t len;
 
-	if (rand_type == TYPE_0)
-		len = sizeof state[0];
-	else
-		len = rand_deg * sizeof state[0];
+    if (rand_type == TYPE_0)
+	len = sizeof state[0];
+    else
+	len = rand_deg * sizeof state[0];
 
-	done = 0;
-	fd = open("/dev/random", O_RDONLY, 0);
-	if (fd >= 0) {
-		if (read(fd, (void *) state, len) == (ssize_t) len)
-			done = 1;
-		close(fd);
-	}
+    done = 0;
+    fd = open("/dev/random", O_RDONLY, 0);
+    if (fd >= 0) 
+    {
+	if (read(fd, (void *) state, len) == (ssize_t) len)
+	    done = 1;
+	close(fd);
+    }
 
-	if (!done) {
-		struct timeval tv;
-		unsigned long junk;
-		// Newer compilers don't like reading un-initialized values..and I'm not
-		// sure how random that is to begin with.  Use a heap address instead.
-		void* mbuf = malloc(1);
-		junk = (unsigned long)(mbuf);
-		free(mbuf);
-		gettimeofday(&tv, NULL);
-		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
-		return;
-	}
+    if (!done) 
+    {
+	struct timeval tv;
+	unsigned long junk;
+	// Newer compilers don't like reading un-initialized values..and I'm not
+	// sure how random that is to begin with.  Use a heap address instead.
+	void* mbuf = malloc(1);
+	junk = (unsigned long)(mbuf);
+	free(mbuf);
+	gettimeofday(&tv, NULL);
+	xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
+	return;
+    }
 
-	if (rand_type != TYPE_0) {
-		fptr = &state[rand_sep];
-		rptr = &state[0];
-	}
+    if (rand_type != TYPE_0) 
+    {
+	fptr = &state[rand_sep];
+	rptr = &state[0];
+    }
 }
 
 /*
@@ -409,53 +414,59 @@ xorp_srandomdev()
  * word boundary; otherwise a bus error will occur. Even so, lint will
  * complain about mis-alignment, but you should disregard these messages.
  */
-char *
+    char *
 xorp_initstate(seed, arg_state, n)
-	unsigned long seed;		/* seed for R.N.G. */
-	char *arg_state;		/* pointer to state array */
-	long n;				/* # bytes of state info */
+    unsigned long seed;		/* seed for R.N.G. */
+    char *arg_state;		/* pointer to state array */
+    long n;				/* # bytes of state info */
 {
-	char *ostate = (char *)(&state[-1]);
-	uint32_t *int_arg_state = (uint32_t *)(void *)arg_state;
+    char *ostate = (char *)(&state[-1]);
+    uint32_t *int_arg_state = (uint32_t *)(void *)arg_state;
 
-	if (rand_type == TYPE_0)
-		state[-1] = rand_type;
-	else
-		state[-1] = MAX_TYPES * (rptr - state) + rand_type;
-	if (n < BREAK_0) {
-		(void)fprintf(stderr,
-		    "random: not enough state (%ld bytes); ignored.\n", n);
-		return (0);
-	}
-	if (n < BREAK_1) {
-		rand_type = TYPE_0;
-		rand_deg = DEG_0;
-		rand_sep = SEP_0;
-	} else if (n < BREAK_2) {
-		rand_type = TYPE_1;
-		rand_deg = DEG_1;
-		rand_sep = SEP_1;
-	} else if (n < BREAK_3) {
-		rand_type = TYPE_2;
-		rand_deg = DEG_2;
-		rand_sep = SEP_2;
-	} else if (n < BREAK_4) {
-		rand_type = TYPE_3;
-		rand_deg = DEG_3;
-		rand_sep = SEP_3;
-	} else {
-		rand_type = TYPE_4;
-		rand_deg = DEG_4;
-		rand_sep = SEP_4;
-	}
-	state = int_arg_state + 1; /* first location */
-	end_ptr = &state[rand_deg];	/* must set end_ptr before srandom */
-	xorp_srandom(seed);
-	if (rand_type == TYPE_0)
-		int_arg_state[0] = rand_type;
-	else
-		int_arg_state[0] = MAX_TYPES * (rptr - state) + rand_type;
-	return (ostate);
+    if (rand_type == TYPE_0)
+	state[-1] = rand_type;
+    else
+	state[-1] = MAX_TYPES * (rptr - state) + rand_type;
+    if (n < BREAK_0) 
+    {
+	(void)fprintf(stderr,
+		"random: not enough state (%ld bytes); ignored.\n", n);
+	return (0);
+    }
+    if (n < BREAK_1) 
+    {
+	rand_type = TYPE_0;
+	rand_deg = DEG_0;
+	rand_sep = SEP_0;
+    } else if (n < BREAK_2) 
+    {
+	rand_type = TYPE_1;
+	rand_deg = DEG_1;
+	rand_sep = SEP_1;
+    } else if (n < BREAK_3) 
+    {
+	rand_type = TYPE_2;
+	rand_deg = DEG_2;
+	rand_sep = SEP_2;
+    } else if (n < BREAK_4) 
+    {
+	rand_type = TYPE_3;
+	rand_deg = DEG_3;
+	rand_sep = SEP_3;
+    } else 
+    {
+	rand_type = TYPE_4;
+	rand_deg = DEG_4;
+	rand_sep = SEP_4;
+    }
+    state = int_arg_state + 1; /* first location */
+    end_ptr = &state[rand_deg];	/* must set end_ptr before srandom */
+    xorp_srandom(seed);
+    if (rand_type == TYPE_0)
+	int_arg_state[0] = rand_type;
+    else
+	int_arg_state[0] = MAX_TYPES * (rptr - state) + rand_type;
+    return (ostate);
 }
 
 /*
@@ -477,40 +488,42 @@ xorp_initstate(seed, arg_state, n)
  * word boundary; otherwise a bus error will occur. Even so, lint will
  * complain about mis-alignment, but you should disregard these messages.
  */
-char *
+    char *
 xorp_setstate(arg_state)
-	char *arg_state;		/* pointer to state array */
+    char *arg_state;		/* pointer to state array */
 {
-	uint32_t *new_state = (uint32_t *)(void *)arg_state;
-	uint32_t type = new_state[0] % MAX_TYPES;
-	uint32_t rear = new_state[0] / MAX_TYPES;
-	char *ostate = (char *)(&state[-1]);
+    uint32_t *new_state = (uint32_t *)(void *)arg_state;
+    uint32_t type = new_state[0] % MAX_TYPES;
+    uint32_t rear = new_state[0] / MAX_TYPES;
+    char *ostate = (char *)(&state[-1]);
 
-	if (rand_type == TYPE_0)
-		state[-1] = rand_type;
-	else
-		state[-1] = MAX_TYPES * (rptr - state) + rand_type;
-	switch(type) {
+    if (rand_type == TYPE_0)
+	state[-1] = rand_type;
+    else
+	state[-1] = MAX_TYPES * (rptr - state) + rand_type;
+    switch(type) 
+    {
 	case TYPE_0:
 	case TYPE_1:
 	case TYPE_2:
 	case TYPE_3:
 	case TYPE_4:
-		rand_type = type;
-		rand_deg = degrees[type];
-		rand_sep = seps[type];
-		break;
+	    rand_type = type;
+	    rand_deg = degrees[type];
+	    rand_sep = seps[type];
+	    break;
 	default:
-		(void)fprintf(stderr,
+	    (void)fprintf(stderr,
 		    "random: state info corrupted; not changed.\n");
-	}
-	state = new_state + 1;
-	if (rand_type != TYPE_0) {
-		rptr = &state[rear];
-		fptr = &state[(rear + rand_sep) % rand_deg];
-	}
-	end_ptr = &state[rand_deg];		/* set end_ptr too */
-	return (ostate);
+    }
+    state = new_state + 1;
+    if (rand_type != TYPE_0) 
+    {
+	rptr = &state[rear];
+	fptr = &state[(rear + rand_sep) % rand_deg];
+    }
+    end_ptr = &state[rand_deg];		/* set end_ptr too */
+    return (ostate);
 }
 
 /*
@@ -530,31 +543,35 @@ xorp_setstate(arg_state)
  *
  * Returns a 31-bit random number.
  */
-long
+    long
 xorp_random()
 {
-	uint32_t i;
-	uint32_t *f, *r;
+    uint32_t i;
+    uint32_t *f, *r;
 
-	if (rand_type == TYPE_0) {
-		i = state[0];
-		state[0] = i = (good_rand(i)) & 0x7fffffff;
-	} else {
-		/*
-		 * Use local variables rather than static variables for speed.
-		 */
-		f = fptr; r = rptr;
-		*f += *r;
-		i = (*f >> 1) & 0x7fffffff;	/* chucking least random bit */
-		if (++f >= end_ptr) {
-			f = state;
-			++r;
-		}
-		else if (++r >= end_ptr) {
-			r = state;
-		}
-
-		fptr = f; rptr = r;
+    if (rand_type == TYPE_0) 
+    {
+	i = state[0];
+	state[0] = i = (good_rand(i)) & 0x7fffffff;
+    } else 
+    {
+	/*
+	 * Use local variables rather than static variables for speed.
+	 */
+	f = fptr; r = rptr;
+	*f += *r;
+	i = (*f >> 1) & 0x7fffffff;	/* chucking least random bit */
+	if (++f >= end_ptr) 
+	{
+	    f = state;
+	    ++r;
 	}
-	return ((long)i);
+	else if (++r >= end_ptr) 
+	{
+	    r = state;
+	}
+
+	fptr = f; rptr = r;
+    }
+    return ((long)i);
 }

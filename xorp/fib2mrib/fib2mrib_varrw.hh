@@ -30,31 +30,33 @@
 /**
  * @short Allows variables to be written and read from fib2mrib routes.
  */
-class Fib2mribVarRW : public SingleVarRW {
-public:
-    enum {
-	VAR_NETWORK4 = VAR_PROTOCOL,
-	VAR_NEXTHOP4,
-	VAR_NETWORK6,
-	VAR_NEXTHOP6,
-	VAR_METRIC
-    };
-    
-    /**
-     * @param route route to read/write values from.
-     */
-    Fib2mribVarRW(Fib2mribRoute& route);
+class Fib2mribVarRW : public SingleVarRW 
+{
+    public:
+	enum 
+	{
+	    VAR_NETWORK4 = VAR_PROTOCOL,
+	    VAR_NEXTHOP4,
+	    VAR_NETWORK6,
+	    VAR_NEXTHOP6,
+	    VAR_METRIC
+	};
 
-    // SingleVarRW inteface:
-    void     start_read();
-    void     single_write(const Id& id, const Element& e);
-    Element* single_read(const Id& id);   
+	/**
+	 * @param route route to read/write values from.
+	 */
+	Fib2mribVarRW(Fib2mribRoute& route);
 
-private:
-    Fib2mribRoute&	_route;
-    ElementFactory	_ef;
-    bool		_is_ipv4;
-    bool		_is_ipv6;
+	// SingleVarRW inteface:
+	void     start_read();
+	void     single_write(const Id& id, const Element& e);
+	Element* single_read(const Id& id);   
+
+    private:
+	Fib2mribRoute&	_route;
+	ElementFactory	_ef;
+	bool		_is_ipv4;
+	bool		_is_ipv6;
 };
 
 #endif // __FIB2MRIB_FIB2MRIB_VARRW_HH__

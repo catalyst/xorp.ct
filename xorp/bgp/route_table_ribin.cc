@@ -30,12 +30,12 @@
 #include "rib_ipc_handler.hh"
 #include "bgp.hh"
 
-template<class A>
+    template<class A>
 RibInTable<A>::RibInTable(string table_name,
-			  Safi safi,
-			  const PeerHandler *peer)
+	Safi safi,
+	const PeerHandler *peer)
     : 	BGPRouteTable<A>("RibInTable-" + table_name, safi),
-	_peer(peer)
+    _peer(peer)
 {
     _route_table = new BgpTrie<A>;
     _peer_is_up = true;
@@ -46,14 +46,14 @@ RibInTable<A>::RibInTable(string table_name,
     _nexthop_push_active = false;
 }
 
-template<class A>
+    template<class A>
 RibInTable<A>::~RibInTable()
 {
     delete _route_table;
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::flush()
 {
     debug_msg("%s\n", this->tablename().c_str());
@@ -61,7 +61,7 @@ RibInTable<A>::flush()
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::ribin_peering_went_down()
 {
     log("Peering went down");
@@ -80,13 +80,14 @@ RibInTable<A>::ribin_peering_went_down()
        back up before we've finished the background deletion process -
        credits to Atanu Ghosh for this neat idea */
 
-    if (_route_table->route_count() > 0) {
+    if (_route_table->route_count() > 0) 
+    {
 
 	string tablename = "Deleted" + this->tablename();
 
 	DeletionTable<A>* deletion_table =
 	    new DeletionTable<A>(tablename, this->safi(), _route_table, _peer, 
-				 _genid, this);
+		    _genid, this);
 
 	_route_table = new BgpTrie<A>;
 
@@ -96,7 +97,8 @@ RibInTable<A>::ribin_peering_went_down()
 
 	this->_next_table->peering_went_down(_peer, _genid, this);
 	deletion_table->initiate_background_deletion();
-    } else {
+    } else 
+    {
 	//nothing to delete - just notify everyone
 	this->_next_table->peering_went_down(_peer, _genid, this);
 	this->_next_table->push(this);
@@ -105,7 +107,7 @@ RibInTable<A>::ribin_peering_went_down()
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::ribin_peering_came_up()
 {
     log("Peering came up");
@@ -113,7 +115,8 @@ RibInTable<A>::ribin_peering_came_up()
     _genid++;
 
     // cope with wrapping genid without using zero which is reserved
-    if (_genid == 0) {
+    if (_genid == 0) 
+    {
 	_genid = 1;
     }
 
@@ -123,10 +126,10 @@ RibInTable<A>::ribin_peering_came_up()
 }
 
 template<class A>
-int
+    int
 RibInTable<A>::add_route(const IPNet<A>& net, 
-			 FPAListRef& fpa_list,
-			 const PolicyTags& policy_tags)
+	FPAListRef& fpa_list,
+	const PolicyTags& policy_tags)
 {
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
@@ -137,7 +140,8 @@ RibInTable<A>::add_route(const IPNet<A>& net,
 
     int response;
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
-    if (iter != _route_table->end()) {
+    if (iter != _route_table->end()) 
+    {
 	existing_route = &(iter.payload());
 	XLOG_ASSERT(existing_route->net() == net);
 	// Preserve the route.  Taking a reference will prevent the
@@ -156,7 +160,7 @@ RibInTable<A>::add_route(const IPNet<A>& net,
 	old_pa_list.deregister_with_attmgr();
 
 	InternalMessage<A> old_rt_msg(existing_route, old_fpa_list, 
-				      _peer, _genid);
+		_peer, _genid);
 
 	// Create the concise format PA list.
 	fpa_list->canonicalize();
@@ -174,8 +178,9 @@ RibInTable<A>::add_route(const IPNet<A>& net,
 	// propagate downstream
 	InternalMessage<A> new_rt_msg(new_route, fpa_list, _peer, _genid);
 	response = this->_next_table->replace_route(old_rt_msg, new_rt_msg,
-					      (BGPRouteTable<A>*)this);
-    } else {
+		(BGPRouteTable<A>*)this);
+    } else 
+    {
 	// Create the concise format PA list.
 	fpa_list->canonicalize();
 	PAListRef<A> pa_list = new PathAttributeList<A>(fpa_list);
@@ -193,29 +198,30 @@ RibInTable<A>::add_route(const IPNet<A>& net,
 	response = this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
     }
 
-    switch (response) {
-    case ADD_UNUSED:
-	new_route->set_in_use(false);
-	new_route->set_filtered(false);
-	break;
-    case ADD_FILTERED:
-	new_route->set_in_use(false);
-	new_route->set_filtered(true);
-	break;
-    case ADD_USED:
-    case ADD_FAILURE:
-	// the default if we don't know for sure that a route is unused
-	// should be that it is used.
-	new_route->set_in_use(true);
-	new_route->set_filtered(false);
-	break;
+    switch (response) 
+    {
+	case ADD_UNUSED:
+	    new_route->set_in_use(false);
+	    new_route->set_filtered(false);
+	    break;
+	case ADD_FILTERED:
+	    new_route->set_in_use(false);
+	    new_route->set_filtered(true);
+	    break;
+	case ADD_USED:
+	case ADD_FAILURE:
+	    // the default if we don't know for sure that a route is unused
+	    // should be that it is used.
+	    new_route->set_in_use(true);
+	    new_route->set_filtered(false);
+	    break;
     }
 
     return response;
 }
 
 template<class A>
-int
+    int
 RibInTable<A>::delete_route(const IPNet<A> &net)
 {
     XLOG_ASSERT(_peer_is_up);
@@ -223,7 +229,8 @@ RibInTable<A>::delete_route(const IPNet<A> &net)
 
 
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
-    if (iter != _route_table->end()) {
+    if (iter != _route_table->end()) 
+    {
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 
 	// Preserve the route.  Taking a reference will prevent the
@@ -245,7 +252,8 @@ RibInTable<A>::delete_route(const IPNet<A> &net)
 	InternalMessage<A> old_rt_msg(existing_route, old_fpa_list, _peer, _genid);
 	if (this->_next_table != NULL)
 	    this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
-    } else {
+    } else 
+    {
 	// we received a delete, but didn't have anything to delete.
 	// It's debatable whether we should silently ignore this, or
 	// drop the peering.  If we don't hold input-filtered routes in
@@ -262,7 +270,7 @@ RibInTable<A>::delete_route(const IPNet<A> &net)
 }
 
 template<class A>
-int
+    int
 RibInTable<A>::push(BGPRouteTable<A> *caller)
 {
     debug_msg("RibInTable<A>::push\n");
@@ -276,13 +284,14 @@ RibInTable<A>::push(BGPRouteTable<A> *caller)
 template<class A>
 const SubnetRoute<A>*
 RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
-			    FPAListRef& fpa_list_ref) const
+	FPAListRef& fpa_list_ref) const
 {
     if (_peer_is_up == false)
 	return NULL;
 
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
-    if (iter != _route_table->end()) {
+    if (iter != _route_table->end()) 
+    {
 	// assert(iter.payload().net() == net);
 	genid = _genid;
 	PAListRef<A> pa_list = iter.payload().attributes();   
@@ -292,11 +301,11 @@ RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
 	return &(iter.payload());
     } else
 	fpa_list_ref = NULL;
-	return NULL;
+    return NULL;
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
 {
     // we look this up rather than modify used_route itself because
@@ -319,38 +328,43 @@ RibInTable<A>::str() const
 }
 
 template<class A>
-bool
+    bool
 RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
     typename BgpTrie<A>::iterator route_iterator;
     debug_msg("dump iter: %s\n", dump_iter.str().c_str());
-   
-    if (dump_iter.route_iterator_is_valid()) {
+
+    if (dump_iter.route_iterator_is_valid()) 
+    {
 	debug_msg("route_iterator is valid\n");
- 	route_iterator = dump_iter.route_iterator();
+	route_iterator = dump_iter.route_iterator();
 	// Make sure the iterator is valid. If it is pointing at a
 	// deleted node this comparison will move it forward.
-	if (route_iterator == _route_table->end()) {
+	if (route_iterator == _route_table->end()) 
+	{
 	    return false;
 	}
-	
+
 	//we need to move on to the next node, except if the iterator
 	//was pointing at a deleted node, because then it will have
 	//just been moved to the next node to dump, so we need to dump
 	//the node that the iterator is currently pointing at.
 	if (dump_iter.iterator_got_moved(route_iterator.key()) == false)
 	    route_iterator++;
-    } else {
+    } else 
+    {
 	debug_msg("route_iterator is not valid\n");
 	route_iterator = _route_table->begin();
     }
 
-    if (route_iterator == _route_table->end()) {
+    if (route_iterator == _route_table->end()) 
+    {
 	return false;
     }
 
     const ChainedSubnetRoute<A>* chained_rt;
-    for ( ; route_iterator != _route_table->end(); route_iterator++) {
+    for ( ; route_iterator != _route_table->end(); route_iterator++) 
+    {
 	chained_rt = &(route_iterator.payload());
 	debug_msg("chained_rt: %s\n", chained_rt->str().c_str());
 
@@ -358,19 +372,22 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	// only dump routes that actually won
 	// XXX: or if its a policy route dump
 
-	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) {
+	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) 
+	{
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
-	   
+
 	    //XLOG_WARNING("dump route: %s", rt_msg.str().c_str());
-	    try {
+	    try 
+	    {
 		int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
-							dump_iter.peer_to_dump_to());
+			dump_iter.peer_to_dump_to());
 		if(res == ADD_FILTERED) 
 		    chained_rt->set_filtered(true);
 		else
 		    chained_rt->set_filtered(false);
 	    }
-	    catch (const XorpException& e) {
+	    catch (const XorpException& e) 
+	    {
 		//TODO:  Make sure bad routes never get into the table in the first place
 		// (was an IPv6 zero default route that triggered this bug initially)
 		//  See test 28-ipv6 in harness/test_peering1.sh  --Ben
@@ -391,25 +408,28 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
-	   bgp_nexthop.str().c_str(), this->tablename().c_str());
+	    bgp_nexthop.str().c_str(), this->tablename().c_str());
 
     log("igp nexthop changed: " + bgp_nexthop.str());
     typename set <A>::const_iterator i;
     i = _changed_nexthops.find(bgp_nexthop);
-    if (i != _changed_nexthops.end()) {
+    if (i != _changed_nexthops.end()) 
+    {
 	debug_msg("nexthop already queued\n");
 	// this nexthop is already queued to be pushed again
 	return;
     }
 
-    if (_nexthop_push_active) {
+    if (_nexthop_push_active) 
+    {
 	debug_msg("push active, adding to queue\n");
 	_changed_nexthops.insert(bgp_nexthop);
-    } else {
+    } else 
+    {
 	debug_msg("push was inactive, activating\n");
 
 	// this is more work than it should be - we need to create a
@@ -425,14 +445,16 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 
 	typename BgpTrie<A>::PathmapType::const_iterator pmi;
 	pmi = _route_table->pathmap().lower_bound(dummy_pa_list);
-	if (pmi == _route_table->pathmap().end()) {
+	if (pmi == _route_table->pathmap().end()) 
+	{
 	    // no route in this trie has this Nexthop
 	    debug_msg("no matching routes - do nothing\n");
 	    return;
 	}
 	PAListRef<A> pa_list = pmi->first;
 	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
-	if (fpa_list->nexthop() != bgp_nexthop) {
+	if (fpa_list->nexthop() != bgp_nexthop) 
+	{
 	    debug_msg("no matching routes (2)- do nothing\n");
 	    return;
 	}
@@ -442,22 +464,23 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 	const SubnetRoute<A>* next_route_to_push = _current_chain->second;
 	UNUSED(next_route_to_push);
 	debug_msg("Found route with nexthop %s:\n%s\n",
-		  bgp_nexthop.str().c_str(),
-		  next_route_to_push->str().c_str());
+		bgp_nexthop.str().c_str(),
+		next_route_to_push->str().c_str());
 
 	// _next_table->push((BGPRouteTable<A>*)this);
 	// call back immediately, but after network events or expired timers
 	_push_task = EventLoop::instance().new_task(
-	    callback(this, &RibInTable<A>::push_next_changed_nexthop),
-	    XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
+		callback(this, &RibInTable<A>::push_next_changed_nexthop),
+		XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
     }
 }
 
 template<class A>
-bool
+    bool
 RibInTable<A>::push_next_changed_nexthop()
 {
-    if (_nexthop_push_active == false) {
+    if (_nexthop_push_active == false) 
+    {
 	//
 	// XXX: No more nexthops to push, probably because routes have
 	// been just deleted.
@@ -469,7 +492,8 @@ RibInTable<A>::push_next_changed_nexthop()
 
     const ChainedSubnetRoute<A>* chained_rt, *first_rt;
     first_rt = chained_rt = _current_chain->second;
-    while (1) {
+    while (1) 
+    {
 	// Replace the route with itself.  This will cause filters to
 	// be re-applied, and decision to re-evaluate the route.
 	InternalMessage<A> old_rt_msg(chained_rt, _peer, _genid);
@@ -482,10 +506,12 @@ RibInTable<A>::push_next_changed_nexthop()
 	this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
 	this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
 
-	if (chained_rt->next() == first_rt) {
+	if (chained_rt->next() == first_rt) 
+	{
 	    debug_msg("end of chain\n");
 	    break;
-	} else {
+	} else 
+	{
 	    debug_msg("chain continues\n");
 	}
 	chained_rt = chained_rt->next();
@@ -503,7 +529,7 @@ RibInTable<A>::push_next_changed_nexthop()
 
 
 template<class A>
-void
+    void
 RibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
 {
     // checks to make sure that the deletion doesn't make
@@ -511,8 +537,10 @@ RibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
     if (!_nexthop_push_active)
 	return;
     const ChainedSubnetRoute<A>* next_route_to_push = _current_chain->second;
-    if (*route == *next_route_to_push) {
-	if (next_route_to_push == next_route_to_push->next()) {
+    if (*route == *next_route_to_push) 
+    {
+	if (next_route_to_push == next_route_to_push->next()) 
+	{
 	    // this is the last route in the chain, so we need to bump
 	    // the iterator before we delete it.
 	    next_chain();
@@ -521,23 +549,27 @@ RibInTable<A>::deletion_nexthop_check(const SubnetRoute<A>* route)
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::next_chain()
 {
     _current_chain++;
-    if (_current_chain != _route_table->pathmap().end()) {
+    if (_current_chain != _route_table->pathmap().end()) 
+    {
 	PAListRef<A> pa_list =_current_chain->first;
 	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
 	XLOG_ASSERT(fpa_list->nexthop_att() );
-	if (fpa_list->nexthop() == _current_changed_nexthop) {
+	if (fpa_list->nexthop() == _current_changed_nexthop) 
+	{
 	    // there's another chain with the same nexthop
 	    return;
 	}
     }
 
-    while (1) {
+    while (1) 
+    {
 	// that's it for this nexthop - try the next
-	if (_changed_nexthops.empty()) {
+	if (_changed_nexthops.empty()) 
+	{
 	    // no more nexthops to push
 	    _nexthop_push_active = false;
 	    return;
@@ -556,13 +588,15 @@ RibInTable<A>::next_chain()
 	typename BgpTrie<A>::PathmapType::const_iterator pmi;
 
 	pmi = _route_table->pathmap().lower_bound(dummy_pa_list);
-	if (pmi == _route_table->pathmap().end()) {
+	if (pmi == _route_table->pathmap().end()) 
+	{
 	    // no route in this trie has this Nexthop, try the next nexthop
 	    continue;
 	}
 	PAListRef<A> pa_list = pmi->first;
 	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
-	if (fpa_list->nexthop() != _current_changed_nexthop) {
+	if (fpa_list->nexthop() != _current_changed_nexthop) 
+	{
 	    // no route in this trie has this Nexthop, try the next nexthop
 	    continue;
 	}
@@ -573,7 +607,7 @@ RibInTable<A>::next_chain()
 }
 
 template<class A>
-void
+    void
 RibInTable<A>::stop_nexthop_push()
 {
     // When a peering goes down tear out all the nexthop change state
@@ -581,13 +615,14 @@ RibInTable<A>::stop_nexthop_push()
     _changed_nexthops.clear();
     _nexthop_push_active = false;
     _current_changed_nexthop = A::ZERO();
-//     _current_chain = _route_table->pathmap().end();
+    //     _current_chain = _route_table->pathmap().end();
     _push_task.unschedule();
 }
 
 template<class A>
 string
-RibInTable<A>::dump_state() const {
+RibInTable<A>::dump_state() const 
+{
     string s;
     s  = "=================================================================\n";
     s += "RibInTable\n";

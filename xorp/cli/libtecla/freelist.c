@@ -35,17 +35,19 @@
 #include "freelist.h"
 
 typedef struct FreeListBlock FreeListBlock;
-struct FreeListBlock {
-  FreeListBlock *next;   /* The next block in the list */
-  char *nodes;           /* The array of free-list nodes */
+struct FreeListBlock 
+{
+	FreeListBlock *next;   /* The next block in the list */
+	char *nodes;           /* The array of free-list nodes */
 };
 
-struct FreeList {
-  size_t node_size;         /* The size of a free-list node */
-  unsigned blocking_factor; /* The number of nodes per block */
-  long nbusy;               /* The number of nodes that are in use */
-  FreeListBlock *block;     /* The head of the list of free-list blocks */
-  void *free_list;          /* The free-list of nodes */
+struct FreeList 
+{
+	size_t node_size;         /* The size of a free-list node */
+	unsigned blocking_factor; /* The number of nodes per block */
+	long nbusy;               /* The number of nodes that are in use */
+	FreeListBlock *block;     /* The head of the list of free-list blocks */
+	void *free_list;          /* The free-list of nodes */
 };
 
 static FreeListBlock *_new_FreeListBlock(FreeList *fl);
@@ -69,60 +71,62 @@ static void _thread_FreeListBlock(FreeList *fl, FreeListBlock *block);
  *  return          FreeList *  The new freelist, or NULL on error.
  */
 FreeList *_new_FreeList(const char *caller, size_t node_size,
-			unsigned blocking_factor)
+		unsigned blocking_factor)
 {
-  FreeList *fl;  /* The new free-list container */
-/*
- * When a free-list node is on the free-list, it is used as a (void *)
- * link field. Roundup node_size to a mulitple of the size of a void
- * pointer. This, plus the fact that the array of nodes is obtained via
- * malloc, which returns memory suitably aligned for any object, will
- * ensure that the first sizeof(void *) bytes of each node will be
- * suitably aligned to use as a (void *) link pointer.
- */
-  node_size = sizeof(void *) *
-    ((node_size + sizeof(void *) - 1) / sizeof(void *));
-/*
- * Enfore a minimum block size.
- */
-  if(blocking_factor < 1)
-    blocking_factor = 1;
-/*
- * Allocate the container of the free list.
- */
-  fl = (FreeList *) malloc(sizeof(FreeList));
-  if(!fl) {
-    if(caller)
-      fprintf(stderr, "_new_FreeList (%s): Insufficient memory.\n", caller);
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to _del_FreeList().
- */
-  fl->node_size = node_size;
-  fl->blocking_factor = blocking_factor;
-  fl->nbusy = 0;
-  fl->block = NULL;
-  fl->free_list = NULL;
-/*
- * Allocate the first block of memory.
- */
-  fl->block = _new_FreeListBlock(fl);
-  if(!fl->block) {
-    if(caller)
-      fprintf(stderr, "_new_FreeList (%s): Insufficient memory.\n", caller);
-    return _del_FreeList(caller, fl, 1);
-  };
-/*
- * Add the new list of nodes to the free-list.
- */
-  fl->free_list = fl->block->nodes;
-/*
- * Return the free-list for use.
- */
-  return fl;
+	FreeList *fl;  /* The new free-list container */
+	/*
+	 * When a free-list node is on the free-list, it is used as a (void *)
+	 * link field. Roundup node_size to a mulitple of the size of a void
+	 * pointer. This, plus the fact that the array of nodes is obtained via
+	 * malloc, which returns memory suitably aligned for any object, will
+	 * ensure that the first sizeof(void *) bytes of each node will be
+	 * suitably aligned to use as a (void *) link pointer.
+	 */
+	node_size = sizeof(void *) *
+		((node_size + sizeof(void *) - 1) / sizeof(void *));
+	/*
+	 * Enfore a minimum block size.
+	 */
+	if(blocking_factor < 1)
+		blocking_factor = 1;
+	/*
+	 * Allocate the container of the free list.
+	 */
+	fl = (FreeList *) malloc(sizeof(FreeList));
+	if(!fl) 
+	{
+		if(caller)
+			fprintf(stderr, "_new_FreeList (%s): Insufficient memory.\n", caller);
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to _del_FreeList().
+	 */
+	fl->node_size = node_size;
+	fl->blocking_factor = blocking_factor;
+	fl->nbusy = 0;
+	fl->block = NULL;
+	fl->free_list = NULL;
+	/*
+	 * Allocate the first block of memory.
+	 */
+	fl->block = _new_FreeListBlock(fl);
+	if(!fl->block) 
+	{
+		if(caller)
+			fprintf(stderr, "_new_FreeList (%s): Insufficient memory.\n", caller);
+		return _del_FreeList(caller, fl, 1);
+	};
+	/*
+	 * Add the new list of nodes to the free-list.
+	 */
+	fl->free_list = fl->block->nodes;
+	/*
+	 * Return the free-list for use.
+	 */
+	return fl;
 }
 
 /*.......................................................................
@@ -135,36 +139,38 @@ FreeList *_new_FreeList(const char *caller, size_t node_size,
  */
 void _rst_FreeList(FreeList *fl)
 {
-  if(fl) {
-    FreeListBlock *block;
-/*
- * Re-thread the nodes of each block into individual free-lists.
- */
-    for(block=fl->block; block; block=block->next)
-      _thread_FreeListBlock(fl, block);
-/*
- * Link all of the block freelists into one large freelist.
- */
-    fl->free_list = NULL;
-    for(block=fl->block; block; block=block->next) {
-/*
- * Locate the last node of the current block.
- */
-      char *last_node = block->nodes + fl->node_size *
-	(fl->blocking_factor - 1);
-/*
- * Make the link-field of the last node point to the first
- * node of the current freelist, then make the first node of the
- * new block the start of the freelist. 
- */
-      *(void **)last_node = fl->free_list;
-      fl->free_list = block->nodes;
-    };
-/*
- * All allocated nodes have now been returned to the freelist.
- */
-    fl->nbusy = 0;
-  };
+	if(fl) 
+	{
+		FreeListBlock *block;
+		/*
+		 * Re-thread the nodes of each block into individual free-lists.
+		 */
+		for(block=fl->block; block; block=block->next)
+			_thread_FreeListBlock(fl, block);
+		/*
+		 * Link all of the block freelists into one large freelist.
+		 */
+		fl->free_list = NULL;
+		for(block=fl->block; block; block=block->next) 
+		{
+			/*
+			 * Locate the last node of the current block.
+			 */
+			char *last_node = block->nodes + fl->node_size *
+				(fl->blocking_factor - 1);
+			/*
+			 * Make the link-field of the last node point to the first
+			 * node of the current freelist, then make the first node of the
+			 * new block the start of the freelist. 
+			 */
+			*(void **)last_node = fl->free_list;
+			fl->free_list = block->nodes;
+		};
+		/*
+		 * All allocated nodes have now been returned to the freelist.
+		 */
+		fl->nbusy = 0;
+	};
 }
 
 /*.......................................................................
@@ -187,35 +193,38 @@ void _rst_FreeList(FreeList *fl)
  */
 FreeList *_del_FreeList(const char *caller, FreeList *fl, int force)
 {
-  if(fl) {
-/*
- * Check whether any nodes are in use.
- */
-    if(!force && _busy_FreeListNodes(fl) != 0) {
-      if(caller)
-	fprintf(stderr, "_del_FreeList (%s): %ld nodes are still in use.\n",
-		caller, _busy_FreeListNodes(fl));
-      return NULL;
-    };
-/*
- * Delete the list blocks.
- */
-    {
-      FreeListBlock *next = fl->block;
-      while(next) {
-	FreeListBlock *block = next;
-	next = block->next;
-	block = _del_FreeListBlock(block);
-      };
-    };
-    fl->block = NULL;
-    fl->free_list = NULL;
-/*
- * Discard the container.
- */
-    free(fl);
-  };
-  return NULL;
+	if(fl) 
+	{
+		/*
+		 * Check whether any nodes are in use.
+		 */
+		if(!force && _busy_FreeListNodes(fl) != 0) 
+		{
+			if(caller)
+				fprintf(stderr, "_del_FreeList (%s): %ld nodes are still in use.\n",
+						caller, _busy_FreeListNodes(fl));
+			return NULL;
+		};
+		/*
+		 * Delete the list blocks.
+		 */
+		{
+			FreeListBlock *next = fl->block;
+			while(next) 
+			{
+				FreeListBlock *block = next;
+				next = block->next;
+				block = _del_FreeListBlock(block);
+			};
+		};
+		fl->block = NULL;
+		fl->free_list = NULL;
+		/*
+		 * Discard the container.
+		 */
+		free(fl);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -231,43 +240,44 @@ FreeList *_del_FreeList(const char *caller, FreeList *fl, int force)
  */
 void *_new_FreeListNode(FreeList *fl)
 {
-  void *node;  /* The node to be returned */
-/*
- * Check arguments.
- */
-  if(!fl)
-    return NULL;
-/*
- * If the free-list has been exhausted extend it by allocating
- * another block of nodes.
- */
-  if(!fl->free_list) {
-    FreeListBlock *block = _new_FreeListBlock(fl);
-    if(!block)
-      return NULL;
-/*
- * Prepend the new block to the list of free-list blocks.
- */
-    block->next = fl->block;
-    fl->block = block;
-/*
- * Add the new list of nodes to the free-list.
- */
-    fl->free_list = fl->block->nodes;
-  };
-/*
- * Remove and return a node from the front of the free list.
- */
-  node = fl->free_list;
-  fl->free_list = *(void **)node;
-/*
- * Record the loss of a node from the free-list.
- */
-  fl->nbusy++;
-/*
- * Return the node.
- */
-  return node;
+	void *node;  /* The node to be returned */
+	/*
+	 * Check arguments.
+	 */
+	if(!fl)
+		return NULL;
+	/*
+	 * If the free-list has been exhausted extend it by allocating
+	 * another block of nodes.
+	 */
+	if(!fl->free_list) 
+	{
+		FreeListBlock *block = _new_FreeListBlock(fl);
+		if(!block)
+			return NULL;
+		/*
+		 * Prepend the new block to the list of free-list blocks.
+		 */
+		block->next = fl->block;
+		fl->block = block;
+		/*
+		 * Add the new list of nodes to the free-list.
+		 */
+		fl->free_list = fl->block->nodes;
+	};
+	/*
+	 * Remove and return a node from the front of the free list.
+	 */
+	node = fl->free_list;
+	fl->free_list = *(void **)node;
+	/*
+	 * Record the loss of a node from the free-list.
+	 */
+	fl->nbusy++;
+	/*
+	 * Return the node.
+	 */
+	return node;
 }
 
 /*.......................................................................
@@ -284,23 +294,24 @@ void *_new_FreeListNode(FreeList *fl)
  */
 void *_del_FreeListNode(FreeList *fl, void *object)
 {
-/*
- * Check arguments.
- */
-  if(!fl)
-    return NULL;
-/*
- * Return the node to the head of the free list.
- */
-  if(object) {
-    *(void **)object = fl->free_list;
-    fl->free_list = object;
-/*
- * Record the return of the node to the free-list.
- */
-    fl->nbusy--;
-  };
-  return NULL;
+	/*
+	 * Check arguments.
+	 */
+	if(!fl)
+		return NULL;
+	/*
+	 * Return the node to the head of the free list.
+	 */
+	if(object) 
+	{
+		*(void **)object = fl->free_list;
+		fl->free_list = object;
+		/*
+		 * Record the return of the node to the free-list.
+		 */
+		fl->nbusy--;
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -313,7 +324,7 @@ void *_del_FreeListNode(FreeList *fl, void *object)
  */
 long _busy_FreeListNodes(FreeList *fl)
 {
-  return fl ? fl->nbusy : 0;
+	return fl ? fl->nbusy : 0;
 }
 
 /*.......................................................................
@@ -329,31 +340,31 @@ long _busy_FreeListNodes(FreeList *fl)
  */
 static FreeListBlock *_new_FreeListBlock(FreeList *fl)
 {
-  FreeListBlock *block;  /* The new block to be returned */
-/*
- * Allocate the container.
- */
-  block = (FreeListBlock *) malloc(sizeof(FreeListBlock));
-  if(!block)
-    return NULL;
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to _del_FreeListBlock().
- */
-  block->next = NULL;
-  block->nodes = NULL;
-/*
- * Allocate the block of nodes.
- */
-  block->nodes = (char *) malloc(fl->node_size * fl->blocking_factor);
-  if(!block->nodes)
-    return _del_FreeListBlock(block);
-/*
- * Initialize the block as a linked list of FreeListNode's.
- */
-  _thread_FreeListBlock(fl, block);
-  return block;
+	FreeListBlock *block;  /* The new block to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	block = (FreeListBlock *) malloc(sizeof(FreeListBlock));
+	if(!block)
+		return NULL;
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to _del_FreeListBlock().
+	 */
+	block->next = NULL;
+	block->nodes = NULL;
+	/*
+	 * Allocate the block of nodes.
+	 */
+	block->nodes = (char *) malloc(fl->node_size * fl->blocking_factor);
+	if(!block->nodes)
+		return _del_FreeListBlock(block);
+	/*
+	 * Initialize the block as a linked list of FreeListNode's.
+	 */
+	_thread_FreeListBlock(fl, block);
+	return block;
 }
 
 /*.......................................................................
@@ -365,11 +376,11 @@ static FreeListBlock *_new_FreeListBlock(FreeList *fl)
  */
 static void _thread_FreeListBlock(FreeList *fl, FreeListBlock *block)
 {
-  char *mem = block->nodes;
-  int i;
-  for(i=0; i<fl->blocking_factor - 1; i++, mem += fl->node_size)
-    *(void **)mem = mem + fl->node_size;  /* Link to the next node */
-  *(void **)mem = NULL;                   /* Terminate the list */
+	char *mem = block->nodes;
+	int i;
+	for(i=0; i<fl->blocking_factor - 1; i++, mem += fl->node_size)
+		*(void **)mem = mem + fl->node_size;  /* Link to the next node */
+	*(void **)mem = NULL;                   /* Terminate the list */
 }
 
 /*.......................................................................
@@ -382,12 +393,13 @@ static void _thread_FreeListBlock(FreeList *fl, FreeListBlock *block)
  */
 static FreeListBlock *_del_FreeListBlock(FreeListBlock *fl)
 {
-  if(fl) {
-    fl->next = NULL;
-    if(fl->nodes)
-      free(fl->nodes);
-    fl->nodes = NULL;
-    free(fl);
-  };
-  return NULL;
+	if(fl) 
+	{
+		fl->next = NULL;
+		if(fl->nodes)
+			free(fl->nodes);
+		fl->nodes = NULL;
+		free(fl);
+	};
+	return NULL;
 }

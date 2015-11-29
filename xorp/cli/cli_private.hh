@@ -42,5 +42,5 @@
 #ifndef CHAR_TO_META
 #define CHAR_TO_META(c) ((c) | 0x080)
 #endif
-    
+
 #endif // __CLI_CLI_PRIVATE_HH__

@@ -24,10 +24,11 @@
 #ifndef __LIBXIPC_FINDER_CONSTANTS_HH__
 #define __LIBXIPC_FINDER_CONSTANTS_HH__
 
-class FinderConstants {
-public:
-    static uint16_t FINDER_DEFAULT_PORT()	{ return (19999); }
-    static const IPv4 FINDER_DEFAULT_HOST()	{ return IPv4::LOOPBACK(); }
+class FinderConstants 
+{
+    public:
+	static uint16_t FINDER_DEFAULT_PORT()	{ return (19999); }
+	static const IPv4 FINDER_DEFAULT_HOST()	{ return IPv4::LOOPBACK(); }
 };
 
 #endif // __LIBXIPC_FINDER_CONSTANTS_HH__

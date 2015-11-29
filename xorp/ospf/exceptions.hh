@@ -28,10 +28,10 @@
  */
 class BadPeer : public XorpReasonedException
 {
-public:
-    BadPeer(const char* file, size_t line, const string init_why = "")
- 	: XorpReasonedException("BadPeer", file, line, init_why)
-    {}
+    public:
+	BadPeer(const char* file, size_t line, const string init_why = "")
+	    : XorpReasonedException("BadPeer", file, line, init_why)
+	    {}
 };
 
 #endif // __OSPF_EXCEPTIONS_HH__

@@ -34,104 +34,104 @@ PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
     _process_watch(rtr, _pmap),
     _conf(_process_watch),
     _filter_manager(_conf.import_filters(),
-		    _conf.sourcematch_filters(),
-		    _conf.export_filters(),
-		    _conf.sets(),
-		    _conf.tagmap(),
-		    rtr,
-		    _process_watch,
-		    _pmap)
+	    _conf.sourcematch_filters(),
+	    _conf.export_filters(),
+	    _conf.sets(),
+	    _conf.tagmap(),
+	    rtr,
+	    _process_watch,
+	    _pmap)
 
 {
     _conf.set_filter_manager(_filter_manager);
     _process_watch.set_notifier(_filter_manager);
 }
 
-bool
+    bool
 PolicyTarget::running()
 {
     return _running;
 }
 
-void
+    void
 PolicyTarget::shutdown()
 {
     _running = false;
 }
 
 
-void
+    void
 PolicyTarget::create_term(const string& policy, const ConfigNodeId& order,
-			  const string& term)
+	const string& term)
 {
     _conf.create_term(policy, order, term);
 }
 
-void
+    void
 PolicyTarget::delete_term(const string& policy, const string& term)
 {
     _conf.delete_term(policy,term);
 }
 
-void
+    void
 PolicyTarget::update_term_block(const string& policy,
-				const string& term,
-				const uint32_t& block,
-				const ConfigNodeId& order,
-				const string& statement)
+	const string& term,
+	const uint32_t& block,
+	const ConfigNodeId& order,
+	const string& statement)
 {
     _conf.update_term_block(policy, term, block, order, statement);
 }
 
-void
+    void
 PolicyTarget::create_policy(const string& policy)
 {
     _conf.create_policy(policy);
 }
 
-void
+    void
 PolicyTarget::delete_policy(const string& policy)
 {
     _conf.delete_policy(policy);
 }
 
-void
+    void
 PolicyTarget::create_set(const string& name)
 {
     _conf.create_set(name);
 }
 
-void
+    void
 PolicyTarget::update_set(const string& type, const string& name,
-			 const string& element)
+	const string& element)
 {
     _conf.update_set(type, name, element);
 }
 
-void
+    void
 PolicyTarget::delete_set(const string& name)
 {
     _conf.delete_set(name);
 }
 
-void
+    void
 PolicyTarget::add_to_set(const string& type, const string& name,
-			 const string& element)
+	const string& element)
 {
     _conf.add_to_set(type, name, element);
 }
 
-void
+    void
 PolicyTarget::delete_from_set(const string& type, const string& name,
-			      const string& element)
+	const string& element)
 {
     _conf.delete_from_set(type, name, element);
 }
 
-void
+    void
 PolicyTarget::update_import(const string& protocol,
-			    const string& policies,
-			    const string& mod)
+	const string& policies,
+	const string& mod)
 {
     POLICIES p;
 
@@ -144,10 +144,10 @@ PolicyTarget::update_import(const string& protocol,
     _conf.commit(_commit_delay);
 }
 
-void
+    void
 PolicyTarget::update_export(const string& protocol,
-			    const string& policies,
-			    const string& mod)
+	const string& policies,
+	const string& mod)
 {
     POLICIES p;
 
@@ -159,33 +159,33 @@ PolicyTarget::update_export(const string& protocol,
     _conf.commit(_commit_delay);
 }
 
-void
+    void
 PolicyTarget::add_varmap(const string& protocol, const string& variable,
-			 const string& type, const string& access,
-			 const VarRW::Id& id)
+	const string& type, const string& access,
+	const VarRW::Id& id)
 {
     _conf.add_varmap(protocol, variable, type, access, id);
 }
 
-void
+    void
 PolicyTarget::commit(uint32_t msec)
 {
     _conf.commit(msec);
 }
 
-string
+    string
 PolicyTarget::dump_state(uint32_t id)
 {
     return _conf.dump_state(id);
 }
 
-void
+    void
 PolicyTarget::birth(const string& tclass, const string& /* tinstance */)
 {
     _process_watch.birth(tclass);
 }
 
-void
+    void
 PolicyTarget::death(const string& tclass, const string& /* tinstance */)
 {
     // Remove the "import" and "export" dependencies for the protocol
@@ -198,13 +198,13 @@ PolicyTarget::death(const string& tclass, const string& /* tinstance */)
     _process_watch.death(tclass);
 }
 
-void
+    void
 PolicyTarget::set_proto_target(const string& protocol, const string& target)
 {
     _pmap.set_xrl_target(protocol, target);
 }
 
-string
+    string
 PolicyTarget::test_policy(const string& args)
 {
     string policy;
@@ -226,17 +226,19 @@ PolicyTarget::test_policy(const string& args)
     string::size_type j = args.find(' ', i);
     if (j == string::npos)
 	prefix = args.substr(i);
-    else {
+    else 
+    {
 	prefix = args.substr(i, j - i);
 
 	j += 1;
 
 	// strip quotes if present
-	if (args.find('"') == j) {
+	if (args.find('"') == j) 
+	{
 	    string tmp("\"");
 	    string::size_type k = args.find_last_of(tmp);
 	    if (j == k || k != (args.length() - 1))
-	        xorp_throw(PolicyException, "Missing last quote");
+		xorp_throw(PolicyException, "Missing last quote");
 
 	    j++;
 	    attributes = args.substr(j, k - j);
@@ -257,9 +259,9 @@ PolicyTarget::test_policy(const string& args)
     return oss.str();
 }
 
-bool
+    bool
 PolicyTarget::test_policy(const string& policy, const string& prefix,
-			  const string& attributes, string& mods)
+	const string& attributes, string& mods)
 {
     RATTR attrs;
     RATTR mod;
@@ -274,7 +276,8 @@ PolicyTarget::test_policy(const string& policy, const string& prefix,
 
     bool res = test_policy(policy, attrs, mod);
 
-    for (RATTR::iterator i = mod.begin(); i != mod.end(); ++i) {
+    for (RATTR::iterator i = mod.begin(); i != mod.end(); ++i) 
+    {
 	mods += i->first;
 	mods += "\t";
 	mods += i->second;
@@ -284,20 +287,21 @@ PolicyTarget::test_policy(const string& policy, const string& prefix,
     return res;
 }
 
-bool
+    bool
 PolicyTarget::test_policy(const string& policy, const RATTR& attrs, RATTR& mods)
 {
     return _conf.test_policy(policy, attrs, mods);
 }
 
-void
+    void
 PolicyTarget::parse_attributes(const string& attr, RATTR& out)
 {
     // format: --attributename=value
     string::size_type i = 0;
     string::size_type j = 0;
 
-    while ((j = attr.find("--", i)) != string::npos) {
+    while ((j = attr.find("--", i)) != string::npos) 
+    {
 	j += 2;
 
 	// name
@@ -320,7 +324,7 @@ PolicyTarget::parse_attributes(const string& attr, RATTR& out)
     }
 }
 
-string
+    string
 PolicyTarget::cli_command(const string& cmd)
 {
     string command;
@@ -329,7 +333,8 @@ PolicyTarget::cli_command(const string& cmd)
     string::size_type i = cmd.find(' ');
     if (i == string::npos)
 	command = cmd;
-    else {
+    else 
+    {
 	command = cmd.substr(0, i);
 	arg = cmd.substr(i + 1);
     }
@@ -342,7 +347,7 @@ PolicyTarget::cli_command(const string& cmd)
 	xorp_throw(PolicyException, "Unknown command");
 }
 
-string
+    string
 PolicyTarget::show(const string& arg)
 {
     string type;
@@ -351,7 +356,8 @@ PolicyTarget::show(const string& arg)
     string::size_type i = arg.find(' ');
     if (i == string::npos)
 	type = arg;
-    else {
+    else 
+    {
 	type = arg.substr(0, i);
 	name = arg.substr(i + 1);
     }
@@ -362,7 +368,8 @@ PolicyTarget::show(const string& arg)
 
     ostringstream oss;
 
-    for (RESOURCES::iterator i = res.begin(); i != res.end(); ++i) {
+    for (RESOURCES::iterator i = res.begin(); i != res.end(); ++i) 
+    {
 	if (name.empty())
 	    oss << i->first << "\t";
 
@@ -372,7 +379,7 @@ PolicyTarget::show(const string& arg)
     return oss.str();
 }
 
-void
+    void
 PolicyTarget::show(const string& type, const string& name, RESOURCES& res)
 {
     _conf.show(type, name, res);

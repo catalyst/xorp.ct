@@ -31,8 +31,8 @@
 
 const char* XrlPFUNIXListener::_protocol = "unix";
 
-XrlPFUNIXListener::XrlPFUNIXListener( XrlDispatcher* xr)
-    : XrlPFSTCPListener( xr)
+    XrlPFUNIXListener::XrlPFUNIXListener( XrlDispatcher* xr)
+: XrlPFSTCPListener( xr)
 {
     string path = get_sock_path();
 
@@ -40,27 +40,32 @@ XrlPFUNIXListener::XrlPFUNIXListener( XrlDispatcher* xr)
     if (!_sock.is_valid())
 	xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
 
-    if (comm_listen(_sock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+    if (comm_listen(_sock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) 
+    {
 	comm_close(_sock);
 	_sock.clear();
-        xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
+	xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
     }
 
     struct group *grp = getgrnam("xorp");
-    if (grp) {
+    if (grp) 
+    {
 	/* Change the group to be 'xorp', leave owner as is. */
-	if (chown(path.c_str(), -1, grp->gr_gid)) {
+	if (chown(path.c_str(), -1, grp->gr_gid)) 
+	{
 	    cerr << "ERROR: Failed chown on path: " << path << " error: " << strerror(errno) << endl;
 	}
     }
-    else {
+    else 
+    {
 	// Something is wrong, probably no xorp user.  This is not necessarily
 	// a real problem, so don't want to fill up logs.  Might be worth
 	// doing a similar check in xorp_rtrmgr startup and warn once there...
     }
 
     /* Owner read/write, group read/write, other read -JC */
-    if (chmod(path.c_str(), S_IWUSR| S_IRUSR| S_IWGRP| S_IRGRP| S_IROTH)) {
+    if (chmod(path.c_str(), S_IWUSR| S_IRUSR| S_IWGRP| S_IRGRP| S_IROTH)) 
+    {
 	cerr << "ERROR: Failed chmod on path: " << path << " error: " << strerror(errno) << endl;
     }
 
@@ -68,11 +73,11 @@ XrlPFUNIXListener::XrlPFUNIXListener( XrlDispatcher* xr)
     encode_address(_address_slash_port);
 
     EventLoop::instance().add_ioevent_cb(_sock, IOT_ACCEPT,
-         callback(dynamic_cast<XrlPFSTCPListener*>(this),
-                  &XrlPFSTCPListener::connect_hook));
+	    callback(dynamic_cast<XrlPFSTCPListener*>(this),
+		&XrlPFSTCPListener::connect_hook));
 }
 
-string
+    string
 XrlPFUNIXListener::get_sock_path()
 {
     // XXX race
@@ -106,10 +111,11 @@ XrlPFUNIXListener::protocol() const
     return _protocol;
 }
 
-static void
+    static void
 replace(string& in, char a, char b)
 {
-    for (string::iterator i = in.begin(); i != in.end(); ++i) {
+    for (string::iterator i = in.begin(); i != in.end(); ++i) 
+    {
 	char& x = *i;
 
 	if (x == a)
@@ -117,13 +123,13 @@ replace(string& in, char a, char b)
     }
 }
 
-void
+    void
 XrlPFUNIXListener::encode_address(string& address)
 {
     replace(address, '/', ':');
 }
 
-void
+    void
 XrlPFUNIXListener::decode_address(string& address)
 {
     replace(address, ':', '/');
@@ -135,8 +141,8 @@ XrlPFUNIXListener::decode_address(string& address)
 //
 ////////////////////////
 
-XrlPFUNIXSender::XrlPFUNIXSender(const string& name,  const char* addr)
-	: XrlPFSTCPSender(name,  addr)
+    XrlPFUNIXSender::XrlPFUNIXSender(const string& name,  const char* addr)
+: XrlPFSTCPSender(name,  addr)
 {
     string address = addr;
     XrlPFUNIXListener::decode_address(address);
@@ -145,22 +151,24 @@ XrlPFUNIXSender::XrlPFUNIXSender(const string& name,  const char* addr)
 
     if (!_sock.is_valid())
 	xorp_throw(XrlPFConstructorError,
-		   c_format("Could not connect to %s\n", address.c_str()));
+		c_format("Could not connect to %s\n", address.c_str()));
 
     // Set the receiving socket buffer size in the kernel
     if (comm_sock_set_rcvbuf(_sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
-        < SO_RCV_BUF_SIZE_MIN) {
-        comm_close(_sock);
-        _sock.clear();
+	    < SO_RCV_BUF_SIZE_MIN) 
+    {
+	comm_close(_sock);
+	_sock.clear();
 
 	xorp_throw(XrlPFConstructorError, "Can't set receive buffer size");
     }
-    
+
     // Set the sending socket buffer size in the kernel
     if (comm_sock_set_sndbuf(_sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
-        < SO_SND_BUF_SIZE_MIN) {
-        comm_close(_sock);
-        _sock.clear();
+	    < SO_SND_BUF_SIZE_MIN) 
+    {
+	comm_close(_sock);
+	_sock.clear();
 
 	xorp_throw(XrlPFConstructorError, "Can't set send buffer size");
     }
@@ -168,7 +176,7 @@ XrlPFUNIXSender::XrlPFUNIXSender(const string& name,  const char* addr)
     construct();
 }
 
-const char*
+    const char*
 XrlPFUNIXSender::protocol_name()
 {
     return XrlPFUNIXListener::_protocol;

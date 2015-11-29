@@ -40,91 +40,95 @@
 // The mechanism to observe the information is routing sockets.
 //
 
-IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigObserver(fea_data_plane_manager),
-      RoutingSocketObserver(*(RoutingSocket *)this)
+	IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigObserver(fea_data_plane_manager),
+	RoutingSocketObserver(*(RoutingSocket *)this)
 {
 }
 
 IfConfigObserverRoutingSocket::~IfConfigObserverRoutingSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
-		   "information about network interfaces from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
+				"information about network interfaces from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IfConfigObserverRoutingSocket::start(string& error_msg)
 {
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigObserverRoutingSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 IfConfigObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
-    // Pre-processing cleanup
-    ifconfig().system_config().finalize_state();
+	// Pre-processing cleanup
+	ifconfig().system_config().finalize_state();
 
-    if (IfConfigGetSysctl::parse_buffer_routing_socket(
-	    ifconfig(), ifconfig().system_config(), buffer)
-	!= XORP_OK) {
-	return;
-    }
-
-    //
-    // Get the VLAN vif info
-    //
-    IfConfigVlanGet* ifconfig_vlan_get;
-    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
-    if (ifconfig_vlan_get != NULL) {
-	bool modified = false; // Ignore this...assume it's always modified.
-	if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
-	    != XORP_OK) {
-	    XLOG_ERROR("Unknown error while pulling VLAN information");
+	if (IfConfigGetSysctl::parse_buffer_routing_socket(
+				ifconfig(), ifconfig().system_config(), buffer)
+			!= XORP_OK) 
+	{
+		return;
 	}
-    }
 
-    //
-    // Propagate the changes from the system config to the merged config
-    //
-    IfTree& merged_config = ifconfig().merged_config();
-    merged_config.align_with_observed_changes(ifconfig().system_config(),
-					      ifconfig().user_config());
-    ifconfig().report_updates(merged_config);
-    merged_config.finalize_state();
+	//
+	// Get the VLAN vif info
+	//
+	IfConfigVlanGet* ifconfig_vlan_get;
+	ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+	if (ifconfig_vlan_get != NULL) 
+	{
+		bool modified = false; // Ignore this...assume it's always modified.
+		if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
+				!= XORP_OK) 
+		{
+			XLOG_ERROR("Unknown error while pulling VLAN information");
+		}
+	}
+
+	//
+	// Propagate the changes from the system config to the merged config
+	//
+	IfTree& merged_config = ifconfig().merged_config();
+	merged_config.align_with_observed_changes(ifconfig().system_config(),
+			ifconfig().user_config());
+	ifconfig().report_updates(merged_config);
+	merged_config.finalize_state();
 }
 
-void
+	void
 IfConfigObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

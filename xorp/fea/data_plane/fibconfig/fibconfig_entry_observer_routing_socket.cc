@@ -42,63 +42,64 @@
 // The mechanism to observe the information is routing sockets.
 //
 
-FibConfigEntryObserverRoutingSocket::FibConfigEntryObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntryObserver(fea_data_plane_manager),
-      RoutingSocketObserver(*(RoutingSocket *)this)
+	FibConfigEntryObserverRoutingSocket::FibConfigEntryObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigEntryObserver(fea_data_plane_manager),
+	RoutingSocketObserver(*(RoutingSocket *)this)
 {
 }
 
 FibConfigEntryObserverRoutingSocket::~FibConfigEntryObserverRoutingSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
-		   "information about forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
+				"information about forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigEntryObserverRoutingSocket::start(string& error_msg)
 {
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryObserverRoutingSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (RoutingSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (RoutingSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 FibConfigEntryObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
-    // TODO: XXX: PAVPAVPAV: use it?
-    UNUSED(buffer);
+	// TODO: XXX: PAVPAVPAV: use it?
+	UNUSED(buffer);
 }
 
-void
+	void
 FibConfigEntryObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

@@ -47,9 +47,9 @@
 #define EXPONENT_BIAS ((EXPONENT_MASK >> 1u) - 1u)
 
 #if __STDC_VERSION__ >= 199901L || \
-    _XOPEN_SOURCE >= 600 || \
-    _ISOC99_SOURCE || \
-    _POSIX_C_SOURCE >= 200112L
+			_XOPEN_SOURCE >= 600 || \
+_ISOC99_SOURCE || \
+_POSIX_C_SOURCE >= 200112L
 
 /* fpclassify is available. */
 #else
@@ -70,15 +70,15 @@
 
 #define fpclassify(X) \
     ((X) == 0.0 ? FP_ZERO :			\
-	(X) >= +XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
-	(X) <= -XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
-	(X) != (X) ? FP_NAN : \
+     (X) >= +XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
+     (X) <= -XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
+     (X) != (X) ? FP_NAN : \
      FP_NORMAL)
 #endif
 
 
 #if __STDC_VERSION__ >= 199901L || \
-    _XOPEN_SOURCE >= 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE >= 200112L
+			_XOPEN_SOURCE >= 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE >= 200112L
 /* signbit is available. */
 #else
 /* We can't guarantee that signbit exists.  Define a simple
@@ -98,72 +98,76 @@ uint_fast64_t fp64enc(fp64_t input)
     int s_exp;
     uint_fast64_t bytes;
 
-    switch (fpclassify(input)) {
-    default:
-	abort();
-	break;
+    switch (fpclassify(input)) 
+    {
+	default:
+	    abort();
+	    break;
 
-    case FP_ZERO:
-	neg = signbit(input);
-	u_mant = 0;
-	u_exp = 0;
-	break;
-
-    case FP_INFINITE:
-	neg = signbit(input);
-	u_mant = 0;
-	u_exp = EXPONENT_MASK;
-	break;
-
-    case FP_NAN:
-	neg = false;
-	u_mant = 1;
-	u_exp = EXPONENT_MASK;
-	break;
-
-    case FP_SUBNORMAL:
-    case FP_NORMAL:
-	/* Handle normal and subnormal together.  The number might be
-	   one class for double, but another for binary64. */
-
-	/* Decompose the input into a significand (mantissa + 1) and
-	   an exponent. */
-	d_mant = XORP_FP64(frexp)(input, &s_exp);
-
-	/* Extract the sign bit from the mantissa. */
-	neg = signbit(input);
-	d_mant = XORP_FP64(fabs)(d_mant);
-
-	/* Offset the exponent so it can be represented as an unsigned
-	   value. */
-	s_exp += EXPONENT_BIAS;
-
-	/* Now we find out whether the number we represent is normal,
-	   subnormal, or overflows binary64. */
-	if (s_exp >= (long) EXPONENT_MASK) {
-	    /* The number is too big for binary64, so use the maximum
-	       value. */
-	    u_mant = MANTISSA_MASK;
-	    u_exp = EXPONENT_MASK - 1u;
-	} else if (s_exp <= 0) {
-	    /* The number is subnormal in binary64. */
-
-	    /* Shift the mantissa so that it's exponent would be 0. */
-	    u_mant = XORP_FP64(ldexp)(d_mant, MANTISSA_BIT);
-
-	    u_mant >>= -s_exp;
+	case FP_ZERO:
+	    neg = signbit(input);
+	    u_mant = 0;
 	    u_exp = 0;
-	} else {
-	    /* The number is normal in binary64. */
+	    break;
 
-	    /* Use the suggested exponent. */
-	    u_exp = s_exp;
+	case FP_INFINITE:
+	    neg = signbit(input);
+	    u_mant = 0;
+	    u_exp = EXPONENT_MASK;
+	    break;
 
-	    /* Make the mantissa value into a positive integer. */
-	    u_mant = XORP_FP64(ldexp)(d_mant, MANTISSA_BIT + 1);
-	}
+	case FP_NAN:
+	    neg = false;
+	    u_mant = 1;
+	    u_exp = EXPONENT_MASK;
+	    break;
 
-	break;
+	case FP_SUBNORMAL:
+	case FP_NORMAL:
+	    /* Handle normal and subnormal together.  The number might be
+	       one class for double, but another for binary64. */
+
+	    /* Decompose the input into a significand (mantissa + 1) and
+	       an exponent. */
+	    d_mant = XORP_FP64(frexp)(input, &s_exp);
+
+	    /* Extract the sign bit from the mantissa. */
+	    neg = signbit(input);
+	    d_mant = XORP_FP64(fabs)(d_mant);
+
+	    /* Offset the exponent so it can be represented as an unsigned
+	       value. */
+	    s_exp += EXPONENT_BIAS;
+
+	    /* Now we find out whether the number we represent is normal,
+	       subnormal, or overflows binary64. */
+	    if (s_exp >= (long) EXPONENT_MASK) 
+	    {
+		/* The number is too big for binary64, so use the maximum
+		   value. */
+		u_mant = MANTISSA_MASK;
+		u_exp = EXPONENT_MASK - 1u;
+	    } else if (s_exp <= 0) 
+	    {
+		/* The number is subnormal in binary64. */
+
+		/* Shift the mantissa so that it's exponent would be 0. */
+		u_mant = XORP_FP64(ldexp)(d_mant, MANTISSA_BIT);
+
+		u_mant >>= -s_exp;
+		u_exp = 0;
+	    } else 
+	    {
+		/* The number is normal in binary64. */
+
+		/* Use the suggested exponent. */
+		u_exp = s_exp;
+
+		/* Make the mantissa value into a positive integer. */
+		u_mant = XORP_FP64(ldexp)(d_mant, MANTISSA_BIT + 1);
+	    }
+
+	    break;
     }
 
     /* Transmit the bottom MANTISSA_BITs of u_mant.  The extra top bit
@@ -189,8 +193,10 @@ fp64_t fp64dec(uint_fast64_t bytes)
     u_mant = (bytes >> MANTISSA_SHIFT) & MANTISSA_MASK;
     neg = (bytes >> SIGN_SHIFT) & SIGN_MASK;
 
-    if (u_exp == EXPONENT_MASK) {
-	if (u_mant == 0) {
+    if (u_exp == EXPONENT_MASK) 
+    {
+	if (u_mant == 0) 
+	{
 #ifdef INFINITY
 	    return neg ? -INFINITY : +INFINITY;
 #else
@@ -205,8 +211,10 @@ fp64_t fp64dec(uint_fast64_t bytes)
     }
 
 
-    do {
-	if (u_exp == 0) {
+    do 
+    {
+	if (u_exp == 0) 
+	{
 	    /* Positive or negative zero */
 	    if (u_mant == 0)
 		return XORP_FP64(copysign)(0.0, neg ? -1.0 : +1.0);

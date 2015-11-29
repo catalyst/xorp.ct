@@ -26,29 +26,30 @@
 
 
 template<class A>
-class DummyNextHopResolver : public NextHopResolver<A> {
-public:
-    DummyNextHopResolver( BGPMain& bgp);
+class DummyNextHopResolver : public NextHopResolver<A> 
+{
+	public:
+		DummyNextHopResolver( BGPMain& bgp);
 
-    virtual ~DummyNextHopResolver();
+		virtual ~DummyNextHopResolver();
 
-    /**
-     * @short lookup next hop.
-     *
-     * @param nexthop. Next hop.
-     * @param resolvable. Is this route resolvable.
-     * @param metric. If this route is resolvable the metric of this
-     * route.
-     * @return True if this next hop is found.
-     *
-     */
-    bool lookup(const A nexthop, bool& resolvable, uint32_t& metric) const;
+		/**
+		 * @short lookup next hop.
+		 *
+		 * @param nexthop. Next hop.
+		 * @param resolvable. Is this route resolvable.
+		 * @param metric. If this route is resolvable the metric of this
+		 * route.
+		 * @return True if this next hop is found.
+		 *
+		 */
+		bool lookup(const A nexthop, bool& resolvable, uint32_t& metric) const;
 
-    void set_nexthop_metric(const A nexthop, uint32_t metric);
-    void unset_nexthop_metric(const A nexthop);
-private:
-    DecisionTable<A> *_decision;
-    map <A, uint32_t> _metrics;
+		void set_nexthop_metric(const A nexthop, uint32_t metric);
+		void unset_nexthop_metric(const A nexthop);
+	private:
+		DecisionTable<A> *_decision;
+		map <A, uint32_t> _metrics;
 };
 
 #endif // __BGP_DUMMY_NEXT_HOP_RESOLVER_HH__

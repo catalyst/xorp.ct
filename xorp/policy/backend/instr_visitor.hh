@@ -40,20 +40,21 @@ class Subr;
  *
  * Inspired by Alexandrescu [Modern C++ Design].
  */
-class InstrVisitor {
-public:
-    virtual ~InstrVisitor() {}
+class InstrVisitor 
+{
+    public:
+	virtual ~InstrVisitor() {}
 
-    virtual void visit(Push&) = 0;
-    virtual void visit(PushSet&) = 0;
-    virtual void visit(OnFalseExit&) = 0;
-    virtual void visit(Load&) = 0;
-    virtual void visit(Store&) = 0;
-    virtual void visit(Accept&) = 0;
-    virtual void visit(Reject&) = 0;
-    virtual void visit(NaryInstr&) = 0;
-    virtual void visit(Next&) = 0;
-    virtual void visit(Subr&) = 0;
+	virtual void visit(Push&) = 0;
+	virtual void visit(PushSet&) = 0;
+	virtual void visit(OnFalseExit&) = 0;
+	virtual void visit(Load&) = 0;
+	virtual void visit(Store&) = 0;
+	virtual void visit(Accept&) = 0;
+	virtual void visit(Reject&) = 0;
+	virtual void visit(NaryInstr&) = 0;
+	virtual void visit(Next&) = 0;
+	virtual void visit(Subr&) = 0;
 };
 
 #endif // __POLICY_BACKEND_INSTR_VISITOR_HH__

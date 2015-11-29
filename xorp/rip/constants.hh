@@ -103,45 +103,47 @@ struct RIP_AF_CONSTANTS;
 template <>
 struct RIP_AF_CONSTANTS<IPv4>
 {
-    static const IPv4		IP_GROUP() { return IPv4::RIP2_ROUTERS(); }
-    static const uint16_t	IP_PORT = RIP_PORT;
-    static const IPv4Net&	DEFAULT_ROUTE() { return IPv4_DEFAULT_ROUTE; }
-    static const uint8_t	PACKET_VERSION = 2;
+	static const IPv4		IP_GROUP() { return IPv4::RIP2_ROUTERS(); }
+	static const uint16_t	IP_PORT = RIP_PORT;
+	static const IPv4Net&	DEFAULT_ROUTE() { return IPv4_DEFAULT_ROUTE; }
+	static const uint8_t	PACKET_VERSION = 2;
 };
 
 template <>
 struct RIP_AF_CONSTANTS<IPv6>
 {
-    static const IPv6&		IP_GROUP() { return IPv6::RIP2_ROUTERS(); }
-    static const uint16_t	IP_PORT = RIP_NG_PORT;
-    static const IPv6Net&	DEFAULT_ROUTE() { return IPv6_DEFAULT_ROUTE; }
-    static const uint8_t	 PACKET_VERSION = 1;
+	static const IPv6&		IP_GROUP() { return IPv6::RIP2_ROUTERS(); }
+	static const uint16_t	IP_PORT = RIP_NG_PORT;
+	static const IPv6Net&	DEFAULT_ROUTE() { return IPv6_DEFAULT_ROUTE; }
+	static const uint8_t	 PACKET_VERSION = 1;
 };
 
 /**
  * Enumeration of RIP Horizon types.
  */
-enum RipHorizon {
-    // No filtering
-    NONE		 = 0,
-    // Don't a route origin its own routes.
-    SPLIT		 = 1,
-    // Show a route origin its own routes but with cost of infinity.
-    SPLIT_POISON_REVERSE = 2
+enum RipHorizon 
+{
+	// No filtering
+	NONE		 = 0,
+	// Don't a route origin its own routes.
+	SPLIT		 = 1,
+	// Show a route origin its own routes but with cost of infinity.
+	SPLIT_POISON_REVERSE = 2
 };
 
-inline static const char*
+	inline static const char*
 rip_horizon_name(RipHorizon h)
 {
-    switch (h) {
-    case SPLIT_POISON_REVERSE:
-	return "split-horizon-poison-reverse";
-    case SPLIT:
-	return "split-horizon";
-    case NONE:
-	break;
-    }
-    return "none";
+	switch (h) 
+	{
+		case SPLIT_POISON_REVERSE:
+			return "split-horizon-poison-reverse";
+		case SPLIT:
+			return "split-horizon";
+		case NONE:
+			break;
+	}
+	return "none";
 };
 
 #endif // __RIP_CONSTANTS_HH__

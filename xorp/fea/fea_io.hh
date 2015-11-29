@@ -36,109 +36,110 @@ class InstanceWatcher;
 /**
  * @short FEA (Forwarding Engine Abstraction) I/O class.
  */
-class FeaIo {
-public:
-    /**
-     * Constructor.
-     *
-     * @param eventloop the event loop to use.
-     */
-    FeaIo();
+class FeaIo 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param eventloop the event loop to use.
+		 */
+		FeaIo();
 
-    /**
-     * Destructor
-     */
-    virtual	~FeaIo();
+		/**
+		 * Destructor
+		 */
+		virtual	~FeaIo();
 
-    /**
-     * Startup the service operation.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		startup();
+		/**
+		 * Startup the service operation.
+		 * 
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		startup();
 
-    /**
-     * Shutdown the service operation.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		shutdown();
+		/**
+		 * Shutdown the service operation.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int		shutdown();
 
-    /**
-     * Test whether the service is running.
-     *
-     * @return true if the service is still running, otherwise false.
-     */
-    bool	is_running() const;
+		/**
+		 * Test whether the service is running.
+		 *
+		 * @return true if the service is still running, otherwise false.
+		 */
+		bool	is_running() const;
 
-    
-    /**
-     * Add a watcher for the status of a component instance.
-     *
-     * @param instance_name the name of the instance to watch.
-     * @param instance_watcher the watcher that tracks the status of the
-     * instance.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_instance_watch(const string& instance_name,
-				   InstanceWatcher* instance_watcher,
-				   string& error_msg);
 
-    /**
-     * Delete a watcher for the status of a component instance.
-     *
-     * @param instance_name the name of the instance to stop watching.
-     * @param instance_watcher the watcher that tracks the status of the
-     * instance.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_instance_watch(const string& instance_name,
-				      InstanceWatcher* instance_watcher,
-				      string& error_msg);
+		/**
+		 * Add a watcher for the status of a component instance.
+		 *
+		 * @param instance_name the name of the instance to watch.
+		 * @param instance_watcher the watcher that tracks the status of the
+		 * instance.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int add_instance_watch(const string& instance_name,
+				InstanceWatcher* instance_watcher,
+				string& error_msg);
 
-    /**
-     * A component instance has been born.
-     *
-     * @param instance_name the name of the instance that is born.
-     */
-    virtual void instance_birth(const string& instance_name);
+		/**
+		 * Delete a watcher for the status of a component instance.
+		 *
+		 * @param instance_name the name of the instance to stop watching.
+		 * @param instance_watcher the watcher that tracks the status of the
+		 * instance.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_instance_watch(const string& instance_name,
+				InstanceWatcher* instance_watcher,
+				string& error_msg);
 
-    /**
-     * A component instance has died.
-     *
-     * @param instance_name the name of the instance that has died.
-     */
-    virtual void instance_death(const string& instance_name);
+		/**
+		 * A component instance has been born.
+		 *
+		 * @param instance_name the name of the instance that is born.
+		 */
+		virtual void instance_birth(const string& instance_name);
 
-protected:
-    /**
-     * Register interest in events relating to a particular instance.
-     *
-     * @param instance_name name of target instance to receive event
-     * notifications for.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int register_instance_event_interest(const string& instance_name,
-						 string& error_msg) = 0;
+		/**
+		 * A component instance has died.
+		 *
+		 * @param instance_name the name of the instance that has died.
+		 */
+		virtual void instance_death(const string& instance_name);
 
-    /**
-     * Deregister interest in events relating to a particular instance.
-     *
-     * @param instance_name name of target instance to stop event
-     * notifications for.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int deregister_instance_event_interest(const string& instance_name,
-						   string& error_msg) = 0;
+	protected:
+		/**
+		 * Register interest in events relating to a particular instance.
+		 *
+		 * @param instance_name name of target instance to receive event
+		 * notifications for.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int register_instance_event_interest(const string& instance_name,
+				string& error_msg) = 0;
 
-private:
-    bool	_is_running;	// True if the service is running
+		/**
+		 * Deregister interest in events relating to a particular instance.
+		 *
+		 * @param instance_name name of target instance to stop event
+		 * notifications for.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int deregister_instance_event_interest(const string& instance_name,
+				string& error_msg) = 0;
 
-    list<pair<string, InstanceWatcher *> > _instance_watchers;
+	private:
+		bool	_is_running;	// True if the service is running
+
+		list<pair<string, InstanceWatcher *> > _instance_watchers;
 };
 
 //
@@ -150,23 +151,24 @@ private:
  * in watching the status of a component instance.
  */
 
-class InstanceWatcher {
-public:
-    virtual ~InstanceWatcher() {}
+class InstanceWatcher 
+{
+	public:
+		virtual ~InstanceWatcher() {}
 
-    /**
-     * Inform the watcher that a component instance is alive.
-     *
-     * @param instance_name the name of the instance that is alive.
-     */
-    virtual void instance_birth(const string& instance_name) = 0;
+		/**
+		 * Inform the watcher that a component instance is alive.
+		 *
+		 * @param instance_name the name of the instance that is alive.
+		 */
+		virtual void instance_birth(const string& instance_name) = 0;
 
-    /**
-     * Inform the watcher that a component instance is dead.
-     *
-     * @param instance_name the name of the instance that is dead.
-     */
-    virtual void instance_death(const string& instance_name) = 0;
+		/**
+		 * Inform the watcher that a component instance is dead.
+		 *
+		 * @param instance_name the name of the instance that is dead.
+		 */
+		virtual void instance_death(const string& instance_name) = 0;
 };
 
 #endif // __FEA_FEA_IO_HH__

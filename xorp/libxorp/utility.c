@@ -63,13 +63,13 @@
  * argument is not representable as an unsigned char and doesn't have the
  * value of EOF.
  */
-int
+    int
 xorp_isalnum(int c)
 {
     return isascii(c) && isalnum(c);
 }
 
-int
+    int
 xorp_isalpha(int c)
 {
     return isascii(c) && isalpha(c);
@@ -79,61 +79,61 @@ xorp_isalpha(int c)
  * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
  * with ISO C99, and may not always be available on the system.
  */
-int
+    int
 xorp_iscntrl(int c)
 {
     return isascii(c) && iscntrl(c);
 }
 
-int
+    int
 xorp_isdigit(int c)
 {
     return isascii(c) && isdigit(c);
 }
 
-int
+    int
 xorp_isgraph(int c)
 {
     return isascii(c) && isgraph(c);
 }
 
-int
+    int
 xorp_islower(int c)
 {
     return isascii(c) && islower(c);
 }
 
-int
+    int
 xorp_isprint(int c)
 {
     return isascii(c) && isprint(c);
 }
 
-int
+    int
 xorp_ispunct(int c)
 {
     return isascii(c) && ispunct(c);
 }
 
-int
+    int
 xorp_isspace(int c)
 {
     return isascii(c) && isspace(c);
 }
 
-int
+    int
 xorp_isupper(int c)
 {
     return isascii(c) && isupper(c);
 }
 
-int
+    int
 xorp_isxdigit(int c)
 {
     return isascii(c) && isxdigit(c);
 }
 
-int
+    int
 xorp_tolower(int c)
 {
     if (isascii(c))
@@ -142,7 +142,7 @@ xorp_tolower(int c)
 	return c;
 }
 
-int
+    int
 xorp_toupper(int c)
 {
     if (isascii(c))
@@ -154,7 +154,7 @@ xorp_toupper(int c)
 /*
  * Function to return C-string representation of a boolean: "true" of "false".
  */
-const char *
+    const char *
 bool_c_str(int v)
 {
     if (v)

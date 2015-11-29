@@ -26,28 +26,30 @@
 #include "xrl_pf_stcp.hh"
 
 
-class XrlPFUNIXListener : public XrlPFSTCPListener {
-public:
-    XrlPFUNIXListener( XrlDispatcher* xr = 0);
-    ~XrlPFUNIXListener();
+class XrlPFUNIXListener : public XrlPFSTCPListener 
+{
+    public:
+	XrlPFUNIXListener( XrlDispatcher* xr = 0);
+	~XrlPFUNIXListener();
 
-    const char* protocol() const;
-    static void encode_address(string& address);
-    static void decode_address(string& address);
+	const char* protocol() const;
+	static void encode_address(string& address);
+	static void decode_address(string& address);
 
-    static const char*	_protocol;
+	static const char*	_protocol;
 
-private:
-    string get_sock_path();
+    private:
+	string get_sock_path();
 };
 
-class XrlPFUNIXSender : public XrlPFSTCPSender {
-public:
-    XrlPFUNIXSender(const string& name,
-		     const char* address = 0);
+class XrlPFUNIXSender : public XrlPFSTCPSender 
+{
+    public:
+	XrlPFUNIXSender(const string& name,
+		const char* address = 0);
 
-    const char* protocol() const;
-    static const char* protocol_name();
+	const char* protocol() const;
+	static const char* protocol_name();
 };
 
 #endif // __LIBXIPC_XRL_PF_UNIX_HH__

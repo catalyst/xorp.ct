@@ -26,7 +26,8 @@
 /**
  * The type fields when saving an OLSR instance's link state database.
  */
-enum TLV {
+enum TLV 
+{
     TLV_VERSION = 1,	  // The first entry in a file 4 byte version number.
     TLV_SYSTEM_INFO = 2,  // A string defining the creation system.
     TLV_OLSR_VERSION = 3, // The OLSR version that the database came from.

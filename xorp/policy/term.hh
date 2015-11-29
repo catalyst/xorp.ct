@@ -43,133 +43,136 @@
 class Term :
     public NONCOPYABLE
 {
-public:
-    enum BLOCKS {
-	SOURCE = 0,
-	DEST,
-	ACTION,
-
-	// keep this last
-	LAST_BLOCK
-    };
-
-    // the integer is the "line number", the node is the parsed structure [AST]
-    // of the statement(s) in that line.
-    typedef ConfigNodeIdMap<Node*> Nodes;
-
-    /**
-     * @short Exception thrown on a syntax error while parsing configuration.
-     */
-    class term_syntax_error :  public PolicyException {
     public:
-        term_syntax_error(const char* file, size_t line, 
-			  const string& init_why = "")   
-            : PolicyException("term_syntax_error", file, line, init_why) {}  
+	enum BLOCKS 
+	{
+	    SOURCE = 0,
+	    DEST,
+	    ACTION,
+
+	    // keep this last
+	    LAST_BLOCK
+	};
+
+	// the integer is the "line number", the node is the parsed structure [AST]
+	// of the statement(s) in that line.
+	typedef ConfigNodeIdMap<Node*> Nodes;
+
+	/**
+	 * @short Exception thrown on a syntax error while parsing configuration.
+	 */
+	class term_syntax_error :  public PolicyException 
+    {
+	public:
+	    term_syntax_error(const char* file, size_t line, 
+		    const string& init_why = "")   
+		: PolicyException("term_syntax_error", file, line, init_why) {}  
     };
 
-    /**
-     * @param name term name.
-     */
-    Term(const string& name);
-    ~Term();
-   
-    /**
-     * @return name of the term.
-     */
-    const string& name() const { return _name; }
-    
-    /**
-     * Perform operations at the end of the term.
-     */
-    void set_term_end();
+	/**
+	 * @param name term name.
+	 */
+	Term(const string& name);
+	~Term();
 
-    /**
-     * Updates the source/dest/action block of a term.
-     *
-     * @param block the block to update (0:source, 1:dest, 2:action).
-     * @param order node ID with position of term.
-     * @param statement the statement to insert.
-     */
-    void set_block(const uint32_t& block, const ConfigNodeId& order,
-		   const string& statement);
+	/**
+	 * @return name of the term.
+	 */
+	const string& name() const { return _name; }
 
-    /**
-     * Deletes statements in the location specified by order and block.
-     *
-     * @param block the block to update (0:source, 1:dest, 2:action).
-     * @param order node ID with position of term.
-     */
-    void del_block(const uint32_t& block, const ConfigNodeId& order);
+	/**
+	 * Perform operations at the end of the term.
+	 */
+	void set_term_end();
 
-    /**
-     * Perform operations at the end of the block.
-     *
-     * @param block the block to perform operations on
-     * (0:source, 1:dest, 2:action).
-     */
-    void set_block_end(uint32_t block);
+	/**
+	 * Updates the source/dest/action block of a term.
+	 *
+	 * @param block the block to update (0:source, 1:dest, 2:action).
+	 * @param order node ID with position of term.
+	 * @param statement the statement to insert.
+	 */
+	void set_block(const uint32_t& block, const ConfigNodeId& order,
+		const string& statement);
 
-    /**
-     * Visitor implementation.
-     *
-     * @param v visitor used to visit this term.
-     */
-    const Element* accept(Visitor& v) {
-	return v.visit(*this);
-    }
+	/**
+	 * Deletes statements in the location specified by order and block.
+	 *
+	 * @param block the block to update (0:source, 1:dest, 2:action).
+	 * @param order node ID with position of term.
+	 */
+	void del_block(const uint32_t& block, const ConfigNodeId& order);
 
-    /**
-     * @return parse tree of source block.
-     */
-    Nodes& source_nodes() { return *_source_nodes; }
+	/**
+	 * Perform operations at the end of the block.
+	 *
+	 * @param block the block to perform operations on
+	 * (0:source, 1:dest, 2:action).
+	 */
+	void set_block_end(uint32_t block);
 
-    /**
-     * @return parse tree of dest block.
-     */
-    Nodes& dest_nodes() { return *_dest_nodes; }
+	/**
+	 * Visitor implementation.
+	 *
+	 * @param v visitor used to visit this term.
+	 */
+	const Element* accept(Visitor& v) 
+	{
+	    return v.visit(*this);
+	}
 
-    /**
-     * @return parse tree of action block.
-     */
-    Nodes& action_nodes() { return *_action_nodes; }
+	/**
+	 * @return parse tree of source block.
+	 */
+	Nodes& source_nodes() { return *_source_nodes; }
 
-    /**
-     * Convert block number to human readable form.
-     *
-     * @param num the block number.
-     * @return human readable representation of block name.
-     */
-    static string block2str(uint32_t num); 
+	/**
+	 * @return parse tree of dest block.
+	 */
+	Nodes& dest_nodes() { return *_dest_nodes; }
 
-    /**
-     * Get the protocol name (in the "from" block).
-     *
-     * @return the protocol name (in the "from" block) if set, otherwise
-     * an empty string.
-     */
-    const string& from_protocol() const { return (_from_protocol); }
+	/**
+	 * @return parse tree of action block.
+	 */
+	Nodes& action_nodes() { return *_action_nodes; }
 
-    /**
-     * Set the protocol name (in the "from" block).
-     *
-     * @param v the protocol name (in the "from" block).
-     */
-    void set_from_protocol(const string& v) { _from_protocol = v; }
+	/**
+	 * Convert block number to human readable form.
+	 *
+	 * @param num the block number.
+	 * @return human readable representation of block name.
+	 */
+	static string block2str(uint32_t num); 
 
-private:
-    list<pair<ConfigNodeId, Node*> >::iterator find_out_of_order_node(
-	const uint32_t& block, const ConfigNodeId& order);
+	/**
+	 * Get the protocol name (in the "from" block).
+	 *
+	 * @return the protocol name (in the "from" block) if set, otherwise
+	 * an empty string.
+	 */
+	const string& from_protocol() const { return (_from_protocol); }
 
-    string _name;
+	/**
+	 * Set the protocol name (in the "from" block).
+	 *
+	 * @param v the protocol name (in the "from" block).
+	 */
+	void set_from_protocol(const string& v) { _from_protocol = v; }
 
-    Nodes* _block_nodes[3];
-    list<pair<ConfigNodeId, Node*> > _out_of_order_nodes[3];
+    private:
+	list<pair<ConfigNodeId, Node*> >::iterator find_out_of_order_node(
+		const uint32_t& block, const ConfigNodeId& order);
 
-    Nodes*& _source_nodes; 
-    Nodes*& _dest_nodes;
-    Nodes*& _action_nodes;
+	string _name;
 
-    string  _from_protocol;	// The protocol (in the "from" block)
+	Nodes* _block_nodes[3];
+	list<pair<ConfigNodeId, Node*> > _out_of_order_nodes[3];
+
+	Nodes*& _source_nodes; 
+	Nodes*& _dest_nodes;
+	Nodes*& _action_nodes;
+
+	string  _from_protocol;	// The protocol (in the "from" block)
 };
 
 #endif // __POLICY_TERM_HH__

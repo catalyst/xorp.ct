@@ -33,17 +33,17 @@
 #include "policy_map.hh"
 
 VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw, 
-				 VarMap& varmap,
-				 SetMap& setmap,
-				 PolicyMap& pmap,
-				 const string& protocol, 
-				 PolicyType ptype) : 
-		_varrw(varrw), _varmap(varmap), _setmap(setmap), _pmap(pmap),
-		_protocol(protocol), _ptype(ptype) 
+	VarMap& varmap,
+	SetMap& setmap,
+	PolicyMap& pmap,
+	const string& protocol, 
+	PolicyType ptype) : 
+    _varrw(varrw), _varmap(varmap), _setmap(setmap), _pmap(pmap),
+    _protocol(protocol), _ptype(ptype) 
 {
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(PolicyStatement& policy)
 {
     do_policy_statement(policy);
@@ -54,7 +54,7 @@ VisitorSemantic::visit(PolicyStatement& policy)
     return NULL;
 }
 
-void
+    void
 VisitorSemantic::do_policy_statement(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
@@ -67,7 +67,7 @@ VisitorSemantic::do_policy_statement(PolicyStatement& policy)
 	(i->second)->accept(*this);
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
@@ -84,8 +84,9 @@ VisitorSemantic::visit(Term& term)
     // go through the source block
     bool empty_source = true;
     debug_msg("[POLICY] source size: %u\n", XORP_UINT_CAST(source.size()));
-    for (i = source.begin(); i != source.end(); ++i) {
-        (i->second)->accept(*this);
+    for (i = source.begin(); i != source.end(); ++i) 
+    {
+	(i->second)->accept(*this);
 	empty_source = false;
     }
 
@@ -95,10 +96,12 @@ VisitorSemantic::visit(Term& term)
 
     // if it is an export policy, a source protocol must be specified [XXX: need
     // to fix this]
-    if (_ptype == EXPORT && _current_protocol == "") {
+    if (_ptype == EXPORT && _current_protocol == "") 
+    {
 	// Currently, allow empty source blocks... which means:
 	// if something manages to get to the export filter, then match it.
-	if (!empty_source) {
+	if (!empty_source) 
+	{
 	    string err = "No protocol specified in source match of export policy";
 
 	    err += " in term: " + term.name();
@@ -108,34 +111,38 @@ VisitorSemantic::visit(Term& term)
     }
 
     // import policies should not have dest blocks
-    if (_ptype == IMPORT && !(dest.empty())) {
+    if (_ptype == IMPORT && !(dest.empty())) 
+    {
 	xorp_throw(sem_error, "Invalid use of dest in import policy in term " + 
-		   term.name());
+		term.name());
     }
 
     // check dest block
-    for (i = dest.begin(); i != dest.end(); ++i) {
-         (i->second)->accept(*this);
+    for (i = dest.begin(); i != dest.end(); ++i) 
+    {
+	(i->second)->accept(*this);
 
     }
 
     // check actions
-    for (i = actions.begin(); i != actions.end(); ++i) {
-         (i->second)->accept(*this);
+    for (i = actions.begin(); i != actions.end(); ++i) 
+    {
+	(i->second)->accept(*this);
     }
     return NULL;
 }
-    
-const Element* 
+
+    const Element* 
 VisitorSemantic::visit(NodeUn& node)
 {
     // check argument
     const Element* arg = node.node().accept(*this);
 
     Element* res;
-   
+
     // see if we may execute unary operation
-    try {
+    try 
+    {
 	res = _disp.run(node.op(),*arg);
 
 	if (res->refcount() == 1)
@@ -144,7 +151,8 @@ VisitorSemantic::visit(NodeUn& node)
 	return res;
     } 
     // we can't
-    catch (const PolicyException& e) {
+    catch (const PolicyException& e) 
+    {
 	ostringstream error;
 
 	error << "Invalid unop " << e.str() << " at line " << node.line();
@@ -152,7 +160,7 @@ VisitorSemantic::visit(NodeUn& node)
     }
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeBin& node)
 {
     // check arguments
@@ -162,12 +170,13 @@ VisitorSemantic::visit(NodeBin& node)
     return do_bin(*left, *right, node.op(), node);
 }
 
-const Element*
+    const Element*
 VisitorSemantic::do_bin(const Element& left, const Element& right,
-			const BinOper& op, const Node& node)
+	const BinOper& op, const Node& node)
 {
     // see if we may execute bin operation.
-    try {
+    try 
+    {
 	Element* res = _disp.run(op, left, right);
 
 	if (res->refcount() == 1)
@@ -176,88 +185,96 @@ VisitorSemantic::do_bin(const Element& left, const Element& right,
 	return res;
     }
     // nope
-    catch (const PolicyException& e) {
-        ostringstream error;
+    catch (const PolicyException& e) 
+    {
+	ostringstream error;
 
-        error << "Invalid binop " << e.str() << " at line " << node.line();
-    
-        xorp_throw(sem_error, error.str());
+	error << "Invalid binop " << e.str() << " at line " << node.line();
+
+	xorp_throw(sem_error, error.str());
     }
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeAssign& node)
 {
     // check argument
     const Element* rvalue = node.rvalue().accept(*this);
 
     // try assignment
-    try {
+    try 
+    {
 	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.varid());
 
 	// see if there's a modifier to the assignment
-	if (node.mod()) {
+	if (node.mod()) 
+	{
 	    const Element* left = &_varrw.read(id);
 
 	    rvalue = do_bin(*left, *rvalue, *node.mod(), node);
 	}
 
 	_varrw.write(id, *rvalue);
-    } catch (SemanticVarRW::var_error e) {
-        ostringstream error;
+    } catch (SemanticVarRW::var_error e) 
+    {
+	ostringstream error;
 
-        error << e.str() << " at line " << node.line();
+	error << e.str() << " at line " << node.line();
 
-        xorp_throw(sem_error, error.str());
+	xorp_throw(sem_error, error.str());
     }
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeVar& node)
 {
     // try reading a variable
-    try {
+    try 
+    {
 	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.val());
 	return &_varrw.read(id);
-    } catch(SemanticVarRW::var_error e) {
-        ostringstream error;
+    } catch(SemanticVarRW::var_error e) 
+    {
+	ostringstream error;
 
-        error << e.str() << " at line " << node.line();
-    
-        xorp_throw(sem_error, error.str());
+	error << e.str() << " at line " << node.line();
+
+	xorp_throw(sem_error, error.str());
     }
 }
-    
-const Element* 
+
+    const Element* 
 VisitorSemantic::visit(NodeSet& node)
 {
     // try getting a set [setdep should have caught there errors]
-    try {
+    try 
+    {
 	const Element& e = _setmap.getSet(node.setid());
 	_sets.insert(node.setid());
 	return &e;
-    } catch(const PolicyException& e) {
-        ostringstream error;
-        error << "Set not found: " << node.setid() << " at line " << node.line();
-    
-        xorp_throw(sem_error, error.str());
+    } catch(const PolicyException& e) 
+    {
+	ostringstream error;
+	error << "Set not found: " << node.setid() << " at line " << node.line();
+
+	xorp_throw(sem_error, error.str());
     }
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeElem& node)
 {
     return &node.val();
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeAccept& /* node */)
 {
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeReject& /* node */)
 {
     _reject = true;
@@ -265,28 +282,30 @@ VisitorSemantic::visit(NodeReject& /* node */)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorSemantic::visit(NodeProto& node)
 {
     ostringstream err;
 
     // import policies may not use protocol directive
-    if(_ptype == IMPORT) {
+    if(_ptype == IMPORT) 
+    {
 	err << "May not define protocol for import policy at line " <<
-        node.line();
-        
-        xorp_throw(sem_error, err.str());
+	    node.line();
+
+	xorp_throw(sem_error, err.str());
     }
 
     string proto = node.proto();
-    
+
 
     // check for redifinition in same term.
-    if(_current_protocol != "") {
-        err << "Redifinition of protocol from " << _current_protocol << 
+    if(_current_protocol != "") 
+    {
+	err << "Redifinition of protocol from " << _current_protocol << 
 	    " to " << proto << " at line " << node.line();
-    
-        xorp_throw(sem_error, err.str());
+
+	xorp_throw(sem_error, err.str());
     }
 
     // do the switch
@@ -296,26 +315,26 @@ VisitorSemantic::visit(NodeProto& node)
     return NULL;
 }
 
-void
+    void
 VisitorSemantic::change_protocol(const string& proto)
 {
     _semantic_protocol = proto;
     _varrw.set_protocol(_semantic_protocol);
 }
 
-const string&
+    const string&
 VisitorSemantic::semantic_protocol()
 {
     return _semantic_protocol;
 }
 
-const Element*
+    const Element*
 VisitorSemantic::visit(NodeNext& /* node */)
 {
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorSemantic::visit(NodeSubr& node)
 {
     // XXX check for recursion.

@@ -38,121 +38,123 @@ typedef vector<string>	SETS;
  * The SetMap owns all sets in the policy configuration. It also tracks
  * dependencies between sets and policies.
  */
-class SetMap {
-public:
-    /**
-     * @short Exception thrown on error, such as deleting a set in use.
-     */
-    class SetMapError : public PolicyException {
+class SetMap 
+{
     public:
-        SetMapError(const char* file, size_t line, const string& init_why = "")
-            : PolicyException("SetMapError", file, line, init_why) {}  
+	/**
+	 * @short Exception thrown on error, such as deleting a set in use.
+	 */
+	class SetMapError : public PolicyException 
+    {
+	public:
+	    SetMapError(const char* file, size_t line, const string& init_why = "")
+		: PolicyException("SetMapError", file, line, init_why) {}  
 
     };
 
-    /**
-     * Throws exception if set is not found.
-     *
-     * @return set requested.
-     * @param name set name requested.
-     */
-    const Element& getSet(const string& name) const;
+	/**
+	 * Throws exception if set is not found.
+	 *
+	 * @return set requested.
+	 * @param name set name requested.
+	 */
+	const Element& getSet(const string& name) const;
 
-    /**
-     * Create a new set.
-     *
-     * Throws exception if set exists.
-     *
-     * @param name name of the set.
-     */
-    void create(const string& name);
+	/**
+	 * Create a new set.
+	 *
+	 * Throws exception if set exists.
+	 *
+	 * @param name name of the set.
+	 */
+	void create(const string& name);
 
-    /**
-     * Replace the elements of a set.
-     *
-     * Throws an expcetion if set does not exist.
-     *
-     * @param type type of the set.
-     * @param name name of the set.
-     * @param elements the new elements comma separated.
-     * @param modified set filled with policies which are now modified.
-     */
-    void update_set(const string& type,
-		    const string& name, 
-		    const string& elements, 
-		    set<string>& modified);
+	/**
+	 * Replace the elements of a set.
+	 *
+	 * Throws an expcetion if set does not exist.
+	 *
+	 * @param type type of the set.
+	 * @param name name of the set.
+	 * @param elements the new elements comma separated.
+	 * @param modified set filled with policies which are now modified.
+	 */
+	void update_set(const string& type,
+		const string& name, 
+		const string& elements, 
+		set<string>& modified);
 
-    /**
-     * Attempts to delete a set.
-     *
-     * Throws an exception if set is in use.
-     *
-     * @param name name of the set.
-     */
-    void delete_set(const string& name);
+	/**
+	 * Attempts to delete a set.
+	 *
+	 * Throws an exception if set is in use.
+	 *
+	 * @param name name of the set.
+	 */
+	void delete_set(const string& name);
 
-    /**
-     * Add an element to a set.
-     *
-     * Throws an expcetion if set does not exist.
-     *
-     * @param type type of the set.
-     * @param name name of the set.
-     * @param element the element to add.
-     * @param modified set filled with policies which are now modified.
-     */
-    void add_to_set(const string& type,
-		    const string& name,
-		    const string& element,
-		    set<string>& modified);
+	/**
+	 * Add an element to a set.
+	 *
+	 * Throws an expcetion if set does not exist.
+	 *
+	 * @param type type of the set.
+	 * @param name name of the set.
+	 * @param element the element to add.
+	 * @param modified set filled with policies which are now modified.
+	 */
+	void add_to_set(const string& type,
+		const string& name,
+		const string& element,
+		set<string>& modified);
 
-    /**
-     * Delete an element from a set.
-     *
-     * Throws an expcetion if set does not exist.
-     *
-     * @param type type of the set.
-     * @param name name of the set.
-     * @param element the element to delete.
-     * @param modified set filled with policies which are now modified.
-     */
-    void delete_from_set(const string& type,
-			 const string& name,
-			 const string& element,
-			 set<string>& modified);
+	/**
+	 * Delete an element from a set.
+	 *
+	 * Throws an expcetion if set does not exist.
+	 *
+	 * @param type type of the set.
+	 * @param name name of the set.
+	 * @param element the element to delete.
+	 * @param modified set filled with policies which are now modified.
+	 */
+	void delete_from_set(const string& type,
+		const string& name,
+		const string& element,
+		set<string>& modified);
 
-    /**
-     * Add a dependency of a policy using a set.
-     *
-     * Throws an exception if set is not found.
-     *
-     * @param setname name of set in which dependency should be added.
-     * @param policyname name of policy which uses the set.
-     */
-    void add_dependency(const string& setname, const string& policyname);
+	/**
+	 * Add a dependency of a policy using a set.
+	 *
+	 * Throws an exception if set is not found.
+	 *
+	 * @param setname name of set in which dependency should be added.
+	 * @param policyname name of policy which uses the set.
+	 */
+	void add_dependency(const string& setname, const string& policyname);
 
-    /**
-     * Delete a dependency of a policy using a set.
-     *
-     * Throws an exception if set or policy is not found.
-     *
-     * @param setname name of set in which dependency should be removed.
-     * @param policyname name of policy which no longer uses the set.
-     */
-    void del_dependency(const string& setname, const string& policyname);
+	/**
+	 * Delete a dependency of a policy using a set.
+	 *
+	 * Throws an exception if set or policy is not found.
+	 *
+	 * @param setname name of set in which dependency should be removed.
+	 * @param policyname name of policy which no longer uses the set.
+	 */
+	void del_dependency(const string& setname, const string& policyname);
 
-    /**
-     * @return string representation of all sets.
-     */
-    string str() const;
+	/**
+	 * @return string representation of all sets.
+	 */
+	string str() const;
 
-    void sets_by_type(SETS& s, const string& type) const;
+	void sets_by_type(SETS& s, const string& type) const;
 
-private:
-    typedef Dependency<Element> Dep;
+    private:
+	typedef Dependency<Element> Dep;
 
-    Dep		    _deps;
-    ElementFactory  _ef;
+	Dep		    _deps;
+	ElementFactory  _ef;
 };
 
 #endif // __POLICY_SET_MAP_HH__

@@ -25,32 +25,32 @@
 #include "packet_queue.hh"
 #include "route_db.hh"
 
-template <typename A>
+    template <typename A>
 OutputUpdates<A>::OutputUpdates( Port<A>&	port,
-				PacketQueue<A>&	pkt_queue,
-				RouteDB<A>&	rdb,
-				const A&	dst_addr,
-				uint16_t	dst_port)
-    : OutputBase<A>( port, pkt_queue, dst_addr, dst_port),
-      _uq(rdb.update_queue())
+	PacketQueue<A>&	pkt_queue,
+	RouteDB<A>&	rdb,
+	const A&	dst_addr,
+	uint16_t	dst_port)
+: OutputBase<A>( port, pkt_queue, dst_addr, dst_port),
+    _uq(rdb.update_queue())
 {
 }
 
-template <typename A>
+    template <typename A>
 OutputUpdates<A>::~OutputUpdates()
 {
     stop_output_processing();
 }
 
 template <typename A>
-void
+    void
 OutputUpdates<A>::ffwd()
 {
     _uq.ffwd(_uq_iter);
 }
 
 template <typename A>
-void
+    void
 OutputUpdates<A>::output_packet()
 {
     ResponsePacketAssembler<A> rpa(this->_port);
@@ -60,7 +60,8 @@ OutputUpdates<A>::output_packet()
     set<const RouteEntry<A>*> added_routes;
     uint32_t done = 0;
     const RouteEntry<A>* r = 0;
-    for (r = _uq.get(_uq_iter); r != 0; r = _uq.next(_uq_iter)) {
+    for (r = _uq.get(_uq_iter); r != 0; r = _uq.next(_uq_iter)) 
+    {
 	if (added_routes.find(r) != added_routes.end())
 	    continue;
 
@@ -72,10 +73,10 @@ OutputUpdates<A>::output_packet()
 	RouteEntryOrigin<A>* origin = NULL;
 	string ifname, vifname;		// XXX: not set, because not needed
 	RouteEntry<A>* copy = new RouteEntry<A>(r->net(), p.first,
-						ifname, vifname,
-						p.second,
-						origin, r->tag(),
-						r->policytags());
+		ifname, vifname,
+		p.second,
+		origin, r->tag(),
+		r->policytags());
 
 	// Policy EXPORT filtering was done here.
 	// It's moved to RouteDB<A>::do_filtering.
@@ -89,18 +90,22 @@ OutputUpdates<A>::output_packet()
 	delete copy;
 
 	done++;
-	if (rpa.packet_full()) {
+	if (rpa.packet_full()) 
+	{
 	    _uq.next(_uq_iter);
 	    break;
 	}
     }
 
     list<RipPacket<A>*> auth_packets;
-    if (done == 0 || rpa.packet_finish(auth_packets) == false) {
+    if (done == 0 || rpa.packet_finish(auth_packets) == false) 
+    {
 	// No routes added to packet or error finishing packet off.
-    } else {
+    } else 
+    {
 	typename list<RipPacket<A>*>::iterator iter;
-	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) 
+	{
 	    RipPacket<A>* auth_pkt = *iter;
 	    this->_pkt_queue.enqueue_packet(auth_pkt);
 	    this->_port.counters().incr_triggered_updates();
@@ -110,26 +115,29 @@ OutputUpdates<A>::output_packet()
     }
     delete pkt;
 
-    if (r != 0) {
+    if (r != 0) 
+    {
 	// Not finished with updates so set time to reschedule self
 	this->_op_timer 
 	    = EventLoop::instance().new_oneoff_after_ms(this->interpacket_gap_ms(),
-			callback(this, &OutputUpdates<A>::output_packet));
-    } else {
+		    callback(this, &OutputUpdates<A>::output_packet));
+    } else 
+    {
 	// Finished with updates for this run.  Do not set timer.
     }
 }
 
-template <typename A>
+    template <typename A>
 void OutputUpdates<A>::start_output_processing()
 {
-    if (_uq.reader_valid(_uq_iter) == false) {
+    if (_uq.reader_valid(_uq_iter) == false) 
+    {
 	_uq_iter = _uq.create_reader();
     }
     output_packet();
 }
 
-template <typename A>
+    template <typename A>
 void OutputUpdates<A>::stop_output_processing()
 {
     _uq.destroy_reader(_uq_iter);

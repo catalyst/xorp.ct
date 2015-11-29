@@ -54,60 +54,69 @@
 #include "ospf/ospf.hh"
 #include "ospf/test_common.hh"
 
-class ClearDatabase {
-public:
-    ClearDatabase(XrlStdRouter& xrl_router, OspfTypes::Version version)
-	: _xrl_router(xrl_router), _version(version),
-	_done(false), _fail(false)
+class ClearDatabase 
+{
+    public:
+	ClearDatabase(XrlStdRouter& xrl_router, OspfTypes::Version version)
+	    : _xrl_router(xrl_router), _version(version),
+	    _done(false), _fail(false)
     {
     }
 
-    void start() {
-	switch(_version) {
-	case OspfTypes::V2: {
-	    XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	    ospfv2.send_clear_database(xrl_target(_version),
-				       callback(this,
-						&ClearDatabase::response));
-	}
-	    break;
-	case OspfTypes::V3: {
+	void start() 
+	{
+	    switch(_version) 
+	    {
+		case OspfTypes::V2: 
+		    {
+			XrlOspfv2V0p1Client ospfv2(&_xrl_router);
+			ospfv2.send_clear_database(xrl_target(_version),
+				callback(this,
+				    &ClearDatabase::response));
+		    }
+		    break;
+		case OspfTypes::V3: 
+		    {
 #ifdef HAVE_IPV6
-	    XrlOspfv3V0p1Client ospfv3(&_xrl_router);
-	    ospfv3.send_clear_database(xrl_target(_version),
-				       callback(this,
-						&ClearDatabase::response));
+			XrlOspfv3V0p1Client ospfv3(&_xrl_router);
+			ospfv3.send_clear_database(xrl_target(_version),
+				callback(this,
+				    &ClearDatabase::response));
 #endif
+		    }
+		    break;
+	    }
 	}
-	    break;
+
+	bool busy() 
+	{
+	    return !_done;
 	}
-    }
 
-    bool busy() {
-	return !_done;
-    }
+	bool fail() 
+	{
+	    return _fail;
+	}
 
-    bool fail() {
-	return _fail;
-    }
-
-private:
-    void response(const XrlError& error) {
-	_done = true;
-	if (XrlError::OKAY() != error) {
+    private:
+	void response(const XrlError& error) 
+	{
+	    _done = true;
+	    if (XrlError::OKAY() != error) 
+	    {
 		XLOG_WARNING("Attempt to clear database");
 		_fail = true;
 		return;
+	    }
 	}
-    }
-private:
-    XrlStdRouter &_xrl_router;
-    OspfTypes::Version _version;
-    bool _done;
-    bool _fail;
+    private:
+	XrlStdRouter &_xrl_router;
+	OspfTypes::Version _version;
+	bool _done;
+	bool _fail;
 };
 
-int
+    int
 usage(const char *myname)
 {
     fprintf(stderr, "usage: %s [-2|-3]\n", myname);
@@ -115,7 +124,7 @@ usage(const char *myname)
     return -1;
 }
 
-int 
+    int 
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -132,20 +141,23 @@ main(int argc, char **argv)
     OspfTypes::Version version = OspfTypes::V2;
 
     int c;
-    while ((c = getopt(argc, argv, "23")) != -1) {
-	switch (c) {
-	case '2':
-	    version = OspfTypes::V2;
-	    break;
-	case '3':
-	    version = OspfTypes::V3;
-	    break;
-	default:
-	    return usage(argv[0]);
+    while ((c = getopt(argc, argv, "23")) != -1) 
+    {
+	switch (c) 
+	{
+	    case '2':
+		version = OspfTypes::V2;
+		break;
+	    case '3':
+		version = OspfTypes::V3;
+		break;
+	    default:
+		return usage(argv[0]);
 	}
     }
 
-    try {
+    try 
+    {
 	XrlStdRouter xrl_router( "clear_database");
 
 	debug_msg("Waiting for router");
@@ -158,12 +170,14 @@ main(int argc, char **argv)
 	while(clear_database.busy())
 	    EventLoop::instance().run();
 
-	if (clear_database.fail()) {
+	if (clear_database.fail()) 
+	{
 	    XLOG_ERROR("Failed to clear database");
 	    return -1;
 	}
 
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

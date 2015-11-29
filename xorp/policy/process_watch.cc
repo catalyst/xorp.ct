@@ -30,27 +30,28 @@
 #include "process_watch.hh"
 
 ProcessWatch::ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap) :
-		_pmap(pmap),
-		_finder(&rtr),
-		_instance_name(rtr.instance_name()),
-		_notifier(NULL),
-		_finder_name("finder") // FIXME: hardcoded value
+    _pmap(pmap),
+    _finder(&rtr),
+    _instance_name(rtr.instance_name()),
+    _notifier(NULL),
+    _finder_name("finder") // FIXME: hardcoded value
 {
 }
 
-void
+    void
 ProcessWatch::register_cb(const XrlError& err)
 {
     string error_msg;
 
-    if (err != XrlError::OKAY()) {
+    if (err != XrlError::OKAY()) 
+    {
 	error_msg = c_format("XRL register_cb() error: %s", err.str().c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-// 	xorp_throw(PWException, error_msg);
+	// 	xorp_throw(PWException, error_msg);
     }
 }
 
-void
+    void
 ProcessWatch::add_interest(const string& proc)
 {
     // check if we already added interested, if so do nothing
@@ -60,15 +61,15 @@ ProcessWatch::add_interest(const string& proc)
     _watching.insert(proc);
 
     debug_msg("[POLICY] ProcessWatch Add interest in process: %s\n",
-	      proc.c_str());
+	    proc.c_str());
 
     // add interested in process
     _finder.send_register_class_event_interest(_finder_name.c_str(),
-		_instance_name, _pmap.xrl_target(proc),
-		callback(this,&ProcessWatch::register_cb));
+	    _instance_name, _pmap.xrl_target(proc),
+	    callback(this,&ProcessWatch::register_cb));
 }
 
-void
+    void
 ProcessWatch::birth(const string& proto)
 {
     const string& p = _pmap.protocol(proto);
@@ -80,7 +81,7 @@ ProcessWatch::birth(const string& proto)
 
 }
 
-void
+    void
 ProcessWatch::death(const string& proto)
 {
     const string& p = _pmap.protocol(proto);
@@ -90,7 +91,7 @@ ProcessWatch::death(const string& proto)
 	_notifier->death(p);
 }
 
-bool
+    bool
 ProcessWatch::alive(const string& proto)
 {
     if (_watching.find(proto) == _watching.end())
@@ -99,7 +100,7 @@ ProcessWatch::alive(const string& proto)
     return _alive.find(proto) != _alive.end();
 }
 
-void
+    void
 ProcessWatch::set_notifier(PWNotifier& notifier)
 {
     // old notifier is lost... it is a feature, not a bug.

@@ -43,65 +43,70 @@ class BGPPeerData;
  * important if the same NLRI is contained in two packets then the
  * later one should be used.
  */
-class Trie {
-public:
-    Trie() : _first(0), _last(0), _update_cnt(0), _changes(0), 
-	     _warning(true) {
-    }
+class Trie 
+{
+	public:
+		Trie() : _first(0), _last(0), _update_cnt(0), _changes(0), 
+		_warning(true) 
+	{
+	}
 
-    const UpdatePacket *lookup(const string& net) const;
-    const UpdatePacket *lookup(const IPv4Net& net) const;
-    const UpdatePacket *lookup(const IPv6Net& net) const;
-    void process_update_packet(const TimeVal& tv, const uint8_t *buf,
-			       size_t len, const BGPPeerData *peerdata);
+		const UpdatePacket *lookup(const string& net) const;
+		const UpdatePacket *lookup(const IPv4Net& net) const;
+		const UpdatePacket *lookup(const IPv6Net& net) const;
+		void process_update_packet(const TimeVal& tv, const uint8_t *buf,
+				size_t len, const BGPPeerData *peerdata);
 
-    typedef RealTrie<IPv4>::TreeWalker TreeWalker_ipv4;
-    typedef RealTrie<IPv6>::TreeWalker TreeWalker_ipv6;
+		typedef RealTrie<IPv4>::TreeWalker TreeWalker_ipv4;
+		typedef RealTrie<IPv6>::TreeWalker TreeWalker_ipv6;
 
-    void tree_walk_table(const TreeWalker_ipv4& tw) const;
-    void tree_walk_table(const TreeWalker_ipv6& tw) const;
+		void tree_walk_table(const TreeWalker_ipv4& tw) const;
+		void tree_walk_table(const TreeWalker_ipv6& tw) const;
 
-    typedef XorpCallback2<void, const UpdatePacket*,
-			  const TimeVal&>::RefPtr ReplayWalker;
-    
-    /**
-     * Generate the set of update packets that would totally populate
-     * this trie.
-     *
-     * @param uw The callback function that is called.
-     */
-    void replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const;
+		typedef XorpCallback2<void, const UpdatePacket*,
+				const TimeVal&>::RefPtr ReplayWalker;
 
-    uint32_t update_count() {
-	return _update_cnt;
-    }
+		/**
+		 * Generate the set of update packets that would totally populate
+		 * this trie.
+		 *
+		 * @param uw The callback function that is called.
+		 */
+		void replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const;
 
-    uint32_t changes() {
-	return _changes;
-    }
+		uint32_t update_count() 
+		{
+			return _update_cnt;
+		}
 
-    void set_warning(bool warning) {
-	_warning = warning;
-    }
+		uint32_t changes() 
+		{
+			return _changes;
+		}
 
-private:
-    template <class A> void add(IPNet<A> net, TriePayload&);
-    template <class A> void del(IPNet<A> net, TriePayload&);
+		void set_warning(bool warning) 
+		{
+			_warning = warning;
+		}
 
-    template <class A> void get_heads(RealTrie<A>*&, RealTrie<A>*&);
+	private:
+		template <class A> void add(IPNet<A> net, TriePayload&);
+		template <class A> void del(IPNet<A> net, TriePayload&);
 
-    RealTrie<IPv4> _head_ipv4;
-    RealTrie<IPv4> _head_ipv4_del;
-    RealTrie<IPv6> _head_ipv6;
-    RealTrie<IPv6> _head_ipv6_del;
+		template <class A> void get_heads(RealTrie<A>*&, RealTrie<A>*&);
 
-    TrieData *_first;
-    TrieData *_last;
+		RealTrie<IPv4> _head_ipv4;
+		RealTrie<IPv4> _head_ipv4_del;
+		RealTrie<IPv6> _head_ipv6;
+		RealTrie<IPv6> _head_ipv6_del;
 
-    uint32_t _update_cnt;	// Number of update packets seen
-    uint32_t _changes;		// Number of trie entry changes.
+		TrieData *_first;
+		TrieData *_last;
 
-    bool _warning;		// Print warning messages;
+		uint32_t _update_cnt;	// Number of update packets seen
+		uint32_t _changes;		// Number of trie entry changes.
+
+		bool _warning;		// Print warning messages;
 };
 
 #endif // __BGP_HARNESS_TRIE_HH__

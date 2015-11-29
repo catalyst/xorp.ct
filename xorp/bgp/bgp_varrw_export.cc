@@ -27,15 +27,15 @@
 #include "bgp_varrw_export.hh"
 
 
-template <class A>
+    template <class A>
 BGPVarRWExport<A>::BGPVarRWExport(const string& name,
-				  const string& neighbor)
-    : BGPVarRW<A>(name), _neighbor(neighbor)
+	const string& neighbor)
+: BGPVarRW<A>(name), _neighbor(neighbor)
 {
 }
 
 template <class A>
-Element*
+    Element*
 BGPVarRWExport<A>::read_neighbor()
 {
     return BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str());

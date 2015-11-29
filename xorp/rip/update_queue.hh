@@ -37,17 +37,18 @@ class UpdateQueueImpl;
  * this class just maintains a token that the reader pool uses.
  */
 template <typename A>
-class UpdateQueueReader {
-public:
-    UpdateQueueReader(UpdateQueueImpl<A>* i);
-    ~UpdateQueueReader();
+class UpdateQueueReader 
+{
+	public:
+		UpdateQueueReader(UpdateQueueImpl<A>* i);
+		~UpdateQueueReader();
 
-    uint32_t id() const;
-    bool parent_is(const UpdateQueueImpl<A>* o) const;
+		uint32_t id() const;
+		bool parent_is(const UpdateQueueImpl<A>* o) const;
 
-private:
-    UpdateQueueImpl<A>* _impl;
-    uint32_t		_id;
+	private:
+		UpdateQueueImpl<A>* _impl;
+		uint32_t		_id;
 };
 
 
@@ -59,87 +60,88 @@ private:
  * used unsolicited responses (routing table announcements).
  */
 template <typename A>
-class UpdateQueue {
-protected:
-    typedef UpdateQueueReader<A>	Reader;
+class UpdateQueue 
+{
+	protected:
+		typedef UpdateQueueReader<A>	Reader;
 
-public:
-    typedef ref_ptr<Reader>		ReadIterator;
-    typedef RouteEntryRef<A>		RouteUpdate;
+	public:
+		typedef ref_ptr<Reader>		ReadIterator;
+		typedef RouteEntryRef<A>		RouteUpdate;
 
-public:
-    UpdateQueue();
-    ~UpdateQueue();
+	public:
+		UpdateQueue();
+		~UpdateQueue();
 
-    /**
-     * Add update to back of queue.
-     */
-    void push_back(const RouteUpdate& ru);
+		/**
+		 * Add update to back of queue.
+		 */
+		void push_back(const RouteUpdate& ru);
 
-    /**
-     * Remove all queued entries and reset all read iterators to the front
-     * of the queue.
-     */
-    void flush();
+		/**
+		 * Remove all queued entries and reset all read iterators to the front
+		 * of the queue.
+		 */
+		void flush();
 
-    /**
-     * Create a read iterator.  These are reference counted entities that
-     * need to be stored in order to operate.  The newly created reader is
-     * set to the end of the update queue.
-     */
-    ReadIterator create_reader();
+		/**
+		 * Create a read iterator.  These are reference counted entities that
+		 * need to be stored in order to operate.  The newly created reader is
+		 * set to the end of the update queue.
+		 */
+		ReadIterator create_reader();
 
-    /**
-     * Destroy read iterator.  This method detaches the iterator from the
-     * update queue.  Use of the iterator after this call is unsafe.
-     */
-    void destroy_reader(ReadIterator& r);
+		/**
+		 * Destroy read iterator.  This method detaches the iterator from the
+		 * update queue.  Use of the iterator after this call is unsafe.
+		 */
+		void destroy_reader(ReadIterator& r);
 
-    /**
-     * Check ReadIterator's validity.
-     * @param r reader to be checked.
-     * @return true if r is an active read iterator, false if iterator does
-     * not belong to this instance or has been destroyed.
-     */
-    bool reader_valid(const ReadIterator& r);
+		/**
+		 * Check ReadIterator's validity.
+		 * @param r reader to be checked.
+		 * @return true if r is an active read iterator, false if iterator does
+		 * not belong to this instance or has been destroyed.
+		 */
+		bool reader_valid(const ReadIterator& r);
 
-    /**
-     * Increment iterator and return pointer to entry if available.
-     *
-     * @return A pointer to a RouteEntry if available, 0 otherwise.
-     */
-    const RouteEntry<A>* next(ReadIterator& r);
+		/**
+		 * Increment iterator and return pointer to entry if available.
+		 *
+		 * @return A pointer to a RouteEntry if available, 0 otherwise.
+		 */
+		const RouteEntry<A>* next(ReadIterator& r);
 
-    /**
-     * Get the RouteEntry associated with the read iterator.
-     *
-     * @return A pointer to a RouteEntry if available, 0 otherwise.
-     */
-    const RouteEntry<A>* get(ReadIterator& r) const;
+		/**
+		 * Get the RouteEntry associated with the read iterator.
+		 *
+		 * @return A pointer to a RouteEntry if available, 0 otherwise.
+		 */
+		const RouteEntry<A>* get(ReadIterator& r) const;
 
-    /**
-     * Advance read iterator to end of update queue.  Calls to
-     * @ref next and @ref get will return 0 until further
-     * updates occur.
-     */
-    void ffwd(ReadIterator& r);
+		/**
+		 * Advance read iterator to end of update queue.  Calls to
+		 * @ref next and @ref get will return 0 until further
+		 * updates occur.
+		 */
+		void ffwd(ReadIterator& r);
 
-    /**
-     * Move read iterator to first entry of update queue.
-     */
-    void rwd(ReadIterator& r);
+		/**
+		 * Move read iterator to first entry of update queue.
+		 */
+		void rwd(ReadIterator& r);
 
-    /**
-     * Return number of updates held.  Note: this may be more than are
-     * available for reading since there is internal buffering and
-     * UpdateQueue iterators attach at the end of the UpdateQueue.
-     *
-     * @return number of updates queued.
-     */
-    uint32_t updates_queued() const;
+		/**
+		 * Return number of updates held.  Note: this may be more than are
+		 * available for reading since there is internal buffering and
+		 * UpdateQueue iterators attach at the end of the UpdateQueue.
+		 *
+		 * @return number of updates queued.
+		 */
+		uint32_t updates_queued() const;
 
-protected:
-    UpdateQueueImpl<A>*	_impl;
+	protected:
+		UpdateQueueImpl<A>*	_impl;
 };
 
 #endif // __RIP_UPDATE_QUEUE__

@@ -32,106 +32,110 @@
 #include "xrl_xorpsh_interface.hh"
 
 
-XrlXorpshInterface::XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh)
-    : XrlXorpshTargetBase(r),
-      _xorpsh(xorpsh),
-      _verbose(xorpsh.verbose())
+	XrlXorpshInterface::XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh)
+: XrlXorpshTargetBase(r),
+	_xorpsh(xorpsh),
+	_verbose(xorpsh.verbose())
 {
 }
 
 XrlCmdError 
 XrlXorpshInterface::common_0_1_get_target_name(// Output values, 
-					       string& name)
+		string& name)
 {
-    name = XrlXorpshTargetBase::get_name();
-    return XrlCmdError::OKAY();
+	name = XrlXorpshTargetBase::get_name();
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::common_0_1_get_version(// Output values, 
-					   string& v)
+		string& v)
 {
-    v = string(version());
-    return XrlCmdError::OKAY();
+	v = string(version());
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlXorpshInterface::common_0_1_get_status(// Output values, 
-					  uint32_t& status,
-					  string& reason)
+		uint32_t& status,
+		string& reason)
 {
-    // XXX placeholder only
-    status = PROC_READY;
-    reason = "Ready";
-    return XrlCmdError::OKAY();
+	// XXX placeholder only
+	status = PROC_READY;
+	reason = "Ready";
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlXorpshInterface::common_0_1_shutdown()
 {
-    // TODO: XXX: implement it!!
-    exit(0);
+	// TODO: XXX: implement it!!
+	exit(0);
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_new_config_user(// Input values, 
-						      const uint32_t& user_id)
+		const uint32_t& user_id)
 {
-    _xorpsh.new_config_user((uid_t)user_id);
-    return XrlCmdError::OKAY();
+	_xorpsh.new_config_user((uid_t)user_id);
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_config_saved_done(// Input values, 
-							 const bool& success, 
-							 const string& errmsg)
+		const bool& success, 
+		const string& errmsg)
 {
-    if (success) {
-	XLOG_TRACE(_verbose, "Configuration saved: success");
-    } else {
-	XLOG_TRACE(_verbose, "Failure saving the configuration: %s",
-		   errmsg.c_str());
-    }
-    _xorpsh.config_saved_done(success, errmsg);
-    return XrlCmdError::OKAY();
+	if (success) 
+	{
+		XLOG_TRACE(_verbose, "Configuration saved: success");
+	} else 
+	{
+		XLOG_TRACE(_verbose, "Failure saving the configuration: %s",
+				errmsg.c_str());
+	}
+	_xorpsh.config_saved_done(success, errmsg);
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_config_change_done(// Input values, 
-							 const bool& success, 
-							 const string& errmsg)
+		const bool& success, 
+		const string& errmsg)
 {
-    if (success) {
-	XLOG_TRACE(_verbose, "Configuration changed: success");
-    } else {
-	XLOG_TRACE(_verbose, "Failure changing the configuration: %s",
-		   errmsg.c_str());
-    }
-    _xorpsh.commit_done(success, errmsg);
-    return XrlCmdError::OKAY();
+	if (success) 
+	{
+		XLOG_TRACE(_verbose, "Configuration changed: success");
+	} else 
+	{
+		XLOG_TRACE(_verbose, "Failure changing the configuration: %s",
+				errmsg.c_str());
+	}
+	_xorpsh.commit_done(success, errmsg);
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_config_changed(// Input values, 
-						     const uint32_t& user_id, 
-						     const string& deltas, 
-						     const string& deletions)
+		const uint32_t& user_id, 
+		const string& deltas, 
+		const string& deletions)
 {
-    XLOG_TRACE(_verbose,
-	       "config changed: user_id: %u\nDELTAS:\n%sDELETIONS:\n%s\n",
-	       XORP_UINT_CAST(user_id), deltas.c_str(), deletions.c_str());
-    _xorpsh.config_changed(user_id, deltas, deletions);
-    return XrlCmdError::OKAY();
+	XLOG_TRACE(_verbose,
+			"config changed: user_id: %u\nDELTAS:\n%sDELETIONS:\n%s\n",
+			XORP_UINT_CAST(user_id), deltas.c_str(), deletions.c_str());
+	_xorpsh.config_changed(user_id, deltas, deletions);
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
 XrlXorpshInterface::rtrmgr_client_0_2_module_status(// Input values,
-						    const string&   modname,
-						    const uint32_t& status)
+		const string&   modname,
+		const uint32_t& status)
 {
-    XLOG_TRACE(_verbose,
-	       "module status: %s changed to status %u\n",
-	       modname.c_str(), XORP_UINT_CAST(status));
-    _xorpsh.module_status_change(modname, (GenericModule::ModuleStatus)status);
-    return XrlCmdError::OKAY();
+	XLOG_TRACE(_verbose,
+			"module status: %s changed to status %u\n",
+			modname.c_str(), XORP_UINT_CAST(status));
+	_xorpsh.module_status_change(modname, (GenericModule::ModuleStatus)status);
+	return XrlCmdError::OKAY();
 }

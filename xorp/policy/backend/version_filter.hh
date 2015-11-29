@@ -42,41 +42,42 @@
  * Say it's a normal route lookup and we do the filtering, and it results to
  * "accepted".  It doesn't imply we need to +1 the reference count.
  */
-class VersionFilter : public FilterBase {
-public:
-    /**
-     * @param fname the variable to read/write in order to access filter.
-     */
-    VersionFilter(const VarRW::Id& fname);
-    ~VersionFilter();
-    
-    /**
-     * Configure the filter
-     *
-     * @param str filter configuration.
-     */
-    void configure(const string& str);
+class VersionFilter : public FilterBase 
+{
+    public:
+	/**
+	 * @param fname the variable to read/write in order to access filter.
+	 */
+	VersionFilter(const VarRW::Id& fname);
+	~VersionFilter();
 
-    /**
-     * Reset the filter.
-     *
-     * Filter becomes a NO-operation -- default action should
-     * be returned everytime an acceptRoute is called.
-     */
-    void reset();
+	/**
+	 * Configure the filter
+	 *
+	 * @param str filter configuration.
+	 */
+	void configure(const string& str);
 
-    /**
-     * See if a route is accepted by the filter.
-     * The route may be modified by the filter [through VarRW].
-     *
-     * @return true if the route is accepted, false otherwise.
-     * @param varrw the VarRW associated with the route being filtered.
-     */
-    bool acceptRoute(VarRW& varrw);
+	/**
+	 * Reset the filter.
+	 *
+	 * Filter becomes a NO-operation -- default action should
+	 * be returned everytime an acceptRoute is called.
+	 */
+	void reset();
 
-private:
-    RefPf _filter;
-    VarRW::Id _fname;
+	/**
+	 * See if a route is accepted by the filter.
+	 * The route may be modified by the filter [through VarRW].
+	 *
+	 * @return true if the route is accepted, false otherwise.
+	 * @param varrw the VarRW associated with the route being filtered.
+	 */
+	bool acceptRoute(VarRW& varrw);
+
+    private:
+	RefPf _filter;
+	VarRW::Id _fname;
 };
 
 #endif // __POLICY_BACKEND_VERSION_FILTER_HH__

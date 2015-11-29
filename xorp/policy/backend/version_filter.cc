@@ -35,8 +35,8 @@
 
 
 VersionFilter::VersionFilter(const VarRW::Id& fname) : 
-		    _filter(new PolicyFilter), 
-		    _fname(fname)
+    _filter(new PolicyFilter), 
+    _fname(fname)
 {
 }
 
@@ -44,25 +44,27 @@ VersionFilter::~VersionFilter()
 {
 }
 
-void
+    void
 VersionFilter::configure(const string& conf)
 {
     PolicyFilter* pf = new PolicyFilter();
 
-    try {
+    try 
+    {
 	pf->configure(conf);
-    // XXX: programming question:
-    // Since i'm deleting pf... do i need to copy the exception [i.e. not ref to
-    // exception?]
-    } catch(PolicyException e) {
+	// XXX: programming question:
+	// Since i'm deleting pf... do i need to copy the exception [i.e. not ref to
+	// exception?]
+    } catch(PolicyException e) 
+    {
 	delete pf;
 	throw e;
     }
-    
+
     _filter = RefPf(pf);
 }
 
-void
+    void
 VersionFilter::reset()
 {
     PolicyFilter* pf = new PolicyFilter();
@@ -71,7 +73,7 @@ VersionFilter::reset()
     _filter = RefPf(pf);
 }
 
-bool
+    bool
 VersionFilter::acceptRoute(VarRW& varrw)
 {
     // get the associated filter
@@ -79,12 +81,13 @@ VersionFilter::acceptRoute(VarRW& varrw)
     try {    
 	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(varrw.read(_fname));
 	filter = ef.val();
-    } catch(const bad_cast& exp) {
+    } catch(const bad_cast& exp) 
+    {
 	const Element& e = varrw.read(_fname);
 	UNUSED(e); // in case XLOG_FATAL is compiled out.
 
 	XLOG_FATAL("Reading %d but didn't get ElemFilter! Got %s: (%s)", 
-		   _fname, e.type(), e.str().c_str());
+		_fname, e.type(), e.str().c_str());
 	xorp_throw(PolicyException, "Reading filter but didn't get ElemFilter!");
     }
 

@@ -29,119 +29,124 @@
 #include "packet_queue.hh"
 
 
-template <typename A>
-PacketQueue<A>::PacketQueue()
-    : _buffered_bytes(0), _max_buffered_bytes(64000), _drops(0)
+	template <typename A>
+	PacketQueue<A>::PacketQueue()
+: _buffered_bytes(0), _max_buffered_bytes(64000), _drops(0)
 {
 }
 
-template <typename A>
+	template <typename A>
 PacketQueue<A>::~PacketQueue()
 {
-    flush_packets();
+	flush_packets();
 }
 
 template <typename A>
-void
+	void
 PacketQueue<A>::enqueue_packet(const RipPacket<A>* pkt)
 {
-    while (_buffered_bytes + pkt->data_bytes() >= _max_buffered_bytes
-	   && drop_old() == true) {
-	// XXX: Empty body
-    }
-    _buffered_bytes += pkt->data_bytes();
-    _ready_packets.push_back(pkt);
+	while (_buffered_bytes + pkt->data_bytes() >= _max_buffered_bytes
+			&& drop_old() == true) 
+	{
+		// XXX: Empty body
+	}
+	_buffered_bytes += pkt->data_bytes();
+	_ready_packets.push_back(pkt);
 }
 
 template <typename A>
 bool
 PacketQueue<A>::empty() const
 {
-    return _ready_packets.empty();
+	return _ready_packets.empty();
 }
 
 template <typename A>
 const RipPacket<A>*
 PacketQueue<A>::head() const
 {
-    if (_ready_packets.empty())
-	return 0;
-    return _ready_packets.front();
+	if (_ready_packets.empty())
+		return 0;
+	return _ready_packets.front();
 }
 
 template <typename A>
-void
+	void
 PacketQueue<A>::pop_head()
 {
-    if (_ready_packets.empty() == false) {
-	_buffered_bytes -= _ready_packets.front()->data_bytes();
-	delete _ready_packets.front();
-	_ready_packets.pop_front();
-    }
+	if (_ready_packets.empty() == false) 
+	{
+		_buffered_bytes -= _ready_packets.front()->data_bytes();
+		delete _ready_packets.front();
+		_ready_packets.pop_front();
+	}
 }
 
 template <typename A>
-bool
+	bool
 PacketQueue<A>::drop_old()
 {
-    if (_ready_packets.empty() == false) {
-	typename QueueRep::iterator i = ++_ready_packets.begin();
-	if (i != _ready_packets.end()) {
-	    XLOG_INFO("Dropping outbound RIP packet");
-	    delete *i;
-	    _ready_packets.erase(i);
-	    _drops++;
-	    return true;
+	if (_ready_packets.empty() == false) 
+	{
+		typename QueueRep::iterator i = ++_ready_packets.begin();
+		if (i != _ready_packets.end()) 
+		{
+			XLOG_INFO("Dropping outbound RIP packet");
+			delete *i;
+			_ready_packets.erase(i);
+			_drops++;
+			return true;
+		}
 	}
-    }
-    return false;
+	return false;
 }
 
 template <typename A>
 uint32_t
 PacketQueue<A>::drop_count() const
 {
-    return _drops;
+	return _drops;
 }
 
 template <typename A>
-void
+	void
 PacketQueue<A>::reset_drop_count()
 {
-    _drops = 0;
+	_drops = 0;
 }
 
 template <typename A>
-void
+	void
 PacketQueue<A>::flush_packets()
 {
-    while (_ready_packets.empty() == false) {
-	_buffered_bytes -= _ready_packets.front()->data_bytes();
-	delete _ready_packets.front();
-	_ready_packets.pop_front();
-    }
-    XLOG_ASSERT(_buffered_bytes == 0);
+	while (_ready_packets.empty() == false) 
+	{
+		_buffered_bytes -= _ready_packets.front()->data_bytes();
+		delete _ready_packets.front();
+		_ready_packets.pop_front();
+	}
+	XLOG_ASSERT(_buffered_bytes == 0);
 }
 
 template <typename A>
-void
+	void
 PacketQueue<A>::set_max_buffered_bytes(uint32_t mbb)
 {
-    _max_buffered_bytes = mbb;
+	_max_buffered_bytes = mbb;
 }
 
 template <typename A>
 uint32_t
 PacketQueue<A>::max_buffered_bytes() const
 {
-    return _max_buffered_bytes;
+	return _max_buffered_bytes;
 }
 
 template <typename A>
 uint32_t
 PacketQueue<A>::buffered_bytes() const
 {
-    return _buffered_bytes;
+	return _buffered_bytes;
 }
 
 

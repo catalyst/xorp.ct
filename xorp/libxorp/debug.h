@@ -28,19 +28,21 @@
 
 
 #ifdef __cplusplus
-class EnvTrace {
-public:
-    EnvTrace(const char* e) {
-	_do_trace = 0;
-	const char* elt = getenv(e);
-	if (elt)
-	    _do_trace = atoi(elt);
-    }
-    bool on() const { return _do_trace > 0; }
-    int getTrace() const { return _do_trace; }
+class EnvTrace 
+{
+    public:
+	EnvTrace(const char* e) 
+	{
+	    _do_trace = 0;
+	    const char* elt = getenv(e);
+	    if (elt)
+		_do_trace = atoi(elt);
+	}
+	bool on() const { return _do_trace > 0; }
+	int getTrace() const { return _do_trace; }
 
-protected:
-    int _do_trace;
+    protected:
+	int _do_trace;
 };
 #endif
 
@@ -110,19 +112,19 @@ protected:
 #   ifdef CPP_SUPPORTS_GNU_VA_ARGS
 #	ifdef DEBUG_PRINT_FUNCTION_NAME
 #	    define debug_msg(args...)					\
-			_xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
+    _xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
 #	else
 #	    define debug_msg(args...)     				\
-			_xdebug_msg_long(__FILE__,__LINE__,0,args)
+    _xdebug_msg_long(__FILE__,__LINE__,0,args)
 #	endif
 #   else
 #	ifdef DEBUG_PRINT_FUNCTION_NAME
 #	    define debug_msg						\
-		_xdebug_entry(__FILE__,__LINE__,__FUNCTION__),		\
-		_xdebug_msg_short
+    _xdebug_entry(__FILE__,__LINE__,__FUNCTION__),		\
+_xdebug_msg_short
 #	else
 #		define debug_msg					\
-		_xdebug_entry(__FILE__,__LINE__,0), _xdebug_msg_short
+    _xdebug_entry(__FILE__,__LINE__,0), _xdebug_msg_short
 #	endif
 #   endif
 #
@@ -183,12 +185,12 @@ inline void
 check_args(const char*, ...) {}
 
 #define debug_msg(args...) 						      \
-do {                                                                          \
-  if (0) { 								      \
-    check_args(args);							      \
-    swallow_args(args);							      \
-  }                                                                           \
-} while (0)
+    do {                                                                          \
+	if (0) { 								      \
+	    check_args(args);							      \
+	    swallow_args(args);							      \
+	}                                                                           \
+    } while (0)
 
 #    else
 #	ifdef CPP_SUPPORTS_GNU_VA_ARGS
@@ -203,22 +205,23 @@ do {                                                                          \
 #endif
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
-/* Function for systems with variable argument macros */
-void	_xdebug_msg_long(const char* file, int line, const char* fn,
-			 const char* format, ...) __printflike(4, 5);
+    /* Function for systems with variable argument macros */
+    void	_xdebug_msg_long(const char* file, int line, const char* fn,
+	    const char* format, ...) __printflike(4, 5);
 
-/* Functions for systems without variable argument macros */
-void	_xdebug_entry(const char* file, int line, const char* fn);
-void	_xdebug_msg_short(const char* format, ...) __printflike(1,2);
-void	_xdebug_null(const char* format, ...) __printflike(1,2);
+    /* Functions for systems without variable argument macros */
+    void	_xdebug_entry(const char* file, int line, const char* fn);
+    void	_xdebug_msg_short(const char* format, ...) __printflike(1,2);
+    void	_xdebug_null(const char* format, ...) __printflike(1,2);
 
-/* Misc */
-void	_xdebug_set_indent(uint32_t n);
+    /* Misc */
+    void	_xdebug_set_indent(uint32_t n);
 
-/* Undefine __printflike if we defined it */
+    /* Undefine __printflike if we defined it */
 #ifdef __libxorp_debug_defined_printflike
 #undef __libxorp_debug_defined_printflike
 #undef __printflike

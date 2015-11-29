@@ -26,66 +26,69 @@
 
 
 
-class GenericModule {
-public:
-    GenericModule(const string& name);
-    virtual ~GenericModule();
+class GenericModule 
+{
+	public:
+		GenericModule(const string& name);
+		virtual ~GenericModule();
 
-    enum ModuleStatus {
-	// The process has started, but we haven't started configuring it yet
-	MODULE_STARTUP		= 0,
+		enum ModuleStatus 
+		{
+			// The process has started, but we haven't started configuring it yet
+			MODULE_STARTUP		= 0,
 
-	// The process has started, and we're in the process of configuring it
-	// (or it's finished configuration, but waiting for another process)
-	MODULE_INITIALIZING	= 1,
+			// The process has started, and we're in the process of configuring it
+			// (or it's finished configuration, but waiting for another process)
+			MODULE_INITIALIZING	= 1,
 
-	// The process is operating normally
-	MODULE_RUNNING		= 2,
+			// The process is operating normally
+			MODULE_RUNNING		= 2,
 
-	// The process has failed, and is no longer runnning
-	MODULE_FAILED		= 3,
+			// The process has failed, and is no longer runnning
+			MODULE_FAILED		= 3,
 
-	// The process has failed; it's running, but not responding anymore
-	MODULE_STALLED		= 4,
+			// The process has failed; it's running, but not responding anymore
+			MODULE_STALLED		= 4,
 
-	// The process has been signalled to shut down, but hasn't exitted yet
-	MODULE_SHUTTING_DOWN	= 5,
+			// The process has been signalled to shut down, but hasn't exitted yet
+			MODULE_SHUTTING_DOWN	= 5,
 
-	// The process has not been started
-	MODULE_NOT_STARTED	= 6,
+			// The process has not been started
+			MODULE_NOT_STARTED	= 6,
 
-	// We have no record of such a module
-	NO_SUCH_MODULE          = 7
-    };
- 
-    virtual string str() const;
-    ModuleStatus status() const { return _status; }
-    const string& name() const { return _name; }
-    virtual void new_status(ModuleStatus new_status);
+			// We have no record of such a module
+			NO_SUCH_MODULE          = 7
+		};
 
-protected:
-    string		_name;
-    ModuleStatus	_status;
+		virtual string str() const;
+		ModuleStatus status() const { return _status; }
+		const string& name() const { return _name; }
+		virtual void new_status(ModuleStatus new_status);
 
-private:
+	protected:
+		string		_name;
+		ModuleStatus	_status;
+
+	private:
 };
 
-class GenericModuleManager {
-public:
-    GenericModuleManager( bool verbose);
-    virtual ~GenericModuleManager();
+class GenericModuleManager 
+{
+	public:
+		GenericModuleManager( bool verbose);
+		virtual ~GenericModuleManager();
 
-    bool module_exists(const string& module_name) const;
-    GenericModule::ModuleStatus module_status(const string& module_name) const;
-    GenericModule* find_module(const string& module_name);
-    const GenericModule* const_find_module(const string& module_name) const;
+		bool module_exists(const string& module_name) const;
+		GenericModule::ModuleStatus module_status(const string& module_name) const;
+		GenericModule* find_module(const string& module_name);
+		const GenericModule* const_find_module(const string& module_name) const;
 
-protected:
-    bool store_new_module(GenericModule *module, string& error_msg);
+	protected:
+		bool store_new_module(GenericModule *module, string& error_msg);
 
-    map<string, GenericModule *> _modules;	// Map module name to module
-    bool	_verbose;	// Set to true if output is verbose
-private:
+		map<string, GenericModule *> _modules;	// Map module name to module
+		bool	_verbose;	// Set to true if output is verbose
+	private:
 };
 
 #endif // __RTRMGR_GENERIC_MODULE_MANAGER_HH__

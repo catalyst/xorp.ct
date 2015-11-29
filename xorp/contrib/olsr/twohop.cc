@@ -39,27 +39,28 @@
 #include "twohop.hh"
 
 TwoHopNeighbor::TwoHopNeighbor( Neighborhood* parent,
-			       const OlsrTypes::TwoHopNodeID id,
-			       const IPv4& main_addr,
-			       const OlsrTypes::TwoHopLinkID tlid)
- : _parent(parent),
-   _id(id),
-   _main_addr(main_addr),
-   _is_strict(false),
-   _coverage(0),
-   _reachability(0)
+	const OlsrTypes::TwoHopNodeID id,
+	const IPv4& main_addr,
+	const OlsrTypes::TwoHopLinkID tlid)
+: _parent(parent),
+    _id(id),
+    _main_addr(main_addr),
+    _is_strict(false),
+    _coverage(0),
+    _reachability(0)
 {
     add_twohop_link(tlid);
 }
 
-string TwoHopNeighbor::toStringBrief() {
+string TwoHopNeighbor::toStringBrief() 
+{
     ostringstream oss;
     oss << id() << "-(" << main_addr().str() << ")";
     return oss.str();
 }
 
 
-void
+    void
 TwoHopNeighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
@@ -70,7 +71,7 @@ TwoHopNeighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     _twohop_links.insert(tlid);
 }
 
-bool
+    bool
 TwoHopNeighbor::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
@@ -83,7 +84,7 @@ TwoHopNeighbor::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     return _twohop_links.empty();
 }
 
-size_t
+    size_t
 TwoHopNeighbor::delete_all_twohop_links()
 {
     size_t deleted_count = 0;
@@ -92,7 +93,8 @@ TwoHopNeighbor::delete_all_twohop_links()
     // TwoHopNeighbor::delete_twohop_link(). Maintain a separate
     // iterator as jj will be invalidated by that method invocation.
     set<OlsrTypes::TwoHopLinkID>::iterator ii, jj;
-    for (ii = _twohop_links.begin(); ii != _twohop_links.end(); ) {
+    for (ii = _twohop_links.begin(); ii != _twohop_links.end(); ) 
+    {
 	jj = ii++;
 	_parent->delete_twohop_link((*jj));
 	++deleted_count;
@@ -101,7 +103,7 @@ TwoHopNeighbor::delete_all_twohop_links()
     return deleted_count;
 }
 
-void
+    void
 TwoHopNeighbor::add_covering_mpr(const OlsrTypes::NeighborID nid)
 {
     // We need only update a counter if MPR state is computed
@@ -111,7 +113,7 @@ TwoHopNeighbor::add_covering_mpr(const OlsrTypes::NeighborID nid)
     UNUSED(nid);
 }
 
-void
+    void
 TwoHopNeighbor::withdraw_covering_mpr(const OlsrTypes::NeighborID nid)
 {
     --_coverage;
@@ -119,31 +121,31 @@ TwoHopNeighbor::withdraw_covering_mpr(const OlsrTypes::NeighborID nid)
     UNUSED(nid);
 }
 
-void
+    void
 TwoHopNeighbor::reset_covering_mprs()
 {
     _coverage = 0;
 }
 
 TwoHopLink::TwoHopLink( Neighborhood* parent,
-		       OlsrTypes::TwoHopLinkID tlid, Neighbor* nexthop,
-		       const TimeVal& vtime)
- :  _parent(parent), _id(tlid), _nexthop(nexthop), _destination(0)
+	OlsrTypes::TwoHopLinkID tlid, Neighbor* nexthop,
+	const TimeVal& vtime)
+:  _parent(parent), _id(tlid), _nexthop(nexthop), _destination(0)
 {
     update_timer(vtime);
 }
 
-void
+    void
 TwoHopLink::update_timer(const TimeVal& vtime)
 {
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
     _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
-	callback(this, &TwoHopLink::event_dead));
+	    callback(this, &TwoHopLink::event_dead));
 }
 
-void
+    void
 TwoHopLink::event_dead()
 {
     debug_msg("called\n");

@@ -33,49 +33,50 @@
  *
  * Nodes implement the visitor pattern [Inspired by Alexandrescu].
  */
-class Node {
-public:
-    /**
-     * @param line the configuration line number where this node was created.
-     */
-    Node(unsigned line) : _line(line) {}
-    virtual ~Node() {}
+class Node 
+{
+    public:
+	/**
+	 * @param line the configuration line number where this node was created.
+	 */
+	Node(unsigned line) : _line(line) {}
+	virtual ~Node() {}
 
-    /**
-     * @return line number of configuration where node was created.
-     */
-    unsigned line() const { return _line; }
+	/**
+	 * @return line number of configuration where node was created.
+	 */
+	unsigned line() const { return _line; }
 
-    /**
-     * Implementation of visitor.
-     *
-     * @param v visit node with this pattern.
-     * @return element at the end of node evaluation.
-     */
-    virtual const Element* accept(Visitor& v) =0;
+	/**
+	 * Implementation of visitor.
+	 *
+	 * @param v visit node with this pattern.
+	 * @return element at the end of node evaluation.
+	 */
+	virtual const Element* accept(Visitor& v) =0;
 
-    /**
-     * Test whether this is a "protocol" statement.
-     *
-     * @return true if this is a "protocol" statement.
-     */
-    virtual bool is_protocol_statement() const { return (false); }
+	/**
+	 * Test whether this is a "protocol" statement.
+	 *
+	 * @return true if this is a "protocol" statement.
+	 */
+	virtual bool is_protocol_statement() const { return (false); }
 
-    /**
-     * Test whether this is "accept" or "reject" statement.
-     *
-     * @return true if this is "accept" or "reject" statement.
-     */
-    virtual bool is_accept_or_reject() const { return (false); }
+	/**
+	 * Test whether this is "accept" or "reject" statement.
+	 *
+	 * @return true if this is "accept" or "reject" statement.
+	 */
+	virtual bool is_accept_or_reject() const { return (false); }
 
-private:
-    unsigned _line;
+    private:
+	unsigned _line;
 };
 
 // macro ugliness for visitor implemntation.
 #define DEFINE_VISITABLE() \
-const Element* accept(Visitor& visitor) { \
-    return visitor.visit(*this); \
-}
+    const Element* accept(Visitor& visitor) { \
+	return visitor.visit(*this); \
+    }
 
 #endif // __POLICY_NODE_BASE_HH__

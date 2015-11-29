@@ -45,7 +45,7 @@
 
 #include "bsdroute.h"
 
-HRESULT
+    HRESULT
 add_protocol_to_rras(int family)
 {
     static const SHORT XORPRTM_BLOCK_SIZE = 0x0004;
@@ -66,9 +66,11 @@ add_protocol_to_rras(int family)
     memset(&igc, 0, sizeof(igc));
 
 #ifdef IPV6_DLL
-    if (family == AF_INET) {
+    if (family == AF_INET) 
+    {
 	pid = PID_IP;
-    } else {
+    } else 
+    {
 	pid = PID_IPV6;
     }
 #else
@@ -78,113 +80,120 @@ add_protocol_to_rras(int family)
     /* Connect to the server */
     /* ---------------------------------------------------------------- */
     dwErr = MprAdminServerConnect((LPWSTR) pswzServerName, &hMprServer);
-    if (dwErr == ERROR_SUCCESS) {
-        /* Ok, get the infobase from the server */
-        /* ------------------------------------------------------------ */
-        dwErr = MprAdminTransportGetInfo(hMprServer,
-                                         pid,
-                                         &pByte,
-                                         &dwSize,
-                                         NULL,
-                                         NULL);
+    if (dwErr == ERROR_SUCCESS) 
+    {
+	/* Ok, get the infobase from the server */
+	/* ------------------------------------------------------------ */
+	dwErr = MprAdminTransportGetInfo(hMprServer,
+		pid,
+		&pByte,
+		&dwSize,
+		NULL,
+		NULL);
 
-        if (dwErr == ERROR_SUCCESS) {
-            /* Call MprInfoDuplicate to create a duplicate of */
-            /* the infoblock */
-            /* -------------------------------------------------------- */
-            MprInfoDuplicate(pByte, &pHeader);
-            MprAdminBufferFree(pByte);
-            pByte = NULL;
-            dwSize = 0;
-        }
+	if (dwErr == ERROR_SUCCESS) 
+	{
+	    /* Call MprInfoDuplicate to create a duplicate of */
+	    /* the infoblock */
+	    /* -------------------------------------------------------- */
+	    MprInfoDuplicate(pByte, &pHeader);
+	    MprAdminBufferFree(pByte);
+	    pByte = NULL;
+	    dwSize = 0;
+	}
     }
 
     /* We also have to open the hMprConfig, but we can ignore the error */
     /* ---------------------------------------------------------------- */
     dwErrT = MprConfigServerConnect((LPWSTR) pswzServerName, &hMprConfig);
-    if (dwErrT == ERROR_SUCCESS) {
-        dwErrT = MprConfigTransportGetHandle(hMprConfig, pid, &hTransport);
+    if (dwErrT == ERROR_SUCCESS) 
+    {
+	dwErrT = MprConfigTransportGetHandle(hMprConfig, pid, &hTransport);
     }
 
-    if (dwErr != ERROR_SUCCESS) {
-        /* Ok, try to use the MprConfig calls. */
-        /* ------------------------------------------------------------ */
-        MprConfigTransportGetInfo(hMprConfig,
-                                  hTransport,
-                                  &pByte,
-                                  &dwSize,
-                                  NULL,
-                                  NULL,
-                                  NULL);
+    if (dwErr != ERROR_SUCCESS) 
+    {
+	/* Ok, try to use the MprConfig calls. */
+	/* ------------------------------------------------------------ */
+	MprConfigTransportGetInfo(hMprConfig,
+		hTransport,
+		&pByte,
+		&dwSize,
+		NULL,
+		NULL,
+		NULL);
 
-        /* Call MprInfoDuplicate to create a duplicate of */
-        /* the infoblock */
-        /* ------------------------------------------------------------ */
-        MprInfoDuplicate(pByte, &pHeader);
-        MprConfigBufferFree(pByte);
-        pByte = NULL;
-        dwSize = 0;
+	/* Call MprInfoDuplicate to create a duplicate of */
+	/* the infoblock */
+	/* ------------------------------------------------------------ */
+	MprInfoDuplicate(pByte, &pHeader);
+	MprConfigBufferFree(pByte);
+	pByte = NULL;
+	dwSize = 0;
     }
 
     /* Call MprInfoBlockRemove to remove the old protocol block */
     MprInfoBlockRemove(pHeader, PROTO_IP_XORPRTM, &pNewHeader);
 
     /* Did we remove the block? */
-    if (pNewHeader != NULL) {
-        /* The block was found and removed, so use the new header. */
-        MprInfoDelete(pHeader);
-        pHeader = pNewHeader;
-        pNewHeader = NULL;
+    if (pNewHeader != NULL) 
+    {
+	/* The block was found and removed, so use the new header. */
+	MprInfoDelete(pHeader);
+	pHeader = pNewHeader;
+	pNewHeader = NULL;
     }
 
     /* Add protocol to the infoblock here!     */
     MprInfoBlockAdd(pHeader,
-                    PROTO_IP_XORPRTM,
-                    XORPRTM_BLOCK_SIZE,
-                    1,
-                    (LPBYTE)&igc,
-                    &pNewHeader);
+	    PROTO_IP_XORPRTM,
+	    XORPRTM_BLOCK_SIZE,
+	    1,
+	    (LPBYTE)&igc,
+	    &pNewHeader);
     MprInfoDelete(pHeader);
     pHeader = NULL;
 
 
-    if (hMprServer) {
+    if (hMprServer) 
+    {
 
-        MprAdminTransportSetInfo(hMprServer,
-                                 pid,
-                                 (BYTE*)pNewHeader,
-                                 MprInfoBlockQuerySize(pNewHeader),
-                                 NULL,
-                                 0);
+	MprAdminTransportSetInfo(hMprServer,
+		pid,
+		(BYTE*)pNewHeader,
+		MprInfoBlockQuerySize(pNewHeader),
+		NULL,
+		0);
     }
 
-    if (hMprConfig && hTransport) {
+    if (hMprConfig && hTransport) 
+    {
 
-        MprConfigTransportSetInfo(hMprConfig,
-                                  hTransport,
-                                  (BYTE*)pNewHeader,
-                                  MprInfoBlockQuerySize(pNewHeader),
-                                  NULL,
-                                  0,
-                                  NULL);
+	MprConfigTransportSetInfo(hMprConfig,
+		hTransport,
+		(BYTE*)pNewHeader,
+		MprInfoBlockQuerySize(pNewHeader),
+		NULL,
+		0,
+		NULL);
     }
 
     if (pHeader)
-        MprInfoDelete(pHeader);
+	MprInfoDelete(pHeader);
 
     if (pNewHeader)
-        MprInfoDelete(pNewHeader);
+	MprInfoDelete(pNewHeader);
 
     if (hMprConfig)
-        MprConfigServerDisconnect(hMprConfig);
+	MprConfigServerDisconnect(hMprConfig);
 
     if (hMprServer)
-        MprAdminServerDisconnect(hMprServer);
+	MprAdminServerDisconnect(hMprServer);
 
     return hr;
 }
 
-int
+    int
 restart_rras()
 {
     SERVICE_STATUS ss;
@@ -194,12 +203,14 @@ restart_rras()
     int is_running, tries, fatal;
 
     h_scm = OpenSCManager(NULL, NULL, GENERIC_READ);
-    if (h_scm == NULL) {
+    if (h_scm == NULL) 
+    {
 	return (-1);
     }
 
     h_rras = OpenService(h_scm, RRAS_SERVICE_NAME, GENERIC_READ);
-    if (h_rras == NULL) {
+    if (h_rras == NULL) 
+    {
 	result = GetLastError();
 	/*printf("OpenService() failed: %d", result); */
 	CloseServiceHandle(h_scm);
@@ -210,29 +221,36 @@ restart_rras()
 
     /*printf("Stoping service \"%s\" ", RRAS_SERVICE_NAME); */
 
-    for (tries = 30; tries > 0; tries++) {
+    for (tries = 30; tries > 0; tries++) 
+    {
 	/* Check if the service is running, stopping, or stopped. */
 	result = ControlService(h_rras, SERVICE_CONTROL_INTERROGATE, &ss);
-	if (result == NO_ERROR) {
+	if (result == NO_ERROR) 
+	{
 	    /* Stopped; carry on */
 	    if (ss.dwCurrentState == SERVICE_STOPPED)
 		break;
 	    /* Stopping; poll until it's done */
-	    if (ss.dwCurrentState == SERVICE_STOP_PENDING) {
+	    if (ss.dwCurrentState == SERVICE_STOP_PENDING) 
+	    {
 		Sleep(1000);
 		continue;
 	    }
-	} else if (result == ERROR_SERVICE_NOT_ACTIVE) {
+	} else if (result == ERROR_SERVICE_NOT_ACTIVE) 
+	{
 	    break;
-	} else {
+	} else 
+	{
 	    fatal = 1;
 	    break;
 	}
 
 	result = ControlService(h_rras, SERVICE_CONTROL_STOP, &ss);
-	if (result == ERROR_SERVICE_NOT_ACTIVE) {
+	if (result == ERROR_SERVICE_NOT_ACTIVE) 
+	{
 	    break;
-	} else if (result != NO_ERROR) {
+	} else if (result != NO_ERROR) 
+	{
 	    fatal = 1;
 	    break;
 	}
@@ -254,16 +272,16 @@ restart_rras()
  */
 
 #define HKLM_XORPRTM4_NAME \
-"SOFTWARE\\Microsoft\\Router\\CurrentVersion\\RouterManagers\\Ip\\XORPRTM4"
+    "SOFTWARE\\Microsoft\\Router\\CurrentVersion\\RouterManagers\\Ip\\XORPRTM4"
 
 #define HKLM_XORPRTM6_NAME \
-"SOFTWARE\\Microsoft\\Router\\CurrentVersion\\RouterManagers\\Ipv6\\XORPRTM6"
+    "SOFTWARE\\Microsoft\\Router\\CurrentVersion\\RouterManagers\\Ipv6\\XORPRTM6"
 
 #define HKLM_XORPRTM4_TRACING_NAME \
-"SOFTWARE\\Microsoft\\Tracing\\XORPRTM4"
+    "SOFTWARE\\Microsoft\\Tracing\\XORPRTM4"
 
 #define HKLM_XORPRTM6_TRACING_NAME \
-"SOFTWARE\\Microsoft\\Tracing\\XORPRTM6"
+    "SOFTWARE\\Microsoft\\Tracing\\XORPRTM6"
 
 static CHAR DLL_CLSID_IPV4[] = "{C2FE450A-D6C2-11D0-A37B-00C04FC9DA04}";
 static CHAR DLL_CLSID_IPV6[] = "{C2FE451A-D6C2-11D0-A37B-00C04FC9DA04}";
@@ -277,7 +295,7 @@ static CHAR DLL_TITLE_IPV6[] = "Router Manager V2 adapter for XORP (IPv6)";
 static CHAR DLL_VENDOR[] = "www.xorp.org";
 static CHAR TRACING_DIR[] = "%windir%\\Tracing";
 
-void
+    void
 add_protocol_to_registry(int family)
 {
     DWORD result;
@@ -285,22 +303,24 @@ add_protocol_to_registry(int family)
     HKEY hKey;
 
     result = RegCreateKeyExA(
-	HKEY_LOCAL_MACHINE,
-	family == AF_INET ? HKLM_XORPRTM4_NAME : HKLM_XORPRTM6_NAME,
-	0,
-	NULL,
-	REG_OPTION_NON_VOLATILE,
-	KEY_ALL_ACCESS,
-	NULL,
-	&hKey,
-	NULL);
+	    HKEY_LOCAL_MACHINE,
+	    family == AF_INET ? HKLM_XORPRTM4_NAME : HKLM_XORPRTM6_NAME,
+	    0,
+	    NULL,
+	    REG_OPTION_NON_VOLATILE,
+	    KEY_ALL_ACCESS,
+	    NULL,
+	    &hKey,
+	    NULL);
 
     RegSetValueExA(hKey, "ConfigDll", 0, REG_SZ, DLL_CONFIG_DLL, sizeof(DLL_CONFIG_DLL));
-    if (family == AF_INET) {
+    if (family == AF_INET) 
+    {
 	RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV4, sizeof(DLL_CLSID_IPV4));
 	RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV4, sizeof(DLL_TITLE_IPV4));
 	RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV4, sizeof(DLL_NAME_IPV4));
-    } else {
+    } else 
+    {
 	RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV6, sizeof(DLL_CLSID_IPV6));
 	RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV6, sizeof(DLL_TITLE_IPV6));
 	RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV6, sizeof(DLL_NAME_IPV6));
@@ -310,18 +330,18 @@ add_protocol_to_registry(int family)
     RegSetValueExA(hKey, "VendorName", 0, REG_SZ, DLL_VENDOR, sizeof(DLL_VENDOR));
     RegCloseKey(hKey);
 
- /* XXX: Enable console tracing for debugging. */
+    /* XXX: Enable console tracing for debugging. */
 
     result = RegCreateKeyExA(
-	HKEY_LOCAL_MACHINE,
-	family == AF_INET ? HKLM_XORPRTM4_TRACING_NAME : HKLM_XORPRTM6_TRACING_NAME,
-	0,
-	NULL,
-	REG_OPTION_NON_VOLATILE,
-	KEY_ALL_ACCESS,
-	NULL,
-	&hKey,
-	NULL);
+	    HKEY_LOCAL_MACHINE,
+	    family == AF_INET ? HKLM_XORPRTM4_TRACING_NAME : HKLM_XORPRTM6_TRACING_NAME,
+	    0,
+	    NULL,
+	    REG_OPTION_NON_VOLATILE,
+	    KEY_ALL_ACCESS,
+	    NULL,
+	    &hKey,
+	    NULL);
 
     foo = 1;
     RegSetValueExA(hKey, "EnableConsoleTracing", 0, REG_DWORD, (BYTE*)&foo, sizeof(foo));
@@ -337,7 +357,7 @@ add_protocol_to_registry(int family)
     RegCloseKey(hKey);
 }
 
-int
+    int
 main(int argc, char *argv[])
 {
     add_protocol_to_registry(AF_INET);

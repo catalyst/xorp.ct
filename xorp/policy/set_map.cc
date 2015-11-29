@@ -30,7 +30,7 @@ SetMap::getSet(const string& name) const
     return _deps.find(name);
 }
 
-void
+    void
 SetMap::create(const string& name)
 {
     // initially, set is empty [null object is fine].
@@ -39,9 +39,9 @@ SetMap::create(const string& name)
 	xorp_throw(SetMapError, "Can't create set " + name + " : exists");
 }
 
-void 
+    void 
 SetMap::update_set(const string& type, const string& name, 
-		   const string& elements, set<string>& modified)
+	const string& elements, set<string>& modified)
 {
     // create the object, _deps will own it...
     Element* e = _ef.create(type, elements.c_str());
@@ -53,32 +53,34 @@ SetMap::update_set(const string& type, const string& name,
     _deps.update_object(name, e);
 }
 
-void 
+    void 
 SetMap::delete_set(const string& name)
 {
     _deps.remove(name);
 }
 
-void
+    void
 SetMap::add_to_set(const string& type, const string& name,
-		   const string& element, set<string>& modified)
+	const string& element, set<string>& modified)
 {
     Element* e = _deps.find_ptr(name);
 
     // Find the element
-    if (e == NULL) {
+    if (e == NULL) 
+    {
 	// First element to the set
 	update_set(type, name, element, modified);
 	return;
     }
 
     // Check the element type
-    if (type != string(e->type())) {
+    if (type != string(e->type())) 
+    {
 	string error_msg = c_format("Can't add to set %s: type mismatch "
-				    "(received %s expected %s)",
-				    name.c_str(),
-				    type.c_str(),
-				    e->type());
+		"(received %s expected %s)",
+		name.c_str(),
+		type.c_str(),
+		e->type());
 	xorp_throw(SetMapError, error_msg);
     }
 
@@ -91,27 +93,29 @@ SetMap::add_to_set(const string& type, const string& name,
     update_set(type, name, elements, modified);
 }
 
-void
+    void
 SetMap::delete_from_set(const string& type, const string& name,
-			const string& element, set<string>& modified)
+	const string& element, set<string>& modified)
 {
     Element* e = _deps.find_ptr(name);
 
     // Find the element
-    if (e == NULL) {
+    if (e == NULL) 
+    {
 	string error_msg = c_format("Can't delete from set %s: not found",
-				    name.c_str());
+		name.c_str());
 	xorp_throw(SetMapError, error_msg);
 	return;
     }
 
     // Check the element type
-    if (type != string(e->type())) {
+    if (type != string(e->type())) 
+    {
 	string error_msg = c_format("Can't delete from set %s: type mismatch "
-				    "(received %s expected %s)",
-				    name.c_str(),
-				    type.c_str(),
-				    e->type());
+		"(received %s expected %s)",
+		name.c_str(),
+		type.c_str(),
+		e->type());
 	xorp_throw(SetMapError, error_msg);
 	return;
     }
@@ -120,7 +124,8 @@ SetMap::delete_from_set(const string& type, const string& name,
     Element* base = _ef.create(type, element.c_str());
     ElemSet* del = dynamic_cast<ElemSet*>(base);
     ElemSet* eset = dynamic_cast<ElemSet*>(e);
-    if (eset != NULL && del != NULL) {
+    if (eset != NULL && del != NULL) 
+    {
 	eset->erase(*del);
     }
     delete base;
@@ -129,13 +134,13 @@ SetMap::delete_from_set(const string& type, const string& name,
     _deps.get_deps(name, modified);
 }
 
-void 
+    void 
 SetMap::add_dependency(const string& setname, const string& policyname)
 {
     _deps.add_dependency(setname,policyname);
 }
 
-void 
+    void 
 SetMap::del_dependency(const string& setname, const string& policyname)
 {
     _deps.del_dependency(setname,policyname);
@@ -148,7 +153,8 @@ SetMap::str() const
 
     string ret;
 
-    while (_deps.has_next(i)) {
+    while (_deps.has_next(i)) 
+    {
 	Dep::ObjPair op(_deps.next(i));
 
 	ret += op.name + ": ";
@@ -164,7 +170,8 @@ SetMap::sets_by_type(SETS& s, const string& type) const
 {
     Dep::Map::const_iterator i = _deps.get_iterator();
 
-    while (_deps.has_next(i)) {
+    while (_deps.has_next(i)) 
+    {
 	Dep::ObjPair op(_deps.next(i));
 
 	const Element* e = &op.object;

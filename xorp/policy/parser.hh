@@ -36,28 +36,29 @@
  * Each node will normally relate to a single statement. The vector of nodes
  * reflects all the statements present.
  */
-class Parser {
-public:
-    typedef vector<Node*> Nodes;
+class Parser 
+{
+    public:
+	typedef vector<Node*> Nodes;
 
-    /**
-     * @param block the term block which is being parsed [action/src/dest].
-     * @param text Configuration to parse.
-     * @return the parse-tree of the configuration. Null on error.
-     */
-    Nodes* parse(const Term::BLOCKS& block, const string& text);
+	/**
+	 * @param block the term block which is being parsed [action/src/dest].
+	 * @param text Configuration to parse.
+	 * @return the parse-tree of the configuration. Null on error.
+	 */
+	Nodes* parse(const Term::BLOCKS& block, const string& text);
 
-    /**
-     * This should be called if parse returns null.
-     *
-     * If parse is successful, the value of last_error is undefined.
-     * 
-     * @return the last error of the parse.
-     */
-    string last_error();
+	/**
+	 * This should be called if parse returns null.
+	 *
+	 * If parse is successful, the value of last_error is undefined.
+	 * 
+	 * @return the last error of the parse.
+	 */
+	string last_error();
 
-private:
-    string _last_error;
+    private:
+	string _last_error;
 };
 
 #endif // __POLICY_PARSER_HH__

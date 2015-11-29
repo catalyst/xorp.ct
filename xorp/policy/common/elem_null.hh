@@ -35,23 +35,25 @@
  * The dispatcher also treats Null arguments as a special case by returning a
  * Null.
  */
-class ElemNull : public Element {
-public:
-    static const char* id;
-    static Hash _hash;
-            
-    ElemNull() : Element(_hash) {}
-    ElemNull(const char* /* c_str */) : Element(_hash) {}
-                
-    string str() const { return "null"; }
+class ElemNull : public Element 
+{
+    public:
+	static const char* id;
+	static Hash _hash;
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemNull, hash: " << (int)(hash()) << " id: " << id;
-	return oss.str();
-    }
+	ElemNull() : Element(_hash) {}
+	ElemNull(const char* /* c_str */) : Element(_hash) {}
 
-    const char* type() const { return id; }
+	string str() const { return "null"; }
+
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemNull, hash: " << (int)(hash()) << " id: " << id;
+	    return oss.str();
+	}
+
+	const char* type() const { return id; }
 };
 
 #endif // __POLICY_COMMON_ELEM_NULL_HH__

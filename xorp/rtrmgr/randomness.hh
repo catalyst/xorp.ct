@@ -22,24 +22,25 @@
 #ifndef __RTRMGR_RANDOMNESS_HH__
 #define __RTRMGR_RANDOMNESS_HH__
 
-class RandomGen {
-public:
-    RandomGen();
-    ~RandomGen();
+class RandomGen 
+{
+	public:
+		RandomGen();
+		~RandomGen();
 
-    void get_random_bytes(size_t len, uint8_t* buf);
+		void get_random_bytes(size_t len, uint8_t* buf);
 
-private:
-    bool read_file(const string& filename);
-    bool read_fd(FILE* file);
-    void add_buf_to_randomness(uint8_t* buf, size_t len);
+	private:
+		bool read_file(const string& filename);
+		bool read_fd(FILE* file);
+		void add_buf_to_randomness(uint8_t* buf, size_t len);
 
-    static const size_t RAND_POOL_SIZE = 65536;
+		static const size_t RAND_POOL_SIZE = 65536;
 
-    bool	_random_exists;
-    bool	_urandom_exists;
-    uint8_t*	_random_data;
-    uint32_t	_counter;
+		bool	_random_exists;
+		bool	_urandom_exists;
+		uint8_t*	_random_data;
+		uint32_t	_counter;
 };
 
 #endif // __RTRMGR_RANDOMNESS_HH__

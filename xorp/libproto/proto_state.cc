@@ -70,10 +70,10 @@ ProtoState::ProtoState()
 
 ProtoState::~ProtoState()
 {
-    
+
 }
 
-int
+    int
 ProtoState::start()
 {
     if (is_disabled())
@@ -91,7 +91,7 @@ ProtoState::start()
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::stop()
 {
     if (is_down())
@@ -105,7 +105,7 @@ ProtoState::stop()
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::pending_start()
 {
     if (is_disabled())
@@ -116,11 +116,11 @@ ProtoState::pending_start()
 	return (XORP_OK);		// Already pending UP
 
     ServiceBase::set_status(SERVICE_STARTING);
-    
+
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::pending_stop()
 {
     if (is_down())
@@ -133,14 +133,14 @@ ProtoState::pending_stop()
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::startup()
 {
     //
     // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
-	|| (ServiceBase::status() == SERVICE_RUNNING))
+	    || (ServiceBase::status() == SERVICE_RUNNING))
 	return (XORP_OK);
 
     if (ServiceBase::status() != SERVICE_READY)
@@ -149,7 +149,7 @@ ProtoState::startup()
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::reset()
 {
     if (ServiceBase::status() != SERVICE_READY)
@@ -158,30 +158,32 @@ ProtoState::reset()
     return (XORP_OK);
 }
 
-int
+    int
 ProtoState::shutdown()
 {
     //
     // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
-	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
-	|| (ServiceBase::status() == SERVICE_FAILED)) {
+	    || (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	    || (ServiceBase::status() == SERVICE_FAILED)) 
+    {
 	return (XORP_OK);
     }
 
     if ((ServiceBase::status() != SERVICE_RUNNING)
-	&& (ServiceBase::status() != SERVICE_STARTING)
-	&& (ServiceBase::status() != SERVICE_PAUSING)
-	&& (ServiceBase::status() != SERVICE_PAUSED)
-	&& (ServiceBase::status() != SERVICE_RESUMING)) {
+	    && (ServiceBase::status() != SERVICE_STARTING)
+	    && (ServiceBase::status() != SERVICE_PAUSING)
+	    && (ServiceBase::status() != SERVICE_PAUSED)
+	    && (ServiceBase::status() != SERVICE_RESUMING)) 
+    {
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-void
+    void
 ProtoState::disable()
 {
     (void)ProtoState::shutdown();
@@ -201,7 +203,7 @@ ProtoState::state_str() const
 	return ("PENDING_UP");
     if (is_pending_down())
 	return ("PENDING_DOWN");
-    
+
     return ("UNKNOWN");
 }
 

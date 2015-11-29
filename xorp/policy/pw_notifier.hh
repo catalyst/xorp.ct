@@ -32,23 +32,24 @@
  * This will enable the object to receive announcements for the death and birth
  * of a XORP process.
  */
-class PWNotifier {
-public:
-    virtual ~PWNotifier() {}
-  
-    /**
-     * Method called when a XORP process comes to life.
-     *
-     * @param process process name which was born.
-     */
-    virtual void birth(const string& process) = 0;
+class PWNotifier 
+{
+    public:
+	virtual ~PWNotifier() {}
 
-    /**
-     * Method called when a XORP process dies.
-     *
-     * @param process process name which died.
-     */
-    virtual void death(const string& process) = 0;
+	/**
+	 * Method called when a XORP process comes to life.
+	 *
+	 * @param process process name which was born.
+	 */
+	virtual void birth(const string& process) = 0;
+
+	/**
+	 * Method called when a XORP process dies.
+	 *
+	 * @param process process name which died.
+	 */
+	virtual void death(const string& process) = 0;
 };
 
 #endif // __POLICY_PW_NOTIFIER_HH__

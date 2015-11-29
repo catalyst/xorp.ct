@@ -55,9 +55,9 @@
 #endif
 #ifndef IGMPMSG_WHOLEPKT
 #define IGMPMSG_WHOLEPKT	3	// Whole packet sent from the kernel to
-					// the user-level process (typically
-					// a multicast data packet for PIM
-					// register encapsulation).
+// the user-level process (typically
+// a multicast data packet for PIM
+// register encapsulation).
 #endif
 #ifndef IPPROTO_PIM
 #define IPPROTO_PIM		103	// Protocol Independent Multicast

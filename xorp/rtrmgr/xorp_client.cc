@@ -38,33 +38,37 @@
 /* XorpClient                                                          */
 /***********************************************************************/
 
-XorpClient::XorpClient( XrlRouter& xrl_router)
-    : _xrl_router(xrl_router)
+	XorpClient::XorpClient( XrlRouter& xrl_router)
+: _xrl_router(xrl_router)
 {
 }
 
-XorpClient::~XorpClient() {
-    EventLoop::instance().remove_timer(_delay_timer);
+XorpClient::~XorpClient() 
+{
+	EventLoop::instance().remove_timer(_delay_timer);
 }
 
-void
+	void
 XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
-		     const string& xrl_return_spec, bool do_exec)
+		const string& xrl_return_spec, bool do_exec)
 {
-    if (do_exec) {
-	debug_msg("send_sync before sending\n");
-	_xrl_router.send(xrl, cb);
-	debug_msg("send_sync after sending\n");
-    } else {
-	debug_msg("send_sync before sending\n");
-	debug_msg("DUMMY SEND: immediate callback dispatch\n");
-	if (!cb.is_empty()) {
-	    _delay_timer = EventLoop::instance().new_oneoff_after_ms(0,
-				callback(this, &XorpClient::fake_send_done,
-					 xrl_return_spec, cb));
+	if (do_exec) 
+	{
+		debug_msg("send_sync before sending\n");
+		_xrl_router.send(xrl, cb);
+		debug_msg("send_sync after sending\n");
+	} else 
+	{
+		debug_msg("send_sync before sending\n");
+		debug_msg("DUMMY SEND: immediate callback dispatch\n");
+		if (!cb.is_empty()) 
+		{
+			_delay_timer = EventLoop::instance().new_oneoff_after_ms(0,
+					callback(this, &XorpClient::fake_send_done,
+						xrl_return_spec, cb));
+		}
+		debug_msg("send_sync after sending\n");
 	}
-	debug_msg("send_sync after sending\n");
-    }
 }
 
 /**
@@ -73,102 +77,108 @@ XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
  * send_now has returned.
  */
 void XorpClient::fake_send_done(string xrl_return_spec,
-				XrlRouter::XrlCallback cb)
+		XrlRouter::XrlCallback cb)
 {
-    XrlArgs args = fake_return_args(xrl_return_spec);
-    cb->dispatch(XrlError::OKAY(), &args);
+	XrlArgs args = fake_return_args(xrl_return_spec);
+	cb->dispatch(XrlError::OKAY(), &args);
 }
 
 /**
  * fake_return_args is purely needed for testing, so that XRLs that
  * should return a value don't completely fail
  */
-XrlArgs
+	XrlArgs
 XorpClient::fake_return_args(const string& xrl_return_spec)
 {
-    list<string> args;
-    string s = xrl_return_spec;
+	list<string> args;
+	string s = xrl_return_spec;
 
-    debug_msg("fake_return_args %s\n", xrl_return_spec.c_str());
+	debug_msg("fake_return_args %s\n", xrl_return_spec.c_str());
 
-    if (xrl_return_spec.empty())
-	return XrlArgs();
+	if (xrl_return_spec.empty())
+		return XrlArgs();
 
-    while (true) {
-	string::size_type start = s.find("&");
-	if (start == string::npos) {
-	    args.push_back(s);
-	    break;
-	}
-	args.push_back(s.substr(0, start));
-	s = s.substr(start + 1, s.size() - (start + 1));
-    }
-
-    XrlArgs xargs;
-    list<string>::const_iterator iter;
-    for (iter = args.begin(); iter != args.end(); ++iter) {
-	string::size_type eq = iter->find("=");
-	uint8_t data[] = {0}; //Needed for xrlatom_binary
-	XrlAtom atom;
-
-	debug_msg("ARG: %s\n", iter->c_str());
-
-	if (eq == string::npos) {
-	    debug_msg("ARG2: %s\n", iter->c_str());
-	    atom = XrlAtom(iter->c_str());
-	} else {
-	    debug_msg("ARG2: >%s<\n", iter->substr(0, eq).c_str());
-	    atom = XrlAtom(iter->substr(0, eq).c_str());
+	while (true) 
+	{
+		string::size_type start = s.find("&");
+		if (start == string::npos) 
+		{
+			args.push_back(s);
+			break;
+		}
+		args.push_back(s.substr(0, start));
+		s = s.substr(start + 1, s.size() - (start + 1));
 	}
 
-	switch (atom.type()) {
-	case xrlatom_no_type:
-	    XLOG_UNREACHABLE();
-	case xrlatom_int32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0, true) );
-	    break;
-	case xrlatom_uint32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0, true) );
-	    break;
-	case xrlatom_ipv4:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0"), true) );
-	    break;
-	case xrlatom_ipv4net:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0"), true) );
-	    break;
-	case xrlatom_text:
-	    xargs.add(XrlAtom(atom.name().c_str(), string(""), true) );
-	    break;
-	case xrlatom_ipv6:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv6("::"), true) );
-	    break;
-	case xrlatom_ipv6net:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0"), true) );
-	    break;
-	case xrlatom_mac:
-	    xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00"), true) );
-	    break;
-	case xrlatom_list:
-	    xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList(), true) );
-	    break;
-	case xrlatom_boolean:
-	    xargs.add(XrlAtom(atom.name().c_str(), false, true) );
-	    break;
-	case xrlatom_binary:
-	    xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data), true) );
-	    break;
-	case xrlatom_uint64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0, true) );
-	    break;
-	case xrlatom_int64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0, true) );
-	    break;
-	case xrlatom_fp64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0, true) );
-	    break;
+	XrlArgs xargs;
+	list<string>::const_iterator iter;
+	for (iter = args.begin(); iter != args.end(); ++iter) 
+	{
+		string::size_type eq = iter->find("=");
+		uint8_t data[] = {0}; //Needed for xrlatom_binary
+		XrlAtom atom;
+
+		debug_msg("ARG: %s\n", iter->c_str());
+
+		if (eq == string::npos) 
+		{
+			debug_msg("ARG2: %s\n", iter->c_str());
+			atom = XrlAtom(iter->c_str());
+		} else 
+		{
+			debug_msg("ARG2: >%s<\n", iter->substr(0, eq).c_str());
+			atom = XrlAtom(iter->substr(0, eq).c_str());
+		}
+
+		switch (atom.type()) 
+		{
+			case xrlatom_no_type:
+				XLOG_UNREACHABLE();
+			case xrlatom_int32:
+				xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0, true) );
+				break;
+			case xrlatom_uint32:
+				xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0, true) );
+				break;
+			case xrlatom_ipv4:
+				xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0"), true) );
+				break;
+			case xrlatom_ipv4net:
+				xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0"), true) );
+				break;
+			case xrlatom_text:
+				xargs.add(XrlAtom(atom.name().c_str(), string(""), true) );
+				break;
+			case xrlatom_ipv6:
+				xargs.add(XrlAtom(atom.name().c_str(), IPv6("::"), true) );
+				break;
+			case xrlatom_ipv6net:
+				xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0"), true) );
+				break;
+			case xrlatom_mac:
+				xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00"), true) );
+				break;
+			case xrlatom_list:
+				xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList(), true) );
+				break;
+			case xrlatom_boolean:
+				xargs.add(XrlAtom(atom.name().c_str(), false, true) );
+				break;
+			case xrlatom_binary:
+				xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data), true) );
+				break;
+			case xrlatom_uint64:
+				xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0, true) );
+				break;
+			case xrlatom_int64:
+				xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0, true) );
+				break;
+			case xrlatom_fp64:
+				xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0, true) );
+				break;
+		}
 	}
-    }
-    debug_msg("ARGS: %s\n", xargs.str().c_str());
-    return xargs;
+	debug_msg("ARGS: %s\n", xargs.str().c_str());
+	return xargs;
 }
 

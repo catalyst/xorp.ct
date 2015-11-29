@@ -27,10 +27,10 @@
 #include "arpd.hh"
 #include "vrrp_vif.hh"
 
-ARPd::ARPd(VrrpInterface& vif) 
-    : _vif(vif),
-      _running(false),
-      _receiving(false)
+    ARPd::ARPd(VrrpInterface& vif) 
+: _vif(vif),
+    _running(false),
+    _receiving(false)
 {
 }
 
@@ -40,7 +40,7 @@ ARPd::~ARPd()
 	stop();
 }
 
-void
+    void
 ARPd::start()
 {
     XLOG_ASSERT(!_running);
@@ -50,7 +50,7 @@ ARPd::start()
     ips_updated();
 }
 
-void
+    void
 ARPd::stop()
 {
     XLOG_ASSERT(_running);
@@ -60,20 +60,20 @@ ARPd::stop()
     _running = false;
 }
 
-void
+    void
 ARPd::clear()
 {
     _ips.clear();
 }
 
-void
+    void
 ARPd::insert(const IPv4& ip)
 {
     XLOG_ASSERT(_ips.find(ip) == _ips.end());
     _ips.insert(ip);
 }
 
-void
+    void
 ARPd::ips_updated()
 {
     if (_ips.empty())
@@ -82,7 +82,7 @@ ARPd::ips_updated()
 	start_receiving();
 }
 
-void
+    void
 ARPd::start_receiving()
 {
     if (!_running || _receiving)
@@ -93,7 +93,7 @@ ARPd::start_receiving()
     _receiving = true;
 }
 
-void
+    void
 ARPd::stop_receiving()
 {
     if (!_running || !_receiving)
@@ -104,21 +104,22 @@ ARPd::stop_receiving()
     _receiving = false;
 }
 
-void
+    void
 ARPd::set_mac(const Mac& mac)
 {
     _mac = mac;
 }
 
-void
+    void
 ARPd::recv(const Mac& src, const PAYLOAD& payload)
 {
     if (!_receiving)
 	return;
 
-    if (payload.size() > sizeof(ArpHeader)) {
+    if (payload.size() > sizeof(ArpHeader)) 
+    {
 	XLOG_ERROR("ERROR:  payload_size: %i is > than ArpHeader size: %i\n",
-		   (int)(payload.size()), (int)(sizeof(ArpHeader)));
+		(int)(payload.size()), (int)(sizeof(ArpHeader)));
 	return;
     }
 

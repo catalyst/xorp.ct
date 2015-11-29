@@ -26,7 +26,8 @@
 /**
  * @short Trace control variables.
  */
-struct Trace {
+struct Trace 
+{
     /**
      * Construct a new Trace instance.
      *
@@ -47,16 +48,17 @@ struct Trace {
     /**
      * Set all tracing options to @param value
      */
-    inline void all(bool value) {
+    inline void all(bool value) 
+    {
 	_input_errors =
-	_packets =
-	_mpr_selection =
-	_interface_events =
-	_neighbor_events =
-	_spt =
-	_routes =
-	_import_policy =
-	_export_policy =
+	    _packets =
+	    _mpr_selection =
+	    _interface_events =
+	    _neighbor_events =
+	    _spt =
+	    _routes =
+	    _import_policy =
+	    _export_policy =
 	    value;
     }
 

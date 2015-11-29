@@ -56,29 +56,32 @@ const int NOT_IN_HEAP =	-1 ;
  * Objects stored on the heap should inherit from this class. If
  * removal from arbitary positions (not just head) is required.
  */
-class HeapBase {
- public:
-    HeapBase() : _pos_in_heap(NOT_IN_HEAP) {}
-    virtual ~HeapBase() {}
+class HeapBase 
+{
+    public:
+	HeapBase() : _pos_in_heap(NOT_IN_HEAP) {}
+	virtual ~HeapBase() {}
 
-    int		_pos_in_heap;	// position of this object in the heap
+	int		_pos_in_heap;	// position of this object in the heap
 };
 
-class Heap /*: public BugCatcher*/ {
+class Heap /*: public BugCatcher*/ 
+{
     friend class TimerList;
-protected:
-typedef TimeVal Heap_Key ;
-    struct heap_entry {
+    protected:
+    typedef TimeVal Heap_Key ;
+    struct heap_entry 
+    {
 	Heap_Key key;	/* sorting key. Topmost element is smallest one */
 	HeapBase *object;      /* object pointer */
     } ;
-public:
+    public:
     /**
      * Default constructor used to build a standard heap with no support for
      * removal from the middle.
      */
     Heap();
-    
+
     /**
      * Constructor used to build a standard heap with support for
      * removal from the middle. Should be used with something
@@ -90,7 +93,7 @@ public:
      * </PRE>
      */
     explicit Heap(bool); // heap supporting removal from the middle
-    
+
     /**
      * Destructor
      */
@@ -129,7 +132,8 @@ public:
      * 
      * @return the pointer to the entry at the top of the heap.
      */
-    struct heap_entry *top() const {
+    struct heap_entry *top() const 
+    {
 	return  (_p == 0 || _elements == 0) ? 0 :  &(_p[0]) ;
     }
 
@@ -164,12 +168,12 @@ public:
     void print();
     void print_all(int);
 #endif
-    
-private:
+
+    private:
     void push(Heap_Key key, HeapBase *p, int son);
     int resize(int new_size);
     void verify();
-    
+
     int _size;
     int _elements ;
     bool _intrude ; // True if the object holds the heap position

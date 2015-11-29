@@ -62,16 +62,16 @@
  * 
  * Return value: The allocated #buffer_t structure.
  **/
-buffer_t *
+    buffer_t *
 buffer_malloc_utils_(size_t buffer_size)
 {
     buffer_t *buffer;
-    
+
     buffer = malloc(sizeof(*buffer));
     buffer->_data = malloc(buffer_size);
     buffer->_buffer_size = buffer_size;
     BUFFER_RESET(buffer);
-    
+
     return (buffer);
 }
 
@@ -82,12 +82,12 @@ buffer_malloc_utils_(size_t buffer_size)
  * Free a #buffer_t structure and all associated memory with it (including
  * the data stream).
  **/
-void
+    void
 buffer_free_utils_(buffer_t *buffer)
 {
     if (buffer->_data != NULL)
 	free(buffer->_data);
-    
+
     free(buffer);
 }
 
@@ -99,12 +99,12 @@ buffer_free_utils_(buffer_t *buffer)
  * 
  * Return value: The reset #buffer_t structure.
  **/
-buffer_t *
+    buffer_t *
 buffer_reset_utils_(buffer_t *buffer)
 {
     buffer->_data_head	= buffer->_data;
     buffer->_data_tail	= buffer->_data;
     memset(buffer->_data, 0, buffer->_buffer_size);
-    
+
     return (buffer);
 }

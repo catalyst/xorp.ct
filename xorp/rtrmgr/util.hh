@@ -161,7 +161,7 @@ string find_executable_filename(const string& program_filename);
  * or an empty string if no arguments were supplied.
  */
 void find_executable_filename_and_arguments(const string& program_request,
-					    string& executable_filename,
-					    string& program_arguments);
+		string& executable_filename,
+		string& program_arguments);
 
 #endif // __RTRMGR_UTIL_HH__

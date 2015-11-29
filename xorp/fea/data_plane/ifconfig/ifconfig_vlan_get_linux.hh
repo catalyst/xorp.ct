@@ -25,51 +25,52 @@
 #include "fea/ifconfig_vlan_get.hh"
 
 
-class IfConfigVlanGetLinux : public IfConfigVlanGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager, bool is_dummy);
+class IfConfigVlanGetLinux : public IfConfigVlanGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager, bool is_dummy);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigVlanGetLinux();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigVlanGetLinux();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Pull the VLAN network interface information from the underlying system.
-     * 
-     * The VLAN information is added to the existing state in the iftree.
-     *
-     * @param iftree the IfTree storage to store the pulled information.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int pull_config(IfTree& iftree, bool& modified);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-private:
-    int read_config(IfTree& iftree, bool& modified);
-    bool _is_dummy;
-    int _s4;
+		/**
+		 * Pull the VLAN network interface information from the underlying system.
+		 * 
+		 * The VLAN information is added to the existing state in the iftree.
+		 *
+		 * @param iftree the IfTree storage to store the pulled information.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int pull_config(IfTree& iftree, bool& modified);
+
+	private:
+		int read_config(IfTree& iftree, bool& modified);
+		bool _is_dummy;
+		int _s4;
 };
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_GET_LINUX_HH__

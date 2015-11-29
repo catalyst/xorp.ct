@@ -41,18 +41,20 @@ CrashDumpManager::CrashDumpManager()
 }
 
 
-void
+    void
 CrashDumpManager::register_dumper(CrashDumper *dumper)
 {
     _dumpers.push_back(dumper);
 }
 
-void
+    void
 CrashDumpManager::unregister_dumper(CrashDumper *dumper)
 {
     list <CrashDumper*>::iterator i;
-    for (i = _dumpers.begin(); i != _dumpers.end(); ++i) {
-	if (*i == dumper) {
+    for (i = _dumpers.begin(); i != _dumpers.end(); ++i) 
+    {
+	if (*i == dumper) 
+	{
 	    _dumpers.erase(i);
 	    return;
 	}
@@ -60,7 +62,7 @@ CrashDumpManager::unregister_dumper(CrashDumper *dumper)
     XLOG_UNREACHABLE();
 }
 
-void
+    void
 CrashDumpManager::crash_dump()
 {
     FILE *dumpfile;
@@ -70,13 +72,15 @@ CrashDumpManager::crash_dump()
     filename += pwd->pw_name;
 
     dumpfile = fopen(filename.c_str(), "w");
-    if (dumpfile == NULL) {
+    if (dumpfile == NULL) 
+    {
 	XLOG_WARNING("Failed to open dump file: %s", filename.c_str());
 	return;
     }
 
     list <CrashDumper*>::iterator i;
-    for (i = _dumpers.begin(); i != _dumpers.end(); i++) {
+    for (i = _dumpers.begin(); i != _dumpers.end(); i++) 
+    {
 	string s = (*i)->dump_state();
 	fwrite(s.c_str(), 1, s.size(), dumpfile);
     }
@@ -103,20 +107,23 @@ CrashDumper::crash_dump() const
     _mgr.crash_dump();
 }
 
-void
+    void
 CrashDumper::log(const string& msg)
 {
-    if (_logfirst == _loglast) {
+    if (_logfirst == _loglast) 
+    {
 	// first time we're called, allocate the storage
 	_log.resize(CRASHLOG_SIZE);
 	_logtimes.resize(CRASHLOG_SIZE);
     }
 
-    if ( ((_loglast + 1) % CRASHLOG_SIZE) == _logfirst) {
+    if ( ((_loglast + 1) % CRASHLOG_SIZE) == _logfirst) 
+    {
 	// need to overwrite an old entry
 	_loglast = _logfirst;
 	_logfirst = ((_logfirst + 1) % CRASHLOG_SIZE);
-    } else {
+    } else 
+    {
 	// there's still space
 	_loglast = ((_loglast + 1) % CRASHLOG_SIZE);
     }
@@ -132,10 +139,12 @@ string
 CrashDumper::dump_state() const
 {
     string s;
-    if (_logfirst != _loglast) {
+    if (_logfirst != _loglast) 
+    {
 	s = "Audit Log:\n";
 	int i = _logfirst;
-	while (1) {
+	while (1) 
+	{
 	    s += _logtimes[i].str() + " " + _log[i] + "\n";
 	    if (i == _loglast)
 		break;

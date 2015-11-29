@@ -27,10 +27,12 @@
 
 #include "profile_vars.hh"
 
-struct profile_vars {
+struct profile_vars 
+{
     string var;
     string comment;
-} profile_vars[] = {
+} profile_vars[] = 
+{
     { profile_message_in, 	"Messages entering OLSR" },
     { profile_route_ribin, 	"Routes entering OLSR" },
     { profile_route_rpc_in, 	"Routes being queued for the RIB" },
@@ -41,11 +43,11 @@ struct profile_vars {
     { trace_policy_configure,	"Trace policy introduction" },
 };
 
-void
+    void
 initialize_profiling_variables(Profile& p)
 {
     for (size_t i = 0;
-	 i < sizeof(profile_vars) / sizeof(struct profile_vars);
-	 i++)
+	    i < sizeof(profile_vars) / sizeof(struct profile_vars);
+	    i++)
 	p.create(profile_vars[i].var, profile_vars[i].comment);
 }

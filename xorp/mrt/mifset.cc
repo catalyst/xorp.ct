@@ -53,19 +53,20 @@
 //
 
 
-void
+    void
 mifset_to_array(const Mifset& mifset, uint8_t *array)
 {
     size_t i;
-    
+
     // Reset the array
     for (i = 0; i < mifset.size() / sizeof(array[0]); i++)
 	array[i] = 0;
     if (mifset.size() % sizeof(array[0]))
 	array[i] = 0;		// XXX: the extra, semi-filled byte
-    
+
     // Set the bits
-    for (size_t i = 0; i < mifset.size(); i++) {
+    for (size_t i = 0; i < mifset.size(); i++) 
+    {
 	size_t byte = i / sizeof(array[0]);
 	size_t bit = i % sizeof(array[0]);
 	if (mifset.test(i))
@@ -73,14 +74,15 @@ mifset_to_array(const Mifset& mifset, uint8_t *array)
     }
 }
 
-void
+    void
 array_to_mifset(const uint8_t *array, Mifset& mifset)
 {
     // Reset the mifset
     mifset.reset();
-    
+
     // Set the bits
-    for (size_t i = 0; i < mifset.size(); i++) {
+    for (size_t i = 0; i < mifset.size(); i++) 
+    {
 	size_t byte = i / sizeof(array[0]);
 	size_t bit = i % sizeof(array[0]);
 	if (array[byte] & (1 << bit))
@@ -88,17 +90,18 @@ array_to_mifset(const uint8_t *array, Mifset& mifset)
     }
 }
 
-void
+    void
 mifset_to_vector(const Mifset& mifset, vector<uint8_t>& vector)
 {
     size_t i;
-    
+
     // Reset the vector
     for (i = 0; i < vector.size(); i++)
 	vector[i] = 0;
-    
+
     // Set the bits
-    for (size_t i = 0; i < mifset.size(); i++) {
+    for (size_t i = 0; i < mifset.size(); i++) 
+    {
 	size_t byte = i / sizeof(vector[0]);
 	size_t bit = i % sizeof(vector[0]);
 	if (mifset.test(i))
@@ -110,9 +113,10 @@ void vector_to_mifset(const vector<uint8_t>& vector, Mifset& mifset)
 {
     // Reset the mifset
     mifset.reset();
-    
+
     // Set the bits
-    for (size_t i = 0; i < mifset.size(); i++) {
+    for (size_t i = 0; i < mifset.size(); i++) 
+    {
 	size_t byte = i / sizeof(vector[0]);
 	size_t bit = i % sizeof(vector[0]);
 	if (vector[byte] & (1 << bit))

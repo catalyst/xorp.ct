@@ -29,8 +29,8 @@
 // inherit.
 
 VisitorTest::VisitorTest(SetMap& sm, PolicyMap& pm, VarMap& vm,
-			 const RATTR& attr, RATTR& mod) 
-	 : _sm(sm), _pm(pm), _vm(vm), _finished(false), _varrw(NULL), _mod(mod)
+	const RATTR& attr, RATTR& mod) 
+: _sm(sm), _pm(pm), _vm(vm), _finished(false), _varrw(NULL), _mod(mod)
 {
     TestVarRW* varrw = new TestVarRW();
     _varrw = varrw;
@@ -42,7 +42,8 @@ VisitorTest::VisitorTest(SetMap& sm, PolicyMap& pm, VarMap& vm,
     change_protocol(_protocol);
 
     // init varrw with route attributes
-    for (i = attr.begin(); i != attr.end(); ++i) {
+    for (i = attr.begin(); i != attr.end(); ++i) 
+    {
 	string name = i->first;
 
 	if (name.compare("protocol") == 0)
@@ -66,7 +67,7 @@ VisitorTest::~VisitorTest()
     _trash.clear();
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(PolicyStatement& ps)
 {
     do_policy_statement(ps);
@@ -74,7 +75,7 @@ VisitorTest::visit(PolicyStatement& ps)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::do_policy_statement(PolicyStatement& ps)
 {
     PolicyStatement::TermContainer& terms = ps.terms();
@@ -83,19 +84,22 @@ VisitorTest::do_policy_statement(PolicyStatement& ps)
 
     // go throgh all terms
     for (PolicyStatement::TermContainer::iterator i = terms.begin();
-         i != terms.end(); ++i) {
+	    i != terms.end(); ++i) 
+    {
 	(i->second)->accept(*this);
 
 	if (_outcome != DEFAULT)
 	    break;
 
-	if (_finished) {
-	    switch (_flow) {
-	    case NodeNext::POLICY:
-		return NULL;
+	if (_finished) 
+	{
+	    switch (_flow) 
+	    {
+		case NodeNext::POLICY:
+		    return NULL;
 
-	    case NodeNext::TERM:
-		continue;
+		case NodeNext::TERM:
+		    continue;
 	    }
 	}
     }
@@ -103,7 +107,7 @@ VisitorTest::do_policy_statement(PolicyStatement& ps)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(Term& term)
 {
     Term::Nodes& source  = term.source_nodes();
@@ -117,8 +121,9 @@ VisitorTest::visit(Term& term)
     change_protocol(_protocol);
 
     // do source block
-    for (i = source.begin(); i != source.end(); ++i) {
-        const Element* e = (i->second)->accept(*this);
+    for (i = source.begin(); i != source.end(); ++i) 
+    {
+	const Element* e = (i->second)->accept(*this);
 
 	if (_finished)
 	    return NULL;
@@ -130,8 +135,9 @@ VisitorTest::visit(Term& term)
     change_protocol(_protocol);
 
     // do dest block
-    for (i = dest.begin(); i != dest.end(); ++i) {
-        const Element* e = (i->second)->accept(*this);
+    for (i = dest.begin(); i != dest.end(); ++i) 
+    {
+	const Element* e = (i->second)->accept(*this);
 
 	if (_finished)
 	    return NULL;
@@ -141,8 +147,9 @@ VisitorTest::visit(Term& term)
     }
 
     // do action block
-    for (i = actions.begin(); i != actions.end(); ++i) {
-        (i->second)->accept(*this);
+    for (i = actions.begin(); i != actions.end(); ++i) 
+    {
+	(i->second)->accept(*this);
 
 	if (_finished)
 	    return NULL;
@@ -151,7 +158,7 @@ VisitorTest::visit(Term& term)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeUn& node) 
 {
     const Element* arg = node.node().accept(*this);
@@ -162,7 +169,7 @@ VisitorTest::visit(NodeUn& node)
     return res;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeBin& node) 
 {
     const Element* left  = node.left().accept(*this);
@@ -171,9 +178,9 @@ VisitorTest::visit(NodeBin& node)
     return do_bin(*left, *right, node.op());
 }
 
-const Element*
+    const Element*
 VisitorTest::do_bin(const Element& left, const Element& right,
-		    const BinOper& op)
+	const BinOper& op)
 {
     Element* res = _disp.run(op, left, right);
     trash_add(res);
@@ -181,12 +188,13 @@ VisitorTest::do_bin(const Element& left, const Element& right,
     return res;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeAssign& node) 
 {
     const Element* rvalue = node.rvalue().accept(*this);
 
-    if (node.mod()) {
+    if (node.mod()) 
+    {
 	const Element& left = read(node.varid());
 
 	rvalue = do_bin(left, *rvalue, *node.mod());
@@ -197,7 +205,7 @@ VisitorTest::visit(NodeAssign& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeVar& node) 
 {
     const Element& e = read(node.val());
@@ -205,7 +213,7 @@ VisitorTest::visit(NodeVar& node)
     return &e;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeSet& node) 
 {
     const Element& e = _sm.getSet(node.setid());
@@ -213,7 +221,7 @@ VisitorTest::visit(NodeSet& node)
     return &e;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeElem& node) 
 {
     const Element& e = node.val();
@@ -221,7 +229,7 @@ VisitorTest::visit(NodeElem& node)
     return &e;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeAccept& /* node */) 
 {
     _outcome = ACCEPT;
@@ -230,7 +238,7 @@ VisitorTest::visit(NodeAccept& /* node */)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeReject& /*node */)
 {
     _outcome = REJECT;
@@ -239,7 +247,7 @@ VisitorTest::visit(NodeReject& /*node */)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeProto& node) 
 {
     change_protocol(node.proto());
@@ -247,7 +255,7 @@ VisitorTest::visit(NodeProto& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeNext& node)
 {
     _flow = node.flow();
@@ -256,7 +264,7 @@ VisitorTest::visit(NodeNext& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorTest::visit(NodeSubr& node)
 {
     PolicyStatement& policy = _pm.find(node.policy());
@@ -276,35 +284,37 @@ VisitorTest::visit(NodeSubr& node)
     return e;
 }
 
-void
+    void
 VisitorTest::trash_add(Element* e)
 {
     if (e->refcount() == 1)
 	_trash.insert(e);
 }
 
-bool
+    bool
 VisitorTest::accepted()
 {
     return _outcome != REJECT;
 }
 
-void
+    void
 VisitorTest::change_protocol(const string& protocol)
 {
     _current_protocol = protocol;
 }
 
-const Element&
+    const Element&
 VisitorTest::read(const string& id)
 {
-    try {
+    try 
+    {
 	Id i = var2id(id);
 
 	const Element& e = _varrw->read(i);
 
 	return e;
-    } catch (const PolicyException& e) {
+    } catch (const PolicyException& e) 
+    {
 	ostringstream oss;
 
 	oss << "Can't read uninitialized attribute " << id;
@@ -313,7 +323,7 @@ VisitorTest::read(const string& id)
     }
 }
 
-void
+    void
 VisitorTest::write(const string& id, const Element& e)
 {
     const Variable& v = var2variable(id);
@@ -330,7 +340,7 @@ VisitorTest::write(const string& id, const Element& e)
     _mod[id] = e.str();
 }
 
-VisitorTest::Id
+    VisitorTest::Id
 VisitorTest::var2id(const string& var)
 {
     const Variable& v = var2variable(var);
@@ -338,14 +348,15 @@ VisitorTest::var2id(const string& var)
     return v.id;
 }
 
-const VisitorTest::Variable&
+    const VisitorTest::Variable&
 VisitorTest::var2variable(const string& var)
 {
     string protocol = _current_protocol;
 
     // Always allow reading prefix.
     // XXX we could code this better...
-    if (protocol.empty()) {
+    if (protocol.empty()) 
+    {
 	if (var.compare("network4") == 0 || var.compare("network6") == 0)
 	    protocol = "bgp";
     }
@@ -358,7 +369,7 @@ VisitorTest::var2variable(const string& var)
     return _vm.variable(protocol, id);
 }
 
-bool
+    bool
 VisitorTest::match(const Element* e)
 {
     if (!e)

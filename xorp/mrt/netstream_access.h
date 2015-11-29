@@ -72,99 +72,99 @@
  *                                     to 'cp'.
  */
 #define GET_DATA(to, cp, rcvlen, datalen)				\
-do {									\
+    do {									\
 	if ((size_t)(rcvlen) < (size_t)(datalen))			\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	memcpy((to), (cp), (datalen));					\
 	(rcvlen) -= (datalen);						\
 	(cp) += (datalen);						\
-} while (0)
+    } while (0)
 #define PUT_DATA(from, cp, buflen, datalen)				\
-do {									\
+    do {									\
 	if ((size_t)(buflen) < (size_t)(datalen))			\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	memcpy((cp), (from), (datalen));				\
 	(buflen) -= (datalen);						\
 	(cp) += (datalen);						\
-} while (0)
+    } while (0)
 
 #define GET_SKIP(octets, cp, rcvlen)					\
-do {									\
+    do {									\
 	if ((size_t)(rcvlen) < (size_t)(octets))			\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen) -= (octets);						\
 	(cp) += (octets);						\
-} while (0)
+    } while (0)
 #define PUT_SKIP(octets, cp, buflen)					\
-do {									\
+    do {									\
 	if ((size_t)(buflen) < (size_t)(octets))			\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen) -= (octets);						\
 	(cp) += (octets);						\
-} while (0)
+    } while (0)
 
 #define GET_OCTET(val, cp, rcvlen)					\
-do {									\
+    do {									\
 	if ((size_t)(rcvlen) < (size_t)1)				\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen)--;							\
 	((val) = *(cp)++);						\
-} while (0)
+    } while (0)
 #define PUT_OCTET(val, cp, buflen)					\
-do {									\
+    do {									\
 	if ((size_t)(buflen) < (size_t)1)				\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen)--;							\
 	(*(cp)++ = (uint8_t)(val));					\
-} while (0)
+    } while (0)
 
 #define GET_HOST_16(val, cp, rcvlen)					\
-do {									\
+    do {									\
 	register uint16_t v_;						\
-									\
+	\
 	if ((size_t)(rcvlen) < (size_t)2)				\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen) -= 2;							\
 	v_ = (*(cp)++) << 8;						\
 	v_ |= *(cp)++;							\
 	(val) = v_;							\
-} while (0)
+    } while (0)
 
 #define PUT_HOST_16(val, cp, buflen)					\
-do {									\
+    do {									\
 	register uint16_t v_;						\
-									\
+	\
 	if ((size_t)(buflen) < (size_t)2)				\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen) -= 2;							\
 	v_ = (uint16_t)(val);						\
 	*(cp)++ = (uint8_t)(v_ >> 8);					\
 	*(cp)++ = (uint8_t)v_;						\
-} while (0)
+    } while (0)
 
 #if defined(BYTE_ORDER) && (BYTE_ORDER == LITTLE_ENDIAN)
 #define GET_NET_16(val, cp, rcvlen)					\
-do {									\
+    do {									\
 	register uint16_t v_;						\
-									\
+	\
 	if ((size_t)(rcvlen) < (size_t)2)				\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen) -= 2;							\
 	v_ = *(cp)++;							\
 	v_ |= (*(cp)++) << 8;						\
 	(val) = v_;							\
-} while (0)
+    } while (0)
 #define PUT_NET_16(val, cp, buflen)					\
-do {									\
+    do {									\
 	register uint16_t v_;						\
-									\
+	\
 	if ((size_t)(buflen) < (size_t)2)				\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen) -= 2;							\
 	v_ = (uint16_t)(val);						\
 	*(cp)++ = (uint8_t)v_;						\
 	*(cp)++ = (uint8_t)(v_ >> 8);					\
-} while (0)
+    } while (0)
 #endif /* LITTLE_ENDIAN {GET,PUT}_NET_16 */
 
 #if defined(BYTE_ORDER) && (BYTE_ORDER == BIG_ENDIAN)
@@ -173,61 +173,61 @@ do {									\
 #endif /* BIG_ENDIAN {GET,PUT}_NET_16 */
 
 #define GET_HOST_32(val, cp, rcvlen)					\
-do {									\
+    do {									\
 	register uint32_t v_;						\
-									\
+	\
 	if ((size_t)(rcvlen) < (size_t)4)				\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen) -= 4;							\
 	v_  = (*(cp)++) << 24;						\
 	v_ |= (*(cp)++) << 16;						\
 	v_ |= (*(cp)++) <<  8;						\
 	v_ |= *(cp)++;							\
 	(val) = v_;							\
-} while (0)
+    } while (0)
 
 #define PUT_HOST_32(val, cp, buflen)					\
-do {									\
+    do {									\
 	register uint32_t v_;						\
-									\
+	\
 	if ((size_t)(buflen) < (size_t)4)				\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen) -= 4;							\
 	v_ = (uint32_t)(val);						\
 	*(cp)++ = (uint8_t)(v_ >> 24);					\
 	*(cp)++ = (uint8_t)(v_ >> 16);					\
 	*(cp)++ = (uint8_t)(v_ >>  8);					\
 	*(cp)++ = (uint8_t)v_;						\
-} while (0)
+    } while (0)
 
 #if defined(BYTE_ORDER) && (BYTE_ORDER == LITTLE_ENDIAN)
 #define GET_NET_32(val, cp, rcvlen)					\
-do {									\
+    do {									\
 	register uint32_t v_;						\
-									\
+	\
 	if ((size_t)(rcvlen) < (size_t)4)				\
-		goto rcvlen_error;					\
+	goto rcvlen_error;					\
 	(rcvlen) -= 4;							\
 	v_  = *(cp)++;							\
 	v_ |= (*(cp)++) <<  8;						\
 	v_ |= (*(cp)++) << 16;						\
 	v_ |= (*(cp)++) << 24;						\
 	(val) = v_;							\
-} while (0)
+    } while (0)
 
 #define PUT_NET_32(val, cp, buflen)					\
-do {									\
+    do {									\
 	register uint32_t v_;						\
-									\
+	\
 	if ((size_t)(buflen) < (size_t)4)				\
-		goto buflen_error;					\
+	goto buflen_error;					\
 	(buflen) -= 4;							\
 	v_ = (uint32_t)(val);						\
 	*(cp)++ = (uint8_t)v_;						\
 	*(cp)++ = (uint8_t)(v_ >>  8);					\
 	*(cp)++ = (uint8_t)(v_ >> 16);					\
 	*(cp)++ = (uint8_t)(v_ >> 24);					\
-} while (0)
+    } while (0)
 #endif /* LITTLE_ENDIAN {GET,PUT}_HOST_32 */
 
 #if defined(BYTE_ORDER) && (BYTE_ORDER == BIG_ENDIAN)

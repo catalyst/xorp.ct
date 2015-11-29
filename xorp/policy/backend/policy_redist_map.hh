@@ -40,42 +40,42 @@
 class PolicyRedistMap :
     public NONCOPYABLE
 {
-public:
-    PolicyRedistMap();
-    ~PolicyRedistMap();
+    public:
+	PolicyRedistMap();
+	~PolicyRedistMap();
 
-    /**
-     * Remove route redistribution for a protocol.
-     *
-     * @param protocol protocol which tags should be removed.
-     */
-    void remove(const string& protocol);
+	/**
+	 * Remove route redistribution for a protocol.
+	 *
+	 * @param protocol protocol which tags should be removed.
+	 */
+	void remove(const string& protocol);
 
-    /**
-     * Configure redistribution to a protcol for these tags.
-     *
-     * @param protocol destination protocol for these tags.
-     * @param tags policytags which need to be redistributed to the protocol.
-     */
-    void insert(const string& protocol, const PolicyTags& tags);
+	/**
+	 * Configure redistribution to a protcol for these tags.
+	 *
+	 * @param protocol destination protocol for these tags.
+	 * @param tags policytags which need to be redistributed to the protocol.
+	 */
+	void insert(const string& protocol, const PolicyTags& tags);
 
-    /**
-     * Reset the redistribution map
-     */
-    void reset();
+	/**
+	 * Reset the redistribution map
+	 */
+	void reset();
 
-    /**
-     * Obtain which protocols the route containing these tags should be sent to.
-     *
-     * @param out will be filled with protocols route should be sent to.
-     * @param tags policytags that need to be resolved.
-     */
-    void get_protocols(set<string>& out, const PolicyTags& tags);
+	/**
+	 * Obtain which protocols the route containing these tags should be sent to.
+	 *
+	 * @param out will be filled with protocols route should be sent to.
+	 * @param tags policytags that need to be resolved.
+	 */
+	void get_protocols(set<string>& out, const PolicyTags& tags);
 
-private:
-    // XXX: this should be the other way around for faster lookups
-    typedef map<string,PolicyTags*> Map;
-    Map _map;
+    private:
+	// XXX: this should be the other way around for faster lookups
+	typedef map<string,PolicyTags*> Map;
+	Map _map;
 };
 
 #endif // __POLICY_BACKEND_POLICY_REDIST_MAP_HH__

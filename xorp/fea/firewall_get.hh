@@ -29,91 +29,92 @@
 class FirewallManager;
 
 
-class FirewallGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FirewallGet(FeaDataPlaneManager& fea_data_plane_manager)
-	: _is_running(false),
-	  _firewall_manager(fea_data_plane_manager.firewall_manager()),
-	  _fea_data_plane_manager(fea_data_plane_manager)
-    {}
+class FirewallGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FirewallGet(FeaDataPlaneManager& fea_data_plane_manager)
+			: _is_running(false),
+			_firewall_manager(fea_data_plane_manager.firewall_manager()),
+			_fea_data_plane_manager(fea_data_plane_manager)
+	{}
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FirewallGet() {}
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FirewallGet() {}
 
-    /**
-     * Get the @ref FirewallManager instance.
-     *
-     * @return the @ref FirewallManager instance.
-     */
-    FirewallManager&	firewall_manager() { return _firewall_manager; }
+		/**
+		 * Get the @ref FirewallManager instance.
+		 *
+		 * @return the @ref FirewallManager instance.
+		 */
+		FirewallManager&	firewall_manager() { return _firewall_manager; }
 
-    /**
-     * Get the @ref FeaDataPlaneManager instance.
-     *
-     * @return the @ref FeaDataPlaneManager instance.
-     */
-    FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+		/**
+		 * Get the @ref FeaDataPlaneManager instance.
+		 *
+		 * @return the @ref FeaDataPlaneManager instance.
+		 */
+		FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
 
-    /**
-     * Test whether this instance is running.
-     *
-     * @return true if the instance is running, otherwise false.
-     */
-    virtual bool is_running() const { return _is_running; }
+		/**
+		 * Test whether this instance is running.
+		 *
+		 * @return true if the instance is running, otherwise false.
+		 */
+		virtual bool is_running() const { return _is_running; }
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg) = 0;
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg) = 0;
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg) = 0;
 
-    /**
-     * Obtain the IPv4 firewall table.
-     *
-     * @param firewall_entry_list the return-by-reference list with all
-     * entries in the IPv4 firewall table.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table4(list<FirewallEntry>& firewall_entry_list,
-			   string& error_msg) = 0;
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg) = 0;
 
-    /**
-     * Obtain the IPv6 firewall table.
-     *
-     * @param firewall_entry_list the return-by-reference list with all
-     * entries in the IPv6 firewall table.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table6(list<FirewallEntry>& firewall_entry_list,
-			   string& error_msg) = 0;
+		/**
+		 * Obtain the IPv4 firewall table.
+		 *
+		 * @param firewall_entry_list the return-by-reference list with all
+		 * entries in the IPv4 firewall table.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table4(list<FirewallEntry>& firewall_entry_list,
+				string& error_msg) = 0;
 
-protected:
-    // Misc other state
-    bool	_is_running;
+		/**
+		 * Obtain the IPv6 firewall table.
+		 *
+		 * @param firewall_entry_list the return-by-reference list with all
+		 * entries in the IPv6 firewall table.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table6(list<FirewallEntry>& firewall_entry_list,
+				string& error_msg) = 0;
 
-private:
-    FirewallManager&		_firewall_manager;
-    FeaDataPlaneManager&	_fea_data_plane_manager;
+	protected:
+		// Misc other state
+		bool	_is_running;
+
+	private:
+		FirewallManager&		_firewall_manager;
+		FeaDataPlaneManager&	_fea_data_plane_manager;
 };
 
 #endif // __FEA_FIREWALL_GET_HH__

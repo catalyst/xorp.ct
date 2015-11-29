@@ -44,22 +44,24 @@ class IfMgrXrlMirrorTarget;
  * @short Base for classes that watch for Finder events from an
  * IfMgrXrlMirrorRouter.
  */
-class IfMgrXrlMirrorRouterObserver {
-public:
-    virtual ~IfMgrXrlMirrorRouterObserver() = 0;
-    virtual void finder_disconnect_event() = 0;
-    virtual void finder_ready_event() = 0;
+class IfMgrXrlMirrorRouterObserver 
+{
+    public:
+	virtual ~IfMgrXrlMirrorRouterObserver() = 0;
+	virtual void finder_disconnect_event() = 0;
+	virtual void finder_ready_event() = 0;
 };
 
 /**
  * @short Base for classes that are interested in configuration event
  * hint commands.
  */
-class IfMgrHintObserver {
-public:
-    virtual ~IfMgrHintObserver() = 0;
-    virtual void tree_complete() = 0;
-    virtual void updates_made() = 0;
+class IfMgrHintObserver 
+{
+    public:
+	virtual ~IfMgrHintObserver() = 0;
+	virtual void tree_complete() = 0;
+	virtual void updates_made() = 0;
 };
 
 /**
@@ -90,125 +92,125 @@ public:
  * methods.
  */
 class IfMgrXrlMirror
-    : public	ServiceBase,
-      protected	IfMgrXrlMirrorRouterObserver,
-      protected	IfMgrHintObserver
+: public	ServiceBase,
+    protected	IfMgrXrlMirrorRouterObserver,
+    protected	IfMgrHintObserver
 {
-public:
-    typedef IfMgrCommandSinkBase::Cmd Cmd;
+    public:
+	typedef IfMgrCommandSinkBase::Cmd Cmd;
 
-public:
-    /**
-     * Constructor
-     *
-     * @param eventloop to use for events.
-     * @param rtarget name of Xrl class or target to supply interface
-     *                configuration updates.
-     * @param finder_addr address to route finder messages to.
-     * @param finder_port port to direct finder messages to.
-     */
-    IfMgrXrlMirror( const char*	rtarget,
-		   IPv4		finder_addr,
-		   uint16_t	finder_port);
+    public:
+	/**
+	 * Constructor
+	 *
+	 * @param eventloop to use for events.
+	 * @param rtarget name of Xrl class or target to supply interface
+	 *                configuration updates.
+	 * @param finder_addr address to route finder messages to.
+	 * @param finder_port port to direct finder messages to.
+	 */
+	IfMgrXrlMirror( const char*	rtarget,
+		IPv4		finder_addr,
+		uint16_t	finder_port);
 
-    /**
-     * Constructor
-     *
-     * @param eventloop to use for events.
-     * @param rtarget name of Xrl class or target to supply interface
-     *                configuration updates.
-     * @param finder_hostname host name to route finder messages to.
-     * @param finder_port port to direct finder messages to.
-     */
-    IfMgrXrlMirror( const char*	rtarget,
-		   const char*	finder_hostname,
-		   uint16_t	finder_port);
+	/**
+	 * Constructor
+	 *
+	 * @param eventloop to use for events.
+	 * @param rtarget name of Xrl class or target to supply interface
+	 *                configuration updates.
+	 * @param finder_hostname host name to route finder messages to.
+	 * @param finder_port port to direct finder messages to.
+	 */
+	IfMgrXrlMirror( const char*	rtarget,
+		const char*	finder_hostname,
+		uint16_t	finder_port);
 
-    ~IfMgrXrlMirror();
+	~IfMgrXrlMirror();
 
-    /**
-     * Start running.  Attempt to register instance with the
-     * registration target supplied in the constructor and await
-     * interface configuration tree data.  When data is received
-     * transition into the SERVICE_RUNNING state (see @ref ServiceBase for
-     * states).
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int startup();
+	/**
+	 * Start running.  Attempt to register instance with the
+	 * registration target supplied in the constructor and await
+	 * interface configuration tree data.  When data is received
+	 * transition into the SERVICE_RUNNING state (see @ref ServiceBase for
+	 * states).
+	 *
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int startup();
 
-    /**
-     * Stop running and shutdown.  Deregister with the registration
-     * target and transition to SERVICE_SHUTDOWN state when complete.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int shutdown();
+	/**
+	 * Stop running and shutdown.  Deregister with the registration
+	 * target and transition to SERVICE_SHUTDOWN state when complete.
+	 *
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int shutdown();
 
-    /**
-     * @return interface configuration tree.  Should only be trusted when
-     * status() is SERVICE_READY.
-     */
-    const IfMgrIfTree& iftree() const		{ return _iftree; }
+	/**
+	 * @return interface configuration tree.  Should only be trusted when
+	 * status() is SERVICE_READY.
+	 */
+	const IfMgrIfTree& iftree() const		{ return _iftree; }
 
-    /**
-     * Attach an observer interested in receiving IfMgr hints.
-     * @param o observer to be attached.
-     * @return true on success, false if observer is already registered.
-     */
-    bool attach_hint_observer(IfMgrHintObserver* o);
+	/**
+	 * Attach an observer interested in receiving IfMgr hints.
+	 * @param o observer to be attached.
+	 * @return true on success, false if observer is already registered.
+	 */
+	bool attach_hint_observer(IfMgrHintObserver* o);
 
-    /**
-     * Detach an observer interested in receiving IfMgr hints.
-     * @param o observer to be detached.
-     * @return true on success, false if observer was not registered.
-     */
-    bool detach_hint_observer(IfMgrHintObserver* o);
+	/**
+	 * Detach an observer interested in receiving IfMgr hints.
+	 * @param o observer to be detached.
+	 * @return true on success, false if observer was not registered.
+	 */
+	bool detach_hint_observer(IfMgrHintObserver* o);
 
-    /**
-     * Delay the interface configuration tree updates.
-     *
-     * @param delay the delay.
-     */
-    void delay_updates(const TimeVal& delay);
+	/**
+	 * Delay the interface configuration tree updates.
+	 *
+	 * @param delay the delay.
+	 */
+	void delay_updates(const TimeVal& delay);
 
-protected:
-    void finder_ready_event();
-    void finder_disconnect_event();
-    void register_with_ifmgr();
-    void unregister_with_ifmgr();
+    protected:
+	void finder_ready_event();
+	void finder_disconnect_event();
+	void register_with_ifmgr();
+	void unregister_with_ifmgr();
 
-protected:
-    void tree_complete();
-    void updates_made();
+    protected:
+	void tree_complete();
+	void updates_made();
 
-protected:
-    void register_cb(const XrlError& e);
-    void unregister_cb(const XrlError& e);
+    protected:
+	void register_cb(const XrlError& e);
+	void unregister_cb(const XrlError& e);
 
-protected:
-    IPv4			_finder_addr;
-    string			_finder_hostname;
-    uint16_t			_finder_port;
-    IfMgrIfTree	   		_iftree;
-    IfMgrCommandDispatcher	_dispatcher;
-    string			_rtarget;	// registration target (ifmgr)
+    protected:
+	IPv4			_finder_addr;
+	string			_finder_hostname;
+	uint16_t			_finder_port;
+	IfMgrIfTree	   		_iftree;
+	IfMgrCommandDispatcher	_dispatcher;
+	string			_rtarget;	// registration target (ifmgr)
 
-    IfMgrXrlMirrorRouter*	_rtr;
-    IfMgrXrlMirrorTarget*	_xrl_tgt;
+	IfMgrXrlMirrorRouter*	_rtr;
+	IfMgrXrlMirrorTarget*	_xrl_tgt;
 
-    list<IfMgrHintObserver*>	_hint_observers;
+	list<IfMgrHintObserver*>	_hint_observers;
 
-    XorpTimer			_reg_timer;	// registration timer
+	XorpTimer			_reg_timer;	// registration timer
 
-private:
-    /**
-     * Perform the interface configuration tree updates.
-     */
-    void do_updates();
+    private:
+	/**
+	 * Perform the interface configuration tree updates.
+	 */
+	void do_updates();
 
-    TimeVal			_updates_delay;
-    XorpTimer			_updates_timer;
+	TimeVal			_updates_delay;
+	XorpTimer			_updates_timer;
 };
 
 #endif // __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__

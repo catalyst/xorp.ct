@@ -42,10 +42,11 @@
  * The following container object contains free-lists to be used
  * for allocation of HashTable containers and nodes.
  */
-struct HashMemory {
-  FreeList *hash_memory;    /* HashTable free-list */
-  FreeList *node_memory;    /* HashNode free-list */
-  StringMem *string_memory; /* Memory used to allocate hash strings */
+struct HashMemory 
+{
+	FreeList *hash_memory;    /* HashTable free-list */
+	FreeList *node_memory;    /* HashNode free-list */
+	StringMem *string_memory; /* Memory used to allocate hash strings */
 };
 
 /*
@@ -53,18 +54,20 @@ struct HashMemory {
  * See symbol.h for the definition of the Symbol container type.
  */
 typedef struct HashNode HashNode;
-struct HashNode {
-  Symbol symbol;       /* The symbol stored in the hash-entry */
-  HashNode *next;      /* The next hash-table entry in a bucket list */
+struct HashNode 
+{
+	Symbol symbol;       /* The symbol stored in the hash-entry */
+	HashNode *next;      /* The next hash-table entry in a bucket list */
 };
 
 /*
  * Each hash-table bucket contains a linked list of entries that
  * hash to the same bucket.
  */
-typedef struct {
-  HashNode *head;   /* The head of the bucket hash-node list */
-  int count;        /* The number of entries in the list */
+typedef struct 
+{
+	HashNode *head;   /* The head of the bucket hash-node list */
+	int count;        /* The number of entries in the list */
 } HashBucket;
 
 /*
@@ -79,23 +82,24 @@ typedef struct {
  * A hash-table consists of 'size' hash buckets.
  * Note that the HashTable typedef for this struct is contained in hash.h.
  */
-struct HashTable {
-  char errmsg[ERRLEN+1];/* Error-report buffer */
-  HashMemory *mem;      /* HashTable free-list */
-  int internal_mem;     /* True if 'mem' was allocated by _new_HashTable() */
-  int case_sensitive;   /* True if case is significant in lookup keys */
-  int size;             /* The number of hash buckets */
-  HashBucket *bucket;   /* An array of 'size' hash buckets */
-  int (*keycmp)(const char *, const char *); /* Key comparison function */
-  void *app_data;       /* Application-provided data */
-  HASH_DEL_FN(*del_fn); /* Application-provided 'app_data' destructor */
+struct HashTable 
+{
+	char errmsg[ERRLEN+1];/* Error-report buffer */
+	HashMemory *mem;      /* HashTable free-list */
+	int internal_mem;     /* True if 'mem' was allocated by _new_HashTable() */
+	int case_sensitive;   /* True if case is significant in lookup keys */
+	int size;             /* The number of hash buckets */
+	HashBucket *bucket;   /* An array of 'size' hash buckets */
+	int (*keycmp)(const char *, const char *); /* Key comparison function */
+	void *app_data;       /* Application-provided data */
+	HASH_DEL_FN(*del_fn); /* Application-provided 'app_data' destructor */
 };
 
 static HashNode *_del_HashNode(HashTable *hash, HashNode *node);
 static HashNode *_new_HashNode(HashTable *hash, const char *name, int code,
-		      void (*fn)(void), void *data, SYM_DEL_FN(*del_fn));
+		void (*fn)(void), void *data, SYM_DEL_FN(*del_fn));
 static HashNode *_find_HashNode(HashTable *hash, HashBucket *bucket,
-				const char *name, HashNode **prev);
+		const char *name, HashNode **prev);
 static HashBucket *_find_HashBucket(HashTable *hash, const char *name);
 static int _ht_lower_strcmp(const char *node_key, const char *look_key);
 static int _ht_strcmp(const char *node_key, const char *look_key);
@@ -113,40 +117,41 @@ static int _ht_strcmp(const char *node_key, const char *look_key);
  */
 HashMemory *_new_HashMemory(int hash_count, int node_count)
 {
-  HashMemory *mem;
-/*
- * Allocate the free-list container.
- */
-  mem = (HashMemory *) malloc(sizeof(HashMemory));
-  if(!mem) {
-    fprintf(stderr, "_new_HashMemory: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Initialize the container at least up to the point at which it can
- * safely be passed to _del_HashMemory().
- */
-  mem->hash_memory = NULL;
-  mem->node_memory = NULL;
-  mem->string_memory = NULL;
-/*
- * Allocate the two free-lists.
- */
-  mem->hash_memory = _new_FreeList("_new_HashMemory", sizeof(HashTable),
-				  hash_count);
-  if(!mem->hash_memory)
-    return _del_HashMemory(mem, 1);
-  mem->node_memory = _new_FreeList("_new_HashMemory", sizeof(HashNode),
-				  node_count);
-  if(!mem->node_memory)
-    return _del_HashMemory(mem, 1);
-  mem->string_memory = _new_StringMem("_new_HashMemory", 64);
-  if(!mem->string_memory)
-    return _del_HashMemory(mem, 1);
-/*
- * Return the free-list container.
- */
-  return mem;
+	HashMemory *mem;
+	/*
+	 * Allocate the free-list container.
+	 */
+	mem = (HashMemory *) malloc(sizeof(HashMemory));
+	if(!mem) 
+	{
+		fprintf(stderr, "_new_HashMemory: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Initialize the container at least up to the point at which it can
+	 * safely be passed to _del_HashMemory().
+	 */
+	mem->hash_memory = NULL;
+	mem->node_memory = NULL;
+	mem->string_memory = NULL;
+	/*
+	 * Allocate the two free-lists.
+	 */
+	mem->hash_memory = _new_FreeList("_new_HashMemory", sizeof(HashTable),
+			hash_count);
+	if(!mem->hash_memory)
+		return _del_HashMemory(mem, 1);
+	mem->node_memory = _new_FreeList("_new_HashMemory", sizeof(HashNode),
+			node_count);
+	if(!mem->node_memory)
+		return _del_HashMemory(mem, 1);
+	mem->string_memory = _new_StringMem("_new_HashMemory", 64);
+	if(!mem->string_memory)
+		return _del_HashMemory(mem, 1);
+	/*
+	 * Return the free-list container.
+	 */
+	return mem;
 }
 
 /*.......................................................................
@@ -167,19 +172,21 @@ HashMemory *_new_HashMemory(int hash_count, int node_count)
  */
 HashMemory *_del_HashMemory(HashMemory *mem, int force)
 {
-  const char *caller = "_del_HashMemory";
-  if(mem) {
-    if(!force && (_busy_FreeListNodes(mem->hash_memory) > 0 ||
-		  _busy_FreeListNodes(mem->node_memory) > 0)) {
-      fprintf(stderr, "%s: Free-list in use.\n", caller);
-      return NULL;
-    };
-    mem->hash_memory = _del_FreeList(caller, mem->hash_memory, force);
-    mem->node_memory = _del_FreeList(caller, mem->node_memory, force);
-    mem->string_memory = _del_StringMem(caller, mem->string_memory, force);
-    free(mem);
-  };
-  return NULL;
+	const char *caller = "_del_HashMemory";
+	if(mem) 
+	{
+		if(!force && (_busy_FreeListNodes(mem->hash_memory) > 0 ||
+					_busy_FreeListNodes(mem->node_memory) > 0)) 
+		{
+			fprintf(stderr, "%s: Free-list in use.\n", caller);
+			return NULL;
+		};
+		mem->hash_memory = _del_FreeList(caller, mem->hash_memory, force);
+		mem->node_memory = _del_FreeList(caller, mem->node_memory, force);
+		mem->string_memory = _del_StringMem(caller, mem->string_memory, force);
+		free(mem);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -215,71 +222,76 @@ HashMemory *_del_HashMemory(HashMemory *mem, int force)
  *  return HashTable *  The new hash table, or NULL on error.
  */
 HashTable *_new_HashTable(HashMemory *mem, int size, HashCase hcase,
-			 void *app_data, HASH_DEL_FN(*del_fn))
+		void *app_data, HASH_DEL_FN(*del_fn))
 {
-  HashTable *hash;         /* The table to be returned */
-  int allocate_mem = !mem; /* True if mem should be internally allocated */
-  int i;
-/*
- * Check arguments.
- */
-  if(size <= 0) {
-    fprintf(stderr, "_new_HashTable: Illegal table size (%d).\n", size);
-    return NULL;
-  };
-/*
- * Allocate an internal free-list?
- */
-  if(allocate_mem) {
-    mem = _new_HashMemory(1, 100);
-    if(!mem)
-      return NULL;
-  };
-/*
- * Allocate the container.
- */
-  hash = (HashTable *) _new_FreeListNode(mem->hash_memory);
-  if(!hash) {
-    fprintf(stderr, "_new_HashTable: Insufficient memory.\n");
-    if(allocate_mem)
-      mem = _del_HashMemory(mem, 1);
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize
- * the container at least up to the point at which it can safely
- * be passed to _del_HashTable().
- */
-  hash->errmsg[0] = '\0';
-  hash->mem = mem;
-  hash->internal_mem = allocate_mem;
-  hash->case_sensitive = hcase==HONOUR_CASE;
-  hash->size = size;
-  hash->bucket = NULL;
-  hash->keycmp = hash->case_sensitive ? _ht_strcmp : _ht_lower_strcmp;
-  hash->app_data = app_data;
-  hash->del_fn = del_fn;
-/*
- * Allocate the array of 'size' hash buckets.
- */
-  hash->bucket = (HashBucket *) malloc(sizeof(HashBucket) * size);
-  if(!hash->bucket) {
-    fprintf(stderr, "_new_HashTable: Insufficient memory for %d buckets.\n",
-	    size);
-    return _del_HashTable(hash);
-  };
-/*
- * Initialize the bucket array.
- */
-  for(i=0; i<size; i++) {
-    HashBucket *b = hash->bucket + i;
-    b->head = NULL;
-    b->count = 0;
-  };
-/*
- * The table is ready for use - albeit currently empty.
- */
-  return hash;
+	HashTable *hash;         /* The table to be returned */
+	int allocate_mem = !mem; /* True if mem should be internally allocated */
+	int i;
+	/*
+	 * Check arguments.
+	 */
+	if(size <= 0) 
+	{
+		fprintf(stderr, "_new_HashTable: Illegal table size (%d).\n", size);
+		return NULL;
+	};
+	/*
+	 * Allocate an internal free-list?
+	 */
+	if(allocate_mem) 
+	{
+		mem = _new_HashMemory(1, 100);
+		if(!mem)
+			return NULL;
+	};
+	/*
+	 * Allocate the container.
+	 */
+	hash = (HashTable *) _new_FreeListNode(mem->hash_memory);
+	if(!hash) 
+	{
+		fprintf(stderr, "_new_HashTable: Insufficient memory.\n");
+		if(allocate_mem)
+			mem = _del_HashMemory(mem, 1);
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize
+	 * the container at least up to the point at which it can safely
+	 * be passed to _del_HashTable().
+	 */
+	hash->errmsg[0] = '\0';
+	hash->mem = mem;
+	hash->internal_mem = allocate_mem;
+	hash->case_sensitive = hcase==HONOUR_CASE;
+	hash->size = size;
+	hash->bucket = NULL;
+	hash->keycmp = hash->case_sensitive ? _ht_strcmp : _ht_lower_strcmp;
+	hash->app_data = app_data;
+	hash->del_fn = del_fn;
+	/*
+	 * Allocate the array of 'size' hash buckets.
+	 */
+	hash->bucket = (HashBucket *) malloc(sizeof(HashBucket) * size);
+	if(!hash->bucket) 
+	{
+		fprintf(stderr, "_new_HashTable: Insufficient memory for %d buckets.\n",
+				size);
+		return _del_HashTable(hash);
+	};
+	/*
+	 * Initialize the bucket array.
+	 */
+	for(i=0; i<size; i++) 
+	{
+		HashBucket *b = hash->bucket + i;
+		b->head = NULL;
+		b->count = 0;
+	};
+	/*
+	 * The table is ready for use - albeit currently empty.
+	 */
+	return hash;
 }
 
 /*.......................................................................
@@ -292,31 +304,33 @@ HashTable *_new_HashTable(HashMemory *mem, int size, HashCase hcase,
  */
 HashTable *_del_HashTable(HashTable *hash)
 {
-  if(hash) {
-/*
- * Clear and delete the bucket array.
- */
-    if(hash->bucket) {
-      _clear_HashTable(hash);
-      free(hash->bucket);
-      hash->bucket = NULL;
-    };
-/*
- * Delete application data.
- */
-    if(hash->del_fn)
-      hash->del_fn(hash->app_data);
-/*
- * If the hash table was allocated from an internal free-list, delete
- * it and the hash table by deleting the free-list. Otherwise just
- * return the hash-table to the external free-list.
- */
-    if(hash->internal_mem)
-      _del_HashMemory(hash->mem, 1);
-    else
-      hash = (HashTable *) _del_FreeListNode(hash->mem->hash_memory, hash);
-  };
-  return NULL;
+	if(hash) 
+	{
+		/*
+		 * Clear and delete the bucket array.
+		 */
+		if(hash->bucket) 
+		{
+			_clear_HashTable(hash);
+			free(hash->bucket);
+			hash->bucket = NULL;
+		};
+		/*
+		 * Delete application data.
+		 */
+		if(hash->del_fn)
+			hash->del_fn(hash->app_data);
+		/*
+		 * If the hash table was allocated from an internal free-list, delete
+		 * it and the hash table by deleting the free-list. Otherwise just
+		 * return the hash-table to the external free-list.
+		 */
+		if(hash->internal_mem)
+			_del_HashMemory(hash->mem, 1);
+		else
+			hash = (HashTable *) _del_FreeListNode(hash->mem->hash_memory, hash);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -344,47 +358,50 @@ HashTable *_del_HashTable(HashTable *hash)
  *                      memory or the arguments were invalid.
  */
 Symbol *_new_HashSymbol(HashTable *hash, const char *name, int code,
-			void (*fn)(void), void *data, SYM_DEL_FN(*del_fn))
+		void (*fn)(void), void *data, SYM_DEL_FN(*del_fn))
 {
-  HashBucket *bucket;  /* The hash-bucket associated with the name */
-  HashNode *node;      /* The new node */
-/*
- * Check arguments.
- */
-  if(!hash || !name)
-    return NULL;
-/*
- * Get the hash bucket of the specified name.
- */
-  bucket = _find_HashBucket(hash, name);
-/*
- * See if a node with the same name already exists.
- */
-  node = _find_HashNode(hash, bucket, name, NULL);
-/*
- * If found, delete its contents by calling the user-supplied
- * destructor function, if provided.
- */
-  if(node) {
-    if(node->symbol.data && node->symbol.del_fn) {
-      node->symbol.data = node->symbol.del_fn(hash->app_data, node->symbol.code,
-					      node->symbol.data);
-    };
-/*
- * Allocate a new node if necessary.
- */
-  } else {
-    node = _new_HashNode(hash, name, code, fn, data, del_fn);
-    if(!node)
-      return NULL;
-  };
-/*
- * Install the node at the head of the hash-bucket list.
- */
-  node->next = bucket->head;
-  bucket->head = node;
-  bucket->count++;
-  return &node->symbol;
+	HashBucket *bucket;  /* The hash-bucket associated with the name */
+	HashNode *node;      /* The new node */
+	/*
+	 * Check arguments.
+	 */
+	if(!hash || !name)
+		return NULL;
+	/*
+	 * Get the hash bucket of the specified name.
+	 */
+	bucket = _find_HashBucket(hash, name);
+	/*
+	 * See if a node with the same name already exists.
+	 */
+	node = _find_HashNode(hash, bucket, name, NULL);
+	/*
+	 * If found, delete its contents by calling the user-supplied
+	 * destructor function, if provided.
+	 */
+	if(node) 
+	{
+		if(node->symbol.data && node->symbol.del_fn) 
+		{
+			node->symbol.data = node->symbol.del_fn(hash->app_data, node->symbol.code,
+					node->symbol.data);
+		};
+		/*
+		 * Allocate a new node if necessary.
+		 */
+	} else 
+	{
+		node = _new_HashNode(hash, name, code, fn, data, del_fn);
+		if(!node)
+			return NULL;
+	};
+	/*
+	 * Install the node at the head of the hash-bucket list.
+	 */
+	node->next = bucket->head;
+	bucket->head = node;
+	bucket->count++;
+	return &node->symbol;
 }
 
 /*.......................................................................
@@ -398,33 +415,37 @@ Symbol *_new_HashSymbol(HashTable *hash, const char *name, int code,
  */
 Symbol *_del_HashSymbol(HashTable *hash, const char *name)
 {
-  if(hash && name) {
-    HashBucket *bucket = _find_HashBucket(hash, name);
-    HashNode *prev;   /* The node preceding the located node */
-    HashNode *node = _find_HashNode(hash, bucket, name, &prev);
-/*
- * Node found?
- */
-    if(node) {
-/*
- * Remove the node from the bucket list.
- */
-      if(prev) {
-	prev->next = node->next;
-      } else {
-	bucket->head = node->next;
-      };
-/*
- * Record the loss of a node.
- */
-      bucket->count--;
-/*
- * Delete the node.
- */
-      (void) _del_HashNode(hash, node);
-    };
-  };
-  return NULL;
+	if(hash && name) 
+	{
+		HashBucket *bucket = _find_HashBucket(hash, name);
+		HashNode *prev;   /* The node preceding the located node */
+		HashNode *node = _find_HashNode(hash, bucket, name, &prev);
+		/*
+		 * Node found?
+		 */
+		if(node) 
+		{
+			/*
+			 * Remove the node from the bucket list.
+			 */
+			if(prev) 
+			{
+				prev->next = node->next;
+			} else 
+			{
+				bucket->head = node->next;
+			};
+			/*
+			 * Record the loss of a node.
+			 */
+			bucket->count--;
+			/*
+			 * Delete the node.
+			 */
+			(void) _del_HashNode(hash, node);
+		};
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -439,29 +460,29 @@ Symbol *_del_HashSymbol(HashTable *hash, const char *name)
  */
 Symbol *_find_HashSymbol(HashTable *hash, const char *name)
 {
-  HashBucket *bucket;  /* The hash-table bucket associated with name[] */
-  HashNode *node;      /* The hash-table node of the requested symbol */
-/*
- * Check arguments.
- */
-  if(!hash)
-    return NULL;
-/*
- * Nothing to lookup?
- */
-  if(!name)
-    return NULL;
-/*
- * Hash the name to a hash-table bucket.
- */
-  bucket = _find_HashBucket(hash, name);
-/*
- * Find the bucket entry that exactly matches the name.
- */
-  node = _find_HashNode(hash, bucket, name, NULL);
-  if(!node)
-    return NULL;
-  return &node->symbol;
+	HashBucket *bucket;  /* The hash-table bucket associated with name[] */
+	HashNode *node;      /* The hash-table node of the requested symbol */
+	/*
+	 * Check arguments.
+	 */
+	if(!hash)
+		return NULL;
+	/*
+	 * Nothing to lookup?
+	 */
+	if(!name)
+		return NULL;
+	/*
+	 * Hash the name to a hash-table bucket.
+	 */
+	bucket = _find_HashBucket(hash, name);
+	/*
+	 * Find the bucket entry that exactly matches the name.
+	 */
+	node = _find_HashNode(hash, bucket, name, NULL);
+	if(!node)
+		return NULL;
+	return &node->symbol;
 }
 
 /*.......................................................................
@@ -480,47 +501,49 @@ Symbol *_find_HashSymbol(HashTable *hash, const char *name)
  *  return    HashNode *  The new node, or NULL on error.
  */
 static HashNode *_new_HashNode(HashTable *hash, const char *name, int code,
-			      void (*fn)(void), void *data, SYM_DEL_FN(*del_fn))
+		void (*fn)(void), void *data, SYM_DEL_FN(*del_fn))
 {
-  HashNode *node;  /* The new node */
-/*
- * Allocate the new node from the free list.
- */
-  node = (HashNode *) _new_FreeListNode(hash->mem->node_memory);
-  if(!node)
-    return NULL;
-/*
- * Before attempting any operation that might fail, initialize the
- * contents of 'node' at least up to the point at which it can be
- * safely passed to _del_HashNode().
- */
-  node->symbol.name = NULL;
-  node->symbol.code = code;
-  node->symbol.fn = fn;
-  node->symbol.data = data;
-  node->symbol.del_fn = del_fn;
-  node->next = NULL;
-/*
- * Allocate a copy of 'name'.
- */
-  node->symbol.name = _new_StringMemString(hash->mem->string_memory,
-					  strlen(name) + 1);
-  if(!node->symbol.name)
-    return _del_HashNode(hash, node);
-/*
- * If character-case is insignificant in the current table, convert the
- * name to lower case while copying it.
- */
-  if(hash->case_sensitive) {
-    strncpy(node->symbol.name, name, strlen(name) + 1);
-  } else {
-    const char *src = name;
-    char *dst = node->symbol.name;
-    for( ; *src; src++,dst++)
-      *dst = tolower((int)(unsigned char) *src);
-    *dst = '\0';
-  };
-  return node;
+	HashNode *node;  /* The new node */
+	/*
+	 * Allocate the new node from the free list.
+	 */
+	node = (HashNode *) _new_FreeListNode(hash->mem->node_memory);
+	if(!node)
+		return NULL;
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * contents of 'node' at least up to the point at which it can be
+	 * safely passed to _del_HashNode().
+	 */
+	node->symbol.name = NULL;
+	node->symbol.code = code;
+	node->symbol.fn = fn;
+	node->symbol.data = data;
+	node->symbol.del_fn = del_fn;
+	node->next = NULL;
+	/*
+	 * Allocate a copy of 'name'.
+	 */
+	node->symbol.name = _new_StringMemString(hash->mem->string_memory,
+			strlen(name) + 1);
+	if(!node->symbol.name)
+		return _del_HashNode(hash, node);
+	/*
+	 * If character-case is insignificant in the current table, convert the
+	 * name to lower case while copying it.
+	 */
+	if(hash->case_sensitive) 
+	{
+		strncpy(node->symbol.name, name, strlen(name) + 1);
+	} else 
+	{
+		const char *src = name;
+		char *dst = node->symbol.name;
+		for( ; *src; src++,dst++)
+			*dst = tolower((int)(unsigned char) *src);
+		*dst = '\0';
+	};
+	return node;
 }
 
 /*.......................................................................
@@ -537,23 +560,24 @@ static HashNode *_new_HashNode(HashTable *hash, const char *name, int code,
  */
 static HashNode *_del_HashNode(HashTable *hash, HashNode *node)
 {
-  if(node) {
-    node->symbol.name = _del_StringMemString(hash->mem->string_memory,
-					    node->symbol.name);
-/*
- * Call the user-supplied data-destructor if provided.
- */
-    if(node->symbol.data && node->symbol.del_fn)
-      node->symbol.data = node->symbol.del_fn(hash->app_data,
-					      node->symbol.code,
-					      node->symbol.data);
-/*
- * Return the node to the free-list.
- */
-    node->next = NULL;
-    node = (HashNode *) _del_FreeListNode(hash->mem->node_memory, node);
-  };
-  return NULL;
+	if(node) 
+	{
+		node->symbol.name = _del_StringMemString(hash->mem->string_memory,
+				node->symbol.name);
+		/*
+		 * Call the user-supplied data-destructor if provided.
+		 */
+		if(node->symbol.data && node->symbol.del_fn)
+			node->symbol.data = node->symbol.del_fn(hash->app_data,
+					node->symbol.code,
+					node->symbol.data);
+		/*
+		 * Return the node to the free-list.
+		 */
+		node->next = NULL;
+		node = (HashNode *) _del_FreeListNode(hash->mem->node_memory, node);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -572,16 +596,18 @@ static HashNode *_del_HashNode(HashTable *hash, HashNode *node)
  */
 static HashBucket *_find_HashBucket(HashTable *hash, const char *name)
 {
-  unsigned const char *kp;
-  unsigned long h = 0L;
-  if(hash->case_sensitive) {
-    for(kp=(unsigned const char *) name; *kp; kp++)
-      h = 65599UL * h + *kp;  /* 65599 is a prime close to 2^16 */
-  } else {
-    for(kp=(unsigned const char *) name; *kp; kp++)
-      h = 65599UL * h + tolower((int)*kp);  /* 65599 is a prime close to 2^16 */
-  };
-  return hash->bucket + (h % hash->size);
+	unsigned const char *kp;
+	unsigned long h = 0L;
+	if(hash->case_sensitive) 
+	{
+		for(kp=(unsigned const char *) name; *kp; kp++)
+			h = 65599UL * h + *kp;  /* 65599 is a prime close to 2^16 */
+	} else 
+	{
+		for(kp=(unsigned const char *) name; *kp; kp++)
+			h = 65599UL * h + tolower((int)*kp);  /* 65599 is a prime close to 2^16 */
+	};
+	return hash->bucket + (h % hash->size);
 }
 
 /*.......................................................................
@@ -601,20 +627,20 @@ static HashBucket *_find_HashBucket(HashTable *hash, const char *name)
  *                        found.
  */
 static HashNode *_find_HashNode(HashTable *hash, HashBucket *bucket,
-			       const char *name, HashNode **prev)
+		const char *name, HashNode **prev)
 {
-  HashNode *last;  /* The previously searched node */
-  HashNode *node;  /* The node that is being searched */
-/*
- * Search the list for a node containing the specified name.
- */
-  for(last=NULL, node=bucket->head;
-      node && hash->keycmp(node->symbol.name, name)!=0;
-      last = node, node=node->next)
-    ;
-  if(prev)
-    *prev = node ? last : NULL;
-  return node;
+	HashNode *last;  /* The previously searched node */
+	HashNode *node;  /* The node that is being searched */
+	/*
+	 * Search the list for a node containing the specified name.
+	 */
+	for(last=NULL, node=bucket->head;
+			node && hash->keycmp(node->symbol.name, name)!=0;
+			last = node, node=node->next)
+		;
+	if(prev)
+		*prev = node ? last : NULL;
+	return node;
 }
 
 /*.......................................................................
@@ -635,13 +661,14 @@ static HashNode *_find_HashNode(HashTable *hash, HashBucket *bucket,
  */
 static int _ht_lower_strcmp(const char *node_key, const char *look_key)
 {
-  int cn;  /* The latest character from node_key[] */
-  int cl;  /* The latest character from look_key[] */
-  do {
-    cn = *node_key++;
-    cl = *look_key++;
-  } while(cn && cn==tolower((int)(unsigned char) cl));
-  return cn - tolower((int)(unsigned char) cl);
+	int cn;  /* The latest character from node_key[] */
+	int cl;  /* The latest character from look_key[] */
+	do 
+	{
+		cn = *node_key++;
+		cl = *look_key++;
+	} while(cn && cn==tolower((int)(unsigned char) cl));
+	return cn - tolower((int)(unsigned char) cl);
 }
 
 /*.......................................................................
@@ -663,7 +690,7 @@ static int _ht_lower_strcmp(const char *node_key, const char *look_key)
  */
 static int _ht_strcmp(const char *node_key, const char *look_key)
 {
-  return strcmp(node_key, look_key);
+	return strcmp(node_key, look_key);
 }
 
 /*.......................................................................
@@ -677,33 +704,35 @@ static int _ht_strcmp(const char *node_key, const char *look_key)
  */
 int _clear_HashTable(HashTable *hash)
 {
-  int i;
-/*
- * Check the arguments.
- */
-  if(!hash)
-    return 1;
-/*
- * Clear the contents of the bucket array.
- */
-  for(i=0; i<hash->size; i++) {
-    HashBucket *bucket = hash->bucket + i;
-/*
- * Delete the list of active hash nodes from the bucket.
- */
-    HashNode *node = bucket->head;
-    while(node) {
-      HashNode *next = node->next;
-      (void) _del_HashNode(hash, node);
-      node = next;
-    };
-/*
- * Mark the bucket as empty.
- */
-    bucket->head = NULL;
-    bucket->count = 0;
-  };
-  return 0;
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!hash)
+		return 1;
+	/*
+	 * Clear the contents of the bucket array.
+	 */
+	for(i=0; i<hash->size; i++) 
+	{
+		HashBucket *bucket = hash->bucket + i;
+		/*
+		 * Delete the list of active hash nodes from the bucket.
+		 */
+		HashNode *node = bucket->head;
+		while(node) 
+		{
+			HashNode *next = node->next;
+			(void) _del_HashNode(hash, node);
+			node = next;
+		};
+		/*
+		 * Mark the bucket as empty.
+		 */
+		bucket->head = NULL;
+		bucket->count = 0;
+	};
+	return 0;
 }
 
 /*.......................................................................
@@ -723,26 +752,28 @@ int _clear_HashTable(HashTable *hash)
  */
 int _scan_HashTable(HashTable *hash, HASH_SCAN_FN(*scan_fn), void *context)
 {
-  int i;
-/*
- * Check the arguments.
- */
-  if(!hash || !scan_fn)
-    return 1;
-/*
- * Iterate through the buckets of the table.
- */
-  for(i=0; i<hash->size; i++) {
-    HashBucket *bucket = hash->bucket + i;
-    HashNode *node;
-/*
- * Iterate through the list of symbols that fall into bucket i,
- * passing each one to the caller-specified function.
- */
-    for(node=bucket->head; node; node=node->next) {
-      if(scan_fn(&node->symbol, context))
-	return 1;
-    };
-  };
-  return 0;
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!hash || !scan_fn)
+		return 1;
+	/*
+	 * Iterate through the buckets of the table.
+	 */
+	for(i=0; i<hash->size; i++) 
+	{
+		HashBucket *bucket = hash->bucket + i;
+		HashNode *node;
+		/*
+		 * Iterate through the list of symbols that fall into bucket i,
+		 * passing each one to the caller-specified function.
+		 */
+		for(node=bucket->head; node; node=node->next) 
+		{
+			if(scan_fn(&node->symbol, context))
+				return 1;
+		};
+	};
+	return 0;
 }

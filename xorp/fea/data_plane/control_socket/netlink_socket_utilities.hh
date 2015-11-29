@@ -46,13 +46,13 @@
 #ifdef HAVE_BROKEN_MACRO_NLMSG_NEXT
 #undef NLMSG_NEXT
 #define NLMSG_NEXT(nlh, len)	((len) -= NLMSG_ALIGN((nlh)->nlmsg_len), \
-				  (struct nlmsghdr*)(void*)(((char*)(nlh)) + NLMSG_ALIGN((nlh)->nlmsg_len)))
+		(struct nlmsghdr*)(void*)(((char*)(nlh)) + NLMSG_ALIGN((nlh)->nlmsg_len)))
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_RTA_NEXT
 #undef RTA_NEXT
 #define RTA_NEXT(rta, attrlen)	((attrlen) -= RTA_ALIGN((rta)->rta_len), \
-				    (struct rtattr*)(void*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
+		(struct rtattr*)(void*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_IFA_RTA
@@ -88,84 +88,85 @@ class FibConfig;
 /**
  * @short Helper class for various NETLINK-format related utilities.
  */
-class NlmUtils {
-public:
-    /**
-     * Convert a message type from netlink socket message into
-     * human-readable form.
-     *
-     * @param m message type from netlink socket message.
-     * @return human-readable message of the message type.
-     */
-    static string nlm_msg_type(uint32_t m);
+class NlmUtils 
+{
+	public:
+		/**
+		 * Convert a message type from netlink socket message into
+		 * human-readable form.
+		 *
+		 * @param m message type from netlink socket message.
+		 * @return human-readable message of the message type.
+		 */
+		static string nlm_msg_type(uint32_t m);
 
-    static string nlm_print_msg(vector<uint8_t>& message);
+		static string nlm_print_msg(vector<uint8_t>& message);
 
-    /**
-     * Get pointers to set of netlink rtattr entries.
-     *
-     * @param rtattr the pointer to the first rtattr entry.
-     * @param rta_len the length of all rtattr entries.
-     * @param rta_array the array with the pointers to store the result.
-     * @param rta_array_n the maximum number of entries to store
-     * in the array.
-     */
-    static void get_rtattr(struct rtattr* rtattr, int rta_len,
-			   struct rtattr* rta_array[],
-			   size_t rta_array_n);
+		/**
+		 * Get pointers to set of netlink rtattr entries.
+		 *
+		 * @param rtattr the pointer to the first rtattr entry.
+		 * @param rta_len the length of all rtattr entries.
+		 * @param rta_array the array with the pointers to store the result.
+		 * @param rta_array_n the maximum number of entries to store
+		 * in the array.
+		 */
+		static void get_rtattr(struct rtattr* rtattr, int rta_len,
+				struct rtattr* rta_array[],
+				size_t rta_array_n);
 
-    /**
-     * Extract the routing information from netlink message.
-     *
-     * @param iftree the interface tree to use.
-     * @param fte the return-by-reference @ref FteX entry to return the result.
-     * @param nlh the netlink message header.
-     * @param rtmsg the routing message.
-     * @param rta_len the routing message payload.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
-				   const struct nlmsghdr* nlh,
-				   struct rtmsg* rtmsg, int rta_len,
-				   const FibConfig& fibconfig, string& err_msg);
+		/**
+		 * Extract the routing information from netlink message.
+		 *
+		 * @param iftree the interface tree to use.
+		 * @param fte the return-by-reference @ref FteX entry to return the result.
+		 * @param nlh the netlink message header.
+		 * @param rtmsg the routing message.
+		 * @param rta_len the routing message payload.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
+				const struct nlmsghdr* nlh,
+				struct rtmsg* rtmsg, int rta_len,
+				const FibConfig& fibconfig, string& err_msg);
 
-    /**
-     * Check that a previous netlink request has succeeded.
-     *
-     * @param ns_reader the NetlinkSocketReader to use for reading data.
-     * @param ns the NetlinkSocket to use for reading data.
-     * @param seqno the sequence nomer of the netlink request to check for.
-     * @param last_errno the last error number (if error).
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    static int check_netlink_request(NetlinkSocketReader& ns_reader,
-				     NetlinkSocket& ns,
-				     uint32_t seqno,
-				     int& last_errno,
-				     string& error_msg);
+		/**
+		 * Check that a previous netlink request has succeeded.
+		 *
+		 * @param ns_reader the NetlinkSocketReader to use for reading data.
+		 * @param ns the NetlinkSocket to use for reading data.
+		 * @param seqno the sequence nomer of the netlink request to check for.
+		 * @param last_errno the last error number (if error).
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		static int check_netlink_request(NetlinkSocketReader& ns_reader,
+				NetlinkSocket& ns,
+				uint32_t seqno,
+				int& last_errno,
+				string& error_msg);
 
-    static int nlm_decode_ipvx_address(int family, const struct rtattr* rtattr,
-				       IPvX& ipvx_addr, bool& is_set, string& error_msg);
-
-
-    static int nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfomsg,
-						 const struct rtattr* rtattr,
-						 IPvX& ipvx_addr, bool& is_set,
-						 string& error_msg);
-
-    static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
-					    struct ifinfomsg* ifinfomsg,
-					    int rta_len, bool& modified);
+		static int nlm_decode_ipvx_address(int family, const struct rtattr* rtattr,
+				IPvX& ipvx_addr, bool& is_set, string& error_msg);
 
 
-    static void nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
-				       int rta_len, bool& modified);
+		static int nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfomsg,
+				const struct rtattr* rtattr,
+				IPvX& ipvx_addr, bool& is_set,
+				string& error_msg);
+
+		static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
+				struct ifinfomsg* ifinfomsg,
+				int rta_len, bool& modified);
 
 
-    static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
-					       struct ifaddrmsg* ifaddrmsg,
-					       int rta_len, bool is_deleted, bool& modified);
+		static void nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
+				int rta_len, bool& modified);
+
+
+		static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
+				struct ifaddrmsg* ifaddrmsg,
+				int rta_len, bool is_deleted, bool& modified);
 
 };
 

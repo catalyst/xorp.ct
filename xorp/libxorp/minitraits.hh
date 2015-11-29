@@ -32,16 +32,19 @@
  * tracking const pointer types in templates.
  */
 template <typename T>
-class MiniTraits {
+class MiniTraits 
+{
     template <class U>
-    struct UnConst {
-	typedef U Result;
-    };
+	struct UnConst 
+	{
+	    typedef U Result;
+	};
     template <class U>
-    struct UnConst <const U> {
-        typedef U Result;
-    };
-public:
+	struct UnConst <const U> 
+	{
+	    typedef U Result;
+	};
+    public:
     typedef typename UnConst<T>::Result NonConst;
 };
 
@@ -60,13 +63,15 @@ public:
  * pointer types then sizeof(X::f()) for both of them is sizeof(char).
  */
 template <typename B, typename D>
-class BaseAndDerived {
-    struct X {
+class BaseAndDerived 
+{
+    struct X 
+    {
 	static char f(const B*);
 	static double f(...);
     };
 
-public:
+    public:
     static const bool True = ( sizeof(X::f((D*)0)) == sizeof(X::f((B*)0)) );
 };
 

@@ -51,7 +51,8 @@
 // later on in this file.
 
 template <typename A>
-struct Send {
+struct Send 
+{
     typedef bool (XrlRibV0p1Client::*AddIgpTable)
 	(const char*, const string&, const string&, const string&,
 	 const bool&, const bool&,
@@ -142,38 +143,38 @@ Send<IPv6>::delete_route = &XrlRibV0p1Client::send_delete_route6;
 // ----------------------------------------------------------------------------
 // XrlRibNotifier implementation
 
-template <typename A>
+    template <typename A>
 XrlRibNotifier<A>::XrlRibNotifier( UpdateQueue<A>&	uq,
-				  XrlRouter&		xr,
-				  uint32_t		mf,
-				  uint32_t		pms)
+	XrlRouter&		xr,
+	uint32_t		mf,
+	uint32_t		pms)
     : RibNotifierBase<A>( uq, pms), ServiceBase("RIB Updater"),
-      _xs(xr), _cname(xr.class_name()), _iname(xr.instance_name()),
-      _max_inflight(mf), _inflight(0)
+    _xs(xr), _cname(xr.class_name()), _iname(xr.instance_name()),
+    _max_inflight(mf), _inflight(0)
 {
     set_status(SERVICE_READY);
 }
 
-template <typename A>
+    template <typename A>
 XrlRibNotifier<A>::XrlRibNotifier( UpdateQueue<A>&	uq,
-				  XrlSender&		xs,
-				  const string&		class_name,
-				  const string&		instance_name,
-				  uint32_t		mf,
-				  uint32_t		pms)
-    : RibNotifierBase<A>( uq, pms),
-      _xs(xs), _cname(class_name), _iname(instance_name),
-      _max_inflight(mf), _inflight(0)
+	XrlSender&		xs,
+	const string&		class_name,
+	const string&		instance_name,
+	uint32_t		mf,
+	uint32_t		pms)
+: RibNotifierBase<A>( uq, pms),
+    _xs(xs), _cname(class_name), _iname(instance_name),
+    _max_inflight(mf), _inflight(0)
 {
 }
 
-template <typename A>
+    template <typename A>
 XrlRibNotifier<A>::~XrlRibNotifier()
 {
 }
 
 template <typename A>
-inline void
+    inline void
 XrlRibNotifier<A>::incr_inflight()
 {
     _inflight++;
@@ -181,7 +182,7 @@ XrlRibNotifier<A>::incr_inflight()
 }
 
 template <typename A>
-inline void
+    inline void
 XrlRibNotifier<A>::decr_inflight()
 {
     _inflight--;
@@ -190,7 +191,7 @@ XrlRibNotifier<A>::decr_inflight()
 
 
 template<typename A>
-int
+    int
 XrlRibNotifier<A>::startup()
 {
     XrlRibV0p1Client c(&_xs);
@@ -198,8 +199,9 @@ XrlRibNotifier<A>::startup()
     bool mcast = false;
 
     if ((c.*Send<A>::add_igp_table)
-	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
-	 callback(this, &XrlRibNotifier<A>::add_igp_cb)) == false) {
+	    (xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
+	     callback(this, &XrlRibNotifier<A>::add_igp_cb)) == false) 
+    {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
@@ -211,11 +213,12 @@ XrlRibNotifier<A>::startup()
 }
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::add_igp_cb(const XrlError& xe)
 {
     decr_inflight();
-    if (xe != XrlError::OKAY()) {
+    if (xe != XrlError::OKAY()) 
+    {
 	XLOG_ERROR("add_igp failed: %s\n", xe.str().c_str());
 	set_status(SERVICE_FAILED);
 	return;
@@ -226,7 +229,7 @@ XrlRibNotifier<A>::add_igp_cb(const XrlError& xe)
 
 
 template<typename A>
-int
+    int
 XrlRibNotifier<A>::shutdown()
 {
     this->stop_polling();
@@ -238,8 +241,9 @@ XrlRibNotifier<A>::shutdown()
     bool mcast = false;
 
     if ((c.*Send<A>::delete_igp_table)
-	(xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
-	 callback(this, &XrlRibNotifier<A>::delete_igp_cb)) == false) {
+	    (xrl_rib_name(), "rip", _cname, _iname, ucast, mcast,
+	     callback(this, &XrlRibNotifier<A>::delete_igp_cb)) == false) 
+    {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
@@ -250,11 +254,12 @@ XrlRibNotifier<A>::shutdown()
 }
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::delete_igp_cb(const XrlError& e)
 {
     decr_inflight();
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	set_status(SERVICE_FAILED);
 	return;
     }
@@ -263,28 +268,31 @@ XrlRibNotifier<A>::delete_igp_cb(const XrlError& e)
 
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::send_add_route(const RouteEntry<A>& re)
 {
     XrlRibV0p1Client c(&_xs);
     bool ok;
 
-    if (_ribnets.find(re.net()) == _ribnets.end()) {
+    if (_ribnets.find(re.net()) == _ribnets.end()) 
+    {
 	_ribnets.insert(re.net());
 	ok = (c.*Send<A>::add_route)
-	      (xrl_rib_name(), "rip", true, false,
-	       re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
-	       re.policytags().xrl_atomlist(),
-	       callback(this, &XrlRibNotifier<A>::send_route_cb));
-    } else {
+	    (xrl_rib_name(), "rip", true, false,
+	     re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
+	     re.policytags().xrl_atomlist(),
+	     callback(this, &XrlRibNotifier<A>::send_route_cb));
+    } else 
+    {
 	ok = (c.*Send<A>::replace_route)
-	      (xrl_rib_name(), "rip", true, false,
-	       re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
-	       re.policytags().xrl_atomlist(),
-	       callback(this, &XrlRibNotifier<A>::send_route_cb));
+	    (xrl_rib_name(), "rip", true, false,
+	     re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
+	     re.policytags().xrl_atomlist(),
+	     callback(this, &XrlRibNotifier<A>::send_route_cb));
     }
 
-    if (ok == false) {
+    if (ok == false) 
+    {
 	shutdown();
 	return;
     }
@@ -292,22 +300,25 @@ XrlRibNotifier<A>::send_add_route(const RouteEntry<A>& re)
 }
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::send_delete_route(const RouteEntry<A>& re)
 {
     typename set<IPNet<A> >::iterator i = _ribnets.find(re.net());
-    if (i == _ribnets.end()) {
+    if (i == _ribnets.end()) 
+    {
 	debug_msg("Request to delete route to net %s that's not been passed"
-		  "to rib\n", re.net().str().c_str());
+		"to rib\n", re.net().str().c_str());
 	return;
-    } else {
+    } else 
+    {
 	_ribnets.erase(i);
     }
 
     XrlRibV0p1Client c(&_xs);
     if ((c.*Send<A>::delete_route)
-	(xrl_rib_name(), "rip", true, false, re.net(),
-	 callback(this, &XrlRibNotifier<A>::send_route_cb)) == false) {
+	    (xrl_rib_name(), "rip", true, false, re.net(),
+	     callback(this, &XrlRibNotifier<A>::send_route_cb)) == false) 
+    {
 	shutdown();
 	return;
     }
@@ -315,37 +326,44 @@ XrlRibNotifier<A>::send_delete_route(const RouteEntry<A>& re)
 }
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::send_route_cb(const XrlError& xe)
 {
     decr_inflight();
-    if (xe != XrlError::OKAY()) {
+    if (xe != XrlError::OKAY()) 
+    {
 	XLOG_ERROR("Xrl error %s\n", xe.str().c_str());
     }
 }
 
 
 template <typename A>
-void
+    void
 XrlRibNotifier<A>::updates_available()
 {
     XLOG_ASSERT(_inflight <= _max_inflight);
     for (const RouteEntry<A>* r = this->_uq.get(this->_ri); 
-	 r != 0; r = this->_uq.next(this->_ri)) {
-	if (_inflight == _max_inflight) {
+	    r != 0; r = this->_uq.next(this->_ri)) 
+    {
+	if (_inflight == _max_inflight) 
+	{
 	    break;
 	}
-	if (status() != SERVICE_RUNNING) {
+	if (status() != SERVICE_RUNNING) 
+	{
 	    // If we're not running just skip any available updates.
 	    continue;
 	}
-	if ((r->origin() != NULL) && (r->origin()->is_rib_origin())) {
+	if ((r->origin() != NULL) && (r->origin()->is_rib_origin())) 
+	{
 	    // XXX: don't redistribute the RIB routes back to the RIB
 	    continue;
 	}
-	if (r->cost() < RIP_INFINITY) {
+	if (r->cost() < RIP_INFINITY) 
+	{
 	    send_add_route(*r);
-	} else {
+	} else 
+	{
 	    send_delete_route(*r);
 	}
     }

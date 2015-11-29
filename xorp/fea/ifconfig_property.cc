@@ -36,13 +36,13 @@
 
 
 IfConfigProperty::IfConfigProperty(
-    FeaDataPlaneManager& fea_data_plane_manager)
-    : _is_running(false),
-      _ifconfig(fea_data_plane_manager.ifconfig()),
-      _fea_data_plane_manager(fea_data_plane_manager),
-      _have_ipv4(false),
-      _have_ipv6(false),
-      _first_start(true)
+	FeaDataPlaneManager& fea_data_plane_manager)
+: _is_running(false),
+    _ifconfig(fea_data_plane_manager.ifconfig()),
+    _fea_data_plane_manager(fea_data_plane_manager),
+    _have_ipv4(false),
+    _have_ipv6(false),
+    _first_start(true)
 {
 }
 
@@ -50,14 +50,15 @@ IfConfigProperty::~IfConfigProperty()
 {
     string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
+    if (stop(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Cannot stop the mechanism for testing "
-		   "the data plane property: %s",
-		   error_msg.c_str());
+		"the data plane property: %s",
+		error_msg.c_str());
     }
 }
 
-int
+    int
 IfConfigProperty::start(string& error_msg)
 {
     UNUSED(error_msg);
@@ -65,7 +66,8 @@ IfConfigProperty::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (_first_start) {
+    if (_first_start) 
+    {
 	//
 	// Test if the system supports IPv4 and IPv6 respectively
 	//
@@ -80,7 +82,7 @@ IfConfigProperty::start(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 IfConfigProperty::stop(string& error_msg)
 {
     UNUSED(error_msg);

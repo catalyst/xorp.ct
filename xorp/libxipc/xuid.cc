@@ -43,7 +43,7 @@
 
 static const char* sfmt = "%08x-%08x-%08x-%08x";
 
-static uint32_t
+    static uint32_t
 local_ip4_addr()
 {
     static uint32_t cached_addr;
@@ -53,23 +53,26 @@ local_ip4_addr()
 
     if (cached_addr) return cached_addr;
 
-    if (gethostname(name, sizeof(name)/sizeof(name[0]))) {
-        return 0;
+    if (gethostname(name, sizeof(name)/sizeof(name[0]))) 
+    {
+	return 0;
     }
 
-    if (inet_pton(AF_INET, name, &ia) != 1) {
-        struct hostent *h = gethostbyname(name);
-        if (h == NULL) {
-            return 0;
-        }
-        memcpy(&ia, h->h_addr_list[0], sizeof(ia));
+    if (inet_pton(AF_INET, name, &ia) != 1) 
+    {
+	struct hostent *h = gethostbyname(name);
+	if (h == NULL) 
+	{
+	    return 0;
+	}
+	memcpy(&ia, h->h_addr_list[0], sizeof(ia));
     }
 
     cached_addr = ia.s_addr;
     return cached_addr;
 }
 
-void
+    void
 XUID::initialize()
 {
     static TimeVal last;	// last time clock reading value
@@ -90,13 +93,16 @@ XUID::initialize()
 
     // See if we are issuing xuid's at a critical rate and sleep if
     // ticks are advancing too quickly...a pretty unlikely event
-    if (now == last) {
-        ticks++;
-        if ((ticks & 0x7fff) == 0x7fff) {
+    if (now == last) 
+    {
+	ticks++;
+	if ((ticks & 0x7fff) == 0x7fff) 
+	{
 	    TimerList::system_sleep(TimeVal(0, 100000));
 	}
-    } else {
-        ticks = 0;
+    } else 
+    {
+	ticks = 0;
 	last = now;
     }
 
@@ -117,10 +123,12 @@ XUID::XUID(const string& s) throw (InvalidString)
 	throw InvalidString();
 
     if (sscanf(s.c_str(), sfmt, &_data[0], &_data[1], &_data[2], &_data[3])
-	!= 4) {
-            throw InvalidString();
+	    != 4) 
+    {
+	throw InvalidString();
     }
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) 
+    {
 	_data[i] = htonl(_data[i]);
     }
 }
@@ -139,7 +147,8 @@ XUID::operator<(const XUID& x) const
     int i;
 
     for (i = 0; i < 3; i++) {	// Loop ends intentionally at 3 not 4.
-	if (_data[i] != x._data[i]) {
+	if (_data[i] != x._data[i]) 
+	{
 	    break;
 	}
     }
@@ -151,7 +160,7 @@ XUID::str() const
 {
     char dst[XUID_CSTR_BYTES + 1];
     snprintf(dst, sizeof(dst) / sizeof(dst[0]), sfmt, ntohl(_data[0]),
-	     ntohl(_data[1]), ntohl(_data[2]), ntohl(_data[3]));
+	    ntohl(_data[1]), ntohl(_data[2]), ntohl(_data[3]));
     return string(dst);
 }
 

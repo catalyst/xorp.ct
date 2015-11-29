@@ -28,30 +28,31 @@
 
 class FinderClientXrlCommandInterface; 
 
-class FinderClientXrlTarget : public XrlFinderclientTargetBase {
-public:
-    FinderClientXrlTarget(FinderClientXrlCommandInterface* client,
-			  XrlCmdMap* cmds);
+class FinderClientXrlTarget : public XrlFinderclientTargetBase 
+{
+    public:
+	FinderClientXrlTarget(FinderClientXrlCommandInterface* client,
+		XrlCmdMap* cmds);
 
-    XrlCmdError common_0_1_get_target_name(string& name);
-    XrlCmdError common_0_1_get_version(string& version);
-    XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
-    XrlCmdError common_0_1_shutdown();
-    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+	XrlCmdError common_0_1_get_target_name(string& name);
+	XrlCmdError common_0_1_get_version(string& version);
+	XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
+	XrlCmdError common_0_1_shutdown();
+	XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
 
-    XrlCmdError finder_client_0_2_hello();
+	XrlCmdError finder_client_0_2_hello();
 
-    XrlCmdError finder_client_0_2_remove_xrl_from_cache(const string& xrl);
+	XrlCmdError finder_client_0_2_remove_xrl_from_cache(const string& xrl);
 
-    XrlCmdError finder_client_0_2_remove_xrls_for_target_from_cache(
-							const string& target);
+	XrlCmdError finder_client_0_2_remove_xrls_for_target_from_cache(
+		const string& target);
 
-    XrlCmdError finder_client_0_2_dispatch_tunneled_xrl(const string& xrl,
-							uint32_t& xrl_errno,
-							string&   xrl_errtxt);
-    
-protected:
-    FinderClientXrlCommandInterface* _client;
+	XrlCmdError finder_client_0_2_dispatch_tunneled_xrl(const string& xrl,
+		uint32_t& xrl_errno,
+		string&   xrl_errtxt);
+
+    protected:
+	FinderClientXrlCommandInterface* _client;
 };
 
 #endif // __LIBXIPC_FINDER_CLIENT_XRL_TARGET_HH__

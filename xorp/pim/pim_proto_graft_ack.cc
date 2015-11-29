@@ -66,16 +66,16 @@
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-int
+	int
 PimVif::pim_graft_ack_recv(PimNbr *pim_nbr,
-			   const IPvX& , // src
-			   const IPvX& , // dst
-			   buffer_t *buffer)
+		const IPvX& , // src
+		const IPvX& , // dst
+		buffer_t *buffer)
 {
-    UNUSED(pim_nbr);
-    // UNUSED(src);
-    // UNUSED(dst);
-    UNUSED(buffer);
-    
-    return (XORP_OK);
+	UNUSED(pim_nbr);
+	// UNUSED(src);
+	// UNUSED(dst);
+	UNUSED(buffer);
+
+	return (XORP_OK);
 }

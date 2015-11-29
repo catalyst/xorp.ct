@@ -25,41 +25,43 @@
 #define __LIBXORP_DAEMON_H__
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
 #ifndef _PATH_DEVNULL
 #define _PATH_DEVNULL "/dev/null"
 #endif
 
-/**
- * @short Options for xorp_daemonize().
- */
-enum {
+    /**
+     * @short Options for xorp_daemonize().
+     */
+    enum 
+    {
 	DAEMON_CHDIR = 0,
 	DAEMON_NOCHDIR = 1,
 	DAEMON_CLOSE = 0,
 	DAEMON_NOCLOSE = 1
-} xorp_daemon_t;
+    } xorp_daemon_t;
 
-/**
- * A local implementation of daemon(3).
- *
- * Fork a new process and detach from parent in a controlled way, allowing
- * XORP processes to run as UNIX daemons.
- * Uses the POSIX setsid() to detach from the controlling terminal.
- *
- * The parent SHOULD use the platform _exit() function to exit.
- *
- * This function is a no-op under Microsoft Windows.
- *
- * @param nochdir set to 0 if the process should chdir to / once detached.
- * @param noclose set to 0 if the process should close 
- *
- * @return -1 if any error occurred, 0 if we are in the child process,
- * otherwise the return value is the child process ID.
- */
-int xorp_daemonize(int nochdir, int noclose);
+    /**
+     * A local implementation of daemon(3).
+     *
+     * Fork a new process and detach from parent in a controlled way, allowing
+     * XORP processes to run as UNIX daemons.
+     * Uses the POSIX setsid() to detach from the controlling terminal.
+     *
+     * The parent SHOULD use the platform _exit() function to exit.
+     *
+     * This function is a no-op under Microsoft Windows.
+     *
+     * @param nochdir set to 0 if the process should chdir to / once detached.
+     * @param noclose set to 0 if the process should close 
+     *
+     * @return -1 if any error occurred, 0 if we are in the child process,
+     * otherwise the return value is the child process ID.
+     */
+    int xorp_daemonize(int nochdir, int noclose);
 
 #ifdef __cplusplus
 }

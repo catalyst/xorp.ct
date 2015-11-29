@@ -41,51 +41,52 @@
  * Instantiates a Finder object and IPC infrastructure for Finder to accept
  * accept incoming connections.
  */
-class FinderServer {
-public:
-    typedef list<FinderTcpListener*> Listeners;
+class FinderServer 
+{
+    public:
+	typedef list<FinderTcpListener*> Listeners;
 
-public:
+    public:
 
-    /**
-     * Constructor
-     */
-    FinderServer( IPv4 default_interface, uint16_t default_port)
-	throw (InvalidAddress, InvalidPort);
+	/**
+	 * Constructor
+	 */
+	FinderServer( IPv4 default_interface, uint16_t default_port)
+	    throw (InvalidAddress, InvalidPort);
 
-    /**
-     * Destructor
-     */
-    ~FinderServer();
+	/**
+	 * Destructor
+	 */
+	~FinderServer();
 
-    /**
-     * Add an additional interface and port to accept connections on.
-     *
-     * @return true on success, false if binding already exists or cannot be
-     * instantiated.
-     */
-    bool add_binding(IPv4 addr, uint16_t port)
-	throw (InvalidAddress, InvalidPort);
+	/**
+	 * Add an additional interface and port to accept connections on.
+	 *
+	 * @return true on success, false if binding already exists or cannot be
+	 * instantiated.
+	 */
+	bool add_binding(IPv4 addr, uint16_t port)
+	    throw (InvalidAddress, InvalidPort);
 
-    /**
-     * Remove an interface binding that was added by calling add_binding.
-     * @return true on success, false if binding does not exist or was
-     * not added by add_binding.
-     */
-    bool remove_binding(IPv4 addr, uint16_t port);
+	/**
+	 * Remove an interface binding that was added by calling add_binding.
+	 * @return true on success, false if binding does not exist or was
+	 * not added by add_binding.
+	 */
+	bool remove_binding(IPv4 addr, uint16_t port);
 
-    /**
-     * Accessor to the number of connections the Finder has.
-     */
-    uint32_t connection_count() const	{ return _f.messengers(); }
+	/**
+	 * Accessor to the number of connections the Finder has.
+	 */
+	uint32_t connection_count() const	{ return _f.messengers(); }
 
-    IPv4 addr() const { return _listeners.front()->address(); }
-    uint16_t port() const { return _listeners.front()->port(); }
+	IPv4 addr() const { return _listeners.front()->address(); }
+	uint16_t port() const { return _listeners.front()->port(); }
 
-protected:
-    Finder		_f;
-    FinderXrlTarget	_fxt;
-    Listeners		_listeners;
+    protected:
+	Finder		_f;
+	FinderXrlTarget	_fxt;
+	Listeners		_listeners;
 };
 
 #endif // __LIBXIPC_FINDER_SERVER_HH__

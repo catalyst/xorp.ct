@@ -60,14 +60,14 @@
  * Query whether an address exists on given interface and vif path,
  * and that all items on path are enabled.
  */
-static bool
+    static bool
 address_exists(const IfMgrIfTree&	iftree,
-	       const string&		ifname,
-	       const string&		vifname,
-	       const IPv4&		addr)
+	const string&		ifname,
+	const string&		vifname,
+	const IPv4&		addr)
 {
     debug_msg("Looking for %s/%s/%s\n",
-	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	    ifname.c_str(), vifname.c_str(), addr.str().c_str());
 
     const IfMgrIfAtom* ia = iftree.find_interface(ifname);
     if (ia == NULL)
@@ -88,29 +88,32 @@ address_exists(const IfMgrIfTree&	iftree,
  * Query whether an address exists on given interface and vif path.
  * and that all items on path are enabled.
  */
-static bool
+    static bool
 address_enabled(const IfMgrIfTree&	iftree,
-		const string&		ifname,
-		const string&		vifname,
-		const IPv4&		addr)
+	const string&		ifname,
+	const string&		vifname,
+	const IPv4&		addr)
 {
     debug_msg("Looking for %s/%s/%s\n",
-	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	    ifname.c_str(), vifname.c_str(), addr.str().c_str());
 
     const IfMgrIfAtom* ia = iftree.find_interface(ifname);
-    if (ia == 0 || ia->enabled() == false || ia->no_carrier()) {
+    if (ia == 0 || ia->enabled() == false || ia->no_carrier()) 
+    {
 	debug_msg("if %s exists ? %d ?\n", ifname.c_str(), (ia ? 1 : 0));
 	return false;
     }
 
     const IfMgrVifAtom* va = ia->find_vif(vifname);
-    if (va == 0 || va->enabled() == false) {
+    if (va == 0 || va->enabled() == false) 
+    {
 	debug_msg("vif %s exists ? %d?\n", vifname.c_str(), (va ? 1: 0));
 	return false;
     }
 
     const IfMgrIPv4Atom* aa = va->find_addr(addr);
-    if (aa == 0 || aa->enabled() == false) {
+    if (aa == 0 || aa->enabled() == false) 
+    {
 	debug_msg("addr %s exists ? %d?\n", addr.str().c_str(), (aa ? 1: 0));
 	return false;
     }
@@ -125,12 +128,14 @@ address_enabled(const IfMgrIfTree&	iftree,
  * @short Functor to test whether a particular local address is
  * associated with an XrlPort.
  */
-struct port_has_local_address {
+struct port_has_local_address 
+{
     port_has_local_address(const IPv4& addr) : _addr(addr) {}
-    bool operator() (const XrlPort* xp) {
+    bool operator() (const XrlPort* xp) 
+    {
 	return xp && xp->local_address() == _addr;
     }
-private:
+    private:
     IPv4 _addr;
 };
 
@@ -138,14 +143,16 @@ private:
  * @short Functor to test whether a particular interface/vif is
  * associated with an XrlPort.
  */
-struct port_has_interface_vif {
+struct port_has_interface_vif 
+{
     port_has_interface_vif(const string& interface,
-			   const string& vif)
-     : _interface(interface), _vif(vif) {}
-    bool operator() (const XrlPort* xp) {
+	    const string& vif)
+	: _interface(interface), _vif(vif) {}
+    bool operator() (const XrlPort* xp) 
+    {
 	return xp && xp->ifname() == _interface && xp->vifname() == _vif;
     }
-private:
+    private:
     string _interface;
     string _vif;
 };
@@ -154,14 +161,15 @@ private:
  * @short Functor to test whether a particular XrlPort
  * is in a given service state.
  */
-struct port_has_io_in_state {
+struct port_has_io_in_state 
+{
     port_has_io_in_state(ServiceStatus st) : _st(st) {}
 
     bool operator() (const XrlPort* xp) const
     {
 	return xp && xp->status() == _st;
     }
-protected:
+    protected:
     ServiceStatus _st;
 };
 
@@ -172,23 +180,24 @@ protected:
  * NB At a future date we might want to track socket id to XrlPortIO
  * mappings.  This would be more efficient.
  */
-struct is_port_for {
+struct is_port_for 
+{
     is_port_for(const string* sockid, const string* ifname,
-		const string* vifname, const IPv4* addr,
-		IfMgrXrlMirror* im)
+	    const string* vifname, const IPv4* addr,
+	    IfMgrXrlMirror* im)
 	: _psid(sockid),
-	  _ifname(ifname),
-	  _vifname(vifname),
-	  _pa(addr),
-	  _pim(im)
+	_ifname(ifname),
+	_vifname(vifname),
+	_pa(addr),
+	_pim(im)
     {}
 
     bool operator() (XrlPort*& xp);
 
-protected:
+    protected:
     bool link_addr_valid() const;
 
-private:
+    private:
     const string* 	_psid;
     const string*	_ifname;
     const string*	_vifname;
@@ -202,7 +211,7 @@ is_port_for::link_addr_valid() const
     return true;
 }
 
-bool
+    bool
 is_port_for::operator() (XrlPort*& xp)
 {
     //
@@ -210,7 +219,8 @@ is_port_for::operator() (XrlPort*& xp)
     // link-local.  For IPv4 the concept does not exist, for IPv6
     // check if origin is link local.
     //
-    if (link_addr_valid() == false) {
+    if (link_addr_valid() == false) 
+    {
 	return false;
     }
 
@@ -226,7 +236,8 @@ is_port_for::operator() (XrlPort*& xp)
 	return false;
 
     // Check the incoming interface and vif name (if known)
-    if ((! _ifname->empty()) && (! _vifname->empty())) {
+    if ((! _ifname->empty()) && (! _vifname->empty())) 
+    {
 	if (xp->ifname() != *_ifname)
 	    return false;
 	if (xp->vifname() != *_vifname)
@@ -241,13 +252,15 @@ is_port_for::operator() (XrlPort*& xp)
     //
     const IfMgrIPv4Atom* ifa;
     ifa = _pim->iftree().find_addr(xp->ifname(),
-				   xp->vifname(),
-				   xp->local_address());
+	    xp->vifname(),
+	    xp->local_address());
 
-    if (ifa == 0) {
+    if (ifa == 0) 
+    {
 	return false;
     }
-    if (ifa->has_endpoint()) {
+    if (ifa->has_endpoint()) 
+    {
 	return ifa->endpoint_addr() == *_pa;
     }
 
@@ -259,14 +272,14 @@ is_port_for::operator() (XrlPort*& xp)
 // XrlIO
 
 XrlIO::XrlIO( XrlRouter& xrl_router,
-	     const string& feaname, const string& ribname)
-    : _xrl_router(xrl_router),
-      _feaname(feaname),
-      _ribname(ribname),
-      _component_count(0),
-      _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
-	     _xrl_router.finder_port()),
-      _rib_queue( xrl_router)
+	const string& feaname, const string& ribname)
+: _xrl_router(xrl_router),
+    _feaname(feaname),
+    _ribname(ribname),
+    _component_count(0),
+    _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
+	    _xrl_router.finder_port()),
+    _rib_queue( xrl_router)
 {
     _ifmgr.set_observer(this);
     _ifmgr.attach_hint_observer(this);
@@ -278,7 +291,8 @@ XrlIO::~XrlIO()
     _ifmgr.detach_hint_observer(this);
     _ifmgr.unset_observer(this);
 
-    while (! _dead_ports.empty()) {
+    while (! _dead_ports.empty()) 
+    {
 	XrlDeadPortMap::iterator ii = _dead_ports.begin();
 	XrlPort* xp = (*ii).second;
 	delete xp;
@@ -286,7 +300,7 @@ XrlIO::~XrlIO()
     }
 }
 
-int
+    int
 XrlIO::startup()
 {
     ServiceBase::set_status(SERVICE_STARTING);
@@ -294,7 +308,8 @@ XrlIO::startup()
     // XXX: when the startup is completed,
     // IfMgrHintObserver::tree_complete() will be called.
     //
-    if (_ifmgr.startup() != XORP_OK) {
+    if (_ifmgr.startup() != XORP_OK) 
+    {
 	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
@@ -305,7 +320,7 @@ XrlIO::startup()
     return (XORP_OK);
 }
 
-int
+    int
 XrlIO::shutdown()
 {
     //
@@ -320,10 +335,11 @@ XrlIO::shutdown()
     //
     debug_msg("XXX XrlIO::shutdown (%p)\n", this);
     debug_msg("XXX n_ports = %u n_dead_ports %u\n",
-	      XORP_UINT_CAST(_ports.size()),
-	      XORP_UINT_CAST(_dead_ports.size()));
+	    XORP_UINT_CAST(_ports.size()),
+	    XORP_UINT_CAST(_dead_ports.size()));
 
-    while (! _ports.empty()) {
+    while (! _ports.empty()) 
+    {
 	XrlPortList::iterator ii = _ports.begin();
 	XrlPort* xp = (*ii);
 	debug_msg("   XXX killing port %p\n", xp);
@@ -340,7 +356,7 @@ XrlIO::shutdown()
     return (_ifmgr.shutdown());
 }
 
-void
+    void
 XrlIO::component_up(string name)
 {
     XLOG_ASSERT(name != "OlsrXrlPort");
@@ -359,7 +375,7 @@ XrlIO::component_up(string name)
     UNUSED(name);
 }
 
-void
+    void
 XrlIO::component_down(string name)
 {
     XLOG_ASSERT(name != "OlsrXrlPort");
@@ -377,12 +393,13 @@ XrlIO::component_down(string name)
     UNUSED(name);
 }
 
-void
+    void
 XrlIO::status_change(ServiceBase*  service,
-		     ServiceStatus old_status,
-		     ServiceStatus new_status)
+	ServiceStatus old_status,
+	ServiceStatus new_status)
 {
-    if (service->service_name() == "OlsrXrlPort") {
+    if (service->service_name() == "OlsrXrlPort") 
+    {
 	try_start_next_port();
 
 	if (new_status != SERVICE_SHUTDOWN)
@@ -406,18 +423,18 @@ XrlIO::status_change(ServiceBase*  service,
 // or port at this time, therefore it is impossible to verify that
 // the traffic has been sent to a broadcast or multicast group.
 //
-void
+    void
 XrlIO::receive(const string& sockid,
-	       const string& interface,
-	       const string& vif,
-	       const IPv4& src,
-	       const uint16_t& sport,
-	       const vector<uint8_t>& payload)
+	const string& interface,
+	const string& vif,
+	const IPv4& src,
+	const uint16_t& sport,
+	const vector<uint8_t>& payload)
 {
     debug_msg("receive(%s, %s, %s, %s, %u, %u)\n",
-	sockid.c_str(), interface.c_str(), vif.c_str(),
-	cstring(src), XORP_UINT_CAST(sport),
-	XORP_UINT_CAST(payload.size()));
+	    sockid.c_str(), interface.c_str(), vif.c_str(),
+	    cstring(src), XORP_UINT_CAST(sport),
+	    XORP_UINT_CAST(payload.size()));
 
     // Do I have an XrlPort on this interface where this packet
     // could actually have been received?
@@ -429,10 +446,11 @@ XrlIO::receive(const string& sockid,
     XrlPortList& xpl = this->ports();
     XrlPortList::iterator xpi;
     xpi = find_if(xpl.begin(), xpl.end(),
-		  port_has_interface_vif(interface, vif));
-    if (xpi == xpl.end()) {
+	    port_has_interface_vif(interface, vif));
+    if (xpi == xpl.end()) 
+    {
 	XLOG_ERROR("No socket exists for interface/vif %s/%s",
-		   interface.c_str(), vif.c_str());
+		interface.c_str(), vif.c_str());
 	return;
     }
 
@@ -448,29 +466,30 @@ XrlIO::receive(const string& sockid,
     //
     vector<uint8_t> payload_copy(payload);
     IO::_receive_cb->dispatch(interface, vif, IPv4::ZERO(), 0, src, sport,
-			      &payload_copy[0], payload_copy.size());
+	    &payload_copy[0], payload_copy.size());
 }
 
-bool
+    bool
 XrlIO::send(const string& interface, const string& vif,
-	    const IPv4& src, const uint16_t& sport,
-	    const IPv4& dst, const uint16_t& dport,
-	    uint8_t* data, const uint32_t& len)
+	const IPv4& src, const uint16_t& sport,
+	const IPv4& dst, const uint16_t& dport,
+	uint8_t* data, const uint32_t& len)
 {
     debug_msg("send(%s, %s, %s, %u, %s, %u, %p, %u)\n",
-	      interface.c_str(), vif.c_str(),
-	      cstring(src), XORP_UINT_CAST(dport),
-	      cstring(dst), XORP_UINT_CAST(sport),
-	      data, XORP_UINT_CAST(len));
+	    interface.c_str(), vif.c_str(),
+	    cstring(src), XORP_UINT_CAST(dport),
+	    cstring(dst), XORP_UINT_CAST(sport),
+	    data, XORP_UINT_CAST(len));
 
     // Do I have an XrlPort on this interface to send from?
     XrlPortList& xpl = this->ports();
     XrlPortList::iterator xpi;
     xpi = find_if(xpl.begin(), xpl.end(), port_has_local_address(src));
-    if (xpi == xpl.end()) {
+    if (xpi == xpl.end()) 
+    {
 	XLOG_ERROR("No socket exists for address %s/%s/%s:%u",
-		   interface.c_str(), vif.c_str(),
-		   cstring(src), XORP_UINT_CAST(sport));
+		interface.c_str(), vif.c_str(),
+		cstring(src), XORP_UINT_CAST(sport));
 	return false;
     }
 
@@ -483,43 +502,45 @@ XrlIO::send(const string& interface, const string& vif,
     return result;
 }
 
-bool
+    bool
 XrlIO::enable_address(const string& interface, const string& vif,
-		      const IPv4& address, const uint16_t& port,
-		      const IPv4& all_nodes_address)
+	const IPv4& address, const uint16_t& port,
+	const IPv4& all_nodes_address)
 {
     debug_msg("Interface %s Vif %s Address %s Port %u AllNodesAddr %s\n",
-	      interface.c_str(), vif.c_str(),
-	      cstring(address), XORP_UINT_CAST(port),
-	      cstring(all_nodes_address));
-
-    if (! address_exists(_iftree, interface, vif, address)) {
-	XLOG_WARNING("%s/%s/%s:%u does not exist",
 	    interface.c_str(), vif.c_str(),
-	    cstring(address), XORP_UINT_CAST(port));
+	    cstring(address), XORP_UINT_CAST(port),
+	    cstring(all_nodes_address));
+
+    if (! address_exists(_iftree, interface, vif, address)) 
+    {
+	XLOG_WARNING("%s/%s/%s:%u does not exist",
+		interface.c_str(), vif.c_str(),
+		cstring(address), XORP_UINT_CAST(port));
 	return false;
     }
 
     // Check if port already exists.
     XrlPortList::const_iterator xpi;
     xpi = find_if(this->ports().begin(), this->ports().end(),
-		  port_has_local_address(address));
-    if (xpi != this->ports().end()) {
+	    port_has_local_address(address));
+    if (xpi != this->ports().end()) 
+    {
 	XLOG_WARNING("Socket already exists for address %s/%s/%s:%u",
-		     interface.c_str(), vif.c_str(),
-		     cstring(address), XORP_UINT_CAST(port));
+		interface.c_str(), vif.c_str(),
+		cstring(address), XORP_UINT_CAST(port));
 	return true;
     }
 
     // Create XrlPort.
     XrlPort* xp = new XrlPort(this,
-			      _xrl_router,
-			      _feaname,
-			      interface,
-			      vif,
-			      address,
-			      port,
-			      all_nodes_address);
+	    _xrl_router,
+	    _feaname,
+	    interface,
+	    vif,
+	    address,
+	    port,
+	    all_nodes_address);
     this->ports().push_back(xp);
 
     // Add self to observers of the XrlPort's status.
@@ -531,20 +552,22 @@ XrlIO::enable_address(const string& interface, const string& vif,
     return true;
 }
 
-bool
+    bool
 XrlIO::disable_address(const string& interface, const string& vif,
-		       const IPv4& address, const uint16_t& port)
+	const IPv4& address, const uint16_t& port)
 {
     debug_msg("Interface %s Vif %s Address %s Port %u\n",
-	      interface.c_str(), vif.c_str(),
-	      cstring(address), XORP_UINT_CAST(port));
+	    interface.c_str(), vif.c_str(),
+	    cstring(address), XORP_UINT_CAST(port));
 
     XrlPortList& xpl = this->ports();
     XrlPortList::iterator xpi;
     xpi = find_if(xpl.begin(), xpl.end(), port_has_local_address(address));
-    if (xpi != xpl.end()) {
+    if (xpi != xpl.end()) 
+    {
 	XrlPort* xp = *xpi;
-	if (xp) {
+	if (xp) 
+	{
 	    _dead_ports.insert(make_pair(dynamic_cast<ServiceBase*>(xp), xp));
 	    xp->shutdown();
 	}
@@ -554,7 +577,7 @@ XrlIO::disable_address(const string& interface, const string& vif,
     return true;
 }
 
-bool
+    bool
 XrlIO::is_vif_broadcast_capable(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -569,7 +592,7 @@ XrlIO::is_vif_broadcast_capable(const string& interface, const string& vif)
     return (fv->broadcast_capable());
 }
 
-bool
+    bool
 XrlIO::is_vif_multicast_capable(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -584,7 +607,7 @@ XrlIO::is_vif_multicast_capable(const string& interface, const string& vif)
     return (fv->multicast_capable());
 }
 
-bool
+    bool
 XrlIO::is_vif_loopback(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -601,25 +624,26 @@ XrlIO::is_vif_loopback(const string& interface, const string& vif)
 
 bool
 XrlIO::get_broadcast_address(const string& interface,
-			     const string& vif,
-			     const IPv4& address,
-			     IPv4& bcast_address) const
+	const string& vif,
+	const IPv4& address,
+	IPv4& bcast_address) const
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
+	    vif.c_str(), cstring(address));
 
     if (! is_vif_enabled(interface, vif))
 	return false;
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
+	    vif,
+	    address);
     if (fa == NULL)
 	return false;
 
-    if (! fa->has_broadcast()) {
+    if (! fa->has_broadcast()) 
+    {
 	debug_msg("%s/%s/%s doesn't have a broadcast address.\n",
-		  interface.c_str(), vif.c_str(), cstring(address));
+		interface.c_str(), vif.c_str(), cstring(address));
 	return false;
     }
 
@@ -657,14 +681,14 @@ XrlIO::is_vif_enabled(const string& interface, const string& vif) const
 
 bool
 XrlIO::is_address_enabled(const string& interface, const string& vif,
-			  const IPv4& address) const
+	const IPv4& address) const
 {
     return address_enabled(ifmgr_iftree(), interface, vif, address);
 }
 
 bool
 XrlIO::get_addresses(const string& interface, const string& vif,
-			   list<IPv4>& addresses) const
+	list<IPv4>& addresses) const
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
@@ -679,7 +703,7 @@ XrlIO::get_addresses(const string& interface, const string& vif,
     return true;
 }
 
-bool
+    bool
 XrlIO::get_interface_id(const string& interface, uint32_t& interface_id)
 {
     debug_msg("Interface %s\n", interface.c_str());
@@ -693,23 +717,23 @@ XrlIO::get_interface_id(const string& interface, uint32_t& interface_id)
     return true;
 }
 
-uint32_t
+    uint32_t
 XrlIO::get_prefix_length(const string& interface, const string& vif,
-			       IPv4 address)
+	IPv4 address)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
+	    vif.c_str(), cstring(address));
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
+	    vif,
+	    address);
     if (fa == NULL)
 	return 0;
 
     return (fa->prefix_len());
 }
 
-uint32_t
+    uint32_t
 XrlIO::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
@@ -721,7 +745,7 @@ XrlIO::get_mtu(const string& interface)
     return (fi->mtu());
 }
 
-void
+    void
 XrlIO::register_rib()
 {
     XrlRibV0p1Client rib(&_xrl_router);
@@ -730,134 +754,140 @@ XrlIO::register_rib()
     // XXX: Don't forget to add the protocol admin distance to every
     // RIB for which we plan to provide an origin table.
     if (! rib.send_set_protocol_admin_distance(
-	    _ribname.c_str(),
-	    "olsr",	// protocol
-	    true,	// ipv4
-	    false,	// ipv6
-	    true,	// unicast
-	    false,	// multicast
-	    OLSR_ADMIN_DISTANCE,	// admin_distance
-	    callback(this,
-		     &XrlIO::rib_command_done,
-		     true,
-		     "set_protocol_admin_distance"))) {
+		_ribname.c_str(),
+		"olsr",	// protocol
+		true,	// ipv4
+		false,	// ipv6
+		true,	// unicast
+		false,	// multicast
+		OLSR_ADMIN_DISTANCE,	// admin_distance
+		callback(this,
+		    &XrlIO::rib_command_done,
+		    true,
+		    "set_protocol_admin_distance"))) 
+    {
 	XLOG_WARNING("Failed to set OLSR admin distance in RIB");
     }
 
     if (! rib.send_add_igp_table4(
-	    _ribname.c_str(),			// RIB target name
-	    "olsr",				// protocol name
-	    _xrl_router.class_name(),		// our class
-	    _xrl_router.instance_name(),	// our instance
-	    true,				// unicast
-	    false,				// multicast
-	    callback(this,
-		     &XrlIO::rib_command_done,
-		     true,
-		     "add_igp_table4"))) {
+		_ribname.c_str(),			// RIB target name
+		"olsr",				// protocol name
+		_xrl_router.class_name(),		// our class
+		_xrl_router.instance_name(),	// our instance
+		true,				// unicast
+		false,				// multicast
+		callback(this,
+		    &XrlIO::rib_command_done,
+		    true,
+		    "add_igp_table4"))) 
+    {
 	XLOG_FATAL("Failed to add OLSR table(s) to IPv4 RIB");
     }
 }
 
-void
+    void
 XrlIO::unregister_rib()
 {
     XrlRibV0p1Client rib(&_xrl_router);
 
     if (! rib.send_delete_igp_table4(
-	    _ribname.c_str(),			// RIB target name
-	    "olsr",				// protocol name
-	    _xrl_router.class_name(),		// our class
-	    _xrl_router.instance_name(),	// our instance
-	    true,				// unicast
-	    false,				// multicast
-	    callback(this,
-		     &XrlIO::rib_command_done,
-		     false,
-		     "delete_igp_table4"))) {
+		_ribname.c_str(),			// RIB target name
+		"olsr",				// protocol name
+		_xrl_router.class_name(),		// our class
+		_xrl_router.instance_name(),	// our instance
+		true,				// unicast
+		false,				// multicast
+		callback(this,
+		    &XrlIO::rib_command_done,
+		    false,
+		    "delete_igp_table4"))) 
+    {
 	XLOG_FATAL("Failed to delete OLSR table(s) from IPv4 RIB");
     }
 }
 
-void
+    void
 XrlIO::rib_command_done(const XrlError& error, bool up,
-			const char *comment)
+	const char *comment)
 {
     debug_msg("callback %s %s\n", comment, cstring(error));
 
-    switch (error.error_code()) {
-    case OKAY:
-	break;
-    case REPLY_TIMED_OUT:
-	// We should really be using a reliable transport where
-	// this error cannot happen. But it has so lets retry if we can.
-	XLOG_ERROR("callback: %s %s",  comment, cstring(error));
-	break;
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-    case SEND_FAILED_TRANSIENT:
-    case NO_SUCH_METHOD:
-	XLOG_ERROR("callback: %s %s",  comment, cstring(error));
-	break;
-    case NO_FINDER:
-	// XXX - Temporarily code dump if this condition occurs.
-	XLOG_FATAL("NO FINDER");
-	break;
-    case BAD_ARGS:
-    case COMMAND_FAILED:
-    case INTERNAL_ERROR:
-	XLOG_FATAL("callback: %s %s",  comment, cstring(error));
-	break;
+    switch (error.error_code()) 
+    {
+	case OKAY:
+	    break;
+	case REPLY_TIMED_OUT:
+	    // We should really be using a reliable transport where
+	    // this error cannot happen. But it has so lets retry if we can.
+	    XLOG_ERROR("callback: %s %s",  comment, cstring(error));
+	    break;
+	case RESOLVE_FAILED:
+	case SEND_FAILED:
+	case SEND_FAILED_TRANSIENT:
+	case NO_SUCH_METHOD:
+	    XLOG_ERROR("callback: %s %s",  comment, cstring(error));
+	    break;
+	case NO_FINDER:
+	    // XXX - Temporarily code dump if this condition occurs.
+	    XLOG_FATAL("NO FINDER");
+	    break;
+	case BAD_ARGS:
+	case COMMAND_FAILED:
+	case INTERNAL_ERROR:
+	    XLOG_FATAL("callback: %s %s",  comment, cstring(error));
+	    break;
     }
 
     if (0 == strcasecmp(comment, "set_protocol_admin_distance"))
 	return;
 
-    if (up) {
+    if (up) 
+    {
 	component_up(c_format("rib %s", comment));
-    } else {
+    } else 
+    {
 	component_down(c_format("rib %s", comment));
     }
 }
 
-bool
+    bool
 XrlIO::add_route(IPv4Net net,
-		 IPv4 nexthop,
-		 uint32_t nexthop_id,
-		 uint32_t metric,
-		 const PolicyTags& policytags)
+	IPv4 nexthop,
+	uint32_t nexthop_id,
+	uint32_t metric,
+	const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d policy %s\n",
-	      cstring(net),
-	      cstring(nexthop),
-	      metric,
-	      cstring(policytags));
+	    cstring(net),
+	    cstring(nexthop),
+	    metric,
+	    cstring(policytags));
 
     _rib_queue.queue_add_route(_ribname, net, nexthop, nexthop_id, metric,
-			       policytags);
+	    policytags);
 
     return true;
 }
 
-bool
+    bool
 XrlIO::replace_route(IPv4Net net, IPv4 nexthop, uint32_t nexthop_id,
-			uint32_t metric,
-			const PolicyTags& policytags)
+	uint32_t metric,
+	const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d policy %s\n",
-	      cstring(net),
-	      cstring(nexthop),
-	      metric,
-	      cstring(policytags));
+	    cstring(net),
+	    cstring(nexthop),
+	    metric,
+	    cstring(policytags));
 
     _rib_queue.queue_delete_route(_ribname, net);
     _rib_queue.queue_add_route(_ribname, net, nexthop, nexthop_id, metric,
-			       policytags);
+	    policytags);
 
     return true;
 }
 
-bool
+    bool
 XrlIO::delete_route(IPv4Net net)
 {
     debug_msg("Net %s\n", cstring(net));
@@ -867,7 +897,7 @@ XrlIO::delete_route(IPv4Net net)
     return true;
 }
 
-void
+    void
 XrlIO::tree_complete()
 {
     //
@@ -876,7 +906,7 @@ XrlIO::tree_complete()
     updates_made();
 }
 
-void
+    void
 XrlIO::updates_made()
 {
     IfMgrIfTree::IfMap::const_iterator ii;
@@ -893,8 +923,8 @@ XrlIO::updates_made()
     // Check whether the old interfaces, vifs and addresses are still there
     //
     for (ii = _iftree.interfaces().begin();
-	 ii != _iftree.interfaces().end();
-	 ++ii)
+	    ii != _iftree.interfaces().end();
+	    ++ii)
     {
 	bool is_old_interface_enabled = false;
 	bool is_new_interface_enabled = false;
@@ -909,71 +939,82 @@ XrlIO::updates_made()
 
 	// Check the interface
 	other_if_atom = ifmgr_iftree().find_interface(if_atom->name());
-	if (other_if_atom == NULL) {
+	if (other_if_atom == NULL) 
+	{
 	    // The interface has disappeared
 	    is_new_interface_enabled = false;
-	} else {
+	} else 
+	{
 	    is_new_interface_enabled = other_if_atom->enabled();
 	    is_new_interface_enabled &= (! other_if_atom->no_carrier());
 	}
 
 	if ((is_old_interface_enabled != is_new_interface_enabled)
-	    && (! _interface_status_cb.is_empty())) {
+		&& (! _interface_status_cb.is_empty())) 
+	{
 	    // The interface's enabled flag has changed
 	    _interface_status_cb->dispatch(if_atom->name(),
-					   is_new_interface_enabled);
+		    is_new_interface_enabled);
 	}
 
-	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) 
+	{
 	    vif_atom = &vi->second;
 	    is_old_vif_enabled = vif_atom->enabled();
 	    is_old_vif_enabled &= is_old_interface_enabled;
 
 	    // Check the vif
 	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
-						     vif_atom->name());
-	    if (other_vif_atom == NULL) {
+		    vif_atom->name());
+	    if (other_vif_atom == NULL) 
+	    {
 		// The vif has disappeared
 		is_new_vif_enabled = false;
-	    } else {
+	    } else 
+	    {
 		is_new_vif_enabled = other_vif_atom->enabled();
 	    }
 	    is_new_vif_enabled &= is_new_interface_enabled;
 
 	    if ((is_old_vif_enabled != is_new_vif_enabled)
-		&& (! _vif_status_cb.is_empty())) {
+		    && (! _vif_status_cb.is_empty())) 
+	    {
 		// The vif's enabled flag has changed
 		_vif_status_cb->dispatch(if_atom->name(),
-					 vif_atom->name(),
-					 is_new_vif_enabled);
+			vif_atom->name(),
+			is_new_vif_enabled);
 	    }
 
 	    for (ai = vif_atom->ipv4addrs().begin();
-		 ai != vif_atom->ipv4addrs().end();
-		 ++ai) {
+		    ai != vif_atom->ipv4addrs().end();
+		    ++ai) 
+	    {
 		addr_atom = &ai->second;
 		is_old_address_enabled = addr_atom->enabled();
 		is_old_address_enabled &= is_old_vif_enabled;
 
 		// Check the address
 		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
-							   vif_atom->name(),
-							   addr_atom->addr());
-		if (other_addr_atom == NULL) {
+			vif_atom->name(),
+			addr_atom->addr());
+		if (other_addr_atom == NULL) 
+		{
 		    // The address has disappeared
 		    is_new_address_enabled = false;
-		} else {
+		} else 
+		{
 		    is_new_address_enabled = other_addr_atom->enabled();
 		}
 		is_new_address_enabled &= is_new_vif_enabled;
 
 		if ((is_old_address_enabled != is_new_address_enabled)
-		    && (! _address_status_cb.is_empty())) {
+			&& (! _address_status_cb.is_empty())) 
+		{
 		    // The address's enabled flag has changed
 		    _address_status_cb->dispatch(if_atom->name(),
-						 vif_atom->name(),
-						 addr_atom->addr(),
-						 is_new_address_enabled);
+			    vif_atom->name(),
+			    addr_atom->addr(),
+			    is_new_address_enabled);
 		}
 	    }
 	}
@@ -983,58 +1024,67 @@ XrlIO::updates_made()
     // Check for new interfaces, vifs and addresses
     //
     for (ii = ifmgr_iftree().interfaces().begin();
-	 ii != ifmgr_iftree().interfaces().end();
-	 ++ii) {
+	    ii != ifmgr_iftree().interfaces().end();
+	    ++ii) 
+    {
 	if_atom = &ii->second;
 
 	// Check the interface
 	other_if_atom = _iftree.find_interface(if_atom->name());
-	if (other_if_atom == NULL) {
+	if (other_if_atom == NULL) 
+	{
 	    // A new interface
 	    if (if_atom->enabled()
-		&& (! if_atom->no_carrier())
-		&& (! _interface_status_cb.is_empty())) {
+		    && (! if_atom->no_carrier())
+		    && (! _interface_status_cb.is_empty())) 
+	    {
 		_interface_status_cb->dispatch(if_atom->name(), true);
 	    }
 	}
 
-	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) 
+	{
 	    vif_atom = &vi->second;
 
 	    // Check the vif
 	    other_vif_atom = _iftree.find_vif(if_atom->name(),
-					      vif_atom->name());
-	    if (other_vif_atom == NULL) {
+		    vif_atom->name());
+	    if (other_vif_atom == NULL) 
+	    {
 		// A new vif
 		if (if_atom->enabled()
-		    && (! if_atom->no_carrier())
-		    && (vif_atom->enabled())
-		    && (! _vif_status_cb.is_empty())) {
+			&& (! if_atom->no_carrier())
+			&& (vif_atom->enabled())
+			&& (! _vif_status_cb.is_empty())) 
+		{
 		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
-					     true);
+			    true);
 		}
 	    }
 
 	    for (ai = vif_atom->ipv4addrs().begin();
-		 ai != vif_atom->ipv4addrs().end();
-		 ++ai) {
+		    ai != vif_atom->ipv4addrs().end();
+		    ++ai) 
+	    {
 		addr_atom = &ai->second;
 
 		// Check the address
 		other_addr_atom = _iftree.find_addr(if_atom->name(),
-						    vif_atom->name(),
-						    addr_atom->addr());
-		if (other_addr_atom == NULL) {
+			vif_atom->name(),
+			addr_atom->addr());
+		if (other_addr_atom == NULL) 
+		{
 		    // A new address
 		    if (if_atom->enabled()
-			&& (! if_atom->no_carrier())
-			&& (vif_atom->enabled())
-			&& (addr_atom->enabled())
-			&& (! _address_status_cb.is_empty())) {
+			    && (! if_atom->no_carrier())
+			    && (vif_atom->enabled())
+			    && (addr_atom->enabled())
+			    && (! _address_status_cb.is_empty())) 
+		    {
 			_address_status_cb->dispatch(if_atom->name(),
-						     vif_atom->name(),
-						     addr_atom->addr(),
-						     true);
+				vif_atom->name(),
+				addr_atom->addr(),
+				true);
 		    }
 		}
 	    }
@@ -1048,17 +1098,18 @@ XrlIO::updates_made()
 }
 
 // Gradually start each XrlPort to avoid races with the FEA.
-void
+    void
 XrlIO::try_start_next_port()
 {
     // If there are any ports currently starting up,
     // do not try to start another.
     XrlPortList::const_iterator cpi;
     cpi = find_if(_ports.begin(), _ports.end(),
-		  port_has_io_in_state(SERVICE_STARTING));
-    if (cpi != _ports.end()) {
+	    port_has_io_in_state(SERVICE_STARTING));
+    if (cpi != _ports.end()) 
+    {
 	debug_msg("doing nothing (there is a port %p in SERVICE_STARTING "
-		  "state).\n", (*cpi));
+		"state).\n", (*cpi));
 	return;
     }
 
@@ -1066,10 +1117,12 @@ XrlIO::try_start_next_port()
     // to start it up.
     XrlPortList::iterator xpi = _ports.begin();
     XrlPort* xp = 0;
-    while (xp == 0) {
+    while (xp == 0) 
+    {
 	xpi = find_if(xpi, _ports.end(),
-		      port_has_io_in_state(SERVICE_READY));
-	if (xpi == _ports.end()) {
+		port_has_io_in_state(SERVICE_READY));
+	if (xpi == _ports.end()) 
+	{
 	    debug_msg("reached end of ports in SERVICE_READY state\n");
 	    return;
 	}
@@ -1081,20 +1134,22 @@ XrlIO::try_start_next_port()
     xp->startup();
 }
 
-XrlPort*
+    XrlPort*
 XrlIO::find_port(const string&	ifname,
-		 const string&	vifname,
-		 const IPv4&	addr)
+	const string&	vifname,
+	const IPv4&	addr)
 {
     XrlPortList::iterator xpi;
     xpi = find_if(this->ports().begin(), this->ports().end(),
-		  port_has_local_address(addr));
-    if (xpi == this->ports().end()) {
+	    port_has_local_address(addr));
+    if (xpi == this->ports().end()) 
+    {
 	return 0;
     }
 
     XrlPort* xp = (*xpi);
-    if (xp->ifname() != ifname || xp->vifname() != vifname) {
+    if (xp->ifname() != ifname || xp->vifname() != vifname) 
+    {
 	return 0;
     }
     return xp;
@@ -1102,18 +1157,20 @@ XrlIO::find_port(const string&	ifname,
 
 const XrlPort*
 XrlIO::find_port(const string&	ifname,
-		 const string&	vifname,
-		 const IPv4&	addr) const
+	const string&	vifname,
+	const IPv4&	addr) const
 {
     XrlPortList::const_iterator xpi;
     xpi = find_if(this->ports().begin(), this->ports().end(),
-		  port_has_local_address(addr));
-    if (xpi == this->ports().end()) {
+	    port_has_local_address(addr));
+    if (xpi == this->ports().end()) 
+    {
 	return 0;
     }
 
     const XrlPort* xp = (*xpi);
-    if (xp->ifname() != ifname || xp->vifname() != vifname) {
+    if (xp->ifname() != ifname || xp->vifname() != vifname) 
+    {
 	return 0;
     }
     return xp;

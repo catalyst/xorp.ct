@@ -26,14 +26,14 @@
 #include "libxorp/debug.h"
 #include "rib_varrw.hh"
 
-template <class A>
-RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route)
-    : _route(route)
+    template <class A>
+    RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route)
+: _route(route)
 {
 }
 
 template <class A>
-void
+    void
 RIBVarRW<A>::start_read()
 {
     initialize(_route.policytags());
@@ -48,38 +48,38 @@ RIBVarRW<A>::start_read()
 }
 
 template <>
-void
+    void
 RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route)
 {
     initialize(VAR_NETWORK4,
-	       _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
+	    _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
     initialize(VAR_NEXTHOP4, _ef.create(ElemIPv4NextHop::id,
-               route.nexthop_addr().str().c_str()));
+		route.nexthop_addr().str().c_str()));
     initialize(VAR_NETWORK6, NULL);
     initialize(VAR_NEXTHOP6, NULL);
 }
 
 template <>
-void
+    void
 RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route)
 {
     initialize(VAR_NETWORK6,
-	       _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
+	    _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
     initialize(VAR_NEXTHOP6, _ef.create(ElemIPv6NextHop::id,
-               route.nexthop_addr().str().c_str()));
+		route.nexthop_addr().str().c_str()));
 
     initialize(VAR_NETWORK4, NULL);
     initialize(VAR_NEXTHOP4, NULL);
 }
 
 template <class A>
-void
+    void
 RIBVarRW<A>::single_write(const Id& /* id */, const Element& /* e */)
 {
 }
 
 template <class A>
-Element*
+    Element*
 RIBVarRW<A>::single_read(const Id& /* id */)
 {
     XLOG_UNREACHABLE();

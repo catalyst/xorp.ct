@@ -28,35 +28,37 @@
 
 #include "fib2mrib_varrw.hh"
 
-Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
-    : _route(route), _is_ipv4(route.is_ipv4()), _is_ipv6(route.is_ipv6())
+    Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
+: _route(route), _is_ipv4(route.is_ipv4()), _is_ipv6(route.is_ipv6())
 {
 }
 
-void
+    void
 Fib2mribVarRW::start_read()
 {
     initialize(_route.policytags());
 
-    if (_is_ipv4) {
+    if (_is_ipv4) 
+    {
 	initialize(VAR_NETWORK4,
-		   _ef.create(ElemIPv4Net::id,
-			      _route.network().str().c_str()));
+		_ef.create(ElemIPv4Net::id,
+		    _route.network().str().c_str()));
 	initialize(VAR_NEXTHOP4,
-		   _ef.create(ElemIPv4NextHop::id,
-			      _route.nexthop().str().c_str()));
-	
+		_ef.create(ElemIPv4NextHop::id,
+		    _route.nexthop().str().c_str()));
+
 	initialize(VAR_NETWORK6, NULL);
 	initialize(VAR_NEXTHOP6, NULL);
     }
 
-    if (_is_ipv6) {
+    if (_is_ipv6) 
+    {
 	initialize(VAR_NETWORK6,
-		   _ef.create(ElemIPv6Net::id,
-			      _route.network().str().c_str()));
+		_ef.create(ElemIPv6Net::id,
+		    _route.network().str().c_str()));
 	initialize(VAR_NEXTHOP6,
-		   _ef.create(ElemIPv6NextHop::id,
-			      _route.nexthop().str().c_str()));
+		_ef.create(ElemIPv6NextHop::id,
+		    _route.nexthop().str().c_str()));
 
 	initialize(VAR_NETWORK4, NULL);
 	initialize(VAR_NEXTHOP4, NULL);
@@ -69,12 +71,12 @@ Fib2mribVarRW::start_read()
     initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str()));
 }
 
-void
+    void
 Fib2mribVarRW::single_write(const Id& /* id */, const Element& /* e */)
 {
 }
 
-Element*
+    Element*
 Fib2mribVarRW::single_read(const Id& /*id */)
 {
     XLOG_UNREACHABLE();

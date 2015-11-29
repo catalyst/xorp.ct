@@ -53,7 +53,8 @@ VarMap::variable(const string& protocol, const VarRW::Id& varname) const
 
     VariableMap::const_iterator i = vmap.find(varname);
 
-    if(i == vmap.end()) {
+    if(i == vmap.end()) 
+    {
 	ostringstream oss;
 
 	oss << "Unknown variable: " << varname << " in protocol " << protocol;
@@ -75,8 +76,9 @@ VarMap::VarMap(ProcessWatchBase& pw) : _process_watch(pw)
 VarMap::~VarMap()
 {
     for(ProtoMap::iterator i = _protocols.begin();
-	i != _protocols.end(); ++i) {
-	
+	    i != _protocols.end(); ++i) 
+    {
+
 	VariableMap* vm = (*i).second;
 
 	clear_map(*vm);	
@@ -86,18 +88,19 @@ VarMap::~VarMap()
 }
 
 
-bool 
+    bool 
 VarMap::protocol_known(const string& protocol)
 {
     return _protocols.find(protocol) != _protocols.end();
 }
 
-void 
+    void 
 VarMap::add_variable(VariableMap& vm, Variable* var)
 {
     VariableMap::iterator i = vm.find(var->id);
 
-    if(i != vm.end()) {
+    if(i != vm.end()) 
+    {
 	// XXX: if the same variable already exists, then return silently
 	Variable* old_var = i->second;
 	if (*old_var == *var)
@@ -108,19 +111,20 @@ VarMap::add_variable(VariableMap& vm, Variable* var)
 	delete var;
 	xorp_throw(VarMapErr, oss.str());
     }	
-    
+
     vm[var->id] = var;
 }
 
-void 
+    void 
 VarMap::add_protocol_variable(const string& protocol, Variable* var)
 {
 
     debug_msg("[POLICY] VarMap adding proto: %s, var: %s, type: %s, R/W: %d, ID: %d\n",
-	      protocol.c_str(), var->name.c_str(), 
-	      var->type.c_str(), var->access, var->id);
+	    protocol.c_str(), var->name.c_str(), 
+	    var->type.c_str(), var->access, var->id);
 
-    if (!ElementFactory::can_create(var->type)) {
+    if (!ElementFactory::can_create(var->type)) 
+    {
 	ostringstream oss;
 
 	oss << "Unable to create element of type: " << var->type
@@ -133,32 +137,35 @@ VarMap::add_protocol_variable(const string& protocol, Variable* var)
     VariableMap* vm;
 
     // if no variablemap exists for the protocol exists, create one
-    if(iter == _protocols.end()) {
-        vm = new VariableMap();
-        _protocols[protocol] = vm;
-    
-        _process_watch.add_interest(protocol);
+    if(iter == _protocols.end()) 
+    {
+	vm = new VariableMap();
+	_protocols[protocol] = vm;
+
+	_process_watch.add_interest(protocol);
 
 	// add the metavars
 	for (MetaVarContainer::iterator i = _metavars.begin(); i !=
-	     _metavars.end(); ++i) {
-	    
+		_metavars.end(); ++i) 
+	{
+
 	    Variable* v = i->second;
 	    add_variable(*vm, new Variable(*v));
 	}
     }
     // or else just update existing one
     else 
-        vm = (*iter).second;
+	vm = (*iter).second;
 
     add_variable(*vm, var);
 
 }
 
-void
+    void
 VarMap::add_metavariable(Variable* v)
 {
-    if (_metavars.find(v->id) != _metavars.end()) {
+    if (_metavars.find(v->id) != _metavars.end()) 
+    {
 	ostringstream oss;
 
 	oss << "Metavar: " << v->id << " exists already" << endl;
@@ -169,19 +176,21 @@ VarMap::add_metavariable(Variable* v)
     _metavars[v->id] = v;
 }
 
-string
+    string
 VarMap::str()
 {
     ostringstream out;
 
     // go through protocols
     for (ProtoMap::iterator i = _protocols.begin(); 
-	 i != _protocols.end(); ++i) {
+	    i != _protocols.end(); ++i) 
+    {
 
 	const string& proto = i->first;
 	VariableMap* vm = i->second;
 
-	for(VariableMap::iterator j = vm->begin(); j != vm->end(); ++j) {
+	for(VariableMap::iterator j = vm->begin(); j != vm->end(); ++j) 
+	{
 	    Variable* v = j->second;
 
 	    out << proto << " " << v->name << " " << v->type << " ";
@@ -207,7 +216,8 @@ VarMap::var2id(const string& protocol, const string& varname) const
     const VariableMap* vm = i->second;
 
     // XXX slow & lame.  Semantic checking / compilation will be slow.
-    for (VariableMap::const_iterator j = vm->begin(); j != vm->end(); ++j) {
+    for (VariableMap::const_iterator j = vm->begin(); j != vm->end(); ++j) 
+    {
 	const Variable* v = j->second;
 
 	if (v->name == varname)

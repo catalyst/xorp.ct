@@ -35,63 +35,65 @@ class TemplateTree;
  * It is used as a base class by other classes (e.g., @ref XorpShell)
  * which contain the real implementation.
  */
-class XorpShellBase {
-public:
-    typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
-    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
-    typedef XorpCallback2<void, const XrlError&,
-			  const XrlAtomList*>::RefPtr GET_USERS_CALLBACK;
-    typedef XorpCallback2<void, const XrlError&,
-			  const uint32_t*>::RefPtr PID_CALLBACK;
-    typedef XorpCallback3<void, const XrlError&, const bool*,
-			  const uint32_t*>::RefPtr LOCK_CALLBACK;
+class XorpShellBase 
+{
+    public:
+	typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
+	typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+	typedef XorpCallback2<void, const XrlError&,
+		const XrlAtomList*>::RefPtr GET_USERS_CALLBACK;
+	typedef XorpCallback2<void, const XrlError&,
+		const uint32_t*>::RefPtr PID_CALLBACK;
+	typedef XorpCallback3<void, const XrlError&, const bool*,
+		const uint32_t*>::RefPtr LOCK_CALLBACK;
 
-    virtual ~XorpShellBase() {}
-
-
-    enum Mode {
-	MODE_AUTHENTICATING, 
-	MODE_INITIALIZING, 
-	MODE_IDLE, 
-	MODE_COMMITTING, 
-	MODE_LOADING,
-	MODE_SAVING,
-	MODE_SHUTDOWN
-    };
+	virtual ~XorpShellBase() {}
 
 
-    virtual OpCommandList* op_cmd_list() = 0;
+	enum Mode 
+	{
+	    MODE_AUTHENTICATING, 
+	    MODE_INITIALIZING, 
+	    MODE_IDLE, 
+	    MODE_COMMITTING, 
+	    MODE_LOADING,
+	    MODE_SAVING,
+	    MODE_SHUTDOWN
+	};
 
-    virtual SlaveConfigTree* config_tree() = 0;
 
-    virtual TemplateTree* template_tree() = 0;
+	virtual OpCommandList* op_cmd_list() = 0;
 
-    virtual uint32_t clientid() const = 0;
+	virtual SlaveConfigTree* config_tree() = 0;
 
-    virtual uint32_t rtrmgr_pid() const = 0;
+	virtual TemplateTree* template_tree() = 0;
 
-    virtual bool commit_changes(const string& deltas, const string& deletions,
-				GENERIC_CALLBACK cb, CallBack final_cb) = 0;
-    
-    virtual bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb) = 0;
+	virtual uint32_t clientid() const = 0;
 
-    virtual bool get_config_users(GET_USERS_CALLBACK cb) = 0;
+	virtual uint32_t rtrmgr_pid() const = 0;
 
-    virtual bool get_rtrmgr_pid(PID_CALLBACK cb) = 0;
+	virtual bool commit_changes(const string& deltas, const string& deletions,
+		GENERIC_CALLBACK cb, CallBack final_cb) = 0;
 
-    virtual bool leave_config_mode(GENERIC_CALLBACK cb) = 0;
+	virtual bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb) = 0;
 
-    virtual bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
-				CallBack final_cb) = 0;
+	virtual bool get_config_users(GET_USERS_CALLBACK cb) = 0;
 
-    virtual bool lock_config(LOCK_CALLBACK cb) = 0;
+	virtual bool get_rtrmgr_pid(PID_CALLBACK cb) = 0;
 
-    virtual bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
-			      CallBack final_cb) = 0;
+	virtual bool leave_config_mode(GENERIC_CALLBACK cb) = 0;
 
-    virtual void set_mode(Mode mode) = 0;
+	virtual bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
+		CallBack final_cb) = 0;
 
-    virtual bool unlock_config(GENERIC_CALLBACK cb) = 0;
+	virtual bool lock_config(LOCK_CALLBACK cb) = 0;
+
+	virtual bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
+		CallBack final_cb) = 0;
+
+	virtual void set_mode(Mode mode) = 0;
+
+	virtual bool unlock_config(GENERIC_CALLBACK cb) = 0;
 };
 
 #endif // __RTRMGR_XORPSH_BASE_HH__

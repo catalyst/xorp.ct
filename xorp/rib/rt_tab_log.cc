@@ -28,16 +28,16 @@
 #include "rt_tab_log.hh"
 
 
-template<typename A>
+	template<typename A>
 LogTable<A>::LogTable(const string&   tablename,
-		      RouteTable<A>*  parent)
-    : RouteTable<A>(tablename), _update_number(0)
+		RouteTable<A>*  parent)
+: RouteTable<A>(tablename), _update_number(0)
 {
-    _parent = parent;
-    _parent->set_next_table(this);
+	_parent = parent;
+	_parent->set_next_table(this);
 }
 
-template<typename A>
+	template<typename A>
 LogTable<A>::~LogTable()
 {
 }
@@ -46,114 +46,118 @@ template<typename A>
 uint32_t
 LogTable<A>::update_number() const
 {
-    return _update_number;
+	return _update_number;
 }
 
 template<typename A>
-int
+	int
 LogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
-    _update_number++;
-    RouteTable<A>* n = this->next_table();
-    if (n != NULL) {
-	return n->add_route(route);
-    }
-    return XORP_OK;
+	_update_number++;
+	RouteTable<A>* n = this->next_table();
+	if (n != NULL) 
+	{
+		return n->add_route(route);
+	}
+	return XORP_OK;
 }
 
 template<typename A>
-int
+	int
 LogTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
-    RouteTable<A>* n = this->next_table();
-    if (n != NULL) {
-	return n->delete_route(route);
-    }
-    _update_number++;
-    return XORP_OK;
+	RouteTable<A>* n = this->next_table();
+	if (n != NULL) 
+	{
+		return n->delete_route(route);
+	}
+	_update_number++;
+	return XORP_OK;
 }
 
 template<typename A>
 const IPRouteEntry<A>*
 LogTable<A>::lookup_route(const IPNet<A>& net) const
 {
-    return _parent->lookup_route(net);
+	return _parent->lookup_route(net);
 }
 
 template<typename A>
 const IPRouteEntry<A>*
 LogTable<A>::lookup_route(const A& addr) const
 {
-    return _parent->lookup_route(addr);
+	return _parent->lookup_route(addr);
 }
 
 template<typename A>
-void
+	void
 LogTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    _parent = new_parent;
+	_parent = new_parent;
 }
 
 template<typename A>
 RouteRange<A>*
 LogTable<A>::lookup_route_range(const A& addr) const
 {
-    return _parent->lookup_route_range(addr);
+	return _parent->lookup_route_range(addr);
 }
 
 template<typename A> string
 LogTable<A>::str() const
 {
-    string s;
-    s = "-------\nLogTable: " + this->tablename() + "\n";
-    s += "parent = " + _parent->tablename() + "\n";
-    return s;
+	string s;
+	s = "-------\nLogTable: " + this->tablename() + "\n";
+	s += "parent = " + _parent->tablename() + "\n";
+	return s;
 }
 
 
 // ----------------------------------------------------------------------------
 
-template <typename A>
+	template <typename A>
 OstreamLogTable<A>::OstreamLogTable(const string&	tablename,
-				    RouteTable<A>*	parent,
-				    ostream&	out)
-    : LogTable<A>(tablename, parent), _o(out)
+		RouteTable<A>*	parent,
+		ostream&	out)
+: LogTable<A>(tablename, parent), _o(out)
 {
 }
 
 template <typename A>
-int
+	int
 OstreamLogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
-    _o << this->update_number() << (const char*)(" Add: ") << route.str()
-       << (const char*)(" Return: ");
-    int s = LogTable<A>::add_route(route);
-    _o << s << endl;
-    return s;
+	_o << this->update_number() << (const char*)(" Add: ") << route.str()
+		<< (const char*)(" Return: ");
+	int s = LogTable<A>::add_route(route);
+	_o << s << endl;
+	return s;
 }
 
 template <typename A>
-int
+	int
 OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
-    if (route != NULL) {
-	_o << this->update_number() << (const char*)(" Delete: ") << route->str()
-	   << (const char*)(" Return: ");
-    }
+	if (route != NULL) 
+	{
+		_o << this->update_number() << (const char*)(" Delete: ") << route->str()
+			<< (const char*)(" Return: ");
+	}
 
-    int s = LogTable<A>::delete_route(route);
+	int s = LogTable<A>::delete_route(route);
 
-    if (route != NULL) {
-	_o << s << endl;
-    }
-    return s;
+	if (route != NULL) 
+	{
+		_o << s << endl;
+	}
+	return s;
 }
 
 template <typename A>
 string
 OstreamLogTable<A>::str() const
 {
-    return "OstreamLogTable<" + A::ip_version_str() + ">";
+	return "OstreamLogTable<" + A::ip_version_str() + ">";
 }
 
 template class OstreamLogTable<IPv4>;
@@ -164,54 +168,56 @@ template class OstreamLogTable<IPv6>;
 #include "rib_module.h"
 #include "libxorp/xlog.h"
 
-template <typename A>
+	template <typename A>
 XLogTraceTable<A>::XLogTraceTable(const string&	tablename,
-				  RouteTable<A>* parent)
+		RouteTable<A>* parent)
 
-    : LogTable<A>(tablename, parent)
+: LogTable<A>(tablename, parent)
 {
 }
 
 template <typename A>
-int
+	int
 XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
-    string msg = c_format("%u Add: %s Return: ",
-			  XORP_UINT_CAST(this->update_number()),
-			  route.str().c_str());
-    int s = LogTable<A>::add_route(route);
-    msg += c_format("%d\n", s);
-    XLOG_TRACE(true, "%s", msg.c_str());
+	string msg = c_format("%u Add: %s Return: ",
+			XORP_UINT_CAST(this->update_number()),
+			route.str().c_str());
+	int s = LogTable<A>::add_route(route);
+	msg += c_format("%d\n", s);
+	XLOG_TRACE(true, "%s", msg.c_str());
 
-    return s;
+	return s;
 }
 
 template <typename A>
-int
+	int
 XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
-    string msg;
+	string msg;
 
-    if (route != NULL) {
-	msg = c_format("%u Delete: %s Return: ",
-		       XORP_UINT_CAST(this->update_number()),
-		       route->str().c_str());
-    }
+	if (route != NULL) 
+	{
+		msg = c_format("%u Delete: %s Return: ",
+				XORP_UINT_CAST(this->update_number()),
+				route->str().c_str());
+	}
 
-    int s = LogTable<A>::delete_route(route);
+	int s = LogTable<A>::delete_route(route);
 
-    if (route != NULL) {
-	msg += c_format("%d\n", s);
-	XLOG_TRACE(true, "%s", msg.c_str());
-    }
-    return s;
+	if (route != NULL) 
+	{
+		msg += c_format("%d\n", s);
+		XLOG_TRACE(true, "%s", msg.c_str());
+	}
+	return s;
 }
 
 template <typename A>
 string
 XLogTraceTable<A>::str() const
 {
-    return "XLogTraceTable<" + A::ip_version_str() + ">";
+	return "XLogTraceTable<" + A::ip_version_str() + ">";
 }
 
 template class XLogTraceTable<IPv4>;
@@ -226,54 +232,56 @@ template class XLogTraceTable<IPv6>;
 
 #include "libxorp/debug.h"
 
-template <typename A>
+	template <typename A>
 DebugMsgLogTable<A>::DebugMsgLogTable(const string&	tablename,
-				  RouteTable<A>* parent)
+		RouteTable<A>* parent)
 
-    : LogTable<A>(tablename, parent)
+: LogTable<A>(tablename, parent)
 {
 }
 
 template <typename A>
-int
+	int
 DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
-    string msg = c_format("%u Add: %s Return: ",
-			  XORP_UINT_CAST(this->update_number()),
-			  route.str().c_str());
-    int s = LogTable<A>::add_route(route);
-    msg += c_format("%d\n", s);
-    debug_msg("%s", msg.c_str());
+	string msg = c_format("%u Add: %s Return: ",
+			XORP_UINT_CAST(this->update_number()),
+			route.str().c_str());
+	int s = LogTable<A>::add_route(route);
+	msg += c_format("%d\n", s);
+	debug_msg("%s", msg.c_str());
 
-    return s;
+	return s;
 }
 
 template <typename A>
-int
+	int
 DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
-    string msg;
+	string msg;
 
-    if (route != NULL) {
-	msg = c_format("%u Delete: %s Return: ",
-		       XORP_UINT_CAST(this->update_number()),
-		       route->str().c_str());
-    }
+	if (route != NULL) 
+	{
+		msg = c_format("%u Delete: %s Return: ",
+				XORP_UINT_CAST(this->update_number()),
+				route->str().c_str());
+	}
 
-    int s = LogTable<A>::delete_route(route);
+	int s = LogTable<A>::delete_route(route);
 
-    if (route != NULL) {
-	msg += c_format("%d\n", s);
-	debug_msg("%s", msg.c_str());
-    }
-    return s;
+	if (route != NULL) 
+	{
+		msg += c_format("%d\n", s);
+		debug_msg("%s", msg.c_str());
+	}
+	return s;
 }
 
 template <typename A>
 string
 DebugMsgLogTable<A>::str() const
 {
-    return "DebugMsgLogTable<" + A::ip_version_str() + ">";
+	return "DebugMsgLogTable<" + A::ip_version_str() + ">";
 }
 
 template class DebugMsgLogTable<IPv4>;

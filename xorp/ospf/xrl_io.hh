@@ -38,63 +38,66 @@ template <typename A> class XrlIO;
  * Queue route adds and deletes to the RIB.
  */
 template <class A>
-class XrlQueue {
-public:
-    XrlQueue( XrlRouter& xrl_router);
+class XrlQueue 
+{
+    public:
+	XrlQueue( XrlRouter& xrl_router);
 
-    void set_io(XrlIO<A> *io) {
-	_io = io;
-    }
+	void set_io(XrlIO<A> *io) 
+	{
+	    _io = io;
+	}
 
-    void queue_add_route(string ribname, const IPNet<A>& net,
-			 const A& nexthop, uint32_t nexthop_id, 
-			 uint32_t metric, const PolicyTags& policytags);
+	void queue_add_route(string ribname, const IPNet<A>& net,
+		const A& nexthop, uint32_t nexthop_id, 
+		uint32_t metric, const PolicyTags& policytags);
 
-    void queue_delete_route(string ribname, const IPNet<A>& net);
+	void queue_delete_route(string ribname, const IPNet<A>& net);
 
-    bool busy();
-private:
-    static const size_t WINDOW = 100;	// Maximum number of XRLs
-					// allowed in flight.
+	bool busy();
+    private:
+	static const size_t WINDOW = 100;	// Maximum number of XRLs
+	// allowed in flight.
 
-    XrlIO<A>    *_io;
-    XrlRouter& _xrl_router;
+	XrlIO<A>    *_io;
+	XrlRouter& _xrl_router;
 
-    struct Queued {
-	bool add;
-	string ribname;
-	IPNet<A> net;
-	A nexthop;
-	uint32_t nexthop_id;
-	uint32_t metric;
-	string comment;
-	PolicyTags policytags;
-    };
+	struct Queued 
+	{
+	    bool add;
+	    string ribname;
+	    IPNet<A> net;
+	    A nexthop;
+	    uint32_t nexthop_id;
+	    uint32_t metric;
+	    string comment;
+	    PolicyTags policytags;
+	};
 
-    deque <Queued> _xrl_queue;
-    size_t _flying; //XRLs currently in flight
+	deque <Queued> _xrl_queue;
+	size_t _flying; //XRLs currently in flight
 
-    /**
-     * Maximum number in flight
-     */
-    bool maximum_number_inflight() const { return _flying >= WINDOW; }
+	/**
+	 * Maximum number in flight
+	 */
+	bool maximum_number_inflight() const { return _flying >= WINDOW; }
 
-    /**
-     * Start the transmission of XRLs to tbe RIB.
-     */
-    void start();
+	/**
+	 * Start the transmission of XRLs to tbe RIB.
+	 */
+	void start();
 
-    /**
-     * The specialised method called by sendit to deal with IPv4/IPv6.
-     *
-     * @param q the queued command.
-     * @param protocol "ospf"
-     * @return True if the add/delete was queued.
-     */
-    bool sendit_spec(Queued& q, const char *protocol);
+	/**
+	 * The specialised method called by sendit to deal with IPv4/IPv6.
+	 *
+	 * @param q the queued command.
+	 * @param protocol "ospf"
+	 * @return True if the add/delete was queued.
+	 */
+	bool sendit_spec(Queued& q, const char *protocol);
 
 
-    void route_command_done(const XrlError& error, const string comment);
+	void route_command_done(const XrlError& error, const string comment);
 };
 
 /**
@@ -102,18 +105,19 @@ private:
  */
 template <typename A>
 class XrlIO : public IO<A>,
-	      public IfMgrHintObserver,
-	      public ServiceChangeObserverBase {
- public:
-    XrlIO( XrlRouter& xrl_router, const string& feaname,
-	  const string& ribname)
-	: _xrl_router(xrl_router),
-	  _feaname(feaname),
-	  _ribname(ribname),
-	  _component_count(0),
-	  _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
-		 _xrl_router.finder_port()),
-	  _rib_queue( xrl_router)
+    public IfMgrHintObserver,
+    public ServiceChangeObserverBase 
+{
+    public:
+	XrlIO( XrlRouter& xrl_router, const string& feaname,
+		const string& ribname)
+	    : _xrl_router(xrl_router),
+	    _feaname(feaname),
+	    _ribname(ribname),
+	    _component_count(0),
+	    _ifmgr( feaname.c_str(), _xrl_router.finder_address(),
+		    _xrl_router.finder_port()),
+	    _rib_queue( xrl_router)
 
     {
 	_ifmgr.set_observer(this);
@@ -123,341 +127,349 @@ class XrlIO : public IO<A>,
 	// TODO: for now startup inside the constructor. Ideally, we want
 	// to startup after the FEA birth event.
 	//
-// 	startup();
+	// 	startup();
     }
 
-    ~XrlIO() {
-	//
-	// TODO: for now shutdown inside the destructor. Ideally, we want
-	// to shutdown gracefully before we call the destructor.
-	//
-// 	shutdown();
+	~XrlIO() 
+	{
+	    //
+	    // TODO: for now shutdown inside the destructor. Ideally, we want
+	    // to shutdown gracefully before we call the destructor.
+	    //
+	    // 	shutdown();
 
-	_ifmgr.detach_hint_observer(this);
-	_ifmgr.unset_observer(this);
-    }
-
-    /**
-     * Startup operation.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int startup() {
-	//
-	// XXX: when the startup is completed,
-	// IfMgrHintObserver::tree_complete() will be called.
-	//
-	if (_ifmgr.startup() != XORP_OK) {
-	    ServiceBase::set_status(SERVICE_FAILED);
-	    return (XORP_ERROR);
+	    _ifmgr.detach_hint_observer(this);
+	    _ifmgr.unset_observer(this);
 	}
 
- 	register_rib();
-	component_up("startup");
+	/**
+	 * Startup operation.
+	 *
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int startup() 
+	{
+	    //
+	    // XXX: when the startup is completed,
+	    // IfMgrHintObserver::tree_complete() will be called.
+	    //
+	    if (_ifmgr.startup() != XORP_OK) 
+	    {
+		ServiceBase::set_status(SERVICE_FAILED);
+		return (XORP_ERROR);
+	    }
 
-	return (XORP_OK);
-    }
+	    register_rib();
+	    component_up("startup");
+
+	    return (XORP_OK);
+	}
 
 
-    /**
-     * Shutdown operation.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int shutdown() {
-	//
-	// XXX: when the shutdown is completed, XrlIO::status_change()
-	// will be called.
-	//
+	/**
+	 * Shutdown operation.
+	 *
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int shutdown() 
+	{
+	    //
+	    // XXX: when the shutdown is completed, XrlIO::status_change()
+	    // will be called.
+	    //
 
-	unregister_rib();
-	component_down("shutdown");
+	    unregister_rib();
+	    component_down("shutdown");
 
-	return (_ifmgr.shutdown());
-    }
+	    return (_ifmgr.shutdown());
+	}
 
-    /**
-     * Called when internal subsystem comes up.
-     */
-    void component_up(string /*name*/) {
-//  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
-// 		_component_count + 1);
-	_component_count++;
-	// XXX - Should really get every component to register at
-	// initialisation time and track the individual
-	// status. Simpler to uncomment the printfs and track the count.
+	/**
+	 * Called when internal subsystem comes up.
+	 */
+	void component_up(string /*name*/) 
+	{
+	    //  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
+	    // 		_component_count + 1);
+	    _component_count++;
+	    // XXX - Should really get every component to register at
+	    // initialisation time and track the individual
+	    // status. Simpler to uncomment the printfs and track the count.
 #ifdef HAVE_IPV6
-	if (4 == _component_count)
-	    ServiceBase::set_status(SERVICE_RUNNING);
+	    if (4 == _component_count)
+		ServiceBase::set_status(SERVICE_RUNNING);
 #else
-	if (3 == _component_count)
-	    ServiceBase::set_status(SERVICE_RUNNING);
+	    if (3 == _component_count)
+		ServiceBase::set_status(SERVICE_RUNNING);
 #endif
-    }
+	}
 
-    /**
-     * Called when internal subsystem goes down.
-     */
-    void component_down(string /*name*/) {
-//  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
-// 		_component_count - 1);
-	_component_count--;
-	if (0 == _component_count)
-	    ServiceBase::set_status(SERVICE_SHUTDOWN);
-	else
-	    ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
-    }
+	/**
+	 * Called when internal subsystem goes down.
+	 */
+	void component_down(string /*name*/) 
+	{
+	    //  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
+	    // 		_component_count - 1);
+	    _component_count--;
+	    if (0 == _component_count)
+		ServiceBase::set_status(SERVICE_SHUTDOWN);
+	    else
+		ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
+	}
 
-    /**
-     * Receiver Raw frames.
-     */
-    void recv(const string& interface,
-	      const string& vif,
-	      A src,
-	      A dst,
-	      uint8_t ip_protocol,
-	      int32_t ip_ttl,
-	      int32_t ip_tos,
-	      bool ip_router_alert,
-	      bool ip_internet_control,
-	      const vector<uint8_t>& payload);
+	/**
+	 * Receiver Raw frames.
+	 */
+	void recv(const string& interface,
+		const string& vif,
+		A src,
+		A dst,
+		uint8_t ip_protocol,
+		int32_t ip_ttl,
+		int32_t ip_tos,
+		bool ip_router_alert,
+		bool ip_internet_control,
+		const vector<uint8_t>& payload);
 
-    /**
-     * Send Raw frames.
-     */
-    bool send(const string& interface, const string& vif, 
-	      A dst, A src,
-	      int ttl, uint8_t* data, uint32_t len);
+	/**
+	 * Send Raw frames.
+	 */
+	bool send(const string& interface, const string& vif, 
+		A dst, A src,
+		int ttl, uint8_t* data, uint32_t len);
 
-    /**
-     * Enable the interface/vif to receive frames.
-     */
-    bool enable_interface_vif(const string& interface, const string& vif);
+	/**
+	 * Enable the interface/vif to receive frames.
+	 */
+	bool enable_interface_vif(const string& interface, const string& vif);
 
-    /**
-     * Disable this interface/vif from receiving frames.
-     */
-    bool disable_interface_vif(const string& interface, const string& vif);
+	/**
+	 * Disable this interface/vif from receiving frames.
+	 */
+	bool disable_interface_vif(const string& interface, const string& vif);
 
-    /**
-     * Test whether an interface is enabled.
-     *
-     * @param interface the name of the interface to test.
-     * @return true if it exists and is enabled, otherwise false.
-     */
-    bool is_interface_enabled(const string& interface) const;
+	/**
+	 * Test whether an interface is enabled.
+	 *
+	 * @param interface the name of the interface to test.
+	 * @return true if it exists and is enabled, otherwise false.
+	 */
+	bool is_interface_enabled(const string& interface) const;
 
-    /**
-     * Test whether an interface/vif is enabled.
-     *
-     * @param interface the name of the interface to test.
-     * @param vif the name of the vif to test.
-     * @return true if it exists and is enabled, otherwise false.
-     */
-    bool is_vif_enabled(const string& interface, const string& vif) const;
+	/**
+	 * Test whether an interface/vif is enabled.
+	 *
+	 * @param interface the name of the interface to test.
+	 * @param vif the name of the vif to test.
+	 * @return true if it exists and is enabled, otherwise false.
+	 */
+	bool is_vif_enabled(const string& interface, const string& vif) const;
 
-    /**
-     * Test whether an interface/vif/address is enabled.
-     *
-     * @param interface the name of the interface to test.
-     * @param vif the name of the vif to test.
-     * @param address the address to test.
-     * @return true if it exists and is enabled, otherwise false.
-     */
-    bool is_address_enabled(const string& interface, const string& vif,
-			    const A& address) const;
+	/**
+	 * Test whether an interface/vif/address is enabled.
+	 *
+	 * @param interface the name of the interface to test.
+	 * @param vif the name of the vif to test.
+	 * @param address the address to test.
+	 * @return true if it exists and is enabled, otherwise false.
+	 */
+	bool is_address_enabled(const string& interface, const string& vif,
+		const A& address) const;
 
-    /**
-     * Get all addresses associated with this interface/vif.
-     *
-     * @param interface the name of the interface
-     * @param vif the name of the vif
-     * @param addresses (out argument) list of associated addresses
-     *
-     * @return true if there are no errors.
-     */
-    bool get_addresses(const string& interface, const string& vif,
-		       list<A>& addresses) const;
+	/**
+	 * Get all addresses associated with this interface/vif.
+	 *
+	 * @param interface the name of the interface
+	 * @param vif the name of the vif
+	 * @param addresses (out argument) list of associated addresses
+	 *
+	 * @return true if there are no errors.
+	 */
+	bool get_addresses(const string& interface, const string& vif,
+		list<A>& addresses) const;
 
-    /**
-     * Get a link local address for this interface/vif if available.
-     *
-     * @param interface the name of the interface
-     * @param vif the name of the vif
-     * @param address (out argument) set if address is found.
-     *
-     * @return true if a link local address is available.
-     */
-    bool get_link_local_address(const string& interface, const string& vif,
-				A& address);
+	/**
+	 * Get a link local address for this interface/vif if available.
+	 *
+	 * @param interface the name of the interface
+	 * @param vif the name of the vif
+	 * @param address (out argument) set if address is found.
+	 *
+	 * @return true if a link local address is available.
+	 */
+	bool get_link_local_address(const string& interface, const string& vif,
+		A& address);
 
-    /**
-     * Get the interface ID.
-     *
-     * @param interface the name of the interface.
-     * @param interface_id the value if found..
-     * @return true if the interface ID has been found..
-     */
-    bool get_interface_id(const string& interface, uint32_t& interface_id);
+	/**
+	 * Get the interface ID.
+	 *
+	 * @param interface the name of the interface.
+	 * @param interface_id the value if found..
+	 * @return true if the interface ID has been found..
+	 */
+	bool get_interface_id(const string& interface, uint32_t& interface_id);
 
-    /**
-     * Obtain the subnet prefix length for an interface/vif/address.
-     *
-     * @param interface the name of the interface.
-     * @param vif the name of the vif.
-     * @param address the address.
-     * @return the subnet prefix length for the address.
-     */
-    uint32_t get_prefix_length(const string& interface, const string& vif,
-			       A address);
+	/**
+	 * Obtain the subnet prefix length for an interface/vif/address.
+	 *
+	 * @param interface the name of the interface.
+	 * @param vif the name of the vif.
+	 * @param address the address.
+	 * @return the subnet prefix length for the address.
+	 */
+	uint32_t get_prefix_length(const string& interface, const string& vif,
+		A address);
 
-    /**
-     * Obtain the MTU for an interface.
-     *
-     * @param the name of the interface.
-     * @return the mtu for the interface.
-     */
-    uint32_t get_mtu(const string& interface);
+	/**
+	 * Obtain the MTU for an interface.
+	 *
+	 * @param the name of the interface.
+	 * @return the mtu for the interface.
+	 */
+	uint32_t get_mtu(const string& interface);
 
-    /**
-     * On the interface/vif join this multicast group.
-     */
-    bool join_multicast_group(const string& interface, const string& vif,
-			      A mcast);
+	/**
+	 * On the interface/vif join this multicast group.
+	 */
+	bool join_multicast_group(const string& interface, const string& vif,
+		A mcast);
 
-    /**
-     * On the interface/vif leave this multicast group.
-     */
-    bool leave_multicast_group(const string& interface, const string& vif,
-			       A mcast);
+	/**
+	 * On the interface/vif leave this multicast group.
+	 */
+	bool leave_multicast_group(const string& interface, const string& vif,
+		A mcast);
 
-    /**
-     * Register with the RIB.
-     */
-    void register_rib();
+	/**
+	 * Register with the RIB.
+	 */
+	void register_rib();
 
-    /**
-     * Remove registration from the RIB.
-     */
-    void unregister_rib();
+	/**
+	 * Remove registration from the RIB.
+	 */
+	void unregister_rib();
 
-    void rib_command_done(const XrlError& error, bool up, const char *comment);
+	void rib_command_done(const XrlError& error, bool up, const char *comment);
 
-    /**
-     * Add route to RIB.
-     *
-     * @param net network
-     * @param nexthop
-     * @param nexthop_id interface ID towards the nexthop
-     * @param metric to network
-     * @param equal true if this in another route to the same destination.
-     * @param discard true if this is a discard route.
-     * @param policytags policy info to the RIB.
-     */
-    bool add_route(IPNet<A> net,
-		   A nexthop,
-		   uint32_t nexthop_id,
-		   uint32_t metric,
-		   bool equal,
-		   bool discard,
-		   const PolicyTags& policytags);
+	/**
+	 * Add route to RIB.
+	 *
+	 * @param net network
+	 * @param nexthop
+	 * @param nexthop_id interface ID towards the nexthop
+	 * @param metric to network
+	 * @param equal true if this in another route to the same destination.
+	 * @param discard true if this is a discard route.
+	 * @param policytags policy info to the RIB.
+	 */
+	bool add_route(IPNet<A> net,
+		A nexthop,
+		uint32_t nexthop_id,
+		uint32_t metric,
+		bool equal,
+		bool discard,
+		const PolicyTags& policytags);
 
-    /**
-     * Replace route in RIB.
-     *
-     * @param net network
-     * @param nexthop
-     * @param nexthop_id interface ID towards the nexthop
-     * @param metric to network
-     * @param equal true if this in another route to the same destination.
-     * @param discard true if this is a discard route.
-     * @param policytags policy info to the RIB.
-     */
-    bool replace_route(IPNet<A> net,
-		       A nexthop,
-		       uint32_t nexthop_id,
-		       uint32_t metric,
-		       bool equal,
-		       bool discard,
-		       const PolicyTags& policytags);
+	/**
+	 * Replace route in RIB.
+	 *
+	 * @param net network
+	 * @param nexthop
+	 * @param nexthop_id interface ID towards the nexthop
+	 * @param metric to network
+	 * @param equal true if this in another route to the same destination.
+	 * @param discard true if this is a discard route.
+	 * @param policytags policy info to the RIB.
+	 */
+	bool replace_route(IPNet<A> net,
+		A nexthop,
+		uint32_t nexthop_id,
+		uint32_t metric,
+		bool equal,
+		bool discard,
+		const PolicyTags& policytags);
 
-    /**
-     * Delete route from RIB.
-     */
-    bool delete_route(IPNet<A> net);
+	/**
+	 * Delete route from RIB.
+	 */
+	bool delete_route(IPNet<A> net);
 
- private:
-    /**
-     * A method invoked when the status of a service changes.
-     *
-     * @param service the service whose status has changed.
-     * @param old_status the old status.
-     * @param new_status the new status.
-     */
-    void status_change(ServiceBase*	service,
-		       ServiceStatus	old_status,
-		       ServiceStatus	new_status) {
-	if (old_status == new_status)
-	    return;
-	if (SERVICE_RUNNING == new_status)
-	    component_up(service->service_name());
-	if (SERVICE_SHUTDOWN == new_status)
-	    component_down(service->service_name());
+    private:
+	/**
+	 * A method invoked when the status of a service changes.
+	 *
+	 * @param service the service whose status has changed.
+	 * @param old_status the old status.
+	 * @param new_status the new status.
+	 */
+	void status_change(ServiceBase*	service,
+		ServiceStatus	old_status,
+		ServiceStatus	new_status) 
+	{
+	    if (old_status == new_status)
+		return;
+	    if (SERVICE_RUNNING == new_status)
+		component_up(service->service_name());
+	    if (SERVICE_SHUTDOWN == new_status)
+		component_down(service->service_name());
 
-    }
+	}
 
-    /**
-     * Obtain a pointer to the interface manager service base.
-     *
-     * @return a pointer to the interface manager service base.
-     */
-    const ServiceBase* ifmgr_mirror_service_base() const {
-	return dynamic_cast<const ServiceBase*>(&_ifmgr);
-    }
+	/**
+	 * Obtain a pointer to the interface manager service base.
+	 *
+	 * @return a pointer to the interface manager service base.
+	 */
+	const ServiceBase* ifmgr_mirror_service_base() const 
+	{
+	    return dynamic_cast<const ServiceBase*>(&_ifmgr);
+	}
 
-    /**
-     * Obtain a reference to the interface manager's interface tree.
-     *
-     * @return a reference to the interface manager's interface tree.
-     */
-    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+	/**
+	 * Obtain a reference to the interface manager's interface tree.
+	 *
+	 * @return a reference to the interface manager's interface tree.
+	 */
+	const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
-    /**
-     * An IfMgrHintObserver method invoked when the initial interface tree
-     * information has been received.
-     */
-    void tree_complete();
+	/**
+	 * An IfMgrHintObserver method invoked when the initial interface tree
+	 * information has been received.
+	 */
+	void tree_complete();
 
-    /**
-     * An IfMgrHintObserver method invoked whenever the interface tree
-     * information has been changed.
-     */
-    void updates_made();
+	/**
+	 * An IfMgrHintObserver method invoked whenever the interface tree
+	 * information has been changed.
+	 */
+	void updates_made();
 
-    //
-    // XRL callbacks
-    //
-    void send_cb(const XrlError& xrl_error, string interface, string vif);
-    void enable_interface_vif_cb(const XrlError& xrl_error, string interface,
-				 string vif);
-    void disable_interface_vif_cb(const XrlError& xrl_error, string interface,
-				  string vif);
-    void join_multicast_group_cb(const XrlError& xrl_error, string interface,
-				 string vif);
-    void leave_multicast_group_cb(const XrlError& xrl_error, string interface,
-				  string vif);
+	//
+	// XRL callbacks
+	//
+	void send_cb(const XrlError& xrl_error, string interface, string vif);
+	void enable_interface_vif_cb(const XrlError& xrl_error, string interface,
+		string vif);
+	void disable_interface_vif_cb(const XrlError& xrl_error, string interface,
+		string vif);
+	void join_multicast_group_cb(const XrlError& xrl_error, string interface,
+		string vif);
+	void leave_multicast_group_cb(const XrlError& xrl_error, string interface,
+		string vif);
 
-    XrlRouter&		_xrl_router;
-    string		_feaname;
-    string		_ribname;
-    uint32_t		_component_count;
+	XrlRouter&		_xrl_router;
+	string		_feaname;
+	string		_ribname;
+	uint32_t		_component_count;
 
-    IfMgrXrlMirror	_ifmgr;
-    XrlQueue<A>		_rib_queue;
+	IfMgrXrlMirror	_ifmgr;
+	XrlQueue<A>		_rib_queue;
 
-    //
-    // A local copy with the interface state information
-    //
-    IfMgrIfTree		_iftree;
+	//
+	// A local copy with the interface state information
+	//
+	IfMgrIfTree		_iftree;
 };
 #endif // __OSPF_XRL_IO_HH__

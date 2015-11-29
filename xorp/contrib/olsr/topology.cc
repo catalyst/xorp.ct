@@ -43,28 +43,28 @@
 #include "topology.hh"
 
 TopologyManager::TopologyManager(Olsr& olsr, 
-    FaceManager& fm, Neighborhood& nh)
-     : _olsr(olsr),
-       _fm(fm),
-       _nh(nh),
-       _rm(0),
-       _next_mid_id(1),
-       _next_tcid(1)
+	FaceManager& fm, Neighborhood& nh)
+: _olsr(olsr),
+    _fm(fm),
+    _nh(nh),
+    _rm(0),
+    _next_mid_id(1),
+    _next_tcid(1)
 {
     _nh.set_topology_manager(this);
 
     _fm.add_message_cb(callback(this,
-				&TopologyManager::event_receive_tc));
+		&TopologyManager::event_receive_tc));
     _fm.add_message_cb(callback(this,
-				&TopologyManager::event_receive_mid));
+		&TopologyManager::event_receive_mid));
 }
 
 TopologyManager::~TopologyManager()
 {
     _fm.delete_message_cb(callback(this,
-				   &TopologyManager::event_receive_tc));
+		&TopologyManager::event_receive_tc));
     _fm.delete_message_cb(callback(this,
-				   &TopologyManager::event_receive_mid));
+		&TopologyManager::event_receive_mid));
 
     clear_tc_entries();
     clear_mid_entries();
@@ -77,30 +77,32 @@ TopologyManager::~TopologyManager()
  * TC entries.
  */
 
-void
+    void
 TopologyManager::update_tc_entry(const IPv4& dest_addr,
-    const IPv4& origin_addr,
-    const uint16_t distance,
-    const uint16_t ansn,
-    const TimeVal& vtime,
-    bool& is_created)
-    throw(BadTopologyEntry)
+	const IPv4& origin_addr,
+	const uint16_t distance,
+	const uint16_t ansn,
+	const TimeVal& vtime,
+	bool& is_created)
+throw(BadTopologyEntry)
 {
     debug_msg("DestAddr %s OriginAddr %s Distance %u ANSN %u Expiry %s\n",
-	      cstring(dest_addr),
-	      cstring(origin_addr),
-	      XORP_UINT_CAST(distance),
-	      XORP_UINT_CAST(ansn),
-	      cstring(vtime));
+	    cstring(dest_addr),
+	    cstring(origin_addr),
+	    XORP_UINT_CAST(distance),
+	    XORP_UINT_CAST(ansn),
+	    cstring(vtime));
 
     OlsrTypes::TopologyID tcid = OlsrTypes::UNUSED_TOPOLOGY_ID;
     bool is_found = false;
 
     TcDestMap::iterator ii = _tc_destinations.find(dest_addr);
-    for (; ii != _tc_destinations.end(); ii++) {
+    for (; ii != _tc_destinations.end(); ii++) 
+    {
 	tcid = (*ii).second;
 	if (_topology[tcid]->destination() == dest_addr &&
-	    _topology[tcid]->lasthop() == origin_addr) {
+		_topology[tcid]->lasthop() == origin_addr) 
+	{
 	    is_found = true;
 	    break;
 	}
@@ -109,7 +111,8 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
     TimeVal now;
     EventLoop::instance().current_time(now);
 
-    if (is_found) {
+    if (is_found) 
+    {
 	TopologyEntry* tc = _topology[tcid];
 
 	// 9.5, 4.1: Update holding time of the existing tuple in the
@@ -119,45 +122,47 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
 	// Update the distance of this TC entry, as the hop-count may
 	// have changed due to other changes in topology.
 	update_tc_distance(tc, distance);
-    } else {
+    } else 
+    {
 	// 9.5, 4.2: Record a new tuple in the topology set.
 	// May throw BadTopologyEntry exception.
 	tcid = add_tc_entry(dest_addr, origin_addr, distance, ansn, vtime);
 	debug_msg("%s: Added TC entry %u.\n",
-		  cstring(_fm.get_main_addr()),
-		  XORP_UINT_CAST(tcid));
+		cstring(_fm.get_main_addr()),
+		XORP_UINT_CAST(tcid));
     }
 
     is_created = !is_found;
 }
 
-OlsrTypes::TopologyID
+    OlsrTypes::TopologyID
 TopologyManager::add_tc_entry(const IPv4& dest_addr,
-    const IPv4& origin_addr,
-    const uint16_t distance,
-    const uint16_t ansn,
-    const TimeVal& expiry_time)
-    throw(BadTopologyEntry)
+	const IPv4& origin_addr,
+	const uint16_t distance,
+	const uint16_t ansn,
+	const TimeVal& expiry_time)
+throw(BadTopologyEntry)
 {
     debug_msg("DestAddr %s OriginAddr %s Distance %u ANSN %u Expiry %s\n",
-	      cstring(dest_addr),
-	      cstring(origin_addr),
-	      XORP_UINT_CAST(distance),
-	      XORP_UINT_CAST(ansn),
-	      cstring(expiry_time));
+	    cstring(dest_addr),
+	    cstring(origin_addr),
+	    XORP_UINT_CAST(distance),
+	    XORP_UINT_CAST(ansn),
+	    cstring(expiry_time));
 
     OlsrTypes::TopologyID tcid = _next_tcid++;
 
     // Throw an exception if we overflowed the TopologyID space.
-    if (0 != _topology.count(tcid)) {
+    if (0 != _topology.count(tcid)) 
+    {
 	xorp_throw(BadTopologyEntry,
-		   c_format("Mapping for TopologyID %u already exists",
-			    XORP_UINT_CAST(tcid)));
+		c_format("Mapping for TopologyID %u already exists",
+		    XORP_UINT_CAST(tcid)));
     }
 
     _topology[tcid] = new TopologyEntry( this, tcid,
-					dest_addr, origin_addr,
-					distance, ansn, expiry_time);
+	    dest_addr, origin_addr,
+	    distance, ansn, expiry_time);
 
     // Add the new link to the multimaps.
     _tc_distances.insert(make_pair(distance, tcid));
@@ -167,7 +172,7 @@ TopologyManager::add_tc_entry(const IPv4& dest_addr,
     return tcid;
 }
 
-bool
+    bool
 TopologyManager::delete_tc_entry(const OlsrTypes::TopologyID tcid)
 {
     debug_msg("Tcid %u\n", XORP_UINT_CAST(tcid));
@@ -182,8 +187,10 @@ TopologyManager::delete_tc_entry(const OlsrTypes::TopologyID tcid)
     // Remove from destination map.
     pair<TcDestMap::iterator, TcDestMap::iterator> ra =
 	_tc_destinations.equal_range(t->destination());
-    for (TcDestMap::iterator jj = ra.first; jj != ra.second; ) {
-	if ((*jj).second == tcid) {
+    for (TcDestMap::iterator jj = ra.first; jj != ra.second; ) 
+    {
+	if ((*jj).second == tcid) 
+	{
 	    _tc_destinations.erase(jj);
 	    break;
 	}
@@ -193,8 +200,10 @@ TopologyManager::delete_tc_entry(const OlsrTypes::TopologyID tcid)
     // Remove from lasthop map.
     pair<TcLasthopMap::iterator, TcLasthopMap::iterator> rb =
 	_tc_lasthops.equal_range(t->lasthop());
-    for (TcLasthopMap::iterator kk = rb.first; kk != rb.second; ) {
-	if ((*kk).second == tcid) {
+    for (TcLasthopMap::iterator kk = rb.first; kk != rb.second; ) 
+    {
+	if ((*kk).second == tcid) 
+	{
 	    _tc_lasthops.erase(kk);
 	    break;
 	}
@@ -204,8 +213,10 @@ TopologyManager::delete_tc_entry(const OlsrTypes::TopologyID tcid)
     // Remove from distance map.
     pair<TcDistanceMap::iterator, TcDistanceMap::iterator> rc =
 	_tc_distances.equal_range(t->distance());
-    for (TcDistanceMap::iterator ll = rc.first; ll != rc.second; ) {
-	if ((*ll).second == t->id()) {
+    for (TcDistanceMap::iterator ll = rc.first; ll != rc.second; ) 
+    {
+	if ((*ll).second == t->id()) 
+	{
 	    _tc_distances.erase(ll);
 	    break;
 	}
@@ -225,20 +236,20 @@ TopologyManager::delete_tc_entry(const OlsrTypes::TopologyID tcid)
 
 // XXX: This is a definite candidate for a Boost multi_index container.
 
-void
+    void
 TopologyManager::clear_tc_entries()
 {
     while (! _topology.empty())
 	delete_tc_entry((*_topology.begin()).first);
 }
 
-bool
+    bool
 TopologyManager::apply_tc_ansn(const uint16_t ansn,
-			       const IPv4& origin_addr)
+	const IPv4& origin_addr)
 {
     debug_msg("ANSN %u Origin %s\n",
-	      XORP_UINT_CAST(ansn),
-	      cstring(origin_addr));
+	    XORP_UINT_CAST(ansn),
+	    cstring(origin_addr));
 
     // The ANSN is regarded as valid until proven otherwise.
     bool is_valid = true;
@@ -246,16 +257,19 @@ TopologyManager::apply_tc_ansn(const uint16_t ansn,
     // Find the tuples, if any, recorded from the origin.
     TcLasthopMap::iterator ii, jj;
     ii = _tc_lasthops.find(origin_addr);
-    while (is_valid && ii != _tc_lasthops.end()) {
+    while (is_valid && ii != _tc_lasthops.end()) 
+    {
 	jj = ii++;
 	OlsrTypes::TopologyID tcid = (*jj).second;
 
-	if ( (*jj).first == origin_addr && _topology[tcid]->seqno() != ansn ) {
+	if ( (*jj).first == origin_addr && _topology[tcid]->seqno() != ansn ) 
+	{
 	    // 9.5, 2: If any tuple in the topology set has T_seq > ANSN,
 	    // then the TC message was received out of order and MUST be
 	    // silently discarded.
 	    is_valid = false;
-	} else {
+	} else 
+	{
 	    // 9.5, 3: All tuples in the topology set where T_seq < ANSN
 	    // MUST be removed from the topology set.
 	    delete_tc_entry(tcid);
@@ -265,46 +279,50 @@ TopologyManager::apply_tc_ansn(const uint16_t ansn,
     return is_valid;
 }
 
-OlsrTypes::TopologyID
+    OlsrTypes::TopologyID
 TopologyManager::get_topologyid(const IPv4& dest_addr,
-				const IPv4& lasthop_addr)
-    throw(BadTopologyEntry)
+	const IPv4& lasthop_addr)
+throw(BadTopologyEntry)
 {
     debug_msg("DestAddr %s LasthopAddr %s\n",
-	      cstring(dest_addr),
-	      cstring(lasthop_addr));
+	    cstring(dest_addr),
+	    cstring(lasthop_addr));
 
     bool is_found = false;
     OlsrTypes::TopologyID tcid;
 
     multimap<IPv4, OlsrTypes::TopologyID>::const_iterator ii =
 	_tc_destinations.find(dest_addr);
-    while (ii != _tc_destinations.end()) {
+    while (ii != _tc_destinations.end()) 
+    {
 	tcid = (*ii).second;
-	if (_topology[tcid]->lasthop() == lasthop_addr) {
+	if (_topology[tcid]->lasthop() == lasthop_addr) 
+	{
 	    is_found = true;
 	    break;
 	}
 	ii++;
     }
 
-    if (!is_found) {
+    if (!is_found) 
+    {
 	xorp_throw(BadTopologyEntry,
-		   c_format("No mapping for %s exists", cstring(dest_addr)));
+		c_format("No mapping for %s exists", cstring(dest_addr)));
     }
 
     return tcid;
 }
 
-const TopologyEntry*
-TopologyManager::get_topology_entry_by_id(const OlsrTypes::TopologyID tcid)
-    const throw(BadTopologyEntry)
+    const TopologyEntry*
+    TopologyManager::get_topology_entry_by_id(const OlsrTypes::TopologyID tcid)
+const throw(BadTopologyEntry)
 {
     TcIdMap::const_iterator ii = _topology.find(tcid);
 
-    if (ii == _topology.end()) {
+    if (ii == _topology.end()) 
+    {
 	xorp_throw(BadTopologyEntry,
-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tcid)));
+		c_format("No mapping for %u exists", XORP_UINT_CAST(tcid)));
     }
 
     return (*ii).second;
@@ -319,20 +337,21 @@ TopologyManager::get_topology_list(list<OlsrTypes::TopologyID>& tclist) const
 	tclist.push_back((*ii).first);
 }
 
-vector<IPv4>
-TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
-    throw(BadTopologyEntry)
+    vector<IPv4>
+    TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+throw(BadTopologyEntry)
 {
     debug_msg("MyMainAddr %s Origin %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(origin_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(origin_addr));
 
     size_t found_tc_count = 0;
     vector<IPv4> addrs;
 
     pair<TcLasthopMap::iterator, TcLasthopMap::iterator> rl =
 	_tc_lasthops.equal_range(origin_addr);
-    for (TcLasthopMap::iterator ii = rl.first; ii != rl.second; ii++) {
+    for (TcLasthopMap::iterator ii = rl.first; ii != rl.second; ii++) 
+    {
 	TopologyEntry* t = _topology[(*ii).second];
 	XLOG_ASSERT(t != 0);	// paranoia
 
@@ -349,78 +368,84 @@ TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
 	++found_tc_count;
     }
 
-    if (found_tc_count == 0) {
+    if (found_tc_count == 0) 
+    {
 	// Check to see if this origin was recorded as having an empty
 	// neighbor set.
 	// OLSR nodes originating TC broadcasts MUST send an
 	// empty TC message with a new ANSN to invalidate any existing
 	// topology information when they stop being selected as MPRs.
 	TcFinalSeqMap::const_iterator ii = _tc_final_seqnos.find(origin_addr);
-	if (ii != _tc_final_seqnos.end()) {
+	if (ii != _tc_final_seqnos.end()) 
+	{
 	    ansn = (*ii).second;
 	    debug_msg("%s: found final ansn %u for %s\n",
-		      cstring(_fm.get_main_addr()),
-		      XORP_UINT_CAST(ansn),
-		      cstring(origin_addr));
+		    cstring(_fm.get_main_addr()),
+		    XORP_UINT_CAST(ansn),
+		    cstring(origin_addr));
 	    return addrs;
 	}
 	// The origin is not known to TopologyManager.
 	// This is a distinct condition from "there were no entries
 	// for the given origin".
 	xorp_throw(BadTopologyEntry,
-		   c_format("No mapping for %s exists", cstring(origin_addr)));
+		c_format("No mapping for %s exists", cstring(origin_addr)));
     }
 
     return addrs;
 }
 
-uint16_t
+    uint16_t
 TopologyManager::get_tc_distance(const IPv4& origin_addr,
-				 const IPv4& dest_addr)
-    throw(BadTopologyEntry)
+	const IPv4& dest_addr)
+throw(BadTopologyEntry)
 {
     debug_msg("MyMainAddr %s Origin %s Dest %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(origin_addr),
-	      cstring(dest_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(origin_addr),
+	    cstring(dest_addr));
 
     bool is_found = false;
     uint16_t distance = 0;
 
     pair<TcLasthopMap::iterator, TcLasthopMap::iterator> rl =
 	_tc_lasthops.equal_range(origin_addr);
-    for (TcLasthopMap::iterator ii = rl.first; ii != rl.second; ii++) {
+    for (TcLasthopMap::iterator ii = rl.first; ii != rl.second; ii++) 
+    {
 	TopologyEntry* t = _topology[(*ii).second];
-	if (t->destination() == dest_addr) {
+	if (t->destination() == dest_addr) 
+	{
 	    is_found = true;
 	    distance = t->distance();
 	    break;
 	}
     }
 
-    if (! is_found) {
+    if (! is_found) 
+    {
 	// No TC entry was found matching that origin and destination.
 	xorp_throw(BadTopologyEntry,
-		   c_format("No mapping for (%s, %s) exists",
-			    cstring(origin_addr),
-			    cstring(dest_addr)));
+		c_format("No mapping for (%s, %s) exists",
+		    cstring(origin_addr),
+		    cstring(dest_addr)));
     }
 
     return distance;
 }
 
-size_t
+    size_t
 TopologyManager::get_tc_lasthop_count_by_dest(const IPv4& dest_addr)
 {
     debug_msg("MyMainAddr %s Dest %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(dest_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(dest_addr));
 
     size_t lasthop_count = 0;
 
     pair<TcDestMap::iterator, TcDestMap::iterator> rl =
 	_tc_destinations.equal_range(dest_addr);
-    for (TcDestMap::iterator ii = rl.first; ii != rl.second; ii++) {
+    for (TcDestMap::iterator ii = rl.first; ii != rl.second; ii++) 
+    {
 	++lasthop_count;
     }
 
@@ -435,8 +460,8 @@ TopologyManager::tc_node_count() const
     // Count the number of unique keys (main addresses) in the lasthop map.
     TcLasthopMap::const_iterator ii;
     for (ii = _tc_lasthops.begin();
-	 ii != _tc_lasthops.end();
-	 ii = _tc_lasthops.upper_bound((*ii).first))
+	    ii != _tc_lasthops.end();
+	    ii = _tc_lasthops.upper_bound((*ii).first))
     {
 	unique_key_count++;
     }
@@ -444,7 +469,7 @@ TopologyManager::tc_node_count() const
     return unique_key_count;
 }
 
-void
+    void
 TopologyManager::update_tc_distance(TopologyEntry* tc, uint16_t distance)
 {
     if (tc->distance() == distance)
@@ -453,8 +478,10 @@ TopologyManager::update_tc_distance(TopologyEntry* tc, uint16_t distance)
     // If the TC entry is already recorded for this distance, remove it.
     pair<TcDistanceMap::iterator, TcDistanceMap::iterator> range =
 	_tc_distances.equal_range(distance);
-    for (TcDistanceMap::iterator ii = range.first; ii != range.second; ) {
-	if ((*ii).second == tc->id()) {
+    for (TcDistanceMap::iterator ii = range.first; ii != range.second; ) 
+    {
+	if ((*ii).second == tc->id()) 
+	{
 	    _tc_distances.erase(ii);
 	    break;
 	}
@@ -472,35 +499,38 @@ TopologyManager::update_tc_distance(TopologyEntry* tc, uint16_t distance)
 #endif
 }
 
-void
-TopologyManager::assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid)
-    throw(BadTopologyEntry)
+    void
+    TopologyManager::assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid)
+throw(BadTopologyEntry)
 {
 #ifdef DETAILED_DEBUG
     size_t id_seen_count = 0;
 
     multimap<uint16_t, OlsrTypes::TopologyID>::const_iterator ii;
-    for (ii = _tc_distances.begin(); ii != _tc_distances.end(); ii++) {
-	if (tcid == (*ii).second) {
+    for (ii = _tc_distances.begin(); ii != _tc_distances.end(); ii++) 
+    {
+	if (tcid == (*ii).second) 
+	{
 	    id_seen_count++;
 	}
     }
 
-    if (id_seen_count != 1) {
+    if (id_seen_count != 1) 
+    {
 	xorp_throw(BadTopologyEntry,
-		   c_format("Duplicate TopologyID %u in _tc_distances: "
-			    "appeared %u times.",
-			    XORP_UINT_CAST(tcid),
-			    XORP_UINT_CAST(id_seen_count)));
+		c_format("Duplicate TopologyID %u in _tc_distances: "
+		    "appeared %u times.",
+		    XORP_UINT_CAST(tcid),
+		    XORP_UINT_CAST(id_seen_count)));
     }
 #else
     UNUSED(tcid);
 #endif // DETAILED_DEBUG
 }
 
-void
-TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
-    throw(BadTopologyEntry)
+    void
+    TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
+throw(BadTopologyEntry)
 {
 #ifdef DETAILED_DEBUG
     bool is_origin_found = false;
@@ -510,18 +540,23 @@ TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
     TopologyEntry* t = 0;
 
     TcIdMap::const_iterator ii;
-    for (ii = _topology.begin(); ii != _topology.end(); ii++) {
+    for (ii = _topology.begin(); ii != _topology.end(); ii++) 
+    {
 	t = (*ii).second;
-	if (t->lasthop() == origin_addr) {
-	    if (! is_origin_found) {
+	if (t->lasthop() == origin_addr) 
+	{
+	    if (! is_origin_found) 
+	    {
 		// First match; record first sequence number seen
 		// for this origin.
 		first_ansn = t->seqno();
 		is_origin_found = true;
-	    } else {
+	    } else 
+	    {
 		// We've seen at least one entry for this origin before.
 		// Do the sequence numbers match, is the ANSN consistent?
-		if (t->seqno() != first_ansn) {
+		if (t->seqno() != first_ansn) 
+		{
 		    is_seq_match_failed = true;
 		    break;
 		}
@@ -529,13 +564,14 @@ TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
 	}
     }
 
-    if (is_origin_found && is_seq_match_failed) {
+    if (is_origin_found && is_seq_match_failed) 
+    {
 	xorp_throw(BadTopologyEntry,
-		   c_format("Inconsistent ANSN (%s, %s, %u) in TopologyID %u",
-			    cstring(t->lasthop()),
-			    cstring(t->destination()),
-			    XORP_UINT_CAST(t->seqno()),
-			    XORP_UINT_CAST(t->id())));
+		c_format("Inconsistent ANSN (%s, %s, %u) in TopologyID %u",
+		    cstring(t->lasthop()),
+		    cstring(t->destination()),
+		    XORP_UINT_CAST(t->seqno()),
+		    XORP_UINT_CAST(t->id())));
     }
 
 #else
@@ -547,30 +583,31 @@ TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
  * MID entries.
  */
 
-void
+    void
 TopologyManager::update_mid_entry(const IPv4& main_addr,
-				  const IPv4& iface_addr,
-				  const uint16_t distance,
-				  const TimeVal& vtime,
-				  bool& is_mid_created)
-    throw(BadMidEntry)
+	const IPv4& iface_addr,
+	const uint16_t distance,
+	const TimeVal& vtime,
+	bool& is_mid_created)
+throw(BadMidEntry)
 {
     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s Distance %u Vtime %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      cstring(iface_addr),
-	      XORP_UINT_CAST(distance),
-	      cstring(vtime));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    cstring(iface_addr),
+	    XORP_UINT_CAST(distance),
+	    cstring(vtime));
 
     is_mid_created = false;
 
     // Do not add redundant MID entries.
-    if (main_addr == iface_addr) {
+    if (main_addr == iface_addr) 
+    {
 	debug_msg("Rejecting MID entry from %s for its main address.\n",
-		  cstring(main_addr));
+		cstring(main_addr));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting MID entry from %s for its main address.",
-		   cstring(main_addr));
+		"Rejecting MID entry from %s for its main address.",
+		cstring(main_addr));
 	return;
     }
 
@@ -581,51 +618,56 @@ TopologyManager::update_mid_entry(const IPv4& main_addr,
     // given origin address.
     pair<MidAddrMap::iterator, MidAddrMap::iterator> range =
 	_mid_addr.equal_range(main_addr);
-    for (MidAddrMap::iterator ii = range.first; ii != range.second; ii++) {
+    for (MidAddrMap::iterator ii = range.first; ii != range.second; ii++) 
+    {
 	mie = _mids[(*ii).second];
-	if (mie->iface_addr() == iface_addr) {
+	if (mie->iface_addr() == iface_addr) 
+	{
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (is_found) {
+    if (is_found) 
+    {
 	// Section 5.4, 2.1: Update existing MID tuple.
 	mie->update_timer(vtime);
 	mie->set_distance(distance);
-    } else {
+    } else 
+    {
 	// Section 5.4, 2.2: Create new MID tuple.
 	add_mid_entry(main_addr, iface_addr, distance, vtime);
 	is_mid_created = true;
     }
 }
 
-void
+    void
 TopologyManager::add_mid_entry(const IPv4& main_addr,
-			       const IPv4& iface_addr,
-			       const uint16_t distance,
-			       const TimeVal& vtime)
-    throw(BadMidEntry)
+	const IPv4& iface_addr,
+	const uint16_t distance,
+	const TimeVal& vtime)
+throw(BadMidEntry)
 {
     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s Distance %u Vtime %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      cstring(iface_addr),
-	      XORP_UINT_CAST(distance),
-	      cstring(vtime));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    cstring(iface_addr),
+	    XORP_UINT_CAST(distance),
+	    cstring(vtime));
 
     // Section 5.4, 2.2: Create new MID tuple.
     OlsrTypes::MidEntryID mid_id = _next_mid_id++;
 
     // Throw an exception if we overflow the MID ID space.
-    if (0 != _mids.count(mid_id)) {
+    if (0 != _mids.count(mid_id)) 
+    {
 	xorp_throw(BadMidEntry,
-		   c_format("Mapping for %u already exists",
-			    XORP_UINT_CAST(mid_id)));
+		c_format("Mapping for %u already exists",
+		    XORP_UINT_CAST(mid_id)));
     }
 
     _mids[mid_id] = new MidEntry( this, mid_id, iface_addr,
-				 main_addr, distance, vtime);
+	    main_addr, distance, vtime);
 
     // Tot up another MID entry for this main address and MID entry combo.
     _mid_addr.insert(make_pair(main_addr, mid_id));
@@ -633,24 +675,27 @@ TopologyManager::add_mid_entry(const IPv4& main_addr,
     debug_msg("new MidEntryID %u\n", XORP_UINT_CAST(mid_id));
 }
 
-bool
+    bool
 TopologyManager::delete_mid_entry(const OlsrTypes::MidEntryID mid_id)
 {
     debug_msg("MyMainAddr %s MidEntryID %u\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(mid_id));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(mid_id));
 
     bool is_deleted = false;
 
     map<OlsrTypes::MidEntryID, MidEntry*>::iterator ii = _mids.find(mid_id);
-    if (ii != _mids.end()) {
+    if (ii != _mids.end()) 
+    {
 	MidEntry* mie = (*ii).second;
 
 	// Withdraw mid_id from multimap of MID IDs per primary address.
 	pair<MidAddrMap::iterator, MidAddrMap::iterator> range =
 	    _mid_addr.equal_range(mie->main_addr());
-	for (MidAddrMap::iterator jj = range.first; jj != range.second; jj++) {
-	    if ((*jj).second == mid_id) {
+	for (MidAddrMap::iterator jj = range.first; jj != range.second; jj++) 
+	{
+	    if ((*jj).second == mid_id) 
+	    {
 		// Only the first match by ID should be deleted.
 		// Duplicates of the second key, mid_id, SHOULD NOT exist.
 		_mid_addr.erase(jj);
@@ -665,7 +710,8 @@ TopologyManager::delete_mid_entry(const OlsrTypes::MidEntryID mid_id)
 	debug_msg("MidEntryID %u was deleted.\n", XORP_UINT_CAST(mid_id));
     }
 
-    if (is_deleted) {
+    if (is_deleted) 
+    {
 	// If any MID address entry was deleted, schedule a route
 	// computation.
 	// TODO: Find a way of optimizing the processing of MID entries
@@ -678,18 +724,19 @@ TopologyManager::delete_mid_entry(const OlsrTypes::MidEntryID mid_id)
     return is_deleted;
 }
 
-void
+    void
 TopologyManager::clear_mid_entries()
 {
     map<OlsrTypes::MidEntryID, MidEntry*>::iterator ii, jj;
-    for (ii = _mids.begin(); ii != _mids.end(); ) {
+    for (ii = _mids.begin(); ii != _mids.end(); ) 
+    {
 	jj = ii++;
 	delete (*jj).second;
 	_mids.erase(jj);
     }
 }
 
-vector<IPv4>
+    vector<IPv4>
 TopologyManager::get_mid_addresses(const IPv4& main_addr)
 {
     vector<IPv4> addrs;
@@ -697,7 +744,8 @@ TopologyManager::get_mid_addresses(const IPv4& main_addr)
     pair<MidAddrMap::const_iterator, MidAddrMap::const_iterator> range =
 	_mid_addr.equal_range(main_addr);
     MidAddrMap::const_iterator ii;
-    for (ii = range.first; ii != range.second; ii++) {
+    for (ii = range.first; ii != range.second; ii++) 
+    {
 	MidEntry* mie = _mids[(*ii).second];
 	addrs.push_back(mie->iface_addr());
     }
@@ -707,15 +755,15 @@ TopologyManager::get_mid_addresses(const IPv4& main_addr)
 
 // Only used by regression tests.
 
-uint16_t
+    uint16_t
 TopologyManager::get_mid_address_distance(const IPv4& main_addr,
-					  const IPv4& iface_addr)
-    throw(BadMidEntry)
+	const IPv4& iface_addr)
+throw(BadMidEntry)
 {
     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(main_addr),
-	      cstring(iface_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(main_addr),
+	    cstring(iface_addr));
 
     bool is_found = false;
     MidEntry* mie = 0;
@@ -725,43 +773,49 @@ TopologyManager::get_mid_address_distance(const IPv4& main_addr,
     pair<MidAddrMap::const_iterator, MidAddrMap::const_iterator> range =
 	_mid_addr.equal_range(main_addr);
     MidAddrMap::const_iterator ii;
-    for (ii = range.first; ii != range.second; ii++) {
+    for (ii = range.first; ii != range.second; ii++) 
+    {
 	mie = _mids[(*ii).second];
-	if (mie->iface_addr() == iface_addr) {
+	if (mie->iface_addr() == iface_addr) 
+	{
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (! is_found) {
+    if (! is_found) 
+    {
 	xorp_throw(BadMidEntry,
-		   c_format("No mapping for (%s, %s) exists",
-			    cstring(main_addr),
-			    cstring(iface_addr)));
+		c_format("No mapping for (%s, %s) exists",
+		    cstring(main_addr),
+		    cstring(iface_addr)));
     }
 
     return mie->distance();
 }
 
-IPv4
-TopologyManager::get_main_addr_of_mid(const IPv4& mid_addr)
-    throw(BadMidEntry)
+    IPv4
+    TopologyManager::get_main_addr_of_mid(const IPv4& mid_addr)
+throw(BadMidEntry)
 {
     MidEntry* mie = 0;
     bool is_found = false;
 
     map<OlsrTypes::MidEntryID, MidEntry*>::const_iterator ii;
-    for (ii = _mids.begin(); ii != _mids.end(); ii++) {
+    for (ii = _mids.begin(); ii != _mids.end(); ii++) 
+    {
 	mie = (*ii).second;
-	if (mie->iface_addr() == mid_addr) {
+	if (mie->iface_addr() == mid_addr) 
+	{
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (!is_found) {
+    if (!is_found) 
+    {
 	xorp_throw(BadMidEntry,
-		   c_format("No mapping for %s exists", cstring(mid_addr)));
+		c_format("No mapping for %s exists", cstring(mid_addr)));
     }
 
     return mie->main_addr();
@@ -775,8 +829,8 @@ TopologyManager::mid_node_count() const
     // Count the number of unique keys (main addresses) in the multimap.
     multimap<IPv4, OlsrTypes::MidEntryID>::const_iterator ii;
     for (ii = _mid_addr.begin();
-	 ii != _mid_addr.end();
-	 ii = _mid_addr.upper_bound((*ii).first))
+	    ii != _mid_addr.end();
+	    ii = _mid_addr.upper_bound((*ii).first))
     {
 	unique_key_count++;
     }
@@ -785,15 +839,16 @@ TopologyManager::mid_node_count() const
 }
 
 const MidEntry*
-TopologyManager::get_mid_entry_by_id(const OlsrTypes::MidEntryID midid) const
-    throw(BadTopologyEntry)
+    TopologyManager::get_mid_entry_by_id(const OlsrTypes::MidEntryID midid) const
+throw(BadTopologyEntry)
 {
     MidIdMap::const_iterator ii = _mids.find(midid);
 
-    if (ii == _mids.end()) {
+    if (ii == _mids.end()) 
+    {
 	xorp_throw(BadMidEntry,
-		   c_format("No mapping for %u exists",
-			    XORP_UINT_CAST(midid)));
+		c_format("No mapping for %u exists",
+		    XORP_UINT_CAST(midid)));
     }
 
     return (*ii).second;
@@ -813,7 +868,7 @@ TopologyManager::get_mid_list(list<OlsrTypes::MidEntryID>& midlist) const
  * RouteManager interaction.
  */
 
-void
+    void
 TopologyManager::push_topology()
 {
     size_t tc_link_added_count = 0;
@@ -822,15 +877,16 @@ TopologyManager::push_topology()
 
     // For all entries at each recorded radius in the topology set.
     TcDistanceMap::const_iterator ii, jj;
-    for (ii = _tc_distances.begin(); ii != _tc_distances.end(); ) {
+    for (ii = _tc_distances.begin(); ii != _tc_distances.end(); ) 
+    {
 	// Look up the range of TC entries at the current radius.
 	uint16_t hops = (*ii).first;
 
 	// The following is equivalent to _tc_distances.upper_bound(hops);
 	// equal_range() has a more efficient expansion.
 	pair<TcDistanceMap::const_iterator,
-	     TcDistanceMap::const_iterator> rd =
-	    _tc_distances.equal_range(hops);
+	    TcDistanceMap::const_iterator> rd =
+		_tc_distances.equal_range(hops);
 	ii = rd.second;
 
 	// Skip neighbors with redundant TC information; that is, those
@@ -840,11 +896,12 @@ TopologyManager::push_topology()
 	// know about other nodes which our neighbors don't. In any event
 	// the SPF calculation will have screened those out.
 	// Print detailed information about such hops if debugging.
-	if (hops < 2) {
+	if (hops < 2) 
+	{
 	    debug_msg("%s: skipping %u redundant TC entries at distance %u\n",
-		      cstring(_fm.get_main_addr()),
-		      XORP_UINT_CAST(std::distance(rd.first, rd.second)),
-		      XORP_UINT_CAST(hops));
+		    cstring(_fm.get_main_addr()),
+		    XORP_UINT_CAST(std::distance(rd.first, rd.second)),
+		    XORP_UINT_CAST(hops));
 	    continue;
 	}
 
@@ -854,7 +911,8 @@ TopologyManager::push_topology()
 	    break;
 
 	// For each link in the topology set at the current radius.
-	for (jj = rd.first; jj != rd.second; jj++) {
+	for (jj = rd.first; jj != rd.second; jj++) 
+	{
 	    TopologyEntry* tc = _topology[(*jj).second];
 
 	    // Notify RouteManager of the link's existence.
@@ -868,18 +926,18 @@ TopologyManager::push_topology()
     }
 
     debug_msg("%u TC entries pushed to SPT.\n",
-	      XORP_UINT_CAST(tc_link_added_count));
+	    XORP_UINT_CAST(tc_link_added_count));
 }
 
 /*
  * Event handlers.
  */
 
-bool
+    bool
 TopologyManager::event_receive_tc(
-    Message* msg,
-    const IPv4& remote_addr,
-    const IPv4& local_addr)
+	Message* msg,
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
 {
     TcMessage* tc = dynamic_cast<TcMessage *>(msg);
     if (0 == tc)
@@ -887,19 +945,20 @@ TopologyManager::event_receive_tc(
 
     // Put this after the cast to skip false positives.
     debug_msg("[TC] MyMainAddr %s Src %s RecvIf %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(remote_addr),
-	      cstring(local_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(remote_addr),
+	    cstring(local_addr));
 
     // 9.5.1 Sender of packet must be in symmetric 1-hop neighborhood.
-    if (! _nh.is_sym_neighbor_addr(remote_addr)) {
+    if (! _nh.is_sym_neighbor_addr(remote_addr)) 
+    {
 	debug_msg("Rejecting TC message from %s via non-neighbor %s\n",
-		  cstring(msg->origin()),
-		  cstring(remote_addr));
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting TC message from %s via non-neighbor %s",
-		   cstring(msg->origin()),
-		   cstring(remote_addr));
+		"Rejecting TC message from %s via non-neighbor %s",
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	return true; // consumed but invalid.
     }
 
@@ -908,14 +967,15 @@ TopologyManager::event_receive_tc(
     XLOG_ASSERT(tc->origin() != _fm.get_main_addr());
 
     // 9.5.1, 9.5.2 Evaluate ANSN.
-    if (! apply_tc_ansn(tc->ansn(), tc->origin())) {
+    if (! apply_tc_ansn(tc->ansn(), tc->origin())) 
+    {
 	debug_msg("Rejecting TC message from %s with old ANSN %u\n",
-		  cstring(msg->origin()),
-		  XORP_UINT_CAST(tc->ansn()));
+		cstring(msg->origin()),
+		XORP_UINT_CAST(tc->ansn()));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting TC message from %s with old ANSN %u",
-		   cstring(msg->origin()),
-		   XORP_UINT_CAST(tc->ansn()));
+		"Rejecting TC message from %s with old ANSN %u",
+		cstring(msg->origin()),
+		XORP_UINT_CAST(tc->ansn()));
 	return true;
     }
 
@@ -938,10 +998,11 @@ TopologyManager::event_receive_tc(
 
     const vector<LinkAddrInfo>& addrs = tc->neighbors();
     vector<LinkAddrInfo>::const_iterator ii;
-    for (ii = addrs.begin(); ii != addrs.end(); ii++) {
+    for (ii = addrs.begin(); ii != addrs.end(); ii++) 
+    {
 	update_tc_entry((*ii).remote_addr(), tc->origin(),
-			distance, tc->ansn(),
-			tc->expiry_time(), is_new_tc);
+		distance, tc->ansn(),
+		tc->expiry_time(), is_new_tc);
     }
 
     // Maintain a list of the final sequence numbers seen from origins
@@ -949,9 +1010,11 @@ TopologyManager::event_receive_tc(
     TcFinalSeqMap::iterator jj = _tc_final_seqnos.find(tc->origin());
     if (jj != _tc_final_seqnos.end())
 	_tc_final_seqnos.erase(jj);
-    if (addrs.empty()) {
+    if (addrs.empty()) 
+    {
 	_tc_final_seqnos.insert(make_pair(tc->origin(), tc->ansn()));
-    } else {
+    } else 
+    {
 	// Invariant: There must be no 'final' entry recorded if the
 	// origin advertised any neighbors.
 	XLOG_ASSERT(0 == _tc_final_seqnos.count(tc->origin()));
@@ -974,7 +1037,7 @@ TopologyManager::event_receive_tc(
     return true;    // consumed
 }
 
-void
+    void
 TopologyManager::event_tc_dead(const OlsrTypes::TopologyID tcid)
 {
     XLOG_ASSERT(0 != _topology.count(tcid));
@@ -982,11 +1045,11 @@ TopologyManager::event_tc_dead(const OlsrTypes::TopologyID tcid)
     delete_tc_entry(tcid);
 }
 
-bool
+    bool
 TopologyManager::event_receive_mid(
-    Message* msg,
-    const IPv4& remote_addr,
-    const IPv4& local_addr)
+	Message* msg,
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
 {
     MidMessage* mid = dynamic_cast<MidMessage *>(msg);
     if (0 == mid)
@@ -994,22 +1057,23 @@ TopologyManager::event_receive_mid(
 
     // Put this after the cast to skip false positives.
     debug_msg("[MID] MyMainAddr %s Src %s RecvIf %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(remote_addr),
-	      cstring(local_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(remote_addr),
+	    cstring(local_addr));
 
     // 5.4.1 Sender must be in symmetric 1-hop neighborhood.
     //  This condition can be triggered during startup if the
     //  protocol timers are set low or if we haven't seen a
     //  HELLO from remote_addr yet.
-    if (! _nh.is_sym_neighbor_addr(remote_addr)) {
+    if (! _nh.is_sym_neighbor_addr(remote_addr)) 
+    {
 	debug_msg("Rejecting MID message from %s via non-neighbor %s\n",
-		  cstring(msg->origin()),
-		  cstring(remote_addr));
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting MID message from %s via non-neighbor %s",
-		   cstring(msg->origin()),
-		   cstring(remote_addr));
+		"Rejecting MID message from %s via non-neighbor %s",
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	return true; // consumed but invalid.
     }
 
@@ -1018,7 +1082,8 @@ TopologyManager::event_receive_mid(
 
     // 5.4.2 Process each interface listed in MID message.
     size_t added_mid_count = 0;
-    try {
+    try 
+    {
 	bool is_mid_created = false;
 
 	// Message::hops() is not incremented for our last hop until
@@ -1027,13 +1092,15 @@ TopologyManager::event_receive_mid(
 	const uint16_t distance = mid->hops() + 1;
 
 	vector<IPv4>::const_iterator ii;
-	for (ii = addrs.begin(); ii != addrs.end(); ii++) {
+	for (ii = addrs.begin(); ii != addrs.end(); ii++) 
+	{
 	    update_mid_entry(mid->origin(), (*ii), distance,
-			     mid->expiry_time(), is_mid_created);
+		    mid->expiry_time(), is_mid_created);
 	    if (is_mid_created)
 		added_mid_count++;
 	}
-    } catch (...) {
+    } catch (...) 
+    {
 	// If an exception is thrown, disregard the rest
 	// of the MID entries in this message, as it is more than
 	// likely we hit a hard limit. We can still forward the
@@ -1050,7 +1117,7 @@ TopologyManager::event_receive_mid(
     UNUSED(local_addr);
 }
 
-void
+    void
 TopologyManager::event_mid_dead(const OlsrTypes::MidEntryID mid_id)
 {
     XLOG_ASSERT(0 != _mids.count(mid_id));
@@ -1062,32 +1129,32 @@ TopologyManager::event_mid_dead(const OlsrTypes::MidEntryID mid_id)
  * Child classes.
  */
 
-void
+    void
 TopologyEntry::update_timer(const TimeVal& vtime)
 {
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
     _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
-	callback(this, &TopologyEntry::event_dead));
+	    callback(this, &TopologyEntry::event_dead));
 }
 
-void
+    void
 TopologyEntry::event_dead()
 {
     _parent->event_tc_dead(id());
 }
 
-void
+    void
 MidEntry::update_timer(const TimeVal& vtime)
 {
     if (_expiry_timer.scheduled())
 	_expiry_timer.clear();
 
     _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
-	callback(this, &MidEntry::event_dead));
+	    callback(this, &MidEntry::event_dead));
 }
 
-void
+    void
 MidEntry::event_dead()
 {
     _parent->event_mid_dead(id());

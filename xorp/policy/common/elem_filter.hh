@@ -30,24 +30,26 @@
 /**
  * @short a filter element.  Used when versioning.
  */
-class ElemFilter : public Element {
-public:
-    static Hash _hash;
-    
-    ElemFilter(const RefPf& pf) : Element(_hash), _pf(pf) {}
-    string str() const { return "policy filter"; }
-    const RefPf& val() const { return _pf; }
+class ElemFilter : public Element 
+{
+    public:
+	static Hash _hash;
 
-    const char* type() const { return "filter"; }
+	ElemFilter(const RefPf& pf) : Element(_hash), _pf(pf) {}
+	string str() const { return "policy filter"; }
+	const RefPf& val() const { return _pf; }
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemFilter: hash: " << (int)(hash()) << flush;
-	return oss.str();
-    }
+	const char* type() const { return "filter"; }
 
-private:
-    RefPf _pf;
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemFilter: hash: " << (int)(hash()) << flush;
+	    return oss.str();
+	}
+
+    private:
+	RefPf _pf;
 };
 
 #endif // __POLICY_COMMON_ELEM_FILTER_HH__

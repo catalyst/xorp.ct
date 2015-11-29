@@ -29,82 +29,84 @@
 
 #define DEBUG_ROUTE_TABLE
 
-template<class A>
-BGPRouteTable<A>::BGPRouteTable(string tablename, Safi safi)
-    : _tablename(tablename), _safi(safi)
+	template<class A>
+	BGPRouteTable<A>::BGPRouteTable(string tablename, Safi safi)
+: _tablename(tablename), _safi(safi)
 {
-    _next_table = NULL;
-    debug_msg("Creating table %s\n", _tablename.c_str());
+	_next_table = NULL;
+	debug_msg("Creating table %s\n", _tablename.c_str());
 }
 
-template<class A>
+	template<class A>
 BGPRouteTable<A>::~BGPRouteTable()
 {}
 
 template<class A>
-bool
+	bool
 BGPRouteTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
-    XLOG_ASSERT(_parent != NULL);
-    return _parent->dump_next_route(dump_iter);
+	XLOG_ASSERT(_parent != NULL);
+	return _parent->dump_next_route(dump_iter);
 }
 
 template<class A>
-int
+	int
 BGPRouteTable<A>::route_dump(InternalMessage<A> &rtmsg, 
-			     BGPRouteTable<A> */*caller*/,
-			     const PeerHandler *peer)
+		BGPRouteTable<A> */*caller*/,
+		const PeerHandler *peer)
 {
-    XLOG_ASSERT(_next_table != NULL);
-    return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
+	XLOG_ASSERT(_next_table != NULL);
+	return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
 }
 
 template<class A>
-void 
+	void 
 BGPRouteTable<A>::wakeup()
 {
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->wakeup();
+	XLOG_ASSERT(_next_table != NULL);
+	_next_table->wakeup();
 }
 
 template<class A>
-void
+	void
 BGPRouteTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
-    XLOG_ASSERT(_parent != NULL);
-    return _parent->igp_nexthop_changed(bgp_nexthop);
+	XLOG_ASSERT(_parent != NULL);
+	return _parent->igp_nexthop_changed(bgp_nexthop);
 }
 
 template<class A>
-void
+	void
 BGPRouteTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller)
+		BGPRouteTable<A> *caller)
 {
-    debug_msg("%s\n", _tablename.c_str());
+	debug_msg("%s\n", _tablename.c_str());
 
-    XLOG_ASSERT(_parent == caller);
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->peering_went_down(peer, genid, this);
+	XLOG_ASSERT(_parent == caller);
+	XLOG_ASSERT(_next_table != NULL);
+	_next_table->peering_went_down(peer, genid, this);
 }
 
 template<class A>
-void
+	void
 BGPRouteTable<A>::peering_down_complete(const PeerHandler *peer, 
-					uint32_t genid,
-					BGPRouteTable<A> *caller) {
-    XLOG_ASSERT(_parent == caller);
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->peering_down_complete(peer, genid, this);
+		uint32_t genid,
+		BGPRouteTable<A> *caller) 
+{
+	XLOG_ASSERT(_parent == caller);
+	XLOG_ASSERT(_next_table != NULL);
+	_next_table->peering_down_complete(peer, genid, this);
 }
 
 template<class A>
-void
+	void
 BGPRouteTable<A>::peering_came_up(const PeerHandler *peer, 
-					uint32_t genid,
-					BGPRouteTable<A> *caller) {
-    XLOG_ASSERT(_parent == caller);
-    if (_next_table)
-	_next_table->peering_came_up(peer, genid, this);
+		uint32_t genid,
+		BGPRouteTable<A> *caller) 
+{
+	XLOG_ASSERT(_parent == caller);
+	if (_next_table)
+		_next_table->peering_came_up(peer, genid, this);
 }
 
 template class BGPRouteTable<IPv4>;

@@ -28,7 +28,7 @@ VisitorPrinter::VisitorPrinter(ostream& out) : _out(out)
 {
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(PolicyStatement& ps)
 {
     PolicyStatement::TermContainer& terms = ps.terms();
@@ -39,15 +39,16 @@ VisitorPrinter::visit(PolicyStatement& ps)
     const char* cp = "}";
     _out << pss << ps.name() << op << endl;
     // go throgh all terms
-    for(i = terms.begin(); i != terms.end(); ++i) {
-        (i->second)->accept(*this);
+    for(i = terms.begin(); i != terms.end(); ++i) 
+    {
+	(i->second)->accept(*this);
     }
     _out << cp << endl;
 
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
@@ -60,27 +61,30 @@ VisitorPrinter::visit(Term& term)
 
     _out << (const char*)("\t\tfrom {") << endl;
     // do source block
-    for (i = source.begin(); i != source.end(); ++i) {
+    for (i = source.begin(); i != source.end(); ++i) 
+    {
 	_out << (const char*)("\t\t\t");
-        (i->second)->accept(*this);
+	(i->second)->accept(*this);
 	_out << (const char*)(";") << endl;
     }
     _out << (const char*)("\t\t}") << endl;
 
     _out << (const char*)("\t\tto {") << endl;
     // do dest block
-    for (i = dest.begin(); i != dest.end(); ++i) {
+    for (i = dest.begin(); i != dest.end(); ++i) 
+    {
 	_out << (const char*)("\t\t\t");
-        (i->second)->accept(*this);
+	(i->second)->accept(*this);
 	_out << (const char*)(";") << endl;
     }
     _out << (const char*)("\t\t}") << endl;
 
     _out << (const char*)("\t\tthen {") << endl;
     // do action block
-    for (i = actions.begin(); i != actions.end(); ++i) {
+    for (i = actions.begin(); i != actions.end(); ++i) 
+    {
 	_out << (const char*)("\t\t\t");
-        (i->second)->accept(*this);
+	(i->second)->accept(*this);
 	_out << (const char*)(";") << endl;
     }
     _out << (const char*)("\t\t}") << endl;
@@ -90,7 +94,7 @@ VisitorPrinter::visit(Term& term)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeUn& node) 
 {
     // const char* cast works around uSTL bug.
@@ -99,7 +103,7 @@ VisitorPrinter::visit(NodeUn& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeBin& node) 
 {
     node.left().accept(*this);
@@ -109,7 +113,7 @@ VisitorPrinter::visit(NodeBin& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeAssign& node) 
 {
     _out << node.varid() << (const char*)(" ");
@@ -124,67 +128,68 @@ VisitorPrinter::visit(NodeAssign& node)
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeVar& node) 
 {
     _out << node.val();
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeSet& node) 
 {
     _out << node.setid();
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeElem& node) 
 {
     _out << node.val().str();
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeAccept& /* node */) 
 {
     _out << (const char*)("accept");
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeReject& /*node */)
 {
     _out << (const char*)("reject");
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeProto& node) 
 {
     _out << (const char*)("protocol ") << node.proto();
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeNext& node)
 {
     _out << (const char*)("next ");
 
-    switch (node.flow()) {
-    case NodeNext::POLICY:
-	_out << (const char*)("policy ");
-	break;
+    switch (node.flow()) 
+    {
+	case NodeNext::POLICY:
+	    _out << (const char*)("policy ");
+	    break;
 
-    case NodeNext::TERM:
-	_out << (const char*)("term ");
-	break;
+	case NodeNext::TERM:
+	    _out << (const char*)("term ");
+	    break;
     }
 
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorPrinter::visit(NodeSubr& node)
 {
     _out << (const char*)("policy ") << node.policy();

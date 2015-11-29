@@ -53,89 +53,95 @@
 // routing sockets.
 //
 
-int
+	int
 FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
-						     const IfTree& iftree,
-						     list<FteX>& fte_list,
-						     const vector<uint8_t>& buffer,
-						     FibMsgSet filter)
+		const IfTree& iftree,
+		list<FteX>& fte_list,
+		const vector<uint8_t>& buffer,
+		FibMsgSet filter)
 {
-    const struct rt_msghdr* rtm;
-    size_t offset;
+	const struct rt_msghdr* rtm;
+	size_t offset;
 
-    rtm = (const struct rt_msghdr*)(&(buffer[0]));
-    for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
-	bool filter_match = false;
+	rtm = (const struct rt_msghdr*)(&(buffer[0]));
+	for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) 
+	{
+		bool filter_match = false;
 
-	rtm = (const struct rt_msghdr*)(&(buffer[offset]));
-	if (rtm->rtm_version != RTM_VERSION) {
-	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
-		       RTM_VERSION,
-		       rtm->rtm_version);
-	    continue;
-	}
+		rtm = (const struct rt_msghdr*)(&(buffer[offset]));
+		if (rtm->rtm_version != RTM_VERSION) 
+		{
+			XLOG_ERROR("RTM version mismatch: expected %d got %d",
+					RTM_VERSION,
+					rtm->rtm_version);
+			continue;
+		}
 
-	// XXX: ignore entries with an error
-	if (rtm->rtm_errno != 0)
-	    continue;
+		// XXX: ignore entries with an error
+		if (rtm->rtm_errno != 0)
+			continue;
 
-	if (filter & FibMsg::GETS) {
+		if (filter & FibMsg::GETS) 
+		{
 #ifdef RTM_GET
-	    if ((rtm->rtm_type == RTM_GET) && (rtm->rtm_flags & RTF_UP))
-		filter_match = true;
+			if ((rtm->rtm_type == RTM_GET) && (rtm->rtm_flags & RTF_UP))
+				filter_match = true;
 #endif
-	}
+		}
 
-	// Upcalls may not be supported in some BSD derived implementations.
-	if (filter & FibMsg::RESOLVES) {
+		// Upcalls may not be supported in some BSD derived implementations.
+		if (filter & FibMsg::RESOLVES) 
+		{
 #ifdef RTM_MISS
-	    if (rtm->rtm_type == RTM_MISS)
-		filter_match = true;
+			if (rtm->rtm_type == RTM_MISS)
+				filter_match = true;
 #endif
 #ifdef RTM_RESOLVE
-	    if (rtm->rtm_type == RTM_RESOLVE)
-		filter_match = true;
+			if (rtm->rtm_type == RTM_RESOLVE)
+				filter_match = true;
 #endif
-	}
+		}
 
-	if (filter & FibMsg::UPDATES) {
-	    if ((rtm->rtm_type == RTM_ADD) ||
-		(rtm->rtm_type == RTM_DELETE) ||
-		(rtm->rtm_type == RTM_CHANGE))
-		    filter_match = true;
-	}
+		if (filter & FibMsg::UPDATES) 
+		{
+			if ((rtm->rtm_type == RTM_ADD) ||
+					(rtm->rtm_type == RTM_DELETE) ||
+					(rtm->rtm_type == RTM_CHANGE))
+				filter_match = true;
+		}
 
-	if (!filter_match)
-	    continue;
+		if (!filter_match)
+			continue;
 
 #ifdef RTF_LLINFO
-	if (rtm->rtm_flags & RTF_LLINFO)
-	    continue;		// Ignore ARP table entries.
+		if (rtm->rtm_flags & RTF_LLINFO)
+			continue;		// Ignore ARP table entries.
 #endif
 #ifdef RTF_WASCLONED
-	if (rtm->rtm_flags & RTF_WASCLONED)
-	    continue;		// XXX: ignore cloned entries
+		if (rtm->rtm_flags & RTF_WASCLONED)
+			continue;		// XXX: ignore cloned entries
 #endif
 #ifdef RTF_CLONED
-	if (rtm->rtm_flags & RTF_CLONED)
-	    continue;		// XXX: ignore cloned entries
+		if (rtm->rtm_flags & RTF_CLONED)
+			continue;		// XXX: ignore cloned entries
 #endif
 #ifdef RTF_MULTICAST
-	if (rtm->rtm_flags & RTF_MULTICAST)
-	    continue;		// XXX: ignore multicast entries
+		if (rtm->rtm_flags & RTF_MULTICAST)
+			continue;		// XXX: ignore multicast entries
 #endif
 #ifdef RTF_BROADCAST
-	if (rtm->rtm_flags & RTF_BROADCAST)
-	    continue;		// XXX: ignore broadcast entries
+		if (rtm->rtm_flags & RTF_BROADCAST)
+			continue;		// XXX: ignore broadcast entries
 #endif
 
-	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm) == XORP_OK) {
-	    fte_list.push_back(fte);
+		FteX fte(family);
+		if (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm) == XORP_OK) 
+		{
+			fte_list.push_back(fte);
+		}
 	}
-    }
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
 #endif // HAVE_ROUTING_SOCKETS 

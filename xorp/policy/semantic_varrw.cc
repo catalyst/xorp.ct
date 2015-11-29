@@ -30,16 +30,18 @@
 
 
 SemanticVarRW::SemanticVarRW(VarMap& vars) : 
-		    _vars(vars) 
+    _vars(vars) 
 {
 }
 
-SemanticVarRW::~SemanticVarRW() {
+SemanticVarRW::~SemanticVarRW() 
+{
     policy_utils::clear_container(_trash);
 }
 
-const Element& 
-SemanticVarRW::read(const Id& id) {
+    const Element& 
+SemanticVarRW::read(const Id& id) 
+{
     const VarMap::Variable& var = _vars.variable(_protocol,id);
 
     Element* e =  _ef.create(var.type,NULL);
@@ -48,35 +50,40 @@ SemanticVarRW::read(const Id& id) {
     return *e;
 }
 
-void 
-SemanticVarRW::write(const Id& id, const Element& elem) {
+    void 
+SemanticVarRW::write(const Id& id, const Element& elem) 
+{
     // this will throw exception on unknown variable
     const VarMap::Variable& var = _vars.variable(_protocol,id);
 
     // check the rw access
-    if(!var.writable()) {
+    if(!var.writable()) 
+    {
 	ostringstream err;
 	err <<"Trying to write on read-only variable " << (int)(id);
-        xorp_throw(var_error, err.str());
+	xorp_throw(var_error, err.str());
     }    
 
     // type checking
-    if(var.type != elem.type()) {
+    if(var.type != elem.type()) 
+    {
 	ostringstream err;
 
-        err << "Trying to assign value of type " << elem.type() << " to " <<
-	var.type << " variable " << id;
+	err << "Trying to assign value of type " << elem.type() << " to " <<
+	    var.type << " variable " << id;
 
-        xorp_throw(var_error, err.str());
+	xorp_throw(var_error, err.str());
     }
 }
 
-void 
-SemanticVarRW::set_protocol(const string& proto) {
+    void 
+SemanticVarRW::set_protocol(const string& proto) 
+{
     _protocol = proto;
 }
 
-void
-SemanticVarRW::sync() {
+    void
+SemanticVarRW::sync() 
+{
     policy_utils::clear_container(_trash);
 }

@@ -38,180 +38,182 @@ class RoutingSocketPlumber;
  * on the socket to RoutingSocketObservers. 
  */
 class RoutingSocket :
-    public NONCOPYABLE
+	public NONCOPYABLE
 {
-public:
-    RoutingSocket();
-    ~RoutingSocket();
+	public:
+		RoutingSocket();
+		~RoutingSocket();
 
-    /**
-     * Start the routing socket operation for a given address family.
-     * 
-     * @param af the address family.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start(int af, string& error_msg);
+		/**
+		 * Start the routing socket operation for a given address family.
+		 * 
+		 * @param af the address family.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int start(int af, string& error_msg);
 
-    /**
-     * Start the routing socket operation for an unspecified address family.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start(string& error_msg) { return start(AF_UNSPEC, error_msg); }
+		/**
+		 * Start the routing socket operation for an unspecified address family.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int start(string& error_msg) { return start(AF_UNSPEC, error_msg); }
 
-    /**
-     * Stop the routing socket operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int stop(string& error_msg);
+		/**
+		 * Stop the routing socket operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int stop(string& error_msg);
 
-    /**
-     * Test if the routing socket is open.
-     * 
-     * This method is needed because RoutingSocket may fail to open
-     * routing socket during startup.
-     * 
-     * @return true if the routing socket is open, otherwise false.
-     */
-    bool is_open() const { return _fd >= 0; }
+		/**
+		 * Test if the routing socket is open.
+		 * 
+		 * This method is needed because RoutingSocket may fail to open
+		 * routing socket during startup.
+		 * 
+		 * @return true if the routing socket is open, otherwise false.
+		 */
+		bool is_open() const { return _fd >= 0; }
 
-    /**
-     * Write data to routing socket.
-     * 
-     * This method also updates the sequence number associated with
-     * this routing socket.
-     * 
-     * @return the number of bytes which were written, or -1 if error.
-     */
-    ssize_t write(const void* data, size_t nbytes);
+		/**
+		 * Write data to routing socket.
+		 * 
+		 * This method also updates the sequence number associated with
+		 * this routing socket.
+		 * 
+		 * @return the number of bytes which were written, or -1 if error.
+		 */
+		ssize_t write(const void* data, size_t nbytes);
 
-    /**
-     * Get the sequence number for next message written into the kernel.
-     * 
-     * The sequence number is derived from the instance number of this routing
-     * socket and a 16-bit counter.
-     * 
-     * @return the sequence number for the next message written into the
-     * kernel.
-     */
-    uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
+		/**
+		 * Get the sequence number for next message written into the kernel.
+		 * 
+		 * The sequence number is derived from the instance number of this routing
+		 * socket and a 16-bit counter.
+		 * 
+		 * @return the sequence number for the next message written into the
+		 * kernel.
+		 */
+		uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
-    /**
-     * Get the cached process identifier value.
-     * 
-     * @return the cached process identifier value.
-     */
-    pid_t pid() const { return _pid; }
+		/**
+		 * Get the cached process identifier value.
+		 * 
+		 * @return the cached process identifier value.
+		 */
+		pid_t pid() const { return _pid; }
 
-    /**
-     * Force socket to read data.
-     * 
-     * This usually is performed after writing a request that the
-     * kernel will answer (e.g., after writing a route lookup).
-     * Use sparingly, with caution, and at your own risk.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int force_read(string& error_msg);
+		/**
+		 * Force socket to read data.
+		 * 
+		 * This usually is performed after writing a request that the
+		 * kernel will answer (e.g., after writing a route lookup).
+		 * Use sparingly, with caution, and at your own risk.
+		 *
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int force_read(string& error_msg);
 
-private:
-    typedef list<RoutingSocketObserver*> ObserverList;
+	private:
+		typedef list<RoutingSocketObserver*> ObserverList;
 
-    /**
-     * Read data available for RoutingSocket and invoke
-     * RoutingSocketObserver::routing_socket_data() on all observers of routing
-     * socket.
-     */
-    void io_event(XorpFd fd, IoEventType type);
+		/**
+		 * Read data available for RoutingSocket and invoke
+		 * RoutingSocketObserver::routing_socket_data() on all observers of routing
+		 * socket.
+		 */
+		void io_event(XorpFd fd, IoEventType type);
 
-private:
-    static const size_t ROUTING_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
+	private:
+		static const size_t ROUTING_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 
-private:
-    int		 _fd;
-    ObserverList _ol;
+	private:
+		int		 _fd;
+		ObserverList _ol;
 
-    uint16_t 	 _seqno;	// Seqno of next write()
-    uint16_t	 _instance_no;  // Instance number of this routing socket
+		uint16_t 	 _seqno;	// Seqno of next write()
+		uint16_t	 _instance_no;  // Instance number of this routing socket
 
-    static uint16_t _instance_cnt;
-    static pid_t    _pid;
+		static uint16_t _instance_cnt;
+		static pid_t    _pid;
 
-    friend class RoutingSocketPlumber; // class that hooks observers in and out
+		friend class RoutingSocketPlumber; // class that hooks observers in and out
 };
 
-class RoutingSocketObserver {
-public:
-    RoutingSocketObserver(RoutingSocket& rs);
+class RoutingSocketObserver 
+{
+	public:
+		RoutingSocketObserver(RoutingSocket& rs);
 
-    virtual ~RoutingSocketObserver();
+		virtual ~RoutingSocketObserver();
 
-    /**
-     * Receive data from the routing socket.
-     *
-     * Note that this method is called asynchronously when the routing socket
-     * has data to receive, therefore it should never be called directly by
-     * anything else except the routing socket facility itself.
-     *
-     * @param buffer the buffer with the received data.
-     */
-    virtual void routing_socket_data(vector<uint8_t>& buffer) = 0;
+		/**
+		 * Receive data from the routing socket.
+		 *
+		 * Note that this method is called asynchronously when the routing socket
+		 * has data to receive, therefore it should never be called directly by
+		 * anything else except the routing socket facility itself.
+		 *
+		 * @param buffer the buffer with the received data.
+		 */
+		virtual void routing_socket_data(vector<uint8_t>& buffer) = 0;
 
-    /**
-     * Get RoutingSocket associated with Observer.
-     */
-    RoutingSocket& routing_socket();
+		/**
+		 * Get RoutingSocket associated with Observer.
+		 */
+		RoutingSocket& routing_socket();
 
-private:
-    RoutingSocket& _rs;
+	private:
+		RoutingSocket& _rs;
 };
 
-class RoutingSocketReader : public RoutingSocketObserver {
-public:
-    RoutingSocketReader(RoutingSocket& rs);
-    virtual ~RoutingSocketReader();
+class RoutingSocketReader : public RoutingSocketObserver 
+{
+	public:
+		RoutingSocketReader(RoutingSocket& rs);
+		virtual ~RoutingSocketReader();
 
-    /**
-     * Force the reader to receive data from the specified routing socket.
-     *
-     * @param rs the routing socket to receive the data from.
-     * @param seqno the sequence number of the data to receive.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int receive_data(RoutingSocket& rs, uint32_t seqno, string& error_msg);
+		/**
+		 * Force the reader to receive data from the specified routing socket.
+		 *
+		 * @param rs the routing socket to receive the data from.
+		 * @param seqno the sequence number of the data to receive.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int receive_data(RoutingSocket& rs, uint32_t seqno, string& error_msg);
 
-    /**
-     * Get the buffer with the data that was received.
-     *
-     * @return a reference to the buffer with the data that was received.
-     */
-    const vector<uint8_t>& buffer() const { return (_cache_data); }
+		/**
+		 * Get the buffer with the data that was received.
+		 *
+		 * @return a reference to the buffer with the data that was received.
+		 */
+		const vector<uint8_t>& buffer() const { return (_cache_data); }
 
-    /**
-     * Receive data from the routing socket.
-     *
-     * Note that this method is called asynchronously when the routing socket
-     * has data to receive, therefore it should never be called directly by
-     * anything else except the routing socket facility itself.
-     *
-     * @param buffer the buffer with the received data.
-     */
-    virtual void routing_socket_data(vector<uint8_t>& buffer);
+		/**
+		 * Receive data from the routing socket.
+		 *
+		 * Note that this method is called asynchronously when the routing socket
+		 * has data to receive, therefore it should never be called directly by
+		 * anything else except the routing socket facility itself.
+		 *
+		 * @param buffer the buffer with the received data.
+		 */
+		virtual void routing_socket_data(vector<uint8_t>& buffer);
 
-private:
-    RoutingSocket&  _rs;
+	private:
+		RoutingSocket&  _rs;
 
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of routing socket data to
-					// cache so reading via routing
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached routing socket data.
+		bool	    _cache_valid;	// Cache data arrived.
+		uint32_t	    _cache_seqno;	// Seqno of routing socket data to
+		// cache so reading via routing
+		// socket can appear synchronous.
+		vector<uint8_t> _cache_data;	// Cached routing socket data.
 };
 
 #endif

@@ -40,7 +40,7 @@ SystemClock::~SystemClock()
     delete _tv;
 }
 
-void
+    void
 SystemClock::advance_time()
 {
     int error;
@@ -52,7 +52,7 @@ SystemClock::advance_time()
 }
 
 
-void
+    void
 SystemClock::current_time(TimeVal& tv)
 {
     tv = *_tv;

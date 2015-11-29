@@ -51,82 +51,92 @@
 #define  LDWRAPPER_GET_POLICY_ROUTE_OK  37
 
 
-typedef struct wraiper_Data {
-    uint32_t code;
-    uint32_t data_len;
-    void * data;
+typedef struct wraiper_Data 
+{
+	uint32_t code;
+	uint32_t data_len;
+	void * data;
 } wrapperData_t;
 
-typedef struct add_route_st {
-    bool unicast;
-    bool multicast;
-    char dst[40];
-    char next_hop[20];
-    char ifname[128];
-    char vifname[128];
-    uint32_t metric;
-    uint32_t priority;
+typedef struct add_route_st 
+{
+	bool unicast;
+	bool multicast;
+	char dst[40];
+	char next_hop[20];
+	char ifname[128];
+	char vifname[128];
+	uint32_t metric;
+	uint32_t priority;
 } add_route_t;
 
-typedef struct del_route_st {
-    bool unicast;
-    bool multicast;
-    char dst[40];
-    char ifname[128];
-    char vifname[128];
+typedef struct del_route_st 
+{
+	bool unicast;
+	bool multicast;
+	char dst[40];
+	char ifname[128];
+	char vifname[128];
 } del_route_t;
 
-typedef struct udp_open_st {
-    uint32_t domain;
-    uint32_t type;
-    uint32_t protocol;
+typedef struct udp_open_st 
+{
+	uint32_t domain;
+	uint32_t type;
+	uint32_t protocol;
 } udp_open_t;
 
-typedef struct xrl_socket_id_st {
-    uint32_t len;
-    char xorp_sock_name[128];
+typedef struct xrl_socket_id_st 
+{
+	uint32_t len;
+	char xorp_sock_name[128];
 } xrl_socket_id_t;
 
-typedef struct xrl_socket_st {
-    xrl_socket_id_t sock_id;
-    char 	local_addr[40];
-    uint32_t 	local_port;
+typedef struct xrl_socket_st 
+{
+	xrl_socket_id_t sock_id;
+	char 	local_addr[40];
+	uint32_t 	local_port;
 } xrl_socket_t;
 
-typedef struct xrl_socket_option_st {
-    xrl_socket_id_t sock_id;
-    uint32_t 	level;
-    char	opt_name[64];
-    uint32_t	opt_value;
-    char	dev_name[128];
-    uint32_t	length;
+typedef struct xrl_socket_option_st 
+{
+	xrl_socket_id_t sock_id;
+	uint32_t 	level;
+	char	opt_name[64];
+	uint32_t	opt_value;
+	char	dev_name[128];
+	uint32_t	length;
 } xrl_socket_option_t;
 
-typedef struct xrl_send_udp_st {
-    xrl_socket_id_t sock_id;
-    char        target_addr[40];
-    uint32_t 	target_port;
-    uint32_t	data_len;
-    uint8_t	*data;
+typedef struct xrl_send_udp_st 
+{
+	xrl_socket_id_t sock_id;
+	char        target_addr[40];
+	uint32_t 	target_port;
+	uint32_t	data_len;
+	uint8_t	*data;
 } xrl_send_udp_t;
 
-typedef struct xrl_recv_udp_st {
-    xrl_socket_id_t sock_id;
-    char ifname[128];
-    char vifname[128];
-    char        src_addr[40];
-    uint32_t    src_port;
-    uint32_t    data_len;
-    uint8_t     *data;
+typedef struct xrl_recv_udp_st 
+{
+	xrl_socket_id_t sock_id;
+	char ifname[128];
+	char vifname[128];
+	char        src_addr[40];
+	uint32_t    src_port;
+	uint32_t    data_len;
+	uint8_t     *data;
 } xrl_recv_udp_t;
 
-typedef struct xrl_policy_st {
-    uint32_t cmd;
-    bool unicast;
-    bool multicast;
-    char network[40];
-    char next_hop[20];
-    uint32_t metric;
+typedef struct xrl_policy_st 
+{
+	uint32_t cmd;
+	bool unicast;
+	bool multicast;
+	char network[40];
+	char next_hop[20];
+	uint32_t metric;
 
 }xrl_policy_t;
 

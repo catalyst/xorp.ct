@@ -29,97 +29,99 @@
 #include "xrl.hh"
 #include "xrl_parser_input.hh"
 
-class XrlParseError {
-public:
+class XrlParseError 
+{
+    public:
 
-    XrlParseError(const string& input, ssize_t offset, const string& reason)
-	: _input(input), _offset(offset), _reason(reason) {}
+	XrlParseError(const string& input, ssize_t offset, const string& reason)
+	    : _input(input), _offset(offset), _reason(reason) {}
 
-    XrlParseError(const string& input, string::const_iterator pos,
-		  const string& reason)
-	: _input(input), _offset(pos - input.begin()), _reason(reason) {}
+	XrlParseError(const string& input, string::const_iterator pos,
+		const string& reason)
+	    : _input(input), _offset(pos - input.begin()), _reason(reason) {}
 
-    XrlParseError() : _input(""), _offset(0xffffffff), _reason("") {}
+	XrlParseError() : _input(""), _offset(0xffffffff), _reason("") {}
 
-    virtual ~XrlParseError() {}
+	virtual ~XrlParseError() {}
 
-    const string& input() const		{ return _input; }
-    ssize_t offset() const		{ return _offset; }
-    const string& reason() const	{ return _reason; }
+	const string& input() const		{ return _input; }
+	ssize_t offset() const		{ return _offset; }
+	const string& reason() const	{ return _reason; }
 
-    string pretty_print(size_t termwidth = 80u) const;
+	string pretty_print(size_t termwidth = 80u) const;
 
-protected:
-    const string    _input;
-    size_t	    _offset;
-    string 	    _reason;
+    protected:
+	const string    _input;
+	size_t	    _offset;
+	string 	    _reason;
 
-    void get_coordinates(size_t& lineno, size_t& charno) const;
+	void get_coordinates(size_t& lineno, size_t& charno) const;
 };
 
 // XrlLocator - locates sub-strings that look like spaceless and
 // presentation Xrl's.  It does weak examination of syntax and leaves
 // finer grained examination to the Xrl instantiation routines.
 
-class XrlParser {
-public:
-    XrlParser(XrlParserInput& xpi) : _xpi(xpi) {}
-    virtual ~XrlParser() {}
+class XrlParser 
+{
+    public:
+	XrlParser(XrlParserInput& xpi) : _xpi(xpi) {}
+	virtual ~XrlParser() {}
 
-    /** Starts new parsing cycle.
-     * @return true upon success, false if there is no more data
-     */
-    bool start_next() throw (XrlParserInputException);
+	/** Starts new parsing cycle.
+	 * @return true upon success, false if there is no more data
+	 */
+	bool start_next() throw (XrlParserInputException);
 
-    /** Check if input is exhausted.
-     *  @return true if input is exhausted, false otherwise.
-     */
-    bool finished() const { return _xpi.eof(); }
+	/** Check if input is exhausted.
+	 *  @return true if input is exhausted, false otherwise.
+	 */
+	bool finished() const { return _xpi.eof(); }
 
-    bool get(string&  protocol,
-	     string&  target,
-	     string&  command,
-	     XrlArgs& args)
-	throw (XrlParseError);
+	bool get(string&  protocol,
+		string&  target,
+		string&  command,
+		XrlArgs& args)
+	    throw (XrlParseError);
 
-    bool get(string& protocol,
-	     string& target,
-	     string& command,
-	     XrlArgs& args,
-	     list<XrlAtomSpell>& spells)
-	throw (XrlParseError);
+	bool get(string& protocol,
+		string& target,
+		string& command,
+		XrlArgs& args,
+		list<XrlAtomSpell>& spells)
+	    throw (XrlParseError);
 
-    bool get(string& xrl_c_str) throw (XrlParseError);
+	bool get(string& xrl_c_str) throw (XrlParseError);
 
-    bool get_return_specs(list<XrlAtomSpell>& spells);
+	bool get_return_specs(list<XrlAtomSpell>& spells);
 
-    const string& input() const { return _input; }
+	const string& input() const { return _input; }
 
-    /**
-     * Attempt to find a new XRL starting point after an error has
-     * occurred.
-     *
-     * @return true if text resembling an XRL start is found.
-     */
-    bool resync();
+	/**
+	 * Attempt to find a new XRL starting point after an error has
+	 * occurred.
+	 *
+	 * @return true if text resembling an XRL start is found.
+	 */
+	bool resync();
 
-    const XrlParserInput& parser_input() const;
+	const XrlParserInput& parser_input() const;
 
-protected:
+    protected:
 
-    bool get(string& 		 protocol,
-	     string& 		 target,
-	     string& 		 command,
-	     XrlArgs*		 args,
-	     list<XrlAtomSpell>* spells)
-	throw (XrlParseError);
+	bool get(string& 		 protocol,
+		string& 		 target,
+		string& 		 command,
+		XrlArgs*		 args,
+		list<XrlAtomSpell>* spells)
+	    throw (XrlParseError);
 
-    bool parse_atoms_and_spells(XrlArgs*	    args,
-				list<XrlAtomSpell>* spells);
+	bool parse_atoms_and_spells(XrlArgs*	    args,
+		list<XrlAtomSpell>* spells);
 
-    XrlParserInput&	   _xpi;
-    string		   _input;
-    string::const_iterator _pos;
+	XrlParserInput&	   _xpi;
+	string		   _input;
+	string::const_iterator _pos;
 };
 
 #endif // __LIBXIPC_XRL_PARSER_HH__

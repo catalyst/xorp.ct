@@ -38,55 +38,57 @@
 class PolicyInstr :
     public NONCOPYABLE
 {
-public:
-    /**
-     * @param name name of the policy.
-     * @param terms terms of the policy. Caller must not delete terms.
-     */
-    PolicyInstr(const string& name, vector<TermInstr*>* terms) :
-        _name(name), _trace(false) { 
-   
-	int i = 0;
+    public:
+	/**
+	 * @param name name of the policy.
+	 * @param terms terms of the policy. Caller must not delete terms.
+	 */
+	PolicyInstr(const string& name, vector<TermInstr*>* terms) :
+	    _name(name), _trace(false) { 
 
-	vector<TermInstr*>::iterator iter;
+		int i = 0;
 
-	_termc = terms->size();
-	_terms = new TermInstr*[_termc];
-	for (iter = terms->begin(); iter != terms->end(); ++iter) {
-	    _terms[i] = *iter;
-	    i++;
+		vector<TermInstr*>::iterator iter;
+
+		_termc = terms->size();
+		_terms = new TermInstr*[_termc];
+		for (iter = terms->begin(); iter != terms->end(); ++iter) 
+		{
+		    _terms[i] = *iter;
+		    i++;
+		}
+
+		delete terms;
+	    }
+
+	~PolicyInstr() 
+	{
+	    for (int i = 0; i < _termc; i++)
+		delete _terms[i];
+
+	    delete [] _terms;
 	}
-	
-	delete terms;
-    }
 
-    ~PolicyInstr() {
-	for (int i = 0; i < _termc; i++)
-	    delete _terms[i];
-	
-	delete [] _terms;
-    }
+	/**
+	 * @return terms of this policy. Caller must not delete terms.
+	 */
+	TermInstr** terms() { return _terms; }
 
-    /**
-     * @return terms of this policy. Caller must not delete terms.
-     */
-    TermInstr** terms() { return _terms; }
+	/**
+	 * @return name of the policy.
+	 */
+	const string& name() { return _name; }
 
-    /**
-     * @return name of the policy.
-     */
-    const string& name() { return _name; }
+	int termc() const { return _termc; }
 
-    int termc() const { return _termc; }
+	void set_trace(bool trace)	{ _trace = trace; }
+	bool trace() const		{ return _trace; }
 
-    void set_trace(bool trace)	{ _trace = trace; }
-    bool trace() const		{ return _trace; }
-
-private:
-    string	_name;
-    TermInstr**	_terms;
-    int		_termc;
-    bool	_trace;
+    private:
+	string	_name;
+	TermInstr**	_terms;
+	int		_termc;
+	bool	_trace;
 };
 
 #endif // __POLICY_BACKEND_POLICY_INSTR_HH__

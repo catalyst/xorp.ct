@@ -31,35 +31,36 @@ class XRLdb;
 #include "template_tree.hh"
 #include "master_template_tree_node.hh"
 
-class MasterTemplateTree : public TemplateTree {
-public:
-    MasterTemplateTree(const string& xorp_root_dir,
-		       XRLdb* xrldb,
-		       bool verbose)  throw (InitError);
+class MasterTemplateTree : public TemplateTree 
+{
+	public:
+		MasterTemplateTree(const string& xorp_root_dir,
+				XRLdb* xrldb,
+				bool verbose)  throw (InitError);
 
-    bool load_template_tree(const string& config_template_dir,
-			    string& error_msg);
+		bool load_template_tree(const string& config_template_dir,
+				string& error_msg);
 
-    void add_cmd(char* cmd) throw (ParseError);
-    void add_cmd_action(const string& cmd, const list<string>& action)
-	throw (ParseError);
-    const XRLdb* xrldb() const { return _xrldb; }
+		void add_cmd(char* cmd) throw (ParseError);
+		void add_cmd_action(const string& cmd, const list<string>& action)
+			throw (ParseError);
+		const XRLdb* xrldb() const { return _xrldb; }
 
-    const MasterTemplateTreeNode* find_node(const list<string>& path_segments) 
-	const 
-    {
-	return (const MasterTemplateTreeNode*)
-	    (TemplateTree::find_node(path_segments));
-    }
+		const MasterTemplateTreeNode* find_node(const list<string>& path_segments) 
+			const 
+			{
+				return (const MasterTemplateTreeNode*)
+					(TemplateTree::find_node(path_segments));
+			}
 
-    MasterTemplateTreeNode* root_node() const { 
-	return (MasterTemplateTreeNode*)_root_node; 
-    }
-private:
-    bool expand_master_template_tree(string& error_msg);
-    bool check_master_template_tree(string& error_msg);
+		MasterTemplateTreeNode* root_node() const { 
+			return (MasterTemplateTreeNode*)_root_node; 
+		}
+	private:
+		bool expand_master_template_tree(string& error_msg);
+		bool check_master_template_tree(string& error_msg);
 
-    XRLdb*		_xrldb;
+		XRLdb*		_xrldb;
 };
 
 #endif // __RTRMGR_MASTER_TEMPLATE_TREE_HH__

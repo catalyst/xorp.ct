@@ -55,16 +55,16 @@
  * as absolute paths by this function.
  * @return true if the path if satisfies the criteria for an absolute path.
  */
-inline bool
+    inline bool
 is_absolute_path(const string& path, bool homeok = false)
 {
     if (path.empty())
 	return false;
 
     if (path[0] == '/')
-        return true;
+	return true;
     if (homeok && path[0] == '~')
-        return true;
+	return true;
     return false;
 }
 
@@ -106,18 +106,19 @@ const char* xorp_basename(const char* argv0);
  * 
  * @param delete_list the list of pointers to objects to delete.
  */
-template<class T> void
+    template<class T> void
 delete_pointers_list(list<T *>& delete_list)
 {
     list<T *> tmp_list;
-    
+
     // Swap the elements, so the original container never contains
     // entries that point to deleted elements.
     swap(tmp_list, delete_list);
-    
+
     for (typename list<T *>::iterator iter = tmp_list.begin();
-	 iter != tmp_list.end();
-	 ++iter) {
+	    iter != tmp_list.end();
+	    ++iter) 
+    {
 	T *elem = (*iter);
 	delete elem;
     }
@@ -129,17 +130,18 @@ delete_pointers_list(list<T *>& delete_list)
  * 
  * @param delete_vector the vector of pointers to objects to delete.
  */
-template<class T> void
+    template<class T> void
 delete_pointers_vector(vector<T *>& delete_vector)
 {
     vector<T *> tmp_vector;
     // Swap the elements, so the original container never contains
     // entries that point to deleted elements.
     swap(tmp_vector, delete_vector);
-    
+
     for (typename vector<T *>::iterator iter = tmp_vector.begin();
-	 iter != tmp_vector.end();
-	 ++iter) {
+	    iter != tmp_vector.end();
+	    ++iter) 
+    {
 	T *elem = (*iter);
 	delete elem;
     }
@@ -186,9 +188,9 @@ delete_pointers_vector(vector<T *>& delete_vector)
  * reading and writing) on success, otherwise NULL.
  */
 FILE*	xorp_make_temporary_file(const string& tmp_dir,
-				 const string& filename_template,
-				 string& final_filename,
-				 string& errmsg);
+	const string& filename_template,
+	string& final_filename,
+	string& errmsg);
 
 
 /**
@@ -205,8 +207,8 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
  * @param x the value to test.
  * @return the number of bits that are set in @ref x.
  */
-inline uint32_t
-xorp_bit_count_uint32(uint32_t x)
+    inline uint32_t
+    xorp_bit_count_uint32(uint32_t x)
 {
     //
     // 32-bit recursive reduction using SWAR...
@@ -232,8 +234,8 @@ xorp_bit_count_uint32(uint32_t x)
  * @param x the value to test.
  * @return the number of leading zeroes in @ref x.
  */
-inline uint32_t
-xorp_leading_zero_count_uint32(uint32_t x)
+    inline uint32_t
+    xorp_leading_zero_count_uint32(uint32_t x)
 {
     x |= (x >> 1);
     x |= (x >> 2);

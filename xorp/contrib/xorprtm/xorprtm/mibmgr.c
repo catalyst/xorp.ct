@@ -32,9 +32,9 @@
 
 /* XXX: This needs to use the router manager event queue interface. */
 DWORD
-WINAPI
+    WINAPI
 MM_MibSet (
-    PXORPRTM_MIB_SET_INPUT_DATA    pimsid)
+	PXORPRTM_MIB_SET_INPUT_DATA    pimsid)
 {
     DWORD                   dwErr = NO_ERROR;
     ROUTING_PROTOCOL_EVENTS rpeEvent;
@@ -44,20 +44,24 @@ MM_MibSet (
 
     if (!ENTER_XORPRTM_API()) { return ERROR_CAN_NOT_COMPLETE; }
 
-    do {
-        if (pimsid->IMSID_TypeID == XORPRTM_GLOBAL_CONFIG_ID) {
-            if (pimsid->IMSID_BufferSize < sizeof(XORPRTM_GLOBAL_CONFIG)) {
-                dwErr = ERROR_INVALID_PARAMETER;
-                break;
-            }
-           rpeEvent = SAVE_GLOBAL_CONFIG_INFO;
-        } else {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
-        /* notify router manager */
-        if (EnqueueEvent(rpeEvent, mMessage) == NO_ERROR)
-            SetEvent(g_ce.hMgrNotificationEvent);
+    do 
+    {
+	if (pimsid->IMSID_TypeID == XORPRTM_GLOBAL_CONFIG_ID) 
+	{
+	    if (pimsid->IMSID_BufferSize < sizeof(XORPRTM_GLOBAL_CONFIG)) 
+	    {
+		dwErr = ERROR_INVALID_PARAMETER;
+		break;
+	    }
+	    rpeEvent = SAVE_GLOBAL_CONFIG_INFO;
+	} else 
+	{
+	    dwErr = ERROR_INVALID_PARAMETER;
+	    break;
+	}
+	/* notify router manager */
+	if (EnqueueEvent(rpeEvent, mMessage) == NO_ERROR)
+	    SetEvent(g_ce.hMgrNotificationEvent);
 
     } while(FALSE);
 
@@ -69,12 +73,12 @@ MM_MibSet (
 
 /* XXX: We must have a 'mib get' function to retrieve the global config. */
 DWORD
-WINAPI
+    WINAPI
 MM_MibGet (
-    PXORPRTM_MIB_GET_INPUT_DATA    pimgid,
-    PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
-    PULONG                         pulOutputSize,
-    MODE                            mMode)
+	PXORPRTM_MIB_GET_INPUT_DATA    pimgid,
+	PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
+	PULONG                         pulOutputSize,
+	MODE                            mMode)
 {
     DWORD               dwErr           = NO_ERROR;
     ULONG               ulSizeGiven     = 0;
@@ -85,32 +89,36 @@ MM_MibGet (
     if (!ENTER_XORPRTM_API()) { return ERROR_CAN_NOT_COMPLETE; }
 
     if (*pulOutputSize < sizeof(XORPRTM_MIB_GET_OUTPUT_DATA))
-        ulSizeGiven = 0;
+	ulSizeGiven = 0;
     else
-        ulSizeGiven = *pulOutputSize - sizeof(XORPRTM_MIB_GET_OUTPUT_DATA);
+	ulSizeGiven = *pulOutputSize - sizeof(XORPRTM_MIB_GET_OUTPUT_DATA);
 
-    switch (pimgid->IMGID_TypeID) {
-        case XORPRTM_GLOBAL_CONFIG_ID: {
-            if (mMode == GET_NEXT) {
-                dwErr = ERROR_NO_MORE_ITEMS;
-                break;
-            }
-            dwErr = CM_GetGlobalInfo ((PVOID) pimgod->IMGOD_Buffer,
-                                      &ulSizeGiven,
-                                      NULL,
-                                      NULL,
-                                      NULL);
-            ulSizeNeeded = ulSizeGiven;
-            if (dwErr != NO_ERROR)
-                break;
-            pimgod->IMGOD_TypeID = XORPRTM_GLOBAL_CONFIG_ID;
-            break;
-        }
+    switch (pimgid->IMGID_TypeID) 
+    {
+	case XORPRTM_GLOBAL_CONFIG_ID: 
+	    {
+		if (mMode == GET_NEXT) 
+		{
+		    dwErr = ERROR_NO_MORE_ITEMS;
+		    break;
+		}
+		dwErr = CM_GetGlobalInfo ((PVOID) pimgod->IMGOD_Buffer,
+			&ulSizeGiven,
+			NULL,
+			NULL,
+			NULL);
+		ulSizeNeeded = ulSizeGiven;
+		if (dwErr != NO_ERROR)
+		    break;
+		pimgod->IMGOD_TypeID = XORPRTM_GLOBAL_CONFIG_ID;
+		break;
+	    }
 
-        default: {
-            dwErr = ERROR_INVALID_PARAMETER;
-            break;
-        }
+	default: 
+	    {
+		dwErr = ERROR_INVALID_PARAMETER;
+		break;
+	    }
     }
 
     *pulOutputSize = sizeof(XORPRTM_MIB_GET_OUTPUT_DATA) + ulSizeNeeded;

@@ -50,154 +50,159 @@
 #include "xrl/targets/profiler_base.hh"
 
 
-class XrlProfilerTarget :  XrlProfilerTargetBase {
- public:
-    XrlProfilerTarget(XrlRouter *r)
-	:  XrlProfilerTargetBase(r), _xrl_router(r), _done(false)
-    {}
+class XrlProfilerTarget :  XrlProfilerTargetBase 
+{
+    public:
+	XrlProfilerTarget(XrlRouter *r)
+	    :  XrlProfilerTargetBase(r), _xrl_router(r), _done(false)
+	{}
 
-    XrlCmdError
-    common_0_1_get_target_name(string& name)
-    {
-	name = "profiler";
-	return XrlCmdError::OKAY();
-    }
+	XrlCmdError
+	    common_0_1_get_target_name(string& name)
+	    {
+		name = "profiler";
+		return XrlCmdError::OKAY();
+	    }
 
-    XrlCmdError
-    common_0_1_get_version(string& version)
-    {
-	version = "0.1";
-	return XrlCmdError::OKAY();
-    }
+	XrlCmdError
+	    common_0_1_get_version(string& version)
+	    {
+		version = "0.1";
+		return XrlCmdError::OKAY();
+	    }
 
-    XrlCmdError
-    common_0_1_get_status(uint32_t& status, string& /*reason*/)
-    {
-	status =  PROC_READY;
-	return XrlCmdError::OKAY();
-    }
+	XrlCmdError
+	    common_0_1_get_status(uint32_t& status, string& /*reason*/)
+	    {
+		status =  PROC_READY;
+		return XrlCmdError::OKAY();
+	    }
 
-    XrlCmdError
-    common_0_1_shutdown()
-    {
-	_done = true;
-	return XrlCmdError::OKAY();
-    }
+	XrlCmdError
+	    common_0_1_shutdown()
+	    {
+		_done = true;
+		return XrlCmdError::OKAY();
+	    }
 
-    XrlCmdError common_0_1_startup() {
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError
-    profile_client_0_1_log(const string& pname,	const uint32_t&	sec,
-			   const uint32_t& usec, const string&	comment)
-    {
-	printf("%s %u %u %s\n", pname.c_str(), XORP_UINT_CAST(sec),
-	       XORP_UINT_CAST(usec), comment.c_str());
-
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError 
-    profile_client_0_1_finished(const string& /*pname*/)
-    {
-	_done = true;
-	return XrlCmdError::OKAY();
-    }
-
-    void
-    list(const string& target)
-    {
-	_done = false;
-
-	XrlProfileV0p1Client profile(_xrl_router);
-	profile.send_list(target.c_str(),
-			  callback(this, &XrlProfilerTarget::list_cb));
-    }
-
-    void
-    list_cb(const XrlError& error, const string* list)
-    {
-	_done = true;
-	if(XrlError::OKAY() != error) {
-	    XLOG_WARNING("callback: %s", error.str().c_str());
-	    return;
+	XrlCmdError common_0_1_startup() 
+	{
+	    return XrlCmdError::OKAY();
 	}
-	printf("%s", list->c_str());
-    }
 
-    void
-    enable(const string& target, const string& pname)
-    {
-	_done = false;
+	XrlCmdError
+	    profile_client_0_1_log(const string& pname,	const uint32_t&	sec,
+		    const uint32_t& usec, const string&	comment)
+	    {
+		printf("%s %u %u %s\n", pname.c_str(), XORP_UINT_CAST(sec),
+			XORP_UINT_CAST(usec), comment.c_str());
 
-	XrlProfileV0p1Client profile(_xrl_router);
-	profile.send_enable(target.c_str(),
-			    pname,
-			    callback(this, &XrlProfilerTarget::cb));
-    }
+		return XrlCmdError::OKAY();
+	    }
 
-    void
-    disable(const string& target, const string& pname)
-    {
-	_done = false;
+	XrlCmdError 
+	    profile_client_0_1_finished(const string& /*pname*/)
+	    {
+		_done = true;
+		return XrlCmdError::OKAY();
+	    }
 
-	XrlProfileV0p1Client profile(_xrl_router);
-	profile.send_disable(target.c_str(),
-			     pname,
-			     callback(this, &XrlProfilerTarget::cb));
-    }
+	void
+	    list(const string& target)
+	    {
+		_done = false;
 
-    void
-    clear(const string& target, const string& pname)
-    {
-	_done = false;
+		XrlProfileV0p1Client profile(_xrl_router);
+		profile.send_list(target.c_str(),
+			callback(this, &XrlProfilerTarget::list_cb));
+	    }
 
-	XrlProfileV0p1Client profile(_xrl_router);
-	profile.send_clear(target.c_str(),
-			   pname,
-			   callback(this, &XrlProfilerTarget::cb));
-    }
+	void
+	    list_cb(const XrlError& error, const string* list)
+	    {
+		_done = true;
+		if(XrlError::OKAY() != error) 
+		{
+		    XLOG_WARNING("callback: %s", error.str().c_str());
+		    return;
+		}
+		printf("%s", list->c_str());
+	    }
 
-    void
-    get(const string& target, const string& pname)
-    {
-	_done = false;
+	void
+	    enable(const string& target, const string& pname)
+	    {
+		_done = false;
 
-	XrlProfileV0p1Client profile(_xrl_router);
-	profile.send_get_entries(target.c_str(),
-				 pname,
-				 _xrl_router->instance_name(),
-				 callback(this, &XrlProfilerTarget::get_cb));
-    }
+		XrlProfileV0p1Client profile(_xrl_router);
+		profile.send_enable(target.c_str(),
+			pname,
+			callback(this, &XrlProfilerTarget::cb));
+	    }
 
-    void
-    get_cb(const XrlError& error)
-    {
-	// If there is an error then set done to be true.
-	if(XrlError::OKAY() != error) {
-	    _done = true;
-	    XLOG_WARNING("callback: %s", error.str().c_str());
-	}
-    }
+	void
+	    disable(const string& target, const string& pname)
+	    {
+		_done = false;
 
-    void
-    cb(const XrlError& error)
-    {
-	_done = true;
-	if(XrlError::OKAY() != error) {
-	    XLOG_WARNING("callback: %s", error.str().c_str());
-	}
-    }
+		XrlProfileV0p1Client profile(_xrl_router);
+		profile.send_disable(target.c_str(),
+			pname,
+			callback(this, &XrlProfilerTarget::cb));
+	    }
 
-    bool done() const { return _done; }
+	void
+	    clear(const string& target, const string& pname)
+	    {
+		_done = false;
 
- private:
-    XrlRouter *_xrl_router;
-    bool _done;
+		XrlProfileV0p1Client profile(_xrl_router);
+		profile.send_clear(target.c_str(),
+			pname,
+			callback(this, &XrlProfilerTarget::cb));
+	    }
+
+	void
+	    get(const string& target, const string& pname)
+	    {
+		_done = false;
+
+		XrlProfileV0p1Client profile(_xrl_router);
+		profile.send_get_entries(target.c_str(),
+			pname,
+			_xrl_router->instance_name(),
+			callback(this, &XrlProfilerTarget::get_cb));
+	    }
+
+	void
+	    get_cb(const XrlError& error)
+	    {
+		// If there is an error then set done to be true.
+		if(XrlError::OKAY() != error) 
+		{
+		    _done = true;
+		    XLOG_WARNING("callback: %s", error.str().c_str());
+		}
+	    }
+
+	void
+	    cb(const XrlError& error)
+	    {
+		_done = true;
+		if(XrlError::OKAY() != error) 
+		{
+		    XLOG_WARNING("callback: %s", error.str().c_str());
+		}
+	    }
+
+	bool done() const { return _done; }
+
+    private:
+	XrlRouter *_xrl_router;
+	bool _done;
 };
 
-int
+    int
 usage(const char *myname)
 {
     fprintf(stderr,
@@ -206,7 +211,7 @@ usage(const char *myname)
     return 1;
 }
 
-int
+    int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -226,48 +231,51 @@ main(int argc, char **argv)
     bool requires_pname = false;
 
     int c;
-    while ((c = getopt(argc, argv, "t:lv:edcg")) != -1) {
-	switch (c) {
-	case 't':
-	    target = optarg;
-	    break;
-	case 'l':
-	    command = "list";
-	    break;
-	case 'v':
-	    pname = optarg;
-	    break;
-	case 'e':
-	    command = "enable";
-	    requires_pname = true;
-	    break;
-	case 'd':
-	    command = "disable";
-	    requires_pname = true;
-	    break;
-	case 'c':
-	    command = "clear";
-	    requires_pname = true;
-	    break;
-	case 'g':
-	    command = "get";
-	    requires_pname = true;
-	    break;
-	default:
-	    return usage(argv[0]);
+    while ((c = getopt(argc, argv, "t:lv:edcg")) != -1) 
+    {
+	switch (c) 
+	{
+	    case 't':
+		target = optarg;
+		break;
+	    case 'l':
+		command = "list";
+		break;
+	    case 'v':
+		pname = optarg;
+		break;
+	    case 'e':
+		command = "enable";
+		requires_pname = true;
+		break;
+	    case 'd':
+		command = "disable";
+		requires_pname = true;
+		break;
+	    case 'c':
+		command = "clear";
+		requires_pname = true;
+		break;
+	    case 'g':
+		command = "get";
+		requires_pname = true;
+		break;
+	    default:
+		return usage(argv[0]);
 	}
     }
-    
+
     if (target.empty())
 	return usage(argv[0]);
 
     if (command.empty())
 	return usage(argv[0]);
-    
+
     if (requires_pname && pname.empty())
 	return usage(argv[0]);
 
-    try {
+    try 
+    {
 	XrlStdRouter xrl_router( "profiler");
 	XrlProfilerTarget profiler(&xrl_router);
 
@@ -291,9 +299,10 @@ main(int argc, char **argv)
 	    EventLoop::instance().run();
 
 	while (xrl_router.pending())
- 	    EventLoop::instance().run();
+	    EventLoop::instance().run();
 
-        } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

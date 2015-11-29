@@ -103,23 +103,25 @@ typedef XrlRecvSyncCallback XrlRecvCallback;
 
 
 
-class XrlCmdEntry {
+class XrlCmdEntry 
+{
     // An asynchronous command implementation that calls a synchronous
     // one
     static void invoke_sync(const XrlArgs& in, XrlRespCallback out,
-			    XrlRecvSyncCallback impl);
+	    XrlRecvSyncCallback impl);
 
-public:
+    public:
     // Make an asynchronous command implementation out of a
     // synchronous one.
-    static XrlRecvAsyncCallback make_async_cb(const XrlRecvSyncCallback& cb) {
+    static XrlRecvAsyncCallback make_async_cb(const XrlRecvSyncCallback& cb) 
+    {
 	return callback(&XrlCmdEntry::invoke_sync, cb);
     }
 
     XrlCmdEntry(const string& s, XrlRecvAsyncCallback cb) :
-	    _name(s), _cb(cb) {}
+	_name(s), _cb(cb) {}
     XrlCmdEntry(const string& s, XrlRecvSyncCallback cb) :
-	    _name(s), _cb(make_async_cb(cb)) {}
+	_name(s), _cb(make_async_cb(cb)) {}
 
 #ifdef XORP_USE_USTL
     XrlCmdEntry() { }
@@ -127,11 +129,12 @@ public:
 
     const string& name() const { return _name; }
 
-    void dispatch(const XrlArgs& inputs, XrlRespCallback outputs) const {
+    void dispatch(const XrlArgs& inputs, XrlRespCallback outputs) const 
+    {
 	return _cb->dispatch(inputs, outputs);
     }
 
-protected:
+    protected:
     string			_name;
     XrlRecvAsyncCallback	_cb;
 };
@@ -139,47 +142,49 @@ protected:
 class XrlCmdMap :
     public NONCOPYABLE
 {
-public:
-    typedef map<string, XrlCmdEntry> CmdMap;
+    public:
+	typedef map<string, XrlCmdEntry> CmdMap;
 
-    XrlCmdMap(const string& name = "anonymous") : _name(name) {}
-    virtual ~XrlCmdMap() {}
+	XrlCmdMap(const string& name = "anonymous") : _name(name) {}
+	virtual ~XrlCmdMap() {}
 
-    const string& name() const { return _name; }
+	const string& name() const { return _name; }
 
-    virtual bool add_handler_internal(const string& cmd,
-				      const XrlRecvAsyncCallback& rcb);
+	virtual bool add_handler_internal(const string& cmd,
+		const XrlRecvAsyncCallback& rcb);
 
-    bool add_handler(const string& cmd, const XrlRecvAsyncCallback& rcb) {
-	return add_handler_internal(cmd, rcb);
-    }
+	bool add_handler(const string& cmd, const XrlRecvAsyncCallback& rcb) 
+	{
+	    return add_handler_internal(cmd, rcb);
+	}
 
-    bool add_handler(const string& cmd, const XrlRecvSyncCallback& rcb) {
-	return add_handler_internal(cmd, XrlCmdEntry::make_async_cb(rcb));
-    }
+	bool add_handler(const string& cmd, const XrlRecvSyncCallback& rcb) 
+	{
+	    return add_handler_internal(cmd, XrlCmdEntry::make_async_cb(rcb));
+	}
 
-    virtual bool remove_handler (const string& name);
+	virtual bool remove_handler (const string& name);
 
-    const XrlCmdEntry* get_handler(const string& name) const;
+	const XrlCmdEntry* get_handler(const string& name) const;
 
-    uint32_t count_handlers() const;
+	uint32_t count_handlers() const;
 
-    const XrlCmdEntry* get_handler(uint32_t index) const;
+	const XrlCmdEntry* get_handler(uint32_t index) const;
 
-    void get_command_names(list<string>& names) const;
+	void get_command_names(list<string>& names) const;
 
-    /**
-     * Mark command map as finished.
-     */
-    virtual void finalize();
+	/**
+	 * Mark command map as finished.
+	 */
+	virtual void finalize();
 
-protected:
-    bool add_handler (const XrlCmdEntry& c);
+    protected:
+	bool add_handler (const XrlCmdEntry& c);
 
-protected:
-    const string _name;
+    protected:
+	const string _name;
 
-    CmdMap _cmd_map;
+	CmdMap _cmd_map;
 };
 
 #endif // __LIBXIPC_XRL_CMD_MAP_HH__

@@ -43,237 +43,244 @@
 
 /* **************** BGPSocket - PUBLIC METHODS *********************** */
 
-Socket::Socket(const Iptuple& iptuple)
-    : _iptuple(iptuple)
+	Socket::Socket(const Iptuple& iptuple)
+: _iptuple(iptuple)
 {
-    debug_msg("Socket constructor called: %s\n", _iptuple.str().c_str());
+	debug_msg("Socket constructor called: %s\n", _iptuple.str().c_str());
 
 
 #ifdef	DEBUG_PEERNAME
-    _remote_host = "unconnected socket";
+	_remote_host = "unconnected socket";
 #endif
 }
 
-void
+	void
 Socket::create_listener()
 {
-    debug_msg("create_listener called\n");
+	debug_msg("create_listener called\n");
 
-    size_t len;
-    const struct sockaddr *sin = get_local_socket(len);
+	size_t len;
+	const struct sockaddr *sin = get_local_socket(len);
 
-    XLOG_ASSERT(!_s.is_valid());
+	XLOG_ASSERT(!_s.is_valid());
 
-    _s = comm_bind_tcp(sin, COMM_SOCK_NONBLOCKING);
-    if (!_s.is_valid()) {
-	XLOG_ERROR("comm_bind_tcp failed");
-    }
-    else {
-	// bindtodevice?
-	debug_msg("create_listener, local_interface: %s", get_local_interface().c_str());
-	if (get_local_interface().size()) {
-	    comm_set_bindtodevice(_s, get_local_interface().c_str());
+	_s = comm_bind_tcp(sin, COMM_SOCK_NONBLOCKING);
+	if (!_s.is_valid()) 
+	{
+		XLOG_ERROR("comm_bind_tcp failed");
 	}
+	else 
+	{
+		// bindtodevice?
+		debug_msg("create_listener, local_interface: %s", get_local_interface().c_str());
+		if (get_local_interface().size()) 
+		{
+			comm_set_bindtodevice(_s, get_local_interface().c_str());
+		}
 
-	if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
-	    XLOG_ERROR("comm_listen failed");
+		if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) 
+		{
+			XLOG_ERROR("comm_listen failed");
+		}
 	}
-    }
 }
 
 /* **************** BGPSocket - PROTECTED METHODS *********************** */
 
-void
+	void
 Socket::close_socket()
 {
-    debug_msg("Close socket %s %s\n", get_remote_host(), _s.str().c_str());
+	debug_msg("Close socket %s %s\n", get_remote_host(), _s.str().c_str());
 
-    comm_sock_close(_s);
-    _s.clear();
+	comm_sock_close(_s);
+	_s.clear();
 }
 
-void
+	void
 Socket::create_socket(const struct sockaddr *sin, int is_blocking)
 {
-    debug_msg("create_socket called\n");
+	debug_msg("create_socket called\n");
 
-    XLOG_ASSERT(!_s.is_valid());
+	XLOG_ASSERT(!_s.is_valid());
 
-    _s = comm_sock_open(sin->sa_family, SOCK_STREAM, 0, is_blocking);
-    if (!_s.is_valid()) {
-	XLOG_ERROR("comm_sock_open failed");
-	return;
-    }
+	_s = comm_sock_open(sin->sa_family, SOCK_STREAM, 0, is_blocking);
+	if (!_s.is_valid()) 
+	{
+		XLOG_ERROR("comm_sock_open failed");
+		return;
+	}
 
-    debug_msg("BGPSocket socket created (sock - %s)\n", _s.str().c_str());
+	debug_msg("BGPSocket socket created (sock - %s)\n", _s.str().c_str());
 }
 
-void
+	void
 Socket::init_sockaddr(string addr, uint16_t local_port,
-		      struct sockaddr_storage& ss, size_t& len)
+		struct sockaddr_storage& ss, size_t& len)
 {
-    debug_msg("addr %s port %u len = %u\n", addr.c_str(),
-	      XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
+	debug_msg("addr %s port %u len = %u\n", addr.c_str(),
+			XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
 
-    string port = c_format("%d", local_port);
+	string port = c_format("%d", local_port);
 
-    int error;
-    struct addrinfo hints, *res0;
-    // Need to provide a hint because we are providing a numeric port number.
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = PF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    // addr must be numeric so this can't fail.
-    if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
-	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
-		   port.c_str(),
-		   gai_strerror(error));
-    }
+	int error;
+	struct addrinfo hints, *res0;
+	// Need to provide a hint because we are providing a numeric port number.
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	// addr must be numeric so this can't fail.
+	if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) 
+	{
+		XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
+				port.c_str(),
+				gai_strerror(error));
+	}
 
-    XLOG_ASSERT(res0->ai_addrlen <= sizeof(ss));
-    memset(&ss, 0, sizeof(ss));
-    memcpy(&ss, res0->ai_addr, res0->ai_addrlen);
-    len = res0->ai_addrlen;
+	XLOG_ASSERT(res0->ai_addrlen <= sizeof(ss));
+	memset(&ss, 0, sizeof(ss));
+	memcpy(&ss, res0->ai_addr, res0->ai_addrlen);
+	len = res0->ai_addrlen;
 
-    freeaddrinfo(res0);
+	freeaddrinfo(res0);
 }	
 
 /* **************** BGPSocket - PRIVATE METHODS *********************** */
 
 /* **************** BGPSocketClient - PUBLIC METHODS *********************** */
 
-SocketClient::SocketClient(const Iptuple& iptuple,  bool md5sig)
-    : Socket(iptuple), _md5sig(md5sig)
+	SocketClient::SocketClient(const Iptuple& iptuple,  bool md5sig)
+: Socket(iptuple), _md5sig(md5sig)
 {
-    debug_msg("SocketClient constructor called\n");
-    _async_writer = 0;
-    _async_reader = 0;
-    _disconnecting = false;
-    _connecting = false;
+	debug_msg("SocketClient constructor called\n");
+	_async_writer = 0;
+	_async_reader = 0;
+	_disconnecting = false;
+	_connecting = false;
 }
 
 SocketClient::~SocketClient()
 {
-    async_remove();
-    if( _connecting)
-	connect_break();
+	async_remove();
+	if( _connecting)
+		connect_break();
 }
 
-void
+	void
 SocketClient::disconnect()
 {
-    debug_msg("Disconnect\n");
-    XLOG_ASSERT(get_sock().is_valid());
+	debug_msg("Disconnect\n");
+	XLOG_ASSERT(get_sock().is_valid());
 
-    /*
-    ** If you see this assert then the disconnect code has been
-    ** re-entered. The call graph is typically:
-    **
-    ** Socket::disconnect()
-    ** Socket::async_remove()
-    ** AsyncFileWriter::flush_buffers()
-    ** 
-    ** The call to flush_buffers() cause the completion methods to be
-    ** run which in some cases call disconnect() again.
-    ** The solution is to check with SocketClient::disconnecting()
-    ** and just return if we are currently disconnecting. This is
-    ** perfectly safe as the initial call to disconnect() should
-    ** perform all the correct state transitions.
-    **
-    ** Look at "BGPPeer::send_notification_complete".
-    */
-    if (_disconnecting)
-	return;
-//     XLOG_ASSERT(!_disconnecting);
+	/*
+	 ** If you see this assert then the disconnect code has been
+	 ** re-entered. The call graph is typically:
+	 **
+	 ** Socket::disconnect()
+	 ** Socket::async_remove()
+	 ** AsyncFileWriter::flush_buffers()
+	 ** 
+	 ** The call to flush_buffers() cause the completion methods to be
+	 ** run which in some cases call disconnect() again.
+	 ** The solution is to check with SocketClient::disconnecting()
+	 ** and just return if we are currently disconnecting. This is
+	 ** perfectly safe as the initial call to disconnect() should
+	 ** perform all the correct state transitions.
+	 **
+	 ** Look at "BGPPeer::send_notification_complete".
+	 */
+	if (_disconnecting)
+		return;
+	//     XLOG_ASSERT(!_disconnecting);
 
-    _disconnecting = true;
-    async_remove();
-    close_socket();
-    _disconnecting = false;
+	_disconnecting = true;
+	async_remove();
+	close_socket();
+	_disconnecting = false;
 }
 
-void
+	void
 SocketClient::connect(ConnectCallback cb)
 {
-    debug_msg("SocketClient connecting to remote Peer %s\n",
-	      get_remote_host());
+	debug_msg("SocketClient connecting to remote Peer %s\n",
+			get_remote_host());
 
-    // Assert that socket doesn't already exist, as we are about to create it.
-    // XXX: This paranoid assertion existed to catch socket recycling
-    // issues on the Windows platform; commented out for now.
-    //XLOG_ASSERT(!get_sock().is_valid());
+	// Assert that socket doesn't already exist, as we are about to create it.
+	// XXX: This paranoid assertion existed to catch socket recycling
+	// issues on the Windows platform; commented out for now.
+	//XLOG_ASSERT(!get_sock().is_valid());
 
-    size_t len;
-    create_socket(get_local_socket(len), COMM_SOCK_BLOCKING);
+	size_t len;
+	create_socket(get_local_socket(len), COMM_SOCK_BLOCKING);
 
-    // bindtodevice?
-    debug_msg("SocketClient::connect, local_interface: %s", get_local_interface().c_str());
-    if (get_local_interface().size()) {
-	comm_set_bindtodevice(get_sock(), get_local_interface().c_str());
-    }
+	// bindtodevice?
+	debug_msg("SocketClient::connect, local_interface: %s", get_local_interface().c_str());
+	if (get_local_interface().size()) 
+	{
+		comm_set_bindtodevice(get_sock(), get_local_interface().c_str());
+	}
 
-    if (_md5sig)
- 	comm_set_tcpmd5(get_sock(), _md5sig);
+	if (_md5sig)
+		comm_set_tcpmd5(get_sock(), _md5sig);
 
-    return connect_socket(get_sock(), get_remote_addr(), get_remote_port(),
-			  get_local_addr(), cb);
+	return connect_socket(get_sock(), get_remote_addr(), get_remote_port(),
+			get_local_addr(), cb);
 }
 
-void
+	void
 SocketClient::connect_break()
 {
-    connect_socket_break();
+	connect_socket_break();
 }
 
-void
+	void
 SocketClient::connected(XorpFd s)
 {
 #ifdef	DEBUG_PEERNAME
-    sockaddr_storage ss;
-    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(ss);
-    socklen_t len = sizeof(ss);
-    if (-1 == getpeername(s, sin, &len))
-	XLOG_FATAL("getpeername failed: %s", strerror(errno));
-    char hostname[1024];
-    int error;
-    if (error = getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0, 0))
-	XLOG_FATAL("getnameinfo failed: %s", gai_strerror(error));
-    set_remote_host(hostname);
+	sockaddr_storage ss;
+	struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(ss);
+	socklen_t len = sizeof(ss);
+	if (-1 == getpeername(s, sin, &len))
+		XLOG_FATAL("getpeername failed: %s", strerror(errno));
+	char hostname[1024];
+	int error;
+	if (error = getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0, 0))
+		XLOG_FATAL("getnameinfo failed: %s", gai_strerror(error));
+	set_remote_host(hostname);
 #endif
 
-    debug_msg("Connected to remote Peer %s\n", get_remote_host());
+	debug_msg("Connected to remote Peer %s\n", get_remote_host());
 
-    XLOG_ASSERT(!get_sock().is_valid());
-    XLOG_ASSERT(!_connecting);
-    // Clean up any old reader/writers we might have around.
-    // This can happen if you kill network connection between two peers
-    // for 10 seconds and then re-start it.
-    async_remove();
-    set_sock(s);
-    async_add(s);
+	XLOG_ASSERT(!get_sock().is_valid());
+	XLOG_ASSERT(!_connecting);
+	// Clean up any old reader/writers we might have around.
+	// This can happen if you kill network connection between two peers
+	// for 10 seconds and then re-start it.
+	async_remove();
+	set_sock(s);
+	async_add(s);
 }
 
-void
+	void
 SocketClient::flush_transmit_queue() 
 {
-    if (_async_writer)
-	_async_writer->flush_buffers();
+	if (_async_writer)
+		_async_writer->flush_buffers();
 }
 
-void
+	void
 SocketClient::async_read_start(size_t cnt, size_t offset)
 {
-    debug_msg("start reading %s\n", get_remote_host());
+	debug_msg("start reading %s\n", get_remote_host());
 
-    XLOG_ASSERT(_async_reader);
+	XLOG_ASSERT(_async_reader);
 
-    _async_reader->
-	add_buffer_with_offset(_read_buf, 
-			       cnt,
-			       offset,
-			       callback(this,
+	_async_reader->
+		add_buffer_with_offset(_read_buf, 
+				cnt,
+				offset,
+				callback(this,
 					&SocketClient::async_read_message));
-    _async_reader->start();
+	_async_reader->start();
 }
 
 /*
@@ -287,359 +294,375 @@ SocketClient::async_read_start(size_t cnt, size_t offset)
  * whatever we already read).
  * Once the packet is complete, we invoke the packet decoder with dispatch()
  */
-void
+	void
 SocketClient::async_read_message(AsyncFileWriter::Event ev,
 		const uint8_t *buf,	// the base of the buffer
 		const size_t buf_bytes,	// desired message size
 		const size_t offset)	// where we got so far (next free byte)
 {
-    debug_msg("async_read_message %d %u %u %s\n", ev,
-	      XORP_UINT_CAST(buf_bytes), XORP_UINT_CAST(offset),
-	      get_remote_host());
+	debug_msg("async_read_message %d %u %u %s\n", ev,
+			XORP_UINT_CAST(buf_bytes), XORP_UINT_CAST(offset),
+			get_remote_host());
 
-    XLOG_ASSERT(_async_reader);
+	XLOG_ASSERT(_async_reader);
 
-    switch (ev) {
-    case AsyncFileReader::DATA:
-	XLOG_ASSERT(offset <= buf_bytes);
-	if (offset == buf_bytes) {		// message complete so far
-	    size_t fh_length = extract_16(buf + BGPPacket::LENGTH_OFFSET);
+	switch (ev) 
+	{
+		case AsyncFileReader::DATA:
+			XLOG_ASSERT(offset <= buf_bytes);
+			if (offset == buf_bytes) {		// message complete so far
+				size_t fh_length = extract_16(buf + BGPPacket::LENGTH_OFFSET);
 
-	    if (fh_length < BGPPacket::MINPACKETSIZE
-		|| fh_length > sizeof(_read_buf)) {
-		XLOG_ERROR("Illegal length value %u",
-			   XORP_UINT_CAST(fh_length));
-		if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,
-					 buf, buf_bytes, this))
-		    return;
-	    }
-	    /*
-	     * Keep reading until we have the whole message.
-	     */
-	    if (buf_bytes == fh_length) {
-		if (_callback->dispatch(BGPPacket::GOOD_MESSAGE,
-					buf, buf_bytes, this))
-		    async_read_start();		// ready for next message
-	    } else {				// read rest of the message
-		async_read_start(fh_length, buf_bytes);
-	    }
+				if (fh_length < BGPPacket::MINPACKETSIZE
+						|| fh_length > sizeof(_read_buf)) 
+				{
+					XLOG_ERROR("Illegal length value %u",
+							XORP_UINT_CAST(fh_length));
+					if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,
+								buf, buf_bytes, this))
+						return;
+				}
+				/*
+				 * Keep reading until we have the whole message.
+				 */
+				if (buf_bytes == fh_length) 
+				{
+					if (_callback->dispatch(BGPPacket::GOOD_MESSAGE,
+								buf, buf_bytes, this))
+						async_read_start();		// ready for next message
+				} else {				// read rest of the message
+					async_read_start(fh_length, buf_bytes);
+				}
+			}
+			/*
+			 ** At this point if we have a valid _async_reader then it should
+			 ** have buffers into which we expect data.
+			 */
+			if (_async_reader && 0 == _async_reader->buffers_remaining())
+				XLOG_WARNING("No outstanding reads %s socket %p async_reader %p",
+						is_connected() ? "connected" : "not connected",
+						this, _async_reader);
+
+			XLOG_ASSERT(!_async_reader ||
+					(_async_reader &&
+					 _async_reader->buffers_remaining() > 0));
+			break;
+
+		case AsyncFileReader::WOULDBLOCK:
+		case AsyncFileReader::FLUSHING:
+			/*
+			 * We are not using a dynamic buffer so don't worry.
+			 */
+			break;
+
+		case AsyncFileReader::OS_ERROR:
+			debug_msg("Read failed: %d\n", _async_reader->error());
+			_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
+			break;
+
+		case AsyncFileReader::END_OF_FILE:
+			debug_msg("End of file\n");
+			_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
+			break;
 	}
-	/*
-	** At this point if we have a valid _async_reader then it should
-	** have buffers into which we expect data.
-	*/
-	if (_async_reader && 0 == _async_reader->buffers_remaining())
-	    XLOG_WARNING("No outstanding reads %s socket %p async_reader %p",
-			 is_connected() ? "connected" : "not connected",
-			 this, _async_reader);
-	
-	XLOG_ASSERT(!_async_reader ||
-		    (_async_reader &&
-		     _async_reader->buffers_remaining() > 0));
-	break;
-
-    case AsyncFileReader::WOULDBLOCK:
-    case AsyncFileReader::FLUSHING:
-	/*
-	 * We are not using a dynamic buffer so don't worry.
-	 */
-	break;
-
-    case AsyncFileReader::OS_ERROR:
-	debug_msg("Read failed: %d\n", _async_reader->error());
-	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
-	break;
-
-    case AsyncFileReader::END_OF_FILE:
-	debug_msg("End of file\n");
-	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
-	break;
-    }
 }
 
-void
+	void
 SocketClient::send_message_complete(AsyncFileWriter::Event ev,
-				   const uint8_t *buf,
-				   const size_t buf_bytes,
-				   const size_t offset,
-				   SendCompleteCallback cb)
+		const uint8_t *buf,
+		const size_t buf_bytes,
+		const size_t offset,
+		SendCompleteCallback cb)
 {
-    debug_msg("event %d %s\n", ev, get_remote_host());
+	debug_msg("event %d %s\n", ev, get_remote_host());
 
-    switch (ev) {
-    case AsyncFileWriter::DATA:
-	if (offset == buf_bytes) {
-	    debug_msg("Message sent\n");
-	    cb->dispatch(SocketClient::DATA, buf);
+	switch (ev) 
+	{
+		case AsyncFileWriter::DATA:
+			if (offset == buf_bytes) 
+			{
+				debug_msg("Message sent\n");
+				cb->dispatch(SocketClient::DATA, buf);
+			}
+			XLOG_ASSERT(offset <= buf_bytes);
+			break;
+		case AsyncFileWriter::FLUSHING:
+			cb->dispatch(SocketClient::FLUSHING, buf);
+			break;
+		case AsyncFileWriter::OS_ERROR:
+			//XXXX do something
+			//probably need to do some more error handling here
+			cb->dispatch(SocketClient::ERROR, buf);
+			break;
+		case AsyncFileWriter::WOULDBLOCK:
+		case AsyncFileWriter::END_OF_FILE:
+			// Can't possibly happen.
+			break;
 	}
-	XLOG_ASSERT(offset <= buf_bytes);
-	break;
-    case AsyncFileWriter::FLUSHING:
-	cb->dispatch(SocketClient::FLUSHING, buf);
-	break;
-    case AsyncFileWriter::OS_ERROR:
-	//XXXX do something
-	//probably need to do some more error handling here
-	cb->dispatch(SocketClient::ERROR, buf);
-	break;
-    case AsyncFileWriter::WOULDBLOCK:
-    case AsyncFileWriter::END_OF_FILE:
-	// Can't possibly happen.
-	break;
-    }
 }
 
-bool
+	bool
 SocketClient::send_message(const uint8_t* buf,
-			   const size_t	cnt,
-			   SendCompleteCallback cb)
+		const size_t	cnt,
+		SendCompleteCallback cb)
 {
-    debug_msg("peer %s bytes = %u\n", get_remote_host(),
-	      XORP_UINT_CAST(cnt));
+	debug_msg("peer %s bytes = %u\n", get_remote_host(),
+			XORP_UINT_CAST(cnt));
 
-    if(!is_connected()) {
+	if(!is_connected()) 
+	{
 #ifdef	DEBUG_LOGGING
-	XLOG_WARNING("sending message to %s, not connected!!!",
-		   get_remote_host());
+		XLOG_WARNING("sending message to %s, not connected!!!",
+				get_remote_host());
 #else
-	XLOG_WARNING("sending message to %s, not connected!!!",
-		     get_remote_addr().c_str());
+		XLOG_WARNING("sending message to %s, not connected!!!",
+				get_remote_addr().c_str());
 #endif
-	return false;
-    }
+		return false;
+	}
 
-    XLOG_ASSERT(_async_writer);
+	XLOG_ASSERT(_async_writer);
 
-    _async_writer->add_buffer(buf, cnt,
-			      callback(this,
-				       &SocketClient::send_message_complete,
-				       cb));
-    _async_writer->start();
+	_async_writer->add_buffer(buf, cnt,
+			callback(this,
+				&SocketClient::send_message_complete,
+				cb));
+	_async_writer->start();
 
-    return true;
+	return true;
 }
 
 bool 
 SocketClient::output_queue_busy() const 
 {
-    //20 is a fairly arbitrary soft limit on how many buffers we want
-    //in the output queue before we start to push back
-    XLOG_ASSERT(_async_writer);
+	//20 is a fairly arbitrary soft limit on how many buffers we want
+	//in the output queue before we start to push back
+	XLOG_ASSERT(_async_writer);
 
-    if (_async_writer->buffers_remaining() > 20)
-	return true;
-    else
-	return false;
+	if (_async_writer->buffers_remaining() > 20)
+		return true;
+	else
+		return false;
 }
 
 int
 SocketClient::output_queue_size() const 
 {
-    XLOG_ASSERT(_async_writer);
+	XLOG_ASSERT(_async_writer);
 
-    return _async_writer->buffers_remaining();
+	return _async_writer->buffers_remaining();
 }
 
 /* **************** BGPSocketClient - PROTECTED METHODS *********************** */
 
 /* **************** BGPSocketClient - PRIVATE METHODS *********************** */
 
-void
+	void
 SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
-			     string laddr, ConnectCallback cb)
+		string laddr, ConnectCallback cb)
 {
-    debug_msg("raddt %s port %d laddr %s\n", raddr.c_str(), port,
-	      laddr.c_str());
+	debug_msg("raddt %s port %d laddr %s\n", raddr.c_str(), port,
+			laddr.c_str());
 
-    size_t len;
-    const struct sockaddr *local = get_bind_socket(len);
+	size_t len;
+	const struct sockaddr *local = get_bind_socket(len);
 
-    /* Bind the local endpoint to the supplied address */
-    if (XORP_ERROR == comm_sock_bind(sock, local)) {
+	/* Bind the local endpoint to the supplied address */
+	if (XORP_ERROR == comm_sock_bind(sock, local)) 
+	{
 
-	/*
-	** This endpoint is now screwed so shut it.
-	*/
-	close_socket();
+		/*
+		 ** This endpoint is now screwed so shut it.
+		 */
+		close_socket();
 
-	cb->dispatch(false);
+		cb->dispatch(false);
 
-	return;
-    }
-
-    // bindtodevice?
-    debug_msg("SocketClient::connect_socket, local_interface: %s", get_local_interface().c_str());
-    if (get_local_interface().size()) {
-	comm_set_bindtodevice(sock, get_local_interface().c_str());
-    }
-
-    const struct sockaddr *servername = get_remote_socket(len);
-
-    if (!EventLoop::instance().add_ioevent_cb(sock,
-		    IOT_CONNECT,
-		     callback(this,
-			      &SocketClient::connect_socket_complete,
-			      cb))) {
-	XLOG_ERROR("Failed to add socket %s to eventloop", sock.str().c_str());
-    }
-
-    const int blocking = 0;
-
-    if (XORP_ERROR == comm_sock_set_blocking(sock, blocking))
-	XLOG_FATAL("Failed to go non-blocking");
-
-    // Given the file descriptor is now non-blocking we would expect a
-    // in progress error.
-
-    XLOG_ASSERT(!_connecting);
-    _connecting = true;
-    int in_progress = 0;
-    if (XORP_ERROR == comm_sock_connect(sock, servername, blocking,
-					&in_progress)) {
-	if (in_progress) {
-	    debug_msg("connect failed in progress %s\n",
-		      in_progress ? "yes" : "no");
-	    return;
+		return;
 	}
-    }
 
-    // 1) If an error apart from in_progress occured call the completion
-    // method which will tidy up.
-    //
-    // 2) A connection may have been made already, this happens in the
-    // loopback case, again the completion method should deal with this.
+	// bindtodevice?
+	debug_msg("SocketClient::connect_socket, local_interface: %s", get_local_interface().c_str());
+	if (get_local_interface().size()) 
+	{
+		comm_set_bindtodevice(sock, get_local_interface().c_str());
+	}
 
-    connect_socket_complete(sock, IOT_CONNECT, cb);
+	const struct sockaddr *servername = get_remote_socket(len);
+
+	if (!EventLoop::instance().add_ioevent_cb(sock,
+				IOT_CONNECT,
+				callback(this,
+					&SocketClient::connect_socket_complete,
+					cb))) 
+	{
+		XLOG_ERROR("Failed to add socket %s to eventloop", sock.str().c_str());
+	}
+
+	const int blocking = 0;
+
+	if (XORP_ERROR == comm_sock_set_blocking(sock, blocking))
+		XLOG_FATAL("Failed to go non-blocking");
+
+	// Given the file descriptor is now non-blocking we would expect a
+	// in progress error.
+
+	XLOG_ASSERT(!_connecting);
+	_connecting = true;
+	int in_progress = 0;
+	if (XORP_ERROR == comm_sock_connect(sock, servername, blocking,
+				&in_progress)) 
+	{
+		if (in_progress) 
+		{
+			debug_msg("connect failed in progress %s\n",
+					in_progress ? "yes" : "no");
+			return;
+		}
+	}
+
+	// 1) If an error apart from in_progress occured call the completion
+	// method which will tidy up.
+	//
+	// 2) A connection may have been made already, this happens in the
+	// loopback case, again the completion method should deal with this.
+
+	connect_socket_complete(sock, IOT_CONNECT, cb);
 }
 
-void
+	void
 SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
-				      ConnectCallback cb)
+		ConnectCallback cb)
 {
-    int soerror;
-    int is_connected = 0;
-    socklen_t len = sizeof(soerror);
+	int soerror;
+	int is_connected = 0;
+	socklen_t len = sizeof(soerror);
 
-    debug_msg("connect socket complete %s %d\n", sock.str().c_str(), type);
+	debug_msg("connect socket complete %s %d\n", sock.str().c_str(), type);
 
-    UNUSED(type);
+	UNUSED(type);
 
-    XLOG_ASSERT(_connecting);
-    _connecting = false;
+	XLOG_ASSERT(_connecting);
+	_connecting = false;
 
-    XLOG_ASSERT(get_sock() == sock);
+	XLOG_ASSERT(get_sock() == sock);
 
-    EventLoop::instance().remove_ioevent_cb(sock);
+	EventLoop::instance().remove_ioevent_cb(sock);
 
-    // Did the connection succeed?
-    if (comm_sock_is_connected(sock, &is_connected) != XORP_OK) {
-	debug_msg("connect failed (comm_sock_is_connected: %s) %s\n",
-		  comm_get_last_error_str(), sock.str().c_str());
-	goto failed;
-    }
-    if (is_connected == 0) {
-	debug_msg("connect failed (comm_sock_is_connected: false) %s\n",
-		  sock.str().c_str());
-	goto failed;
-    }
+	// Did the connection succeed?
+	if (comm_sock_is_connected(sock, &is_connected) != XORP_OK) 
+	{
+		debug_msg("connect failed (comm_sock_is_connected: %s) %s\n",
+				comm_get_last_error_str(), sock.str().c_str());
+		goto failed;
+	}
+	if (is_connected == 0) 
+	{
+		debug_msg("connect failed (comm_sock_is_connected: false) %s\n",
+				sock.str().c_str());
+		goto failed;
+	}
 
-    // Check for a pending socket error if one exists.
-    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (void*)&soerror,
-		   &len) != 0) {
-	debug_msg("connect failed (getsockopt) %s\n", sock.str().c_str());
-	goto failed;
-    }
+	// Check for a pending socket error if one exists.
+	if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (void*)&soerror,
+				&len) != 0) 
+	{
+		debug_msg("connect failed (getsockopt) %s\n", sock.str().c_str());
+		goto failed;
+	}
 
-    debug_msg("connect suceeded %s\n", sock.str().c_str());
+	debug_msg("connect suceeded %s\n", sock.str().c_str());
 
-    // Clean up any old reader/writers we might have around.
-    // Not sure exactly how this one was triggered.
-    async_remove();
-    async_add(sock);
-    cb->dispatch(true);
-    return;
+	// Clean up any old reader/writers we might have around.
+	// Not sure exactly how this one was triggered.
+	async_remove();
+	async_add(sock);
+	cb->dispatch(true);
+	return;
 
- failed:
-//  	XLOG_ERROR("Connect failed: raddr %s port %d",
-// 		   inet_ntoa(get_remote_addr()), ntohs(get_remote_port()));
+failed:
+	//  	XLOG_ERROR("Connect failed: raddr %s port %d",
+	// 		   inet_ntoa(get_remote_addr()), ntohs(get_remote_port()));
 
 	close_socket();
 	cb->dispatch(false);
 }
 
-void
+	void
 SocketClient::connect_socket_break()
 {
-    _connecting = false;
+	_connecting = false;
 
-    EventLoop::instance().remove_ioevent_cb(get_sock());
-    close_socket();
+	EventLoop::instance().remove_ioevent_cb(get_sock());
+	close_socket();
 }
 
-void 
+	void 
 SocketClient::async_add(XorpFd sock)
 {
-    if (XORP_ERROR == comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING))
-	XLOG_FATAL("Failed to go non-blocking");
+	if (XORP_ERROR == comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING))
+		XLOG_FATAL("Failed to go non-blocking");
 
-    XLOG_ASSERT(0 == _async_writer);
-    _async_writer = new AsyncFileWriter(sock);
+	XLOG_ASSERT(0 == _async_writer);
+	_async_writer = new AsyncFileWriter(sock);
 
-    XLOG_ASSERT(0 == _async_reader);
-    //
-    // XXX: We use lowest priority for the file reader so that we don't
-    // generally receive data in faster than we can send it back out.
-    // Also, the priority is lower than the tasks' background priority
-    // to avoid being overloaded by high volume data from the peers.
-    //
-    _async_reader = new AsyncFileReader( sock,
-					XorpTask::PRIORITY_BACKGROUND);
+	XLOG_ASSERT(0 == _async_reader);
+	//
+	// XXX: We use lowest priority for the file reader so that we don't
+	// generally receive data in faster than we can send it back out.
+	// Also, the priority is lower than the tasks' background priority
+	// to avoid being overloaded by high volume data from the peers.
+	//
+	_async_reader = new AsyncFileReader( sock,
+			XorpTask::PRIORITY_BACKGROUND);
 
-    async_read_start();
+	async_read_start();
 }
 
-void 
+	void 
 SocketClient::async_remove()
 {
-    if(_async_writer) {
-	_async_writer->stop();
-	_async_writer->flush_buffers();
-	delete _async_writer;
-	_async_writer = 0;
-    }
-    async_remove_reader();
+	if(_async_writer) 
+	{
+		_async_writer->stop();
+		_async_writer->flush_buffers();
+		delete _async_writer;
+		_async_writer = 0;
+	}
+	async_remove_reader();
 }
 
-void 
+	void 
 SocketClient::async_remove_reader()
 {
-    if (_async_reader) {
-	_async_reader->stop();
-	_async_reader->flush_buffers();
-	delete _async_reader;
-	_async_reader = 0;
-    }
+	if (_async_reader) 
+	{
+		_async_reader->stop();
+		_async_reader->flush_buffers();
+		delete _async_reader;
+		_async_reader = 0;
+	}
 }
 
-bool 
+	bool 
 SocketClient::is_connected()
 {
-    if (_connecting)
-	return false;
+	if (_connecting)
+		return false;
 
-    return get_sock().is_valid();
+	return get_sock().is_valid();
 }	
 
-bool
+	bool
 SocketClient::still_reading()
 {
-    return _async_reader;
+	return _async_reader;
 }
 
 /* **************** BGPSocketServer *********************** */
 
 SocketServer::SocketServer(const Iptuple& iptuple) :
-    Socket(iptuple)
+	Socket(iptuple)
 {
-    debug_msg("SocketServer constructor called\n");	
+	debug_msg("SocketServer constructor called\n");	
 }

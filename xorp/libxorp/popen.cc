@@ -106,7 +106,8 @@
 extern char **environ;
 
 // XXX: static instance
-static struct pid_s {
+static struct pid_s 
+{
     struct pid_s *next;
     FILE *fp_out;
     FILE *fp_err;
@@ -116,9 +117,9 @@ static struct pid_s {
 } *pidlist;
 
 
-pid_t
+    pid_t
 popen2(const string& command, const list<string>& arguments,
-       FILE *& outstream, FILE *&errstream, bool redirect_stderr_to_stdout)
+	FILE *& outstream, FILE *&errstream, bool redirect_stderr_to_stdout)
 {
 
     struct pid_s *cur;
@@ -130,18 +131,21 @@ popen2(const string& command, const list<string>& arguments,
     outstream = NULL;
     errstream = NULL;
 
-    if (pipe(pdes_out) < 0) {
+    if (pipe(pdes_out) < 0) 
+    {
 	free(argv);
 	return 0;
     }
-    if (pipe(pdes_err) < 0) {
+    if (pipe(pdes_err) < 0) 
+    {
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
 	free(argv);
 	return 0;
     }
 
-    if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) {
+    if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) 
+    {
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
@@ -153,9 +157,10 @@ popen2(const string& command, const list<string>& arguments,
     /* Disable blocking on read */
     int fl;
     fl = fcntl(pdes_out[0], F_GETFL);
-    if (fcntl(pdes_out[0], F_SETFL, fl | O_NONBLOCK) == -1) {
+    if (fcntl(pdes_out[0], F_SETFL, fl | O_NONBLOCK) == -1) 
+    {
 	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d",
-		   pdes_out[0]);
+		pdes_out[0]);
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
@@ -164,9 +169,10 @@ popen2(const string& command, const list<string>& arguments,
 	return 0;
     }
     fl = fcntl(pdes_err[0], F_GETFL);
-    if (fcntl(pdes_err[0], F_SETFL, fl | O_NONBLOCK) == -1) {
+    if (fcntl(pdes_err[0], F_SETFL, fl | O_NONBLOCK) == -1) 
+    {
 	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d",
-		   pdes_err[0]);
+		pdes_err[0]);
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
@@ -182,92 +188,103 @@ popen2(const string& command, const list<string>& arguments,
     size_t i;
     list<string>::const_iterator iter;
     for (i = 0, iter = arguments.begin();
-	 iter != arguments.end();
-	 ++i, ++iter) {
+	    iter != arguments.end();
+	    ++i, ++iter) 
+    {
 	argv[i + 1] = iter->c_str();
     }
     argv[argv_size - 1] = NULL;
 
-    switch (pid = vfork()) {
-    case -1:				/* Error. */
-	(void)close(pdes_out[0]);
-	(void)close(pdes_out[1]);
-	(void)close(pdes_err[0]);
-	(void)close(pdes_err[1]);
-	free(cur);
-	free(argv);
-	return 0;
-	/* NOTREACHED */
-    case 0:				/* Child. */
-	//
-	// Unblock all signals that may have been blocked by the parent
-	//
-	sigset_t sigset;
-	sigfillset(&sigset);
-	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-
-	/*
-	 * The dup2() to STDIN_FILENO is repeated to avoid
-	 * writing to pdes[1], which might corrupt the
-	 * parent's copy.  This isn't good enough in
-	 * general, since the _exit() is no return, so
-	 * the compiler is free to corrupt all the local
-	 * variables.
-	 */
-	(void)close(pdes_out[0]);
-	(void)close(pdes_err[0]);
-
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-
-	if (redirect_stderr_to_stdout) {
+    switch (pid = vfork()) 
+    {
+	case -1:				/* Error. */
+	    (void)close(pdes_out[0]);
+	    (void)close(pdes_out[1]);
+	    (void)close(pdes_err[0]);
+	    (void)close(pdes_err[1]);
+	    free(cur);
+	    free(argv);
+	    return 0;
+	    /* NOTREACHED */
+	case 0:				/* Child. */
 	    //
-	    // Redirect stderr to stdout
+	    // Unblock all signals that may have been blocked by the parent
 	    //
-	    bool do_close_pdes_out = false;
-	    bool do_close_pdes_err = false;
-	    if ((pdes_out[1] != STDOUT_FILENO)
-		&& (pdes_out[1] != STDERR_FILENO)) {
-		do_close_pdes_out = true;
+	    sigset_t sigset;
+	    sigfillset(&sigset);
+	    sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+	    /*
+	     * The dup2() to STDIN_FILENO is repeated to avoid
+	     * writing to pdes[1], which might corrupt the
+	     * parent's copy.  This isn't good enough in
+	     * general, since the _exit() is no return, so
+	     * the compiler is free to corrupt all the local
+	     * variables.
+	     */
+	    (void)close(pdes_out[0]);
+	    (void)close(pdes_err[0]);
+
+	    setvbuf(stdout, NULL, _IONBF, 0);
+	    setvbuf(stderr, NULL, _IONBF, 0);
+
+	    if (redirect_stderr_to_stdout) 
+	    {
+		//
+		// Redirect stderr to stdout
+		//
+		bool do_close_pdes_out = false;
+		bool do_close_pdes_err = false;
+		if ((pdes_out[1] != STDOUT_FILENO)
+			&& (pdes_out[1] != STDERR_FILENO)) 
+		{
+		    do_close_pdes_out = true;
+		}
+		if ((pdes_err[1] != STDOUT_FILENO)
+			&& (pdes_err[1] != STDERR_FILENO)) 
+		{
+		    do_close_pdes_err = true;
+		}
+		if (pdes_out[1] != STDOUT_FILENO) 
+		{
+		    (void)dup2(pdes_out[1], STDOUT_FILENO);
+		}
+		if (pdes_out[1] != STDERR_FILENO) 
+		{
+		    (void)dup2(pdes_out[1], STDERR_FILENO);
+		}
+		if (do_close_pdes_out)
+		    (void)close(pdes_out[1]);
+		if (do_close_pdes_err)
+		    (void)close(pdes_err[1]);
+	    } else 
+	    {
+		if (pdes_out[1] != STDOUT_FILENO) 
+		{
+		    (void)dup2(pdes_out[1], STDOUT_FILENO);
+		    (void)close(pdes_out[1]);
+		}
+		if (pdes_err[1] != STDERR_FILENO) 
+		{
+		    (void)dup2(pdes_err[1], STDERR_FILENO);
+		    (void)close(pdes_err[1]);
+		}
 	    }
-	    if ((pdes_err[1] != STDOUT_FILENO)
-		&& (pdes_err[1] != STDERR_FILENO)) {
-		do_close_pdes_err = true;
+	    for (p = pidlist; p; p = p->next) 
+	    {
+		(void)close(fileno(p->fp_out));
+		(void)close(fileno(p->fp_err));
 	    }
-	    if (pdes_out[1] != STDOUT_FILENO) {
-		(void)dup2(pdes_out[1], STDOUT_FILENO);
-	    }
-	    if (pdes_out[1] != STDERR_FILENO) {
-		(void)dup2(pdes_out[1], STDERR_FILENO);
-	    }
-	    if (do_close_pdes_out)
-		(void)close(pdes_out[1]);
-	    if (do_close_pdes_err)
-		(void)close(pdes_err[1]);
-	} else {
-	    if (pdes_out[1] != STDOUT_FILENO) {
-		(void)dup2(pdes_out[1], STDOUT_FILENO);
-		(void)close(pdes_out[1]);
-	    }
-	    if (pdes_err[1] != STDERR_FILENO) {
-		(void)dup2(pdes_err[1], STDERR_FILENO);
-		(void)close(pdes_err[1]);
-	    }
-	}
-	for (p = pidlist; p; p = p->next) {
-	    (void)close(fileno(p->fp_out));
-	    (void)close(fileno(p->fp_err));
-	}
-	// Set the process as a group leader
-	setpgid(0, 0);
-	execve(const_cast<char*>(command.c_str()), const_cast<char**>(argv),
-	       environ);
-	//
-	// XXX: don't call any function that may corrupt the state of the
-	// parent process, otherwise the result is unpredictable.
-	//
-	_exit(127);
-	/* NOTREACHED */
+	    // Set the process as a group leader
+	    setpgid(0, 0);
+	    execve(const_cast<char*>(command.c_str()), const_cast<char**>(argv),
+		    environ);
+	    //
+	    // XXX: don't call any function that may corrupt the state of the
+	    // parent process, otherwise the result is unpredictable.
+	    //
+	    _exit(127);
+	    /* NOTREACHED */
     }
 
     /* Parent; assume fdopen can't fail. */
@@ -299,7 +316,7 @@ popen2(const string& command, const list<string>& arguments,
  *	Pclose returns -1 if stream is not associated with a `popened' command,
  *	if already `pclosed', or waitpid returns an error.
  */
-int
+    int
 pclose2(FILE *iop_out, bool dont_wait)
 {
     register struct pid_s *cur, *last;
@@ -314,7 +331,8 @@ pclose2(FILE *iop_out, bool dont_wait)
 	return (-1);
 
     pid = cur->pid;
-    if (dont_wait || cur->is_closed) {
+    if (dont_wait || cur->is_closed) 
+    {
 	if (cur->is_closed)
 	    pstat = cur->pstat;
 	else
@@ -325,13 +343,16 @@ pclose2(FILE *iop_out, bool dont_wait)
     (void)fclose(cur->fp_out);
     (void)fclose(cur->fp_err);
 
-    if (dont_wait || cur->is_closed) {
+    if (dont_wait || cur->is_closed) 
+    {
 	if (cur->is_closed)
 	    pstat = cur->pstat;
 	else
 	    pstat = 0;	// XXX: imitating the result of wait4(WNOHANG)
-    } else {
-	do {
+    } else 
+    {
+	do 
+	{
 	    pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
 	} while (pid == -1 && errno == EINTR);
     }
@@ -346,12 +367,13 @@ pclose2(FILE *iop_out, bool dont_wait)
     return (pid == -1 ? -1 : pstat);
 }
 
-int
+    int
 popen2_mark_as_closed(pid_t pid, int wait_status)
 {
     struct pid_s *cur;
 
-    for (cur = pidlist; cur != NULL; cur = cur->next) {
+    for (cur = pidlist; cur != NULL; cur = cur->next) 
+    {
 	if (static_cast<pid_t>(cur->pid) == pid)
 	    break;
     }

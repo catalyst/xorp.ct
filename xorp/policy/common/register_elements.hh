@@ -29,16 +29,17 @@
  * This class only has a constructor which registers callbacks. It is used to
  * ensure that callbacks are registered once, and at the correct time.
  */
-class RegisterElements {
-public:
-    /**
-     * Contains callback registration routines.
-     */
-    RegisterElements();
+class RegisterElements 
+{
+    public:
+	/**
+	 * Contains callback registration routines.
+	 */
+	RegisterElements();
 
-private:
-    template <class T>
-    void register_element();
+    private:
+	template <class T>
+	    void register_element();
 };
 
 #endif // __POLICY_COMMON_REGISTER_ELEMENTS_HH__

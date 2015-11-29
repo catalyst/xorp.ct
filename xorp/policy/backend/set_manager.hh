@@ -41,44 +41,45 @@
 class SetManager :
     public NONCOPYABLE
 {
-public:
-    typedef map<string,Element*> SetMap;
-
-    /**
-     * @short Exception thrown when a set with an unknown name is requested.
-     */
-    class SetNotFound : public PolicyException {
     public:
-        SetNotFound(const char* file, size_t line, const string& init_why = "")   
-	  : PolicyException("SetNotFound", file, line, init_why) {}  
+	typedef map<string,Element*> SetMap;
+
+	/**
+	 * @short Exception thrown when a set with an unknown name is requested.
+	 */
+	class SetNotFound : public PolicyException 
+    {
+	public:
+	    SetNotFound(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("SetNotFound", file, line, init_why) {}  
     };
 
-    SetManager();
-    ~SetManager();
+	SetManager();
+	~SetManager();
 
-    /**
-     * Return the corresponding ElemSet for the requested set name.
-     *
-     * @return the ElemSet requested.
-     * @param setid name of set wanted.
-     */
-    const Element& getSet(const string& setid) const;
-   
-    /**
-     * Resplace all sets with the given ones.
-     * Caller must not delete them.
-     *
-     * @param sets the new sets that should be used.
-     */
-    void replace_sets(SetMap* sets);
+	/**
+	 * Return the corresponding ElemSet for the requested set name.
+	 *
+	 * @return the ElemSet requested.
+	 * @param setid name of set wanted.
+	 */
+	const Element& getSet(const string& setid) const;
 
-    /**
-     * Zap all sets.
-     */
-    void clear();
+	/**
+	 * Resplace all sets with the given ones.
+	 * Caller must not delete them.
+	 *
+	 * @param sets the new sets that should be used.
+	 */
+	void replace_sets(SetMap* sets);
 
-private:
-    SetMap* _sets;
+	/**
+	 * Zap all sets.
+	 */
+	void clear();
+
+    private:
+	SetMap* _sets;
 };
 
 #endif // __POLICY_BACKEND_SET_MANAGER_HH__

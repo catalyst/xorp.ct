@@ -43,16 +43,17 @@
 #include "xrl_target.hh"
 
 
-static int
+    static int
 decode_time_string( const string& time_string,
-		   TimeVal& timeval)
+	TimeVal& timeval)
 {
     const char* s;
     const char* format = "%Y-%m-%d.%H:%M";
     struct tm tm;
     time_t result;
 
-    if (time_string.empty()) {
+    if (time_string.empty()) 
+    {
 	timeval = TimeVal::ZERO();
 	return (XORP_OK);
     }
@@ -69,7 +70,8 @@ decode_time_string( const string& time_string,
     memcpy(&tm, local_tm, sizeof(tm));
 
     s = xorp_strptime(time_string.c_str(), format, &tm);
-    if ((s == NULL) || (*s != '\0')) {
+    if ((s == NULL) || (*s != '\0')) 
+    {
 	return (XORP_ERROR);
     }
 
@@ -82,28 +84,28 @@ decode_time_string( const string& time_string,
 }
 
 XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf,
-				 XrlIO<IPv4>& io)
-	: XrlOspfv2TargetBase(r), _ospf(ospf), _xrl_io(io)
+	XrlIO<IPv4>& io)
+: XrlOspfv2TargetBase(r), _ospf(ospf), _xrl_io(io)
 {
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::common_0_1_get_target_name(string&  name)
 {
     name = "ospfv2";
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::common_0_1_get_version(string&	version)
 {
     version = "0.1";
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::common_0_1_get_status(uint32_t& status,
-				       string& reason)
+	string& reason)
 {
 
     status = _ospf.status(reason);
@@ -111,7 +113,7 @@ XrlOspfV2Target::common_0_1_get_status(uint32_t& status,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::common_0_1_shutdown()
 {
     _ospf.shutdown();
@@ -119,7 +121,7 @@ XrlOspfV2Target::common_0_1_shutdown()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::common_0_1_startup()
 {
     // Starts by default...nothing to do here.
@@ -128,64 +130,67 @@ XrlOspfV2Target::common_0_1_startup()
 
 XrlCmdError
 XrlOspfV2Target::raw_packet4_client_0_1_recv(
-    // Input values,
-    const string&	if_name,
-    const string&	vif_name,
-    const IPv4&		src_address,
-    const IPv4&		dst_address,
-    const uint32_t&	ip_protocol,
-    const int32_t&	ip_ttl,
-    const int32_t&	ip_tos,
-    const bool&		ip_router_alert,
-    const bool&		ip_internet_control,
-    const vector<uint8_t>& payload)
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&		src_address,
+	const IPv4&		dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&		ip_router_alert,
+	const bool&		ip_internet_control,
+	const vector<uint8_t>& payload)
 {
     _xrl_io.recv(if_name,
-		 vif_name,
-		 src_address,
-		 dst_address,
-		 ip_protocol,
-		 ip_ttl,
-		 ip_tos,
-		 ip_router_alert,
-		 ip_internet_control,
-		 payload);
+	    vif_name,
+	    src_address,
+	    dst_address,
+	    ip_protocol,
+	    ip_ttl,
+	    ip_tos,
+	    ip_router_alert,
+	    ip_internet_control,
+	    payload);
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_configure(const uint32_t& filter,
-					      const string& conf)
+	const string& conf)
 {
     debug_msg("policy filter: %u conf: %s\n", filter, conf.c_str());
 
-    try {
+    try 
+    {
 	_ospf.configure_filter(filter,conf);
-    } catch(const PolicyException& e) {
+    } catch(const PolicyException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
-					   e.str());
+		e.str());
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
 {
     debug_msg("policy filter reset: %u\n", filter);
 
-    try {
+    try 
+    {
 	_ospf.reset_filter(filter);
     } catch(const PolicyException& e){ 
 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
-					   e.str());
+		e.str());
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_push_routes()
 {
     debug_msg("policy route push\n");
@@ -195,13 +200,13 @@ XrlOspfV2Target::policy_backend_0_1_push_routes()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
-					       const bool& unicast,
-					       const bool& multicast,
-					       const IPv4& nexthop,
-					       const uint32_t& metric,
-					       const XrlAtomList& policytags)
+	const bool& unicast,
+	const bool& multicast,
+	const IPv4& nexthop,
+	const uint32_t& metric,
+	const XrlAtomList& policytags)
 {
     //XLOG_INFO("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
     //          cstring(network), cstring(nexthop), bool_c_str(unicast),
@@ -209,17 +214,18 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
     UNUSED(unicast);
     UNUSED(multicast);
 
-    if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
+    if (!_ospf.originate_route(network, nexthop, metric, policytags)) 
+    {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
-						  const bool& unicast,
-						  const bool& multicast)
+	const bool& unicast,
+	const bool& multicast)
 {
     //XLOG_INFO("Net: %s Unicast: %s Multicast %s\n",
     //          cstring(network), bool_c_str(unicast), bool_c_str(multicast));
@@ -227,14 +233,15 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
     UNUSED(multicast);
 
 
-    if (!_ospf.withdraw_route(network)) {
+    if (!_ospf.withdraw_route(network)) 
+    {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
 {
     OspfTypes::RouterID rid = ntohl(id.addr());
@@ -244,7 +251,7 @@ XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_rfc1583_compatibility(const bool& compatibility)
 {
     _ospf.set_rfc1583_compatibility(compatibility);
@@ -252,7 +259,7 @@ XrlOspfV2Target::ospfv2_0_1_set_rfc1583_compatibility(const bool& compatibility)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_ip_router_alert(const bool& ip_router_alert)
 {
     if (!_ospf.set_ip_router_alert(ip_router_alert))
@@ -261,57 +268,57 @@ XrlOspfV2Target::ospfv2_0_1_set_ip_router_alert(const bool& ip_router_alert)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_create_area_router(const IPv4& a,
-					       const string& type)
+	const string& type)
 {
     bool status;
     OspfTypes::AreaType t = from_string_to_area_type(type, status);
     if (!status)
 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
-	
+
     OspfTypes::AreaID area = ntohl(a.addr());
     if (!_ospf.get_peer_manager().create_area_router(area, t))
 	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
-					   pr_id(area));
+		pr_id(area));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_change_area_router_type(const IPv4& a,
-						    const string& type)
+	const string& type)
 {
     bool status;
     OspfTypes::AreaType t = from_string_to_area_type(type, status);
     if (!status)
 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
-	
+
     OspfTypes::AreaID area = ntohl(a.addr());
     if (!_ospf.get_peer_manager().change_area_router_type(area, t))
 	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
-					   pr_id(area));
+		pr_id(area));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_destroy_area_router(const IPv4& a)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     if (!_ospf.get_peer_manager().destroy_area_router(area))
 	return XrlCmdError::COMMAND_FAILED("Failed to destroy area " +
-					   pr_id(area));
+		pr_id(area));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
-					const string& vifname,
-					const IPv4& addr,
-					const string& type,
-					const IPv4& a)
+	const string& vifname,
+	const IPv4& addr,
+	const string& type,
+	const IPv4& a)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     bool status;
@@ -319,26 +326,30 @@ XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
     if (!status)
 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
 
-    try {
+    try 
+    {
 	_ospf.get_peer_manager().create_peer(ifname, vifname, addr,
-					     linktype, area);
-    } catch(XorpException& e) {
+		linktype, area);
+    } catch(XorpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
-					const string& vifname)
+	const string& vifname)
 {
     debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
 
     OspfTypes::PeerID peerid;
-    try {
+    try 
+    {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
+    } catch(XorpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     if (!_ospf.get_peer_manager().delete_peer(peerid))
@@ -347,18 +358,20 @@ XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
-					   const string& vifname,
-					   const bool& enable)
+	const string& vifname,
+	const bool& enable)
 {
     debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
-	      vifname.c_str(), bool_c_str(enable));
+	    vifname.c_str(), bool_c_str(enable));
 
     OspfTypes::PeerID peerid;
-    try {
+    try 
+    {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
+    } catch(XorpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     if (!_ospf.get_peer_manager().set_state_peer(peerid, enable))
@@ -367,75 +380,80 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_add_neighbour(const string&	ifname,
-					  const string&	vifname,
-					  const IPv4& addr,
-					  const IPv4& neighbour_address,
-					  const IPv4& neighbour_id)
+	const string&	vifname,
+	const IPv4& addr,
+	const IPv4& neighbour_address,
+	const IPv4& neighbour_id)
 {
     OspfTypes::AreaID area = ntohl(addr.addr());
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
     debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), 
-	      cstring(neighbour_address),pr_id(rid).c_str());
+	    vifname.c_str(), pr_id(area).c_str(), 
+	    cstring(neighbour_address),pr_id(rid).c_str());
 
     OspfTypes::PeerID peerid;
-    try {
+    try 
+    {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
+    } catch(XorpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     if (!_ospf.get_peer_manager().add_neighbour(peerid, area,
-						neighbour_address,
-						rid))
+		neighbour_address,
+		rid))
 	return XrlCmdError::COMMAND_FAILED("Failed to add neighbour " +
-					   neighbour_address.str());
+		neighbour_address.str());
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
-					     const string& vifname,
-					     const IPv4& addr,
-					     const IPv4& neighbour_address,
-					     const IPv4& neighbour_id)
+	const string& vifname,
+	const IPv4& addr,
+	const IPv4& neighbour_address,
+	const IPv4& neighbour_id)
 {
     OspfTypes::AreaID area = ntohl(addr.addr());
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
     debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), 
-	      cstring(neighbour_address),pr_id(rid).c_str());
+	    vifname.c_str(), pr_id(area).c_str(), 
+	    cstring(neighbour_address),pr_id(rid).c_str());
 
     OspfTypes::PeerID peerid;
-    try {
+    try 
+    {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
+    } catch(XorpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     if (!_ospf.get_peer_manager().remove_neighbour(peerid, area,
-						   neighbour_address,
-						   rid))
+		neighbour_address,
+		rid))
 	return XrlCmdError::COMMAND_FAILED("Failed to remove neighbour" +
-					   neighbour_address.str());
+		neighbour_address.str());
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_create_virtual_link(const IPv4& neighbour_id,
-						const IPv4& a)
+	const IPv4& a)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
     debug_msg("Neighbour's router ID %s configuration area %s\n",
-	      pr_id(rid).c_str(), pr_id(area).c_str());
+	    pr_id(rid).c_str(), pr_id(area).c_str());
 
-    if (OspfTypes::BACKBONE != area) {
+    if (OspfTypes::BACKBONE != area) 
+    {
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Virtual link must be in area %s",
-				    pr_id(OspfTypes::BACKBONE).c_str()));
+			pr_id(OspfTypes::BACKBONE).c_str()));
     }
 
     if (!_ospf.create_virtual_link(rid))
@@ -444,7 +462,7 @@ XrlOspfV2Target::ospfv2_0_1_create_virtual_link(const IPv4& neighbour_id,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_delete_virtual_link(const IPv4& neighbour_id)
 {
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
@@ -455,9 +473,9 @@ XrlOspfV2Target::ospfv2_0_1_delete_virtual_link(const IPv4& neighbour_id)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
-						      const IPv4& transit_area)
+	const IPv4& transit_area)
 {
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
     OspfTypes::AreaID area = ntohl(transit_area.addr());
@@ -468,65 +486,65 @@ XrlOspfV2Target::ospfv2_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
-					       const string& vifname,
-					       const IPv4& a,
-					       const uint32_t& cost)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& cost)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), cost);
+	    vifname.c_str(), pr_id(area).c_str(), cost);
 
     if (!_ospf.set_interface_cost(ifname, vifname, area, cost))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "interface cost");
+		"interface cost");
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_retransmit_interval(const string& ifname,
-						    const string& vifname,
-						    const IPv4& a,
-						    const uint32_t& interval)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& interval)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), interval);
+	    vifname.c_str(), pr_id(area).c_str(), interval);
 
     if (!_ospf.set_retransmit_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "RxmtInterval interval");
+		"RxmtInterval interval");
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
-					      const string& vifname,
-					      const IPv4& a,
-					      const uint32_t& delay)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& delay)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), delay);
+	    vifname.c_str(), pr_id(area).c_str(), delay);
 
     if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "inftransdelay delay");
+		"inftransdelay delay");
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
-						const string& vifname,
-						const IPv4& a,
-						const uint32_t& priority)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& priority)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s priority %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), priority);
+	    vifname.c_str(), pr_id(area).c_str(), priority);
 
     if (!_ospf.set_router_priority(ifname, vifname, area, priority))
 	return XrlCmdError::COMMAND_FAILED("Failed to set priority");
@@ -534,15 +552,15 @@ XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_hello_interval(const string& ifname,
-					       const string& vifname,
-					       const IPv4& a,
-					       const uint32_t& interval)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& interval)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), interval);
+	    vifname.c_str(), pr_id(area).c_str(), interval);
 
     if (!_ospf.set_hello_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set hello interval");
@@ -550,43 +568,44 @@ XrlOspfV2Target::ospfv2_0_1_set_hello_interval(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
-						     const string& vifname,
-						     const IPv4& a,
-						     const uint32_t& interval)
+	const string& vifname,
+	const IPv4& a,
+	const uint32_t& interval)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), interval);
+	    vifname.c_str(), pr_id(area).c_str(), interval);
 
     if (!_ospf.set_router_dead_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "router dead interval");
+		"router dead interval");
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_simple_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		area,
-    const string&	password)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		area,
+	const string&	password)
 {
     string error_msg;
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("set_simple_authentication_key(): "
-	      "interface %s vif %s area %s password %s\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
-	      password.c_str());
+	    "interface %s vif %s area %s password %s\n",
+	    ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
+	    password.c_str());
 
     if (!_ospf.set_simple_authentication_key(ifname, vifname, area_id,
-					     password, error_msg)) {
+		password, error_msg)) 
+    {
 	error_msg = c_format("Failed to set simple authentication key: %s",
-			     error_msg.c_str());
+		error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -595,22 +614,23 @@ XrlOspfV2Target::ospfv2_0_1_set_simple_authentication_key(
 
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_delete_simple_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		area)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		area)
 {
     string error_msg;
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("delete_simple_authentication_key(): "
-	      "interface %s vif %s area %s\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str());
+	    "interface %s vif %s area %s\n",
+	    ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str());
 
     if (!_ospf.delete_simple_authentication_key(ifname, vifname, area_id,
-						error_msg)) {
+		error_msg)) 
+    {
 	error_msg = c_format("Failed to delete simple authentication key: %s",
-			     error_msg.c_str());
+		error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -619,15 +639,15 @@ XrlOspfV2Target::ospfv2_0_1_delete_simple_authentication_key(
 
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		area,
-    const uint32_t&	key_id,
-    const string&	password,
-    const string&	start_time,
-    const string&	end_time,
-    const uint32_t&	max_time_drift)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		area,
+	const uint32_t&	key_id,
+	const string&	password,
+	const string&	start_time,
+	const string&	end_time,
+	const uint32_t&	max_time_drift)
 {
     string error_msg;
     TimeVal start_timeval = TimeVal::ZERO();
@@ -636,44 +656,50 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("set_md5_authentication_key(): "
-	      "interface %s vif %s area %s key_id %u password %s "
-	      "start_time %s end_time %s max_time_drift %u\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
-	      key_id, password.c_str(), start_time.c_str(), end_time.c_str(),
-	      max_time_drift);
+	    "interface %s vif %s area %s key_id %u password %s "
+	    "start_time %s end_time %s max_time_drift %u\n",
+	    ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
+	    key_id, password.c_str(), start_time.c_str(), end_time.c_str(),
+	    max_time_drift);
 
     //
     // Check the key ID
     //
-    if (key_id > 255) {
+    if (key_id > 255) 
+    {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
-			     XORP_UINT_CAST(key_id));
+		XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     //
     // Decode the start and end time
     //
-    if (! start_time.empty()) {
+    if (! start_time.empty()) 
+    {
 	if (decode_time_string( start_time,
-			       start_timeval)
-	    != XORP_OK) {
+		    start_timeval)
+		!= XORP_OK) 
+	{
 	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
-    if (! end_time.empty()) {
+    if (! end_time.empty()) 
+    {
 	if (decode_time_string(end_time, end_timeval)
-	    != XORP_OK) {
+		!= XORP_OK) 
+	{
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
     // XXX: Allowed time drift seconds are [0--65534] and 65535 for infinity
-    if (max_time_drift > 65535) {
+    if (max_time_drift > 65535) 
+    {
 	error_msg = c_format("Invalid maximum time drift seconds: %u "
-			     "(allowed range is [0--65535])",
-			     max_time_drift);
+		"(allowed range is [0--65535])",
+		max_time_drift);
     }
     if (max_time_drift <= 65534)
 	max_time_drift_timeval = TimeVal(max_time_drift, 0);
@@ -681,10 +707,11 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
 	max_time_drift_timeval = TimeVal::MAXIMUM();
 
     if (!_ospf.set_md5_authentication_key(ifname, vifname, area_id, key_id,
-					  password, start_timeval, end_timeval,
-					  max_time_drift_timeval, error_msg)) {
+		password, start_timeval, end_timeval,
+		max_time_drift_timeval, error_msg)) 
+    {
 	error_msg = c_format("Failed to set MD5 authentication key: %s",
-			     error_msg.c_str());
+		error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -693,49 +720,51 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
 
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_delete_md5_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		area,
-    const uint32_t&	key_id)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		area,
+	const uint32_t&	key_id)
 {
     string error_msg;
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("delete_md5_authentication_key(): "
-	      "interface %s vif %s area %s key_id %u\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(), key_id);
+	    "interface %s vif %s area %s key_id %u\n",
+	    ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(), key_id);
 
     //
     // Check the key ID
     //
-    if (key_id > 255) {
+    if (key_id > 255) 
+    {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
-			     XORP_UINT_CAST(key_id));
+		XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     if (!_ospf.delete_md5_authentication_key(ifname, vifname, area_id, key_id,
-					     error_msg)) {
+		error_msg)) 
+    {
 	error_msg = c_format("Failed to delete MD5 authentication key: %s",
-			     error_msg.c_str());
+		error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
-					const string& vifname,
-					const IPv4& a,
-					const bool& passive,
-					const bool& host)
+	const string& vifname,
+	const IPv4& a,
+	const bool& passive,
+	const bool& host)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s passive %s host %s\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      bool_c_str(passive), bool_c_str(host));
+	    ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
+	    bool_c_str(passive), bool_c_str(host));
 
     if (!_ospf.set_passive(ifname, vifname, area, passive, host))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
@@ -743,9 +772,9 @@ XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
-						    const bool&	enable)
+	const bool&	enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
@@ -757,9 +786,9 @@ XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_stub_default_cost(const IPv4& a,
-					      const uint32_t& cost)
+	const uint32_t& cost)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s cost %u\n", pr_id(area).c_str(), cost);
@@ -771,9 +800,9 @@ XrlOspfV2Target::ospfv2_0_1_stub_default_cost(const IPv4& a,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
-				      const bool& enable)
+	const bool& enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
@@ -785,28 +814,28 @@ XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_area_range_add(const IPv4& a,
-					   const IPv4Net& net,
-					   const bool& advertise)
+	const IPv4Net& net,
+	const bool& advertise)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), bool_c_str(advertise));
+	    cstring(net), bool_c_str(advertise));
 
     if (!_ospf.area_range_add(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to add area range "
-				    "area %s net %s advertise %s\n",
-				    pr_id(area).c_str(), cstring(net),
-				    bool_c_str(advertise)));
+			"area %s net %s advertise %s\n",
+			pr_id(area).c_str(), cstring(net),
+			bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_area_range_delete(const IPv4& a,
-					      const IPv4Net& net)
+	const IPv4Net& net)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s\n", pr_id(area).c_str(), cstring(net));
@@ -814,41 +843,43 @@ XrlOspfV2Target::ospfv2_0_1_area_range_delete(const IPv4& a,
     if (!_ospf.area_range_delete(area, net))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to delete area range "
-				    "area %s net %s\n",
-				    pr_id(area).c_str(), cstring(net)));
+			"area %s net %s\n",
+			pr_id(area).c_str(), cstring(net)));
 
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_area_range_change_state(const IPv4& a,
-						    const IPv4Net& net,
-						    const bool&	advertise)
+	const IPv4Net& net,
+	const bool&	advertise)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), bool_c_str(advertise));
+	    cstring(net), bool_c_str(advertise));
 
     if (!_ospf.area_range_change_state(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to change area range "
-				    "area %s net %s advertise %s\n",
-				    pr_id(area).c_str(), cstring(net),
-				    bool_c_str(advertise)));
+			"area %s net %s advertise %s\n",
+			pr_id(area).c_str(), cstring(net),
+			bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
 {
     debug_msg("trace variable %s enable %s\n", tvar.c_str(),
-	      bool_c_str(enable));
+	    bool_c_str(enable));
 
-    if (tvar == "all") {
+    if (tvar == "all") 
+    {
 	_ospf.trace().all(enable);
-    } else {
+    } else 
+    {
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
     } 
@@ -856,13 +887,13 @@ XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
-						     const uint32_t& index,
-						     bool& valid,
-						     bool& toohigh,
-						     bool& self,
-						     vector<uint8_t>& lsa)
+	const uint32_t& index,
+	bool& valid,
+	bool& toohigh,
+	bool& self,
+	vector<uint8_t>& lsa)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s index %u\n", pr_id(area).c_str(), index);
@@ -871,13 +902,13 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 	return XrlCmdError::COMMAND_FAILED("Unable to get LSA");
 
     debug_msg("area %s index %u valid %s toohigh %s self %s\n",
-	      pr_id(area).c_str(), index, bool_c_str(valid),
-	      bool_c_str(toohigh), bool_c_str(self));
+	    pr_id(area).c_str(), index, bool_c_str(valid),
+	    bool_c_str(toohigh), bool_c_str(self));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
 {
     list<OspfTypes::AreaID> arealist;
@@ -892,7 +923,7 @@ XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& neighbours)
 {
     list<OspfTypes::NeighbourID> neighbourlist;
@@ -907,20 +938,20 @@ XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& neighbours)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& nid,
-					       string& address,
-					       string& interface,
-					       string& state,
-					       IPv4& rid,
-					       uint32_t& priority,
-					       uint32_t& deadtime,
-					       IPv4& area,
-					       uint32_t& opt,
-					       IPv4& dr,
-					       IPv4& bdr,
-					       uint32_t& up,
-					       uint32_t& adjacent)
+	string& address,
+	string& interface,
+	string& state,
+	IPv4& rid,
+	uint32_t& priority,
+	uint32_t& deadtime,
+	IPv4& area,
+	uint32_t& opt,
+	IPv4& dr,
+	IPv4& bdr,
+	uint32_t& up,
+	uint32_t& adjacent)
 {
     NeighbourInfo ninfo;
 
@@ -945,7 +976,7 @@ XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& nid,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_clear_database()
 {
     if (!_ospf.clear_database())

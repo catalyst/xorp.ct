@@ -53,7 +53,7 @@
 //
 
 FeaDataPlaneManagerDummy::FeaDataPlaneManagerDummy(FeaNode& fea_node)
-    : FeaDataPlaneManager(fea_node, "Dummy")
+	: FeaDataPlaneManager(fea_node, "Dummy")
 {
 }
 
@@ -61,100 +61,100 @@ FeaDataPlaneManagerDummy::~FeaDataPlaneManagerDummy()
 {
 }
 
-int
+	int
 FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_loaded_plugins)
+	if (_is_loaded_plugins)
+		return (XORP_OK);
+
+	XLOG_ASSERT(_ifconfig_property == NULL);
+	XLOG_ASSERT(_ifconfig_get == NULL);
+	XLOG_ASSERT(_ifconfig_set == NULL);
+	XLOG_ASSERT(_ifconfig_observer == NULL);
+	XLOG_ASSERT(_ifconfig_vlan_get == NULL);
+	XLOG_ASSERT(_ifconfig_vlan_set == NULL);
+#ifndef XORP_DISABLE_FIREWALL
+	XLOG_ASSERT(_firewall_get == NULL);
+	XLOG_ASSERT(_firewall_set == NULL);
+#endif
+	XLOG_ASSERT(_fibconfig_forwarding == NULL);
+	XLOG_ASSERT(_fibconfig_entry_get == NULL);
+	XLOG_ASSERT(_fibconfig_entry_set == NULL);
+	XLOG_ASSERT(_fibconfig_entry_observer == NULL);
+	XLOG_ASSERT(_fibconfig_table_get == NULL);
+	XLOG_ASSERT(_fibconfig_table_set == NULL);
+	XLOG_ASSERT(_fibconfig_table_observer == NULL);
+
+	//
+	// Load the plugins
+	//
+	_ifconfig_property = new IfConfigPropertyDummy(*this);
+	_ifconfig_get = new IfConfigGetDummy(*this);
+	_ifconfig_set = new IfConfigSetDummy(*this);
+	_ifconfig_observer = new IfConfigObserverDummy(*this);
+	_ifconfig_vlan_get = new IfConfigVlanGetLinux(*this, true);
+	_ifconfig_vlan_set = new IfConfigVlanSetLinux(*this, true);
+#ifndef XORP_DISABLE_FIREWALL
+	_firewall_get = new FirewallGetDummy(*this);
+	_firewall_set = new FirewallSetDummy(*this);
+#endif
+	_fibconfig_forwarding = new FibConfigForwardingDummy(*this);
+	_fibconfig_entry_get = new FibConfigEntryGetDummy(*this);
+	_fibconfig_entry_set = new FibConfigEntrySetDummy(*this);
+	_fibconfig_entry_observer = new FibConfigEntryObserverDummy(*this);
+	_fibconfig_table_get = new FibConfigTableGetDummy(*this);
+	_fibconfig_table_set = new FibConfigTableSetDummy(*this);
+	_fibconfig_table_observer = new FibConfigTableObserverDummy(*this);
+
+	_is_loaded_plugins = true;
+
 	return (XORP_OK);
-
-    XLOG_ASSERT(_ifconfig_property == NULL);
-    XLOG_ASSERT(_ifconfig_get == NULL);
-    XLOG_ASSERT(_ifconfig_set == NULL);
-    XLOG_ASSERT(_ifconfig_observer == NULL);
-    XLOG_ASSERT(_ifconfig_vlan_get == NULL);
-    XLOG_ASSERT(_ifconfig_vlan_set == NULL);
-#ifndef XORP_DISABLE_FIREWALL
-    XLOG_ASSERT(_firewall_get == NULL);
-    XLOG_ASSERT(_firewall_set == NULL);
-#endif
-    XLOG_ASSERT(_fibconfig_forwarding == NULL);
-    XLOG_ASSERT(_fibconfig_entry_get == NULL);
-    XLOG_ASSERT(_fibconfig_entry_set == NULL);
-    XLOG_ASSERT(_fibconfig_entry_observer == NULL);
-    XLOG_ASSERT(_fibconfig_table_get == NULL);
-    XLOG_ASSERT(_fibconfig_table_set == NULL);
-    XLOG_ASSERT(_fibconfig_table_observer == NULL);
-
-    //
-    // Load the plugins
-    //
-    _ifconfig_property = new IfConfigPropertyDummy(*this);
-    _ifconfig_get = new IfConfigGetDummy(*this);
-    _ifconfig_set = new IfConfigSetDummy(*this);
-    _ifconfig_observer = new IfConfigObserverDummy(*this);
-    _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this, true);
-    _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this, true);
-#ifndef XORP_DISABLE_FIREWALL
-    _firewall_get = new FirewallGetDummy(*this);
-    _firewall_set = new FirewallSetDummy(*this);
-#endif
-    _fibconfig_forwarding = new FibConfigForwardingDummy(*this);
-    _fibconfig_entry_get = new FibConfigEntryGetDummy(*this);
-    _fibconfig_entry_set = new FibConfigEntrySetDummy(*this);
-    _fibconfig_entry_observer = new FibConfigEntryObserverDummy(*this);
-    _fibconfig_table_get = new FibConfigTableGetDummy(*this);
-    _fibconfig_table_set = new FibConfigTableSetDummy(*this);
-    _fibconfig_table_observer = new FibConfigTableObserverDummy(*this);
-
-    _is_loaded_plugins = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FeaDataPlaneManagerDummy::register_plugins(string& error_msg)
 {
-    return (FeaDataPlaneManager::register_all_plugins(true, error_msg));
+	return (FeaDataPlaneManager::register_all_plugins(true, error_msg));
 }
 
-IoLink*
+	IoLink*
 FeaDataPlaneManagerDummy::allocate_io_link(const IfTree& iftree,
-					   const string& if_name,
-					   const string& vif_name,
-					   uint16_t ether_type,
-					   const string& filter_program)
+		const string& if_name,
+		const string& vif_name,
+		uint16_t ether_type,
+		const string& filter_program)
 {
-    IoLink* io_link = NULL;
+	IoLink* io_link = NULL;
 
-    io_link = new IoLinkDummy(*this, iftree, if_name, vif_name, ether_type,
-			      filter_program);
-    _io_link_list.push_back(io_link);
+	io_link = new IoLinkDummy(*this, iftree, if_name, vif_name, ether_type,
+			filter_program);
+	_io_link_list.push_back(io_link);
 
-    return (io_link);
+	return (io_link);
 }
 
-IoIp*
+	IoIp*
 FeaDataPlaneManagerDummy::allocate_io_ip(const IfTree& iftree, int family,
-					 uint8_t ip_protocol)
+		uint8_t ip_protocol)
 {
-    IoIp* io_ip = NULL;
+	IoIp* io_ip = NULL;
 
-    io_ip = new IoIpDummy(*this, iftree, family, ip_protocol);
-    _io_ip_list.push_back(io_ip);
+	io_ip = new IoIpDummy(*this, iftree, family, ip_protocol);
+	_io_ip_list.push_back(io_ip);
 
-    return (io_ip);
+	return (io_ip);
 }
 
-IoTcpUdp*
+	IoTcpUdp*
 FeaDataPlaneManagerDummy::allocate_io_tcpudp(const IfTree& iftree, int family,
-					     bool is_tcp)
+		bool is_tcp)
 {
-    IoTcpUdp* io_tcpudp = NULL;
+	IoTcpUdp* io_tcpudp = NULL;
 
-    io_tcpudp = new IoTcpUdpDummy(*this, iftree, family, is_tcp);
-    _io_tcpudp_list.push_back(io_tcpudp);
+	io_tcpudp = new IoTcpUdpDummy(*this, iftree, family, is_tcp);
+	_io_tcpudp_list.push_back(io_tcpudp);
 
-    return (io_tcpudp);
+	return (io_tcpudp);
 }

@@ -45,36 +45,36 @@
 
 
 static const uint32_t PROTO_FOURCC = (('S' << 24) | ('T' << 16) |
-				      ('C' <<  8) | ('P' <<  0));
+	('C' <<  8) | ('P' <<  0));
 static const uint8_t PROTO_MAJOR = 1;
 static const uint8_t PROTO_MINOR = 1;
 
 
-STCPPacketHeader::STCPPacketHeader(uint8_t* data)
-    : _data(data),
-      _fourcc(_data + _fourcc_offset),
-      _major(_data + _major_offset),
-      _minor(_data + _minor_offset),
-      _seqno(_data + _seqno_offset),
-      _flags(_data + _flags_offset),
-      _type(_data + _type_offset),
-      _error_code(_data + _error_code_offset),
-      _error_note_bytes(_data + _error_note_bytes_offset),
-      _xrl_data_bytes(_data + _xrl_data_bytes_offset)
+    STCPPacketHeader::STCPPacketHeader(uint8_t* data)
+: _data(data),
+    _fourcc(_data + _fourcc_offset),
+    _major(_data + _major_offset),
+    _minor(_data + _minor_offset),
+    _seqno(_data + _seqno_offset),
+    _flags(_data + _flags_offset),
+    _type(_data + _type_offset),
+    _error_code(_data + _error_code_offset),
+    _error_note_bytes(_data + _error_note_bytes_offset),
+    _xrl_data_bytes(_data + _xrl_data_bytes_offset)
 {
     x_static_assert(STCPPacketHeader::SIZE == _fourcc_sizeof + _major_sizeof
-		  + _minor_sizeof + _seqno_sizeof + _flags_sizeof + _type_sizeof
-		  + _error_code_sizeof + _error_note_bytes_sizeof
-		  + _xrl_data_bytes_sizeof);
+	    + _minor_sizeof + _seqno_sizeof + _flags_sizeof + _type_sizeof
+	    + _error_code_sizeof + _error_note_bytes_sizeof
+	    + _xrl_data_bytes_sizeof);
     x_static_assert(STCPPacketHeader::SIZE ==
-		  _xrl_data_bytes_offset + _xrl_data_bytes_sizeof);
+	    _xrl_data_bytes_offset + _xrl_data_bytes_sizeof);
 }
 
-void
+    void
 STCPPacketHeader::initialize(uint32_t		seqno,
-			     STCPPacketType	type,
-			     const XrlError&	xrl_err,
-			     uint32_t		xrl_data_bytes)
+	STCPPacketType	type,
+	const XrlError&	xrl_err,
+	uint32_t		xrl_data_bytes)
 {
     embed_32(_fourcc, PROTO_FOURCC);
     embed_8(_major, PROTO_MAJOR);
@@ -87,15 +87,16 @@ STCPPacketHeader::initialize(uint32_t		seqno,
     embed_32(_xrl_data_bytes, xrl_data_bytes);
 }
 
-static bool
+    static bool
 stcp_packet_type_valid(uint8_t t)
 {
-    switch (STCPPacketType(t)) {
-    case STCP_PT_HELO:
-    case STCP_PT_HELO_ACK:
-    case STCP_PT_REQUEST:
-    case STCP_PT_RESPONSE:
-	return true;
+    switch (STCPPacketType(t)) 
+    {
+	case STCP_PT_HELO:
+	case STCP_PT_HELO_ACK:
+	case STCP_PT_REQUEST:
+	case STCP_PT_RESPONSE:
+	    return true;
     }
     return false;
 }
@@ -103,16 +104,19 @@ stcp_packet_type_valid(uint8_t t)
 bool
 STCPPacketHeader::is_valid() const
 {
-    if (fourcc() != PROTO_FOURCC) {
+    if (fourcc() != PROTO_FOURCC) 
+    {
 	debug_msg("invalid fourcc %c %c %c %c\n",
-		  _fourcc[0], _fourcc[1], _fourcc[2], _fourcc[3]);
+		_fourcc[0], _fourcc[1], _fourcc[2], _fourcc[3]);
 	return false;
     }
-    if (major() != PROTO_MAJOR || minor() != PROTO_MINOR) {
+    if (major() != PROTO_MAJOR || minor() != PROTO_MINOR) 
+    {
 	debug_msg("invalid proto (%u.%u)\n", _major[0], _minor[0]);
 	return false;
     }
-    if (stcp_packet_type_valid(type()) == false) {
+    if (stcp_packet_type_valid(type()) == false) 
+    {
 	debug_msg("invalid type/padding (%u.%u)\n", _type[0], _type[0]);
 	return false;
     }
@@ -185,7 +189,7 @@ STCPPacketHeader::batch() const
     return extract_8(_flags) & FLAG_BATCH_MASK;
 }
 
-void
+    void
 STCPPacketHeader::set_batch(bool batch)
 {
     uint8_t flags = extract_8(_flags);

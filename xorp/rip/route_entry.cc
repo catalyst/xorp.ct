@@ -29,18 +29,19 @@
 #include "route_entry.hh"
 
 template <typename A>
-inline void
+    inline void
 RouteEntry<A>::dissociate()
 {
     RouteEntryOrigin<A>* o = _origin;
     _origin = 0;
-    if (o) {
+    if (o) 
+    {
 	o->dissociate(this);
     }
 }
 
 template <typename A>
-inline void
+    inline void
 RouteEntry<A>::associate(Origin* o)
 {
     if (o)
@@ -48,49 +49,51 @@ RouteEntry<A>::associate(Origin* o)
     _origin = o;
 }
 
-template <typename A>
+    template <typename A>
 RouteEntry<A>::RouteEntry(const Net&	n,
-			  const Addr&	nh,
-			  const string&	ifname,
-			  const string&	vifname,
-			  uint16_t	cost,
-			  Origin*&	o,
-			  uint16_t	tag)
-    : _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
-      _cost(cost), _tag(tag), _ref_cnt(0), _filtered(false)
+	const Addr&	nh,
+	const string&	ifname,
+	const string&	vifname,
+	uint16_t	cost,
+	Origin*&	o,
+	uint16_t	tag)
+: _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
+    _cost(cost), _tag(tag), _ref_cnt(0), _filtered(false)
 {
     associate(o);
 }
 
-template <typename A>
+    template <typename A>
 RouteEntry<A>::RouteEntry(const Net&		n,
-			  const Addr&		nh,
-			  const string&		ifname,
-			  const string&		vifname,
-			  uint16_t		cost,
-			  Origin*&		o,
-			  uint16_t		tag,
-			  const PolicyTags&	policytags)
-    : _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
-      _cost(cost), _tag(tag), _ref_cnt(0), _policytags(policytags),
-      _filtered(false)
+	const Addr&		nh,
+	const string&		ifname,
+	const string&		vifname,
+	uint16_t		cost,
+	Origin*&		o,
+	uint16_t		tag,
+	const PolicyTags&	policytags)
+: _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
+    _cost(cost), _tag(tag), _ref_cnt(0), _policytags(policytags),
+    _filtered(false)
 {
     associate(o);
 }
 
-template <typename A>
+    template <typename A>
 RouteEntry<A>::~RouteEntry()
 {
     Origin* o = _origin;
     _origin = 0;
-    if (o) {
+    if (o) 
+    {
 	o->dissociate(this);
     }
 }
 
 template <typename A>
 string
-RouteEntry<A>::str() const {
+RouteEntry<A>::str() const 
+{
     ostringstream oss;
     oss << " net: " << _net.str() << " nexthop: " << _nh.str() << " vif: " << _ifname << ":" << _vifname
 	<< " cost: " << _cost << " tag: " << _tag << " refcnt: " << _ref_cnt
@@ -100,10 +103,11 @@ RouteEntry<A>::str() const {
 
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_nexthop(const A& nh)
 {
-    if (nh != _nh) {
+    if (nh != _nh) 
+    {
 	_nh = nh;
 	//
 	// XXX: If the nexthop is not link-local or zero, then reset
@@ -114,7 +118,8 @@ RouteEntry<A>::set_nexthop(const A& nh)
 	// find the interface and vif name based on the common subnet
 	// address to the nexthop.
 	//
-	if (! (_nh.is_linklocal_unicast() || _nh.is_zero())) {
+	if (! (_nh.is_linklocal_unicast() || _nh.is_zero())) 
+	{
 	    set_ifname("");
 	    set_vifname("");
 	}
@@ -124,10 +129,11 @@ RouteEntry<A>::set_nexthop(const A& nh)
 }
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_ifname(const string& ifname)
 {
-    if (ifname != _ifname) {
+    if (ifname != _ifname) 
+    {
 	_ifname = ifname;
 	return true;
     }
@@ -135,10 +141,11 @@ RouteEntry<A>::set_ifname(const string& ifname)
 }
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_vifname(const string& vifname)
 {
-    if (vifname != _vifname) {
+    if (vifname != _vifname) 
+    {
 	_vifname = vifname;
 	return true;
     }
@@ -146,10 +153,11 @@ RouteEntry<A>::set_vifname(const string& vifname)
 }
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_cost(uint16_t cost)
 {
-    if (cost != _cost) {
+    if (cost != _cost) 
+    {
 	_cost = cost;
 	return true;
     }
@@ -157,10 +165,11 @@ RouteEntry<A>::set_cost(uint16_t cost)
 }
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_origin(Origin* o)
 {
-    if (o != _origin) {
+    if (o != _origin) 
+    {
 	dissociate();
 	associate(o);
 	return true;
@@ -169,10 +178,11 @@ RouteEntry<A>::set_origin(Origin* o)
 }
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_tag(uint16_t tag)
 {
-    if (tag != _tag) {
+    if (tag != _tag) 
+    {
 	_tag = tag;
 	return true;
     }
@@ -181,10 +191,11 @@ RouteEntry<A>::set_tag(uint16_t tag)
 
 
 template <typename A>
-bool
+    bool
 RouteEntry<A>::set_policytags(const PolicyTags& ptags)
 {
-    if (ptags != _policytags) {
+    if (ptags != _policytags) 
+    {
 	_policytags = ptags;
 	return true;
     }
@@ -204,7 +215,8 @@ RouteEntry<A>::set_policytags(const PolicyTags& ptags)
  * RouteEntryOrigin.
  */
 template <typename A>
-struct NetCmp {
+struct NetCmp 
+{
     bool operator() (const IPNet<A>& l, const IPNet<A>& r) const
     {
 	if (l.prefix_len() < r.prefix_len())
@@ -225,24 +237,25 @@ struct NetCmp {
 
 
 template <typename A>
-struct RouteEntryOrigin<A>::RouteEntryStore {
-public:
-    typedef map<IPNet<A>, RouteEntry<A>*, NetCmp<A> > Container;
-    Container routes;
+struct RouteEntryOrigin<A>::RouteEntryStore 
+{
+    public:
+	typedef map<IPNet<A>, RouteEntry<A>*, NetCmp<A> > Container;
+	Container routes;
 };
 
 
 // ----------------------------------------------------------------------------
 // RouteEntryOrigin
 
-template <typename A>
-RouteEntryOrigin<A>::RouteEntryOrigin(bool is_rib_origin)
-    : _is_rib_origin(is_rib_origin)
+    template <typename A>
+    RouteEntryOrigin<A>::RouteEntryOrigin(bool is_rib_origin)
+: _is_rib_origin(is_rib_origin)
 {
     _rtstore = new RouteEntryStore();
 }
 
-template <typename A>
+    template <typename A>
 RouteEntryOrigin<A>::~RouteEntryOrigin()
 {
     // XXX store should be empty
@@ -251,27 +264,29 @@ RouteEntryOrigin<A>::~RouteEntryOrigin()
 }
 
 template <typename A>
-bool
+    bool
 RouteEntryOrigin<A>::associate(Route* r)
 {
     XLOG_ASSERT(r != 0);
-    if (_rtstore->routes.find(r->net()) != _rtstore->routes.end()) {
+    if (_rtstore->routes.find(r->net()) != _rtstore->routes.end()) 
+    {
 	XLOG_FATAL("entry already exists");
 	return false;
     }
     _rtstore->routes.insert(typename
-			    RouteEntryStore::Container::value_type(r->net(), r));
+	    RouteEntryStore::Container::value_type(r->net(), r));
     return true;
 }
 
 template <typename A>
-bool
+    bool
 RouteEntryOrigin<A>::dissociate(Route* r)
 {
     typename RouteEntryStore::Container::iterator
 	i = _rtstore->routes.find(r->net());
 
-    if (i == _rtstore->routes.end()) {
+    if (i == _rtstore->routes.end()) 
+    {
 	XLOG_FATAL("entry does not exist");
 	return false;
     }
@@ -287,12 +302,13 @@ RouteEntryOrigin<A>::route_count() const
 }
 
 template <typename A>
-void
+    void
 RouteEntryOrigin<A>::clear()
 {
     typename RouteEntryStore::Container::iterator
 	i = _rtstore->routes.begin();
-    while (i != _rtstore->routes.end()) {
+    while (i != _rtstore->routes.end()) 
+    {
 	Route* r = i->second;
 	delete r;
 	i = _rtstore->routes.begin();
@@ -308,7 +324,8 @@ RouteEntryOrigin<A>::dump_routes(vector<const Route*>& routes) const
     typename RouteEntryStore::Container::const_iterator
 	end = _rtstore->routes.end();
 
-    while (i != end) {
+    while (i != end) 
+    {
 	routes.push_back(i->second);
 	++i;
     }

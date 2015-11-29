@@ -33,7 +33,8 @@
 #include "libxorp/eventloop.hh"
 
 #ifdef HAVE_PCAP_H
-extern "C" {
+extern "C" 
+{
 #include <pcap.h>
 }
 #endif
@@ -51,141 +52,142 @@ typedef void pcap_t;
  * Each protocol 'registers' for link raw I/O per interface and vif 
  * and gets assigned one object (per interface and vif) of this class.
  */
-class IoLinkPcap : public IoLink {
-public:
-    /**
-     * Constructor for link-level access for a given interface and vif.
-     * 
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     * @param iftree the interface tree to use.
-     * @param if_name the interface name.
-     * @param vif_name the vif name.
-     * @param ether_type the EtherType protocol number. If it is 0 then
-     * it is unused.
-     * @param filter_program the optional filter program to be applied on the
-     * received packets. The program uses tcpdump(1) style expression.
-     */
-    IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
-	       const IfTree& iftree, const string& if_name,
-	       const string& vif_name, uint16_t ether_type,
-	       const string& filter_program);
+class IoLinkPcap : public IoLink 
+{
+    public:
+	/**
+	 * Constructor for link-level access for a given interface and vif.
+	 * 
+	 * @param fea_data_plane_manager the corresponding data plane manager
+	 * (@ref FeaDataPlaneManager).
+	 * @param iftree the interface tree to use.
+	 * @param if_name the interface name.
+	 * @param vif_name the vif name.
+	 * @param ether_type the EtherType protocol number. If it is 0 then
+	 * it is unused.
+	 * @param filter_program the optional filter program to be applied on the
+	 * received packets. The program uses tcpdump(1) style expression.
+	 */
+	IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
+		const IfTree& iftree, const string& if_name,
+		const string& vif_name, uint16_t ether_type,
+		const string& filter_program);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IoLinkPcap();
+	/**
+	 * Virtual destructor.
+	 */
+	virtual ~IoLinkPcap();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start(string& error_msg);
+	/**
+	 * Start operation.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		start(string& error_msg);
 
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop(string& error_msg);
+	/**
+	 * Stop operation.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		stop(string& error_msg);
 
-    /**
-     * Join a multicast group on an interface.
-     * 
-     * @param group the multicast group to join.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		join_multicast_group(const Mac& group, string& error_msg);
-    
-    /**
-     * Leave a multicast group on an interface.
-     * 
-     * @param group the multicast group to leave.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		leave_multicast_group(const Mac& group, string& error_msg);
+	/**
+	 * Join a multicast group on an interface.
+	 * 
+	 * @param group the multicast group to join.
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		join_multicast_group(const Mac& group, string& error_msg);
 
-    /**
-     * Send a link-level packet.
-     *
-     * @param src_address the MAC source address.
-     * @param dst_address the MAC destination address.
-     * @param ether_type the EtherType protocol number.
-     * @param payload the payload, everything after the MAC header.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		send_packet(const Mac&		src_address,
-			    const Mac&		dst_address,
-			    uint16_t		ether_type,
-			    const vector<uint8_t>& payload,
-			    string&		error_msg);
+	/**
+	 * Leave a multicast group on an interface.
+	 * 
+	 * @param group the multicast group to leave.
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		leave_multicast_group(const Mac& group, string& error_msg);
 
-private:
-    /**
-     * Open the pcap access.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		open_pcap_access(string& error_msg);
-    
-    /**
-     * Close the pcap access.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		close_pcap_access(string& error_msg);
+	/**
+	 * Send a link-level packet.
+	 *
+	 * @param src_address the MAC source address.
+	 * @param dst_address the MAC destination address.
+	 * @param ether_type the EtherType protocol number.
+	 * @param payload the payload, everything after the MAC header.
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		send_packet(const Mac&		src_address,
+		const Mac&		dst_address,
+		uint16_t		ether_type,
+		const vector<uint8_t>& payload,
+		string&		error_msg);
 
-    /**
-     * Join or leave a multicast group on an interface.
-     * 
-     * @param is_join if true, then join the group, otherwise leave.
-     * @param group the multicast group to join/leave.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		join_leave_multicast_group(bool is_join, const Mac& group,
-					   string& error_msg);
+    private:
+	/**
+	 * Open the pcap access.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		open_pcap_access(string& error_msg);
 
-    /**
-     * Callback that is called when there data to read from the system.
-     *
-     * This is called as a IoEventCb callback.
-     * @param fd file descriptor that with event caused this method to be
-     * called.
-     * @param type the event type.
-     */
-    void	ioevent_read_cb(XorpFd fd, IoEventType type);
+	/**
+	 * Close the pcap access.
+	 * 
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		close_pcap_access(string& error_msg);
 
-    /**
-     * Read data from the system, and then call the appropriate
-     * module to process it.
-     */
-    void	recv_data();
+	/**
+	 * Join or leave a multicast group on an interface.
+	 * 
+	 * @param is_join if true, then join the group, otherwise leave.
+	 * @param group the multicast group to join/leave.
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		join_leave_multicast_group(bool is_join, const Mac& group,
+		string& error_msg);
 
-    /**
-     * Reopen the pcap access.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		reopen_pcap_access(string& error_msg);
+	/**
+	 * Callback that is called when there data to read from the system.
+	 *
+	 * This is called as a IoEventCb callback.
+	 * @param fd file descriptor that with event caused this method to be
+	 * called.
+	 * @param type the event type.
+	 */
+	void	ioevent_read_cb(XorpFd fd, IoEventType type);
 
-    // Private state
-    XorpFd	_packet_fd;	// The file descriptor to send and recv packets
-    pcap_t*	_pcap;		// The pcap descriptor to send and recv packets
-    int		_datalink_type;	// The pcap-defined DLT_* data link type
-    char*	_pcap_errbuf;	// The pcap buffer for error messages
-    int		_multicast_sock; // The socket to join L2 multicast groups
+	/**
+	 * Read data from the system, and then call the appropriate
+	 * module to process it.
+	 */
+	void	recv_data();
 
-    XorpTask	_recv_data_task; // Task for receiving pending data
+	/**
+	 * Reopen the pcap access.
+	 *
+	 * @param error_msg the error message (if error).
+	 * @return XORP_OK on success, otherwise XORP_ERROR.
+	 */
+	int		reopen_pcap_access(string& error_msg);
+
+	// Private state
+	XorpFd	_packet_fd;	// The file descriptor to send and recv packets
+	pcap_t*	_pcap;		// The pcap descriptor to send and recv packets
+	int		_datalink_type;	// The pcap-defined DLT_* data link type
+	char*	_pcap_errbuf;	// The pcap buffer for error messages
+	int		_multicast_sock; // The socket to join L2 multicast groups
+
+	XorpTask	_recv_data_task; // Task for receiving pending data
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__

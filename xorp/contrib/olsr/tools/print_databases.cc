@@ -59,19 +59,21 @@
  * @param short_form true if a single character should be printed.
  * @return "yes"/"*" if value is true, otherwise "no"/" ".
  */
-inline const char*
+    inline const char*
 humanize_bool(const bool value, const bool short_form = false)
 {
-    if (value) {
-    	if (short_form)
-		return ("*");
+    if (value) 
+    {
+	if (short_form)
+	    return ("*");
 	else
-		return ("yes");
-    } else {
-    	if (short_form)
-		return (" ");
+	    return ("yes");
+    } else 
+    {
+	if (short_form)
+	    return (" ");
 	else
-		return ("no");
+	    return ("no");
     }
 }
 
@@ -85,36 +87,37 @@ humanize_bool(const bool value, const bool short_form = false)
 // Base class.
 //
 
-class Getter {
-public:
-    Getter(XrlRouter& xr, const string& tgt)
-      : _xr(xr), _tgt(tgt), _fail(false), _done(false)
-    {}
+class Getter 
+{
+    public:
+	Getter(XrlRouter& xr, const string& tgt)
+	    : _xr(xr), _tgt(tgt), _fail(false), _done(false)
+	{}
 
-    virtual ~Getter() {}
+	virtual ~Getter() {}
 
-    // parse command line arguments and fire off the XRLs
-    // to get the particular state we want.
-    virtual void get(int argc, char *argv[]) = 0;
+	// parse command line arguments and fire off the XRLs
+	// to get the particular state we want.
+	virtual void get(int argc, char *argv[]) = 0;
 
-    // true if the command failed
-    virtual bool fail() { return _fail; }
+	// true if the command failed
+	virtual bool fail() { return _fail; }
 
-    // print the appropriate output
-    virtual void output() = 0;
+	// print the appropriate output
+	virtual void output() = 0;
 
-    // TODO: save to a TLV file
-    //virtual void save() = 0;
+	// TODO: save to a TLV file
+	//virtual void save() = 0;
 
-    // poll for completion; return true if we should keep
-    // running the event loop.
-    inline bool busy() { return ! _done; }
+	// poll for completion; return true if we should keep
+	// running the event loop.
+	inline bool busy() { return ! _done; }
 
-protected:
-    XrlRouter&	_xr;
-    string	_tgt;
-    bool	_fail;
-    bool	_done;
+    protected:
+	XrlRouter&	_xr;
+	string	_tgt;
+	bool	_fail;
+	bool	_done;
 };
 
 
@@ -122,52 +125,54 @@ protected:
 // External route information.
 //
 
-struct ExternalInfo {
+struct ExternalInfo 
+{
     IPv4Net	_destination;
     IPv4	_lasthop;
     uint32_t	_distance;
     uint32_t	_hold_time;
 };
 
-class GetExternals : public Getter {
-public:
-    GetExternals(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetExternals : public Getter 
+{
+    public:
+	GetExternals(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetExternals()
-    {}
+	~GetExternals()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void external_cb(const XrlError& e,
-		     const IPv4Net* destination,
-		     const IPv4* lasthop,
-		     const uint32_t* distance,
-		     const uint32_t* hold_time);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void external_cb(const XrlError& e,
+		const IPv4Net* destination,
+		const IPv4* lasthop,
+		const uint32_t* distance,
+		const uint32_t* hold_time);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::ExternalID>			_external_ids;
-    list<OlsrTypes::ExternalID>::iterator	_index;
+    private:
+	list<OlsrTypes::ExternalID>			_external_ids;
+	list<OlsrTypes::ExternalID>::iterator	_index;
 
-    list<ExternalInfo>				_infos;
+	list<ExternalInfo>				_infos;
 };
 
-void
+    void
 GetExternals::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_hna_entry_list(this->_tgt.c_str(),
-			           callback(this, &GetExternals::list_cb));
+		callback(this, &GetExternals::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get external route list.");
@@ -176,10 +181,11 @@ GetExternals::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetExternals::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get external route list.");
 	_done = true;
 	_fail = true;
@@ -187,7 +193,8 @@ GetExternals::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_external_ids.push_back((atoms->get(i).uint32()));
     }
 
@@ -196,10 +203,11 @@ GetExternals::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetExternals::fetch_next()
 {
-    if (_external_ids.end() == _index) {
+    if (_external_ids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -207,22 +215,23 @@ GetExternals::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_hna_entry(this->_tgt.c_str(),
-			      *_index,
-			      callback(this,
-				       &GetExternals::external_cb));
+		*_index,
+		callback(this,
+		    &GetExternals::external_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get external route info.");
 }
 
-void
+    void
 GetExternals::external_cb(const XrlError& e,
-			  const IPv4Net* destination,
-			  const IPv4* lasthop,
-			  const uint32_t* distance,
-			  const uint32_t* hold_time)
+	const IPv4Net* destination,
+	const IPv4* lasthop,
+	const uint32_t* distance,
+	const uint32_t* hold_time)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Attempt to get external route info failed");
 	_done = true;
 	_fail = true;
@@ -240,19 +249,21 @@ GetExternals::external_cb(const XrlError& e,
     fetch_next();
 }
 
-void
+    void
 GetExternals::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No external routes learned.\n");
 	return;
     }
 
     printf("%-18s %-15s %8s %5s\n", "Destination", "Lasthop",
-	   "Distance", "Hold");
+	    "Distance", "Hold");
 
     list<ExternalInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const ExternalInfo& info = (*ii);
 	printf("%-18s %-15s %8u %5u\n",
 		cstring(info._destination),
@@ -266,7 +277,8 @@ GetExternals::output()
 // Interface information.
 //
 
-struct InterfaceInfo {
+struct InterfaceInfo 
+{
     string	_ifname;
     string	_vifname;
     IPv4	_local_addr;
@@ -275,47 +287,48 @@ struct InterfaceInfo {
     uint16_t	_all_nodes_port;
 };
 
-class GetInterfaces : public Getter {
-public:
-    GetInterfaces(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetInterfaces : public Getter 
+{
+    public:
+	GetInterfaces(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetInterfaces()
-    {}
+	~GetInterfaces()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void interface_cb(const XrlError& e,
-		      const string* ifname,
-		      const string* vifname,
-		      const IPv4* local_addr,
-		      const uint32_t* local_port,
-		      const IPv4* all_nodes_addr,
-		      const uint32_t* all_nodes_port);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void interface_cb(const XrlError& e,
+		const string* ifname,
+		const string* vifname,
+		const IPv4* local_addr,
+		const uint32_t* local_port,
+		const IPv4* all_nodes_addr,
+		const uint32_t* all_nodes_port);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::FaceID>		_face_ids;
-    list<OlsrTypes::FaceID>::iterator	_index;
+    private:
+	list<OlsrTypes::FaceID>		_face_ids;
+	list<OlsrTypes::FaceID>::iterator	_index;
 
-    list<InterfaceInfo>			_infos;
+	list<InterfaceInfo>			_infos;
 };
 
-void
+    void
 GetInterfaces::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_interface_list(this->_tgt.c_str(),
-			           callback(this, &GetInterfaces::list_cb));
+		callback(this, &GetInterfaces::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get interface list.");
@@ -324,10 +337,11 @@ GetInterfaces::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetInterfaces::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get interface list.");
 	_done = true;
 	_fail = true;
@@ -335,7 +349,8 @@ GetInterfaces::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_face_ids.push_back((atoms->get(i).uint32()));
     }
 
@@ -344,10 +359,11 @@ GetInterfaces::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetInterfaces::fetch_next()
 {
-    if (_face_ids.end() == _index) {
+    if (_face_ids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -355,25 +371,26 @@ GetInterfaces::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_interface_info(this->_tgt.c_str(),
-				   *_index,
-			           callback(this,
-					    &GetInterfaces::interface_cb));
+		*_index,
+		callback(this,
+		    &GetInterfaces::interface_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get interface info.");
 }
 
-void
+    void
 GetInterfaces::interface_cb(
-    const XrlError& e,
-    const string* ifname,
-    const string* vifname,
-    const IPv4* local_addr,
-    const uint32_t* local_port,
-    const IPv4* all_nodes_addr,
-    const uint32_t* all_nodes_port)
+	const XrlError& e,
+	const string* ifname,
+	const string* vifname,
+	const IPv4* local_addr,
+	const uint32_t* local_port,
+	const IPv4* all_nodes_addr,
+	const uint32_t* all_nodes_port)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Attempt to get interface info failed");
 	_done = true;
 	_fail = true;
@@ -393,10 +410,11 @@ GetInterfaces::interface_cb(
     fetch_next();
 }
 
-void
+    void
 GetInterfaces::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No interfaces configured.\n");
 	return;
     }
@@ -404,19 +422,21 @@ GetInterfaces::output()
     printf("%-10s %-20s %-20s\n", "Interface", "LocalAddr", "AllNodesAddr");
 
     list<InterfaceInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const InterfaceInfo& info = (*ii);
 	printf("%-4s/%-4s %15s:%-5u %15s:%-5u\n",
-	       info._ifname.c_str(),
-	       info._vifname.c_str(),
-	       cstring(info._local_addr),
-	       XORP_UINT_CAST(info._local_port),
-	       cstring(info._all_nodes_addr),
-	       XORP_UINT_CAST(info._all_nodes_port));
+		info._ifname.c_str(),
+		info._vifname.c_str(),
+		cstring(info._local_addr),
+		XORP_UINT_CAST(info._local_port),
+		cstring(info._all_nodes_addr),
+		XORP_UINT_CAST(info._all_nodes_port));
     }
 }
 
-struct InterfaceStatsInfo {
+struct InterfaceStatsInfo 
+{
     uint32_t	_bad_packets;
     uint32_t	_bad_messages;
     uint32_t	_messages_from_self;
@@ -431,7 +451,8 @@ struct InterfaceStatsInfo {
 // Link information.
 //
 
-struct LinkInfo {
+struct LinkInfo 
+{
     IPv4	_local_addr;
     IPv4	_remote_addr;
     IPv4	_main_addr;
@@ -441,48 +462,49 @@ struct LinkInfo {
     uint32_t	_hold_time;
 };
 
-class GetLinks : public Getter {
-public:
-    GetLinks(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetLinks : public Getter 
+{
+    public:
+	GetLinks(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetLinks()
-    {}
+	~GetLinks()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void link_cb(const XrlError& e,
-		 const IPv4*   local_addr,
-		 const IPv4*   remote_addr,
-		 const IPv4*   main_addr,
-		 const uint32_t* link_type,
-		 const uint32_t* sym_time,
-		 const uint32_t* asym_time,
-		 const uint32_t* hold_time);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void link_cb(const XrlError& e,
+		const IPv4*   local_addr,
+		const IPv4*   remote_addr,
+		const IPv4*   main_addr,
+		const uint32_t* link_type,
+		const uint32_t* sym_time,
+		const uint32_t* asym_time,
+		const uint32_t* hold_time);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::LogicalLinkID>		_link_ids;
-    list<OlsrTypes::LogicalLinkID>::iterator	_index;
+    private:
+	list<OlsrTypes::LogicalLinkID>		_link_ids;
+	list<OlsrTypes::LogicalLinkID>::iterator	_index;
 
-    list<LinkInfo>				_infos;
+	list<LinkInfo>				_infos;
 };
 
-void
+    void
 GetLinks::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_link_list(this->_tgt.c_str(),
-			      callback(this, &GetLinks::list_cb));
+		callback(this, &GetLinks::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get link list.");
@@ -491,10 +513,11 @@ GetLinks::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get link list.");
 	_done = true;
 	_fail = true;
@@ -502,7 +525,8 @@ GetLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_link_ids.push_back((atoms->get(i).uint32()));
     }
 
@@ -511,10 +535,11 @@ GetLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetLinks::fetch_next()
 {
-    if (_link_ids.end() == _index) {
+    if (_link_ids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -522,25 +547,26 @@ GetLinks::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_link_info(this->_tgt.c_str(),
-			      *_index,
-			      callback(this,
-				       &GetLinks::link_cb));
+		*_index,
+		callback(this,
+		    &GetLinks::link_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get link info.");
 }
 
-void
+    void
 GetLinks::link_cb(const XrlError& e,
-		  const IPv4*   local_addr,
-		  const IPv4*   remote_addr,
-		  const IPv4*   main_addr,
-		  const uint32_t* link_type,
-		  const uint32_t* sym_time,
-		  const uint32_t* asym_time,
-		  const uint32_t* hold_time)
+	const IPv4*   local_addr,
+	const IPv4*   remote_addr,
+	const IPv4*   main_addr,
+	const uint32_t* link_type,
+	const uint32_t* sym_time,
+	const uint32_t* asym_time,
+	const uint32_t* hold_time)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get link info.");
 	_done = true;
 	_fail = true;
@@ -561,26 +587,28 @@ GetLinks::link_cb(const XrlError& e,
     fetch_next();
 }
 
-struct LinkSortOrderPred {
+struct LinkSortOrderPred 
+{
     bool operator()(const LinkInfo& lhs, const LinkInfo& rhs) const
     {
 	return lhs._remote_addr < rhs._remote_addr;
     }
 };
 
-void
+    void
 GetLinks::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No links learned.\n");
 	return;
     }
 
-//LocalAddr       RemoteAddr      Neighbor        Type   ASYM    SYM  Hold
-//%-15s           %-15s           %-15s           %-4s    %5u    %5u   %5u
+    //LocalAddr       RemoteAddr      Neighbor        Type   ASYM    SYM  Hold
+    //%-15s           %-15s           %-15s           %-4s    %5u    %5u   %5u
     printf("%-15s %-15s %-15s %-4s %5s %5s %5s\n",
-	   "LocalAddr", "RemoteAddr", "Neighbor", "Type", "ASYM",
-	   "SYM", "Hold");
+	    "LocalAddr", "RemoteAddr", "Neighbor", "Type", "ASYM",
+	    "SYM", "Hold");
 
     // TODO: Turn LinkType into a symbolic string.
 
@@ -593,7 +621,8 @@ GetLinks::output()
 #endif
 
     list<LinkInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const LinkInfo& info = (*ii);
 	printf("%-15s %-15s %-15s %-4u %5u %5u %5u\n",
 		cstring(info._local_addr),
@@ -610,52 +639,54 @@ GetLinks::output()
 // MID entries.
 //
 
-struct MidInfo {
+struct MidInfo 
+{
     IPv4	_main_addr;
     IPv4	_iface_addr;
     uint32_t	_distance;
     uint32_t	_hold_time;
 };
 
-class GetMids : public Getter {
-public:
-    GetMids(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetMids : public Getter 
+{
+    public:
+	GetMids(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetMids()
-    {}
+	~GetMids()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void mid_cb(const XrlError& e,
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void mid_cb(const XrlError& e,
 		const IPv4*   main_addr,
 		const IPv4*   iface_addr,
 		const uint32_t* distance,
 		const uint32_t* hold_time);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::MidEntryID>			_mid_ids;
-    list<OlsrTypes::MidEntryID>::iterator	_index;
+    private:
+	list<OlsrTypes::MidEntryID>			_mid_ids;
+	list<OlsrTypes::MidEntryID>::iterator	_index;
 
-    list<MidInfo>				_infos;
+	list<MidInfo>				_infos;
 };
 
-void
+    void
 GetMids::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_mid_entry_list(this->_tgt.c_str(),
-				   callback(this, &GetMids::list_cb));
+		callback(this, &GetMids::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get MID list.");
@@ -664,10 +695,11 @@ GetMids::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetMids::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get MID list.");
 	_done = true;
 	_fail = true;
@@ -675,7 +707,8 @@ GetMids::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_mid_ids.push_back((atoms->get(i).uint32()));
     }
 
@@ -684,10 +717,11 @@ GetMids::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetMids::fetch_next()
 {
-    if (_mid_ids.end() == _index) {
+    if (_mid_ids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -695,22 +729,23 @@ GetMids::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_mid_entry(this->_tgt.c_str(),
-			      *_index,
-			      callback(this,
-				       &GetMids::mid_cb));
+		*_index,
+		callback(this,
+		    &GetMids::mid_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get MID info.");
 }
 
-void
+    void
 GetMids::mid_cb(const XrlError& e,
-		const IPv4*   main_addr,
-		const IPv4*   iface_addr,
-		const uint32_t* distance,
-		const uint32_t* hold_time)
+	const IPv4*   main_addr,
+	const IPv4*   iface_addr,
+	const uint32_t* distance,
+	const uint32_t* hold_time)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get MID info.");
 	_done = true;
 	_fail = true;
@@ -728,19 +763,21 @@ GetMids::mid_cb(const XrlError& e,
     fetch_next();
 }
 
-void
+    void
 GetMids::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No MID entries learned.\n");
 	return;
     }
 
     printf("%-15s %-15s %9s %5s\n", "MainAddr", "RemoteAddr",
-	   "Distance", "Hold");
+	    "Distance", "Hold");
 
     list<MidInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const MidInfo& info = (*ii);
 	printf("%-15s %-15s %9u %5u\n",
 		cstring(info._main_addr),
@@ -754,7 +791,8 @@ GetMids::output()
 // Neighbor information.
 //
 
-struct NeighborInfo {
+struct NeighborInfo 
+{
     IPv4	_main_addr;
     uint32_t	_willingness;
     uint32_t	_degree;
@@ -766,50 +804,51 @@ struct NeighborInfo {
     bool	_is_mpr_selector;
 };
 
-class GetNeighbors : public Getter {
-public:
-    GetNeighbors(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetNeighbors : public Getter 
+{
+    public:
+	GetNeighbors(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetNeighbors()
-    {}
+	~GetNeighbors()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void neighbor_cb(const XrlError& e,
-		     const IPv4*	_main_addr,
-		     const uint32_t*	_willingness,
-		     const uint32_t*	_degree,
-		     const uint32_t*	_link_count,
-		     const uint32_t*	_twohop_link_count,
-		     const bool*	_is_advertised,
-		     const bool*	_is_sym,
-		     const bool*	_is_mpr,
-		     const bool*	_is_mpr_selector);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void neighbor_cb(const XrlError& e,
+		const IPv4*	_main_addr,
+		const uint32_t*	_willingness,
+		const uint32_t*	_degree,
+		const uint32_t*	_link_count,
+		const uint32_t*	_twohop_link_count,
+		const bool*	_is_advertised,
+		const bool*	_is_sym,
+		const bool*	_is_mpr,
+		const bool*	_is_mpr_selector);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::NeighborID>			_nids;
-    list<OlsrTypes::NeighborID>::iterator	_index;
+    private:
+	list<OlsrTypes::NeighborID>			_nids;
+	list<OlsrTypes::NeighborID>::iterator	_index;
 
-    list<NeighborInfo>				_infos;
+	list<NeighborInfo>				_infos;
 };
 
-void
+    void
 GetNeighbors::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_neighbor_list(this->_tgt.c_str(),
-				  callback(this, &GetNeighbors::list_cb));
+		callback(this, &GetNeighbors::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get neighbor list.");
@@ -818,10 +857,11 @@ GetNeighbors::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get neighbor list.");
 	_done = true;
 	_fail = true;
@@ -829,7 +869,8 @@ GetNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_nids.push_back((atoms->get(i).uint32()));
     }
 
@@ -838,10 +879,11 @@ GetNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetNeighbors::fetch_next()
 {
-    if (_nids.end() == _index) {
+    if (_nids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -849,26 +891,27 @@ GetNeighbors::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_neighbor_info(this->_tgt.c_str(),
-				  *_index,
-				  callback(this, &GetNeighbors::neighbor_cb));
+		*_index,
+		callback(this, &GetNeighbors::neighbor_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get neighbor info.");
 }
 
-void
+    void
 GetNeighbors::neighbor_cb(const XrlError& e,
-			 const IPv4*	 main_addr,
-			 const uint32_t* willingness,
-			 const uint32_t* degree,
-			 const uint32_t* link_count,
-			 const uint32_t* twohop_link_count,
-			 const bool*	 is_advertised,
-			 const bool*	 is_sym,
-			 const bool*	 is_mpr,
-			 const bool*	 is_mpr_selector)
+	const IPv4*	 main_addr,
+	const uint32_t* willingness,
+	const uint32_t* degree,
+	const uint32_t* link_count,
+	const uint32_t* twohop_link_count,
+	const bool*	 is_advertised,
+	const bool*	 is_sym,
+	const bool*	 is_mpr,
+	const bool*	 is_mpr_selector)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get neighbor info.");
 	_done = true;
 	_fail = true;
@@ -891,24 +934,26 @@ GetNeighbors::neighbor_cb(const XrlError& e,
     fetch_next();
 }
 
-struct NeighborSortOrderPred {
+struct NeighborSortOrderPred 
+{
     bool operator()(const NeighborInfo& lhs, const NeighborInfo& rhs) const
     {
 	return lhs._main_addr < rhs._main_addr;
     }
 };
 
-void
+    void
 GetNeighbors::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No neighbors learned.\n");
 	return;
     }
 
     printf("%-15s %4s %6s %5s %6s %3s %3s %3s %3s\n",
-	   "MainAddr", "Will", "Degree", "Links", "2links",
-	   "ADV", "SYM", "MPR", "MPRS");
+	    "MainAddr", "Will", "Degree", "Links", "2links",
+	    "ADV", "SYM", "MPR", "MPRS");
 
 #ifdef SORT_OUTPUT
 #ifdef XORP_USE_USTL
@@ -919,7 +964,8 @@ GetNeighbors::output()
 #endif
 
     list<NeighborInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const NeighborInfo& info = (*ii);
 	printf("%-15s %4u %6u %5u %6u %3s %3s %3s %3s\n",
 		cstring(info._main_addr),
@@ -938,7 +984,8 @@ GetNeighbors::output()
 // Topology information.
 //
 
-struct TopologyInfo {
+struct TopologyInfo 
+{
     IPv4	_destination;
     IPv4	_lasthop;
     uint32_t	_distance;
@@ -946,46 +993,47 @@ struct TopologyInfo {
     uint32_t	_hold_time;
 };
 
-class GetTopology : public Getter {
-public:
-    GetTopology(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetTopology : public Getter 
+{
+    public:
+	GetTopology(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetTopology()
-    {}
+	~GetTopology()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void topology_cb(const XrlError& e,
-		     const IPv4*   destination,
-		     const IPv4*   lasthop,
-		     const uint32_t* distance,
-		     const uint32_t* seqno,
-		     const uint32_t* hold_time);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void topology_cb(const XrlError& e,
+		const IPv4*   destination,
+		const IPv4*   lasthop,
+		const uint32_t* distance,
+		const uint32_t* seqno,
+		const uint32_t* hold_time);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::TopologyID>			_tc_ids;
-    list<OlsrTypes::TopologyID>::iterator	_index;
+    private:
+	list<OlsrTypes::TopologyID>			_tc_ids;
+	list<OlsrTypes::TopologyID>::iterator	_index;
 
-    list<TopologyInfo>				_infos;
+	list<TopologyInfo>				_infos;
 };
 
-void
+    void
 GetTopology::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_tc_entry_list(this->_tgt.c_str(),
-				  callback(this, &GetTopology::list_cb));
+		callback(this, &GetTopology::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get topology list.");
@@ -994,10 +1042,11 @@ GetTopology::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetTopology::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get topology list.");
 	_done = true;
 	_fail = true;
@@ -1005,7 +1054,8 @@ GetTopology::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_tc_ids.push_back((atoms->get(i).uint32()));
     }
 
@@ -1014,10 +1064,11 @@ GetTopology::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetTopology::fetch_next()
 {
-    if (_tc_ids.end() == _index) {
+    if (_tc_ids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -1025,23 +1076,24 @@ GetTopology::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_tc_entry(this->_tgt.c_str(),
-			     *_index,
-			     callback(this,
-				      &GetTopology::topology_cb));
+		*_index,
+		callback(this,
+		    &GetTopology::topology_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get topology info.");
 }
 
-void
+    void
 GetTopology::topology_cb(const XrlError& e,
-			 const IPv4*   destination,
-			 const IPv4*   lasthop,
-			 const uint32_t* distance,
-			 const uint32_t* seqno,
-			 const uint32_t* hold_time)
+	const IPv4*   destination,
+	const IPv4*   lasthop,
+	const uint32_t* distance,
+	const uint32_t* seqno,
+	const uint32_t* hold_time)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get topology info.");
 	_done = true;
 	_fail = true;
@@ -1060,19 +1112,21 @@ GetTopology::topology_cb(const XrlError& e,
     fetch_next();
 }
 
-void
+    void
 GetTopology::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No TC entries learned.\n");
 	return;
     }
 
     printf("%-15s %-15s %8s %5s %5s\n",
-	   "Destination", "Lasthop", "Distance", "SeqNo", "Hold");
+	    "Destination", "Lasthop", "Distance", "SeqNo", "Hold");
 
     list<TopologyInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const TopologyInfo& info = (*ii);
 	printf("%-15s %-15s %8u %5u %5u\n",
 		cstring(info._destination),
@@ -1087,52 +1141,54 @@ GetTopology::output()
 // Two-hop link information.
 //
 
-struct TwohopLinkInfo {
+struct TwohopLinkInfo 
+{
     uint32_t	_last_face_id;
     IPv4	_nexthop_addr;
     IPv4	_dest_addr;
     uint32_t	_hold_time;
 };
 
-class GetTwohopLinks : public Getter {
-public:
-    GetTwohopLinks(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetTwohopLinks : public Getter 
+{
+    public:
+	GetTwohopLinks(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetTwohopLinks()
-    {}
+	~GetTwohopLinks()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void twohop_link_cb(const XrlError& e,
-			const uint32_t*	_last_face_id,
-			const IPv4*	_nexthop_addr,
-			const IPv4*	_dest_addr,
-			const uint32_t*	_hold_time);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void twohop_link_cb(const XrlError& e,
+		const uint32_t*	_last_face_id,
+		const IPv4*	_nexthop_addr,
+		const IPv4*	_dest_addr,
+		const uint32_t*	_hold_time);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::TwoHopLinkID>			_tlids;
-    list<OlsrTypes::TwoHopLinkID>::iterator		_index;
+    private:
+	list<OlsrTypes::TwoHopLinkID>			_tlids;
+	list<OlsrTypes::TwoHopLinkID>::iterator		_index;
 
-    list<TwohopLinkInfo>				_infos;
+	list<TwohopLinkInfo>				_infos;
 };
 
-void
+    void
 GetTwohopLinks::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_twohop_link_list(this->_tgt.c_str(),
-				     callback(this, &GetTwohopLinks::list_cb));
+		callback(this, &GetTwohopLinks::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get neighbor list.");
@@ -1141,10 +1197,11 @@ GetTwohopLinks::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetTwohopLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get neighbor list.");
 	_done = true;
 	_fail = true;
@@ -1152,7 +1209,8 @@ GetTwohopLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_tlids.push_back((atoms->get(i).uint32()));
     }
 
@@ -1161,10 +1219,11 @@ GetTwohopLinks::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetTwohopLinks::fetch_next()
 {
-    if (_tlids.end() == _index) {
+    if (_tlids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -1172,22 +1231,23 @@ GetTwohopLinks::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_twohop_link_info(this->_tgt.c_str(),
-				     *_index,
-				     callback(this,
-					      &GetTwohopLinks::twohop_link_cb));
+		*_index,
+		callback(this,
+		    &GetTwohopLinks::twohop_link_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get two-hop link info.");
 }
 
-void
+    void
 GetTwohopLinks::twohop_link_cb(const XrlError&	e,
-			      const uint32_t*	last_face_id,
-			      const IPv4*	nexthop_addr,
-			      const IPv4*	dest_addr,
-			      const uint32_t*	hold_time)
+	const uint32_t*	last_face_id,
+	const IPv4*	nexthop_addr,
+	const IPv4*	dest_addr,
+	const uint32_t*	hold_time)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get two-hop link info.");
 	_done = true;
 	_fail = true;
@@ -1205,19 +1265,21 @@ GetTwohopLinks::twohop_link_cb(const XrlError&	e,
     fetch_next();
 }
 
-void
+    void
 GetTwohopLinks::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No two-hop links learned.\n");
 	return;
     }
 
     printf("%-15s %-15s %5s\n",
-	   "Destination", "Nexthop", "Hold");
+	    "Destination", "Nexthop", "Hold");
 
     list<TwohopLinkInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const TwohopLinkInfo& info = (*ii);
 	printf( "%-15s %-15s %5u\n",
 		cstring(info._dest_addr),
@@ -1230,7 +1292,8 @@ GetTwohopLinks::output()
 // Two-hop neighbor information.
 //
 
-struct TwohopNeighborInfo {
+struct TwohopNeighborInfo 
+{
     IPv4	_main_addr;
     bool	_is_strict;
     uint32_t	_link_count;
@@ -1238,47 +1301,48 @@ struct TwohopNeighborInfo {
     uint32_t	_coverage;
 };
 
-class GetTwohopNeighbors : public Getter {
-public:
-    GetTwohopNeighbors(XrlRouter& xr, const string& tgt)
-     : Getter(xr, tgt)
-    {}
+class GetTwohopNeighbors : public Getter 
+{
+    public:
+	GetTwohopNeighbors(XrlRouter& xr, const string& tgt)
+	    : Getter(xr, tgt)
+	{}
 
-    ~GetTwohopNeighbors()
-    {}
+	~GetTwohopNeighbors()
+	{}
 
-    void get(int argc, char *argv[]);
+	void get(int argc, char *argv[]);
 
-    // print the appropriate output
-    void output();
+	// print the appropriate output
+	void output();
 
-private:
-    void list_cb(const XrlError& e, const XrlAtomList *atoms);
-    void twohop_neighbor_cb(const XrlError& e,
-			    const IPv4*	main_addr,
-			    const bool*	is_strict,
-			    const uint32_t*	link_count,
-			    const uint32_t*	reachability,
-			    const uint32_t*	coverage);
+    private:
+	void list_cb(const XrlError& e, const XrlAtomList *atoms);
+	void twohop_neighbor_cb(const XrlError& e,
+		const IPv4*	main_addr,
+		const bool*	is_strict,
+		const uint32_t*	link_count,
+		const uint32_t*	reachability,
+		const uint32_t*	coverage);
 
-    void fetch_next();
+	void fetch_next();
 
-private:
-    list<OlsrTypes::TwoHopNodeID>			_tnids;
-    list<OlsrTypes::TwoHopNodeID>::iterator		_index;
+    private:
+	list<OlsrTypes::TwoHopNodeID>			_tnids;
+	list<OlsrTypes::TwoHopNodeID>::iterator		_index;
 
-    list<TwohopNeighborInfo>				_infos;
+	list<TwohopNeighborInfo>				_infos;
 };
 
-void
+    void
 GetTwohopNeighbors::get(int argc, char *argv[])
 {
     XrlOlsr4V0p1Client cl(&this->_xr);
 
     bool success =
 	cl.send_get_twohop_neighbor_list(
-	    this->_tgt.c_str(),
-	    callback(this, &GetTwohopNeighbors::list_cb));
+		this->_tgt.c_str(),
+		callback(this, &GetTwohopNeighbors::list_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get two-hop neighbor list.");
@@ -1287,10 +1351,11 @@ GetTwohopNeighbors::get(int argc, char *argv[])
     UNUSED(argv);
 }
 
-void
+    void
 GetTwohopNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get two-hop neighbor list.");
 	_done = true;
 	_fail = true;
@@ -1298,7 +1363,8 @@ GetTwohopNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
     }
 
     const size_t size = atoms->size();
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) 
+    {
 	_tnids.push_back((atoms->get(i).uint32()));
     }
 
@@ -1307,10 +1373,11 @@ GetTwohopNeighbors::list_cb(const XrlError& e, const XrlAtomList *atoms)
     fetch_next();
 }
 
-void
+    void
 GetTwohopNeighbors::fetch_next()
 {
-    if (_tnids.end() == _index) {
+    if (_tnids.end() == _index) 
+    {
 	_done = true;
 	return;
     }
@@ -1318,23 +1385,24 @@ GetTwohopNeighbors::fetch_next()
     XrlOlsr4V0p1Client cl(&this->_xr);
     bool success =
 	cl.send_get_twohop_neighbor_info(
-	    this->_tgt.c_str(),
-	    *_index,
-	    callback(this, &GetTwohopNeighbors::twohop_neighbor_cb));
+		this->_tgt.c_str(),
+		*_index,
+		callback(this, &GetTwohopNeighbors::twohop_neighbor_cb));
 
     if (! success)
 	XLOG_WARNING("Failed to get two-hop neighbor info.");
 }
 
-void
+    void
 GetTwohopNeighbors::twohop_neighbor_cb(const XrlError& e,
-				      const IPv4*	main_addr,
-				      const bool*	is_strict,
-				      const uint32_t*	link_count,
-				      const uint32_t*	reachability,
-				      const uint32_t*	coverage)
+	const IPv4*	main_addr,
+	const bool*	is_strict,
+	const uint32_t*	link_count,
+	const uint32_t*	reachability,
+	const uint32_t*	coverage)
 {
-    if (XrlError::OKAY() != e) {
+    if (XrlError::OKAY() != e) 
+    {
 	XLOG_WARNING("Failed to get two-hop neighbor info.");
 	_done = true;
 	_fail = true;
@@ -1353,19 +1421,21 @@ GetTwohopNeighbors::twohop_neighbor_cb(const XrlError& e,
     fetch_next();
 }
 
-void
+    void
 GetTwohopNeighbors::output()
 {
-    if (_infos.empty()) {
+    if (_infos.empty()) 
+    {
 	printf("No two-hop neighbors learned.\n");
 	return;
     }
 
     printf("%-15s %3s %8s %12s\n",
-	   "MainAddr", "N1", "Coverage", "Reachability");
+	    "MainAddr", "N1", "Coverage", "Reachability");
 
     list<TwohopNeighborInfo>::iterator ii;
-    for (ii = _infos.begin(); ii != _infos.end(); ii++) {
+    for (ii = _infos.begin(); ii != _infos.end(); ii++) 
+    {
 	const TwohopNeighborInfo& info = (*ii);
 	printf( "%-15s %3s %8u %12u\n",
 		cstring(info._main_addr),
@@ -1378,23 +1448,24 @@ GetTwohopNeighbors::output()
 typedef map<string, Getter*> GetterMap;
 GetterMap   _getters;
 
-void
+    void
 register_getter(const string& name, Getter* getter)
 {
     _getters[name] = getter;
 }
 
-void
+    void
 unregister_all_getters()
 {
-    while (! _getters.empty()) {
+    while (! _getters.empty()) 
+    {
 	GetterMap::iterator ii = _getters.begin();
 	delete (*ii).second;
 	_getters.erase(ii);
     }
 }
 
-void
+    void
 initialize_getters(XrlRouter& xr, const string& tgt)
 {
     register_getter("external", new GetExternals(xr, tgt));
@@ -1407,7 +1478,7 @@ initialize_getters(XrlRouter& xr, const string& tgt)
     register_getter("twohop-neighbor", new GetTwohopNeighbors(xr, tgt));
 }
 
-Getter*
+    Getter*
 get_getter(const string& get_type)
 {
     GetterMap::iterator ii = _getters.find(get_type);
@@ -1418,17 +1489,17 @@ get_getter(const string& get_type)
     return (*ii).second;
 }
 
-int
+    int
 usage(const char *myname)
 {
     fprintf(stderr,
-"usage: %s [external|interface|link|mid|neighbor|topology|\n"
-"           twohop-link|twohop-neighbor]\n",
+	    "usage: %s [external|interface|link|mid|neighbor|topology|\n"
+	    "           twohop-link|twohop-neighbor]\n",
 	    myname);
     return -1;
 }
 
-int
+    int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -1447,7 +1518,8 @@ main(int argc, char **argv)
 
     // TODO: getopt() here; use options for brief vs terse, ipv4 vs ipv6.
 
-    if (argc < 2) {
+    if (argc < 2) 
+    {
 	usage(progname);
 	exit(1);
     }
@@ -1458,7 +1530,8 @@ main(int argc, char **argv)
     string getter_name(argv[0]);
     argc--; ++argv;
 
-    try {
+    try 
+    {
 	XrlStdRouter xrl_router( "print_databases");
 
 	//debug_msg("Waiting for router\n");
@@ -1469,7 +1542,8 @@ main(int argc, char **argv)
 	initialize_getters(xrl_router, olsr_name);
 
 	Getter* getter = get_getter(getter_name);
-	if (getter == 0) {
+	if (getter == 0) 
+	{
 	    fprintf(stderr, "No such getter %s\n", getter_name.c_str());
 	    unregister_all_getters();
 	    exit(1);
@@ -1480,11 +1554,13 @@ main(int argc, char **argv)
 	while (getter->busy())
 	    EventLoop::instance().run();
 
-	if (! getter->fail()) {
+	if (! getter->fail()) 
+	{
 	    getter->output();
 	}
 
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

@@ -36,38 +36,39 @@ class XrlAction;
 // request.
 //
 
-class UnexpandedXrl {
-public:
-    UnexpandedXrl(const MasterConfigTreeNode& node, const XrlAction& action);
-    ~UnexpandedXrl();
+class UnexpandedXrl 
+{
+	public:
+		UnexpandedXrl(const MasterConfigTreeNode& node, const XrlAction& action);
+		~UnexpandedXrl();
 
-    /**
-     * Expand the variables in the unexpanded XRL, and create an
-     * XRL that we can actually send.
-     * 
-     * @param errmsg the error message (if error).
-     * 
-     * @return the created XRL that we can send, or NULL if error.
-     */
-    Xrl* expand(string& errmsg) const;
+		/**
+		 * Expand the variables in the unexpanded XRL, and create an
+		 * XRL that we can actually send.
+		 * 
+		 * @param errmsg the error message (if error).
+		 * 
+		 * @return the created XRL that we can send, or NULL if error.
+		 */
+		Xrl* expand(string& errmsg) const;
 
-    /**
-     * Return the XRL return specification as a string.
-     * 
-     * @return the XRL return specification.
-     */
-    string return_spec() const;
+		/**
+		 * Return the XRL return specification as a string.
+		 * 
+		 * @return the XRL return specification.
+		 */
+		string return_spec() const;
 
-    string str() const;
+		string str() const;
 
-private:
-    const MasterConfigTreeNode& _node;
-    const XrlAction& _action;
+	private:
+		const MasterConfigTreeNode& _node;
+		const XrlAction& _action;
 
-    // _xrl is mutable because expanding the XRL doesn't conceptually
-    // change the UnexpandedXrl - storing the result here is purely an
-    // optimization.
-    mutable Xrl* _xrl;
+		// _xrl is mutable because expanding the XRL doesn't conceptually
+		// change the UnexpandedXrl - storing the result here is purely an
+		// optimization.
+		mutable Xrl* _xrl;
 };
 
 #endif // __RTRMGR_UNEXPANDED_XRL_HH__

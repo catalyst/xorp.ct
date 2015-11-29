@@ -24,16 +24,18 @@
 #include "libxorp/xorp.h"
 
 
-enum ProtocolType {
-    IGP = 1,		// Interior Gateway Protocol
-    EGP = 2		// Exterior Gateway Protocol
+enum ProtocolType 
+{
+	IGP = 1,		// Interior Gateway Protocol
+	EGP = 2		// Exterior Gateway Protocol
 };
 
-enum ProtocolAdminDistance {
-    CONNECTED_ADMIN_DISTANCE	= 0,	// Only for connected routes.
-    UNKNOWN_ADMIN_DISTANCE	= 255,
-    UNSET_ADMIN_DISTANCE	= 256,
-    MAX_ADMIN_DISTANCE		= 65535
+enum ProtocolAdminDistance 
+{
+	CONNECTED_ADMIN_DISTANCE	= 0,	// Only for connected routes.
+	UNKNOWN_ADMIN_DISTANCE	= 255,
+	UNSET_ADMIN_DISTANCE	= 256,
+	MAX_ADMIN_DISTANCE		= 65535
 };
 
 /**
@@ -42,53 +44,55 @@ enum ProtocolAdminDistance {
  * Protocol holds information related to a specific routing protocol
  * that is supplying information to the RIB.
  */
-class Protocol {
-public:
-    /**
-     * Protocol constuctor
-     *
-     * @param name the canonical name for the routing protocol.
-     * @param protocol_type the routing protocol type (@ref ProtocolType).
-     * @param genid the generation ID for the protocol (if the
-     * protocol goes down and comes up, the genid should be
-     * incremented).
-     */
-    Protocol(const string& name, ProtocolType protocol_type);
+class Protocol 
+{
+	public:
+		/**
+		 * Protocol constuctor
+		 *
+		 * @param name the canonical name for the routing protocol.
+		 * @param protocol_type the routing protocol type (@ref ProtocolType).
+		 * @param genid the generation ID for the protocol (if the
+		 * protocol goes down and comes up, the genid should be
+		 * incremented).
+		 */
+		Protocol(const string& name, ProtocolType protocol_type);
 
-    /**
-     * @return the protocol type.
-     * @see ProtocolType
-     */
-    ProtocolType protocol_type() const { return _protocol_type; }
+		/**
+		 * @return the protocol type.
+		 * @see ProtocolType
+		 */
+		ProtocolType protocol_type() const { return _protocol_type; }
 
-    /**
-     * @return the canonical name of the routing protocol.
-     */
-    const string& name() const { return _name; }
-    const string& str() const { return _name; }
+		/**
+		 * @return the canonical name of the routing protocol.
+		 */
+		const string& name() const { return _name; }
+		const string& str() const { return _name; }
 
-    /**
-     * Equality Operator
-     *
-     * Two Protocol instances are equal if they match only in name.
-     *
-     * @param other the right-hand operand to compare against.
-     * @return true if the left-hand Protocol instance is equal to
-     * the right-hand protocol instance.
-     */
-    bool operator==(const Protocol& other) const {
-	return (name() == other.name());
-    }
+		/**
+		 * Equality Operator
+		 *
+		 * Two Protocol instances are equal if they match only in name.
+		 *
+		 * @param other the right-hand operand to compare against.
+		 * @return true if the left-hand Protocol instance is equal to
+		 * the right-hand protocol instance.
+		 */
+		bool operator==(const Protocol& other) const 
+		{
+			return (name() == other.name());
+		}
 
-    /**
-     * Increment the protocol generation ID.
-     */
-    void increment_genid() { _genid++; }
+		/**
+		 * Increment the protocol generation ID.
+		 */
+		void increment_genid() { _genid++; }
 
-private:
-    string		_name;
-    ProtocolType	_protocol_type;	// The protocol type (IGP or EGP)
-    uint32_t		_genid;		// The protocol generation ID.
+	private:
+		string		_name;
+		ProtocolType	_protocol_type;	// The protocol type (IGP or EGP)
+		uint32_t		_genid;		// The protocol generation ID.
 };
 
 #endif // __RIB_PROTOCOL_HH__

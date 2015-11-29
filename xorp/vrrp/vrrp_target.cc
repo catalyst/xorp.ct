@@ -33,37 +33,38 @@
 const string VrrpTarget::vrrp_target_name   = "vrrp";
 const string VrrpTarget::fea_target_name    = "fea";
 
-namespace {
-
-string
-vrid_error(const string& msg, const string& ifn, const string& vifn,
-	   uint32_t id)
+namespace 
 {
-    ostringstream oss;
 
-    oss << msg
-        << " (ifname " << ifn
-	<< " vifname " << vifn
-	<< " vrid " << id
-	<< ")"
-	;
+    string
+	vrid_error(const string& msg, const string& ifn, const string& vifn,
+		uint32_t id)
+	{
+	    ostringstream oss;
 
-    return oss.str();
-}
+	    oss << msg
+		<< " (ifname " << ifn
+		<< " vifname " << vifn
+		<< " vrid " << id
+		<< ")"
+		;
+
+	    return oss.str();
+	}
 
 } // anonymous namespace
 
-VrrpTarget::VrrpTarget(XrlRouter& rtr)
-    : XrlVrrpTargetBase(&rtr),
-      _rtr(rtr),
-      _running(true),
-      _ifmgr( fea_target_name.c_str(),
-	     rtr.finder_address(), rtr.finder_port()),
-      _ifmgr_setup(false),
-      _rawlink(&rtr),
-      _rawipv4(&rtr),
-      _fea(&rtr),
-      _xrls_pending(0)
+    VrrpTarget::VrrpTarget(XrlRouter& rtr)
+: XrlVrrpTargetBase(&rtr),
+    _rtr(rtr),
+    _running(true),
+    _ifmgr( fea_target_name.c_str(),
+	    rtr.finder_address(), rtr.finder_port()),
+    _ifmgr_setup(false),
+    _rawlink(&rtr),
+    _rawipv4(&rtr),
+    _fea(&rtr),
+    _xrls_pending(0)
 {
     _ifmgr.attach_hint_observer(this);
 
@@ -81,7 +82,7 @@ VrrpTarget::~VrrpTarget()
     shutdown();
 }
 
-void
+    void
 VrrpTarget::start()
 {
     if (_ifmgr.startup() != XORP_OK)
@@ -94,16 +95,18 @@ VrrpTarget::running() const
     return _running || _rtr.pending() || _xrls_pending > 0;
 }
 
-void
+    void
 VrrpTarget::shutdown()
 {
-    if (_running) {
+    if (_running) 
+    {
 	_ifmgr.detach_hint_observer(this);
 	if (_ifmgr.shutdown() != XORP_OK)
 	    xorp_throw(VrrpException, "Can't shutdown fea mirror");
     }
 
-    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) 
+    {
 	VIFS* v = i->second;
 
 	for (VIFS::iterator j = v->begin(); j != v->end(); ++j)
@@ -116,7 +119,7 @@ VrrpTarget::shutdown()
     _running = false;
 }
 
-Vrrp&
+    Vrrp&
 VrrpTarget::find_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
     Vrrp* v = find_vrid_ptr(ifn, vifn, id);
@@ -126,7 +129,7 @@ VrrpTarget::find_vrid(const string& ifn, const string& vifn, uint32_t id)
     return *v;
 }
 
-Vrrp*
+    Vrrp*
 VrrpTarget::find_vrid_ptr(const string& ifn, const string& vifn, uint32_t id)
 {
     VrrpVif* x = find_vif(ifn, vifn);
@@ -136,7 +139,7 @@ VrrpTarget::find_vrid_ptr(const string& ifn, const string& vifn, uint32_t id)
     return x->find_vrid(id);
 }
 
-void
+    void
 VrrpTarget::add_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
     if (find_vrid_ptr(ifn, vifn, id))
@@ -148,7 +151,7 @@ VrrpTarget::add_vrid(const string& ifn, const string& vifn, uint32_t id)
     x->add_vrid(id);
 }
 
-void
+    void
 VrrpTarget::delete_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
     Vrrp* v = find_vrid_ptr(ifn, vifn, id);
@@ -161,7 +164,7 @@ VrrpTarget::delete_vrid(const string& ifn, const string& vifn, uint32_t id)
     x->delete_vrid(id);
 }
 
-VrrpVif*
+    VrrpVif*
 VrrpTarget::find_vif(const string& ifn, const string& vifn, bool add)
 {
     VIFS* v	    = NULL;
@@ -169,7 +172,8 @@ VrrpTarget::find_vif(const string& ifn, const string& vifn, bool add)
     bool added	    = false;
 
     IFS::iterator i = _ifs.find(ifn);
-    if (i == _ifs.end()) {
+    if (i == _ifs.end()) 
+    {
 	if (!add)
 	    return NULL;
 
@@ -180,7 +184,8 @@ VrrpTarget::find_vif(const string& ifn, const string& vifn, bool add)
 	v = i->second;
 
     VIFS::iterator j = v->find(vifn);
-    if (j == v->end()) {
+    if (j == v->end()) 
+    {
 	if (!add)
 	    return NULL;
 
@@ -196,28 +201,30 @@ VrrpTarget::find_vif(const string& ifn, const string& vifn, bool add)
     return vif;
 }
 
-void
+    void
 VrrpTarget::tree_complete()
 {
     _ifmgr_setup = true;
     check_interfaces();
 }
 
-void
+    void
 VrrpTarget::updates_made()
 {
     check_interfaces();
 }
 
-void
+    void
 VrrpTarget::check_interfaces()
 {
     XLOG_ASSERT(_ifmgr_setup);
 
-    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) 
+    {
 	VIFS* vifs = i->second;
 
-	for (VIFS::iterator j = vifs->begin(); j != vifs->end(); ++j) {
+	for (VIFS::iterator j = vifs->begin(); j != vifs->end(); ++j) 
+	{
 	    VrrpVif* vif = j->second;
 
 	    vif->configure(_ifmgr.iftree());
@@ -225,148 +232,150 @@ VrrpTarget::check_interfaces()
     }
 }
 
-void
+    void
 VrrpTarget::send(const string& ifname, const string& vifname, const Mac& src,
-		 const Mac& dest, uint32_t ether, const PAYLOAD& payload)
+	const Mac& dest, uint32_t ether, const PAYLOAD& payload)
 {
     VrrpVif* vif = find_vif(ifname, vifname);
     XLOG_ASSERT(vif);
 
     bool rc = _rawlink.send_send(fea_target_name.c_str(),
-				 ifname, vifname, src, dest, ether, payload,
-				 callback(vif, &VrrpVif::xrl_cb));
+	    ifname, vifname, src, dest, ether, payload,
+	    callback(vif, &VrrpVif::xrl_cb));
 
     if (!rc)
 	XLOG_FATAL("Cannot send raw data");
 }
 
-void
+    void
 VrrpTarget::join_mcast(const string& ifname, const string& vifname)
 {
     bool rc;
     XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
-				callback(this, &VrrpTarget::xrl_cb);
+	callback(this, &VrrpTarget::xrl_cb);
 
     uint32_t proto = IPPROTO_VRRP;
     const IPv4& ip = VrrpPacket::mcast_group;
 
     rc = _rawipv4.send_register_receiver(fea_target_name.c_str(),
-				         _rtr.instance_name(), ifname,
-					 vifname, proto, false, cb);
-    if (!rc) {
+	    _rtr.instance_name(), ifname,
+	    vifname, proto, false, cb);
+    if (!rc) 
+    {
 	XLOG_FATAL("Cannot register receiver");
 	return;
     }
     _xrls_pending++;
 
     rc = _rawipv4.send_join_multicast_group(fea_target_name.c_str(),
-					    _rtr.instance_name(), ifname,
-					    vifname, proto, ip, cb);
+	    _rtr.instance_name(), ifname,
+	    vifname, proto, ip, cb);
     if (!rc)
 	XLOG_FATAL("Cannot join mcast group");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::leave_mcast(const string& ifname, const string& vifname)
 {
     bool rc;
     XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
-				callback(this, &VrrpTarget::xrl_cb);
+	callback(this, &VrrpTarget::xrl_cb);
 
     uint32_t proto = IPPROTO_VRRP;
     const IPv4& ip = VrrpPacket::mcast_group;
 
     rc = _rawipv4.send_leave_multicast_group(fea_target_name.c_str(),
-					     _rtr.instance_name(), ifname,
-					     vifname, proto, ip, cb);
-    if (!rc) {
+	    _rtr.instance_name(), ifname,
+	    vifname, proto, ip, cb);
+    if (!rc) 
+    {
 	XLOG_FATAL("Cannot leave mcast group");
 	return;
     }
     _xrls_pending++;
 
     rc = _rawipv4.send_unregister_receiver(fea_target_name.c_str(),
-					   _rtr.instance_name(), ifname,
-					       vifname, proto, cb);
+	    _rtr.instance_name(), ifname,
+	    vifname, proto, cb);
     if (!rc)
 	XLOG_FATAL("Cannot unregister receiver");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::start_arps(const string& ifname, const string& vifname)
 {
     string filter;
 
     if (!_rawlink.send_register_receiver(fea_target_name.c_str(),
-					 _rtr.instance_name(),
-					 ifname, vifname, ETHERTYPE_ARP,
-					 filter, false, 
-					 callback(this, &VrrpTarget::xrl_cb)))
+		_rtr.instance_name(),
+		ifname, vifname, ETHERTYPE_ARP,
+		filter, false, 
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot register arp receiver");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::stop_arps(const string& ifname, const string& vifname)
 {
     string filter;
 
     if (!_rawlink.send_unregister_receiver(fea_target_name.c_str(),
-					   _rtr.instance_name(),
-					   ifname, vifname, ETHERTYPE_ARP,
-					   filter,
-					   callback(this, &VrrpTarget::xrl_cb)))
+		_rtr.instance_name(),
+		ifname, vifname, ETHERTYPE_ARP,
+		filter,
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot unregister arp receiver");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::add_mac(const string& ifname, const Mac& mac)
 {
     if (!_fea.send_create_mac(fea_target_name.c_str(), ifname, mac,
-			      callback(this, &VrrpTarget::xrl_cb)))
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot add MAC");
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::add_ip(const string& ifname, const IPv4& ip, const uint32_t prefix)
 {
     if (!_fea.send_create_address_atomic(fea_target_name.c_str(), ifname, ifname,
-					 ip, prefix,
-					 callback(this, &VrrpTarget::xrl_cb)))
+		ip, prefix,
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot add IP");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::delete_mac(const string& ifname, const Mac& mac)
 {
     if (!_fea.send_delete_mac(fea_target_name.c_str(), ifname, mac,
-			      callback(this, &VrrpTarget::xrl_cb)))
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot delete MAC");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::delete_ip(const string& ifname, const IPv4& ip)
 {
     if (!_fea.send_delete_address_atomic(fea_target_name.c_str(), ifname, ifname, ip,
-					 callback(this, &VrrpTarget::xrl_cb)))
+		callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot delete IP");
 
     _xrls_pending++;
 }
 
-void
+    void
 VrrpTarget::xrl_cb(const XrlError& xrl_error)
 {
     _xrls_pending--;
@@ -378,8 +387,8 @@ VrrpTarget::xrl_cb(const XrlError& xrl_error)
 
 XrlCmdError
 VrrpTarget::common_0_1_get_target_name(
-        // Output values,
-        string& name)
+	// Output values,
+	string& name)
 {
     name = vrrp_target_name;
 
@@ -388,8 +397,8 @@ VrrpTarget::common_0_1_get_target_name(
 
 XrlCmdError
 VrrpTarget::common_0_1_get_version(
-        // Output values,
-        string& version)
+	// Output values,
+	string& version)
 {
     version = XORP_MODULE_VERSION;
 
@@ -398,14 +407,16 @@ VrrpTarget::common_0_1_get_version(
 
 XrlCmdError
 VrrpTarget::common_0_1_get_status(
-        // Output values,
-        uint32_t&       status,
-        string& reason)
+	// Output values,
+	uint32_t&       status,
+	string& reason)
 {
-    if (_running) {
+    if (_running) 
+    {
 	status = PROC_READY;
 	reason = "running";
-    } else {
+    } else 
+    {
 	status = PROC_SHUTDOWN;
 	reason = "dying";
     }
@@ -413,7 +424,7 @@ VrrpTarget::common_0_1_get_status(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 VrrpTarget::common_0_1_shutdown()
 {
     shutdown();
@@ -421,7 +432,7 @@ VrrpTarget::common_0_1_shutdown()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 VrrpTarget::common_0_1_startup()
 {
     start();
@@ -430,14 +441,16 @@ VrrpTarget::common_0_1_startup()
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_add_vrid(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid)
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid)
 {
-    try {
+    try 
+    {
 	add_vrid(ifname, vifname, vrid);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -446,14 +459,16 @@ VrrpTarget::vrrp_0_1_add_vrid(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_delete_vrid(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid)
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid)
 {
-    try {
+    try 
+    {
 	delete_vrid(ifname, vifname, vrid);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -462,17 +477,19 @@ VrrpTarget::vrrp_0_1_delete_vrid(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_set_priority(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
 	const uint32_t& vrid,
-        const uint32_t& priority)
+	const uint32_t& priority)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_priority(priority);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -481,17 +498,19 @@ VrrpTarget::vrrp_0_1_set_priority(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_set_interval(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
 	const uint32_t& vrid,
-        const uint32_t& interval)
+	const uint32_t& interval)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_interval(interval);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -500,17 +519,19 @@ VrrpTarget::vrrp_0_1_set_interval(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_set_preempt(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
 	const uint32_t& vrid,
-        const bool&     preempt)
+	const bool&     preempt)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_preempt(preempt);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -519,17 +540,19 @@ VrrpTarget::vrrp_0_1_set_preempt(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_set_disable(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
 	const uint32_t& vrid,
-        const bool&     disable)
+	const bool&     disable)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_disable(disable);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -538,17 +561,19 @@ VrrpTarget::vrrp_0_1_set_disable(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_add_ip(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid,
-        const IPv4&     ip)
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid,
+	const IPv4&     ip)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.add_ip(ip);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -557,17 +582,20 @@ VrrpTarget::vrrp_0_1_add_ip(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_set_prefix (
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid,
-        const IPv4&     ip,
-	const uint32_t& prefix_len) {
-    try {
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid,
+	const IPv4&     ip,
+	const uint32_t& prefix_len) 
+{
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_prefix(ip, prefix_len);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     return XrlCmdError::OKAY();
@@ -576,17 +604,19 @@ VrrpTarget::vrrp_0_1_set_prefix (
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_delete_ip(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid,
-        const IPv4&     ip)
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid,
+	const IPv4&     ip)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.delete_ip(ip);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -595,19 +625,21 @@ VrrpTarget::vrrp_0_1_delete_ip(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_get_vrid_info(
-        // Input values,
-        const string&   ifname,
-        const string&   vifname,
-        const uint32_t& vrid,
-        // Output values,
-        string& state,
-        IPv4&   master)
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const uint32_t& vrid,
+	// Output values,
+	string& state,
+	IPv4&   master)
 {
-    try {
+    try 
+    {
 	Vrrp& v = find_vrid(ifname, vifname, vrid);
 
 	v.get_info(state, master);
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -616,13 +648,14 @@ VrrpTarget::vrrp_0_1_get_vrid_info(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_get_vrids(
-        // Input values,      
-        const string&   ifname,
-        const string&   vifname,
-        // Output values,     
-        XrlAtomList&    vrids)
+	// Input values,      
+	const string&   ifname,
+	const string&   vifname,
+	// Output values,     
+	XrlAtomList&    vrids)
 {
-    try {
+    try 
+    {
 	VrrpVif* vif = find_vif(ifname, vifname);
 	if (!vif)
 	    xorp_throw(VrrpException, "unknown vif");
@@ -632,12 +665,14 @@ VrrpTarget::vrrp_0_1_get_vrids(
 	VRIDS tmp;
 	vif->get_vrids(tmp);
 
-	for (VRIDS::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+	for (VRIDS::iterator i = tmp.begin(); i != tmp.end(); ++i) 
+	{
 	    uint32_t vrid = *i;
 
 	    vrids.append(XrlAtom(vrid));
 	}
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -646,21 +681,21 @@ VrrpTarget::vrrp_0_1_get_vrids(
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_get_ifs(
-        // Output values,
-        XrlAtomList&    ifs)
+	// Output values,
+	XrlAtomList&    ifs)
 {
     for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i)
 	ifs.append(XrlAtom(i->first));
 
     return XrlCmdError::OKAY();
 }
-                            
+
 XrlCmdError
 VrrpTarget::vrrp_0_1_get_vifs(
-        // Input values,    
-        const string&   ifname,
-        // Output values,
-        XrlAtomList&    vifs)
+	// Input values,    
+	const string&   ifname,
+	// Output values,
+	XrlAtomList&    vifs)
 {
     IFS::iterator i = _ifs.find(ifname);
     if (i == _ifs.end())
@@ -676,44 +711,48 @@ VrrpTarget::vrrp_0_1_get_vifs(
 
 XrlCmdError
 VrrpTarget::raw_packet4_client_0_1_recv(
-        // Input values,
-        const string&   if_name,
-        const string&   vif_name,
-        const IPv4&     src_address,
-        const IPv4&     dst_address,
-        const uint32_t& ip_protocol,
-        const int32_t&  ip_ttl,
-        const int32_t&  ip_tos,
-        const bool&     ip_router_alert,
-        const bool&     ip_internet_control,
-        const vector<uint8_t>&  payload)
+	// Input values,
+	const string&   if_name,
+	const string&   vif_name,
+	const IPv4&     src_address,
+	const IPv4&     dst_address,
+	const uint32_t& ip_protocol,
+	const int32_t&  ip_ttl,
+	const int32_t&  ip_tos,
+	const bool&     ip_router_alert,
+	const bool&     ip_internet_control,
+	const vector<uint8_t>&  payload)
 {
     UNUSED(ip_tos);
     UNUSED(ip_router_alert);
     UNUSED(ip_internet_control);
 
     VrrpVif* vif = find_vif(if_name, vif_name);
-    if (!vif) {
+    if (!vif) 
+    {
 	XLOG_WARNING("Cannot find IF %s VIF %s",
-		     if_name.c_str(), vif_name.c_str());
+		if_name.c_str(), vif_name.c_str());
 
 	return XrlCmdError::OKAY();
     }
 
-    if (dst_address != VrrpPacket::mcast_group) {
+    if (dst_address != VrrpPacket::mcast_group) 
+    {
 	XLOG_WARNING("Received stuff for unknown IP %s",
-		     dst_address.str().c_str());
+		dst_address.str().c_str());
 
 	return XrlCmdError::OKAY();
     }
 
-    if (ip_protocol != IPPROTO_VRRP) {
+    if (ip_protocol != IPPROTO_VRRP) 
+    {
 	XLOG_WARNING("Unknown protocol %u", ip_protocol);
 
 	return XrlCmdError::OKAY();
     }
 
-    if (ip_ttl != 255) {
+    if (ip_ttl != 255) 
+    {
 	XLOG_WARNING("Bad TTL %d", ip_ttl);
 
 	return XrlCmdError::OKAY();
@@ -726,22 +765,24 @@ VrrpTarget::raw_packet4_client_0_1_recv(
 
 XrlCmdError
 VrrpTarget::raw_link_client_0_1_recv(
-        // Input values,
-        const string&   if_name,
-        const string&   vif_name,
-        const Mac&      src_address,
-        const Mac&      dst_address,
-        const uint32_t& ether_type,
-        const vector<uint8_t>&  payload)
+	// Input values,
+	const string&   if_name,
+	const string&   vif_name,
+	const Mac&      src_address,
+	const Mac&      dst_address,
+	const uint32_t& ether_type,
+	const vector<uint8_t>&  payload)
 {
     VrrpVif* vif = find_vif(if_name, vif_name);
-    if (!vif) {
+    if (!vif) 
+    {
 	XLOG_WARNING("Can't find VIF %s", if_name.c_str());
 
 	return XrlCmdError::OKAY();
     }
 
-    if (ether_type != ETHERTYPE_ARP) {
+    if (ether_type != ETHERTYPE_ARP) 
+    {
 	XLOG_WARNING("Unknown ethertype %u", ether_type);
 
 	return XrlCmdError::OKAY();

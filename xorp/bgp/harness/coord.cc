@@ -42,257 +42,266 @@ static const char SERVER[] = "coord";/* This servers name */
 static const char SERVER_VERSION[] = "0.1";
 
 /*
--------------------- XRL --------------------
-*/
+   -------------------- XRL --------------------
+   */
 
-XrlCoordTarget::XrlCoordTarget(XrlRouter *r, Coord& coord)
-    : XrlCoordTargetBase(r), _coord(coord), _incommand(0)
+	XrlCoordTarget::XrlCoordTarget(XrlRouter *r, Coord& coord)
+: XrlCoordTargetBase(r), _coord(coord), _incommand(0)
 {
-    debug_msg("\n");
+	debug_msg("\n");
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::common_0_1_get_target_name(string& name)
 {
-    debug_msg("\n");
+	debug_msg("\n");
 
-    name = SERVER;
-    return XrlCmdError::OKAY();
+	name = SERVER;
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::common_0_1_get_version(string& version)
 {
-    debug_msg("\n");
+	debug_msg("\n");
 
-    version = SERVER_VERSION;
-    return XrlCmdError::OKAY();
+	version = SERVER_VERSION;
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCoordTarget::common_0_1_get_status(// Output values,
-				      uint32_t& status,
-				      string& reason)
+		uint32_t& status,
+		string& reason)
 {
-    //XXX placeholder only
-    status = PROC_READY;
-    reason = "Ready";
-    return XrlCmdError::OKAY();
+	//XXX placeholder only
+	status = PROC_READY;
+	reason = "Ready";
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::common_0_1_shutdown()
 {
-    _coord.mark_done();
-    return XrlCmdError::OKAY();
+	_coord.mark_done();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::coord_0_1_command(const string&	command)
 {
-    debug_msg("command: <%s>\n", command.c_str());
+	debug_msg("command: <%s>\n", command.c_str());
 
-    _incommand++;
-    try {
-	_coord.command(command);
-    } catch(const XorpException& e) {
+	_incommand++;
+	try 
+	{
+		_coord.command(command);
+	} catch(const XorpException& e) 
+	{
+		_incommand--;
+		return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
+				bool_c_str(_coord.pending()));
+	}
 	_incommand--;
-	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
-					   bool_c_str(_coord.pending()));
-    }
-    _incommand--;
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::coord_0_1_status(const string& peer, string& status)
 {
-    debug_msg("status: %s\n", peer.c_str());
+	debug_msg("status: %s\n", peer.c_str());
 
-    _incommand++;
-    try {
-	_coord.status(peer, status);
-    } catch(const XorpException& e) {
+	_incommand++;
+	try 
+	{
+		_coord.status(peer, status);
+	} catch(const XorpException& e) 
+	{
+		_incommand--;
+		return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
+				bool_c_str(_coord.pending()));
+	}
 	_incommand--;
-	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
-					   bool_c_str(_coord.pending()));
-    }
-    _incommand--;
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::coord_0_1_pending(bool& pending)
 {
-    debug_msg("pending:\n");
+	debug_msg("pending:\n");
 
-    if(0 != _incommand)
-	pending = true;
-    else
-	pending = _coord.pending();
+	if(0 != _incommand)
+		pending = true;
+	else
+		pending = _coord.pending();
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::datain_0_1_receive(const string&  peer, const uint32_t& genid,
-				   const bool& status, const uint32_t& secs,
-				   const uint32_t& micro,
-				   const vector<uint8_t>&  data)
+		const bool& status, const uint32_t& secs,
+		const uint32_t& micro,
+		const vector<uint8_t>&  data)
 {
-    debug_msg("peer: %s genid: %u status: %d secs: %u micro: %u data length: %u\n",
-	      peer.c_str(), XORP_UINT_CAST(genid), status,
-	      XORP_UINT_CAST(secs), XORP_UINT_CAST(micro),
-	      XORP_UINT_CAST(data.size()));
+	debug_msg("peer: %s genid: %u status: %d secs: %u micro: %u data length: %u\n",
+			peer.c_str(), XORP_UINT_CAST(genid), status,
+			XORP_UINT_CAST(secs), XORP_UINT_CAST(micro),
+			XORP_UINT_CAST(data.size()));
 
-    _coord.datain(peer, genid, status, secs, micro, data);
+	_coord.datain(peer, genid, status, secs, micro, data);
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::datain_0_1_error(const string&  peer, const uint32_t& genid,
-				 const string& reason)
+		const string& reason)
 {
-    debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(),
-	      XORP_UINT_CAST(genid), reason.c_str());
+	debug_msg("peer: %s genid: %u reason: %s\n", peer.c_str(),
+			XORP_UINT_CAST(genid), reason.c_str());
 
-    _coord.datain_error(peer, genid, reason);
+	_coord.datain_error(peer, genid, reason);
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCoordTarget::datain_0_1_closed(const string&  peer, const uint32_t& genid)
 {
-    debug_msg("peer: %s\n", peer.c_str());
+	debug_msg("peer: %s\n", peer.c_str());
 
-    _coord.datain_closed(peer, genid);
+	_coord.datain_closed(peer, genid);
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
 /*
--------------------- IMPLEMENTATION --------------------
-*/
-Coord::Coord( Command& command)
-    : _done(false),  _command(command)
+   -------------------- IMPLEMENTATION --------------------
+   */
+	Coord::Coord( Command& command)
+: _done(false),  _command(command)
 {
 }
 
-void
+	void
 Coord::command(const string& command)
 {
-    _command.command(command);
+	_command.command(command);
 }
 
-void
+	void
 Coord::status(const string& peer, string& status)
 {
-    _command.status(peer, status);
+	_command.status(peer, status);
 }
 
-bool
+	bool
 Coord::pending()
 {
-    return _command.pending();
+	return _command.pending();
 }
 
-void
+	void
 Coord::datain(const string&  peer, const uint32_t& genid, const bool& status,
-	      const uint32_t& secs, const uint32_t& micro,
-	      const vector<uint8_t>&  data)
+		const uint32_t& secs, const uint32_t& micro,
+		const vector<uint8_t>&  data)
 {
-    TimeVal tv(secs, micro);
-    _command.datain(peer, genid, status, tv, data);
+	TimeVal tv(secs, micro);
+	_command.datain(peer, genid, status, tv, data);
 }
 
-void
+	void
 Coord::datain_error(const string& peer, const uint32_t& genid,
-		    const string& reason)
+		const string& reason)
 {
-    _command.datain_error(peer, genid, reason);
+	_command.datain_error(peer, genid, reason);
 }
 
-void
+	void
 Coord::datain_closed(const string& peer, const uint32_t& genid)
 {
-    _command.datain_closed(peer, genid);
+	_command.datain_closed(peer, genid);
 }
 
-bool
+	bool
 Coord::done()
 {
-    return _done;
+	return _done;
 }
 
-void
+	void
 Coord::mark_done()
 {
-    _done = true;
+	_done = true;
 }
 
-static void
+	static void
 usage(const char *name)
 {
-    fprintf(stderr,"usage: %s [-h (finder host)]\n", name);
-    exit(-1);
+	fprintf(stderr,"usage: %s [-h (finder host)]\n", name);
+	exit(-1);
 }
 
-int
+	int
 main(int argc, char **argv)
 {
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
+	XorpUnexpectedHandler x(xorp_unexpected_handler);
 
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
+	//
+	// Initialize and start xlog
+	//
+	xlog_init(argv[0], NULL);
+	xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+	// XXX: verbosity of the error messages temporary increased
+	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+	xlog_add_default_output();
+	xlog_start();
 
-    int c;
-    string finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
-    const char *server = SERVER;
+	int c;
+	string finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
+	const char *server = SERVER;
 
-    while((c = getopt (argc, argv, "h:")) != EOF) {
-	switch(c) {
-	case 'h':
-	    finder_host = optarg;
-	    break;
-	case '?':
-	    usage(argv[0]);
-	}
-    }
-
-    try {
-	XrlStdRouter router( server, finder_host.c_str());
-	Command com( router);
-	Coord coord( com);
-	XrlCoordTarget xrl_target(&router, coord);
-
-	wait_until_xrl_router_is_ready( router);
-
-	while (coord.done() == false) {
-		EventLoop::instance().run();
+	while((c = getopt (argc, argv, "h:")) != EOF) 
+	{
+		switch(c) 
+		{
+			case 'h':
+				finder_host = optarg;
+				break;
+			case '?':
+				usage(argv[0]);
+		}
 	}
 
-    } catch(...) {
-	xorp_catch_standard_exceptions();
-    }
+	try 
+	{
+		XrlStdRouter router( server, finder_host.c_str());
+		Command com( router);
+		Coord coord( com);
+		XrlCoordTarget xrl_target(&router, coord);
 
-    //
-    // Gracefully stop and exit xlog
-    //
-    xlog_stop();
-    xlog_exit();
-    debug_msg("Bye!\n");
-    return 0;
+		wait_until_xrl_router_is_ready( router);
+
+		while (coord.done() == false) 
+		{
+			EventLoop::instance().run();
+		}
+
+	} catch(...) 
+	{
+		xorp_catch_standard_exceptions();
+	}
+
+	//
+	// Gracefully stop and exit xlog
+	//
+	xlog_stop();
+	xlog_exit();
+	debug_msg("Bye!\n");
+	return 0;
 }
 
 

@@ -39,27 +39,27 @@
 #include "face.hh"
 
 Face::Face(Olsr& olsr, FaceManager& fm, Neighborhood* nh,
-	   MessageDecoder& md, const string& interface, const string& vif,
-	   OlsrTypes::FaceID id)
- : _olsr(olsr),
-   _fm(fm),
-   _nh(nh),
-   _md(md),
-   _id(id),
-   _enabled(false),
-   _interface(interface),
-   _vif(vif),
-   _mtu(0),			    // XXX obtained later
-   _local_addr(IPv4::ZERO()),	    // XXX obtained later
-   _local_port(OlsrTypes::DEFAULT_OLSR_PORT),
-   _all_nodes_addr(IPv4::ALL_ONES()),
-   _all_nodes_port(OlsrTypes::DEFAULT_OLSR_PORT),
-   _cost(OlsrTypes::DEFAULT_STATIC_FACE_COST),
-   _next_pkt_seqno(1)
+	MessageDecoder& md, const string& interface, const string& vif,
+	OlsrTypes::FaceID id)
+: _olsr(olsr),
+    _fm(fm),
+    _nh(nh),
+    _md(md),
+    _id(id),
+    _enabled(false),
+    _interface(interface),
+    _vif(vif),
+    _mtu(0),			    // XXX obtained later
+    _local_addr(IPv4::ZERO()),	    // XXX obtained later
+    _local_port(OlsrTypes::DEFAULT_OLSR_PORT),
+    _all_nodes_addr(IPv4::ALL_ONES()),
+    _all_nodes_port(OlsrTypes::DEFAULT_OLSR_PORT),
+    _cost(OlsrTypes::DEFAULT_STATIC_FACE_COST),
+    _next_pkt_seqno(1)
 {
 }
 
-void
+    void
 Face::set_enabled(bool value)
 {
     debug_msg("enable %s\n", bool_c_str(value));
@@ -71,25 +71,27 @@ Face::set_enabled(bool value)
 
     XLOG_ASSERT(0 != _nh);
 
-    if (_enabled == false) {
+    if (_enabled == false) 
+    {
 	_nh->delete_face(id());
-    } else {
+    } else 
+    {
 	_nh->add_face(id());
     }
 }
 
-bool
+    bool
 Face::transmit(uint8_t* data, const uint32_t& len)
 {
     debug_msg("tx data %p len %u\n", data, len);
 
     return _fm.transmit(_interface, _vif,
-			_all_nodes_addr, _all_nodes_port,
-			_local_addr, _local_port,
-			data, len);
+	    _all_nodes_addr, _all_nodes_port,
+	    _local_addr, _local_port,
+	    data, len);
 }
 
-void
+    void
 Face::originate_hello()
 {
     Packet* pkt = new Packet(_md, id());
@@ -116,9 +118,10 @@ Face::originate_hello()
     vector<uint8_t> buf;
 
     bool result = pkt->encode(buf);
-    if (result == false) {
+    if (result == false) 
+    {
 	XLOG_WARNING("Outgoing packet on %s/%s truncated by MTU.",
-		     interface().c_str(), vif().c_str());
+		interface().c_str(), vif().c_str());
     }
 
     pkt->set_seqno(get_pkt_seqno());

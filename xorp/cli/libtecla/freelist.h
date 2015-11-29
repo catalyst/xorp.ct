@@ -47,7 +47,7 @@ typedef struct FreeList FreeList;
  * the freelist.
  */
 FreeList *_new_FreeList(const char *caller, size_t node_size,
-			unsigned blocking_factor);
+		unsigned blocking_factor);
 
 /*
  * If it is known that none of the nodes currently allocated from

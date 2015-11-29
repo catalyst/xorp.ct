@@ -26,26 +26,26 @@
 #include "finder_client.hh"
 
 FinderClientXrlTarget::FinderClientXrlTarget(
-			 FinderClientXrlCommandInterface* client,
-			 XrlCmdMap* cmds)
-    : XrlFinderclientTargetBase(cmds), _client(client)
+	FinderClientXrlCommandInterface* client,
+	XrlCmdMap* cmds)
+: XrlFinderclientTargetBase(cmds), _client(client)
 {}
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::common_0_1_get_target_name(string& n)
 {
     n = get_name();
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::common_0_1_get_version(string& v)
 {
     v = version();
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::common_0_1_get_status(uint32_t& status, string& r)
 {
     //Finder client is always ready if it can receive requests.
@@ -54,7 +54,7 @@ FinderClientXrlTarget::common_0_1_get_status(uint32_t& status, string& r)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::common_0_1_shutdown()
 {
     //This isn't the right way to shutdown a process. The common
@@ -63,34 +63,34 @@ FinderClientXrlTarget::common_0_1_shutdown()
     return XrlCmdError::COMMAND_FAILED();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::finder_client_0_2_hello()
 {
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::finder_client_0_2_remove_xrl_from_cache(const string& x)
 {
     _client->uncache_xrl(x);
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::finder_client_0_2_remove_xrls_for_target_from_cache(
-							const string& target
-							)
+	const string& target
+	)
 {
     _client->uncache_xrls_from_target(target);
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 FinderClientXrlTarget::finder_client_0_2_dispatch_tunneled_xrl(
-						const string& xrl,
-						uint32_t&     xrl_errno,
-						string&	      xrl_errtxt
-						)
+	const string& xrl,
+	uint32_t&     xrl_errno,
+	string&	      xrl_errtxt
+	)
 {
     XrlCmdError e = _client->dispatch_tunneled_xrl(xrl);
     xrl_errno  = e.error_code();

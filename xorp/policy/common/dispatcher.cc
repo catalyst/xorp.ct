@@ -48,7 +48,8 @@ unsigned int Dispatcher::makeKey(const Oper& op, unsigned argc, const Element** 
     unsigned int key = op.hash();
     XLOG_ASSERT(key);
 
-    for (unsigned i = 0; i < argc; i++) {
+    for (unsigned i = 0; i < argc; i++) 
+    {
 	const Element* arg = argv[i];
 	unsigned int eh = arg->hash();
 
@@ -70,19 +71,22 @@ Dispatcher::Value Dispatcher::lookup(const Oper& op, unsigned argc, const Elemen
 }
 
 /* NOTE:  add() is called before logging framework is online. */
-void Dispatcher::logAdd(const Oper& op, unsigned int k, const Element* arg1, const Element* arg2) const {
-// Enable this if debugging is needed.
+void Dispatcher::logAdd(const Oper& op, unsigned int k, const Element* arg1, const Element* arg2) const 
+{
+    // Enable this if debugging is needed.
     UNUSED(op);
     UNUSED(k);
     UNUSED(arg1);
     UNUSED(arg2);
 }
 
-void Dispatcher::logRun(const Oper& op, unsigned argc, const Element** argv, int key, const char* dbg) const {
+void Dispatcher::logRun(const Oper& op, unsigned argc, const Element** argv, int key, const char* dbg) const 
+{
     /* We are about to crash, make sure this goes out immediately. */
     printf("operation: %s  key: %d  argc: %d  dbg: %s\n",
-	   op.str().c_str(), key, argc, dbg);
-    for (unsigned int i = 0; i<argc; i++) {
+	    op.str().c_str(), key, argc, dbg);
+    for (unsigned int i = 0; i<argc; i++) 
+    {
 	const Element* arg = argv[i];
 	printf("argv[%d]: %s\n", i, arg->dbgstr().c_str());
     }
@@ -98,8 +102,9 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
     XLOG_ASSERT(key);
 
     // check for null arguments and special case them: return null
-    for (unsigned i = 0; i < argc; i++) {
-    
+    for (unsigned i = 0; i < argc; i++) 
+    {
+
 	const Element* arg = argv[i];
 	unsigned int h = arg->hash();
 
@@ -114,13 +119,14 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
     }
 
     // check for constructor
-    if (argc == 2 && typeid(op) == typeid(OpCtr)) {
+    if (argc == 2 && typeid(op) == typeid(OpCtr)) 
+    {
 	string arg1type = argv[1]->type();
 
 	if (arg1type != ElemStr::id)
 	    xorp_throw(OpNotFound,
-		       "First argument of ctr must be txt type, but is: " 
-		       + arg1type);
+		    "First argument of ctr must be txt type, but is: " 
+		    + arg1type);
 
 	const ElemStr& es = dynamic_cast<const ElemStr&>(*argv[1]);
 
@@ -133,9 +139,11 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
     Value funct = _map[key];
 
     // expand args and execute function
-    switch (argc) {
+    switch (argc) 
+    {
 	case 1:
-	    if (!funct.un) {
+	    if (!funct.un) 
+	    {
 		logRun(op, argc, argv, key, "funct.un is NULL");
 		XLOG_ASSERT(funct.un);
 	    }
@@ -143,9 +151,10 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	    //XLOG_WARNING("running unary operation: %s  key: %d arg: %s result: %s\n",
 	    //	 op.str().c_str(), key, argv[0]->dbgstr().c_str(), rv->dbgstr().c_str());
 	    return rv;
-	
+
 	case 2:
-	    if (!funct.bin) {
+	    if (!funct.bin) 
+	    {
 		logRun(op, argc, argv, key, "funct.bin is NULL");
 		XLOG_ASSERT(funct.bin);
 	    }
@@ -154,11 +163,11 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	    //	 op.str().c_str(), key, argv[1]->dbgstr().c_str(), argv[0]->dbgstr().c_str(),
 	    //	 rv->dbgstr().c_str());
 	    return rv;
-	// the infrastructure is ready however.
+	    // the infrastructure is ready however.
 	default:
 	    xorp_throw(OpNotFound, "Operations of arity: " +
-		       policy_utils::to_str(argc) + 
-		       " not supported");
+		    policy_utils::to_str(argc) + 
+		    " not supported");
     }
     // unreach
 }
@@ -177,8 +186,8 @@ Dispatcher::run(const UnOper& op, const Element& arg) const
 
 Element* 
 Dispatcher::run(const BinOper& op, 
-		const Element& left, 
-		const Element& right) const
+	const Element& left, 
+	const Element& right) const
 {
     static const Element* argv[2];
 

@@ -87,140 +87,148 @@ template<class A>
 class AggregationTable;
 
 template<class A>
-class ComponentRoute {
-public:
-    ComponentRoute(const SubnetRoute<A>* route,
-		   const PeerHandler *origin,
-		   uint32_t genid,
-		   bool from_previous_peering) : _routeref(route) {
-	_origin_peer = origin;
-	_genid = genid;
-	_from_previous_peering = from_previous_peering;
-    }
-    const SubnetRoute<A>* route() const { return _routeref.route(); }
-    const PeerHandler* origin_peer() const { return _origin_peer; }
-    uint32_t genid() const { return _genid; }
-    bool from_previous_peering() const { return _from_previous_peering; }
-private:
-    SubnetRouteConstRef<A> _routeref;
-    const PeerHandler *_origin_peer;
-    uint32_t _genid;
-    bool _from_previous_peering;
+class ComponentRoute 
+{
+	public:
+		ComponentRoute(const SubnetRoute<A>* route,
+				const PeerHandler *origin,
+				uint32_t genid,
+				bool from_previous_peering) : _routeref(route) 
+	{
+		_origin_peer = origin;
+		_genid = genid;
+		_from_previous_peering = from_previous_peering;
+	}
+		const SubnetRoute<A>* route() const { return _routeref.route(); }
+		const PeerHandler* origin_peer() const { return _origin_peer; }
+		uint32_t genid() const { return _genid; }
+		bool from_previous_peering() const { return _from_previous_peering; }
+	private:
+		SubnetRouteConstRef<A> _routeref;
+		const PeerHandler *_origin_peer;
+		uint32_t _genid;
+		bool _from_previous_peering;
 };
 
 
 template<class A>
-class AggregateRoute {
-public:
-    AggregateRoute(IPNet<A> net,
-		   bool brief_mode,
-		   IPv4 bgp_id,
-		   AsNum asnum)
-        : _net(net), _brief_mode(brief_mode),
-	  _was_announced(0), _is_suppressed(0) 
-    {
-	OriginAttribute origin_att(IGP);
-	FPAListRef fpa_list = new FastPathAttributeList<A>(A::ZERO(), 
-							   ASPath(), 
-							   origin_att);
-	_pa_list = new PathAttributeList<A>(fpa_list);
-	
-	_aggregator_attribute = new AggregatorAttribute(bgp_id, asnum);
-    }
+class AggregateRoute 
+{
+	public:
+		AggregateRoute(IPNet<A> net,
+				bool brief_mode,
+				IPv4 bgp_id,
+				AsNum asnum)
+			: _net(net), _brief_mode(brief_mode),
+			_was_announced(0), _is_suppressed(0) 
+	{
+		OriginAttribute origin_att(IGP);
+		FPAListRef fpa_list = new FastPathAttributeList<A>(A::ZERO(), 
+				ASPath(), 
+				origin_att);
+		_pa_list = new PathAttributeList<A>(fpa_list);
 
-    ~AggregateRoute() 
-    {
-	if (_components_table.begin() != _components_table.end())
-	    XLOG_WARNING("ComponentsTable trie was not empty on deletion\n");
-	delete _aggregator_attribute;
-    }
-    PAListRef<A> pa_list() const        { return _pa_list; }
-    const IPNet<A> net() const		{ return _net; }
-    bool was_announced() const		{ return _was_announced; }
-    bool is_suppressed() const		{ return _is_suppressed; }
-    bool brief_mode() const		{ return _brief_mode; }
-    void was_announced(bool value)	{ _was_announced = value; }
-    void is_suppressed(bool value)	{ _is_suppressed = value; }
-    void brief_mode(bool value)		{ _brief_mode = value; }
-    void reevaluate(AggregationTable<A> *parent);
-    RefTrie<A, const ComponentRoute<A> > *components_table() {
-	return &_components_table;
-    }
+		_aggregator_attribute = new AggregatorAttribute(bgp_id, asnum);
+	}
 
-private:
-    const IPNet<A> _net;
-    bool _brief_mode;
-    AggregatorAttribute *_aggregator_attribute;
+		~AggregateRoute() 
+		{
+			if (_components_table.begin() != _components_table.end())
+				XLOG_WARNING("ComponentsTable trie was not empty on deletion\n");
+			delete _aggregator_attribute;
+		}
+		PAListRef<A> pa_list() const        { return _pa_list; }
+		const IPNet<A> net() const		{ return _net; }
+		bool was_announced() const		{ return _was_announced; }
+		bool is_suppressed() const		{ return _is_suppressed; }
+		bool brief_mode() const		{ return _brief_mode; }
+		void was_announced(bool value)	{ _was_announced = value; }
+		void is_suppressed(bool value)	{ _is_suppressed = value; }
+		void brief_mode(bool value)		{ _brief_mode = value; }
+		void reevaluate(AggregationTable<A> *parent);
+		RefTrie<A, const ComponentRoute<A> > *components_table() 
+		{
+			return &_components_table;
+		}
 
-    RefTrie<A, const ComponentRoute<A> > _components_table;
-    PAListRef<A> _pa_list;
-    bool _was_announced;
-    bool _is_suppressed;
+	private:
+		const IPNet<A> _net;
+		bool _brief_mode;
+		AggregatorAttribute *_aggregator_attribute;
+
+		RefTrie<A, const ComponentRoute<A> > _components_table;
+		PAListRef<A> _pa_list;
+		bool _was_announced;
+		bool _is_suppressed;
 };
 
 
 template<class A>
-class AggregationTable : public BGPRouteTable<A>  {
-public:
-    AggregationTable(string tablename,
-		     BGPPlumbing& master,
-		     BGPRouteTable<A> *parent);
-    ~AggregationTable();
-    int add_route(InternalMessage<A> &rtmsg,
-                  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-                      InternalMessage<A> &new_rtmsg,
-                      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg,
-                     BGPRouteTable<A> *caller);
-    int push(BGPRouteTable<A> *caller);
+class AggregationTable : public BGPRouteTable<A>  
+{
+	public:
+		AggregationTable(string tablename,
+				BGPPlumbing& master,
+				BGPRouteTable<A> *parent);
+		~AggregationTable();
+		int add_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller);
+		int delete_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int push(BGPRouteTable<A> *caller);
 
-    bool dump_next_route(DumpIterator<A>& dump_iter);
-    int route_dump(InternalMessage<A> &rtmsg,
-		   BGPRouteTable<A> *caller,
-		   const PeerHandler *dump_peer);
+		bool dump_next_route(DumpIterator<A>& dump_iter);
+		int route_dump(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller,
+				const PeerHandler *dump_peer);
 
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-                                       uint32_t& genid,
-				       FPAListRef& pa_list) const;
-    void route_used(const SubnetRoute<A>* route, bool in_use);
+		const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				uint32_t& genid,
+				FPAListRef& pa_list) const;
+		void route_used(const SubnetRoute<A>* route, bool in_use);
 
-    RouteTableType type() const {return AGGREGATION_TABLE;}
-    string str() const;
+		RouteTableType type() const {return AGGREGATION_TABLE;}
+		string str() const;
 
-    /* mechanisms to implement flow control in the output plumbing */
-    bool get_next_message(BGPRouteTable<A> *next_table);
+		/* mechanisms to implement flow control in the output plumbing */
+		bool get_next_message(BGPRouteTable<A> *next_table);
 
-    int route_count() const {
-        return _aggregates_table.route_count(); // XXX is this OK?
-    }
+		int route_count() const 
+		{
+			return _aggregates_table.route_count(); // XXX is this OK?
+		}
 
-    void peering_went_down(const PeerHandler *peer, uint32_t genid,
-                           BGPRouteTable<A> *caller);
-    void peering_down_complete(const PeerHandler *peer, uint32_t genid,
-                               BGPRouteTable<A> *caller);
-    void peering_came_up(const PeerHandler *peer, uint32_t genid,
-                         BGPRouteTable<A> *caller);
+		void peering_went_down(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		void peering_came_up(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
 
-private:
-    friend class AggregateRoute<A>;
+	private:
+		friend class AggregateRoute<A>;
 
-    RefTrie<A, const AggregateRoute<A> > _aggregates_table;
-    BGPPlumbing& _master_plumbing;
+		RefTrie<A, const AggregateRoute<A> > _aggregates_table;
+		BGPPlumbing& _master_plumbing;
 };
 
 
-class AggregationHandler : public PeerHandler {
-public:
-    AggregationHandler();
+class AggregationHandler : public PeerHandler 
+{
+	public:
+		AggregationHandler();
 
-    virtual PeerType get_peer_type() const {
-	return PEER_TYPE_INTERNAL;
-    }
+		virtual PeerType get_peer_type() const 
+		{
+			return PEER_TYPE_INTERNAL;
+		}
 
-    uint32_t get_unique_id() const	{ return _fake_unique_id; }
-    virtual bool originate_route_handler() const { return true; }
-    const uint32_t _fake_unique_id;
+		uint32_t get_unique_id() const	{ return _fake_unique_id; }
+		virtual bool originate_route_handler() const { return true; }
+		const uint32_t _fake_unique_id;
 };
 
 

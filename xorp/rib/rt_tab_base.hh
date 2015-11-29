@@ -29,7 +29,8 @@
 #include "protocol.hh"
 #include "libxorp/trie.hh"
 
-enum TableType {
+enum TableType 
+{
     ORIGIN_TABLE		= 1 << 0,
     MERGED_TABLE		= 1 << 1,
     EXTINT_TABLE		= 1 << 2,
@@ -67,44 +68,49 @@ enum TableType {
  * valid for addresses in the range 1.0.0.0 to 1.0.0.255 inclusive.
  */
 template<class A>
-class RouteRange {
-public:
-    RouteRange(const A& req_addr, const IPRouteEntry<A>* route,
-	       const A& top, const A& bottom)
-	: _req_addr(req_addr), _route(route), _top(top), _bottom(bottom) {}
+class RouteRange 
+{
+    public:
+	RouteRange(const A& req_addr, const IPRouteEntry<A>* route,
+		const A& top, const A& bottom)
+	    : _req_addr(req_addr), _route(route), _top(top), _bottom(bottom) {}
 
-    const A& top() const			{ return _top;		}
-    const A& bottom() const			{ return _bottom;	}
-    const IPRouteEntry<A>* route() const	{ return _route;	}
-    const IPNet<A>& net() const			{ return _route->net();	}
+	const A& top() const			{ return _top;		}
+	const A& bottom() const			{ return _bottom;	}
+	const IPRouteEntry<A>* route() const	{ return _route;	}
+	const IPNet<A>& net() const			{ return _route->net();	}
 
-    string str() const	{
-	ostringstream oss;
-	oss << "RouteRange: " << endl;
-	oss << "Top - " << _top.str() << endl;
-	oss << "Bottom - " << _bottom.str() << endl;
-	return oss.str();
-    }
+	string str() const	
+	{
+	    ostringstream oss;
+	    oss << "RouteRange: " << endl;
+	    oss << "Top - " << _top.str() << endl;
+	    oss << "Bottom - " << _bottom.str() << endl;
+	    return oss.str();
+	}
 
-    /**
-     * Merge this entry with another entry.
-     *
-     * Replace route with the entry from rr if it is better, (XXX why ?)
-     * shrink the intervals if the other one is smaller.
-     *
-     * @param his_rr the entry to merge with.
-     */
-    void merge(const RouteRange* his_rr)	{
+	/**
+	 * Merge this entry with another entry.
+	 *
+	 * Replace route with the entry from rr if it is better, (XXX why ?)
+	 * shrink the intervals if the other one is smaller.
+	 *
+	 * @param his_rr the entry to merge with.
+	 */
+	void merge(const RouteRange* his_rr)	
+	{
 	    const IPRouteEntry<A>* rrr = his_rr->route();
 
 	    if (_route == NULL)
 		_route = rrr;
-	    else if (rrr != NULL) {
+	    else if (rrr != NULL) 
+	    {
 		int my_prefix_len = net().prefix_len();
 		int his_prefix_len = his_rr->net().prefix_len();
 		if (his_prefix_len > my_prefix_len) // his route beats mine
 		    _route = rrr;
-		else if (his_prefix_len == my_prefix_len) {
+		else if (his_prefix_len == my_prefix_len) 
+		{
 		    // routes are equivalent, compare distance
 		    if (_route->admin_distance() >
 			    rrr->admin_distance()) // his is better
@@ -117,23 +123,25 @@ public:
 		_top = his_rr->top();
 	    if (_bottom < his_rr->bottom()) // he wins, shrink _bottom
 		_bottom = his_rr->bottom();
-    }
+	}
 
-    // Return the largest subnet contained in the range.
-    IPNet<A> minimal_subnet() const {
-	    for (size_t bits = 0; bits <= A::addr_bitlen(); bits++) {
+	// Return the largest subnet contained in the range.
+	IPNet<A> minimal_subnet() const 
+	{
+	    for (size_t bits = 0; bits <= A::addr_bitlen(); bits++) 
+	    {
 		IPNet<A> net(_req_addr, bits);
 		if (net.masked_addr() >= _bottom && net.top_addr() <= _top)
 		    return net; // we got it.
 	    }
 	    XLOG_UNREACHABLE();
-    }
+	}
 
-private:
-    A	_req_addr;
-    const IPRouteEntry<A>* _route;
-    A	_top;
-    A	_bottom;
+    private:
+	A	_req_addr;
+	const IPRouteEntry<A>* _route;
+	A	_top;
+	A	_bottom;
 };
 
 /**
@@ -160,37 +168,38 @@ private:
  * Note: A = Address Type, e.g., IPv4 or IPv6.
  */
 template<class A>
-class RouteTable {
-public:
-    RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
-    virtual ~RouteTable();
+class RouteTable 
+{
+    public:
+	RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
+	virtual ~RouteTable();
 
-    virtual int add_igp_route(const IPRouteEntry<A>& route) = 0;
-    virtual int add_egp_route(const IPRouteEntry<A>& route) = 0;
+	virtual int add_igp_route(const IPRouteEntry<A>& route) = 0;
+	virtual int add_egp_route(const IPRouteEntry<A>& route) = 0;
 
-    virtual int delete_igp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
-    virtual int delete_egp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
+	virtual int delete_igp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
+	virtual int delete_egp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
 
-    virtual void set_next_table(RouteTable* next_table);
+	virtual void set_next_table(RouteTable* next_table);
 
-    virtual TableType type() const = 0;
-    virtual string str() const = 0;
-    virtual void flush() {}
+	virtual TableType type() const = 0;
+	virtual string str() const = 0;
+	virtual void flush() {}
 
-    const string& tablename() const		{ return _tablename; }
-    RouteTable* next_table()			{ return _next_table; }
-    const RouteTable* next_table() const	{ return _next_table; }
+	const string& tablename() const		{ return _tablename; }
+	RouteTable* next_table()			{ return _next_table; }
+	const RouteTable* next_table() const	{ return _next_table; }
 
-    // this call should be received and dealt with by the PolicyRedistTable.
-    virtual void replace_policytags(const IPRouteEntry<A>& route,
-				    const PolicyTags& prevtags);
+	// this call should be received and dealt with by the PolicyRedistTable.
+	virtual void replace_policytags(const IPRouteEntry<A>& route,
+		const PolicyTags& prevtags);
 
-protected:
-    void set_tablename(const string& s) { _tablename = s; }
+    protected:
+	void set_tablename(const string& s) { _tablename = s; }
 
-private:
-    string	_tablename;
-    RouteTable*	_next_table;
+    private:
+	string	_tablename;
+	RouteTable*	_next_table;
 };
 
 #endif // __RIB_RT_TAB_BASE_HH__

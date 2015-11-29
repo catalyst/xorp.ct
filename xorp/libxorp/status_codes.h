@@ -99,33 +99,34 @@
  *
  * PROC_FAILED      Process has suffered a fatal error, and is in the
  *                  process of cleaning up the mess.  Normally the process
- *                  will terminate by itself after being in this state.
- *
- * PROC_DONE        The process has completed operation, but is still
- *                  capable of responding to XRLs.
- *
- * Notes
- * -----
- *
- * A process may spend zero time in PROC_STARTUP, PROC_NOT_READY,
- * PROC_READY, PROC_SHUTDOWN, PROC_FAILED, or PROC_DONE states.  For
- * example, a process may effectively go directly from PROC_NULL to
- * PROC_READY state on startup if there are no dependencies that need
- * to be taken into account.  A process may go from PROC_STARTUP or
- * PROC_NOT_READY states to PROC_SHUTDOWN or PROC_FAILED states
- * without spending any time in PROC_READY state if required.
- *
- * On reconfiguration, a process does not need to go to NOT_READY
- * state unless it needs to delay the reconfiguration of processes
- * that depend on the completion of this reconfiguration.
- *
- * After shutdown or a failure, the process may remain indefinitely in
- * PROC_DONE state (e.g., if the process itself shoudn't really exit
- * but rather await further instructions).
- * </pre>
- */
+*                  will terminate by itself after being in this state.
+*
+* PROC_DONE        The process has completed operation, but is still
+*                  capable of responding to XRLs.
+*
+* Notes
+* -----
+*
+* A process may spend zero time in PROC_STARTUP, PROC_NOT_READY,
+    * PROC_READY, PROC_SHUTDOWN, PROC_FAILED, or PROC_DONE states.  For
+    * example, a process may effectively go directly from PROC_NULL to
+    * PROC_READY state on startup if there are no dependencies that need
+    * to be taken into account.  A process may go from PROC_STARTUP or
+    * PROC_NOT_READY states to PROC_SHUTDOWN or PROC_FAILED states
+    * without spending any time in PROC_READY state if required.
+    *
+    * On reconfiguration, a process does not need to go to NOT_READY
+    * state unless it needs to delay the reconfiguration of processes
+    * that depend on the completion of this reconfiguration.
+    *
+    * After shutdown or a failure, the process may remain indefinitely in
+    * PROC_DONE state (e.g., if the process itself shoudn't really exit
+	    * but rather await further instructions).
+    * </pre>
+    */
 
-typedef enum {
+    typedef enum 
+{
     PROC_NULL	   = 0,
     PROC_STARTUP   = 1,
     PROC_NOT_READY = 2,

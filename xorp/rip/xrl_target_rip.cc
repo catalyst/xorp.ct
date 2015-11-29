@@ -35,16 +35,17 @@
 #include "xrl_target_common.hh"
 
 
-static int
+    static int
 decode_time_string( const string& time_string,
-		   TimeVal& timeval)
+	TimeVal& timeval)
 {
     const char* s;
     const char* format = "%Y-%m-%d.%H:%M";
     struct tm tm;
     time_t result;
 
-    if (time_string.empty()) {
+    if (time_string.empty()) 
+    {
 	timeval = TimeVal::ZERO();
 	return (XORP_OK);
     }
@@ -61,7 +62,8 @@ decode_time_string( const string& time_string,
     memcpy(&tm, local_tm, sizeof(tm));
 
     s = xorp_strptime(time_string.c_str(), format, &tm);
-    if ((s == NULL) || (*s != '\0')) {
+    if ((s == NULL) || (*s != '\0')) 
+    {
 	return (XORP_ERROR);
     }
 
@@ -74,11 +76,11 @@ decode_time_string( const string& time_string,
 }
 
 XrlRipTarget::XrlRipTarget( XrlRouter&			xr,
-			   XrlProcessSpy&		xps,
-			   XrlPortManager<IPv4>& 	xpm,
-			   XrlRedistManager<IPv4>&	xrm,
-			   System<IPv4>&		rip_system)
-    : XrlRipTargetBase(&xr) 
+	XrlProcessSpy&		xps,
+	XrlPortManager<IPv4>& 	xpm,
+	XrlRedistManager<IPv4>&	xrm,
+	System<IPv4>&		rip_system)
+: XrlRipTargetBase(&xr) 
 {
     _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, rip_system);
 }
@@ -88,353 +90,353 @@ XrlRipTarget::~XrlRipTarget()
     delete _ct;
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::common_0_1_get_target_name(string& n)
 {
     n = get_name();
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::common_0_1_get_version(string& v)
 {
     v = string(version());
     return XrlCmdError::OKAY();
 }
 
-void
+    void
 XrlRipTarget::set_status(ProcessStatus status, const string& note)
 {
     _ct->set_status(status, note);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::common_0_1_get_status(uint32_t& status,
-				    string&   reason)
+	string&   reason)
 {
     return _ct->common_0_1_get_status(status, reason);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::common_0_1_shutdown()
 {
     return _ct->common_0_1_shutdown();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::common_0_1_startup()
 {
     return _ct->common_0_1_startup();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::finder_event_observer_0_1_xrl_target_birth(const string& cname,
-							 const string& iname)
+	const string& iname)
 {
     return _ct->finder_event_observer_0_1_xrl_target_birth(cname, iname);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::finder_event_observer_0_1_xrl_target_death(const string& cname,
-							 const string& iname)
+	const string& iname)
 {
     return _ct->finder_event_observer_0_1_xrl_target_death(cname, iname);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_add_rip_address(const string& ifn,
-				      const string& vifn,
-				      const IPv4&   addr)
+	const string& vifn,
+	const IPv4&   addr)
 {
     return _ct->ripx_0_1_add_rip_address(ifn, vifn, addr);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_remove_rip_address(const string& ifn,
-					 const string& vifn,
-					 const IPv4&   addr)
+	const string& vifn,
+	const IPv4&   addr)
 {
     return _ct->ripx_0_1_remove_rip_address(ifn, vifn, addr);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_rip_address_enabled(const string& ifn,
-					      const string& vifn,
-					      const IPv4&   a,
-					      const bool&   en)
+	const string& vifn,
+	const IPv4&   a,
+	const bool&   en)
 {
     return _ct->ripx_0_1_set_rip_address_enabled(ifn, vifn, a, en);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_rip_address_enabled(const string& ifn,
-					  const string& vifn,
-					  const IPv4&   a,
-					  bool&		en)
+	const string& vifn,
+	const IPv4&   a,
+	bool&		en)
 {
     return _ct->ripx_0_1_rip_address_enabled(ifn, vifn, a, en);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_cost(const string&	ifn,
-			       const string&	vifn,
-			       const IPv4&	a,
-			       const uint32_t&	cost)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t&	cost)
 {
     return _ct->ripx_0_1_set_cost(ifn, vifn, a, cost);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_cost(const string&	ifn,
-			   const string&	vifn,
-			   const IPv4&		a,
-			   uint32_t&		cost)
+	const string&	vifn,
+	const IPv4&		a,
+	uint32_t&		cost)
 {
     return _ct->ripx_0_1_cost(ifn, vifn, a, cost);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_horizon(const string&	ifn,
-				  const string&	vifn,
-				  const IPv4&	a,
-				  const string&	horizon)
+	const string&	vifn,
+	const IPv4&	a,
+	const string&	horizon)
 {
     return _ct->ripx_0_1_set_horizon(ifn, vifn, a, horizon);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_horizon(const string&	ifn,
-			      const string&	vifn,
-			      const IPv4&	a,
-			      string&		horizon)
+	const string&	vifn,
+	const IPv4&	a,
+	string&		horizon)
 {
     return _ct->ripx_0_1_horizon(ifn, vifn, a, horizon);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_passive(const string&	ifn,
-				  const string&	vifn,
-				  const IPv4&	a,
-				  const bool&	passive)
+	const string&	vifn,
+	const IPv4&	a,
+	const bool&	passive)
 {
     return _ct->ripx_0_1_set_passive(ifn, vifn, a, passive);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_passive(const string&	ifn,
-			      const string&	vifn,
-			      const IPv4&	a,
-			      bool&		passive)
+	const string&	vifn,
+	const IPv4&	a,
+	bool&		passive)
 {
     return _ct->ripx_0_1_passive(ifn, vifn, a, passive);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_accept_non_rip_requests(const string&	ifn,
-						  const string&	vifn,
-						  const IPv4&	addr,
-						  const bool&	accept)
+	const string&	vifn,
+	const IPv4&	addr,
+	const bool&	accept)
 {
     return _ct->ripx_0_1_set_accept_non_rip_requests(ifn, vifn, addr, accept);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_accept_non_rip_requests(const string&	ifn,
-					      const string&	vifn,
-					      const IPv4&	addr,
-					      bool&		accept)
+	const string&	vifn,
+	const IPv4&	addr,
+	bool&		accept)
 {
     return _ct->ripx_0_1_accept_non_rip_requests(ifn, vifn, addr, accept);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_accept_default_route(const string&	ifn,
-						  const string&	vifn,
-						  const IPv4&	addr,
-						  const bool&	accept)
+	const string&	vifn,
+	const IPv4&	addr,
+	const bool&	accept)
 {
     return _ct->ripx_0_1_set_accept_default_route(ifn, vifn, addr, accept);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_accept_default_route(const string&	ifn,
-					   const string&	vifn,
-					   const IPv4&		addr,
-					   bool&		accept)
+	const string&	vifn,
+	const IPv4&		addr,
+	bool&		accept)
 {
     return _ct->ripx_0_1_accept_default_route(ifn, vifn, addr, accept);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_advertise_default_route(const string&	ifn,
-						  const string&	vifn,
-						  const IPv4&	addr,
-						  const bool&	adv)
+	const string&	vifn,
+	const IPv4&	addr,
+	const bool&	adv)
 {
     return _ct->ripx_0_1_set_advertise_default_route(ifn, vifn, addr, adv);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_advertise_default_route(const string&	ifn,
-					      const string&	vifn,
-					      const IPv4&	addr,
-					      bool&		adv)
+	const string&	vifn,
+	const IPv4&	addr,
+	bool&		adv)
 {
     return _ct->ripx_0_1_advertise_default_route(ifn, vifn, addr, adv);
 }
 
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_route_timeout(const string&	ifn,
-					const string&	vifn,
-					const IPv4&	a,
-					const uint32_t&	t)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_route_timeout(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_route_timeout(const string&	ifn,
-				    const string&	vifn,
-				    const IPv4&		a,
-				    uint32_t&		t)
+	const string&	vifn,
+	const IPv4&		a,
+	uint32_t&		t)
 {
     return _ct->ripx_0_1_route_timeout(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_deletion_delay(const string&		ifn,
-					 const string&		vifn,
-					 const IPv4&		a,
-					 const uint32_t&	t)
+	const string&		vifn,
+	const IPv4&		a,
+	const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_deletion_delay(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_deletion_delay(const string&	ifn,
-				     const string&	vifn,
-				     const IPv4&	a,
-				     uint32_t&		t)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&		t)
 {
     return _ct->ripx_0_1_deletion_delay(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_request_interval(const string&	ifn,
-					   const string&	vifn,
-					   const IPv4&		a,
-					   const uint32_t&	t)
+	const string&	vifn,
+	const IPv4&		a,
+	const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_request_interval(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_request_interval(const string&	ifn,
-				       const string&	vifn,
-				       const IPv4&	a,
-				       uint32_t&	t)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&	t)
 {
     return _ct->ripx_0_1_request_interval(ifn, vifn, a, t);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_update_interval(const string&	ifn,
-					  const string&	vifn,
-					  const IPv4&	a,
-					  const uint32_t& t_secs)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t& t_secs)
 {
     return _ct->ripx_0_1_set_update_interval(ifn, vifn, a, t_secs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_update_interval(const string&	ifn,
-				      const string&	vifn,
-				      const IPv4&	a,
-				      uint32_t&		t_secs)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&		t_secs)
 {
     return _ct->ripx_0_1_update_interval(ifn, vifn, a, t_secs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_update_jitter(const string&	ifn,
-					const string&	vifn,
-					const IPv4&	a,
-					const uint32_t& t_jitter)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t& t_jitter)
 {
     return _ct->ripx_0_1_set_update_jitter(ifn, vifn, a, t_jitter);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_update_jitter(const string&	ifn,
-				    const string&	vifn,
-				    const IPv4&		a,
-				    uint32_t&		t_jitter)
+	const string&	vifn,
+	const IPv4&		a,
+	uint32_t&		t_jitter)
 {
     return _ct->ripx_0_1_update_jitter(ifn, vifn, a, t_jitter);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_triggered_update_delay(const string&	ifn,
-						 const string&	vifn,
-						 const IPv4&	a,
-						 const uint32_t& t_secs)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t& t_secs)
 {
     return _ct->ripx_0_1_set_triggered_update_delay(ifn, vifn, a, t_secs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_triggered_update_delay(const string&	ifn,
-					     const string&	vifn,
-					     const IPv4&	a,
-					     uint32_t&		t_secs)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&		t_secs)
 {
     return _ct->ripx_0_1_triggered_update_delay(ifn, vifn, a, t_secs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_triggered_update_jitter(const string&	ifn,
-						  const string&	vifn,
-						  const IPv4&	a,
-						  const uint32_t& t_jitter)
+	const string&	vifn,
+	const IPv4&	a,
+	const uint32_t& t_jitter)
 {
     return _ct->ripx_0_1_set_triggered_update_jitter(ifn, vifn, a, t_jitter);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_triggered_update_jitter(const string&	ifn,
-					      const string&	vifn,
-					      const IPv4&	a,
-					      uint32_t&		t_jitter)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&		t_jitter)
 {
     return _ct->ripx_0_1_triggered_update_jitter(ifn, vifn, a, t_jitter);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_set_interpacket_delay(const string&	ifn,
-					    const string&	vifn,
-					    const IPv4&		a,
-					    const uint32_t&	t_msecs)
+	const string&	vifn,
+	const IPv4&		a,
+	const uint32_t&	t_msecs)
 {
     return _ct->ripx_0_1_set_interpacket_delay(ifn, vifn, a, t_msecs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_interpacket_delay(const string&	ifn,
-					const string&	vifn,
-					const IPv4&	a,
-					uint32_t&	t_msecs)
+	const string&	vifn,
+	const IPv4&	a,
+	uint32_t&	t_msecs)
 {
     return _ct->ripx_0_1_interpacket_delay(ifn, vifn, a, t_msecs);
 }
 
 XrlCmdError
 XrlRipTarget::rip_0_1_set_simple_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		addr,
-    const string&	password)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		addr,
+	const string&	password)
 {
     AuthHandlerBase* current_ah = NULL;
     PlaintextAuthHandler* plaintext_ah = NULL;
@@ -451,9 +453,11 @@ XrlRipTarget::rip_0_1_set_simple_authentication_key(
     current_ah = pss.auth_handler();
     XLOG_ASSERT(current_ah != NULL);
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(current_ah);
-    if (plaintext_ah != NULL) {
+    if (plaintext_ah != NULL) 
+    {
 	plaintext_ah->set_key(password);
-    } else {
+    } else 
+    {
 	plaintext_ah = new PlaintextAuthHandler();
 	plaintext_ah->set_key(password);
 	pss.set_auth_handler(plaintext_ah);
@@ -465,10 +469,10 @@ XrlRipTarget::rip_0_1_set_simple_authentication_key(
 
 XrlCmdError
 XrlRipTarget::rip_0_1_delete_simple_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		addr)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		addr)
 {
     AuthHandlerBase* current_ah = NULL;
     PlaintextAuthHandler* plaintext_ah = NULL;
@@ -486,7 +490,8 @@ XrlRipTarget::rip_0_1_delete_simple_authentication_key(
     current_ah = pss.auth_handler();
     XLOG_ASSERT(current_ah != NULL);
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(current_ah);
-    if (plaintext_ah != NULL) {
+    if (plaintext_ah != NULL) 
+    {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -510,14 +515,14 @@ XrlRipTarget::rip_0_1_delete_simple_authentication_key(
 
 XrlCmdError
 XrlRipTarget::rip_0_1_set_md5_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		addr,
-    const uint32_t&	key_id,
-    const string&	password,
-    const string&	start_time,
-    const string&	end_time)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		addr,
+	const uint32_t&	key_id,
+	const string&	password,
+	const string&	start_time,
+	const string&	end_time)
 {
     TimeVal start_timeval = TimeVal::ZERO();
     TimeVal end_timeval = TimeVal::MAXIMUM();
@@ -534,23 +539,28 @@ XrlRipTarget::rip_0_1_set_md5_authentication_key(
     //
     // Check the key ID
     //
-    if (key_id > 255) {
+    if (key_id > 255) 
+    {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
-			     XORP_UINT_CAST(key_id));
+		XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     //
     // Decode the start and end time
     //
-    if (! start_time.empty()) {
-	if (decode_time_string( start_time, start_timeval) != XORP_OK) {
+    if (! start_time.empty()) 
+    {
+	if (decode_time_string( start_time, start_timeval) != XORP_OK) 
+	{
 	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
-    if (! end_time.empty()) {
-	if (decode_time_string( end_time, end_timeval) != XORP_OK) {
+    if (! end_time.empty()) 
+    {
+	if (decode_time_string( end_time, end_timeval) != XORP_OK) 
+	{
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
@@ -562,18 +572,22 @@ XrlRipTarget::rip_0_1_set_md5_authentication_key(
     current_ah = pss.auth_handler();
     XLOG_ASSERT(current_ah != NULL);
     md5_ah = dynamic_cast<MD5AuthHandler*>(current_ah);
-    if (md5_ah != NULL) {
+    if (md5_ah != NULL) 
+    {
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			    error_msg)
-	    != true) {
+		    error_msg)
+		!= true) 
+	{
 	    error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
-    } else {
+    } else 
+    {
 	md5_ah = new MD5AuthHandler;
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			    error_msg)
-	    != true) {
+		    error_msg)
+		!= true) 
+	{
 	    delete md5_ah;
 	    error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -587,11 +601,11 @@ XrlRipTarget::rip_0_1_set_md5_authentication_key(
 
 XrlCmdError
 XrlRipTarget::rip_0_1_delete_md5_authentication_key(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv4&		addr,
-    const uint32_t&	key_id)
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&		addr,
+	const uint32_t&	key_id)
 {
     AuthHandlerBase* current_ah = NULL;
     MD5AuthHandler* md5_ah = NULL;
@@ -609,7 +623,8 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
     current_ah = pss.auth_handler();
     XLOG_ASSERT(current_ah != NULL);
     md5_ah = dynamic_cast<MD5AuthHandler*>(current_ah);
-    if (md5_ah != NULL) {
+    if (md5_ah != NULL) 
+    {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -626,18 +641,20 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
     //
     // Check the key ID
     //
-    if (key_id > 255) {
+    if (key_id > 255) 
+    {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
-			     XORP_UINT_CAST(key_id));
+		XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     //
     // Remove the key
     //
-    if (md5_ah->remove_key(key_id, error_msg) != true) {
+    if (md5_ah->remove_key(key_id, error_msg) != true) 
+    {
 	error_msg = c_format("Invalid MD5 key ID %u: %s",
-			     XORP_UINT_CAST(key_id), error_msg.c_str());
+		XORP_UINT_CAST(key_id), error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -645,7 +662,8 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
     // If the last key, then install an empty handler and delete the MD5
     // authentication handler.
     //
-    if (md5_ah->empty()) {
+    if (md5_ah->empty()) 
+    {
 	NullAuthHandler* null_handler = new NullAuthHandler();
 	pss.set_auth_handler(null_handler);
 	delete current_ah;
@@ -654,73 +672,75 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
-					 const string&	vifn,
-					 const IPv4&	a,
-					 string&	status)
+	const string&	vifn,
+	const IPv4&	a,
+	string&	status)
 {
     return _ct->ripx_0_1_rip_address_status(ifn, vifn, a, status);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_get_all_addresses(XrlAtomList&	ifnames,
-					XrlAtomList&	vifnames,
-					XrlAtomList&	addrs)
+	XrlAtomList&	vifnames,
+	XrlAtomList&	addrs)
 {
     return _ct->ripx_0_1_get_all_addresses(ifnames, vifnames, addrs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_get_peers(const string&	ifn,
-				const string&	vifn,
-				const IPv4&	a,
-				XrlAtomList&	peers)
+	const string&	vifn,
+	const IPv4&	a,
+	XrlAtomList&	peers)
 {
     return _ct->ripx_0_1_get_peers(ifn, vifn, a, peers);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_get_all_peers(XrlAtomList&	peers,
-				    XrlAtomList&	ifnames,
-				    XrlAtomList&	vifnames,
-				    XrlAtomList&	addrs)
+	XrlAtomList&	ifnames,
+	XrlAtomList&	vifnames,
+	XrlAtomList&	addrs)
 {
     return _ct->ripx_0_1_get_all_peers(peers, ifnames, vifnames, addrs);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_get_counters(const string&	ifname,
-				   const string&	vifname,
-				   const IPv4&		addr,
-				   XrlAtomList&		descs,
-				   XrlAtomList&		values)
+	const string&	vifname,
+	const IPv4&		addr,
+	XrlAtomList&		descs,
+	XrlAtomList&		values)
 {
     return _ct->ripx_0_1_get_counters(ifname, vifname, addr, descs, values);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_get_peer_counters(const string&	ifn,
-					const string&	vifn,
-					const IPv4&	addr,
-					const IPv4&	peer,
-					XrlAtomList&	descs,
-					XrlAtomList&	vals,
-					uint32_t&	peer_last_active)
+	const string&	vifn,
+	const IPv4&	addr,
+	const IPv4&	peer,
+	XrlAtomList&	descs,
+	XrlAtomList&	vals,
+	uint32_t&	peer_last_active)
 {
     return _ct->ripx_0_1_get_peer_counters(ifn, vifn, addr, peer,
-					   descs, vals, peer_last_active);
+	    descs, vals, peer_last_active);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::rip_0_1_trace(const string& tvar, const bool& enable)
 {
     debug_msg("trace variable %s enable %s\n", tvar.c_str(),
-	      bool_c_str(enable));
+	    bool_c_str(enable));
 
-    if (tvar == "all") {
+    if (tvar == "all") 
+    {
 	_ct->trace(enable);
-    } else {
+    } else 
+    {
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
     }
@@ -729,91 +749,91 @@ XrlRipTarget::rip_0_1_trace(const string& tvar, const bool& enable)
 }
 
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::socket4_user_0_1_recv_event(
-					const string&		sockid,
-					const string&		if_name,
-					const string&		vif_name,
-					const IPv4&		src_host,
-					const uint32_t&		src_port,
-					const vector<uint8_t>&	pdata
-					)
+	const string&		sockid,
+	const string&		if_name,
+	const string&		vif_name,
+	const IPv4&		src_host,
+	const uint32_t&		src_port,
+	const vector<uint8_t>&	pdata
+	)
 {
     return _ct->socketx_user_0_1_recv_event(sockid, if_name, vif_name,
-					    src_host, src_port, pdata);
+	    src_host, src_port, pdata);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::socket4_user_0_1_inbound_connect_event(
-    const string&	sockid,
-    const IPv4&		src_host,
-    const uint32_t&	src_port,
-    const string&	new_sockid,
-    bool&		accept)
+	const string&	sockid,
+	const IPv4&		src_host,
+	const uint32_t&	src_port,
+	const string&	new_sockid,
+	bool&		accept)
 {
     return _ct->socketx_user_0_1_inbound_connect_event(sockid,
-						       src_host,
-						       src_port,
-						       new_sockid,
-						       accept);
+	    src_host,
+	    src_port,
+	    new_sockid,
+	    accept);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::socket4_user_0_1_outgoing_connect_event(
-    const string&	sockid)
+	const string&	sockid)
 {
     return _ct->socketx_user_0_1_outgoing_connect_event(sockid);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::socket4_user_0_1_error_event(const string&	sockid,
-					   const string& 	reason,
-					   const bool&		fatal)
+	const string& 	reason,
+	const bool&		fatal)
 {
     return _ct->socketx_user_0_1_error_event(sockid, reason, fatal);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::socket4_user_0_1_disconnect_event(const string&	sockid)
 {
     return _ct->socketx_user_0_1_disconnect_event(sockid);
 }
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::policy_backend_0_1_configure(const uint32_t& filter,
-					   const string& conf) 
+	const string& conf) 
 {
     return _ct->policy_backend_0_1_configure(filter, conf);
 }					   
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::policy_backend_0_1_reset(const uint32_t& filter) 
 {
     return _ct->policy_backend_0_1_reset(filter);
 }					  
 
-XrlCmdError
+    XrlCmdError
 XrlRipTarget::policy_backend_0_1_push_routes() 
 {
     return _ct->policy_backend_0_1_push_routes();
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlRipTarget::policy_redist4_0_1_add_route4(const IPv4Net&	network,
-					    const bool&		unicast,
-				            const bool&		multicast,
-				            const IPv4&		nexthop,
-				            const uint32_t&	metric,
-    				            const XrlAtomList&  policytags) 
+	const bool&		unicast,
+	const bool&		multicast,
+	const IPv4&		nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&  policytags) 
 {
     return _ct->policy_redistx_0_1_add_routex(network, unicast, multicast,
-					      nexthop, metric, policytags);
+	    nexthop, metric, policytags);
 }
 
-XrlCmdError 
+    XrlCmdError 
 XrlRipTarget::policy_redist4_0_1_delete_route4(const IPv4Net&  network,
-					       const bool&     unicast,
-					       const bool&     multicast)
+	const bool&     unicast,
+	const bool&     multicast)
 {					       
     return _ct->policy_redistx_0_1_delete_routex(network, unicast, multicast);
 }

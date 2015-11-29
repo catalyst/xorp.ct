@@ -24,34 +24,36 @@
 
 
 
-namespace filter {
+namespace filter 
+{
 
 
 
-/**
- * There are three type of filters:
- *
- * IMPORT: deals with import filtering. Incoming routes from other routers and
- * possibly the rib.
- *
- * EXPORT_SOURCEMATCH: a filter which tags routes that need to be
- * redistributed. This filter only modifies policytags.
- *
- * EXPORT: Filters outgoing routes from the routing protocols to other routers
- * and possibly the rib itself.
- */
-enum Filter {
-    IMPORT =		    1,
-    EXPORT_SOURCEMATCH =    2,
-    EXPORT =		    4
-};
+    /**
+     * There are three type of filters:
+     *
+     * IMPORT: deals with import filtering. Incoming routes from other routers and
+     * possibly the rib.
+     *
+     * EXPORT_SOURCEMATCH: a filter which tags routes that need to be
+     * redistributed. This filter only modifies policytags.
+     *
+     * EXPORT: Filters outgoing routes from the routing protocols to other routers
+     * and possibly the rib itself.
+     */
+    enum Filter 
+    {
+	IMPORT =		    1,
+	EXPORT_SOURCEMATCH =    2,
+	EXPORT =		    4
+    };
 
 
-/**
- * @param f filter type to convert to human readable string.
- * @return string representation of filter name.
- */
-const char* filter2str(const Filter& f);
+    /**
+     * @param f filter type to convert to human readable string.
+     * @return string representation of filter name.
+     */
+    const char* filter2str(const Filter& f);
 
 } // namespace
 

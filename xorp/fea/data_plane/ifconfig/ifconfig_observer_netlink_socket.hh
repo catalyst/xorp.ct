@@ -30,48 +30,49 @@
 
 
 class IfConfigObserverNetlinkSocket : public IfConfigObserver,
-				      public NetlinkSocket,
-				      public NetlinkSocketObserver {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public NetlinkSocket,
+	public NetlinkSocketObserver 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigObserverNetlinkSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigObserverNetlinkSocket();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(vector<uint8_t>& buffer);
-    
-    void netlink_socket_data(vector<uint8_t>& buffer);
-    
-private:
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
+
+		/**
+		 * Receive data from the underlying system.
+		 * 
+		 * @param buffer the buffer with the received data.
+		 */
+		virtual void receive_data(vector<uint8_t>& buffer);
+
+		void netlink_socket_data(vector<uint8_t>& buffer);
+
+	private:
 };
 
 #endif

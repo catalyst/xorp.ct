@@ -30,50 +30,54 @@
 #include "rtrmgr_error.hh"
 
 
-enum XRLMatchType {
-    MATCH_FAIL  = 0x0,
-    MATCH_XRL   = 0x1,
-    MATCH_RSPEC = 0x2,
-    MATCH_ALL   = MATCH_XRL | MATCH_RSPEC
+enum XRLMatchType 
+{
+	MATCH_FAIL  = 0x0,
+	MATCH_XRL   = 0x1,
+	MATCH_RSPEC = 0x2,
+	MATCH_ALL   = MATCH_XRL | MATCH_RSPEC
 };
 
-class XrlSpec {
-public:
-    XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose);
-    XRLMatchType matches(const Xrl& xrl, const XrlArgs& rspec) const;
-    string str() const;
+class XrlSpec 
+{
+	public:
+		XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose);
+		XRLMatchType matches(const Xrl& xrl, const XrlArgs& rspec) const;
+		string str() const;
 
-private:
-    Xrl		_xrl;		// The XRL itself
-    XrlArgs	_rspec;		// The return spec
-    bool	_verbose;	// Set to true if output is verbose
+	private:
+		Xrl		_xrl;		// The XRL itself
+		XrlArgs	_rspec;		// The return spec
+		bool	_verbose;	// Set to true if output is verbose
 };
 
-class XRLtarget {
-public:
-    XRLtarget(const string& xrlfilename, bool verbose);
+class XRLtarget 
+{
+	public:
+		XRLtarget(const string& xrlfilename, bool verbose);
 
-    XRLMatchType xrl_matches(const Xrl& test_xrl, const XrlArgs& rspec) const;
-    string str() const;
+		XRLMatchType xrl_matches(const Xrl& test_xrl, const XrlArgs& rspec) const;
+		string str() const;
 
-private:
-    string	_targetname;
-    list<XrlSpec> _xrlspecs;
-    bool	_verbose;	// Set to true if output is verbose
+	private:
+		string	_targetname;
+		list<XrlSpec> _xrlspecs;
+		bool	_verbose;	// Set to true if output is verbose
 };
 
-class XRLdb {
-public:
-    XRLdb(const string& xrldir, bool verbose) throw (InitError);
+class XRLdb 
+{
+	public:
+		XRLdb(const string& xrldir, bool verbose) throw (InitError);
 #ifdef DEBUG_XRLDB
-    bool check_xrl_syntax(const string& xrl) const;
-    XRLMatchType check_xrl_exists(const string& xrl) const;
+		bool check_xrl_syntax(const string& xrl) const;
+		XRLMatchType check_xrl_exists(const string& xrl) const;
 #endif
-    string str() const;
+		string str() const;
 
-private:
-    list<XRLtarget> _targets;
-    bool	_verbose;	// Set to true if output is verbose
+	private:
+		list<XRLtarget> _targets;
+		bool	_verbose;	// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_XRLDB_HH__

@@ -81,12 +81,13 @@
  *    when the symbol is deleted from the symbol table, send a
  *    destructor function to have it deleted automatically.
  */
-typedef struct {
-  char *name;           /* The name of the symbol */
-  int code;             /* Application supplied integral code */
-  void (*fn)(void);     /* Application supplied generic function */
-  void *data;           /* Application supplied context data */
-  SYM_DEL_FN(*del_fn);  /* Data destructor function */
+typedef struct 
+{
+	char *name;           /* The name of the symbol */
+	int code;             /* Application supplied integral code */
+	void (*fn)(void);     /* Application supplied generic function */
+	void *data;           /* Application supplied context data */
+	SYM_DEL_FN(*del_fn);  /* Data destructor function */
 } Symbol;
 
 /*
@@ -99,11 +100,11 @@ typedef struct {
  */
 typedef struct HashMemory HashMemory;
 
-  /* Create a free-list for allocation of hash tables and their nodes */
+/* Create a free-list for allocation of hash tables and their nodes */
 
 HashMemory *_new_HashMemory(int hash_count, int node_count);
 
-  /* Delete a redundant free-list if not being used */
+/* Delete a redundant free-list if not being used */
 
 HashMemory *_del_HashMemory(HashMemory *mem, int force);
 
@@ -116,39 +117,40 @@ typedef struct HashTable HashTable;
 /*
  * Enumerate case-sensitivity options.
  */
-typedef enum {
-  IGNORE_CASE,     /* Ignore case when looking up symbols */
-  HONOUR_CASE      /* Honor case when looking up symbols */
+typedef enum 
+{
+	IGNORE_CASE,     /* Ignore case when looking up symbols */
+	HONOUR_CASE      /* Honor case when looking up symbols */
 } HashCase;
 
-  /* Create a new hash-table */
+/* Create a new hash-table */
 
 HashTable *_new_HashTable(HashMemory *mem, int size, HashCase hcase,
-			 void *app_data, HASH_DEL_FN(*del_fn));
+		void *app_data, HASH_DEL_FN(*del_fn));
 
-  /* Delete a reference to a hash-table */
+/* Delete a reference to a hash-table */
 
 HashTable *_del_HashTable(HashTable *hash);
 
-  /* Add an entry to a hash table */
+/* Add an entry to a hash table */
 
 Symbol *_new_HashSymbol(HashTable *hash, const char *key, int code,
-			void (*fn)(void), void *data, SYM_DEL_FN(*del_fn));
+		void (*fn)(void), void *data, SYM_DEL_FN(*del_fn));
 
-  /* Remove and delete all the entries in a given hash table */
+/* Remove and delete all the entries in a given hash table */
 
 int _clear_HashTable(HashTable *hash);
 
-  /* Remove and delete a given hash-table entry */
+/* Remove and delete a given hash-table entry */
 
 Symbol *_del_HashSymbol(HashTable *hash, const char *key);
 
-  /* Lookup a given hash-table entry */
+/* Lookup a given hash-table entry */
 
 Symbol *_find_HashSymbol(HashTable *hash, const char *key);
 
-  /* Execute a given function on each entry of a hash table, returning */
-  /*  before completion if the specified function returns non-zero. */
+/* Execute a given function on each entry of a hash table, returning */
+/*  before completion if the specified function returns non-zero. */
 
 #define HASH_SCAN_FN(fn)  int (fn)(Symbol *sym, void *context)
 

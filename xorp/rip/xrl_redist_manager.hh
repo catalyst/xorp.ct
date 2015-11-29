@@ -38,26 +38,27 @@ template <typename A> class System;
  * Xrl Route redistribution manager.
  */
 template <typename A>
-class XrlRedistManager : public ServiceBase {
-public:
-    typedef A		Addr;
-    typedef IPNet<A>	Net;
+class XrlRedistManager : public ServiceBase 
+{
+    public:
+	typedef A		Addr;
+	typedef IPNet<A>	Net;
 
-public:
-    XrlRedistManager(System<A>& system);
-    ~XrlRedistManager();
+    public:
+	XrlRedistManager(System<A>& system);
+	~XrlRedistManager();
 
-    int startup();
-    int shutdown();
+	int startup();
+	int shutdown();
 
-    void add_route(const Net& net, const Addr& nh, const string& ifname,
-		   const string& vifname, uint16_t cost, uint16_t tag,
-		   const PolicyTags& policytags);
+	void add_route(const Net& net, const Addr& nh, const string& ifname,
+		const string& vifname, uint16_t cost, uint16_t tag,
+		const PolicyTags& policytags);
 
-    void delete_route(const Net& net);
+	void delete_route(const Net& net);
 
-protected:
-    RouteRedistributor<A> _rr;
+    protected:
+	RouteRedistributor<A> _rr;
 };
 
 #endif // __RIP_XRL_REDIST_MANAGER__

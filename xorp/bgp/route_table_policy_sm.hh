@@ -35,71 +35,72 @@
  * an add/replace or delete.
  */
 template <class A>
-class PolicyTableSourceMatch : public PolicyTable<A> {
-public:
-    /**
-     * @param tablename the name of the table.
-     * @param safi the safi.
-     * @param parent the parent table.
-     * @param pfs a reference to the global policyfilters.
-     * @param ev event loop for this process.
-     */
-    PolicyTableSourceMatch(const string& tablename,
-			   const Safi& safi,
-			   BGPRouteTable<A>* parent,
-			   PolicyFilters& pfs);
-    ~PolicyTableSourceMatch();
+class PolicyTableSourceMatch : public PolicyTable<A> 
+{
+    public:
+	/**
+	 * @param tablename the name of the table.
+	 * @param safi the safi.
+	 * @param parent the parent table.
+	 * @param pfs a reference to the global policyfilters.
+	 * @param ev event loop for this process.
+	 */
+	PolicyTableSourceMatch(const string& tablename,
+		const Safi& safi,
+		BGPRouteTable<A>* parent,
+		PolicyFilters& pfs);
+	~PolicyTableSourceMatch();
 
-    /**
-     * Push routes of all these peers.
-     *
-     * @param peer_list peers for which routes whould be dumped.
-     */
-    void push_routes(list<const PeerTableInfo<A>*>& peer_list);
+	/**
+	 * Push routes of all these peers.
+	 *
+	 * @param peer_list peers for which routes whould be dumped.
+	 */
+	void push_routes(list<const PeerTableInfo<A>*>& peer_list);
 
-    /*
-     * Need to keep track what is going on with dump iterators which peers go
-     * down and up
-     */
-    void peering_is_down(const PeerHandler *peer, uint32_t genid);
+	/*
+	 * Need to keep track what is going on with dump iterators which peers go
+	 * down and up
+	 */
+	void peering_is_down(const PeerHandler *peer, uint32_t genid);
 
-    void peering_went_down(const PeerHandler *peer, uint32_t genid,
-                           BGPRouteTable<A> *caller);
+	void peering_went_down(const PeerHandler *peer, uint32_t genid,
+		BGPRouteTable<A> *caller);
 
-    void peering_down_complete(const PeerHandler *peer, uint32_t genid,
-                               BGPRouteTable<A> *caller);
+	void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+		BGPRouteTable<A> *caller);
 
-    void peering_came_up(const PeerHandler *peer, uint32_t genid,
-                         BGPRouteTable<A> *caller);
+	void peering_came_up(const PeerHandler *peer, uint32_t genid,
+		BGPRouteTable<A> *caller);
 
-private:
-    /**
-     * Dump the next route.
-     */
-    void do_next_route_dump();
+    private:
+	/**
+	 * Dump the next route.
+	 */
+	void do_next_route_dump();
 
-    /**
-     * Stop dumping routes.
-     */
-    void end_route_dump();
+	/**
+	 * Stop dumping routes.
+	 */
+	void end_route_dump();
 
-    /**
-     * Do a background route dump
-     */
-    bool do_background_dump();
+	/**
+	 * Do a background route dump
+	 */
+	bool do_background_dump();
 
-    /**
-     * Check whether a policy push is occuring 
-     *
-     * @return true if routes are being pushed
-     */
-    bool pushing_routes();
+	/**
+	 * Check whether a policy push is occuring 
+	 *
+	 * @return true if routes are being pushed
+	 */
+	bool pushing_routes();
 
-private:
+    private:
 
-    bool		_pushing_routes;
-    DumpIterator<A>*	_dump_iter;
-    XorpTask		_dump_task;
+	bool		_pushing_routes;
+	DumpIterator<A>*	_dump_iter;
+	XorpTask		_dump_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_SM_HH__

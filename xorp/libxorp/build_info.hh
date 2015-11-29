@@ -19,25 +19,27 @@
 #ifndef __XORP_BUILD_INFO_INC__
 #define __XORP_BUILD_INFO_INC__
 
-class BuildInfo {
-public:
-    /** As in: 1.8.5-WIP */
+class BuildInfo 
+{
+	public:
+		/** As in: 1.8.5-WIP */
 #define DEFSTR1(a) #a
 #define DEFSTR(a) DEFSTR1(a)
-    static const char* getXorpVersion() {
-	return DEFSTR(XORP_VERSION);
-    }
+		static const char* getXorpVersion() 
+		{
+			return DEFSTR(XORP_VERSION);
+		}
 
 #ifdef XORP_BUILDINFO
-    /** git md5sum for HEAD */
-    static const char* getGitVersion();
-    /** Last 3 git change logs */
-    static const char* getGitLog();
+		/** git md5sum for HEAD */
+		static const char* getGitVersion();
+		/** Last 3 git change logs */
+		static const char* getGitLog();
 
-    static const char* getShortBuildDate();
-    static const char* getBuildDate();
-    static const char* getBuilder();
-    static const char* getBuildMachine();
+		static const char* getShortBuildDate();
+		static const char* getBuildDate();
+		static const char* getBuilder();
+		static const char* getBuildMachine();
 #endif
 };
 

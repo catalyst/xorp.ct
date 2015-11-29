@@ -29,52 +29,54 @@ class RoundRobin;
 /**
  * Objects stored in the RoundRobinQueue should inherit from this class.
  */
-class RoundRobinObjBase {
-public:
-    RoundRobinObjBase();
+class RoundRobinObjBase 
+{
+    public:
+	RoundRobinObjBase();
 
-    int weight() const { return _weight; }
-    void set_weight(int v) { _weight = v; }
-    RoundRobinObjBase* next() const { return _next; }
-    RoundRobinObjBase* prev() const { return _prev; }
-    void set_next(RoundRobinObjBase* next) { _next = next; }
-    void set_prev(RoundRobinObjBase* prev) { _prev = prev; }
-    bool scheduled() const;
+	int weight() const { return _weight; }
+	void set_weight(int v) { _weight = v; }
+	RoundRobinObjBase* next() const { return _next; }
+	RoundRobinObjBase* prev() const { return _prev; }
+	void set_next(RoundRobinObjBase* next) { _next = next; }
+	void set_prev(RoundRobinObjBase* prev) { _prev = prev; }
+	bool scheduled() const;
 
-private:
-    int _weight;
+    private:
+	int _weight;
 
-    // Links to build a circular list
-    RoundRobinObjBase* _next;
-    RoundRobinObjBase* _prev;
+	// Links to build a circular list
+	RoundRobinObjBase* _next;
+	RoundRobinObjBase* _prev;
 };
 
 /**
  * The Round-robin queue.
  */
-class RoundRobinQueue {
-public:
-    RoundRobinQueue();
-    void push(RoundRobinObjBase* obj, int weight);
-    void pop_obj(RoundRobinObjBase* obj);
-    void pop();
+class RoundRobinQueue 
+{
+    public:
+	RoundRobinQueue();
+	void push(RoundRobinObjBase* obj, int weight);
+	void pop_obj(RoundRobinObjBase* obj);
+	void pop();
 
-    RoundRobinObjBase* get_next_entry();
+	RoundRobinObjBase* get_next_entry();
 
-    /**
-     * Get the number of elements in the heap.
-     *
-     * @return the number of elements in the heap.
-     */
-    size_t size() const { return _elements; }
+	/**
+	 * Get the number of elements in the heap.
+	 *
+	 * @return the number of elements in the heap.
+	 */
+	size_t size() const { return _elements; }
 
-private:
-    void link_object(RoundRobinObjBase* obj, int weight);
-    void unlink_object(RoundRobinObjBase* obj);
+    private:
+	void link_object(RoundRobinObjBase* obj, int weight);
+	void unlink_object(RoundRobinObjBase* obj);
 
-    RoundRobinObjBase* _next_to_run;
-    int _run_count;	// How many times we've run the current task in a row
-    int _elements;
+	RoundRobinObjBase* _next_to_run;
+	int _run_count;	// How many times we've run the current task in a row
+	int _elements;
 };
 
 #endif // __LIBXORP_ROUND_ROBIN_HH__

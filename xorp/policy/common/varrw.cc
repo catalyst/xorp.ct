@@ -37,7 +37,7 @@ VarRW::~VarRW()
 {
 }
 
-const Element&
+    const Element&
 VarRW::read_trace(const Id& id)
 {
     const Element& e = read(id);
@@ -48,14 +48,15 @@ VarRW::read_trace(const Id& id)
     return e;
 }
 
-void
+    void
 VarRW::write_trace(const Id& id, const Element& e)
 {
     if (_do_trace)
 	_tracelog << "Write " << id << ": " << e.str() << endl;
 
     // trace is a special variable, not to be implemented by upper layers...
-    if (id == VAR_TRACE) {
+    if (id == VAR_TRACE) 
+    {
 	XLOG_ASSERT(e.type() == ElemU32::id);
 
 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
@@ -67,37 +68,37 @@ VarRW::write_trace(const Id& id, const Element& e)
     write(id, e);
 }
 
-uint32_t
+    uint32_t
 VarRW::trace()
 {
     return _trace;
 }
 
-string
+    string
 VarRW::tracelog()
 {
     return _tracelog.str();
 }
 
-string
+    string
 VarRW::more_tracelog()
 {
     return "";
 }
 
-void
+    void
 VarRW::reset_trace()
 {
     _trace = 0;
 }
 
-void
+    void
 VarRW::enable_trace(bool on)
 {
     _do_trace = on;
 }
 
-void
+    void
 VarRW::sync()
 {
 }

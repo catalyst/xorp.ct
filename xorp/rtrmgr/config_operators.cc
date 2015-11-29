@@ -28,148 +28,182 @@
 #include "config_operators.hh"
 
 
-string
+    string
 operator_to_str(ConfigOperator op)
 {
-    switch (op) {
-    case OP_NONE:
-	XLOG_UNREACHABLE();
-    case OP_EQ:
-	return string("==");
-    case OP_NE:
-	return string("!=");
-    case OP_LT:
-	return string("<");
-    case OP_LTE:
-	return string("<=");
-    case OP_GT:
-	return string(">");
-    case OP_GTE:
-	return string(">=");
-    case OP_IPNET_EQ:
-	return string("exact");
-    case OP_IPNET_NE:
-	return string("not");
-    case OP_IPNET_LT:
-	return string("longer");
-    case OP_IPNET_GT:
-	return string("shorter");
-    case OP_IPNET_LE:
-	return string("orlonger");
-    case OP_IPNET_GE:
-	return string("orshorter");
-    case OP_ASSIGN:
-	return string(":");
-    case OP_ADD:
-	return string("+");
-    case OP_ADD_EQ:
-	return string("+=");
-    case OP_SUB:
-	return string("-");
-    case OP_SUB_EQ:
-	return string("-=");
-    case OP_MUL:
-	return string("*");
-    case OP_MUL_EQ:
-	return string("*=");
-    case OP_DIV:
-	return string("/");
-    case OP_DIV_EQ:
-	return string("/=");
-    case OP_LSHIFT:
-	return string("<<");
-    case OP_LSHIFT_EQ:
-	return string("<<=");
-    case OP_RSHIFT:
-	return string(">>");
-    case OP_RSHIFT_EQ:
-	return string(">>=");
-    case OP_BITAND:
-	return string("&");
-    case OP_BITAND_EQ:
-	return string("&=");
-    case OP_BITOR:
-	return string("|");
-    case OP_BITOR_EQ:
-	return string("|=");
-    case OP_BITXOR:
-	return string("^");
-    case OP_BITXOR_EQ:
-	return string("^=");
-    case OP_DEL:
-	return string("del");
+    switch (op) 
+    {
+	case OP_NONE:
+	    XLOG_UNREACHABLE();
+	case OP_EQ:
+	    return string("==");
+	case OP_NE:
+	    return string("!=");
+	case OP_LT:
+	    return string("<");
+	case OP_LTE:
+	    return string("<=");
+	case OP_GT:
+	    return string(">");
+	case OP_GTE:
+	    return string(">=");
+	case OP_IPNET_EQ:
+	    return string("exact");
+	case OP_IPNET_NE:
+	    return string("not");
+	case OP_IPNET_LT:
+	    return string("longer");
+	case OP_IPNET_GT:
+	    return string("shorter");
+	case OP_IPNET_LE:
+	    return string("orlonger");
+	case OP_IPNET_GE:
+	    return string("orshorter");
+	case OP_ASSIGN:
+	    return string(":");
+	case OP_ADD:
+	    return string("+");
+	case OP_ADD_EQ:
+	    return string("+=");
+	case OP_SUB:
+	    return string("-");
+	case OP_SUB_EQ:
+	    return string("-=");
+	case OP_MUL:
+	    return string("*");
+	case OP_MUL_EQ:
+	    return string("*=");
+	case OP_DIV:
+	    return string("/");
+	case OP_DIV_EQ:
+	    return string("/=");
+	case OP_LSHIFT:
+	    return string("<<");
+	case OP_LSHIFT_EQ:
+	    return string("<<=");
+	case OP_RSHIFT:
+	    return string(">>");
+	case OP_RSHIFT_EQ:
+	    return string(">>=");
+	case OP_BITAND:
+	    return string("&");
+	case OP_BITAND_EQ:
+	    return string("&=");
+	case OP_BITOR:
+	    return string("|");
+	case OP_BITOR_EQ:
+	    return string("|=");
+	case OP_BITXOR:
+	    return string("^");
+	case OP_BITXOR_EQ:
+	    return string("^=");
+	case OP_DEL:
+	    return string("del");
     }
     XLOG_UNREACHABLE();
 }
 
-ConfigOperator
+    ConfigOperator
 lookup_operator(const string& s) throw (ParseError)
 {
-    if (s == "==") {
+    if (s == "==") 
+    {
 	return OP_EQ;
-    } else if (s == "!=") {
+    } else if (s == "!=") 
+    {
 	return OP_NE;
-    } else if (s == "<") {
+    } else if (s == "<") 
+    {
 	return OP_LT;
-    } else if (s == "<=") {
+    } else if (s == "<=") 
+    {
 	return OP_LTE;
-    } else if (s == ">") {
+    } else if (s == ">") 
+    {
 	return OP_GT;
-    } else if (s == ">=") {
+    } else if (s == ">=") 
+    {
 	return OP_GTE;
-    } else if (s == "exact") {
+    } else if (s == "exact") 
+    {
 	return OP_IPNET_EQ;
-    } else if (s == "not") {
+    } else if (s == "not") 
+    {
 	return OP_IPNET_NE;
-    } else if (s == "longer") {
+    } else if (s == "longer") 
+    {
 	return OP_IPNET_LT;
-    } else if (s == "shorter") {
+    } else if (s == "shorter") 
+    {
 	return OP_IPNET_GT;
-    } else if (s == "orlonger") {
+    } else if (s == "orlonger") 
+    {
 	return OP_IPNET_LE;
-    } else if (s == "orshorter") {
+    } else if (s == "orshorter") 
+    {
 	return OP_IPNET_GE;
-    } else if (s == ":") {
+    } else if (s == ":") 
+    {
 	return OP_ASSIGN;
-    } else if (s == "=") {
+    } else if (s == "=") 
+    {
 	return OP_ASSIGN;
-    } else if (s == "+") {
+    } else if (s == "+") 
+    {
 	return OP_ADD;
-    } else if (s == "add" || s == "+=") {
+    } else if (s == "add" || s == "+=") 
+    {
 	return OP_ADD_EQ;
-    } else if (s == "-") {
+    } else if (s == "-") 
+    {
 	return OP_SUB;
-    } else if (s == "sub" || s == "-=") {
+    } else if (s == "sub" || s == "-=") 
+    {
 	return OP_SUB_EQ;
-    } else if (s == "*") {
+    } else if (s == "*") 
+    {
 	return OP_MUL;
-    } else if (s == "mul" || s == "*=") {
+    } else if (s == "mul" || s == "*=") 
+    {
 	return OP_MUL_EQ;
-    } else if (s == "/") {
+    } else if (s == "/") 
+    {
 	return OP_DIV;
-    } else if (s == "div" || s == "/=") {
+    } else if (s == "div" || s == "/=") 
+    {
 	return OP_DIV_EQ;
-    } else if (s == "<<") {
+    } else if (s == "<<") 
+    {
 	return OP_LSHIFT;
-    } else if (s == "lshift" || s == "<<=") {
+    } else if (s == "lshift" || s == "<<=") 
+    {
 	return OP_LSHIFT_EQ;
-    } else if (s == ">>") {
+    } else if (s == ">>") 
+    {
 	return OP_RSHIFT;
-    } else if (s == "rshift" || s == ">>=") {
+    } else if (s == "rshift" || s == ">>=") 
+    {
 	return OP_RSHIFT_EQ;
-    } else if (s == "&") {
+    } else if (s == "&") 
+    {
 	return OP_BITAND;
-    } else if (s == "bit_and" || s == "&=") {
+    } else if (s == "bit_and" || s == "&=") 
+    {
 	return OP_BITAND_EQ;
-    } else if (s == "|") {
+    } else if (s == "|") 
+    {
 	return OP_BITOR;
-    } else if (s == "bit_or" || s == "|=") {
+    } else if (s == "bit_or" || s == "|=") 
+    {
 	return OP_BITOR_EQ;
-    } else if (s == "^") {
+    } else if (s == "^") 
+    {
 	return OP_BITXOR;
-    } else if (s == "bit_xor" || s == "^=") {
+    } else if (s == "bit_xor" || s == "^=") 
+    {
 	return OP_BITXOR_EQ;
-    } else if (s == "del") {
+    } else if (s == "del") 
+    {
 	return OP_DEL;
     }
 

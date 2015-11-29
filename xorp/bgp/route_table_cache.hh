@@ -36,15 +36,16 @@
  */
 
 template<class A>
-class CacheRoute {
-public:
-    CacheRoute(const SubnetRoute<A>* route, uint32_t genid) 
-	: _routeref(route), _genid(genid) {}
-    const SubnetRoute<A>* route() const { return _routeref.route(); }
-    uint32_t genid() const { return _genid; }
-private:
-    SubnetRouteConstRef<A> _routeref;
-    uint32_t _genid;
+class CacheRoute 
+{
+	public:
+		CacheRoute(const SubnetRoute<A>* route, uint32_t genid) 
+			: _routeref(route), _genid(genid) {}
+		const SubnetRoute<A>* route() const { return _routeref.route(); }
+		uint32_t genid() const { return _genid; }
+	private:
+		SubnetRouteConstRef<A> _routeref;
+		uint32_t _genid;
 };
 
 
@@ -82,48 +83,50 @@ private:
  */
 
 template<class A>
-class CacheTable : public BGPRouteTable<A>, CrashDumper {
-public:
-    CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent,
-	       const PeerHandler *peer);
-    ~CacheTable();
-    int add_route(InternalMessage<A> &rtmsg,
-		  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-		      InternalMessage<A> &new_rtmsg,
-		      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg, 
-		     BGPRouteTable<A> *caller);
-    int push(BGPRouteTable<A> *caller);
-    int route_dump(InternalMessage<A> &rtmsg,
-		   BGPRouteTable<A> *caller,
-		   const PeerHandler *dump_peer);
+class CacheTable : public BGPRouteTable<A>, CrashDumper 
+{
+	public:
+		CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent,
+				const PeerHandler *peer);
+		~CacheTable();
+		int add_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller);
+		int delete_route(InternalMessage<A> &rtmsg, 
+				BGPRouteTable<A> *caller);
+		int push(BGPRouteTable<A> *caller);
+		int route_dump(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller,
+				const PeerHandler *dump_peer);
 
-    void flush_cache();
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
-    void route_used(const SubnetRoute<A>* route, bool in_use);
+		void flush_cache();
+		const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				uint32_t& genid,
+				FPAListRef& pa_list) const;
+		void route_used(const SubnetRoute<A>* route, bool in_use);
 
-    RouteTableType type() const {return CACHE_TABLE;}
-    string str() const;
+		RouteTableType type() const {return CACHE_TABLE;}
+		string str() const;
 
-    /* mechanisms to implement flow control in the output plumbing */
-    bool get_next_message(BGPRouteTable<A> *next_table);
+		/* mechanisms to implement flow control in the output plumbing */
+		bool get_next_message(BGPRouteTable<A> *next_table);
 
-    int route_count() const {
-	return _route_table->route_count();
-    }
+		int route_count() const 
+		{
+			return _route_table->route_count();
+		}
 
-    string dump_state() const;
+		string dump_state() const;
 
 
-private:
-    RefTrie<A, const CacheRoute<A> > *_route_table;
-    const PeerHandler *_peer;
+	private:
+		RefTrie<A, const CacheRoute<A> > *_route_table;
+		const PeerHandler *_peer;
 
-    // stats to help debugging
-    int _unchanged_added, _unchanged_deleted, _changed_added, _changed_deleted;
+		// stats to help debugging
+		int _unchanged_added, _unchanged_deleted, _changed_added, _changed_deleted;
 };
 
 /**
@@ -132,68 +135,77 @@ private:
  * Only one instance of this class exists at any time.
  */
 template<class A>
-class DeleteAllNodes {
-public:
-    typedef RefTrie<A, const CacheRoute<A> > RouteTable;
-    typedef queue<RouteTable *> RouteTables;
+class DeleteAllNodes 
+{
+	public:
+		typedef RefTrie<A, const CacheRoute<A> > RouteTable;
+		typedef queue<RouteTable *> RouteTables;
 
-    DeleteAllNodes(const PeerHandler *peer, RouteTable *route_table)
-	: _peer(peer) {
+		DeleteAllNodes(const PeerHandler *peer, RouteTable *route_table)
+			: _peer(peer) 
+		{
 
- 	    bool empty = _route_tables.empty();
-	    _route_tables.push(route_table);
+			bool empty = _route_tables.empty();
+			_route_tables.push(route_table);
 
- 	    if (empty) {
-		_deleter_task = 
-		    EventLoop::instance().new_task(
-			callback(this, &DeleteAllNodes<A>::delete_some_nodes),
-			XorpTask::PRIORITY_BACKGROUND,
-			XorpTask::WEIGHT_DEFAULT);
- 	    } else {
- 		delete this;
- 	    }
-	}
-    
-    /**
-     * Background task that deletes nodes in trie.
-     *
-     * @return true if there are routes to delete.
-     */
-    bool delete_some_nodes() {
-	RouteTable *route_table = _route_tables.front();
-	typename RouteTable::iterator current = route_table->begin();
-	for(int i = 0; i < _deletions_per_call; i++) {
-	    // In theory if current is invalid then it will move to a
-	    // valid entry. Unlike the STL, which this isn't.
-	    PAListRef<A> old_pa_list = current.payload().route()->attributes();
-	    old_pa_list.deregister_with_attmgr();
-	    route_table->erase(current);
-	    if (current == route_table->end()) {
-		_route_tables.pop();
-		route_table->delete_self();
-		break;
-	    }
-	}
+			if (empty) 
+			{
+				_deleter_task = 
+					EventLoop::instance().new_task(
+							callback(this, &DeleteAllNodes<A>::delete_some_nodes),
+							XorpTask::PRIORITY_BACKGROUND,
+							XorpTask::WEIGHT_DEFAULT);
+			} else 
+			{
+				delete this;
+			}
+		}
 
-	if (_route_tables.empty()) {
-	    delete this;
-	    return false;
-	}
+		/**
+		 * Background task that deletes nodes in trie.
+		 *
+		 * @return true if there are routes to delete.
+		 */
+		bool delete_some_nodes() 
+		{
+			RouteTable *route_table = _route_tables.front();
+			typename RouteTable::iterator current = route_table->begin();
+			for(int i = 0; i < _deletions_per_call; i++) 
+			{
+				// In theory if current is invalid then it will move to a
+				// valid entry. Unlike the STL, which this isn't.
+				PAListRef<A> old_pa_list = current.payload().route()->attributes();
+				old_pa_list.deregister_with_attmgr();
+				route_table->erase(current);
+				if (current == route_table->end()) 
+				{
+					_route_tables.pop();
+					route_table->delete_self();
+					break;
+				}
+			}
 
-	return true;
-    }
+			if (_route_tables.empty()) 
+			{
+				delete this;
+				return false;
+			}
 
-    /**
-     * @return true if route tables exist and are still being deleted.
-     */
-    static bool running() {
-	return !_route_tables.empty();
-    }
-private:
-    static RouteTables _route_tables;	// Queue of route tables to delete.
-    XorpTask _deleter_task;			// 
-    const PeerHandler *_peer;		// Handle to the EventLoop.
-    static int _deletions_per_call;	// Number of nodes deleted per call.
+			return true;
+		}
+
+		/**
+		 * @return true if route tables exist and are still being deleted.
+		 */
+		static bool running() 
+		{
+			return !_route_tables.empty();
+		}
+	private:
+		static RouteTables _route_tables;	// Queue of route tables to delete.
+		XorpTask _deleter_task;			// 
+		const PeerHandler *_peer;		// Handle to the EventLoop.
+		static int _deletions_per_call;	// Number of nodes deleted per call.
 };
 
 #endif // __BGP_ROUTE_TABLE_CACHE_HH__

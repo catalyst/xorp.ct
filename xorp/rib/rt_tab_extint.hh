@@ -58,190 +58,191 @@
  * A RIB normally only has one ExtIntTable.
  */
 template<class A>
-class ExtIntTable : public RouteTable<A> {
-public:
-    /**
-     * ExtIntTable Constructor.
-     *
-     */
-    ExtIntTable();
+class ExtIntTable : public RouteTable<A> 
+{
+	public:
+		/**
+		 * ExtIntTable Constructor.
+		 *
+		 */
+		ExtIntTable();
 
-    /**
-     * ExtInt Destructor
-     */
-    virtual ~ExtIntTable();
+		/**
+		 * ExtInt Destructor
+		 */
+		virtual ~ExtIntTable();
 
-    /**
-     * An add_route request from a parent table causes a lookup on the
-     * other parent table.  If the route is better than the one from the
-     * other table, or no route exists in the other table then it is
-     * passed downstream if nexthop resolution is successful.
-     *
-     * @param route the new route.
-     * @param caller the parent table sending the new route.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_igp_route(const IPRouteEntry<A>& route);
+		/**
+		 * An add_route request from a parent table causes a lookup on the
+		 * other parent table.  If the route is better than the one from the
+		 * other table, or no route exists in the other table then it is
+		 * passed downstream if nexthop resolution is successful.
+		 *
+		 * @param route the new route.
+		 * @param caller the parent table sending the new route.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int add_igp_route(const IPRouteEntry<A>& route);
 
-    int add_egp_route(const IPRouteEntry<A>& route);
+		int add_egp_route(const IPRouteEntry<A>& route);
 
-    /**
-     * An delete_route request from a parent table also causes a
-     * lookup on the other parent table.  The delete_route is
-     * propagated downstream.  If an alternative route is found and
-     * nexthop resolution on it is successful, then it is then
-     * propagated downsteam as an add_route to replace the deleted
-     * route.
-     *
-     * @param route the route to be deleted.
-     * @param caller the parent table sending the delete_route.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+		/**
+		 * An delete_route request from a parent table also causes a
+		 * lookup on the other parent table.  The delete_route is
+		 * propagated downstream.  If an alternative route is found and
+		 * nexthop resolution on it is successful, then it is then
+		 * propagated downsteam as an add_route to replace the deleted
+		 * route.
+		 *
+		 * @param route the route to be deleted.
+		 * @param caller the parent table sending the delete_route.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int delete_igp_route(const IPRouteEntry<A>* route, bool b);
 
-    int delete_best_igp_route(const IPRouteEntry<A>* route, bool b);
+		int delete_best_igp_route(const IPRouteEntry<A>* route, bool b);
 
-    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
+		int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
-    /**
-     * Lookup a specific subnet.  The lookup will first look in the
-     * ExtIntTable 's table of resolved routes - if there is a route
-     * here, then this is returned.  Otherwise the lookup will be sent
-     * to both parent tables.  If both give an answer, then the route
-     * with the better admin_distance is returned, so long as it gives
-     * a nexthop that is resolvable.
-     *
-     * @param net the subnet to look up.
-     * @return a pointer to the route entry if it exists, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
+		/**
+		 * Lookup a specific subnet.  The lookup will first look in the
+		 * ExtIntTable 's table of resolved routes - if there is a route
+		 * here, then this is returned.  Otherwise the lookup will be sent
+		 * to both parent tables.  If both give an answer, then the route
+		 * with the better admin_distance is returned, so long as it gives
+		 * a nexthop that is resolvable.
+		 *
+		 * @param net the subnet to look up.
+		 * @return a pointer to the route entry if it exists, NULL otherwise.
+		 */
+		const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
 
-    /**
-     * Lookup an IP address to get the most specific (longest prefix
-     * length) route that matches this address.  The lookup will be
-     * sent to both parent tables and the ExtIntTable's internal table
-     * of resolved_routes.  The most specific answer is returned, so
-     * long as the nexthop resolves.  If more than one route has the
-     * same prefix length, then the route with the better
-     * admin_distance is returned.
-     *
-     * @param addr the IP address to look up.
-     *
-     * @return a pointer to the best most specific route entry if any
-     * entry matches and its nexthop resolves, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
+		/**
+		 * Lookup an IP address to get the most specific (longest prefix
+		 * length) route that matches this address.  The lookup will be
+		 * sent to both parent tables and the ExtIntTable's internal table
+		 * of resolved_routes.  The most specific answer is returned, so
+		 * long as the nexthop resolves.  If more than one route has the
+		 * same prefix length, then the route with the better
+		 * admin_distance is returned.
+		 *
+		 * @param addr the IP address to look up.
+		 *
+		 * @return a pointer to the best most specific route entry if any
+		 * entry matches and its nexthop resolves, NULL otherwise.
+		 */
+		const IPRouteEntry<A>* lookup_route(const A& addr) const;
 
-    /**
-     * Lookup an IP address to get the most specific (longest prefix
-     * length) route that matches this address, along with the
-     * RouteRange information for this address and route.  As with
-     * lookup_route, this involves querying ExtIntTable's
-     * resolved_routes table and possibly both parent tables.  The
-     * best, most specific route is returned if the nexthop is
-     * resolvable, and the tightest bounds on the answer are returned.
-     *
-     * @see RouteRange
-     * @param addr the IP address to look up.
-     * @return a pointer to a RouteRange class instance containing the
-     * relevant answer.  It is up to the recipient of this pointer to
-     * free the associated memory.
-     */
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+		/**
+		 * Lookup an IP address to get the most specific (longest prefix
+		 * length) route that matches this address, along with the
+		 * RouteRange information for this address and route.  As with
+		 * lookup_route, this involves querying ExtIntTable's
+		 * resolved_routes table and possibly both parent tables.  The
+		 * best, most specific route is returned if the nexthop is
+		 * resolvable, and the tightest bounds on the answer are returned.
+		 *
+		 * @see RouteRange
+		 * @param addr the IP address to look up.
+		 * @return a pointer to a RouteRange class instance containing the
+		 * relevant answer.  It is up to the recipient of this pointer to
+		 * free the associated memory.
+		 */
+		RouteRange<A>* lookup_route_range(const A& addr) const;
 
-    /**
-     * @return the table type (@ref TableType).
-     */
-    TableType type() const	{ return EXTINT_TABLE; }
+		/**
+		 * @return the table type (@ref TableType).
+		 */
+		TableType type() const	{ return EXTINT_TABLE; }
 
-    /**
-     * Changes the admin distance of the OriginTable and replumbs it.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR
-     */
-    int change_admin_distance(OriginTable<A>* ot, uint32_t ad);
+		/**
+		 * Changes the admin distance of the OriginTable and replumbs it.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR
+		 */
+		int change_admin_distance(OriginTable<A>* ot, uint32_t ad);
 
-    /**
-     * Adds new RouteTable to the map
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_protocol_table(OriginTable<A>* new_table);
+		/**
+		 * Adds new RouteTable to the map
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int add_protocol_table(OriginTable<A>* new_table);
 
-    /**
-     * Render this ExtIntTable as a string for debugging purposes.
-     */
-    string str() const;
+		/**
+		 * Render this ExtIntTable as a string for debugging purposes.
+		 */
+		string str() const;
 
-private:
-    typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
-    typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
-    typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > ResolvingParentMultiMap;
-    typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
-    typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
-    typedef map<uint16_t, OriginTable<A>* > RouteTableMap;
-    typedef set<uint16_t> AdminDistanceSet;
+	private:
+		typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
+		typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
+		typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > ResolvingParentMultiMap;
+		typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
+		typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
+		typedef map<uint16_t, OriginTable<A>* > RouteTableMap;
+		typedef set<uint16_t> AdminDistanceSet;
 
-    bool delete_ext_route(const IPRouteEntry<A>* route, bool winning_route = true);
+		bool delete_ext_route(const IPRouteEntry<A>* route, bool winning_route = true);
 
-    const ResolvedIPRouteEntry<A>* lookup_in_resolved_table(
-	const IPNet<A>& ipv4net);
+		const ResolvedIPRouteEntry<A>* lookup_in_resolved_table(
+				const IPNet<A>& ipv4net);
 
-    void resolve_unresolved_nexthops(const IPRouteEntry<A>& route);
+		void resolve_unresolved_nexthops(const IPRouteEntry<A>& route);
 
-    const ResolvedIPRouteEntry<A>* resolve_and_store_route(
-	const IPRouteEntry<A>& route,
-	const IPRouteEntry<A>* nexthop_route);
+		const ResolvedIPRouteEntry<A>* resolve_and_store_route(
+				const IPRouteEntry<A>& route,
+				const IPRouteEntry<A>* nexthop_route);
 
-    bool delete_unresolved_nexthop(const IPRouteEntry<A>* route);
+		bool delete_unresolved_nexthop(const IPRouteEntry<A>* route);
 
-    void recalculate_nexthops(const IPRouteEntry<A>& route);
+		void recalculate_nexthops(const IPRouteEntry<A>& route);
 
-    const ResolvedIPRouteEntry<A>* lookup_by_igp_parent(
-	const IPNet<A>& route_net);
+		const ResolvedIPRouteEntry<A>* lookup_by_igp_parent(
+				const IPNet<A>& route_net);
 
-    const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
-	const IPNet<A>& route_net,
-	const typename ResolvingParentMultiMap::iterator& previous);
+		const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
+				const IPNet<A>& route_net,
+				const typename ResolvingParentMultiMap::iterator& previous);
 
-    const IPRouteEntry<A>* lookup_winning_igp_route(
-	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_winning_igp_route(const A& addr) const;
+		const IPRouteEntry<A>* lookup_winning_igp_route(
+				const IPNet<A>& subnet) const;
+		const IPRouteEntry<A>* lookup_winning_igp_route(const A& addr) const;
 
-    bool best_igp_route(const IPRouteEntry<A>& route);
+		bool best_igp_route(const IPRouteEntry<A>& route);
 
-    bool deleting_best_igp_route(const IPRouteEntry<A>* route);
+		bool deleting_best_igp_route(const IPRouteEntry<A>* route);
 
-    const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
+		const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
 
-    void delete_resolved_routes(const IPRouteEntry<A>* route, bool b);
+		void delete_resolved_routes(const IPRouteEntry<A>* route, bool b);
 
-    void create_unresolved_route(const IPRouteEntry<A>& route);
+		void create_unresolved_route(const IPRouteEntry<A>& route);
 
-    int add_direct_egp_route(const IPRouteEntry<A>& route);
-    int add_indirect_egp_route(const IPRouteEntry<A>& route);
+		int add_direct_egp_route(const IPRouteEntry<A>& route);
+		int add_indirect_egp_route(const IPRouteEntry<A>& route);
 
-    AdminDistanceSet _igp_ad_set;
-    AdminDistanceSet _egp_ad_set;
+		AdminDistanceSet _igp_ad_set;
+		AdminDistanceSet _egp_ad_set;
 
-    RouteTableMap _all_tables;
-    Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_resolved_table;
-    multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
-    IpUnresolvedTableMap			_ip_unresolved_table;
+		RouteTableMap _all_tables;
+		Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_resolved_table;
+		multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
+		IpUnresolvedTableMap			_ip_unresolved_table;
 
-    // _ip_igp_parents gives us a fast way of finding a route
-    // affected by a change in an igp parent route
-    ResolvingParentMultiMap _ip_resolving_parents;
+		// _ip_igp_parents gives us a fast way of finding a route
+		// affected by a change in an igp parent route
+		ResolvingParentMultiMap _ip_resolving_parents;
 
-    // _resolving_routes is a Trie of all the routes that are used to
-    // resolve external routes
-    RouteTrie _resolving_routes;
+		// _resolving_routes is a Trie of all the routes that are used to
+		// resolve external routes
+		RouteTrie _resolving_routes;
 
-    // Tries where we cache wining IGP, EGP and overall routes
-    RouteTrie _wining_igp_routes;
-    RouteTrie _wining_routes;	    // Overall wining routes!
+		// Tries where we cache wining IGP, EGP and overall routes
+		RouteTrie _wining_igp_routes;
+		RouteTrie _wining_routes;	    // Overall wining routes!
 
-    static const string& ext_int_name();
+		static const string& ext_int_name();
 };
 
 #endif // __RIB_RT_TAB_EXTINT_HH__

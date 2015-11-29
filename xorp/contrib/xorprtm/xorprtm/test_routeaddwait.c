@@ -41,7 +41,7 @@
 
 extern void print_rtmsg(struct rt_msghdr *, int);       /* XXX client_rtmsg.c */
 
-void
+    void
 try_add_route_with_wait(void)
 {
     DWORD result;
@@ -53,14 +53,16 @@ try_add_route_with_wait(void)
     int nbytes;
     int i;
 
-    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) {
+    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) 
+    {
 	fprintf(stderr, "No named pipe instances available.\n");
 	return;
     }
 
     h_pipe = CreateFileA(XORPRTM_PIPENAME, GENERIC_READ | GENERIC_WRITE,
-			 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (h_pipe == INVALID_HANDLE_VALUE) {
+	    0, NULL, OPEN_EXISTING, 0, NULL);
+    if (h_pipe == INVALID_HANDLE_VALUE) 
+    {
 	result = GetLastError();
 	fprintf(stderr, "error opening pipe: %d\n", result);
 	return;
@@ -70,7 +72,8 @@ try_add_route_with_wait(void)
 
     msgsize = sizeof(*msg) + (sizeof(struct sockaddr_storage) * 3);
     msg = malloc(msgsize);
-    if (msg == NULL) {
+    if (msg == NULL) 
+    {
 	fprintf(stderr, "cannot allocate routing socket message\n");
 	CloseHandle(h_pipe);
 	return;
@@ -104,21 +107,26 @@ try_add_route_with_wait(void)
     psin->sin_addr.s_addr = 0x00FFFFFF;
 
     /* Try to add a route 3 times to test callbacks */
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) 
+    {
 	fprintf(stderr, "attempting to add a route\n", GetLastError());
 	result = WriteFile(h_pipe, msg, msgsize, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d writing to pipe\n", GetLastError());
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "sent request %d\n", i);
 	    print_rtmsg(msg, msgsize);
 	}
 
 	/* Block and read a single reply. */
 	result = ReadFile(h_pipe, msg, msgsize, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d reading from pipe\n", GetLastError());
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "got reply %d, printing\n", i);
 	    print_rtmsg(msg, msgsize);
 	}
@@ -129,7 +137,7 @@ try_add_route_with_wait(void)
     free(msg);
 }
 
-int
+    int
 main(int argc, char *argv[])
 {
     try_add_route_with_wait();

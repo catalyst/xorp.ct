@@ -50,118 +50,123 @@
 // The mechanism to observe the information is netlink(7) sockets.
 //
 
-FibConfigTableObserverNetlinkSocket::FibConfigTableObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigTableObserver(fea_data_plane_manager),
-      NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
-      NetlinkSocketObserver(*(NetlinkSocket *)this)
+	FibConfigTableObserverNetlinkSocket::FibConfigTableObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigTableObserver(fea_data_plane_manager),
+	NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
+	NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 }
 
 FibConfigTableObserverNetlinkSocket::~FibConfigTableObserverNetlinkSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
-		   "whole forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
+				"whole forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigTableObserverNetlinkSocket::start(string& error_msg)
 {
-    uint32_t nl_groups = 0;
+	uint32_t nl_groups = 0;
 
-    if (_is_running)
-	return (XORP_OK);
+	if (_is_running)
+		return (XORP_OK);
 
-    //
-    // Listen to the netlink multicast group for IPv4 forwarding entries
-    //
-    if (fea_data_plane_manager().have_ipv4())
-	nl_groups |= RTMGRP_IPV4_ROUTE;
+	//
+	// Listen to the netlink multicast group for IPv4 forwarding entries
+	//
+	if (fea_data_plane_manager().have_ipv4())
+		nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
-    //
-    // Listen to the netlink multicast group for IPv6 forwarding entries
-    //
-    if (fea_data_plane_manager().have_ipv6())
-	nl_groups |= RTMGRP_IPV6_ROUTE;
+	//
+	// Listen to the netlink multicast group for IPv6 forwarding entries
+	//
+	if (fea_data_plane_manager().have_ipv6())
+		nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
 
-    //
-    // Set the netlink multicast groups to listen for on the netlink socket
-    //
-    NetlinkSocket::set_nl_groups(nl_groups);
+	//
+	// Set the netlink multicast groups to listen for on the netlink socket
+	//
+	NetlinkSocket::set_nl_groups(nl_groups);
 
-    if (NetlinkSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+	if (NetlinkSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
 
-    _is_running = true;
+	_is_running = true;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigTableObserverNetlinkSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (NetlinkSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (NetlinkSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 FibConfigTableObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
-    list<FteX> fte_list;
+	list<FteX> fte_list;
 
-    //
-    // Get the IPv4 routes
-    //
-    if (fea_data_plane_manager().have_ipv4()) {
-	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
-	    AF_INET,
-	    fibconfig().system_config_iftree(),
-	    fte_list,
-	    buffer,
-	    false, fibconfig());
-	if (! fte_list.empty()) {
-	    fibconfig().propagate_fib_changes(fte_list, this);
-	    fte_list.clear();
+	//
+	// Get the IPv4 routes
+	//
+	if (fea_data_plane_manager().have_ipv4()) 
+	{
+		FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
+				AF_INET,
+				fibconfig().system_config_iftree(),
+				fte_list,
+				buffer,
+				false, fibconfig());
+		if (! fte_list.empty()) 
+		{
+			fibconfig().propagate_fib_changes(fte_list, this);
+			fte_list.clear();
+		}
 	}
-    }
 
 #ifdef HAVE_IPV6
-    //
-    // Get the IPv6 routes
-    //
-    if (fea_data_plane_manager().have_ipv6()) {
-	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
-	    AF_INET6,
-	    fibconfig().system_config_iftree(),
-	    fte_list,
-	    buffer,
-	    false, fibconfig());
-	if (! fte_list.empty()) {
-	    fibconfig().propagate_fib_changes(fte_list, this);
-	    fte_list.clear();
+	//
+	// Get the IPv6 routes
+	//
+	if (fea_data_plane_manager().have_ipv6()) 
+	{
+		FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
+				AF_INET6,
+				fibconfig().system_config_iftree(),
+				fte_list,
+				buffer,
+				false, fibconfig());
+		if (! fte_list.empty()) 
+		{
+			fibconfig().propagate_fib_changes(fte_list, this);
+			fte_list.clear();
+		}
 	}
-    }
 #endif // HAVE_IPV6
 }
 
-void
+	void
 FibConfigTableObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

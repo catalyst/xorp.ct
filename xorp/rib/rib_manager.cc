@@ -37,24 +37,24 @@
 #include "profile_vars.hh"
 
 RibManager::RibManager( XrlStdRouter& xrl_std_router,
-		       const string& fea_target)
+	const string& fea_target)
     : _status_code(PROC_NOT_READY),
-      _status_reason("Initializing"),
-      _xrl_router(xrl_std_router),
-      _register_server(&_xrl_router),
-      _urib4(UNICAST, *this),
-      _mrib4(MULTICAST, *this),
+    _status_reason("Initializing"),
+    _xrl_router(xrl_std_router),
+    _register_server(&_xrl_router),
+    _urib4(UNICAST, *this),
+    _mrib4(MULTICAST, *this),
 #ifdef HAVE_IPV6
-      _urib6(UNICAST, *this),
-      _mrib6(MULTICAST, *this),
+    _urib6(UNICAST, *this),
+    _mrib6(MULTICAST, *this),
 #endif
-      _vif_manager(_xrl_router, this, fea_target),
-      _xrl_rib_target(&_xrl_router, _urib4, _mrib4,
+    _vif_manager(_xrl_router, this, fea_target),
+    _xrl_rib_target(&_xrl_router, _urib4, _mrib4,
 #ifdef HAVE_IPV6
-		      _urib6, _mrib6,
+	    _urib6, _mrib6,
 #endif
-		      _vif_manager, this),
-      _fea_target(fea_target)
+	    _vif_manager, this),
+    _fea_target(fea_target)
 {
     _urib4.initialize(_register_server);
     _mrib4.initialize(_register_server);
@@ -74,7 +74,7 @@ RibManager::~RibManager()
     stop();
 }
 
-int
+    int
 RibManager::start()
 {
     if (ProtoState::start() != XORP_OK)
@@ -85,7 +85,7 @@ RibManager::start()
     return (XORP_OK);
 }
 
-int
+    int
 RibManager::stop()
 {
     if (! is_up())
@@ -101,7 +101,7 @@ RibManager::stop()
     return (XORP_OK);
 }
 
-bool
+    bool
 RibManager::status_updater()
 {
     ProcessStatus s = PROC_READY;
@@ -112,45 +112,46 @@ RibManager::status_updater()
     // Check the VifManager's status
     //
     ServiceStatus vif_mgr_status = _vif_manager.status();
-    switch (vif_mgr_status) {
-    case SERVICE_READY:
-	break;
-    case SERVICE_STARTING:
-	s = PROC_NOT_READY;
-	reason = "VifManager starting";
-	break;
-    case SERVICE_RUNNING:
-	break;
-    case SERVICE_PAUSING:
-	s = PROC_NOT_READY;
-	reason = "VifManager pausing";
-	break;
-    case SERVICE_PAUSED:
-	s = PROC_NOT_READY;
-	reason = "VifManager paused";
-	break;
-    case SERVICE_RESUMING:
-	s = PROC_NOT_READY;
-	reason = "VifManager resuming";
-	break;
-    case SERVICE_SHUTTING_DOWN:
-	s = PROC_SHUTDOWN;
-	reason = "VifManager shutting down";
-	break;
-    case SERVICE_SHUTDOWN:
-	s = PROC_DONE;
-	reason = "VifManager Shutdown";
-       break;
-    case SERVICE_FAILED:
-	// VifManager failed: set process state to failed.
-	// TODO: XXX: Should we exit here, or wait to be restarted?
-	s = PROC_FAILED;
-	reason = "VifManager Failed";
-	ret = false;
-	break;
-    case SERVICE_ALL:
-	XLOG_UNREACHABLE();
-	break;
+    switch (vif_mgr_status) 
+    {
+	case SERVICE_READY:
+	    break;
+	case SERVICE_STARTING:
+	    s = PROC_NOT_READY;
+	    reason = "VifManager starting";
+	    break;
+	case SERVICE_RUNNING:
+	    break;
+	case SERVICE_PAUSING:
+	    s = PROC_NOT_READY;
+	    reason = "VifManager pausing";
+	    break;
+	case SERVICE_PAUSED:
+	    s = PROC_NOT_READY;
+	    reason = "VifManager paused";
+	    break;
+	case SERVICE_RESUMING:
+	    s = PROC_NOT_READY;
+	    reason = "VifManager resuming";
+	    break;
+	case SERVICE_SHUTTING_DOWN:
+	    s = PROC_SHUTDOWN;
+	    reason = "VifManager shutting down";
+	    break;
+	case SERVICE_SHUTDOWN:
+	    s = PROC_DONE;
+	    reason = "VifManager Shutdown";
+	    break;
+	case SERVICE_FAILED:
+	    // VifManager failed: set process state to failed.
+	    // TODO: XXX: Should we exit here, or wait to be restarted?
+	    s = PROC_FAILED;
+	    reason = "VifManager Failed";
+	    ret = false;
+	    break;
+	case SERVICE_ALL:
+	    XLOG_UNREACHABLE();
+	    break;
     }
 
     //
@@ -165,23 +166,26 @@ RibManager::status_updater()
 
 
 template <typename A>
-int
+    int
 RibManager::add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
 {
     int result = rib.new_vif(vifname, vif);
-    if (result != XORP_OK) {
-	if (err.size() == 0) {
+    if (result != XORP_OK) 
+    {
+	if (err.size() == 0) 
+	{
 	    err = c_format("Failed to add VIF \"%s\" to %s",
-			   vifname.c_str(), rib.name().c_str());
-	} else {
+		    vifname.c_str(), rib.name().c_str());
+	} else 
+	{
 	    err = c_format(", and failed to add VIF \"%s\" to %s",
-			   vifname.c_str(), rib.name().c_str());
+		    vifname.c_str(), rib.name().c_str());
 	}
     }
     return result;
 }
 
-int
+    int
 RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 {
     err.resize(0);
@@ -191,17 +195,17 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 	    | add_rib_vif(_urib6, vifname, vif, err)
 	    | add_rib_vif(_mrib6, vifname, vif, err)
 #endif
-	);
+	   );
 }
 
 template <typename A>
-int
+    int
 RibManager::delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 {
     return rib.delete_vif(vifname, err);
 }
 
-int
+    int
 RibManager::delete_vif(const string& vifname, string& err)
 {
     err.resize(0);
@@ -211,46 +215,48 @@ RibManager::delete_vif(const string& vifname, string& err)
 	    | delete_rib_vif(_urib6, vifname, err)
 	    | delete_rib_vif(_mrib6, vifname, err)
 #endif
-	);
+	   );
 }
 
 
 template <typename A>
-int
+    int
 RibManager::set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
-		  bool is_loopback, bool is_multicast, bool is_broadcast,
-		  bool is_up, uint32_t mtu, string& err)
+	bool is_loopback, bool is_multicast, bool is_broadcast,
+	bool is_up, uint32_t mtu, string& err)
 {
     int result = rib.set_vif_flags(vifname, is_p2p, is_loopback, is_multicast,
-				   is_broadcast, is_up, mtu);
-    if (result != XORP_OK) {
+	    is_broadcast, is_up, mtu);
+    if (result != XORP_OK) 
+    {
 	err = c_format("Failed to add flags for VIF \"%s\" to %s",
-			vifname.c_str(), rib.name().c_str());
+		vifname.c_str(), rib.name().c_str());
     }
     return result;
 }
 
-int
+    int
 RibManager::set_vif_flags(const string& vifname,
-			  bool is_p2p,
-			  bool is_loopback,
-			  bool is_multicast,
-			  bool is_broadcast,
-			  bool is_up,
-			  uint32_t mtu,
-			  string& err)
+	bool is_p2p,
+	bool is_loopback,
+	bool is_multicast,
+	bool is_broadcast,
+	bool is_up,
+	uint32_t mtu,
+	string& err)
 {
     if (set_rib_vif_flags(_urib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK ||
-	set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK
+		is_broadcast, is_up, mtu, err) != XORP_OK ||
+	    set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
+		is_broadcast, is_up, mtu, err) != XORP_OK
 #ifdef HAVE_IPV6
-	|| set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK ||
-	set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK
+	    || set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
+		is_broadcast, is_up, mtu, err) != XORP_OK ||
+	    set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
+		is_broadcast, is_up, mtu, err) != XORP_OK
 #endif
-	) {
+       ) 
+    {
 	return XORP_ERROR;
     }
     return XORP_OK;
@@ -258,22 +264,24 @@ RibManager::set_vif_flags(const string& vifname,
 
 
 template <typename A>
-int
+    int
 RibManager::add_vif_address_to_ribs(RIB<A>& 	urib,
-			RIB<A>& 	mrib,
-			const string&	vifn,
-			const A& 	addr,
-			const IPNet<A>& subnet,
-			const A&	broadcast_addr,
-			const A&	peer_addr,
-			string& 	err)
+	RIB<A>& 	mrib,
+	const string&	vifn,
+	const A& 	addr,
+	const IPNet<A>& subnet,
+	const A&	broadcast_addr,
+	const A&	peer_addr,
+	string& 	err)
 {
     RIB<A>* ribs[2] = { &urib, &mrib };
-    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) {
+    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) 
+    {
 	if (ribs[i]->add_vif_address(vifn, addr, subnet, broadcast_addr,
-				     peer_addr) != XORP_OK) {
+		    peer_addr) != XORP_OK) 
+	{
 	    err = c_format("Failed to add VIF address %s to %s\n",
-			   addr.str().c_str(), ribs[i]->name().c_str());
+		    addr.str().c_str(), ribs[i]->name().c_str());
 	    return XORP_ERROR;
 	}
     }
@@ -281,46 +289,48 @@ RibManager::add_vif_address_to_ribs(RIB<A>& 	urib,
 }
 
 template <typename A>
-int
+    int
 RibManager::delete_vif_address_from_ribs(RIB<A>& 		urib,
-			     RIB<A>& 		mrib,
-			     const string&	vifn,
-			     const A& 		addr,
-			     string& 		err)
+	RIB<A>& 		mrib,
+	const string&	vifn,
+	const A& 		addr,
+	string& 		err)
 {
     RIB<A>* ribs[2] = { &urib, &mrib };
-    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) {
-	if (ribs[i]->delete_vif_address(vifn, addr) != XORP_OK) {
+    for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) 
+    {
+	if (ribs[i]->delete_vif_address(vifn, addr) != XORP_OK) 
+	{
 	    err = c_format("Failed to delete VIF address %s from %s\n",
-			   addr.str().c_str(), ribs[i]->name().c_str());
+		    addr.str().c_str(), ribs[i]->name().c_str());
 	    return XORP_ERROR;
 	}
     }
     return XORP_OK;
 }
 
-int
+    int
 RibManager::add_vif_address(const string& 	vifn,
-			    const IPv4& 	addr,
-			    const IPv4Net& 	subnet,
-			    const IPv4&		broadcast_addr,
-			    const IPv4&		peer_addr,
-			    string& 		err)
+	const IPv4& 	addr,
+	const IPv4Net& 	subnet,
+	const IPv4&		broadcast_addr,
+	const IPv4&		peer_addr,
+	string& 		err)
 {
     return add_vif_address_to_ribs(_urib4, _mrib4, vifn, addr, subnet,
-				   broadcast_addr, peer_addr, err);
+	    broadcast_addr, peer_addr, err);
 }
 
-int
+    int
 RibManager::delete_vif_address(const string& 	vifn,
-			       const IPv4& 	addr,
-			       string& 		err)
+	const IPv4& 	addr,
+	string& 		err)
 {
     return delete_vif_address_from_ribs(_urib4, _mrib4, vifn, addr, err);
 }
 
 
-void
+    void
 RibManager::make_errors_fatal()
 {
     _urib4.set_errors_are_fatal();
@@ -331,57 +341,62 @@ RibManager::make_errors_fatal()
 #endif
 }
 
-void
+    void
 RibManager::register_interest_in_target(const string& target_class)
 {
     if (_targets_of_interest.find(target_class)
-	== _targets_of_interest.end()) {
+	    == _targets_of_interest.end()) 
+    {
 	_targets_of_interest.insert(target_class);
 	XrlFinderEventNotifierV0p1Client finder(&_xrl_router);
 	XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
 	    callback(this, &RibManager::register_interest_in_target_done);
 	finder.send_register_class_event_interest("finder",
-						  _xrl_router.instance_name(),
-						  target_class, cb);
+		_xrl_router.instance_name(),
+		target_class, cb);
     }
 }
 
-void
+    void
 RibManager::register_interest_in_target_done(const XrlError& e)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_ERROR("Failed to register interest in an XRL target\n");
     }
 }
 
-void
+    void
 RibManager::deregister_interest_in_target(const string& target_class)
 {
     if (_targets_of_interest.find(target_class)
-	!= _targets_of_interest.end()) {
+	    != _targets_of_interest.end()) 
+    {
 	_targets_of_interest.erase(target_class);
 	XrlFinderEventNotifierV0p1Client finder(&_xrl_router);
 	XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
 	    callback(this, &RibManager::deregister_interest_in_target_done);
 	finder.send_deregister_class_event_interest("finder",
-						    _xrl_router.instance_name(),
-						    target_class, cb);
+		_xrl_router.instance_name(),
+		target_class, cb);
     }
 }
 
-void
+    void
 RibManager::deregister_interest_in_target_done(const XrlError& e)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_ERROR("Failed to deregister interest in an XRL target\n");
     }
 }
 
-void
+    void
 RibManager::target_death(const string& target_class,
-			 const string& target_instance)
+	const string& target_instance)
 {
-    if (target_class == "fea") {
+    if (target_class == "fea") 
+    {
 	// No cleanup - we just exit.
 	XLOG_ERROR("FEA died, so RIB is exiting too\n");
 	exit(0);
@@ -399,9 +414,9 @@ RibManager::target_death(const string& target_class,
 #endif
 }
 
-string
+    string
 RibManager::make_redist_name(const string& xrl_target, const string& cookie,
-		 bool is_xrl_transaction_output)
+	bool is_xrl_transaction_output)
 {
     string redist_name = xrl_target + ":" + cookie;
 
@@ -414,20 +429,21 @@ RibManager::make_redist_name(const string& xrl_target, const string& cookie,
 }
 
 template <typename A>
-int
+    int
 RibManager::redist_enable_xrl_output( XrlRouter&	rtr,
-			 Profile&	profile,
-			 RIB<A>&	rib,
-			 const string&	to_xrl_target,
-			 const string&	proto,
-			 const IPNet<A>& network_prefix,
-			 const string&	cookie,
-			 bool		is_xrl_transaction_output)
+	Profile&	profile,
+	RIB<A>&	rib,
+	const string&	to_xrl_target,
+	const string&	proto,
+	const IPNet<A>& network_prefix,
+	const string&	cookie,
+	bool		is_xrl_transaction_output)
 {
     string protocol(proto);
 
     RedistPolicy<A>* redist_policy = 0;
-    if (protocol.find("all-") == 0) {
+    if (protocol.find("all-") == 0) 
+    {
 	// XXX Voodoo magic, user requests a name like all-<protocol>
 	// then we attach xrl output to the redist output table (known
 	// internally by the name "all") and set the redist_policy filter
@@ -435,46 +451,53 @@ RibManager::redist_enable_xrl_output( XrlRouter&	rtr,
 	protocol = "all";
 
 	string sub = proto.substr(4, string::npos);
-	if (sub != "all") {
+	if (sub != "all") 
+	{
 	    Protocol* p = rib.find_protocol(sub);
-	    if (p != 0) {
+	    if (p != 0) 
+	    {
 		redist_policy = new IsOfProtocol<A>(*p);
-	    } else {
+	    } else 
+	    {
 		return XORP_ERROR;
 	    }
 	}
     }
 
     RedistTable<A>* rt = rib.protocol_redist_table(protocol);
-    if (rt == 0) {
+    if (rt == 0) 
+    {
 	delete redist_policy;
 	return XORP_ERROR;
     }
 
     string redist_name = make_redist_name(to_xrl_target, cookie,
-					  is_xrl_transaction_output);
-    if (rt->redistributor(redist_name) != 0) {
+	    is_xrl_transaction_output);
+    if (rt->redistributor(redist_name) != 0) 
+    {
 	delete redist_policy;
 	return XORP_ERROR;
     }
 
     Redistributor<A>* redist = new Redistributor<A>( redist_name);
     redist->set_redist_table(rt);
-    if (is_xrl_transaction_output) {
+    if (is_xrl_transaction_output) 
+    {
 	redist->set_output(
-		    new RedistTransactionXrlOutput<A>(redist, rtr,
-						      profile,
-						      protocol,
-						      to_xrl_target,
-						      network_prefix,
-						      cookie)
-		    );
-    } else {
+		new RedistTransactionXrlOutput<A>(redist, rtr,
+		    profile,
+		    protocol,
+		    to_xrl_target,
+		    network_prefix,
+		    cookie)
+		);
+    } else 
+    {
 	redist->set_output(new RedistXrlOutput<A>(redist, rtr,
-						  profile,
-						  protocol,
-						  to_xrl_target,
-						  network_prefix, cookie));
+		    profile,
+		    protocol,
+		    to_xrl_target,
+		    network_prefix, cookie));
     }
 
     redist->set_policy(redist_policy);
@@ -483,15 +506,16 @@ RibManager::redist_enable_xrl_output( XrlRouter&	rtr,
 }
 
 template <typename A>
-int
+    int
 RibManager::redist_disable_xrl_output(RIB<A>& rib,
-			  const string& to_xrl_target,
-			  const string& proto,
-			  const string& cookie,
-			  bool is_xrl_transaction_output)
+	const string& to_xrl_target,
+	const string& proto,
+	const string& cookie,
+	bool is_xrl_transaction_output)
 {
     string protocol(proto);
-    if (protocol.find("ribout-") == 0) {
+    if (protocol.find("ribout-") == 0) 
+    {
 	// XXX Voodoo magic, user requests a name like ribout-<protocol>
 	// then we attach xrl output to the redist output table (known
 	// internally by the name "all"
@@ -503,7 +527,7 @@ RibManager::redist_disable_xrl_output(RIB<A>& rib,
 	return XORP_ERROR;
 
     string redist_name = make_redist_name(to_xrl_target, cookie,
-					  is_xrl_transaction_output);
+	    is_xrl_transaction_output);
     Redistributor<A>* redist = rt->redistributor(redist_name);
     if (redist == 0)
 	return XORP_ERROR;
@@ -513,59 +537,63 @@ RibManager::redist_disable_xrl_output(RIB<A>& rib,
     return XORP_OK;
 }
 
-int
+    int
 RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
-				   const string&	from_protocol,
-				   bool			unicast,
-				   bool			multicast,
-				   const IPv4Net&	network_prefix,
-				   const string&	cookie,
-				   bool			is_xrl_transaction_output)
+	const string&	from_protocol,
+	bool			unicast,
+	bool			multicast,
+	const IPv4Net&	network_prefix,
+	const string&	cookie,
+	bool			is_xrl_transaction_output)
 {
-    if (unicast) {
+    if (unicast) 
+    {
 	int e = redist_enable_xrl_output( _xrl_router, _profile,
-					 _urib4,
-					 to_xrl_target, from_protocol,
-					 network_prefix, cookie,
-					 is_xrl_transaction_output);
-	if (e != XORP_OK) {
+		_urib4,
+		to_xrl_target, from_protocol,
+		network_prefix, cookie,
+		is_xrl_transaction_output);
+	if (e != XORP_OK) 
+	{
 	    return e;
 	}
     }
-    if (multicast) {
+    if (multicast) 
+    {
 	int e = redist_enable_xrl_output( _xrl_router, _profile,
-					 _mrib4,
-					 to_xrl_target, from_protocol,
-					 network_prefix, cookie,
-					 is_xrl_transaction_output);
-	if (e != XORP_OK && unicast) {
+		_mrib4,
+		to_xrl_target, from_protocol,
+		network_prefix, cookie,
+		is_xrl_transaction_output);
+	if (e != XORP_OK && unicast) 
+	{
 	    redist_disable_xrl_output(_urib4,
-				      to_xrl_target, from_protocol, cookie,
-				      is_xrl_transaction_output);
+		    to_xrl_target, from_protocol, cookie,
+		    is_xrl_transaction_output);
 	}
 	return e;
     }
     return XORP_OK;
 }
 
-int
+    int
 RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
-				      const string&	from_protocol,
-				      bool	   	unicast,
-				      bool		multicast,
-				      const string&	cookie,
-				      bool		is_xrl_transaction_output)
+	const string&	from_protocol,
+	bool	   	unicast,
+	bool		multicast,
+	const string&	cookie,
+	bool		is_xrl_transaction_output)
 {
     if (unicast)
 	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
+		is_xrl_transaction_output);
     if (multicast)
 	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
+		is_xrl_transaction_output);
     return XORP_OK;
 }
 
-void
+    void
 RibManager::push_routes()
 {
     _urib4.push_routes();
@@ -576,32 +604,32 @@ RibManager::push_routes()
 #endif
 }
 
-void
+    void
 RibManager::configure_filter(const uint32_t& filter, const string& conf)
 {
     _policy_filters.configure(filter, conf);
 }
 
-void
+    void
 RibManager::reset_filter(const uint32_t& filter)
 {
     _policy_filters.reset(filter);
 }
 
-void
+    void
 RibManager::remove_policy_redist_tags(const string& protocol)
 {
     _policy_redist_map.remove(protocol);
 }
 
-void
+    void
 RibManager::insert_policy_redist_tags(const string& protocol,
-				      const PolicyTags& tags)
+	const PolicyTags& tags)
 {
     _policy_redist_map.insert(protocol, tags);
 }
 
-void
+    void
 RibManager::reset_policy_redist_tags()
 {
     _policy_redist_map.reset();
@@ -612,75 +640,79 @@ RibManager::reset_policy_redist_tags()
 /** IPv6 stuff */
 
 
-int
+    int
 RibManager::add_vif_address(const string&	vifn,
-			    const IPv6&		addr,
-			    const IPv6Net&	subnet,
-			    const IPv6&		peer_addr,
-			    string&		err)
+	const IPv6&		addr,
+	const IPv6Net&	subnet,
+	const IPv6&		peer_addr,
+	string&		err)
 {
     int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet,
-				    IPv6::ZERO(), peer_addr, err);
+	    IPv6::ZERO(), peer_addr, err);
     return r;
 }
 
-int
+    int
 RibManager::delete_vif_address(const string& 	vifn,
-			       const IPv6& 	addr,
-			       string& 		err)
+	const IPv6& 	addr,
+	string& 		err)
 {
     return delete_vif_address_from_ribs(_urib6, _mrib6, vifn, addr, err);
 }
 
-int
+    int
 RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
-				   const string&	from_protocol,
-				   bool			unicast,
-				   bool			multicast,
-				   const IPv6Net&	network_prefix,
-				   const string&	cookie,
-				   bool			is_xrl_transaction_output)
+	const string&	from_protocol,
+	bool			unicast,
+	bool			multicast,
+	const IPv6Net&	network_prefix,
+	const string&	cookie,
+	bool			is_xrl_transaction_output)
 {
-    if (unicast) {
+    if (unicast) 
+    {
 	int e = redist_enable_xrl_output( _xrl_router, _profile,
-					 _urib6,
-					 to_xrl_target, from_protocol,
-					 network_prefix, cookie,
-					 is_xrl_transaction_output);
-	if (e != XORP_OK) {
+		_urib6,
+		to_xrl_target, from_protocol,
+		network_prefix, cookie,
+		is_xrl_transaction_output);
+	if (e != XORP_OK) 
+	{
 	    return e;
 	}
     }
-    if (multicast) {
+    if (multicast) 
+    {
 	int e = redist_enable_xrl_output( _xrl_router, _profile,
-					 _mrib6,
-					 to_xrl_target, from_protocol,
-					 network_prefix, cookie,
-					 is_xrl_transaction_output);
-	if (e != XORP_OK && unicast) {
+		_mrib6,
+		to_xrl_target, from_protocol,
+		network_prefix, cookie,
+		is_xrl_transaction_output);
+	if (e != XORP_OK && unicast) 
+	{
 	    redist_disable_xrl_output(_urib6,
-				      to_xrl_target, from_protocol, cookie,
-				      is_xrl_transaction_output);
+		    to_xrl_target, from_protocol, cookie,
+		    is_xrl_transaction_output);
 	}
 	return e;
     }
     return XORP_OK;
 }
 
-int
+    int
 RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
-				      const string&	from_protocol,
-				      bool	   	unicast,
-				      bool		multicast,
-				      const string&	cookie,
-				      bool		is_xrl_transaction_output)
+	const string&	from_protocol,
+	bool	   	unicast,
+	bool		multicast,
+	const string&	cookie,
+	bool		is_xrl_transaction_output)
 {
     if (unicast)
 	redist_disable_xrl_output(_urib6, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
+		is_xrl_transaction_output);
     if (multicast)
 	redist_disable_xrl_output(_mrib6, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
+		is_xrl_transaction_output);
     return XORP_OK;
 }
 

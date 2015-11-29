@@ -38,18 +38,21 @@
 //
 // Test EightBitTime::to_timeval() against values specified in RFC.
 //
-bool
+    bool
 eightbittime_totv_test(TestInfo& info)
 {
-    struct dtuple {
+    struct dtuple 
+    {
 	uint8_t htime;
 	double dtime;
     };
-    struct dtuple dtuples[] = {
+    struct dtuple dtuples[] = 
+    {
 	{ 0x05, 2.0 }, { 0x86, 6.0 }, { 0xe7, 15.0 }, { 0xe8, 30.0 }
     };
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) 
+    {
 	DOUT_LEVEL(info, 2) <<
 	    c_format("htime is %02x", (int)dtuples[i].htime) << endl;
 
@@ -66,18 +69,21 @@ eightbittime_totv_test(TestInfo& info)
 //
 // Test EightBitTime::from_timeval() against values specified in RFC.
 //
-bool
+    bool
 eightbittime_fromtv_test(TestInfo& info)
 {
-    struct dtuple {
+    struct dtuple 
+    {
 	uint8_t htime;
 	double dtime;
     };
-    struct dtuple dtuples[] = {
+    struct dtuple dtuples[] = 
+    {
 	{ 0x05, 2.0 }, { 0x86, 6.0 }, { 0xe7, 15.0 }, { 0xe8, 30.0 }
     };
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) 
+    {
 	DOUT_LEVEL(info, 2) <<
 	    c_format("dtime is %.4f", dtuples[i].dtime) << endl;
 
@@ -97,7 +103,7 @@ eightbittime_fromtv_test(TestInfo& info)
 // Test EightBitTime::from_timeval() and EightBitTime::to_timeval()
 // together with an expected range of values.
 //
-bool
+    bool
 eightbittime_roundtrip_test(TestInfo& info)
 {
     //
@@ -108,7 +114,8 @@ eightbittime_roundtrip_test(TestInfo& info)
     const double max_time = 3840.0;
     const double increment = 0.0625f;	// 1/16th of a second
 
-    for (double dtime = 0.0f; dtime < max_time; dtime += increment) {
+    for (double dtime = 0.0f; dtime < max_time; dtime += increment) 
+    {
 	TimeVal tv1(dtime);
 	DOUT_LEVEL(info, 2) << c_format("dtime is %.4f", dtime) << endl;
 
@@ -133,14 +140,16 @@ eightbittime_roundtrip_test(TestInfo& info)
     return true;
 }
 
-bool
+    bool
 seqno_test(TestInfo& info)
 {
-    struct seqno_tuple {
+    struct seqno_tuple 
+    {
 	uint16_t s1;
 	uint16_t s2;
 	bool expected_result;
-    } sv[] = {
+    } sv[] = 
+    {
 	{ 65535, 2,	false },
 	{ 2,	 65535,	true },
 	{ 32767, 65535, true },
@@ -149,11 +158,12 @@ seqno_test(TestInfo& info)
 	{ 33791, 1023,	false }
     };
 
-    for (size_t i = 0; i < (sizeof(sv)/sizeof(struct seqno_tuple)); i++) {
+    for (size_t i = 0; i < (sizeof(sv)/sizeof(struct seqno_tuple)); i++) 
+    {
 	bool result = is_seq_newer(sv[i].s1, sv[i].s2);
 	DOUT_LEVEL(info, 2) <<
 	    c_format("is_seq_newer(%u, %u) is %s\n", sv[i].s1, sv[i].s2,
-		     bool_c_str(result));
+		    bool_c_str(result));
 	XLOG_ASSERT(result == sv[i].expected_result);
     }
 
@@ -161,7 +171,7 @@ seqno_test(TestInfo& info)
     UNUSED(info);
 }
 
-int
+    int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -177,29 +187,36 @@ main(int argc, char **argv)
 	t.get_optional_args("-t", "--test", "run only the specified test");
     t.complete_args_parsing();
 
-    struct test {
+    struct test 
+    {
 	string test_name;
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
-    } tests[] = {
+    } tests[] = 
+    {
 	{"eightbittime_totv", callback(eightbittime_totv_test)},
 	{"eightbittime_fromtv", callback(eightbittime_fromtv_test)},
 	{"eightbittime_roundtrip", callback(eightbittime_roundtrip_test)},
 	{"seqno", callback(seqno_test)}
     };
 
-    try {
-	if (test.empty()) {
+    try 
+    {
+	if (test.empty()) 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
 		t.run(tests[i].test_name, tests[i].cb);
-	} else {
+	} else 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
-		if (test == tests[i].test_name) {
+		if (test == tests[i].test_name) 
+		{
 		    t.run(tests[i].test_name, tests[i].cb);
 		    return t.exit();
 		}
 	    t.failed("No test with name " + test + " found\n");
 	}
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

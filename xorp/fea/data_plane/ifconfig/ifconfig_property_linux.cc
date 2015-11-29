@@ -41,8 +41,8 @@
 //
 
 
-IfConfigPropertyLinux::IfConfigPropertyLinux(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigProperty(fea_data_plane_manager)
+	IfConfigPropertyLinux::IfConfigPropertyLinux(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigProperty(fea_data_plane_manager)
 {
 }
 
@@ -53,27 +53,27 @@ IfConfigPropertyLinux::~IfConfigPropertyLinux()
 bool
 IfConfigPropertyLinux::test_have_ipv4() const
 {
-    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
-    if (! s.is_valid())
-	return (false);
+	XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
+	if (! s.is_valid())
+		return (false);
 
-    comm_close(s);
+	comm_close(s);
 
-    return (true);
+	return (true);
 }
 
 bool
 IfConfigPropertyLinux::test_have_ipv6() const
 {
 #ifndef HAVE_IPV6
-    return (false);
-#else
-    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
-    if (! s.is_valid())
 	return (false);
+#else
+	XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
+	if (! s.is_valid())
+		return (false);
 
-    comm_close(s);
-    return (true);
+	comm_close(s);
+	return (true);
 #endif // HAVE_IPV6
 }
 

@@ -50,7 +50,7 @@
 
 
 template <typename A>
-void
+    void
 RoutingTable<A>::begin(OspfTypes::AreaID area)
 {
     debug_msg("area %s\n", pr_id(area).c_str());
@@ -71,19 +71,21 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
 	return;
 
     typename Trie<A, InternalRouteEntry<A> >::iterator tip;
-    for (tip = _previous->begin(); tip != _previous->end(); tip++) {
+    for (tip = _previous->begin(); tip != _previous->end(); tip++) 
+    {
 	// This should be a copy not a reference.
- 	InternalRouteEntry<A> ire = tip.payload();
+	InternalRouteEntry<A> ire = tip.payload();
 	debug_msg("ire %s\n", cstring(ire));
 
 	// If this entry contains a route from this area delete it.
 	bool winner_changed;
 	ire.delete_entry(area, winner_changed);
-	
+
 	// If there are no other routes don't put a copy in current.
-	if (ire.empty()) {
+	if (ire.empty()) 
+	{
 	    debug_msg("empty ire %s only this area was present\n",
-		      cstring(ire));
+		    cstring(ire));
 	    continue;
 	}
 
@@ -93,12 +95,12 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
-			   const RouteEntry<A>& rt, const char* msg)
+	const RouteEntry<A>& rt, const char* msg)
 {
     debug_msg("area %s %s %s msg: %s\n", pr_id(area).c_str(), cstring(net),
-	      const_cast<RouteEntry<A>&>(rt).str().c_str(), msg);
+	    const_cast<RouteEntry<A>&>(rt).str().c_str(), msg);
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
     XLOG_ASSERT(rt.get_directly_connected() || rt.get_nexthop() != A::ZERO());
@@ -110,24 +112,27 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     // In the OSPFv3 case lookups of a router will be done by router
     // ID only, so don't make an entry by net, plus there is no way of
     // guaranteeing a unique net as the net will be a link-local address.
-    if (rt.get_destination_type() == OspfTypes::Router) {
+    if (rt.get_destination_type() == OspfTypes::Router) 
+    {
 	string dbg(msg);
 	dbg += ": RT::add_entry";
 	status = _adv.add_entry(area, rt.get_router_id(), rt, dbg.c_str());
-	switch(_ospf.get_version()) {
-	case OspfTypes::V2:
-	    break;
-	case OspfTypes::V3:
-	    return true;
+	switch(_ospf.get_version()) 
+	{
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		return true;
 	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
-    if (_current->end() == i) {
+    if (_current->end() == i) 
+    {
 	InternalRouteEntry<A> ire;
 	i = _current->insert(net, ire);
-// 	i = _current->lookup_node(net);
+	// 	i = _current->lookup_node(net);
     }
 
     InternalRouteEntry<A>& irentry = i.payload();
@@ -137,27 +142,30 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
-			       const RouteEntry<A>& rt)
+	const RouteEntry<A>& rt)
 {
     debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
     bool status = true;
 
-    if (rt.get_destination_type() == OspfTypes::Router) {
+    if (rt.get_destination_type() == OspfTypes::Router) 
+    {
 	status = _adv.replace_entry(area, rt.get_router_id(), rt, "RT::replace_entry");
- 	switch(_ospf.get_version()) {
- 	case OspfTypes::V2:
- 	    break;
- 	case OspfTypes::V3:
-	    return true;
- 	}
+	switch(_ospf.get_version()) 
+	{
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		return true;
+	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
-    if (_current->end() == i) {
+    if (_current->end() == i) 
+    {
 	return add_entry(area, net, rt, __PRETTY_FUNCTION__);
     }
 
@@ -168,7 +176,7 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(router));
@@ -191,9 +199,9 @@ RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, A router,
-			      RouteEntry<A>& rt)
+	RouteEntry<A>& rt)
 {
     debug_msg("area %s %s\n",  pr_id(area).c_str(), cstring(router));
 
@@ -213,7 +221,7 @@ RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, A router,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
@@ -234,9 +242,9 @@ RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, IPNet<A> net,
-			      RouteEntry<A>& rt)
+	RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
@@ -254,10 +262,10 @@ RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, IPNet<A> net,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::lookup_entry_by_advertising_router(OspfTypes::AreaID area,
-						    uint32_t adv,
-						    RouteEntry<A>& rt)
+	uint32_t adv,
+	RouteEntry<A>& rt)
 {
     debug_msg("area %s %s\n",  pr_id(area).c_str(), pr_id(adv).c_str());
 
@@ -268,7 +276,7 @@ RoutingTable<A>::lookup_entry_by_advertising_router(OspfTypes::AreaID area,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::longest_match_entry(A nexthop, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(nexthop));
@@ -289,7 +297,7 @@ RoutingTable<A>::longest_match_entry(A nexthop, RouteEntry<A>& rt)
 }
 
 template <typename A>
-void
+    void
 RoutingTable<A>::end()
 {
     debug_msg("\n");
@@ -302,11 +310,14 @@ RoutingTable<A>::end()
     // If there is no previous routing table just install the current
     // table and return.
 
-    if (0 == _previous) {
-	for (tic = _current->begin(); tic != _current->end(); tic++) {
+    if (0 == _previous) 
+    {
+	for (tic = _current->begin(); tic != _current->end(); tic++) 
+	{
 	    RouteEntry<A>& rt = tic.payload().get_entry();
 	    if (!add_route(rt.get_area(), tic.key(),
-			   rt.get_nexthop(), rt.get_cost(), rt, true)) {
+			rt.get_nexthop(), rt.get_cost(), rt, true)) 
+	    {
 		XLOG_WARNING("Add of %s failed", cstring(tic.key()));
 	    }
 	}
@@ -323,41 +334,51 @@ RoutingTable<A>::end()
     //		- If the routes match do nothing.
     //		- If the routes are different: replace route.
 
-    for (tip = _previous->begin(); tip != _previous->end(); tip++) {
-	if (_current->end() == _current->lookup_node(tip.key())) {
+    for (tip = _previous->begin(); tip != _previous->end(); tip++) 
+    {
+	if (_current->end() == _current->lookup_node(tip.key())) 
+	{
 	    RouteEntry<A>& rt = tip.payload().get_entry();
-	    if (!delete_route(rt.get_area(), tip.key(), rt, true)) {
+	    if (!delete_route(rt.get_area(), tip.key(), rt, true)) 
+	    {
 		XLOG_WARNING("Delete of %s failed", cstring(tip.key()));
 	    }
 	}
     }
 
-    for (tic = _current->begin(); tic != _current->end(); tic++) {
+    for (tic = _current->begin(); tic != _current->end(); tic++) 
+    {
 	tip = _previous->lookup_node(tic.key());
- 	RouteEntry<A>& rt = tic.payload().get_entry();
-	if (_previous->end() == tip) {
+	RouteEntry<A>& rt = tic.payload().get_entry();
+	if (_previous->end() == tip) 
+	{
 	    if (!add_route(rt.get_area(), tic.key(),
-			   rt.get_nexthop(), rt.get_cost(), rt, true)) {
+			rt.get_nexthop(), rt.get_cost(), rt, true)) 
+	    {
 		XLOG_WARNING("Add of %s failed", cstring(tic.key()));
 	    }
-	} else {
+	} else 
+	{
 	    RouteEntry<A>& rt_previous = tip.payload().get_entry();
 	    if (rt.get_nexthop() != rt_previous.get_nexthop() ||
-		rt.get_cost() != rt_previous.get_cost()) {
+		    rt.get_cost() != rt_previous.get_cost()) 
+	    {
 		if (!replace_route(rt.get_area(), tip.key(),
-				   rt.get_nexthop(), rt.get_cost(),
-				   rt, rt_previous, rt_previous.get_area())) {
+			    rt.get_nexthop(), rt.get_cost(),
+			    rt, rt_previous, rt_previous.get_area())) 
+		{
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
-	    } else {
- 		rt.set_filtered(rt_previous.get_filtered());
+	    } else 
+	    {
+		rt.set_filtered(rt_previous.get_filtered());
 	    }
 	}
     }
 }
 
 template <typename A>
-void
+    void
 RoutingTable<A>::remove_area(OspfTypes::AreaID area)
 {
     XLOG_ASSERT(!_in_transaction);
@@ -372,52 +393,57 @@ RoutingTable<A>::remove_area(OspfTypes::AreaID area)
     // background task.
 
     typename Trie<A, InternalRouteEntry<A> >::iterator tic;
-    for (tic = _current->begin(); tic != _current->begin(); tic++) {
- 	InternalRouteEntry<A>& ire = tic.payload();
+    for (tic = _current->begin(); tic != _current->begin(); tic++) 
+    {
+	InternalRouteEntry<A>& ire = tic.payload();
 	RouteEntry<A>& rt = ire.get_entry();
 	// If the winning entry is for this area delete it from the
 	// routing table.
 	if (rt.get_area() == area)
 	    delete_route(area, tic.key(), rt, true);
-	    
+
 	// Unconditionally remove the area, it may be a losing route.
 	bool winner_changed;
 	if (!ire.delete_entry(area, winner_changed))
 	    continue;
 
 	// No more route entries exist so remove this internal entry.
-	if (ire.empty()) {
+	if (ire.empty()) 
+	{
 	    _current->erase(tic);
 	    continue;
 	}
 
 	// If a new winner has emerged add it to the routing table.
-	if (winner_changed) {
+	if (winner_changed) 
+	{
 	    add_route(area, tic.key(), rt.get_nexthop(), rt.get_cost(),
-		      ire.get_entry(), true);
+		    ire.get_entry(), true);
 	}
     }
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
-			   uint32_t metric, RouteEntry<A>& rt, bool summaries)
+	uint32_t metric, RouteEntry<A>& rt, bool summaries)
 {
     debug_msg("ADD ROUTE area %s net %s nexthop %s metric %u\n",
-	      pr_id(area).c_str(), cstring(net), cstring(nexthop), metric);
+	    pr_id(area).c_str(), cstring(net), cstring(nexthop), metric);
 
     bool result = true;
-    if (!rt.get_discard()) {
+    if (!rt.get_discard()) 
+    {
 	PolicyTags policytags;
 	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
 	rt.set_filtered(!accepted);
 	if (accepted)
 	    result = _ospf.add_route(net, nexthop, rt.get_nexthop_id(), metric,
-				     false /* equal */,
-				     false /* discard */,
-				     policytags);
-    }  else {
+		    false /* equal */,
+		    false /* discard */,
+		    policytags);
+    }  else 
+    {
 	XLOG_WARNING("TBD - installing discard routes");
 	result = false;
     }
@@ -429,20 +455,22 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
-			      RouteEntry<A>& rt, bool summaries)
+	RouteEntry<A>& rt, bool summaries)
 {
     debug_msg("DELETE ROUTE area %s %s filtered %s\n", pr_id(area).c_str(), 
-	      cstring(net), bool_c_str(rt.get_filtered()));
+	    cstring(net), bool_c_str(rt.get_filtered()));
 
     bool result;
-    if (!rt.get_discard()) {
+    if (!rt.get_discard()) 
+    {
 	if (!rt.get_filtered())
 	    result = _ospf.delete_route(net);
 	else
 	    result = true;
-    } else {
+    } else 
+    {
 	XLOG_WARNING("TBD - removing discard routes");
 	result = false;
     }
@@ -454,11 +482,11 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
-			       uint32_t metric, RouteEntry<A>& rt,
-			       RouteEntry<A>& previous_rt,
-			       OspfTypes::AreaID previous_area)
+	uint32_t metric, RouteEntry<A>& rt,
+	RouteEntry<A>& previous_rt,
+	OspfTypes::AreaID previous_area)
 {
     debug_msg("REPLACE ROUTE area %s %s\n", pr_id(area).c_str(), cstring(net));
 
@@ -468,13 +496,13 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
     result = add_route(area, net, nexthop, metric, rt, false);
 
     _ospf.get_peer_manager().summary_replace(area, net, rt, previous_rt,
-					     previous_area);
+	    previous_area);
 
     return result;
 }
 
 template <typename A>
-void
+    void
 RoutingTable<A>::push_routes()
 {
     typename Trie<A, InternalRouteEntry<A> >::iterator tic;
@@ -482,7 +510,8 @@ RoutingTable<A>::push_routes()
     if (0 == _current)
 	return;
 
-    for (tic = _current->begin(); tic != _current->end(); tic++) {
+    for (tic = _current->begin(); tic != _current->end(); tic++) 
+    {
 	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (rt.get_discard())
 	    continue;
@@ -493,21 +522,26 @@ RoutingTable<A>::push_routes()
 	uint32_t metric = rt.get_cost();
 	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
 
-	if (accepted) {
-	    if (!rt.get_filtered()) {
+	if (accepted) 
+	{
+	    if (!rt.get_filtered()) 
+	    {
 		_ospf.replace_route(net, nexthop, nexthop_id, metric,
-				    false /* equal */,
-				    false /* discard */,
-				    policytags);
-				    
-	    } else {
+			false /* equal */,
+			false /* discard */,
+			policytags);
+
+	    } else 
+	    {
 		_ospf.add_route(net, nexthop, nexthop_id, metric,
-				false /* equal */,
-				false /* discard */,
-				policytags);
+			false /* equal */,
+			false /* discard */,
+			policytags);
 	    }
-	} else {
-	    if (!rt.get_filtered()) {
+	} else 
+	{
+	    if (!rt.get_filtered()) 
+	    {
 		_ospf.delete_route(net);
 	    }
 	}
@@ -517,37 +551,38 @@ RoutingTable<A>::push_routes()
 }
 
 template <typename A>
-bool
+    bool
 RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
-			      uint32_t& metric, RouteEntry<A>& rt,
-			      PolicyTags& policytags)
+	uint32_t& metric, RouteEntry<A>& rt,
+	PolicyTags& policytags)
 {
     // The OSPF routing table needs to contain directly connected
     // routes and routes to routers to satisfy requirements for
     // AS-External-LSAs and Summary-LSAs. Drop them here so they don't
     // make it the the RIB.
     if (/*net.contains(nexthop) ||*/
-	OspfTypes::Router == rt.get_destination_type() ||
-	rt.get_directly_connected())
- 	return false;
+	    OspfTypes::Router == rt.get_destination_type() ||
+	    rt.get_directly_connected())
+	return false;
 
     // The import policy filter.
-    try {
+    try 
+    {
 	bool e_bit;
 	uint32_t tag;
 	bool tag_set;
 	OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, tag_set,
-			   policytags);
+		policytags);
 
 	// Import filtering
 	bool accepted;
 
 	debug_msg("[OSPF] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT), cstring(net));
+		filter::filter2str(filter::IMPORT), cstring(net));
 	XLOG_TRACE(_ospf.trace()._import_policy,
-		   "[OSPF] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::IMPORT), cstring(net));
-		   
+		"[OSPF] Running filter: %s on route: %s\n",
+		filter::filter2str(filter::IMPORT), cstring(net));
+
 	accepted = _ospf.get_policy_filters().
 	    run_filter(filter::IMPORT, varrw);
 
@@ -556,22 +591,23 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 	    return accepted;
 
 	OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, tag_set,
-			    policytags);
+		policytags);
 
 	// Export source-match filtering
 	debug_msg("[OSPF] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
-		  cstring(net));
+		filter::filter2str(filter::EXPORT_SOURCEMATCH),
+		cstring(net));
 	XLOG_TRACE(_ospf.trace()._import_policy,
-		   "[OSPF] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::EXPORT_SOURCEMATCH),
-		   cstring(net));
+		"[OSPF] Running filter: %s on route: %s\n",
+		filter::filter2str(filter::EXPORT_SOURCEMATCH),
+		cstring(net));
 
 	_ospf.get_policy_filters().
 	    run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return accepted;
-    } catch(const PolicyException& e) {
+    } catch(const PolicyException& e) 
+    {
 	XLOG_WARNING("PolicyException: %s", e.str().c_str());
 	return false;
     }
@@ -580,13 +616,14 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 }
 
 template <typename A>
-bool
+    bool
 InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area,
-				 const RouteEntry<A>& rt)
+	const RouteEntry<A>& rt)
 {
     // An entry for this *area* should not already exist.
     XLOG_ASSERT(0 == _entries.count(area));
-    if (0 == _entries.size()) {
+    if (0 == _entries.size()) 
+    {
 	_entries[area] = rt;
 	reset_winner();
 	return true;
@@ -599,9 +636,9 @@ InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area,
 }
 
 template <typename A>
-bool
+    bool
 InternalRouteEntry<A>::replace_entry(OspfTypes::AreaID area,
-				     const RouteEntry<A>& rt)
+	const RouteEntry<A>& rt)
 {
     bool winner_changed;
     delete_entry(area, winner_changed);
@@ -609,15 +646,15 @@ InternalRouteEntry<A>::replace_entry(OspfTypes::AreaID area,
 }
 
 template <typename A>
-bool
+    bool
 InternalRouteEntry<A>::delete_entry(OspfTypes::AreaID area,
-				    bool& winner_changed)
+	bool& winner_changed)
 {
     if (0 == _entries.count(area))
 	return false;
 
     _entries.erase(_entries.find(area));
-    
+
     winner_changed = reset_winner();
 
     return true;
@@ -636,7 +673,7 @@ InternalRouteEntry<A>::get_entry() const
 template <typename A>
 bool
 InternalRouteEntry<A>::get_entry(OspfTypes::AreaID area,
-				 RouteEntry<A>& rt) const
+	RouteEntry<A>& rt) const
 {
     typename map<OspfTypes::AreaID, RouteEntry<A> >::const_iterator i;
 
@@ -649,28 +686,34 @@ InternalRouteEntry<A>::get_entry(OspfTypes::AreaID area,
 }
 
 template <typename A>
-bool
+    bool
 InternalRouteEntry<A>::reset_winner()
 {
     RouteEntry<A> *old_winner = _winner;
     _winner = 0;
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
-    for (i = _entries.begin(); i != _entries.end(); i++) {
-	if (i == _entries.begin()) {
+    for (i = _entries.begin(); i != _entries.end(); i++) 
+    {
+	if (i == _entries.begin()) 
+	{
 	    _winner = &(i->second);
 	    continue;
 	}
 	RouteEntry<A>& comp = i->second;
-	if (comp.get_path_type() < _winner->get_path_type()) {
+	if (comp.get_path_type() < _winner->get_path_type()) 
+	{
 	    _winner = &comp;
 	    continue;
 	}
-	if (comp.get_path_type() == _winner->get_path_type()) {
-	    if (comp.get_cost() < _winner->get_cost()) {
+	if (comp.get_path_type() == _winner->get_path_type()) 
+	{
+	    if (comp.get_cost() < _winner->get_cost()) 
+	    {
 		_winner = &comp;
 		continue;
 	    }
-	    if (comp.get_cost() == _winner->get_cost()) {
+	    if (comp.get_cost() == _winner->get_cost()) 
+	    {
 		if (comp.get_area() > _winner->get_area())
 		    _winner = &comp;
 		continue;
@@ -682,13 +725,14 @@ InternalRouteEntry<A>::reset_winner()
 }
 
 template <typename A>
-string
+    string
 InternalRouteEntry<A>::str()
 {
     string output;
 
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
-    for (i = _entries.begin(); i != _entries.end(); i++) {
+    for (i = _entries.begin(); i != _entries.end(); i++) 
+    {
 	output += "Area: " + pr_id(i->first) + " " + i->second.str() + " ";
 	if (&(i->second) == _winner)
 	    output += "winner ";
@@ -698,7 +742,7 @@ InternalRouteEntry<A>::str()
 }
 
 template <typename A>
-void
+    void
 Adv<A>::clear_area(OspfTypes::AreaID area)
 {
     debug_msg("Clearing area %s\n", pr_id(area).c_str());
@@ -712,18 +756,19 @@ Adv<A>::clear_area(OspfTypes::AreaID area)
 }
 
 template <typename A>
-bool
+    bool
 Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
-		  const RouteEntry<A>& rt, const char* dbg)
+	const RouteEntry<A>& rt, const char* dbg)
 {
     UNUSED(dbg); // if logging is compiled out
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
-	   pr_id(adv).c_str());
+	    pr_id(adv).c_str());
 
     XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get())||
-		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
+	    dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
 
-    if (0 == _adv.count(area)) {
+    if (0 == _adv.count(area)) 
+    {
 	AREA a;
 	a[adv] = rt;
 	_adv[area] = a;
@@ -733,12 +778,13 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     typename ADV::iterator i = _adv.find(area);
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
-    if (i->second.end() != j) {
+    if (i->second.end() != j) 
+    {
 	XLOG_WARNING("An entry with this advertising router already exists, area:"
-		     " %s  adv: %s dbg: %s existing: %s\nrt->LSA:\n%s",
-		     pr_id(area).c_str(), pr_id(adv).c_str(), dbg,
-		     cstring(*(j->second.get_lsa())),
-		     cstring(*rt.get_lsa()));
+		" %s  adv: %s dbg: %s existing: %s\nrt->LSA:\n%s",
+		pr_id(area).c_str(), pr_id(adv).c_str(), dbg,
+		cstring(*(j->second.get_lsa())),
+		cstring(*rt.get_lsa()));
 	return false;
     }
 
@@ -749,20 +795,21 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
 }
 
 template <typename A>
-bool
+    bool
 Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
-		      const RouteEntry<A>& rt, const char* dbg)
+	const RouteEntry<A>& rt, const char* dbg)
 {
     UNUSED(dbg); // if logging is compiled out
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
-	   pr_id(adv).c_str());
+	    pr_id(adv).c_str());
 
     XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get())||
-		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
+	    dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
 
-    if (0 == _adv.count(area)) {
+    if (0 == _adv.count(area)) 
+    {
 	XLOG_WARNING("There should already be an entry for this area, dbg: %s rt->LSA:\n%s",
-		     dbg, cstring(*rt.get_lsa()));
+		dbg, cstring(*rt.get_lsa()));
 	AREA a;
 	a[adv] = rt;
 	_adv[area] = a;
@@ -774,9 +821,10 @@ Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
     typename ADV::iterator i = _adv.find(area);
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
-    if (i->second.end() == j) {
+    if (i->second.end() == j) 
+    {
 	XLOG_WARNING("There should already be an entry with this adv, dbg: %s rt->LSA:\n%s",
-		     dbg, cstring(*rt.get_lsa()));
+		dbg, cstring(*rt.get_lsa()));
 	status = false;
     }
 
@@ -789,12 +837,13 @@ Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
 template <typename A>
 bool
 Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
-		     RouteEntry<A>& rt) const
+	RouteEntry<A>& rt) const
 {
     debug_msg("Lookup entry area %s adv %s\n", pr_id(area).c_str(),
-	   pr_id(adv).c_str());
+	    pr_id(adv).c_str());
 
-    if (0 == _adv.count(area)) {
+    if (0 == _adv.count(area)) 
+    {
 	return false;
     }
 
@@ -806,7 +855,7 @@ Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
     rt = j->second;
 
     debug_msg("Found area %s adv %s\n", pr_id(area).c_str(),
-	   pr_id(adv).c_str());
+	    pr_id(adv).c_str());
 
     return true;
 }

@@ -55,17 +55,18 @@
 /*
  * PIM packet header
  */
-struct pim {
+struct pim 
+{
 #ifdef _PIM_VT
 	uint8_t		pim_vt;		/* PIM version and message type	*/
 #else /* ! _PIM_VT   */
 #if BYTE_ORDER == BIG_ENDIAN
 	u_int		pim_vers:4,	/* PIM protocol version		*/
-			pim_type:4;	/* PIM message type		*/
+				pim_type:4;	/* PIM message type		*/
 #endif
 #if BYTE_ORDER == LITTLE_ENDIAN
 	u_int		pim_type:4,	/* PIM message type		*/
-			pim_vers:4;	/* PIM protocol version		*/
+				pim_vers:4;	/* PIM protocol version		*/
 #endif
 #endif /* ! _PIM_VT  */
 	uint8_t		pim_reserved;	/* Reserved			*/
@@ -112,7 +113,7 @@ struct pim {
 #define INADDR_ALLPIM_ROUTERS_GROUP	(uint32_t)0xe000000dU  /* 224.0.0.13 */
 #define IN6ADDR_LINKLOCAL_ALLPIM_ROUTERS	"ff02::d"
 #define IN6ADDR_LINKLOCAL_ALLPIM_ROUTERS_INIT				\
-	{{{ 0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,		\
-	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d }}}
+{{{ 0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,		\
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d }}}
 
 #endif /* _NETINET_PIM_H_ */

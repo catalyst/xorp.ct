@@ -31,26 +31,28 @@
  * The sole purpose of this class is to register the callbacks before the
  * dispatcher is actually used, and register them only once at startup.
  */
-class RegisterOperations {
-public:
-    /**
-     * Constructor which performs registrations
-     *
-     * In essence, this is where the grammar lives.
-     */
-    RegisterOperations();
+class RegisterOperations 
+{
+    public:
+	/**
+	 * Constructor which performs registrations
+	 *
+	 * In essence, this is where the grammar lives.
+	 */
+	RegisterOperations();
 };
 
-namespace operations {
+namespace operations 
+{
 
-/**
- * Maybe be used to construct elements.  Also for casting! 
- *
- * @param type the string representation of typename.
- * @param arg the string representation of value.
- * @return element of wanted type representing arg.
- */
-Element* ctr(const ElemStr& type, const Element& arg);
+    /**
+     * Maybe be used to construct elements.  Also for casting! 
+     *
+     * @param type the string representation of typename.
+     * @param arg the string representation of value.
+     * @return element of wanted type representing arg.
+     */
+    Element* ctr(const ElemStr& type, const Element& arg);
 
 }
 

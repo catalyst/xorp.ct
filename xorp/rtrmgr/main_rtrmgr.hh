@@ -32,47 +32,48 @@
 class MasterConfigTree;
 class XrlRtrmgrInterface;
 
-class Rtrmgr {
-public:
-    Rtrmgr(const string& module_dir,
-	   const string& command_dir,
-	   const string& template_dir,
-	   const string& xrl_targets_dir,
-	   const string& config_file,
-	   const list<IPv4>& bind_addrs,
-	   uint16_t bind_port,
-	   bool	do_exec,
-	   bool	do_restart,
-	   bool verbose,
-	   int32_t quit_time,
-	   bool daemon_mode);
-    ~Rtrmgr();
+class Rtrmgr 
+{
+	public:
+		Rtrmgr(const string& module_dir,
+				const string& command_dir,
+				const string& template_dir,
+				const string& xrl_targets_dir,
+				const string& config_file,
+				const list<IPv4>& bind_addrs,
+				uint16_t bind_port,
+				bool	do_exec,
+				bool	do_restart,
+				bool verbose,
+				int32_t quit_time,
+				bool daemon_mode);
+		~Rtrmgr();
 
-    int run();
-    bool ready() const;
-    void module_status_changed(const string& module_name,
-			       GenericModule::ModuleStatus status);
-    void daemonize();
-    bool verbose() const { return _verbose; }
+		int run();
+		bool ready() const;
+		void module_status_changed(const string& module_name,
+				GenericModule::ModuleStatus status);
+		void daemonize();
+		bool verbose() const { return _verbose; }
 
-private:
-    string	_module_dir;
-    string	_command_dir;
-    string	_template_dir;
-    string	_xrl_targets_dir;        // Only used by DEBUG_XRLDB.
-    string	_config_file;
-    list<IPv4>	_bind_addrs;
-    uint16_t	_bind_port;
+	private:
+		string	_module_dir;
+		string	_command_dir;
+		string	_template_dir;
+		string	_xrl_targets_dir;        // Only used by DEBUG_XRLDB.
+		string	_config_file;
+		list<IPv4>	_bind_addrs;
+		uint16_t	_bind_port;
 
-    bool	_do_exec;
-    bool	_do_restart;
-    bool	_verbose;		// Set to true if output is verbose
-    int32_t	_quit_time;
-    bool 	_daemon_mode;
+		bool	_do_exec;
+		bool	_do_restart;
+		bool	_verbose;		// Set to true if output is verbose
+		int32_t	_quit_time;
+		bool 	_daemon_mode;
 
-    bool	_ready;
-    MasterConfigTree* _mct;
-    XrlRtrmgrInterface* _xrt;
+		bool	_ready;
+		MasterConfigTree* _mct;
+		XrlRtrmgrInterface* _xrt;
 };
 
 #endif // __RTRMGR_MAIN_RTRMGR_HH__

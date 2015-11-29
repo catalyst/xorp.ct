@@ -53,7 +53,7 @@ bool forever = false;
  * Configure a single face. Nothing is really expected to go wrong
  * but the test is useful to verify the normal path through the code.
  */
-bool
+    bool
 single_face(TestInfo& info)
 {
 
@@ -79,23 +79,27 @@ single_face(TestInfo& info)
 
     fm.activate_face(interface, vif);
 
-    if (!olsr.set_hello_interval(TimeVal(hello_interval, 0))) {
+    if (!olsr.set_hello_interval(TimeVal(hello_interval, 0))) 
+    {
 	DOUT(info) << "Failed to set hello interval\n";
 	return false;
     }
 
-    if (!olsr.set_refresh_interval(TimeVal(refresh_interval, 0))) {
+    if (!olsr.set_refresh_interval(TimeVal(refresh_interval, 0))) 
+    {
 	DOUT(info) << "Failed to set refresh interval\n";
 	return false;
     }
 
-    if (!olsr.set_interface_cost(interface, vif, interface_cost)) {
+    if (!olsr.set_interface_cost(interface, vif, interface_cost)) 
+    {
 	DOUT(info) << "Failed to set face cost\n";
 	return false;
     }
 
     // Bring the OLSR interface binding up.
-    if (!fm.set_face_enabled(faceid, true)) {
+    if (!fm.set_face_enabled(faceid, true)) 
+    {
 	DOUT(info) << "Failed enable face\n";
 	return false;
     }
@@ -106,25 +110,29 @@ single_face(TestInfo& info)
 
     bool timeout = false;
     XorpTimer t = EventLoop::instance().set_flag_after(TimeVal(4 * hello_interval ,0),
-					   &timeout);
-    while (olsr.running() && !timeout) {
+	    &timeout);
+    while (olsr.running() && !timeout) 
+    {
 	EventLoop::instance().run();
 	if (2 == io.packets())
 	    break;
     }
-    if (timeout) {
+    if (timeout) 
+    {
 	DOUT(info) << "No packets sent, test timed out\n";
 	return false;
     }
 
     // Take the OLSR interface binding down
-    if (!fm.set_face_enabled(faceid, false)) {
+    if (!fm.set_face_enabled(faceid, false)) 
+    {
 	DOUT(info) << "Failed to disable face\n";
 	return false;
     }
 
     // Delete the face.
-    if (!fm.delete_face(faceid)) {
+    if (!fm.delete_face(faceid)) 
+    {
 	DOUT(info) << "Failed to delete face\n";
 	return false;
     }
@@ -140,7 +148,7 @@ string suppress;
  * Configure two faces. Nothing is really expected to go wrong
  * but the test is useful to verify the normal path through the code.
  */
-bool
+    bool
 two_faces(TestInfo& info, Stagger stagger)
 {
 
@@ -154,21 +162,22 @@ two_faces(TestInfo& info, Stagger stagger)
 	verbose[0] = false;
     else if (suppress == "olsr2")
 	verbose[1] = false;
-    else {
+    else 
+    {
 	info.out() << "illegal value for suppress" << suppress << endl;
 	return false;
     }
-    
+
     TestInfo info1(info.test_name() + "(olsr1)" , verbose[0],
-		   info.verbose_level(), info.out());
+	    info.verbose_level(), info.out());
     TestInfo info2(info.test_name() + "(olsr2)" , verbose[1],
-		   info.verbose_level(), info.out());
+	    info.verbose_level(), info.out());
 
     DebugIO io_1(info1);
     io_1.startup();
     DebugIO io_2(info2);
     io_2.startup();
-    
+
     Olsr olsr_1( &io_1);
     Olsr olsr_2( &io_2);
 
@@ -236,10 +245,11 @@ two_faces(TestInfo& info, Stagger stagger)
 
     bool timeout = false;
     XorpTimer t = EventLoop::instance().set_flag_after(TimeVal(20 * hello_interval, 0),
-					   &timeout);
+	    &timeout);
 
     const int expected = 16;
-    while (olsr_1.running() && olsr_2.running() && !timeout) {
+    while (olsr_1.running() && olsr_2.running() && !timeout) 
+    {
 	EventLoop::instance().run();
 	if (expected <= io_1.packets() + io_2.packets())
 	    break;
@@ -248,22 +258,25 @@ two_faces(TestInfo& info, Stagger stagger)
 	if (STAGGER2 == stagger && 1 == io_1.packets())
 	    fm_2.set_face_enabled(faceid_2, true);
     }
-    if (timeout) {
+    if (timeout) 
+    {
 	DOUT(info) << io_1.packets() << " packets sent, at most " << expected <<
 	    " expected; test timed out\n";
 	return false;
     }
 
     // Assert that OLSR1 sees OLSR2 correctly.
-    try {
+    try 
+    {
 	// Assert that OLSR2's interface on the emulated subnet is present in
 	// OLSR1's link database, and that the link is symmetric.
 	OlsrTypes::LogicalLinkID lid = nh_1.get_linkid(addr_2, addr_1);
 	const LogicalLink* l = nh_1.get_logical_link(lid);
-	if (l->is_sym() == false) {
+	if (l->is_sym() == false) 
+	{
 	    DOUT(info) << "Failed to establish a symmetric link between "
-		       << "remote interface " << addr_2.str() << "\n"
-		       << "and local interface " << addr_1.str() << ".\n";
+		<< "remote interface " << addr_2.str() << "\n"
+		<< "and local interface " << addr_1.str() << ".\n";
 	    return false;
 	}
 
@@ -271,29 +284,33 @@ two_faces(TestInfo& info, Stagger stagger)
 	// and that the neighbor is symmetric.
 	OlsrTypes::NeighborID nid = nh_1.get_neighborid_by_main_addr(addr_2);
 	const Neighbor* n = nh_1.get_neighbor(nid);
-	if (n->is_sym() == false) {
+	if (n->is_sym() == false) 
+	{
 	    DOUT(info) << addr_1.str() << " failed to see " << addr_2.str() <<
-	        " as a symmetric neighbor.\n";
+		" as a symmetric neighbor.\n";
 	    return false;
 	}
 
 	XLOG_ASSERT(n->willingness() == OlsrTypes::WILL_HIGH);
 
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	DOUT(info) << " threw exception " << cstring(e) << "\n";
 	return false;
     }
 
     // Assert that OLSR2 sees OLSR1 correctly.
-    try {
+    try 
+    {
 	// Assert that OLSR1's interface on the emulated subnet is present in
 	// OLSR2's link database, and that the link is symmetric.
 	OlsrTypes::LogicalLinkID lid = nh_2.get_linkid(addr_1, addr_2);
 	const LogicalLink* l = nh_2.get_logical_link(lid);
-	if (l->is_sym() == false) {
+	if (l->is_sym() == false) 
+	{
 	    DOUT(info) << "Failed to establish a symmetric link between "
-		       << "remote interface " << addr_1.str() << "\n"
-		       << "and local interface " << addr_2.str() << ".\n";
+		<< "remote interface " << addr_1.str() << "\n"
+		<< "and local interface " << addr_2.str() << ".\n";
 	    return false;
 	}
 
@@ -301,15 +318,17 @@ two_faces(TestInfo& info, Stagger stagger)
 	// and that the neighbor is symmetric.
 	OlsrTypes::NeighborID nid = nh_2.get_neighborid_by_main_addr(addr_1);
 	const Neighbor* n = nh_2.get_neighbor(nid);
-	if (n->is_sym() == false) {
+	if (n->is_sym() == false) 
+	{
 	    DOUT(info) << addr_2.str() << " failed to see " << addr_1.str() <<
-	        " as a symmetric neighbor.\n";
+		" as a symmetric neighbor.\n";
 	    return false;
 	}
 
 	XLOG_ASSERT(n->willingness() == OlsrTypes::WILL_HIGH);
 
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	DOUT(info) << " threw exception " << cstring(e) << "\n";
 	return false;
     }
@@ -331,38 +350,43 @@ two_faces(TestInfo& info, Stagger stagger)
     bool pulled_1 = false;
     bool pulled_2 = false;
 
-    if (NOSTAGGER == stagger) {
+    if (NOSTAGGER == stagger) 
+    {
 	debug_msg("Pulling both ports.\n");
 	emu.unbind_interface("olsr1", interface_1, vif_1, addr_1,
-			     MY_OLSR_PORT, io_1);
+		MY_OLSR_PORT, io_1);
 	emu.unbind_interface("olsr2", interface_2, vif_2, addr_2,
-			     MY_OLSR_PORT, io_2);
+		MY_OLSR_PORT, io_2);
 	pulled_1 = pulled_2 = true;
     }
 
     timeout = false;
     t.clear();
     t = EventLoop::instance().set_flag_after(3 * nh_1.get_neighbor_hold_time(), &timeout);
-    while (!timeout) {
+    while (!timeout) 
+    {
 	EventLoop::instance().run();
-	if (!pulled_1 && STAGGER1 == stagger && expected_1 == io_1.packets()) {
+	if (!pulled_1 && STAGGER1 == stagger && expected_1 == io_1.packets()) 
+	{
 	    debug_msg("Pulling OLSR1.\n");
 	    emu.unbind_interface("olsr1", interface_1, vif_1, addr_1,
-				 MY_OLSR_PORT, io_1);
+		    MY_OLSR_PORT, io_1);
 	    pulled_1 = true;
 	}
-	if (!pulled_2 && STAGGER2 == stagger && expected_2 == io_2.packets()) {
+	if (!pulled_2 && STAGGER2 == stagger && expected_2 == io_2.packets()) 
+	{
 	    debug_msg("Pulling OLSR2.\n");
 	    emu.unbind_interface("olsr2", interface_2, vif_2, addr_2,
-				 MY_OLSR_PORT, io_2);
+		    MY_OLSR_PORT, io_2);
 	    pulled_2 = true;
 	}
     }
 
-    if (io_1.packets() + io_2.packets() < expected_1 + expected_2) {
+    if (io_1.packets() + io_2.packets() < expected_1 + expected_2) 
+    {
 	DOUT(info) << io_1.packets() + io_2.packets()
-	   << " packets sent, at least " << expected_1 + expected_2
-	   << " expected\n";
+	    << " packets sent, at least " << expected_1 + expected_2
+	    << " expected\n";
 	return false;
     }
 
@@ -371,54 +395,64 @@ two_faces(TestInfo& info, Stagger stagger)
     bool thrown;
 
     // Assert that OLSR1 no longer sees OLSR2 as a neighbor.
-    try {
+    try 
+    {
 	thrown = false;
 	OlsrTypes::NeighborID nid = nh_1.get_neighborid_by_main_addr(addr_2);
 	UNUSED(nid);
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	thrown = true;
     }
     XLOG_ASSERT(thrown == true);
 
     // Assert that OLSR1 no longer sees a link between OLSR2's and OLSR1's
     // interface addresses.
-    try {
+    try 
+    {
 	thrown = false;
 	OlsrTypes::LogicalLinkID lid = nh_1.get_linkid(addr_2, addr_1);
 	UNUSED(lid);
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	thrown = true;
     }
     XLOG_ASSERT(thrown == true);
 
     // Assert that OLSR2 no longer sees OLSR1 as a neighbor.
-    try {
+    try 
+    {
 	thrown = false;
 	OlsrTypes::NeighborID nid = nh_2.get_neighborid_by_main_addr(addr_1);
 	UNUSED(nid);
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	thrown = true;
     }
     XLOG_ASSERT(thrown == true);
 
     // Assert that OLSR2 no longer sees a link between OLSR1's and OLSR2's
     // interface addresses.
-    try {
+    try 
+    {
 	thrown = false;
 	OlsrTypes::LogicalLinkID lid = nh_2.get_linkid(addr_1, addr_2);
 	UNUSED(lid);
-    } catch (XorpException& e) {
+    } catch (XorpException& e) 
+    {
 	thrown = true;
     }
     XLOG_ASSERT(thrown == true);
 
     // Delete the faces.
-    if (!fm_1.delete_face(faceid_1)) {
+    if (!fm_1.delete_face(faceid_1)) 
+    {
 	DOUT(info) << "Failed to delete face\n";
 	return false;
     }
 
-    if (!fm_2.delete_face(faceid_2)) {
+    if (!fm_2.delete_face(faceid_2)) 
+    {
 	DOUT(info) << "Failed to delete face\n";
 	return false;
     }
@@ -428,7 +462,7 @@ two_faces(TestInfo& info, Stagger stagger)
     return true;
 }
 
-int
+    int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -446,29 +480,36 @@ main(int argc, char **argv)
 
     typedef XorpCallback1<bool, TestInfo&>::RefPtr TestCB;
 
-    struct test {
+    struct test 
+    {
 	string test_name;
 	TestCB cb;
-    } tests[] = {
+    } tests[] = 
+    {
 	{"single_face", callback(single_face)},
 	{"two_faces", callback(two_faces, NOSTAGGER)},
 	{"two_faces_s1", callback(two_faces, STAGGER1)},
 	{"two_faces_s2", callback(two_faces, STAGGER2)},
     };
 
-    try {
-	if (test.empty()) {
+    try 
+    {
+	if (test.empty()) 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
 		t.run(tests[i].test_name, tests[i].cb);
-	} else {
+	} else 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
-		if (test == tests[i].test_name) {
+		if (test == tests[i].test_name) 
+		{
 		    t.run(tests[i].test_name, tests[i].cb);
 		    return t.exit();
 		}
 	    t.failed("No test with name " + test + " found\n");
 	}
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

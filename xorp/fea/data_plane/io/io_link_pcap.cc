@@ -48,15 +48,15 @@
 #ifdef HAVE_PCAP_H
 
 IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
-		       const IfTree& iftree, const string& if_name,
-		       const string& vif_name, uint16_t ether_type,
-		       const string& filter_program)
-    : IoLink(fea_data_plane_manager, iftree, if_name, vif_name, ether_type,
-	     filter_program),
-      _pcap(NULL),
-      _datalink_type(-1),
-      _pcap_errbuf(NULL),
-      _multicast_sock(-1)
+	const IfTree& iftree, const string& if_name,
+	const string& vif_name, uint16_t ether_type,
+	const string& filter_program)
+: IoLink(fea_data_plane_manager, iftree, if_name, vif_name, ether_type,
+	filter_program),
+    _pcap(NULL),
+    _datalink_type(-1),
+    _pcap_errbuf(NULL),
+    _multicast_sock(-1)
 {
 }
 
@@ -64,9 +64,10 @@ IoLinkPcap::~IoLinkPcap()
 {
     string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
+    if (stop(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Cannot stop the I/O Link raw pcap(3) mechanism: %s",
-		   error_msg.c_str());
+		error_msg.c_str());
     }
 
     // Free the buffers
@@ -74,7 +75,7 @@ IoLinkPcap::~IoLinkPcap()
 	delete[] _pcap_errbuf;
 }
 
-int
+    int
 IoLinkPcap::start(string& error_msg)
 {
     if (_is_running)
@@ -85,13 +86,15 @@ IoLinkPcap::start(string& error_msg)
     //
     XLOG_ASSERT(_multicast_sock < 0);
     _multicast_sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (_multicast_sock < 0) {
+    if (_multicast_sock < 0) 
+    {
 	error_msg = c_format("Error opening multicast L2 join socket: %s",
-			     strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
-    if (open_pcap_access(error_msg) != XORP_OK) {
+    if (open_pcap_access(error_msg) != XORP_OK) 
+    {
 	close(_multicast_sock);
 	_multicast_sock = -1;
 	return (XORP_ERROR);
@@ -102,7 +105,7 @@ IoLinkPcap::start(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkPcap::stop(string& error_msg)
 {
     if (! _is_running)
@@ -115,9 +118,10 @@ IoLinkPcap::stop(string& error_msg)
     // Close the multicast L2 join socket
     //
     XLOG_ASSERT(_multicast_sock >= 0);
-    if (close(_multicast_sock) < 0) {
+    if (close(_multicast_sock) < 0) 
+    {
 	error_msg = c_format("Error closing multicast L2 join socket: %s",
-			     strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
     _multicast_sock = -1;
@@ -127,19 +131,19 @@ IoLinkPcap::stop(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkPcap::join_multicast_group(const Mac& group, string& error_msg)
 {
     return (join_leave_multicast_group(true, group, error_msg));
 }
 
-int
+    int
 IoLinkPcap::leave_multicast_group(const Mac& group, string& error_msg)
 {
     return (join_leave_multicast_group(false, group, error_msg));
 }
 
-int
+    int
 IoLinkPcap::open_pcap_access(string& error_msg)
 {
     string dummy_error_msg;
@@ -156,54 +160,59 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     _pcap_errbuf[0] = '\0';
     _pcap = pcap_open_live(vif_name().c_str(), L2_MAX_PACKET_SIZE, 0, 1,
-			   _pcap_errbuf);
-    if (_pcap == NULL) {
+	    _pcap_errbuf);
+    if (_pcap == NULL) 
+    {
 	error_msg = c_format("Cannot open interface %s vif %s "
-			     "for pcap access: %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     _pcap_errbuf);
+		"for pcap access: %s",
+		if_name().c_str(), vif_name().c_str(),
+		_pcap_errbuf);
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
-    if (_pcap_errbuf[0] != '\0') {
+    if (_pcap_errbuf[0] != '\0') 
+    {
 	XLOG_WARNING("Warning opening interface %s vif %s for pcap access: %s",
-		     if_name().c_str(), vif_name().c_str(), _pcap_errbuf);
+		if_name().c_str(), vif_name().c_str(), _pcap_errbuf);
     }
 
     //
     // Get the data link type
     //
     _datalink_type = pcap_datalink(_pcap);
-    if (_datalink_type < 0) {
+    if (_datalink_type < 0) 
+    {
 	error_msg = c_format("Cannot get the pcap data link type for "
-			     "interface %s vif %s: %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     pcap_geterr(_pcap));
+		"interface %s vif %s: %s",
+		if_name().c_str(), vif_name().c_str(),
+		pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
-    switch (_datalink_type) {
-    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
-	break;			// XXX: data link type recognized
+    switch (_datalink_type) 
+    {
+	case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+	    break;			// XXX: data link type recognized
 
-    default:
-	error_msg = c_format("Data link type %d (%s) on interface %s vif %s "
-			     "is not supported",
-			     _datalink_type,
-			     pcap_datalink_val_to_name(_datalink_type),
-			     if_name().c_str(), vif_name().c_str());
-	close_pcap_access(dummy_error_msg);
-	return (XORP_ERROR);
+	default:
+	    error_msg = c_format("Data link type %d (%s) on interface %s vif %s "
+		    "is not supported",
+		    _datalink_type,
+		    pcap_datalink_val_to_name(_datalink_type),
+		    if_name().c_str(), vif_name().c_str());
+	    close_pcap_access(dummy_error_msg);
+	    return (XORP_ERROR);
     }
-    
+
     //
     // Put the pcap descriptor in non-blocking mode
     //
-    if (pcap_setnonblock(_pcap, 1, _pcap_errbuf) != 0) {
+    if (pcap_setnonblock(_pcap, 1, _pcap_errbuf) != 0) 
+    {
 	error_msg = c_format("Cannot set interface %s vif %s in pcap "
-			     "non-blocking mode: %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     pcap_geterr(_pcap));
+		"non-blocking mode: %s",
+		if_name().c_str(), vif_name().c_str(),
+		pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -217,11 +226,12 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // Obtain a select()-able file descriptor
     //
     _packet_fd = pcap_get_selectable_fd(_pcap);
-    if (! _packet_fd.is_valid()) {
+    if (! _packet_fd.is_valid()) 
+    {
 	error_msg = c_format("Cannot get selectable file descriptor for "
-			     "pcap access for interface %s vif %s: %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     pcap_geterr(_pcap));
+		"pcap access for interface %s vif %s: %s",
+		if_name().c_str(), vif_name().c_str(),
+		pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -233,18 +243,22 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // user's optional filter program.
     //
     string pcap_filter_program;
-    if (ether_type() > 0) {
-	if (ether_type() < ETHERNET_LENGTH_TYPE_THRESHOLD) {
+    if (ether_type() > 0) 
+    {
+	if (ether_type() < ETHERNET_LENGTH_TYPE_THRESHOLD) 
+	{
 	    // A filter using the DSAP in IEEE 802.2 LLC frame
 	    pcap_filter_program = c_format("(ether[%u] = %u)",
-					   ETHERNET_HEADER_SIZE,
-					   ether_type());
-	} else {
+		    ETHERNET_HEADER_SIZE,
+		    ether_type());
+	} else 
+	{
 	    // A filter using the EtherType
 	    pcap_filter_program = c_format("(ether proto %u)", ether_type());
 	}
     }
-    if (! filter_program().empty()) {
+    if (! filter_program().empty()) 
+    {
 	if (! pcap_filter_program.empty())
 	    pcap_filter_program += " and ";
 	pcap_filter_program += c_format("(%s)", filter_program().c_str());
@@ -261,18 +275,20 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     program_buf[program_buf.size() - 1] = '\0';
     char* program_c_str = &program_buf[0];
     struct bpf_program bpf_program;
-    if (pcap_compile(_pcap, &bpf_program, program_c_str, 1, 0) < 0) {
+    if (pcap_compile(_pcap, &bpf_program, program_c_str, 1, 0) < 0) 
+    {
 	error_msg = c_format("Cannot compile pcap program '%s': %s",
-			     program_c_str, pcap_geterr(_pcap));
+		program_c_str, pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
-    if (pcap_setfilter(_pcap, &bpf_program) != 0) {
+    if (pcap_setfilter(_pcap, &bpf_program) != 0) 
+    {
 	pcap_freecode(&bpf_program);
 	error_msg = c_format("Cannot set the pcap filter for "
-			     "interface %s vif %s for program '%s': %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     program_c_str, pcap_geterr(_pcap));
+		"interface %s vif %s for program '%s': %s",
+		if_name().c_str(), vif_name().c_str(),
+		program_c_str, pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -284,11 +300,12 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     //
 #ifdef PCAP_D_INOUT
-    if (pcap_setdirection(_pcap, PCAP_D_INOUT) != 0) {
+    if (pcap_setdirection(_pcap, PCAP_D_INOUT) != 0) 
+    {
 	error_msg = c_format("Cannot set the pcap packet capture "
-			     "direction for interface %s vif %s: %s",
-			     if_name().c_str(), vif_name().c_str(),
-			     pcap_geterr(_pcap));
+		"direction for interface %s vif %s: %s",
+		if_name().c_str(), vif_name().c_str(),
+		pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -298,10 +315,11 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // Assign a method to read from this descriptor
     //
     if (EventLoop::instance().add_ioevent_cb(_packet_fd, IOT_READ,
-				   callback(this, &IoLinkPcap::ioevent_read_cb))
-	== false) {
+		callback(this, &IoLinkPcap::ioevent_read_cb))
+	    == false) 
+    {
 	error_msg = c_format("Cannot add a pcap file descriptor to the set of "
-			     "sockets to read from in the event loop");
+		"sockets to read from in the event loop");
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -309,7 +327,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkPcap::close_pcap_access(string& error_msg)
 {
     error_msg = "";
@@ -317,12 +335,14 @@ IoLinkPcap::close_pcap_access(string& error_msg)
     //
     // Close the descriptors
     //
-    if (_packet_fd.is_valid()) {
+    if (_packet_fd.is_valid()) 
+    {
 	// Remove it just in case, even though it may not be select()-ed
 	EventLoop::instance().remove_ioevent_cb(_packet_fd);
 	_packet_fd.clear();
     }
-    if (_pcap != NULL) {
+    if (_pcap != NULL) 
+    {
 	pcap_close(_pcap);
 	_pcap = NULL;
     }
@@ -330,21 +350,22 @@ IoLinkPcap::close_pcap_access(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
-				       string& error_msg)
+	string& error_msg)
 {
     const IfTreeVif* vifp;
 
     // Find the vif
     vifp = iftree().find_vif(if_name(), vif_name());
-    if (vifp == NULL) {
+    if (vifp == NULL) 
+    {
 	error_msg = c_format("%s multicast group %s failed: "
-			     "interface %s vif %s not found",
-			     (is_join)? "Joining" : "Leaving",
-			     cstring(group),
-			     if_name().c_str(),
-			     vif_name().c_str());
+		"interface %s vif %s not found",
+		(is_join)? "Joining" : "Leaving",
+		cstring(group),
+		if_name().c_str(),
+		vif_name().c_str());
 	return (XORP_ERROR);
     }
 
@@ -357,7 +378,8 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     // On Linux we need to use ifreq.ifr_hwaddr with sa_family of AF_UNSPEC.
     //
     //
-    struct {
+    struct 
+    {
 	struct ifreq r;
 	struct sockaddr_storage s;
     } buffer;
@@ -375,39 +397,41 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     //
     // Prepare the MAC address
     //
-    switch (_datalink_type) {
-    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+    switch (_datalink_type) 
     {
-	group.copy_out(*sa);
-	break;
-    }
+	case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+	    {
+		group.copy_out(*sa);
+		break;
+	    }
 
-    default:
-	// XXX: The data link type on the interface is not supported
-	error_msg = c_format("Cannot %s group %s on interface %s vif %s: "
-			     "data link type %d (%s) is not supported",
-			     (is_join)? "join" : "leave",
-			     cstring(group),
-			     if_name().c_str(), vif_name().c_str(),
-			     _datalink_type,
-			     pcap_datalink_val_to_name(_datalink_type));
-	return (XORP_ERROR);
+	default:
+	    // XXX: The data link type on the interface is not supported
+	    error_msg = c_format("Cannot %s group %s on interface %s vif %s: "
+		    "data link type %d (%s) is not supported",
+		    (is_join)? "join" : "leave",
+		    cstring(group),
+		    if_name().c_str(), vif_name().c_str(),
+		    _datalink_type,
+		    pcap_datalink_val_to_name(_datalink_type));
+	    return (XORP_ERROR);
     }
 
     int request = (is_join)? SIOCADDMULTI : SIOCDELMULTI;
-    if (ioctl(_multicast_sock, request, ifreq_p) < 0) {
+    if (ioctl(_multicast_sock, request, ifreq_p) < 0) 
+    {
 	error_msg = c_format("Cannot %s group %s on interface %s vif %s: %s",
-			     (is_join)? "join" : "leave",
-			     cstring(group),
-			     if_name().c_str(), vif_name().c_str(),
-			     strerror(errno));
+		(is_join)? "join" : "leave",
+		cstring(group),
+		if_name().c_str(), vif_name().c_str(),
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-void
+    void
 IoLinkPcap::ioevent_read_cb(XorpFd fd, IoEventType type)
 {
     UNUSED(fd);
@@ -416,7 +440,7 @@ IoLinkPcap::ioevent_read_cb(XorpFd fd, IoEventType type)
     recv_data();
 }
 
-void
+    void
 IoLinkPcap::recv_data()
 {
     struct pcap_pkthdr pcap_pkthdr;
@@ -425,7 +449,8 @@ IoLinkPcap::recv_data()
 
     // Receive a packet
     packet = pcap_next(_pcap, &pcap_pkthdr);
-    if (packet == NULL) {
+    if (packet == NULL) 
+    {
 	XLOG_TRACE(is_log_trace(), "No packet");
 	// XXX: No need to have the task that tries to read again the data
 	_recv_data_task.unschedule();
@@ -438,81 +463,86 @@ IoLinkPcap::recv_data()
     // packets queued for receiving.
     //
     _recv_data_task = EventLoop::instance().new_oneoff_task(
-	callback(this, &IoLinkPcap::recv_data));
+	    callback(this, &IoLinkPcap::recv_data));
 
     //
     // Various checks
     //
-    if (pcap_pkthdr.caplen < pcap_pkthdr.len) {
+    if (pcap_pkthdr.caplen < pcap_pkthdr.len) 
+    {
 	XLOG_WARNING("Received packet on interface %s vif %s: "
-		     "data is too short (captured %u expecting %u octets)",
-		     if_name().c_str(),
-		     vif_name().c_str(),
-		     XORP_UINT_CAST(pcap_pkthdr.caplen),
-		     XORP_UINT_CAST(pcap_pkthdr.len));
+		"data is too short (captured %u expecting %u octets)",
+		if_name().c_str(),
+		vif_name().c_str(),
+		XORP_UINT_CAST(pcap_pkthdr.caplen),
+		XORP_UINT_CAST(pcap_pkthdr.len));
 	return;			// Error
     }
 
     //
     // Receive and process the packet
     //
-    switch (_datalink_type) {
-    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+    switch (_datalink_type) 
     {
-	recv_ethernet_packet(packet, packet_size);
-	break;
-    }
+	case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+	    {
+		recv_ethernet_packet(packet, packet_size);
+		break;
+	    }
 
-    default:
-	// XXX: The data link type on the interface is not supported
-	return;			// Error
+	default:
+	    // XXX: The data link type on the interface is not supported
+	    return;			// Error
     }
 }
 
-int
+    int
 IoLinkPcap::send_packet(const Mac& src_address,
-			const Mac& dst_address,
-			uint16_t ether_type,
-			const vector<uint8_t>& payload,
-			string& error_msg)
+	const Mac& dst_address,
+	uint16_t ether_type,
+	const vector<uint8_t>& payload,
+	string& error_msg)
 {
     vector<uint8_t> packet;
 
     //
     // Prepare the packet for transmission
     //
-    switch (_datalink_type) {
-    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+    switch (_datalink_type) 
     {
-	if (prepare_ethernet_packet(src_address, dst_address, ether_type,
-				    payload, packet, error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
-	}
-	break;
-    }
+	case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+	    {
+		if (prepare_ethernet_packet(src_address, dst_address, ether_type,
+			    payload, packet, error_msg)
+			!= XORP_OK) 
+		{
+		    return (XORP_ERROR);
+		}
+		break;
+	    }
 
-    default:
-	error_msg = c_format("Data link type %d (%s) on interface %s vif %s "
-			     "is not supported",
-			     _datalink_type,
-			     pcap_datalink_val_to_name(_datalink_type),
-			     if_name().c_str(), vif_name().c_str());
-	return (XORP_ERROR);
+	default:
+	    error_msg = c_format("Data link type %d (%s) on interface %s vif %s "
+		    "is not supported",
+		    _datalink_type,
+		    pcap_datalink_val_to_name(_datalink_type),
+		    if_name().c_str(), vif_name().c_str());
+	    return (XORP_ERROR);
     }
 
     //
     // Transmit the packet
     //
-    if (pcap_sendpacket(_pcap, &packet[0], packet.size()) != 0) {
+    if (pcap_sendpacket(_pcap, &packet[0], packet.size()) != 0) 
+    {
 	error_msg = c_format("Sending packet from %s to %s EtherType %u"
-			     "on interface %s vif %s failed: %s",
-			     src_address.str().c_str(),
-			     dst_address.str().c_str(),
-			     ether_type,
-			     if_name().c_str(),
-			     vif_name().c_str(),
-			     pcap_geterr(_pcap));
+		"on interface %s vif %s failed: %s",
+		src_address.str().c_str(),
+		dst_address.str().c_str(),
+		ether_type,
+		if_name().c_str(),
+		vif_name().c_str(),
+		pcap_geterr(_pcap));
 
 	//
 	// XXX: Maybe the device was brought down invalidating the
@@ -520,11 +550,13 @@ IoLinkPcap::send_packet(const Mac& src_address,
 	// TODO: is there a way to check "errno"?
 	//
 	string dummy_error_msg;
-    	if ((reopen_pcap_access(dummy_error_msg) == XORP_OK)
-	    && (pcap_sendpacket(_pcap, &packet[0], packet.size()) == 0)) {
+	if ((reopen_pcap_access(dummy_error_msg) == XORP_OK)
+		&& (pcap_sendpacket(_pcap, &packet[0], packet.size()) == 0)) 
+	{
 	    // Success
 	    error_msg = "";
-	} else {
+	} else 
+	{
 	    return (XORP_ERROR);
 	}
     }
@@ -532,7 +564,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkPcap::reopen_pcap_access(string& error_msg)
 {
     if (close_pcap_access(error_msg) != XORP_OK)

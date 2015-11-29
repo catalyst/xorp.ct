@@ -53,83 +53,83 @@ class XrlRouter;
 template <typename A>
 class XrlRibNotifier : public RibNotifierBase<A>, public ServiceBase
 {
-public:
-    typedef RibNotifierBase<A> Super;
+	public:
+		typedef RibNotifierBase<A> Super;
 
-    static const uint32_t DEFAULT_INFLIGHT = 20;
+		static const uint32_t DEFAULT_INFLIGHT = 20;
 
-public:
-    /**
-     * Constructor.
-     */
-    XrlRibNotifier( UpdateQueue<A>&	uq,
-		   XrlRouter&		xr,
-		   uint32_t		max_inflight = DEFAULT_INFLIGHT,
-		   uint32_t		poll_ms = Super::DEFAULT_POLL_MS);
+	public:
+		/**
+		 * Constructor.
+		 */
+		XrlRibNotifier( UpdateQueue<A>&	uq,
+				XrlRouter&		xr,
+				uint32_t		max_inflight = DEFAULT_INFLIGHT,
+				uint32_t		poll_ms = Super::DEFAULT_POLL_MS);
 
-    /**
-     * Constructor taking an XrlSender, a class name, and an instance
-     * name as arguments.  These arguments are broken out for
-     * debugging instances, ie a fake XrlSender can be used to test
-     * behaviour of this class.
-     */
-    XrlRibNotifier( UpdateQueue<A>&	uq,
-		   XrlSender&		xs,
-		   const string&	class_name,
-		   const string&	intance_name,
-		   uint32_t		max_inflight = DEFAULT_INFLIGHT,
-		   uint32_t		poll_ms = Super::DEFAULT_POLL_MS);
+		/**
+		 * Constructor taking an XrlSender, a class name, and an instance
+		 * name as arguments.  These arguments are broken out for
+		 * debugging instances, ie a fake XrlSender can be used to test
+		 * behaviour of this class.
+		 */
+		XrlRibNotifier( UpdateQueue<A>&	uq,
+				XrlSender&		xs,
+				const string&	class_name,
+				const string&	intance_name,
+				uint32_t		max_inflight = DEFAULT_INFLIGHT,
+				uint32_t		poll_ms = Super::DEFAULT_POLL_MS);
 
-    ~XrlRibNotifier();
+		~XrlRibNotifier();
 
-    /**
-     * Request RIB instantiates a RIP routing table and once instantiated
-     * start passing route updates to RIB.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int startup();
+		/**
+		 * Request RIB instantiates a RIP routing table and once instantiated
+		 * start passing route updates to RIB.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int startup();
 
-    /**
-     * Stop forwarding route updates to RIB and request RIB
-     * unregisters RIP routing table.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int shutdown();
+		/**
+		 * Stop forwarding route updates to RIB and request RIB
+		 * unregisters RIP routing table.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int shutdown();
 
-    /**
-     * Accessor returning the current number of Xrls inflight.
-     */
-    uint32_t xrls_inflight() const;
+		/**
+		 * Accessor returning the current number of Xrls inflight.
+		 */
+		uint32_t xrls_inflight() const;
 
-    /**
-     * Accessor returning the maximum number of Xrls inflight.
-     */
-    uint32_t max_xrls_inflight() const;
+		/**
+		 * Accessor returning the maximum number of Xrls inflight.
+		 */
+		uint32_t max_xrls_inflight() const;
 
-protected:
-    void updates_available();
+	protected:
+		void updates_available();
 
-private:
-    void add_igp_cb(const XrlError& e);
-    void delete_igp_cb(const XrlError& e);
+	private:
+		void add_igp_cb(const XrlError& e);
+		void delete_igp_cb(const XrlError& e);
 
-    void send_add_route(const RouteEntry<A>& re);
-    void send_delete_route(const RouteEntry<A>& re);
-    void send_route_cb(const XrlError& e);
+		void send_add_route(const RouteEntry<A>& re);
+		void send_delete_route(const RouteEntry<A>& re);
+		void send_route_cb(const XrlError& e);
 
-    void incr_inflight();
-    void decr_inflight();
+		void incr_inflight();
+		void decr_inflight();
 
-protected:
-    XrlSender&		_xs;
-    string		_cname;
-    string		_iname;
-    const uint32_t	_max_inflight;
-    uint32_t		_inflight;
+	protected:
+		XrlSender&		_xs;
+		string		_cname;
+		string		_iname;
+		const uint32_t	_max_inflight;
+		uint32_t		_inflight;
 
-    set<IPNet<A> >	_ribnets;	// XXX hack
+		set<IPNet<A> >	_ribnets;	// XXX hack
 };
 
 // ----------------------------------------------------------------------------
@@ -139,14 +139,14 @@ template <typename A>
 inline uint32_t
 XrlRibNotifier<A>::xrls_inflight() const
 {
-    return _inflight;
+	return _inflight;
 }
 
 template <typename A>
 inline uint32_t
 XrlRibNotifier<A>::max_xrls_inflight() const
 {
-    return _max_inflight;
+	return _max_inflight;
 }
 
 #endif // __RIP_XRL_RIB_NOTIFIER_HH__

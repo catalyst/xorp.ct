@@ -29,52 +29,53 @@
 
 class IfConfigGetIoctl;
 
-class IfConfigGetProcLinux : public IfConfigGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigGetProcLinux(FeaDataPlaneManager& fea_data_plane_manager);
+class IfConfigGetProcLinux : public IfConfigGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigGetProcLinux(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigGetProcLinux();
-    
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigGetProcLinux();
 
-    /**
-     * Pull the network interface information from the underlying system.
-     * 
-     * @param iftree the IfTree storage to store the pulled information.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int pull_config(const IfTree* local_config, IfTree& iftree);
-    
-private:
-    int read_config(const IfTree* local_config, IfTree& iftree);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    IfConfigGetIoctl*	_ifconfig_get_ioctl;
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    static const string PROC_LINUX_NET_DEVICES_FILE_V4;
-    static const string PROC_LINUX_NET_DEVICES_FILE_V6;
+		/**
+		 * Pull the network interface information from the underlying system.
+		 * 
+		 * @param iftree the IfTree storage to store the pulled information.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int pull_config(const IfTree* local_config, IfTree& iftree);
+
+	private:
+		int read_config(const IfTree* local_config, IfTree& iftree);
+
+		IfConfigGetIoctl*	_ifconfig_get_ioctl;
+
+		static const string PROC_LINUX_NET_DEVICES_FILE_V4;
+		static const string PROC_LINUX_NET_DEVICES_FILE_V6;
 };
 
 #endif

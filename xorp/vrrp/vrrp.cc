@@ -32,18 +32,19 @@
 #include "vrrp_target.hh"
 #include "vrrp_packet.hh"
 
-namespace {
-
-template <class T>
-void
-out_of_range(const string& msg, const T& x)
+namespace 
 {
-    ostringstream oss;
 
-    oss << msg << " (" << x << ")";
+    template <class T>
+	void
+	out_of_range(const string& msg, const T& x)
+	{
+	    ostringstream oss;
 
-    xorp_throw(VrrpException, oss.str());
-}
+	    oss << msg << " (" << x << ")";
+
+	    xorp_throw(VrrpException, oss.str());
+	}
 
 } // anonymous namespace
 
@@ -52,15 +53,15 @@ const Mac Vrrp::mcast_mac = Mac("01:00:5E:00:00:12");
 
 Vrrp::Vrrp(VrrpVif& vif,  uint32_t vrid)
     : _vif(vif),
-      _vrid(vrid),
-      _priority(100),
-      _interval(1),
-      _skew_time(0),
-      _master_down_interval(0),
-      _preempt(true),
-      _state(INITIALIZE),
-      //_own(false),
-      _disable(true)
+    _vrid(vrid),
+    _priority(100),
+    _interval(1),
+    _skew_time(0),
+    _master_down_interval(0),
+    _preempt(true),
+    _state(INITIALIZE),
+    //_own(false),
+    _disable(true)
       //, _arpd(_vif)
 {
     if (_vrid < 1 || _vrid > 255)
@@ -76,10 +77,10 @@ Vrrp::Vrrp(VrrpVif& vif,  uint32_t vrid)
     //_arpd.set_mac(_source_mac);
 
     _master_down_timer = EventLoop::instance().new_periodic_ms(0x29a,
-			    callback(this, &Vrrp::master_down_expiry));
+	    callback(this, &Vrrp::master_down_expiry));
 
     _adver_timer = EventLoop::instance().new_periodic_ms(0x29a,
-			    callback(this, &Vrrp::adver_expiry));
+	    callback(this, &Vrrp::adver_expiry));
     cancel_timers();
 
     setup_intervals();
@@ -90,7 +91,7 @@ Vrrp::~Vrrp()
     stop();
 }
 
-void
+    void
 Vrrp::set_priority(uint32_t priority)
 {
     if (priority == PRIORITY_LEAVE || priority >= PRIORITY_OWN)
@@ -101,14 +102,16 @@ Vrrp::set_priority(uint32_t priority)
     setup_intervals();
 }
 
-void
+    void
 Vrrp::set_interval(uint32_t interval)
 {
-    if (interval == 0) {
+    if (interval == 0) 
+    {
 	XLOG_WARNING("Interval was configured for zero.  Increasing to 1.\n");
 	interval = 1;
     }
-    if (interval > 255) {
+    if (interval > 255) 
+    {
 	XLOG_WARNING("Interval was > 255: %u.  Setting to 255.\n", interval);
 	interval = 255;
     }
@@ -117,13 +120,13 @@ Vrrp::set_interval(uint32_t interval)
     setup_intervals();
 }
 
-void
+    void
 Vrrp::set_preempt(bool preempt)
 {
     _preempt = preempt;
 }
 
-void
+    void
 Vrrp::set_disable(bool disable)
 {
     _disable = disable;
@@ -134,7 +137,7 @@ Vrrp::set_disable(bool disable)
 	start();
 }
 
-void
+    void
 Vrrp::add_ip(const IPv4& ip)
 {
     _ips.insert(ip);
@@ -142,16 +145,18 @@ Vrrp::add_ip(const IPv4& ip)
     //check_ownership();
 }
 
-void Vrrp::set_prefix(const IPv4& ip, uint32_t prefix) {
+void Vrrp::set_prefix(const IPv4& ip, uint32_t prefix) 
+{
     _prefixes[ip.addr()] = prefix;
 
     set<IPv4>::iterator i = _ips.find(ip);
-    if (i == _ips.end()) {
+    if (i == _ips.end()) 
+    {
 	add_ip(ip);
     }
 }
 
-void
+    void
 Vrrp::delete_ip(const IPv4& ip)
 {
     _ips.erase(ip);
@@ -159,14 +164,15 @@ Vrrp::delete_ip(const IPv4& ip)
     //check_ownership();
 }
 
-void
+    void
 Vrrp::setup_intervals()
 {
     double skew_time	        = (256.0 - (double) priority()) / 256.0;
     double master_down_interval = 3.0 * (double) _interval + _skew_time;
 
     if (_skew_time != skew_time 
-	|| _master_down_interval != master_down_interval) {
+	    || _master_down_interval != master_down_interval) 
+    {
 
 	_skew_time	      = skew_time;
 	_master_down_interval = master_down_interval;
@@ -174,7 +180,7 @@ Vrrp::setup_intervals()
     }
 }
 
-void
+    void
 Vrrp::setup_timers(bool skew)
 {
     if (!running())
@@ -182,20 +188,21 @@ Vrrp::setup_timers(bool skew)
 
     cancel_timers();
 
-    switch (_state) {
-    case INITIALIZE:
-	XLOG_ASSERT(false);
-	break;
+    switch (_state) 
+    {
+	case INITIALIZE:
+	    XLOG_ASSERT(false);
+	    break;
 
-    case MASTER:
-	_adver_timer.schedule_after_ms(_interval * 1000);
-	break;
+	case MASTER:
+	    _adver_timer.schedule_after_ms(_interval * 1000);
+	    break;
 
-    case BACKUP:
-	_master_down_timer.schedule_after_ms(
-	    static_cast<int>((skew ? _skew_time : _master_down_interval)
-			     * 1000.0));
-	break;
+	case BACKUP:
+	    _master_down_timer.schedule_after_ms(
+		    static_cast<int>((skew ? _skew_time : _master_down_interval)
+			* 1000.0));
+	    break;
     }
 }
 
@@ -209,7 +216,7 @@ Vrrp::priority() const
     return _priority;
 }
 
-void
+    void
 Vrrp::start()
 {
     if (running())
@@ -226,19 +233,21 @@ Vrrp::start()
 	become_backup();
 }
 
-void
+    void
 Vrrp::become_master()
 {
     _state = MASTER; 
     XLOG_WARNING("become master.");
     _vif.add_mac(_source_mac);
 
-    for (set<IPv4>::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+    for (set<IPv4>::iterator i = _ips.begin(); i != _ips.end(); ++i) 
+    {
 	const IPv4& ip = *i;
 	XLOG_WARNING("become_master, adding IP: %s\n",
-		     ip.str().c_str());
+		ip.str().c_str());
 	uint32_t pf = 24;
-	if (_prefixes.find(ip.addr()) != _prefixes.end()) {
+	if (_prefixes.find(ip.addr()) != _prefixes.end()) 
+	{
 	    pf = _prefixes[ip.addr()];
 	    if (pf <= 0)
 		pf = 24;
@@ -255,20 +264,22 @@ Vrrp::become_master()
     //_arpd.start();
 }
 
-void
+    void
 Vrrp::become_backup()
 {
     XLOG_WARNING("become backup.");
-    if (_state == MASTER) {
+    if (_state == MASTER) 
+    {
 	XLOG_WARNING("deleting mac.");
 	_vif.delete_mac(_source_mac);
 	//_arpd.stop();
 
-	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) 
+	{
 	    const IPv4& ip = *i;
 
 	    XLOG_WARNING("become_backup, deleting IP: %s\n",
-			 ip.str().c_str());
+		    ip.str().c_str());
 	    _vif.delete_ip(ip);
 	}
     }
@@ -279,7 +290,7 @@ Vrrp::become_backup()
     setup_timers();
 }
 
-void
+    void
 Vrrp::stop()
 {
     if (!running())
@@ -289,16 +300,18 @@ Vrrp::stop()
 
     cancel_timers();
 
-    if (_state == MASTER) {
+    if (_state == MASTER) 
+    {
 	send_advertisement(PRIORITY_LEAVE);
 	_vif.delete_mac(_source_mac);
 	//_arpd.stop();
 
-	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) 
+	{
 	    const IPv4& ip = *i;
-	    
+
 	    XLOG_WARNING("stopping, deleting IP: %s\n",
-			 ip.str().c_str());
+		    ip.str().c_str());
 	    _vif.delete_ip(ip);
 	}
     }
@@ -312,20 +325,20 @@ Vrrp::running() const
     return _state != INITIALIZE;
 }
 
-void
+    void
 Vrrp::cancel_timers()
 {
     _master_down_timer.unschedule();
     _adver_timer.unschedule();
 }
 
-void
+    void
 Vrrp::send_advertisement()
 {
     send_advertisement(priority());
 }
 
-void
+    void
 Vrrp::send_advertisement(uint32_t priority)
 {
     XLOG_ASSERT(priority <= PRIORITY_OWN);
@@ -335,12 +348,12 @@ Vrrp::send_advertisement(uint32_t priority)
     prepare_advertisement(priority);
 
     _vif.send(_source_mac, 
-	      mcast_mac,
-	      ETHERTYPE_IP,
-	      _adv_packet.data());
+	    mcast_mac,
+	    ETHERTYPE_IP,
+	    _adv_packet.data());
 }
 
-void
+    void
 Vrrp::prepare_advertisement(uint32_t priority)
 {
     _adv_packet.set_size(VRRP_MAX_PACKET_SIZE);
@@ -352,7 +365,7 @@ Vrrp::prepare_advertisement(uint32_t priority)
     _adv_packet.finalize();
 }
 
-void
+    void
 Vrrp::send_arps()
 {
     XLOG_ASSERT(_state == MASTER);
@@ -361,7 +374,7 @@ Vrrp::send_arps()
 	send_arp(*i);
 }
 
-void
+    void
 Vrrp::send_arp(const IPv4& ip)
 {
     PAYLOAD data;
@@ -371,7 +384,7 @@ Vrrp::send_arp(const IPv4& ip)
     _vif.send(_source_mac, Mac::BROADCAST(), ETHERTYPE_ARP, data);
 }
 
-bool
+    bool
 Vrrp::master_down_expiry()
 {
     XLOG_ASSERT(_state == BACKUP);
@@ -381,7 +394,7 @@ Vrrp::master_down_expiry()
     return false;
 }
 
-bool
+    bool
 Vrrp::adver_expiry()
 {
     XLOG_ASSERT(_state == MASTER);
@@ -392,28 +405,29 @@ Vrrp::adver_expiry()
     return false;
 }
 
-void
+    void
 Vrrp::recv_advertisement(const IPv4& from, uint32_t priority)
 {
     XLOG_ASSERT(priority <= PRIORITY_OWN);
 
-    switch (_state) {
-    case INITIALIZE:
-	XLOG_ASSERT(false);
-	break;
+    switch (_state) 
+    {
+	case INITIALIZE:
+	    XLOG_ASSERT(false);
+	    break;
 
-    case BACKUP:
-	_last_adv = from;
-	recv_adver_backup(priority);
-	break;
+	case BACKUP:
+	    _last_adv = from;
+	    recv_adver_backup(priority);
+	    break;
 
-    case MASTER:
-	recv_adver_master(from, priority);
-	break;
+	case MASTER:
+	    recv_adver_master(from, priority);
+	    break;
     }
 }
 
-void
+    void
 Vrrp::recv_adver_backup(uint32_t pri)
 {
     if (pri == PRIORITY_LEAVE)
@@ -422,17 +436,18 @@ Vrrp::recv_adver_backup(uint32_t pri)
 	setup_timers();
 }
 
-void
+    void
 Vrrp::recv_adver_master(const IPv4& from, uint32_t pri)
 {
-    if (pri == PRIORITY_LEAVE) {
+    if (pri == PRIORITY_LEAVE) 
+    {
 	send_advertisement();
 	setup_timers();
     } else if (pri > priority() || (pri == priority() && from > _vif.addr()))
 	become_backup();
 }
 
-void
+    void
 Vrrp::recv(const IPv4& from, const VrrpHeader& vh)
 {
     XLOG_ASSERT(vh.vh_vrid == _vrid);
@@ -441,7 +456,7 @@ Vrrp::recv(const IPv4& from, const VrrpHeader& vh)
 	xorp_throw(VrrpException, "VRRID not running");
 
     //if (priority() == PRIORITY_OWN)
-//	xorp_throw(VrrpException, "I own VRR-IP but got advertisement, priority: %i",
+    //	xorp_throw(VrrpException, "I own VRR-IP but got advertisement, priority: %i",
     //	   priority());
 
     if (vh.vh_auth != VrrpHeader::VRRP_AUTH_NONE)
@@ -456,22 +471,25 @@ Vrrp::recv(const IPv4& from, const VrrpHeader& vh)
     recv_advertisement(from, vh.vh_priority);
 }
 
-bool
+    bool
 Vrrp::check_ips(const VrrpHeader& vh)
 {
-    if (vh.vh_ipcount != _ips.size()) {
+    if (vh.vh_ipcount != _ips.size()) 
+    {
 	XLOG_WARNING("Mismatch in configured IPs (got %u have %u)",
-		     vh.vh_ipcount, XORP_UINT_CAST(_ips.size()));
+		vh.vh_ipcount, XORP_UINT_CAST(_ips.size()));
 
 	return false;
     }
 
-    for (unsigned i = 0; i < vh.vh_ipcount; i++) {
+    for (unsigned i = 0; i < vh.vh_ipcount; i++) 
+    {
 	IPv4 ip = vh.ip(i);
 
-	if (_ips.find(ip) == _ips.end()) {
+	if (_ips.find(ip) == _ips.end()) 
+	{
 	    XLOG_WARNING("He's got %s configured but I don't",
-			 ip.str().c_str());
+		    ip.str().c_str());
 
 	    return false;
 	}
@@ -487,7 +505,8 @@ Vrrp::get_info(string& state, IPv4& master) const
     typedef map<State, string> STATES;
     static STATES states;
 
-    if (states.empty()) {
+    if (states.empty()) 
+    {
 	states[INITIALIZE] = "initialize";
 	states[MASTER]	   = "master";
 	states[BACKUP]     = "backup";

@@ -43,7 +43,7 @@
  * RFC 1141 Incremental Updating of the Internet Checksum
  */
 inline
-uint16_t
+    uint16_t
 incremental_checksum(uint32_t orig, uint32_t add)
 {
     // Assumes that the original value of the modified field was zero.
@@ -56,12 +56,13 @@ incremental_checksum(uint32_t orig, uint32_t add)
  * Create a printable string of an array of data
  */
 inline
-string
+    string
 printable(const uint8_t* p, size_t max_size)
 {
     string output;
 
-    for (size_t i = 0; i < max_size; i++, p++) {
+    for (size_t i = 0; i < max_size; i++, p++) 
+    {
 	if ('\0' == *p)
 	    break;
 	if (xorp_isprint(*p))
@@ -69,7 +70,7 @@ printable(const uint8_t* p, size_t max_size)
 	else
 	    output += c_format("[%#x]", *p);
     }
-    
+
     return output;
 }
 
@@ -86,14 +87,14 @@ AuthHandlerBase::error() const
     return _error;
 }
 
-inline void
+    inline void
 AuthHandlerBase::reset_error()
 {
     if (_error.empty() == false)
 	_error.erase();
 }
 
-inline void
+    inline void
 AuthHandlerBase::set_error(const string& error_msg)
 {
     _error = error_msg;
@@ -108,13 +109,13 @@ NullAuthHandler::effective_name() const
     return auth_type_name();
 }
 
-const char*
+    const char*
 NullAuthHandler::auth_type_name()
 {
     return "none";
 }
 
-void
+    void
 NullAuthHandler::reset()
 {
 }
@@ -125,23 +126,25 @@ NullAuthHandler::additional_payload() const
     return 0;
 }
 
-bool
+    bool
 NullAuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
-				      const IPv4&,
-				      bool)
+	const IPv4&,
+	bool)
 {
     // TODO: here we should check whether the packet is too large
-    if (pkt.size() < Packet::STANDARD_HEADER_V2) {
+    if (pkt.size() < Packet::STANDARD_HEADER_V2) 
+    {
 	set_error(c_format("packet too small (%u bytes)",
-			   XORP_UINT_CAST(pkt.size())));
+		    XORP_UINT_CAST(pkt.size())));
 	return false;
     }
 
     const uint8_t *ptr = &pkt[0];
     OspfTypes::AuType autype = extract_16(&ptr[Packet::AUTH_TYPE_OFFSET]);
-    if (AUTH_TYPE != autype) {
+    if (AUTH_TYPE != autype) 
+    {
 	set_error(c_format("unexpected authentication data (type %d)",
-			   autype));
+		    autype));
 	return false;
     }
 
@@ -149,7 +152,7 @@ NullAuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     return true;
 }
 
-bool
+    bool
 NullAuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
 {
     XLOG_ASSERT(pkt.size() >= Packet::STANDARD_HEADER_V2);
@@ -157,8 +160,8 @@ NullAuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
     uint8_t *ptr = &pkt[0];
     embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], AUTH_TYPE);
     embed_16(&ptr[Packet::CHECKSUM_OFFSET],	// RFC 1141
-	     incremental_checksum(extract_16(&ptr[Packet::CHECKSUM_OFFSET]),
-				  AUTH_TYPE));
+	    incremental_checksum(extract_16(&ptr[Packet::CHECKSUM_OFFSET]),
+		AUTH_TYPE));
 
     reset_error();
     return (true);
@@ -173,13 +176,13 @@ PlaintextAuthHandler::effective_name() const
     return auth_type_name();
 }
 
-const char*
+    const char*
 PlaintextAuthHandler::auth_type_name()
 {
     return "simple";
 }
 
-void
+    void
 PlaintextAuthHandler::reset()
 {
 }
@@ -190,29 +193,32 @@ PlaintextAuthHandler::additional_payload() const
     return 0;
 }
 
-bool
+    bool
 PlaintextAuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
-					   const IPv4&,
-					   bool)
+	const IPv4&,
+	bool)
 {
     // TODO: here we should check whether the packet is too large
-    if (pkt.size() < Packet::STANDARD_HEADER_V2) {
+    if (pkt.size() < Packet::STANDARD_HEADER_V2) 
+    {
 	set_error(c_format("packet too small (%u bytes)",
-			   XORP_UINT_CAST(pkt.size())));
+		    XORP_UINT_CAST(pkt.size())));
 	return false;
     }
 
     const uint8_t *ptr = &pkt[0];
     OspfTypes::AuType autype = extract_16(&ptr[Packet::AUTH_TYPE_OFFSET]);
-    if (AUTH_TYPE != autype) {
+    if (AUTH_TYPE != autype) 
+    {
 	set_error("not a plaintext authenticated packet");
 	return false;
     }
 
     if (0 != memcmp(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_key_data[0], 
-		    sizeof(_key_data))) {
+		sizeof(_key_data))) 
+    {
 	string passwd = printable(&ptr[Packet::AUTH_PAYLOAD_OFFSET],
-				  Packet::AUTH_PAYLOAD_SIZE);
+		Packet::AUTH_PAYLOAD_SIZE);
 	set_error(c_format("wrong password \"%s\"", passwd.c_str()));
 	return false;
     }
@@ -221,7 +227,7 @@ PlaintextAuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     return true;
 }
 
-bool
+    bool
 PlaintextAuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
 {
     XLOG_ASSERT(pkt.size() >= Packet::STANDARD_HEADER_V2);
@@ -229,17 +235,17 @@ PlaintextAuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
     uint8_t *ptr = &pkt[0];
     embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], AUTH_TYPE);
     embed_16(&ptr[Packet::CHECKSUM_OFFSET], // RFC 1141
-	     incremental_checksum(extract_16(&ptr[Packet::CHECKSUM_OFFSET]),
-				  AUTH_TYPE));
+	    incremental_checksum(extract_16(&ptr[Packet::CHECKSUM_OFFSET]),
+		AUTH_TYPE));
 
     memcpy(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_key_data[0],
-	   sizeof(_key_data));
+	    sizeof(_key_data));
 
     reset_error();
     return (true);
 }
 
-void
+    void
 PlaintextAuthHandler::set_key(const string& plaintext_key)
 {
     _key = string(plaintext_key, 0, Packet::AUTH_PAYLOAD_SIZE);
@@ -260,23 +266,24 @@ PlaintextAuthHandler::key() const
 // MD5AuthHandler::MD5Key implementation
 
 MD5AuthHandler::MD5Key::MD5Key(uint8_t		key_id,
-			       const string&	key,
-			       const TimeVal&	start_timeval,
-			       const TimeVal&	end_timeval,
-			       const TimeVal&	max_time_drift,
-			       XorpTimer	start_timer,
-			       XorpTimer	stop_timer)
-    : _id(key_id),
-      _start_timeval(start_timeval),
-      _end_timeval(end_timeval),
-      _max_time_drift(max_time_drift),
-      _is_persistent(false),
-      _o_seqno(0),
-      _start_timer(start_timer),
-      _stop_timer(stop_timer)
+	const string&	key,
+	const TimeVal&	start_timeval,
+	const TimeVal&	end_timeval,
+	const TimeVal&	max_time_drift,
+	XorpTimer	start_timer,
+	XorpTimer	stop_timer)
+: _id(key_id),
+    _start_timeval(start_timeval),
+    _end_timeval(end_timeval),
+    _max_time_drift(max_time_drift),
+    _is_persistent(false),
+    _o_seqno(0),
+    _start_timer(start_timer),
+    _stop_timer(stop_timer)
 {
     string::size_type n = key.copy(_key_data, 16);
-    if (n < KEY_BYTES) {
+    if (n < KEY_BYTES) 
+    {
 	memset(_key_data + n, 0, KEY_BYTES - n);
     }
 }
@@ -296,7 +303,7 @@ MD5AuthHandler::MD5Key::valid_at(const TimeVal& when) const
     return ((_start_timeval <= when) && (when <= _end_timeval));
 }
 
-void
+    void
 MD5AuthHandler::MD5Key::reset()
 {
     //
@@ -310,7 +317,7 @@ MD5AuthHandler::MD5Key::reset()
     _pkts_recv.clear();
 }
 
-void
+    void
 MD5AuthHandler::MD5Key::reset(const IPv4& src_addr)
 {
     map<IPv4, uint32_t>::iterator seqno_iter;
@@ -355,9 +362,9 @@ MD5AuthHandler::MD5Key::last_seqno_recv(const IPv4& src_addr) const
     return (iter->second);
 }
 
-void
+    void
 MD5AuthHandler::MD5Key::set_last_seqno_recv(const IPv4& src_addr,
-					    uint32_t seqno)
+	uint32_t seqno)
 {
     map<IPv4, uint32_t>::iterator seqno_iter;
     map<IPv4, bool>::iterator recv_iter;
@@ -394,26 +401,28 @@ MD5AuthHandler::effective_name() const
     //
     // XXX: if no valid keys, then don't use any authentication
     //
-    if (_valid_key_chain.empty()) {
+    if (_valid_key_chain.empty()) 
+    {
 	return (_null_handler.effective_name());
     }
 
     return auth_type_name();
 }
 
-const char*
+    const char*
 MD5AuthHandler::auth_type_name()
 {
     return "md5";
 }
 
-void
+    void
 MD5AuthHandler::reset()
 {
     //
     // XXX: if no valid keys, then don't use any authentication
     //
-    if (_valid_key_chain.empty()) {
+    if (_valid_key_chain.empty()) 
+    {
 	_null_handler.reset();
 	return;
     }
@@ -427,23 +436,26 @@ MD5AuthHandler::additional_payload() const
     //
     // XXX: if no valid keys, then don't use any authentication
     //
-    if (_valid_key_chain.empty()) {
+    if (_valid_key_chain.empty()) 
+    {
 	return (_null_handler.additional_payload());
     }
 
     return 0;
 }
 
-bool
+    bool
 MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
-				     const IPv4& src_addr, bool new_peer)
+	const IPv4& src_addr, bool new_peer)
 {
     //
     // XXX: if no valid keys, then don't use any authentication
     //
-    if (_valid_key_chain.empty()) {
+    if (_valid_key_chain.empty()) 
+    {
 	if (_null_handler.authenticate_inbound(pkt, src_addr, new_peer)
-	    != true) {
+		!= true) 
+	{
 	    set_error(_null_handler.error());
 	    return (false);
 	}
@@ -452,15 +464,17 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     }
 
     // TODO: here we should check whether the packet is too large
-    if (pkt.size() < Packet::STANDARD_HEADER_V2) {
+    if (pkt.size() < Packet::STANDARD_HEADER_V2) 
+    {
 	set_error(c_format("packet too small (%u bytes)",
-			   XORP_UINT_CAST(pkt.size())));
+		    XORP_UINT_CAST(pkt.size())));
 	return false;
     }
 
     const uint8_t *ptr = &pkt[0];
     OspfTypes::AuType autype = extract_16(&ptr[Packet::AUTH_TYPE_OFFSET]);
-    if (AUTH_TYPE != autype) {
+    if (AUTH_TYPE != autype) 
+    {
 	set_error("not an MD5 authenticated packet");
 	return false;
     }
@@ -469,12 +483,13 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     uint32_t seqno = extract_32(&ptr[Packet::AUTH_PAYLOAD_OFFSET + 4]);
 
     KeyChain::iterator k = find_if(_valid_key_chain.begin(),
-				   _valid_key_chain.end(),
-				   bind2nd(mem_fun_ref(&MD5Key::id_matches),
-					   key_id));
-    if (k == _valid_key_chain.end()) {
+	    _valid_key_chain.end(),
+	    bind2nd(mem_fun_ref(&MD5Key::id_matches),
+		key_id));
+    if (k == _valid_key_chain.end()) 
+    {
 	set_error(c_format("packet with key ID %d for which no key is "
-			   "configured", key_id));
+		    "configured", key_id));
 	return false;
     }
     MD5Key* key = &(*k);
@@ -484,10 +499,11 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
 
     uint32_t last_seqno_recv = key->last_seqno_recv(src_addr);
     if (key->packets_received(src_addr) && !(new_peer && seqno == 0) &&
-	(seqno - last_seqno_recv >= 0x7fffffff)) {
+	    (seqno - last_seqno_recv >= 0x7fffffff)) 
+    {
 	set_error(c_format("bad sequence number 0x%08x < 0x%08x",
-			   XORP_UINT_CAST(seqno),
-			   XORP_UINT_CAST(last_seqno_recv)));
+		    XORP_UINT_CAST(seqno),
+		    XORP_UINT_CAST(last_seqno_recv)));
 	return false;
     }
 
@@ -504,15 +520,17 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     MD5_Final(&digest[0], &ctx);
 
     if (0 != memcmp(&digest[0], &ptr[md5_packet_length],
-		    MD5_DIGEST_LENGTH)) {
+		MD5_DIGEST_LENGTH)) 
+    {
 	set_error(c_format("authentication digest doesn't match local key "
-			   "(key ID = %d)", key->id()));
-// #define	DUMP_BAD_MD5
+		    "(key ID = %d)", key->id()));
+	// #define	DUMP_BAD_MD5
 #ifdef	DUMP_BAD_MD5
 	const char badmd5[] = "/tmp/ospf_badmd5";
 	// If the file already exists don't dump anything. The file
 	// should contain and only one packet.
-	if (-1 == access(badmd5, R_OK)) {
+	if (-1 == access(badmd5, R_OK)) 
+	{
 	    XLOG_INFO("Dumping bad MD5 to %s", badmd5);
 	    FILE *fp = fopen(badmd5, "w");
 	    fwrite(&pkt[0], pkt.size(), 1 , fp);
@@ -529,7 +547,7 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     return true;
 }
 
-bool
+    bool
 MD5AuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
 {
     TimeVal now;
@@ -542,8 +560,10 @@ MD5AuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
     //
     // XXX: if no valid keys, then don't use any authentication
     //
-    if (key == NULL) {
-	if (_null_handler.authenticate_outbound(pkt) != true) {
+    if (key == NULL) 
+    {
+	if (_null_handler.authenticate_outbound(pkt) != true) 
+	{
 	    set_error(_null_handler.error());
 	    return (false);
 	}
@@ -580,13 +600,13 @@ MD5AuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
     return (true);
 }
 
-bool
+    bool
 MD5AuthHandler::add_key(uint8_t		key_id,
-			const string&	key,
-			const TimeVal&	start_timeval,
-			const TimeVal&	end_timeval,
-			const TimeVal&	max_time_drift,
-			string&		error_msg)
+	const string&	key,
+	const TimeVal&	start_timeval,
+	const TimeVal&	end_timeval,
+	const TimeVal&	max_time_drift,
+	string&		error_msg)
 {
     TimeVal now, adj_timeval;
     XorpTimer start_timer, end_timer;
@@ -594,11 +614,13 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 
     EventLoop::instance().current_time(now);
 
-    if (start_timeval > end_timeval) {
+    if (start_timeval > end_timeval) 
+    {
 	error_msg = c_format("Start time is later than the end time");
 	return false;
     }
-    if (end_timeval < now) {
+    if (end_timeval < now) 
+    {
 	error_msg = c_format("End time is in the past");
 	return false;
     }
@@ -609,10 +631,11 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 	adj_timeval -= max_time_drift;
     else
 	adj_timeval = TimeVal::ZERO();
-    if (adj_timeval > now) {
+    if (adj_timeval > now) 
+    {
 	start_timer = EventLoop::instance().new_oneoff_at(
-	    adj_timeval,
-	    callback(this, &MD5AuthHandler::key_start_cb, key_id));
+		adj_timeval,
+		callback(this, &MD5AuthHandler::key_start_cb, key_id));
     }
 
     // Adjust the time when we stop using the key to accept messages
@@ -621,19 +644,22 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 	adj_timeval += max_time_drift;
     else
 	adj_timeval = TimeVal::MAXIMUM();
-    if (adj_timeval != TimeVal::MAXIMUM()) {
+    if (adj_timeval != TimeVal::MAXIMUM()) 
+    {
 	end_timer = EventLoop::instance().new_oneoff_at(
-	    adj_timeval,
-	    callback(this, &MD5AuthHandler::key_stop_cb, key_id));
+		adj_timeval,
+		callback(this, &MD5AuthHandler::key_stop_cb, key_id));
     }
 
     //
     // XXX: If we are using the last authentication key that has expired,
     // move it to the list of invalid keys.
     //
-    if (_valid_key_chain.size() == 1) {
+    if (_valid_key_chain.size() == 1) 
+    {
 	MD5Key& key = _valid_key_chain.front();
-	if (key.is_persistent()) {
+	if (key.is_persistent()) 
+	{
 	    key.set_persistent(false);
 	    _invalid_key_chain.push_back(key);
 	    _valid_key_chain.pop_front();
@@ -645,7 +671,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 
     // Add the new key to the appropriate chain
     MD5Key new_key = MD5Key(key_id, key, start_timeval, end_timeval,
-			    max_time_drift, start_timer, end_timer);
+	    max_time_drift, start_timer, end_timer);
     if (start_timer.scheduled())
 	_invalid_key_chain.push_back(new_key);
     else
@@ -654,23 +680,25 @@ MD5AuthHandler::add_key(uint8_t		key_id,
     return true;
 }
 
-bool
+    bool
 MD5AuthHandler::remove_key(uint8_t key_id, string& error_msg)
 {
     KeyChain::iterator i;
 
     // Check among all valid keys
     i = find_if(_valid_key_chain.begin(), _valid_key_chain.end(),
-		bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
-    if (i != _valid_key_chain.end()) {
+	    bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
+    if (i != _valid_key_chain.end()) 
+    {
 	_valid_key_chain.erase(i);
 	return true;
     }
 
     // Check among all invalid keys
     i = find_if(_invalid_key_chain.begin(), _invalid_key_chain.end(),
-		bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
-    if (i != _invalid_key_chain.end()) {
+	    bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
+    if (i != _invalid_key_chain.end()) 
+    {
 	_invalid_key_chain.erase(i);
 	return true;
     }
@@ -679,41 +707,44 @@ MD5AuthHandler::remove_key(uint8_t key_id, string& error_msg)
     return false;
 }
 
-void
+    void
 MD5AuthHandler::key_start_cb(uint8_t key_id)
 {
     KeyChain::iterator i;
 
     // Find the key among all invalid keys and move it to the valid keys
     i = find_if(_invalid_key_chain.begin(), _invalid_key_chain.end(),
-		bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
-    if (i != _invalid_key_chain.end()) {
+	    bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
+    if (i != _invalid_key_chain.end()) 
+    {
 	MD5Key& key = *i;
 	_valid_key_chain.push_back(key);
 	_invalid_key_chain.erase(i);
     }
 }
 
-void
+    void
 MD5AuthHandler::key_stop_cb(uint8_t key_id)
 {
     KeyChain::iterator i;
 
     // Find the key among all valid keys and move it to the invalid keys
     i = find_if(_valid_key_chain.begin(), _valid_key_chain.end(),
-		bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
-    if (i != _valid_key_chain.end()) {
+	    bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
+    if (i != _valid_key_chain.end()) 
+    {
 	MD5Key& key = *i;
 	//
 	// XXX: If the last key expires then keep using it as per
 	// RFC 2328 Appendix D.3 until the lifetime is extended, the key
 	// is deleted by network management, or a new key is configured.
 	//
-	if (_valid_key_chain.size() == 1) {
+	if (_valid_key_chain.size() == 1) 
+	{
 	    XLOG_WARNING("Last authentication key (key ID = %u) has expired. "
-			 "Will keep using it until its lifetime is extended, "
-			 "the key is deleted, or a new key is configured.",
-			 key_id);
+		    "Will keep using it until its lifetime is extended, "
+		    "the key is deleted, or a new key is configured.",
+		    key_id);
 	    key.set_persistent(true);
 	    return;
 	}
@@ -731,21 +762,23 @@ MD5AuthHandler::key_stop_cb(uint8_t key_id)
  *
  * @param now current time.
  */
-MD5AuthHandler::MD5Key*
+    MD5AuthHandler::MD5Key*
 MD5AuthHandler::best_outbound_key(const TimeVal& now)
 {
     MD5Key* best_key = NULL;
     KeyChain::iterator iter;
 
     for (iter = _valid_key_chain.begin();
-	 iter != _valid_key_chain.end();
-	 ++iter) {
+	    iter != _valid_key_chain.end();
+	    ++iter) 
+    {
 	MD5Key* key = &(*iter);
 
 	if (! key->valid_at(now))
 	    continue;
 
-	if (best_key == NULL) {
+	if (best_key == NULL) 
+	{
 	    best_key = key;
 	    continue;
 	}
@@ -753,15 +786,17 @@ MD5AuthHandler::best_outbound_key(const TimeVal& now)
 	// Select the key with most recent start-time
 	if (best_key->start_timeval() > key->start_timeval())
 	    continue;
-	if (best_key->start_timeval() < key->start_timeval()) {
+	if (best_key->start_timeval() < key->start_timeval()) 
+	{
 	    best_key = key;
 	    continue;
 	}
-	
+
 	// The start time is same hence select the key with greatest ID
 	if (best_key->id() > key->id())
 	    continue;
-	if (best_key->id() < key->id()) {
+	if (best_key->id() < key->id()) 
+	{
 	    best_key = key;
 	    continue;
 	}
@@ -771,14 +806,15 @@ MD5AuthHandler::best_outbound_key(const TimeVal& now)
     return (best_key);
 }
 
-void
+    void
 MD5AuthHandler::reset_keys()
 {
     KeyChain::iterator iter;
 
     for (iter = _valid_key_chain.begin();
-	 iter != _valid_key_chain.end();
-	 ++iter) {
+	    iter != _valid_key_chain.end();
+	    ++iter) 
+    {
 	iter->reset();
     }
 }
@@ -792,7 +828,7 @@ MD5AuthHandler::empty() const
 // ----------------------------------------------------------------------------
 // Auth implementation
 
-bool
+    bool
 Auth::set_simple_authentication_key(const string& password, string& error_msg)
 {
     PlaintextAuthHandler* plaintext_ah = NULL;
@@ -800,7 +836,8 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
     XLOG_ASSERT(_auth_handler != NULL);
 
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
-    if (plaintext_ah == NULL) {
+    if (plaintext_ah == NULL) 
+    {
 	set_method(PlaintextAuthHandler::auth_type_name());
     }
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
@@ -811,15 +848,16 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
     return (true);
 }
 
-bool
+    bool
 Auth::delete_simple_authentication_key(string& error_msg)
 {
     PlaintextAuthHandler* plaintext_ah = NULL;
-    
+
     XLOG_ASSERT(_auth_handler != NULL);
 
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
-    if (plaintext_ah != NULL) {
+    if (plaintext_ah != NULL) 
+    {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -840,21 +878,23 @@ Auth::delete_simple_authentication_key(string& error_msg)
     return (true);
 }
 
-bool
+    bool
 Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
-				 const TimeVal& start_timeval,
-				 const TimeVal& end_timeval,
-				 const TimeVal& max_time_drift,
-				 string& error_msg)
+	const TimeVal& start_timeval,
+	const TimeVal& end_timeval,
+	const TimeVal& max_time_drift,
+	string& error_msg)
 {
     MD5AuthHandler* md5_ah = NULL;
 
     XLOG_ASSERT(_auth_handler != NULL);
 
     md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
-    if (md5_ah != NULL) {
+    if (md5_ah != NULL) 
+    {
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			    max_time_drift, error_msg) != true) {
+		    max_time_drift, error_msg) != true) 
+	{
 	    error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	    return (false);
 	}
@@ -864,7 +904,8 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
     // Create a new MD5 authentication handler and delete the old handler
     md5_ah = new MD5AuthHandler;
     if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			max_time_drift, error_msg) != true) {
+		max_time_drift, error_msg) != true) 
+    {
 	error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	delete md5_ah;
 	return (false);
@@ -875,7 +916,7 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
     return (true);
 }
 
-bool
+    bool
 Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
 {
     MD5AuthHandler* md5_ah = NULL;
@@ -883,7 +924,8 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
     XLOG_ASSERT(_auth_handler != NULL);
 
     md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
-    if (md5_ah != NULL) {
+    if (md5_ah != NULL) 
+    {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -900,9 +942,10 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
     //
     // Remove the key
     //
-    if (md5_ah->remove_key(key_id, error_msg) != true) {
+    if (md5_ah->remove_key(key_id, error_msg) != true) 
+    {
 	error_msg = c_format("Invalid MD5 key ID %u: %s",
-			     XORP_UINT_CAST(key_id), error_msg.c_str());
+		XORP_UINT_CAST(key_id), error_msg.c_str());
 	return (false);
     }
 
@@ -910,7 +953,8 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
     // If the last key, then install an empty handler and delete the MD5
     // authentication handler.
     //
-    if (md5_ah->empty()) {
+    if (md5_ah->empty()) 
+    {
 	set_method(NullAuthHandler::auth_type_name());
     }
 

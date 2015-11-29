@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8: 
-                       
+
 // Copyright (c) 2001-2011 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
@@ -39,90 +39,93 @@ template <typename A>
 class System :
     public NONCOPYABLE
 {
-public:
-    typedef RouteDB<A>		RouteDatabase;
-    typedef PortManagerBase<A>	PortManager;
+    public:
+	typedef RouteDB<A>		RouteDatabase;
+	typedef PortManagerBase<A>	PortManager;
 
-public:
-    System() :  _rtdb(_policy_filters), _pm(0) {}
-    ~System();
+    public:
+	System() :  _rtdb(_policy_filters), _pm(0) {}
+	~System();
 
 
-    /**
-     * Get the Route Database that each object in the RIP system
-     * should use.
-     */
-    RouteDatabase& route_db()			{ return _rtdb; }
+	/**
+	 * Get the Route Database that each object in the RIP system
+	 * should use.
+	 */
+	RouteDatabase& route_db()			{ return _rtdb; }
 
-    /**
-     * Get the Route Database that each object in the RIP system
-     * should use.
-     */
-    const RouteDatabase& route_db() const	{ return _rtdb; }
+	/**
+	 * Get the Route Database that each object in the RIP system
+	 * should use.
+	 */
+	const RouteDatabase& route_db() const	{ return _rtdb; }
 
-    /**
-     * Set the port manager object associated with the system.
-     *
-     * @param pointer to PortManager to be used.
-     *
-     * @return true if port manager has not previously been set and
-     * pointer is not null, false otherwise.
-     */
-    bool set_port_manager(PortManager* pm);
+	/**
+	 * Set the port manager object associated with the system.
+	 *
+	 * @param pointer to PortManager to be used.
+	 *
+	 * @return true if port manager has not previously been set and
+	 * pointer is not null, false otherwise.
+	 */
+	bool set_port_manager(PortManager* pm);
 
-    /**
-     * Get pointer to PortManager that the RIP system is using.
-     */
-    PortManager* port_manager()			{ return _pm; }
+	/**
+	 * Get pointer to PortManager that the RIP system is using.
+	 */
+	PortManager* port_manager()			{ return _pm; }
 
-    /**
-     * Get pointer PortManager that the RIP system is using.
-     */
-    const PortManager* port_manager() const	{ return _pm; }
+	/**
+	 * Get pointer PortManager that the RIP system is using.
+	 */
+	const PortManager* port_manager() const	{ return _pm; }
 
-    /**
-     * Configure a policy filter.
-     *
-     * @param filter id of filter to configure.
-     * @param conf configuration of filter.
-     */
-    void configure_filter(const uint32_t& filter, const string& conf) {
-	_policy_filters.configure(filter,conf);
-    }
+	/**
+	 * Configure a policy filter.
+	 *
+	 * @param filter id of filter to configure.
+	 * @param conf configuration of filter.
+	 */
+	void configure_filter(const uint32_t& filter, const string& conf) 
+	{
+	    _policy_filters.configure(filter,conf);
+	}
 
-    /**
-     * Reset a policy filter.
-     *
-     * @param filter id of filter to reset.
-     */
-    void reset_filter(const uint32_t& filter) {
-	_policy_filters.reset(filter);
-    }
+	/**
+	 * Reset a policy filter.
+	 *
+	 * @param filter id of filter to reset.
+	 */
+	void reset_filter(const uint32_t& filter) 
+	{
+	    _policy_filters.reset(filter);
+	}
 
-    /**
-     * Push routes through policy filters for re-filtering.
-     */
-    void push_routes() {
-	_rtdb.push_routes();
-    }
+	/**
+	 * Push routes through policy filters for re-filtering.
+	 */
+	void push_routes() 
+	{
+	    _rtdb.push_routes();
+	}
 
-    /**
-     * @return reference to global policy filters.
-     */
-    PolicyFilters& policy_filters() { return _policy_filters; }
+	/**
+	 * @return reference to global policy filters.
+	 */
+	PolicyFilters& policy_filters() { return _policy_filters; }
 
-    Trace& route_trace() { return _rtdb.trace(); }
+	Trace& route_trace() { return _rtdb.trace(); }
 
-protected:
+    protected:
 
-    //
-    // There should be only one instatiation per process.
-    // RIP uses separate processes for IPv4 and IPv6 so we are ok.
-    //
-    PolicyFilters	_policy_filters;
+	//
+	// There should be only one instatiation per process.
+	// RIP uses separate processes for IPv4 and IPv6 so we are ok.
+	//
+	PolicyFilters	_policy_filters;
 
-    RouteDatabase	_rtdb;
-    PortManager*	_pm;
+	RouteDatabase	_rtdb;
+	PortManager*	_pm;
 };
 
 // ----------------------------------------------------------------------------
@@ -130,17 +133,18 @@ protected:
 //
 
 template <typename A>
-bool
+    bool
 System<A>::set_port_manager(PortManager* pm)
 {
-    if (pm != 0 && _pm == 0) {
+    if (pm != 0 && _pm == 0) 
+    {
 	_pm = pm;
 	return true;
     }
     return false;
 }
 
-template <typename A>
+    template <typename A>
 System<A>::~System()
 {
     _rtdb.flush_routes();

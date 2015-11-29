@@ -33,6 +33,6 @@
  * @param y output value checksum
  */
 void fletcher_checksum(uint8_t *bufp, size_t len,
-		       size_t off, int32_t& x, int32_t& y);
+	size_t off, int32_t& x, int32_t& y);
 
 #endif // __OSPF_FLETCHER_CHECKSUM_HH__

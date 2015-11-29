@@ -28,7 +28,8 @@
 #include "policy/policy_module.h"
 #include "libxorp/xlog.h"
 
-enum {
+enum 
+{
     HASH_OP_AND = 1,
     HASH_OP_OR,
     HASH_OP_XOR,
@@ -61,56 +62,59 @@ enum {
  * An operation is simply an operation that may be done upon elements, such as
  * addition and comparison.
  */
-class Oper {
-public:
-    typedef unsigned char Hash;
+class Oper 
+{
+    public:
+	typedef unsigned char Hash;
 
-    Oper(Hash hash, unsigned arity) : _hash(hash), _arity(arity)
+	Oper(Hash hash, unsigned arity) : _hash(hash), _arity(arity)
     {
 	XLOG_ASSERT(_hash < HASH_OP_MAX);
     }
 
-    virtual ~Oper() {};
+	virtual ~Oper() {};
 
-    /**
-     * @return number of arguments operation takes
-     */
-    unsigned arity() const { return _arity; }
+	/**
+	 * @return number of arguments operation takes
+	 */
+	unsigned arity() const { return _arity; }
 
-    /**
-     * Must be unique.
-     *
-     * @return string representation of operation.
-     */
-    virtual string str() const = 0;
+	/**
+	 * Must be unique.
+	 *
+	 * @return string representation of operation.
+	 */
+	virtual string str() const = 0;
 
-    Hash hash() const { return _hash; }
+	Hash hash() const { return _hash; }
 
-private:
-    Hash	_hash;
-    unsigned	_arity;
+    private:
+	Hash	_hash;
+	unsigned	_arity;
 };
 
 /**
  * @short Base class for unary operations.
  */
-class UnOper : public Oper {
-public:
-    UnOper(Hash hash) : Oper(hash, 1) {}
-    virtual ~UnOper() {};
+class UnOper : public Oper 
+{
+    public:
+	UnOper(Hash hash) : Oper(hash, 1) {}
+	virtual ~UnOper() {};
 
-    virtual string str() const = 0;
+	virtual string str() const = 0;
 };
 
 /**
  * @short Base class for binary operations.
  */
-class BinOper : public Oper {
-public:
-    BinOper(Hash hash) : Oper(hash, 2) {}
-    virtual ~BinOper() {};
+class BinOper : public Oper 
+{
+    public:
+	BinOper(Hash hash) : Oper(hash, 2) {}
+	virtual ~BinOper() {};
 
-    virtual string str() const = 0;
+	virtual string str() const = 0;
 };
 
 #endif // __POLICY_COMMON_OPERATOR_BASE_HH__

@@ -28,80 +28,81 @@
 /**
  * @short Container of counters associated with a peer.
  */
-struct PeerCounters {
-public:
-    PeerCounters() : _packets_recv(0), _updates_recv(0), _requests_recv(0),
-		     _bad_routes(0), _bad_packets(0), _bad_auth_packets(0)
-    {}
+struct PeerCounters 
+{
+	public:
+		PeerCounters() : _packets_recv(0), _updates_recv(0), _requests_recv(0),
+		_bad_routes(0), _bad_packets(0), _bad_auth_packets(0)
+	{}
 
-    /**
-     * Get the total number of packets received.
-     */
-    uint32_t packets_recv() const		{ return _packets_recv; }
+		/**
+		 * Get the total number of packets received.
+		 */
+		uint32_t packets_recv() const		{ return _packets_recv; }
 
-    /**
-     * Increment the total number of packets received.
-     */
-    void incr_packets_recv()			{ _packets_recv++; }
+		/**
+		 * Increment the total number of packets received.
+		 */
+		void incr_packets_recv()			{ _packets_recv++; }
 
-    /**
-     * Get the total number of update packets received.
-     */
-    uint32_t update_packets_recv() const	{ return _updates_recv; }
+		/**
+		 * Get the total number of update packets received.
+		 */
+		uint32_t update_packets_recv() const	{ return _updates_recv; }
 
-    /**
-     * Increment the total number of update packets received.
-     */
-    void incr_update_packets_recv()		{ _updates_recv++; }
+		/**
+		 * Increment the total number of update packets received.
+		 */
+		void incr_update_packets_recv()		{ _updates_recv++; }
 
-    /**
-     * Get the total number of table request packets received.
-     */
-    uint32_t table_requests_recv() const	{ return _requests_recv; }
+		/**
+		 * Get the total number of table request packets received.
+		 */
+		uint32_t table_requests_recv() const	{ return _requests_recv; }
 
-    /**
-     * Increment the total number of table request packets received.
-     */
-    void incr_table_requests_recv()		{ _requests_recv++; }
+		/**
+		 * Increment the total number of table request packets received.
+		 */
+		void incr_table_requests_recv()		{ _requests_recv++; }
 
-    /**
-     * Get the number of bad routes received (eg invalid metric,
-     * invalid address family).
-     */
-    uint32_t bad_routes() const			{ return _bad_routes; }
+		/**
+		 * Get the number of bad routes received (eg invalid metric,
+		 * invalid address family).
+		 */
+		uint32_t bad_routes() const			{ return _bad_routes; }
 
-    /**
-     * Increment the number of bad routes received.
-     */
-    void incr_bad_routes()			{ _bad_routes++; }
+		/**
+		 * Increment the number of bad routes received.
+		 */
+		void incr_bad_routes()			{ _bad_routes++; }
 
-    /**
-     * Get the number of bad response packets received.
-     */
-    uint32_t bad_packets() const		{ return _bad_packets; }
+		/**
+		 * Get the number of bad response packets received.
+		 */
+		uint32_t bad_packets() const		{ return _bad_packets; }
 
-    /**
-     * Increment the number of bad response packets received.
-     */
-    void incr_bad_packets()			{ _bad_packets++; }
+		/**
+		 * Increment the number of bad response packets received.
+		 */
+		void incr_bad_packets()			{ _bad_packets++; }
 
-    /**
-     * Get the number of bad authentication packets received.
-     */
-    uint32_t bad_auth_packets() const		{ return _bad_auth_packets; }
+		/**
+		 * Get the number of bad authentication packets received.
+		 */
+		uint32_t bad_auth_packets() const		{ return _bad_auth_packets; }
 
-    /**
-     * Increment the number of bad authentication packets received.
-     */
-    void incr_bad_auth_packets()		{ _bad_auth_packets++; }
+		/**
+		 * Increment the number of bad authentication packets received.
+		 */
+		void incr_bad_auth_packets()		{ _bad_auth_packets++; }
 
-protected:
-    uint32_t _packets_recv;
-    uint32_t _updates_recv;
-    uint32_t _requests_recv;
-    uint32_t _bad_routes;
-    uint32_t _bad_packets;
-    uint32_t _bad_auth_packets;
+	protected:
+		uint32_t _packets_recv;
+		uint32_t _updates_recv;
+		uint32_t _requests_recv;
+		uint32_t _bad_routes;
+		uint32_t _bad_packets;
+		uint32_t _bad_auth_packets;
 };
 
 // Forward declaration of Peer class
@@ -114,15 +115,16 @@ template <typename A> class Peer;
  * Those routes are used to push them whenever the routing policy is modified.
  */
 template <typename A>
-class PeerRoutes : public RouteEntryOrigin<A> {
-public:
-    PeerRoutes(Peer<A>& peer) : RouteEntryOrigin<A>(false), _peer(peer) {}
+class PeerRoutes : public RouteEntryOrigin<A> 
+{
+	public:
+		PeerRoutes(Peer<A>& peer) : RouteEntryOrigin<A>(false), _peer(peer) {}
 
-private:
-    uint32_t expiry_secs() const;
-    uint32_t deletion_secs() const;
+	private:
+		uint32_t expiry_secs() const;
+		uint32_t deletion_secs() const;
 
-    Peer<A>&	_peer;		// The corresponding peer
+		Peer<A>&	_peer;		// The corresponding peer
 };
 
 
@@ -145,87 +147,87 @@ class Port;
 template <typename A>
 class Peer : public RouteEntryOrigin<A>
 {
-public:
-    typedef A			Addr;
-    typedef Port<A>		RipPort;
-    typedef RouteEntry<A>	Route;
+	public:
+		typedef A			Addr;
+		typedef Port<A>		RipPort;
+		typedef RouteEntry<A>	Route;
 
-public:
-    Peer(RipPort& p, const Addr& addr);
-    ~Peer();
+	public:
+		Peer(RipPort& p, const Addr& addr);
+		~Peer();
 
-    /**
-     * Get address of Peer.
-     */
-    const Addr& address() const			{ return _addr; }
+		/**
+		 * Get address of Peer.
+		 */
+		const Addr& address() const			{ return _addr; }
 
-    /**
-     * Get counters associated with Peer.
-     */
-    PeerCounters& counters()			{ return _counters; }
+		/**
+		 * Get counters associated with Peer.
+		 */
+		PeerCounters& counters()			{ return _counters; }
 
-    /**
-     * Get counters associated with Peer.
-     */
-    const PeerCounters& counters() const	{ return _counters; }
+		/**
+		 * Get counters associated with Peer.
+		 */
+		const PeerCounters& counters() const	{ return _counters; }
 
-    /**
-     * Get port associated with Peer.
-     */
-    RipPort& port()				{ return _port; }
+		/**
+		 * Get port associated with Peer.
+		 */
+		RipPort& port()				{ return _port; }
 
-    /**
-     * Get port associated with Peer.
-     */
-    const RipPort& port() const			{ return _port; }
+		/**
+		 * Get port associated with Peer.
+		 */
+		const RipPort& port() const			{ return _port; }
 
-    /**
-     * Set last active time.
-     */
-    void set_last_active(const TimeVal& t)	{ _last_active = t; }
+		/**
+		 * Set last active time.
+		 */
+		void set_last_active(const TimeVal& t)	{ _last_active = t; }
 
-    /**
-     * Get last active time.
-     */
-    const TimeVal& last_active() const		{ return _last_active; }
+		/**
+		 * Get last active time.
+		 */
+		const TimeVal& last_active() const		{ return _last_active; }
 
-    /**
-     * Update Route Entry in database for specified route.
-     *
-     * @param net the network route being updated.
-     * @param nexthop the corresponding nexthop address.
-     * @param cost the corresponding metric value as received from the
-     *	      route originator.
-     * @param tag the corresponding route tag.
-     * @param policytags the policytags of this route.
-     * @return true if an update occurs, false otherwise.
-     */
-    bool update_route(const IPNet<A>&	net,
-		      const A&		nexthop,
-		      uint32_t		cost,
-		      uint32_t		tag,
-		      const PolicyTags& policytags);
+		/**
+		 * Update Route Entry in database for specified route.
+		 *
+		 * @param net the network route being updated.
+		 * @param nexthop the corresponding nexthop address.
+		 * @param cost the corresponding metric value as received from the
+		 *	      route originator.
+		 * @param tag the corresponding route tag.
+		 * @param policytags the policytags of this route.
+		 * @return true if an update occurs, false otherwise.
+		 */
+		bool update_route(const IPNet<A>&	net,
+				const A&		nexthop,
+				uint32_t		cost,
+				uint32_t		tag,
+				const PolicyTags& policytags);
 
-    /**
-     * Push routes through the system.
-     *
-     * This is needed to apply the policy filters for re-filtering.
-     */
-    void push_routes();
+		/**
+		 * Push routes through the system.
+		 *
+		 * This is needed to apply the policy filters for re-filtering.
+		 */
+		void push_routes();
 
-    uint32_t expiry_secs() const;
+		uint32_t expiry_secs() const;
 
-    uint32_t deletion_secs() const;
+		uint32_t deletion_secs() const;
 
-protected:
-    void set_expiry_timer(Route* route);
-    void expire_route(Route* route);
+	protected:
+		void set_expiry_timer(Route* route);
+		void expire_route(Route* route);
 
-    RipPort&		_port;
-    Addr		_addr;
-    PeerCounters	_counters;
-    TimeVal		_last_active;
-    PeerRoutes<A>	_peer_routes;
+		RipPort&		_port;
+		Addr		_addr;
+		PeerCounters	_counters;
+		TimeVal		_last_active;
+		PeerRoutes<A>	_peer_routes;
 };
 
 
@@ -234,15 +236,16 @@ protected:
  * peer has an address.
  */
 template <typename A>
-struct peer_has_address {
-    peer_has_address(const A& addr) : _a(addr) {}
+struct peer_has_address 
+{
+	peer_has_address(const A& addr) : _a(addr) {}
 
-    bool operator() (const Peer<A>& p) const { return p.address() == _a; }
+	bool operator() (const Peer<A>& p) const { return p.address() == _a; }
 
-    bool operator() (const Peer<A>* p) const { return p->address() == _a; }
+	bool operator() (const Peer<A>* p) const { return p->address() == _a; }
 
-private:
-    A _a;
+	private:
+	A _a;
 };
 
 #endif // __RIP_PEER_HH__

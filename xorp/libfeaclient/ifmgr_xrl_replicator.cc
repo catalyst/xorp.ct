@@ -33,26 +33,28 @@
 
 
 IfMgrXrlReplicator::IfMgrXrlReplicator(XrlSender&	sender,
-				       const string&	xrl_target_name)
-    : _s(sender), _tgt(xrl_target_name), _pending(false)
+	const string&	xrl_target_name)
+: _s(sender), _tgt(xrl_target_name), _pending(false)
 {
 }
 
-void
+    void
 IfMgrXrlReplicator::push(const Cmd& cmd)
 {
-    if (_queue.empty()) {
+    if (_queue.empty()) 
+    {
 	XLOG_ASSERT(_pending == false);
 	_queue.push(cmd);
 	push_manager_queue();
 	crank_manager();
-    } else {
+    } else 
+    {
 	_queue.push(cmd);
 	push_manager_queue();
     }
 }
 
-void
+    void
 IfMgrXrlReplicator::crank_replicator()
 {
     if (_pending)
@@ -65,13 +67,14 @@ IfMgrXrlReplicator::crank_replicator()
 
     Cmd c = _queue.front();
     if (c->forward(_s, _tgt, callback(this, &IfMgrXrlReplicator::xrl_cb))
-	== false) {
+	    == false) 
+    {
 	// XXX todo
 	XLOG_FATAL("Send failed.");
     }
 }
 
-void
+    void
 IfMgrXrlReplicator::xrl_cb(const XrlError& err)
 {
     XLOG_ASSERT(_queue.empty() == false);
@@ -80,12 +83,14 @@ IfMgrXrlReplicator::xrl_cb(const XrlError& err)
     Cmd c = _queue.front();
     _queue.pop_front();
 
-    if (err == XrlError::OKAY()) {
+    if (err == XrlError::OKAY()) 
+    {
 	crank_manager_cb();
 	return;
     }
 
-    if (err == XrlError::COMMAND_FAILED()) {
+    if (err == XrlError::COMMAND_FAILED()) 
+    {
 	//
 	// If command failed then we're out of sync with remote tree
 	// this means we have a bug.
@@ -99,7 +104,7 @@ IfMgrXrlReplicator::xrl_cb(const XrlError& err)
 // XXX: note that this method may be overwritten by
 // IfMgrManagedXrlReplicator::crank_manager()
 //
-void
+    void
 IfMgrXrlReplicator::crank_manager()
 {
     crank_replicator();
@@ -109,7 +114,7 @@ IfMgrXrlReplicator::crank_manager()
 // XXX: note that this method may be overwritten by
 // IfMgrManagedXrlReplicator::crank_manager_cb()
 //
-void
+    void
 IfMgrXrlReplicator::crank_manager_cb()
 {
     crank_replicator();
@@ -119,12 +124,12 @@ IfMgrXrlReplicator::crank_manager_cb()
 // XXX: note that this method may be overwritten by
 // IfMgrManagedXrlReplicator::push_manager_queue()
 //
-void
+    void
 IfMgrXrlReplicator::push_manager_queue()
 {
 }
 
-void
+    void
 IfMgrXrlReplicator::xrl_error_event(const XrlError& err)
 {
     XLOG_ERROR("%s", err.str().c_str());
@@ -133,83 +138,86 @@ IfMgrXrlReplicator::xrl_error_event(const XrlError& err)
 
 
 
-IfMgrManagedXrlReplicator::IfMgrManagedXrlReplicator
+    IfMgrManagedXrlReplicator::IfMgrManagedXrlReplicator
 (
  IfMgrXrlReplicationManager&	m,
  XrlSender&			s,
  const string&			n
  )
-    : IfMgrXrlReplicator(s, n), _mgr(m)
+: IfMgrXrlReplicator(s, n), _mgr(m)
 {
 }
 
-void
+    void
 IfMgrManagedXrlReplicator::crank_manager()
 {
     _mgr.crank_replicators_queue();
 }
 
-void
+    void
 IfMgrManagedXrlReplicator::crank_manager_cb()
 {
     _mgr.crank_replicators_queue_cb();
 }
 
 
-void
+    void
 IfMgrManagedXrlReplicator::push_manager_queue()
 {
     _mgr.push_manager_queue(this);
 }
 
-void
+    void
 IfMgrManagedXrlReplicator::xrl_error_event(const XrlError& /* e */)
 {
     XLOG_INFO("An error occurred sending an Xrl to \"%s\".  Target is being "
-	      "removed from list of interface update receivers.",
-	      xrl_target_name().c_str());
+	    "removed from list of interface update receivers.",
+	    xrl_target_name().c_str());
     _mgr.remove_mirror(xrl_target_name());
 }
 
 
 
-IfMgrXrlReplicationManager::IfMgrXrlReplicationManager(XrlRouter& r)
-    : _rtr(r)
+    IfMgrXrlReplicationManager::IfMgrXrlReplicationManager(XrlRouter& r)
+: _rtr(r)
 {
 }
 
 IfMgrXrlReplicationManager::~IfMgrXrlReplicationManager()
 {
-    while (_outputs.empty() == false) {
+    while (_outputs.empty() == false) 
+    {
 	delete _outputs.front();
 	_outputs.pop_front();
     }
 }
 
-bool
+    bool
 IfMgrXrlReplicationManager::add_mirror(const string& target_name)
 {
     Outputs::const_iterator ci = _outputs.begin();
-    while (ci != _outputs.end()) {
+    while (ci != _outputs.end()) 
+    {
 	if ((*ci)->xrl_target_name() == target_name)
 	    return false;
 	++ci;
     }
     _outputs.push_back(new
-		       IfMgrManagedXrlReplicator(*this, _rtr, target_name));
+	    IfMgrManagedXrlReplicator(*this, _rtr, target_name));
 
     IfMgrIfTreeToCommands config_commands(_iftree);
     config_commands.convert(*_outputs.back());
     return true;
 }
 
-bool
+    bool
 IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
 {
     Outputs::iterator i;
 
     // Remove all pending commands for this target
-    for (i = _replicators_queue.begin(); i != _replicators_queue.end(); ) {
+    for (i = _replicators_queue.begin(); i != _replicators_queue.end(); ) 
+    {
 	IfMgrManagedXrlReplicator* r = *i;
 	Outputs::iterator i2 = i;
 	++i;
@@ -218,8 +226,10 @@ IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
     }
 
     // Remove the target itself
-    for (i = _outputs.begin(); i != _outputs.end(); ++i) {
-	if ((*i)->xrl_target_name() == target_name) {
+    for (i = _outputs.begin(); i != _outputs.end(); ++i) 
+    {
+	if ((*i)->xrl_target_name() == target_name) 
+	{
 	    delete *i;
 	    _outputs.erase(i);
 	    return true;
@@ -228,28 +238,32 @@ IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
     return false;
 }
 
-void
+    void
 IfMgrXrlReplicationManager::push(const Cmd& cmd)
 {
-    if (cmd->execute(_iftree) == false) {
+    if (cmd->execute(_iftree) == false) 
+    {
 	XLOG_ERROR("Apply bad command. %s", cmd->str().c_str());
 	return;
     }
 
-    for (Outputs::iterator i = _outputs.begin(); _outputs.end() != i; ++i) {
+    for (Outputs::iterator i = _outputs.begin(); _outputs.end() != i; ++i) 
+    {
 	(*i)->push(cmd);
     }
 }
 
-void
+    void
 IfMgrXrlReplicationManager::crank_replicators_queue()
 {
-    do {
+    do 
+    {
 	if (_replicators_queue.empty())
 	    return;
 	IfMgrManagedXrlReplicator* r = _replicators_queue.front();
 
-	if (r->is_empty_queue()) {
+	if (r->is_empty_queue()) 
+	{
 	    _replicators_queue.pop_front();
 	    continue;
 	}
@@ -263,7 +277,7 @@ IfMgrXrlReplicationManager::crank_replicators_queue()
     } while (true);
 }
 
-void
+    void
 IfMgrXrlReplicationManager::crank_replicators_queue_cb()
 {
     XLOG_ASSERT(_replicators_queue.empty() == false);
@@ -273,7 +287,7 @@ IfMgrXrlReplicationManager::crank_replicators_queue_cb()
     crank_replicators_queue();
 }
 
-void
+    void
 IfMgrXrlReplicationManager::push_manager_queue(IfMgrManagedXrlReplicator* r)
 {
     //

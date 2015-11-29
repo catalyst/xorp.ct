@@ -53,17 +53,19 @@
  * following form.
  */
 typedef struct DirNode DirNode;
-struct DirNode {
-  DirNode *next;       /* The next directory in the list */
-  DirNode *prev;       /* The node that precedes this node in the list */
-  DirReader *dr;       /* The directory reader object */
+struct DirNode 
+{
+	DirNode *next;       /* The next directory in the list */
+	DirNode *prev;       /* The node that precedes this node in the list */
+	DirReader *dr;       /* The directory reader object */
 };
 
-typedef struct {
-  FreeList *mem;       /* Memory for DirNode list nodes */
-  DirNode *head;       /* The head of the list of used and unused cache nodes */
-  DirNode *next;       /* The next unused node between head and tail */
-  DirNode *tail;       /* The tail of the list of unused cache nodes */
+typedef struct 
+{
+	FreeList *mem;       /* Memory for DirNode list nodes */
+	DirNode *head;       /* The head of the list of used and unused cache nodes */
+	DirNode *next;       /* The next unused node between head and tail */
+	DirNode *tail;       /* The tail of the list of unused cache nodes */
 } DirCache;
 
 /*
@@ -89,34 +91,35 @@ typedef struct {
  */
 #define ERRLEN 200
 
-struct ExpandFile {
-  StringGroup *sg;        /* A list of string segments in which */
-                          /*  matching filenames are stored. */
-  DirCache cache;         /* The cache of directory reader objects */
-  PathName *path;         /* The pathname being matched */
-  HomeDir *home;          /* Home-directory lookup object */
-  int files_dim;          /* The allocated dimension of result.files[] */
-  char usrnam[USR_LEN+1]; /* A user name */
-  char envnam[ENV_LEN+1]; /* An environment variable name */
-  char errmsg[ERRLEN+1];  /* Error-report buffer */
-  FileExpansion result;   /* The container used to return the results of */
-                          /*  expanding a path. */
+struct ExpandFile 
+{
+	StringGroup *sg;        /* A list of string segments in which */
+	/*  matching filenames are stored. */
+	DirCache cache;         /* The cache of directory reader objects */
+	PathName *path;         /* The pathname being matched */
+	HomeDir *home;          /* Home-directory lookup object */
+	int files_dim;          /* The allocated dimension of result.files[] */
+	char usrnam[USR_LEN+1]; /* A user name */
+	char envnam[ENV_LEN+1]; /* An environment variable name */
+	char errmsg[ERRLEN+1];  /* Error-report buffer */
+	FileExpansion result;   /* The container used to return the results of */
+	/*  expanding a path. */
 };
 
 static int ef_record_pathname(ExpandFile *ef, const char *pathname,
-			      int remove_escapes);
+		int remove_escapes);
 static char *ef_cache_pathname(ExpandFile *ef, const char *pathname,
-			       int remove_escapes);
+		int remove_escapes);
 static void ef_clear_files(ExpandFile *ef);
 
 static DirNode *ef_open_dir(ExpandFile *ef, const char *pathname);
 static DirNode *ef_close_dir(ExpandFile *ef, DirNode *node);
 static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen);
 static int ef_match_relative_pathname(ExpandFile *ef, DirReader *dr,
-				      const char *pattern, int separate);
+		const char *pattern, int separate);
 static int ef_matches_range(int c, const char *pattern, const char **endp);
 static int ef_string_matches_pattern(const char *file, const char *pattern,
-				      int xplicit, const char *nextp);
+		int xplicit, const char *nextp);
 static int ef_cmp_strings(const void *v1, const void *v2);
 
 /*.......................................................................
@@ -127,68 +130,70 @@ static int ef_cmp_strings(const void *v1, const void *v2);
  */
 ExpandFile *new_ExpandFile(void)
 {
-  ExpandFile *ef;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  ef = (ExpandFile *) malloc(sizeof(ExpandFile));
-  if(!ef) {
-    fprintf(stderr, "new_ExpandFile: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to del_ExpandFile().
- */
-  ef->sg = NULL;
-  ef->cache.mem = NULL;
-  ef->cache.head = NULL;
-  ef->cache.next = NULL;
-  ef->cache.tail = NULL;
-  ef->path = NULL;
-  ef->home = NULL;
-  ef->result.files = NULL;
-  ef->result.nfile = 0;
-  ef->usrnam[0] = '\0';
-  ef->envnam[0] = '\0';
-  ef->errmsg[0] = '\0';
-/*
- * Allocate a list of string segments for storing filenames.
- */
-  ef->sg = _new_StringGroup(_pu_pathname_dim());
-  if(!ef->sg)
-    return del_ExpandFile(ef);
-/*
- * Allocate a freelist for allocating directory cache nodes.
- */
-  ef->cache.mem = _new_FreeList("new_ExpandFile", sizeof(DirNode), DIR_CACHE_BLK);
-  if(!ef->cache.mem)
-    return del_ExpandFile(ef);
-/*
- * Allocate a pathname buffer.
- */
-  ef->path = _new_PathName();
-  if(!ef->path)
-    return del_ExpandFile(ef);
-/*
- * Allocate an object for looking up home-directories.
- */
-  ef->home = _new_HomeDir();
-  if(!ef->home)
-    return del_ExpandFile(ef);
-/*
- * Allocate an array for files. This will be extended later if needed.
- */
-  ef->files_dim = MATCH_BLK_FACT;
-  ef->result.files = (char **) malloc(sizeof(ef->result.files[0]) *
-				      ef->files_dim);
-  if(!ef->result.files) {
-    fprintf(stderr,
-        "new_ExpandFile: Insufficient memory to allocate array of files.\n");
-    return del_ExpandFile(ef);
-  };
-  return ef;
+	ExpandFile *ef;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	ef = (ExpandFile *) malloc(sizeof(ExpandFile));
+	if(!ef) 
+	{
+		fprintf(stderr, "new_ExpandFile: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to del_ExpandFile().
+	 */
+	ef->sg = NULL;
+	ef->cache.mem = NULL;
+	ef->cache.head = NULL;
+	ef->cache.next = NULL;
+	ef->cache.tail = NULL;
+	ef->path = NULL;
+	ef->home = NULL;
+	ef->result.files = NULL;
+	ef->result.nfile = 0;
+	ef->usrnam[0] = '\0';
+	ef->envnam[0] = '\0';
+	ef->errmsg[0] = '\0';
+	/*
+	 * Allocate a list of string segments for storing filenames.
+	 */
+	ef->sg = _new_StringGroup(_pu_pathname_dim());
+	if(!ef->sg)
+		return del_ExpandFile(ef);
+	/*
+	 * Allocate a freelist for allocating directory cache nodes.
+	 */
+	ef->cache.mem = _new_FreeList("new_ExpandFile", sizeof(DirNode), DIR_CACHE_BLK);
+	if(!ef->cache.mem)
+		return del_ExpandFile(ef);
+	/*
+	 * Allocate a pathname buffer.
+	 */
+	ef->path = _new_PathName();
+	if(!ef->path)
+		return del_ExpandFile(ef);
+	/*
+	 * Allocate an object for looking up home-directories.
+	 */
+	ef->home = _new_HomeDir();
+	if(!ef->home)
+		return del_ExpandFile(ef);
+	/*
+	 * Allocate an array for files. This will be extended later if needed.
+	 */
+	ef->files_dim = MATCH_BLK_FACT;
+	ef->result.files = (char **) malloc(sizeof(ef->result.files[0]) *
+			ef->files_dim);
+	if(!ef->result.files) 
+	{
+		fprintf(stderr,
+				"new_ExpandFile: Insufficient memory to allocate array of files.\n");
+		return del_ExpandFile(ef);
+	};
+	return ef;
 }
 
 /*.......................................................................
@@ -201,44 +206,46 @@ ExpandFile *new_ExpandFile(void)
  */
 ExpandFile *del_ExpandFile(ExpandFile *ef)
 {
-  if(ef) {
-    DirNode *dnode;
-/*
- * Delete the string segments.
- */
-    ef->sg = _del_StringGroup(ef->sg);
-/*
- * Delete the cached directory readers.
- */
-    for(dnode=ef->cache.head; dnode; dnode=dnode->next)
-      dnode->dr = _del_DirReader(dnode->dr);
-/*
- * Delete the memory from which the DirNode list was allocated, thus
- * deleting the list at the same time.
- */
-    ef->cache.mem = _del_FreeList("del_ExpandFile", ef->cache.mem, 1);
-    ef->cache.head = ef->cache.tail = ef->cache.next = NULL;
-/*
- * Delete the pathname buffer.
- */
-    ef->path = _del_PathName(ef->path);
-/*
- * Delete the home-directory lookup object.
- */
-    ef->home = _del_HomeDir(ef->home);
-/*
- * Delete the array of pointers to files.
- */
-    if(ef->result.files) {
-      free(ef->result.files);
-      ef->result.files = NULL;
-    };
-/*
- * Delete the container.
- */
-    free(ef);
-  };
-  return NULL;
+	if(ef) 
+	{
+		DirNode *dnode;
+		/*
+		 * Delete the string segments.
+		 */
+		ef->sg = _del_StringGroup(ef->sg);
+		/*
+		 * Delete the cached directory readers.
+		 */
+		for(dnode=ef->cache.head; dnode; dnode=dnode->next)
+			dnode->dr = _del_DirReader(dnode->dr);
+		/*
+		 * Delete the memory from which the DirNode list was allocated, thus
+		 * deleting the list at the same time.
+		 */
+		ef->cache.mem = _del_FreeList("del_ExpandFile", ef->cache.mem, 1);
+		ef->cache.head = ef->cache.tail = ef->cache.next = NULL;
+		/*
+		 * Delete the pathname buffer.
+		 */
+		ef->path = _del_PathName(ef->path);
+		/*
+		 * Delete the home-directory lookup object.
+		 */
+		ef->home = _del_HomeDir(ef->home);
+		/*
+		 * Delete the array of pointers to files.
+		 */
+		if(ef->result.files) 
+		{
+			free(ef->result.files);
+			ef->result.files = NULL;
+		};
+		/*
+		 * Delete the container.
+		 */
+		free(ef);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -304,132 +311,144 @@ ExpandFile *del_ExpandFile(ExpandFile *ef)
  */
 FileExpansion *ef_expand_file(ExpandFile *ef, const char *path, int pathlen)
 {
-  DirNode *dnode;       /* A directory-reader cache node */
-  const char *dirname;  /* The name of the top level directory of the search */
-  const char *pptr;     /* A pointer into path[] */
-  int wild;             /* True if the path contains any wildcards */
-/*
- * Check the arguments.
- */
-  if(!ef || !path) {
-    if(ef)
-      strncpy(ef->errmsg, "ef_expand_file: NULL path argument", sizeof(ef->errmsg));
-    else
-      fprintf(stderr, "ef_expand_file: NULL argument(s).\n");
-    return NULL;
-  };
-/*
- * If the caller specified that the whole of path[] be matched,
- * work out the corresponding length.
- */
-  if(pathlen < 0 || pathlen > strlen(path))
-    pathlen = strlen(path);
-/*
- * Discard previous expansion results.
- */
-  ef_clear_files(ef);
-/*
- * Preprocess the path, expanding ~/, ~user/ and $envvar references,
- * using ef->path as a work directory and returning a pointer to
- * a copy of the resulting pattern in the cache.
- */
-  path = ef_expand_special(ef, path, pathlen);
-  if(!path)
-    return NULL;
-/*
- * Clear the pathname buffer.
- */
-  _pn_clear_path(ef->path);
-/*
- * Does the pathname contain any wildcards?
- */
-  for(wild=0,pptr=path; !wild && *pptr; pptr++) {
-    switch(*pptr) {
-    case '\\':                      /* Skip escaped characters */
-      if(pptr[1])
-	pptr++;
-      break; 
-    case '*': case '?': case '[':   /* A wildcard character? */
-      wild = 1;
-      break;
-    };
-  };
-/*
- * If there are no wildcards to match, copy the current expanded
- * path into the output array, removing backslash escapes while doing so.
- */
-  if(!wild) {
-    if(ef_record_pathname(ef, path, 1))
-      return NULL;
-/*
- * Does the filename exist?
- */
-    ef->result.exists = _pu_file_exists(ef->result.files[0]);
-/*
- * Match wildcards against existing files.
- */
-  } else {
-/*
- * Only existing files that match the pattern will be returned in the
- * cache.
- */
-    ef->result.exists = 1;
-/*
- * Treat matching of the root-directory as a special case since it
- * isn't contained in a directory.
- */
-    if(strcmp(path, FS_ROOT_DIR) == 0) {
-      if(ef_record_pathname(ef, FS_ROOT_DIR, 0))
-	return NULL;
-    } else {
-/*
- * What should the top level directory of the search be?
- */
-      if(strncmp(path, FS_ROOT_DIR, FS_ROOT_DIR_LEN) == 0) {
-	dirname = FS_ROOT_DIR;
-	if(!_pn_append_to_path(ef->path, FS_ROOT_DIR, -1, 0)) {
-	  strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
-	  return NULL;
+	DirNode *dnode;       /* A directory-reader cache node */
+	const char *dirname;  /* The name of the top level directory of the search */
+	const char *pptr;     /* A pointer into path[] */
+	int wild;             /* True if the path contains any wildcards */
+	/*
+	 * Check the arguments.
+	 */
+	if(!ef || !path) 
+	{
+		if(ef)
+			strncpy(ef->errmsg, "ef_expand_file: NULL path argument", sizeof(ef->errmsg));
+		else
+			fprintf(stderr, "ef_expand_file: NULL argument(s).\n");
+		return NULL;
 	};
-	path += FS_ROOT_DIR_LEN;
-      } else {
-	dirname = FS_PWD;
-      };
-/*
- * Open the top-level directory of the search.
- */
-      dnode = ef_open_dir(ef, dirname);
-      if(!dnode)
-	return NULL;
-/*
- * Recursively match successive directory components of the path.
- */
-      if(ef_match_relative_pathname(ef, dnode->dr, path, 0)) {
-	dnode = ef_close_dir(ef, dnode);
-	return NULL;
-      };
-/*
- * Cleanup.
- */
-      dnode = ef_close_dir(ef, dnode);
-    };
-/*
- * No files matched?
- */
-    if(ef->result.nfile < 1) {
-      strncpy(ef->errmsg, "No files match", sizeof(ef->errmsg));
-      return NULL;
-    };
-/*
- * Sort the pathnames that matched.
- */
-    qsort(ef->result.files, ef->result.nfile, sizeof(ef->result.files[0]),
-	  ef_cmp_strings);
-  };
-/*
- * Return the result container.
- */
-  return &ef->result;
+	/*
+	 * If the caller specified that the whole of path[] be matched,
+	 * work out the corresponding length.
+	 */
+	if(pathlen < 0 || pathlen > strlen(path))
+		pathlen = strlen(path);
+	/*
+	 * Discard previous expansion results.
+	 */
+	ef_clear_files(ef);
+	/*
+	 * Preprocess the path, expanding ~/, ~user/ and $envvar references,
+	 * using ef->path as a work directory and returning a pointer to
+	 * a copy of the resulting pattern in the cache.
+	 */
+	path = ef_expand_special(ef, path, pathlen);
+	if(!path)
+		return NULL;
+	/*
+	 * Clear the pathname buffer.
+	 */
+	_pn_clear_path(ef->path);
+	/*
+	 * Does the pathname contain any wildcards?
+	 */
+	for(wild=0,pptr=path; !wild && *pptr; pptr++) 
+	{
+		switch(*pptr) 
+		{
+			case '\\':                      /* Skip escaped characters */
+				if(pptr[1])
+					pptr++;
+				break; 
+			case '*': case '?': case '[':   /* A wildcard character? */
+				wild = 1;
+				break;
+		};
+	};
+	/*
+	 * If there are no wildcards to match, copy the current expanded
+	 * path into the output array, removing backslash escapes while doing so.
+	 */
+	if(!wild) 
+	{
+		if(ef_record_pathname(ef, path, 1))
+			return NULL;
+		/*
+		 * Does the filename exist?
+		 */
+		ef->result.exists = _pu_file_exists(ef->result.files[0]);
+		/*
+		 * Match wildcards against existing files.
+		 */
+	} else 
+	{
+		/*
+		 * Only existing files that match the pattern will be returned in the
+		 * cache.
+		 */
+		ef->result.exists = 1;
+		/*
+		 * Treat matching of the root-directory as a special case since it
+		 * isn't contained in a directory.
+		 */
+		if(strcmp(path, FS_ROOT_DIR) == 0) 
+		{
+			if(ef_record_pathname(ef, FS_ROOT_DIR, 0))
+				return NULL;
+		} else 
+		{
+			/*
+			 * What should the top level directory of the search be?
+			 */
+			if(strncmp(path, FS_ROOT_DIR, FS_ROOT_DIR_LEN) == 0) 
+			{
+				dirname = FS_ROOT_DIR;
+				if(!_pn_append_to_path(ef->path, FS_ROOT_DIR, -1, 0)) 
+				{
+					strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
+					return NULL;
+				};
+				path += FS_ROOT_DIR_LEN;
+			} else 
+			{
+				dirname = FS_PWD;
+			};
+			/*
+			 * Open the top-level directory of the search.
+			 */
+			dnode = ef_open_dir(ef, dirname);
+			if(!dnode)
+				return NULL;
+			/*
+			 * Recursively match successive directory components of the path.
+			 */
+			if(ef_match_relative_pathname(ef, dnode->dr, path, 0)) 
+			{
+				dnode = ef_close_dir(ef, dnode);
+				return NULL;
+			};
+			/*
+			 * Cleanup.
+			 */
+			dnode = ef_close_dir(ef, dnode);
+		};
+		/*
+		 * No files matched?
+		 */
+		if(ef->result.nfile < 1) 
+		{
+			strncpy(ef->errmsg, "No files match", sizeof(ef->errmsg));
+			return NULL;
+		};
+		/*
+		 * Sort the pathnames that matched.
+		 */
+		qsort(ef->result.files, ef->result.nfile, sizeof(ef->result.files[0]),
+				ef_cmp_strings);
+	};
+	/*
+	 * Return the result container.
+	 */
+	return &ef->result;
 }
 
 /*.......................................................................
@@ -451,90 +470,99 @@ FileExpansion *ef_expand_file(ExpandFile *ef, const char *path, int pathlen)
  *                        1 - Error.
  */
 static int ef_match_relative_pathname(ExpandFile *ef, DirReader *dr,
-				       const char *pattern, int separate)
+		const char *pattern, int separate)
 {
-  const char *nextp;  /* The pointer to the character that follows the part */
-                      /*  of the pattern that is to be matched with files */
-                      /*  in the current directory. */
-  char *file;         /* The name of the file being matched */
-  int pathlen;        /* The length of ef->pathname[] on entry to this */
-                      /*  function */
-/*
- * Record the current length of the pathname string recorded in
- * ef->pathname[].
- */
-  pathlen = strlen(ef->path->name);
-/*
- * Get a pointer to the character that follows the end of the part of
- * the pattern that should be matched to files within the current directory.
- * This will either point to a directory separator, or to the '\0' terminator
- * of the pattern string.
- */
-  for(nextp=pattern; *nextp && strncmp(nextp, FS_DIR_SEP, FS_DIR_SEP_LEN) != 0;
-      nextp++)
-    ;
-/*
- * Read each file from the directory, attempting to match it to the
- * current pattern.
- */
-  while((file=_dr_next_file(dr)) != NULL) {
-/*
- * Does the latest file match the pattern up to nextp?
- */
-    if(ef_string_matches_pattern(file, pattern, file[0]=='.', nextp)) {
-/*
- * Append the new directory entry to the current matching pathname.
- */
-      if((separate && _pn_append_to_path(ef->path, FS_DIR_SEP, -1, 0)==NULL) ||
-	 _pn_append_to_path(ef->path, file, -1, 0)==NULL) {
-	strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
-	return 1;
-      };
-/*
- * If we have reached the end of the pattern, record the accumulated
- * pathname in the list of matching files.
- */
-      if(*nextp == '\0') {
-	if(ef_record_pathname(ef, ef->path->name, 0))
-	  return 1;
-/*
- * If the matching directory entry is a subdirectory, and the
- * next character of the pattern is a directory separator,
- * recursively call the current function to scan the sub-directory
- * for matches.
- */
-      } else if(_pu_path_is_dir(ef->path->name) &&
-		strncmp(nextp, FS_DIR_SEP, FS_DIR_SEP_LEN) == 0) {
-/*
- * If the pattern finishes with the directory separator, then
- * record the pathame as matching.
- */
-	if(nextp[FS_DIR_SEP_LEN] == '\0') {
-	  if(ef_record_pathname(ef, ef->path->name, 0))
-	    return 1;
-/*
- * Match files within the directory.
- */
-	} else {
-	  DirNode *subdnode = ef_open_dir(ef, ef->path->name);
-	  if(subdnode) {
-	    if(ef_match_relative_pathname(ef, subdnode->dr,
-					   nextp+FS_DIR_SEP_LEN, 1)) {
-	      subdnode = ef_close_dir(ef, subdnode);
-	      return 1;
-	    };
-	    subdnode = ef_close_dir(ef, subdnode);
-	  };
+	const char *nextp;  /* The pointer to the character that follows the part */
+	/*  of the pattern that is to be matched with files */
+	/*  in the current directory. */
+	char *file;         /* The name of the file being matched */
+	int pathlen;        /* The length of ef->pathname[] on entry to this */
+	/*  function */
+	/*
+	 * Record the current length of the pathname string recorded in
+	 * ef->pathname[].
+	 */
+	pathlen = strlen(ef->path->name);
+	/*
+	 * Get a pointer to the character that follows the end of the part of
+	 * the pattern that should be matched to files within the current directory.
+	 * This will either point to a directory separator, or to the '\0' terminator
+	 * of the pattern string.
+	 */
+	for(nextp=pattern; *nextp && strncmp(nextp, FS_DIR_SEP, FS_DIR_SEP_LEN) != 0;
+			nextp++)
+		;
+	/*
+	 * Read each file from the directory, attempting to match it to the
+	 * current pattern.
+	 */
+	while((file=_dr_next_file(dr)) != NULL) 
+	{
+		/*
+		 * Does the latest file match the pattern up to nextp?
+		 */
+		if(ef_string_matches_pattern(file, pattern, file[0]=='.', nextp)) 
+		{
+			/*
+			 * Append the new directory entry to the current matching pathname.
+			 */
+			if((separate && _pn_append_to_path(ef->path, FS_DIR_SEP, -1, 0)==NULL) ||
+					_pn_append_to_path(ef->path, file, -1, 0)==NULL) 
+			{
+				strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
+				return 1;
+			};
+			/*
+			 * If we have reached the end of the pattern, record the accumulated
+			 * pathname in the list of matching files.
+			 */
+			if(*nextp == '\0') 
+			{
+				if(ef_record_pathname(ef, ef->path->name, 0))
+					return 1;
+				/*
+				 * If the matching directory entry is a subdirectory, and the
+				 * next character of the pattern is a directory separator,
+				 * recursively call the current function to scan the sub-directory
+				 * for matches.
+				 */
+			} else if(_pu_path_is_dir(ef->path->name) &&
+					strncmp(nextp, FS_DIR_SEP, FS_DIR_SEP_LEN) == 0) 
+			{
+				/*
+				 * If the pattern finishes with the directory separator, then
+				 * record the pathame as matching.
+				 */
+				if(nextp[FS_DIR_SEP_LEN] == '\0') 
+				{
+					if(ef_record_pathname(ef, ef->path->name, 0))
+						return 1;
+					/*
+					 * Match files within the directory.
+					 */
+				} else 
+				{
+					DirNode *subdnode = ef_open_dir(ef, ef->path->name);
+					if(subdnode) 
+					{
+						if(ef_match_relative_pathname(ef, subdnode->dr,
+									nextp+FS_DIR_SEP_LEN, 1)) 
+						{
+							subdnode = ef_close_dir(ef, subdnode);
+							return 1;
+						};
+						subdnode = ef_close_dir(ef, subdnode);
+					};
+				};
+			};
+			/*
+			 * Remove the latest filename from the pathname string, so that
+			 * another matching file can be appended.
+			 */
+			ef->path->name[pathlen] = '\0';
+		};
 	};
-      };
-/*
- * Remove the latest filename from the pathname string, so that
- * another matching file can be appended.
- */
-      ef->path->name[pathlen] = '\0';
-    };
-  };
-  return 0;
+	return 0;
 }
 
 /*.......................................................................
@@ -551,36 +579,38 @@ static int ef_match_relative_pathname(ExpandFile *ef, DirReader *dr,
  *                                      description of the error).
  */
 static int ef_record_pathname(ExpandFile *ef, const char *pathname,
-			      int remove_escapes)
+		int remove_escapes)
 {
-  char *copy;          /* The recorded copy of pathname[] */
-/*
- * Attempt to make a copy of the pathname in the cache.
- */
-  copy = ef_cache_pathname(ef, pathname, remove_escapes);
-  if(!copy)
-    return 1;
-/*
- * If there isn't room to record a pointer to the recorded pathname in the
- * array of files, attempt to extend the array.
- */
-  if(ef->result.nfile + 1 > ef->files_dim) {
-    int files_dim = ef->files_dim + MATCH_BLK_FACT;
-    char **files = (char **) realloc(ef->result.files,
-				     files_dim * sizeof(files[0]));
-    if(!files) {
-      snprintf(ef->errmsg, sizeof(ef->errmsg),
-	      "Insufficient memory to record all of the matching filenames");
-      return 1;
-    };
-    ef->result.files = files;
-    ef->files_dim = files_dim;
-  };
-/*
- * Record a pointer to the new match.
- */
-  ef->result.files[ef->result.nfile++] = copy;
-  return 0;
+	char *copy;          /* The recorded copy of pathname[] */
+	/*
+	 * Attempt to make a copy of the pathname in the cache.
+	 */
+	copy = ef_cache_pathname(ef, pathname, remove_escapes);
+	if(!copy)
+		return 1;
+	/*
+	 * If there isn't room to record a pointer to the recorded pathname in the
+	 * array of files, attempt to extend the array.
+	 */
+	if(ef->result.nfile + 1 > ef->files_dim) 
+	{
+		int files_dim = ef->files_dim + MATCH_BLK_FACT;
+		char **files = (char **) realloc(ef->result.files,
+				files_dim * sizeof(files[0]));
+		if(!files) 
+		{
+			snprintf(ef->errmsg, sizeof(ef->errmsg),
+					"Insufficient memory to record all of the matching filenames");
+			return 1;
+		};
+		ef->result.files = files;
+		ef->files_dim = files_dim;
+	};
+	/*
+	 * Record a pointer to the new match.
+	 */
+	ef->result.files[ef->result.nfile++] = copy;
+	return 0;
 }
 
 /*.......................................................................
@@ -597,12 +627,12 @@ static int ef_record_pathname(ExpandFile *ef, const char *pathname,
  *                         of the error is left in ef->errmsg[].
  */
 static char *ef_cache_pathname(ExpandFile *ef, const char *pathname,
-			       int remove_escapes)
+		int remove_escapes)
 {
-  char *copy = _sg_store_string(ef->sg, pathname, remove_escapes);
-  if(!copy)
-    strncpy(ef->errmsg, "Insufficient memory to store pathname", sizeof(ef->errmsg));
-  return copy;
+	char *copy = _sg_store_string(ef->sg, pathname, remove_escapes);
+	if(!copy)
+		strncpy(ef->errmsg, "Insufficient memory to store pathname", sizeof(ef->errmsg));
+	return copy;
 }
 
 /*.......................................................................
@@ -614,12 +644,12 @@ static char *ef_cache_pathname(ExpandFile *ef, const char *pathname,
  */
 static void ef_clear_files(ExpandFile *ef)
 {
-  _clr_StringGroup(ef->sg);
-  _pn_clear_path(ef->path);
-  ef->result.exists = 0;
-  ef->result.nfile = 0;
-  ef->errmsg[0] = '\0';
-  return;
+	_clr_StringGroup(ef->sg);
+	_pn_clear_path(ef->path);
+	ef->result.exists = 0;
+	ef->result.nfile = 0;
+	ef->errmsg[0] = '\0';
+	return;
 }
 
 /*.......................................................................
@@ -635,78 +665,82 @@ static void ef_clear_files(ExpandFile *ef)
  */
 static DirNode *ef_open_dir(ExpandFile *ef, const char *pathname)
 {
-  char *errmsg = NULL;  /* An error message from a called function */
-  DirNode *node;        /* The cache node used */
-/*
- * Get the directory reader cache.
- */
-  DirCache *cache = &ef->cache;
-/*
- * Extend the cache if there are no free cache nodes.
- */
-  if(!cache->next) {
-    node = (DirNode *) _new_FreeListNode(cache->mem);
-    if(!node) {
-      snprintf(ef->errmsg, sizeof(ef->errmsg),
-	       "Insufficient memory to open a new directory");
-      return NULL;
-    };
-/*
- * Initialize the cache node.
- */
-    node->next = NULL;
-    node->prev = NULL;
-    node->dr = NULL;
-/*
- * Allocate a directory reader object.
- */
-    node->dr = _new_DirReader();
-    if(!node->dr) {
-      snprintf(ef->errmsg, sizeof(ef->errmsg),
-	       "Insufficient memory to open a new directory");
-      node = (DirNode *) _del_FreeListNode(cache->mem, node);
-      return NULL;
-    };
-/*
- * Append the node to the cache list.
- */
-    node->prev = cache->tail;
-    if(cache->tail)
-      cache->tail->next = node;
-    else
-      cache->head = node;
-    cache->next = cache->tail = node;
-  };
-/*
- * Get the first unused node, but don't remove it from the list yet.
- */
-  node = cache->next;
-/*
- * Attempt to open the specified directory.
- */
-  if(_dr_open_dir(node->dr, pathname, &errmsg)) {
-    strncpy(ef->errmsg, errmsg, ERRLEN);
-    ef->errmsg[ERRLEN] = '\0';
-    return NULL;
-  };
-/*
- * Now that we have successfully opened the specified directory,
- * remove the cache node from the list, and relink the list around it.
- */
-  cache->next = node->next;
-  if(node->prev)
-    node->prev->next = node->next;
-  else
-    cache->head = node->next;
-  if(node->next)
-    node->next->prev = node->prev;
-  else
-    cache->tail = node->prev;
-  node->next = node->prev = NULL;
-/*
- * Return the successfully initialized cache node to the caller.
- */
-  return node;
+	char *errmsg = NULL;  /* An error message from a called function */
+	DirNode *node;        /* The cache node used */
+	/*
+	 * Get the directory reader cache.
+	 */
+	DirCache *cache = &ef->cache;
+	/*
+	 * Extend the cache if there are no free cache nodes.
+	 */
+	if(!cache->next) 
+	{
+		node = (DirNode *) _new_FreeListNode(cache->mem);
+		if(!node) 
+		{
+			snprintf(ef->errmsg, sizeof(ef->errmsg),
+					"Insufficient memory to open a new directory");
+			return NULL;
+		};
+		/*
+		 * Initialize the cache node.
+		 */
+		node->next = NULL;
+		node->prev = NULL;
+		node->dr = NULL;
+		/*
+		 * Allocate a directory reader object.
+		 */
+		node->dr = _new_DirReader();
+		if(!node->dr) 
+		{
+			snprintf(ef->errmsg, sizeof(ef->errmsg),
+					"Insufficient memory to open a new directory");
+			node = (DirNode *) _del_FreeListNode(cache->mem, node);
+			return NULL;
+		};
+		/*
+		 * Append the node to the cache list.
+		 */
+		node->prev = cache->tail;
+		if(cache->tail)
+			cache->tail->next = node;
+		else
+			cache->head = node;
+		cache->next = cache->tail = node;
+	};
+	/*
+	 * Get the first unused node, but don't remove it from the list yet.
+	 */
+	node = cache->next;
+	/*
+	 * Attempt to open the specified directory.
+	 */
+	if(_dr_open_dir(node->dr, pathname, &errmsg)) 
+	{
+		strncpy(ef->errmsg, errmsg, ERRLEN);
+		ef->errmsg[ERRLEN] = '\0';
+		return NULL;
+	};
+	/*
+	 * Now that we have successfully opened the specified directory,
+	 * remove the cache node from the list, and relink the list around it.
+	 */
+	cache->next = node->next;
+	if(node->prev)
+		node->prev->next = node->next;
+	else
+		cache->head = node->next;
+	if(node->next)
+		node->next->prev = node->prev;
+	else
+		cache->tail = node->prev;
+	node->next = node->prev = NULL;
+	/*
+	 * Return the successfully initialized cache node to the caller.
+	 */
+	return node;
 }
 
 /*.......................................................................
@@ -722,26 +756,26 @@ static DirNode *ef_open_dir(ExpandFile *ef, const char *pathname)
  */
 static DirNode *ef_close_dir(ExpandFile *ef, DirNode *node)
 {
-/*
- * Get the directory reader cache.
- */
-  DirCache *cache = &ef->cache;
-/*
- * Close the directory.
- */
-  _dr_close_dir(node->dr);
-/*
- * Return the node to the tail of the cache list.
- */
-  node->next = NULL;
-  node->prev = cache->tail;
-  if(cache->tail)
-    cache->tail->next = node;
-  else
-    cache->head = cache->tail = node;
-  if(!cache->next)
-    cache->next = node;
-  return NULL;
+	/*
+	 * Get the directory reader cache.
+	 */
+	DirCache *cache = &ef->cache;
+	/*
+	 * Close the directory.
+	 */
+	_dr_close_dir(node->dr);
+	/*
+	 * Return the node to the tail of the cache list.
+	 */
+	node->next = NULL;
+	node->prev = cache->tail;
+	if(cache->tail)
+		cache->tail->next = node;
+	else
+		cache->head = cache->tail = node;
+	if(!cache->next)
+		cache->next = node;
+	return NULL;
 }
 
 /*.......................................................................
@@ -760,106 +794,113 @@ static DirNode *ef_close_dir(ExpandFile *ef, DirNode *node)
  *                         1 - The file-name string matches the pattern.
  */
 static int ef_string_matches_pattern(const char *file, const char *pattern,
-				      int xplicit, const char *nextp)
+		int xplicit, const char *nextp)
 {
-  const char *pptr = pattern; /* The pointer used to scan the pattern */
-  const char *fptr = file;    /* The pointer used to scan the filename string */
-/*
- * Match each character of the pattern in turn.
- */
-  while(pptr < nextp) {
-/*
- * Handle the next character of the pattern.
- */
-    switch(*pptr) {
-/*
- * A match zero-or-more characters wildcard operator.
- */
-    case '*':
-/*
- * Skip the '*' character in the pattern.
- */
-      pptr++;
-/*
- * If wildcards aren't allowed, the pattern doesn't match.
- */
-      if(xplicit)
-	return 0;
-/*
- * If the pattern ends with a the '*' wildcard, then the
- * rest of the filename matches this.
- */
-      if(pptr >= nextp)
-	return 1;
-/*
- * Using the wildcard to match successively longer sections of
- * the remaining characters of the filename, attempt to match
- * the tail of the filename against the tail of the pattern.
- */
-      for( ; *fptr; fptr++) {
-	if(ef_string_matches_pattern(fptr, pptr, 0, nextp))
-	  return 1;
-      };
-      return 0; /* The pattern following the '*' didn't match */
-      break;
-/*
- * A match-one-character wildcard operator.
- */
-    case '?':
-/*
- * If there is a character to be matched, skip it and advance the
- * pattern pointer.
- */
-      if(!xplicit && *fptr) {
-        fptr++;
-        pptr++;
-/*
- * If we hit the end of the filename string, there is no character
- * matching the operator, so the string doesn't match.
- */
-      } else {
-        return 0;
-      };
-      break;
-/*
- * A character range operator, with the character ranges enclosed
- * in matching square brackets.
- */
-    case '[':
-      if(xplicit || !ef_matches_range(*fptr++, ++pptr, &pptr))
-        return 0;
-      break;
-/*
- * A backslash in the pattern prevents the following character as
- * being seen as a special character.
- */
-    case '\\':
-      pptr++;
-      /* Note fallthrough to default */
-/*
- * A normal character to be matched explicitly.
- */
-    default:
-      if(*fptr == *pptr) {
-        fptr++;
-        pptr++;
-      } else {
-        return 0;
-      };
-      break;
-    };
-/*
- * After passing the first character, turn off the explicit match
- * requirement.
- */
-    xplicit = 0;
-  };
-/*
- * To get here the pattern must have been exhausted. If the filename
- * string matched, then the filename string must also have been
- * exhausted.
- */
-  return *fptr == '\0';
+	const char *pptr = pattern; /* The pointer used to scan the pattern */
+	const char *fptr = file;    /* The pointer used to scan the filename string */
+	/*
+	 * Match each character of the pattern in turn.
+	 */
+	while(pptr < nextp) 
+	{
+		/*
+		 * Handle the next character of the pattern.
+		 */
+		switch(*pptr) 
+		{
+			/*
+			 * A match zero-or-more characters wildcard operator.
+			 */
+			case '*':
+				/*
+				 * Skip the '*' character in the pattern.
+				 */
+				pptr++;
+				/*
+				 * If wildcards aren't allowed, the pattern doesn't match.
+				 */
+				if(xplicit)
+					return 0;
+				/*
+				 * If the pattern ends with a the '*' wildcard, then the
+				 * rest of the filename matches this.
+				 */
+				if(pptr >= nextp)
+					return 1;
+				/*
+				 * Using the wildcard to match successively longer sections of
+				 * the remaining characters of the filename, attempt to match
+				 * the tail of the filename against the tail of the pattern.
+				 */
+				for( ; *fptr; fptr++) 
+				{
+					if(ef_string_matches_pattern(fptr, pptr, 0, nextp))
+						return 1;
+				};
+				return 0; /* The pattern following the '*' didn't match */
+				break;
+				/*
+				 * A match-one-character wildcard operator.
+				 */
+			case '?':
+				/*
+				 * If there is a character to be matched, skip it and advance the
+				 * pattern pointer.
+				 */
+				if(!xplicit && *fptr) 
+				{
+					fptr++;
+					pptr++;
+					/*
+					 * If we hit the end of the filename string, there is no character
+					 * matching the operator, so the string doesn't match.
+					 */
+				} else 
+				{
+					return 0;
+				};
+				break;
+				/*
+				 * A character range operator, with the character ranges enclosed
+				 * in matching square brackets.
+				 */
+			case '[':
+				if(xplicit || !ef_matches_range(*fptr++, ++pptr, &pptr))
+					return 0;
+				break;
+				/*
+				 * A backslash in the pattern prevents the following character as
+				 * being seen as a special character.
+				 */
+			case '\\':
+				pptr++;
+				/* Note fallthrough to default */
+				/*
+				 * A normal character to be matched explicitly.
+				 */
+			default:
+				if(*fptr == *pptr) 
+				{
+					fptr++;
+					pptr++;
+				} else 
+				{
+					return 0;
+				};
+				break;
+		};
+		/*
+		 * After passing the first character, turn off the explicit match
+		 * requirement.
+		 */
+		xplicit = 0;
+	};
+	/*
+	 * To get here the pattern must have been exhausted. If the filename
+	 * string matched, then the filename string must also have been
+	 * exhausted.
+	 */
+	return *fptr == '\0';
 }
 
 /*.......................................................................
@@ -879,87 +920,97 @@ static int ef_string_matches_pattern(const char *file, const char *pattern,
  */
 static int ef_matches_range(int c, const char *pattern, const char **endp)
 {
-  const char *pptr = pattern;  /* The pointer used to scan the pattern */
-  int invert = 0;              /* True to invert the sense of the match */
-  int matched = 0;             /* True if the character matched the pattern */
-/*
- * If the first character is a caret, the sense of the match is
- * inverted and only if the character isn't one of those in the
- * range, do we say that it matches.
- */
-  if(*pptr == '^') {
-    pptr++;
-    invert = 1;
-  };
-/*
- * The hyphen is only a special character when it follows the first
- * character of the range (not including the caret).
- */
-  if(*pptr == '-') {
-    pptr++;
-    if(c == '-') {
-      *endp = pptr;
-      matched = 1;
-    };
-/*
- * Skip other leading '-' characters since they make no sense.
- */
-    while(*pptr == '-')
-      pptr++;
-  };
-/*
- * The hyphen is only a special character when it follows the first
- * character of the range (not including the caret or a hyphen).
- */
-  if(*pptr == ']') {
-    pptr++;
-    if(c == ']') {
-      *endp = pptr;
-      matched = 1;
-    };
-  };
-/*
- * Having dealt with the characters that have special meanings at
- * the beginning of a character range expression, see if the
- * character matches any of the remaining characters of the range,
- * up until a terminating ']' character is seen.
- */
-  while(!matched && *pptr && *pptr != ']') {
-/*
- * Is this a range of characters signaled by the two end characters
- * separated by a hyphen?
- */
-    if(*pptr == '-') {
-      if(pptr[1] != ']') {
-        if(c >= pptr[-1] && c <= pptr[1])
-	  matched = 1;
-	pptr += 2;
-      };
-/*
- * A normal character to be compared directly.
- */
-    } else if(*pptr++ == c) {
-      matched = 1;
-    };
-  };
-/*
- * Find the terminating ']'.
- */
-  while(*pptr && *pptr != ']')
-    pptr++;
-/*
- * Did we find a terminating ']'?
- */
-  if(*pptr == ']') {
-    *endp = pptr + 1;
-    return matched ? !invert : invert;
-  };
-/*
- * If the pattern didn't end with a ']' then it doesn't match, regardless
- * of the value of the required sense of the match.
- */
-  *endp = pptr;
-  return 0;
+	const char *pptr = pattern;  /* The pointer used to scan the pattern */
+	int invert = 0;              /* True to invert the sense of the match */
+	int matched = 0;             /* True if the character matched the pattern */
+	/*
+	 * If the first character is a caret, the sense of the match is
+	 * inverted and only if the character isn't one of those in the
+	 * range, do we say that it matches.
+	 */
+	if(*pptr == '^') 
+	{
+		pptr++;
+		invert = 1;
+	};
+	/*
+	 * The hyphen is only a special character when it follows the first
+	 * character of the range (not including the caret).
+	 */
+	if(*pptr == '-') 
+	{
+		pptr++;
+		if(c == '-') 
+		{
+			*endp = pptr;
+			matched = 1;
+		};
+		/*
+		 * Skip other leading '-' characters since they make no sense.
+		 */
+		while(*pptr == '-')
+			pptr++;
+	};
+	/*
+	 * The hyphen is only a special character when it follows the first
+	 * character of the range (not including the caret or a hyphen).
+	 */
+	if(*pptr == ']') 
+	{
+		pptr++;
+		if(c == ']') 
+		{
+			*endp = pptr;
+			matched = 1;
+		};
+	};
+	/*
+	 * Having dealt with the characters that have special meanings at
+	 * the beginning of a character range expression, see if the
+	 * character matches any of the remaining characters of the range,
+	 * up until a terminating ']' character is seen.
+	 */
+	while(!matched && *pptr && *pptr != ']') 
+	{
+		/*
+		 * Is this a range of characters signaled by the two end characters
+		 * separated by a hyphen?
+		 */
+		if(*pptr == '-') 
+		{
+			if(pptr[1] != ']') 
+			{
+				if(c >= pptr[-1] && c <= pptr[1])
+					matched = 1;
+				pptr += 2;
+			};
+			/*
+			 * A normal character to be compared directly.
+			 */
+		} else if(*pptr++ == c) 
+		{
+			matched = 1;
+		};
+	};
+	/*
+	 * Find the terminating ']'.
+	 */
+	while(*pptr && *pptr != ']')
+		pptr++;
+	/*
+	 * Did we find a terminating ']'?
+	 */
+	if(*pptr == ']') 
+	{
+		*endp = pptr + 1;
+		return matched ? !invert : invert;
+	};
+	/*
+	 * If the pattern didn't end with a ']' then it doesn't match, regardless
+	 * of the value of the required sense of the match.
+	 */
+	*endp = pptr;
+	return 0;
 }
 
 /*.......................................................................
@@ -974,9 +1025,9 @@ static int ef_matches_range(int c, const char *pattern, const char **endp)
  */
 static int ef_cmp_strings(const void *v1, const void *v2)
 {
-  char * const *s1 = (char * const *) v1;
-  char * const *s2 = (char * const *) v2;
-  return strcmp(*s1, *s2);
+	char * const *s1 = (char * const *) v1;
+	char * const *s2 = (char * const *) v2;
+	return strcmp(*s1, *s2);
 }
 
 /*.......................................................................
@@ -994,179 +1045,193 @@ static int ef_cmp_strings(const void *v1, const void *v2)
  */
 static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
 {
-  int spos;      /* The index of the start of the path segment that needs */
-                 /*  to be copied from path[] to the output pathname. */
-  int ppos;      /* The index of a character in path[] */
-  char *pptr;    /* A pointer into the output path */
-  int escaped;   /* True if the previous character was a '\' */
-  int i;
-/*
- * Clear the pathname buffer.
- */
-  _pn_clear_path(ef->path);
-/*
- * We need to perform two passes, one to expand environment variables
- * and a second to do tilde expansion. This caters for the case
- * where an initial dollar expansion yields a tilde expression.
- */
-  escaped = 0;
-  for(spos=ppos=0; ppos < pathlen; ppos++) {
-    int c = path[ppos];
-    if(escaped) {
-      escaped = 0;
-    } else if(c == '\\') {
-      escaped = 1;
-    } else if(c == '$') {
-      int envlen;   /* The length of the environment variable */
-      char *value;  /* The value of the environment variable */
-/*
- * Record the preceding unrecorded part of the pathname.
- */
-      if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
-	 == NULL) {
-	strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
-	return NULL;
-      };
-/*
- * Skip the dollar.
- */
-      ppos++;
-/*
- * Copy the environment variable name that follows the dollar into
- * ef->envnam[], stopping if a directory separator or end of string
- * is seen.
- */
-      for(envlen=0; envlen<ENV_LEN && ppos < pathlen &&
-	  strncmp(path + ppos, FS_DIR_SEP, FS_DIR_SEP_LEN); envlen++)
-	ef->envnam[envlen] = path[ppos++];
-/*
- * If the username overflowed the buffer, treat it as invalid (note that
- * on most unix systems only 8 characters are allowed in a username,
- * whereas our ENV_LEN is much bigger than that.
- */
-      if(envlen >= ENV_LEN) {
-	strncpy(ef->errmsg, "Environment variable name too long", sizeof(ef->errmsg));
-	return NULL;
-      };
-/*
- * Terminate the environment variable name.
- */
-      ef->envnam[envlen] = '\0';
-/*
- * Lookup the value of the environment variable.
- */
-      value = getenv(ef->envnam);
-      if(!value) {
-	const char *fmt = "No expansion found for: $%.*s";
-	snprintf(ef->errmsg, sizeof(ef->errmsg), fmt, ERRLEN - strlen(fmt),
-		 ef->envnam);
-	return NULL;
-      };
-/*
- * Copy the value of the environment variable into the output pathname.
- */
-      if(_pn_append_to_path(ef->path, value, -1, 0) == NULL) {
-	strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
-	return NULL;
-      };
-/*
- * Record the start of the uncopied tail of the input pathname.
- */
-      spos = ppos;
-    };
-  };
-/*
- * Record the uncopied tail of the pathname.
- */
-  if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
-     == NULL) {
-    strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
-    return NULL;
-  };
-/*
- * If the first character of the resulting pathname is a tilde,
- * then attempt to substitute the home directory of the specified user.
- */
-  pptr = ef->path->name;
-  if(*pptr == '~' && path[0] != '\\') {
-    int usrlen;           /* The length of the username following the tilde */
-    const char *homedir;  /* The home directory of the user */
-    int homelen;          /* The length of the home directory string */
-    int plen;             /* The current length of the path */
-    int skip=0;           /* The number of characters to skip after the ~user */
-/*
- * Get the current length of the output path.
- */
-    plen = strlen(ef->path->name);
-/*
- * Skip the tilde.
- */
-    pptr++;
-/*
- * Copy the optional username that follows the tilde into ef->usrnam[].
- */
-    for(usrlen=0; usrlen<USR_LEN && *pptr &&
-	strncmp(pptr, FS_DIR_SEP, FS_DIR_SEP_LEN); usrlen++)
-      ef->usrnam[usrlen] = *pptr++;
-/*
- * If the username overflowed the buffer, treat it as invalid (note that
- * on most unix systems only 8 characters are allowed in a username,
- * whereas our USR_LEN is much bigger than that.
- */
-    if(usrlen >= USR_LEN) {
-      strncpy(ef->errmsg, "Username too long", sizeof(ef->errmsg));
-      return NULL;
-    };
-/*
- * Terminate the username string.
- */
-    ef->usrnam[usrlen] = '\0';
-/*
- * Lookup the home directory of the user.
- */
-    homedir = _hd_lookup_home_dir(ef->home, ef->usrnam);
-    if(!homedir) {
-      strncpy(ef->errmsg, _hd_last_home_dir_error(ef->home), ERRLEN);
-      ef->errmsg[ERRLEN] = '\0';
-      return NULL;
-    };
-    homelen = strlen(homedir);
-/*
- * ~user and ~ are usually followed by a directory separator to
- * separate them from the file contained in the home directory.
- * If the home directory is the root directory, then we don't want
- * to follow the home directory by a directory separator, so we must
- * erase it.
- */
-    if(strcmp(homedir, FS_ROOT_DIR) == 0 &&
-       strncmp(pptr, FS_DIR_SEP, FS_DIR_SEP_LEN) == 0) {
-      skip = FS_DIR_SEP_LEN;
-    };
-/*
- * If needed, increase the size of the pathname buffer to allow it
- * to accomodate the home directory instead of the tilde expression.
- * Note that pptr may not be valid after this call.
- */
-    if(_pn_resize_path(ef->path, plen - usrlen - 1 - skip + homelen)==NULL) {
-      strncpy(ef->errmsg, "Insufficient memory to expand filename", sizeof(ef->errmsg));
-      return NULL;
-    };
-/*
- * Move the part of the pathname that follows the tilde expression to
- * the end of where the home directory will need to be inserted.
- */
-    memmove(ef->path->name + homelen,
-	    ef->path->name + 1 + usrlen + skip, plen - usrlen - 1 - skip+1);
-/*
- * Write the home directory at the beginning of the string.
- */
-    for(i=0; i<homelen; i++)
-      ef->path->name[i] = homedir[i];
-  };
-/*
- * Copy the result into the cache, and return a pointer to the copy.
- */
-  return ef_cache_pathname(ef, ef->path->name, 0);
+	int spos;      /* The index of the start of the path segment that needs */
+	/*  to be copied from path[] to the output pathname. */
+	int ppos;      /* The index of a character in path[] */
+	char *pptr;    /* A pointer into the output path */
+	int escaped;   /* True if the previous character was a '\' */
+	int i;
+	/*
+	 * Clear the pathname buffer.
+	 */
+	_pn_clear_path(ef->path);
+	/*
+	 * We need to perform two passes, one to expand environment variables
+	 * and a second to do tilde expansion. This caters for the case
+	 * where an initial dollar expansion yields a tilde expression.
+	 */
+	escaped = 0;
+	for(spos=ppos=0; ppos < pathlen; ppos++) 
+	{
+		int c = path[ppos];
+		if(escaped) 
+		{
+			escaped = 0;
+		} else if(c == '\\') 
+		{
+			escaped = 1;
+		} else if(c == '$') 
+		{
+			int envlen;   /* The length of the environment variable */
+			char *value;  /* The value of the environment variable */
+			/*
+			 * Record the preceding unrecorded part of the pathname.
+			 */
+			if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
+					== NULL) 
+			{
+				strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
+				return NULL;
+			};
+			/*
+			 * Skip the dollar.
+			 */
+			ppos++;
+			/*
+			 * Copy the environment variable name that follows the dollar into
+			 * ef->envnam[], stopping if a directory separator or end of string
+			 * is seen.
+			 */
+			for(envlen=0; envlen<ENV_LEN && ppos < pathlen &&
+					strncmp(path + ppos, FS_DIR_SEP, FS_DIR_SEP_LEN); envlen++)
+				ef->envnam[envlen] = path[ppos++];
+			/*
+			 * If the username overflowed the buffer, treat it as invalid (note that
+			 * on most unix systems only 8 characters are allowed in a username,
+			 * whereas our ENV_LEN is much bigger than that.
+			 */
+			if(envlen >= ENV_LEN) 
+			{
+				strncpy(ef->errmsg, "Environment variable name too long", sizeof(ef->errmsg));
+				return NULL;
+			};
+			/*
+			 * Terminate the environment variable name.
+			 */
+			ef->envnam[envlen] = '\0';
+			/*
+			 * Lookup the value of the environment variable.
+			 */
+			value = getenv(ef->envnam);
+			if(!value) 
+			{
+				const char *fmt = "No expansion found for: $%.*s";
+				snprintf(ef->errmsg, sizeof(ef->errmsg), fmt, ERRLEN - strlen(fmt),
+						ef->envnam);
+				return NULL;
+			};
+			/*
+			 * Copy the value of the environment variable into the output pathname.
+			 */
+			if(_pn_append_to_path(ef->path, value, -1, 0) == NULL) 
+			{
+				strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
+				return NULL;
+			};
+			/*
+			 * Record the start of the uncopied tail of the input pathname.
+			 */
+			spos = ppos;
+		};
+	};
+	/*
+	 * Record the uncopied tail of the pathname.
+	 */
+	if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
+			== NULL) 
+	{
+		strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
+		return NULL;
+	};
+	/*
+	 * If the first character of the resulting pathname is a tilde,
+	 * then attempt to substitute the home directory of the specified user.
+	 */
+	pptr = ef->path->name;
+	if(*pptr == '~' && path[0] != '\\') 
+	{
+		int usrlen;           /* The length of the username following the tilde */
+		const char *homedir;  /* The home directory of the user */
+		int homelen;          /* The length of the home directory string */
+		int plen;             /* The current length of the path */
+		int skip=0;           /* The number of characters to skip after the ~user */
+		/*
+		 * Get the current length of the output path.
+		 */
+		plen = strlen(ef->path->name);
+		/*
+		 * Skip the tilde.
+		 */
+		pptr++;
+		/*
+		 * Copy the optional username that follows the tilde into ef->usrnam[].
+		 */
+		for(usrlen=0; usrlen<USR_LEN && *pptr &&
+				strncmp(pptr, FS_DIR_SEP, FS_DIR_SEP_LEN); usrlen++)
+			ef->usrnam[usrlen] = *pptr++;
+		/*
+		 * If the username overflowed the buffer, treat it as invalid (note that
+		 * on most unix systems only 8 characters are allowed in a username,
+		 * whereas our USR_LEN is much bigger than that.
+		 */
+		if(usrlen >= USR_LEN) 
+		{
+			strncpy(ef->errmsg, "Username too long", sizeof(ef->errmsg));
+			return NULL;
+		};
+		/*
+		 * Terminate the username string.
+		 */
+		ef->usrnam[usrlen] = '\0';
+		/*
+		 * Lookup the home directory of the user.
+		 */
+		homedir = _hd_lookup_home_dir(ef->home, ef->usrnam);
+		if(!homedir) 
+		{
+			strncpy(ef->errmsg, _hd_last_home_dir_error(ef->home), ERRLEN);
+			ef->errmsg[ERRLEN] = '\0';
+			return NULL;
+		};
+		homelen = strlen(homedir);
+		/*
+		 * ~user and ~ are usually followed by a directory separator to
+		 * separate them from the file contained in the home directory.
+		 * If the home directory is the root directory, then we don't want
+		 * to follow the home directory by a directory separator, so we must
+		 * erase it.
+		 */
+		if(strcmp(homedir, FS_ROOT_DIR) == 0 &&
+				strncmp(pptr, FS_DIR_SEP, FS_DIR_SEP_LEN) == 0) 
+		{
+			skip = FS_DIR_SEP_LEN;
+		};
+		/*
+		 * If needed, increase the size of the pathname buffer to allow it
+		 * to accomodate the home directory instead of the tilde expression.
+		 * Note that pptr may not be valid after this call.
+		 */
+		if(_pn_resize_path(ef->path, plen - usrlen - 1 - skip + homelen)==NULL) 
+		{
+			strncpy(ef->errmsg, "Insufficient memory to expand filename", sizeof(ef->errmsg));
+			return NULL;
+		};
+		/*
+		 * Move the part of the pathname that follows the tilde expression to
+		 * the end of where the home directory will need to be inserted.
+		 */
+		memmove(ef->path->name + homelen,
+				ef->path->name + 1 + usrlen + skip, plen - usrlen - 1 - skip+1);
+		/*
+		 * Write the home directory at the beginning of the string.
+		 */
+		for(i=0; i<homelen; i++)
+			ef->path->name[i] = homedir[i];
+	};
+	/*
+	 * Copy the result into the cache, and return a pointer to the copy.
+	 */
+	return ef_cache_pathname(ef, ef->path->name, 0);
 }
 
 /*.......................................................................
@@ -1179,7 +1244,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  */
 const char *ef_last_error(ExpandFile *ef)
 {
-  return ef ? ef->errmsg : "NULL ExpandFile argument";
+	return ef ? ef->errmsg : "NULL ExpandFile argument";
 }
 
 /*.......................................................................
@@ -1196,73 +1261,79 @@ const char *ef_last_error(ExpandFile *ef)
  */
 int ef_list_expansions(FileExpansion *result, FILE *fp, int term_width)
 {
-  int maxlen;    /* The length of the longest matching string */
-  int width;     /* The width of a column */
-  int ncol;      /* The number of columns to list */
-  int nrow;      /* The number of rows needed to list all of the expansions */
-  int row,col;   /* The row and column being written to */
-  int i;
-/*
- * Check the arguments.
- */
-  if(!result || !fp) {
-    fprintf(stderr, "ef_list_expansions: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * Not enough space to list anything?
- */
-  if(term_width < 1)
-    return 0;
-/*
- * Work out the maximum length of the matching filenames.
- */
-  maxlen = 0;
-  for(i=0; i<result->nfile; i++) {
-    int len = strlen(result->files[i]);
-    if(len > maxlen)
-      maxlen = len;
-  };
-/*
- * Nothing to list?
- */
-  if(maxlen == 0)
-    return 0;
-/*
- * Split the available terminal width into columns of maxlen + 2 characters.
- */
-  width = maxlen + 2;
-  ncol = term_width / width;
-/*
- * If the column width is greater than the terminal width, the matches will
- * just have to overlap onto the next line.
- */
-  if(ncol < 1)
-    ncol = 1;
-/*
- * How many rows will be needed?
- */
-  nrow = (result->nfile + ncol - 1) / ncol;
-/*
- * Print the expansions out in ncol columns, sorted in row order within each
- * column.
- */
-  for(row=0; row < nrow; row++) {
-    for(col=0; col < ncol; col++) {
-      int m = col*nrow + row;
-      if(m < result->nfile) {
-	const char *filename = result->files[m];
-	if(fprintf(fp, "%s%-*s%s", filename,
-		   (int) (ncol > 1 ? maxlen - strlen(filename):0), "",
-		   col<ncol-1 ? "  " : "\r\n") < 0)
-	  return 1;
-      } else {
-	if(fprintf(fp, "\r\n") < 0)
-	  return 1;
-	break;
-      };
-    };
-  };
-  return 0;
+	int maxlen;    /* The length of the longest matching string */
+	int width;     /* The width of a column */
+	int ncol;      /* The number of columns to list */
+	int nrow;      /* The number of rows needed to list all of the expansions */
+	int row,col;   /* The row and column being written to */
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!result || !fp) 
+	{
+		fprintf(stderr, "ef_list_expansions: NULL argument(s).\n");
+		return 1;
+	};
+	/*
+	 * Not enough space to list anything?
+	 */
+	if(term_width < 1)
+		return 0;
+	/*
+	 * Work out the maximum length of the matching filenames.
+	 */
+	maxlen = 0;
+	for(i=0; i<result->nfile; i++) 
+	{
+		int len = strlen(result->files[i]);
+		if(len > maxlen)
+			maxlen = len;
+	};
+	/*
+	 * Nothing to list?
+	 */
+	if(maxlen == 0)
+		return 0;
+	/*
+	 * Split the available terminal width into columns of maxlen + 2 characters.
+	 */
+	width = maxlen + 2;
+	ncol = term_width / width;
+	/*
+	 * If the column width is greater than the terminal width, the matches will
+	 * just have to overlap onto the next line.
+	 */
+	if(ncol < 1)
+		ncol = 1;
+	/*
+	 * How many rows will be needed?
+	 */
+	nrow = (result->nfile + ncol - 1) / ncol;
+	/*
+	 * Print the expansions out in ncol columns, sorted in row order within each
+	 * column.
+	 */
+	for(row=0; row < nrow; row++) 
+	{
+		for(col=0; col < ncol; col++) 
+		{
+			int m = col*nrow + row;
+			if(m < result->nfile) 
+			{
+				const char *filename = result->files[m];
+				if(fprintf(fp, "%s%-*s%s", filename,
+							(int) (ncol > 1 ? maxlen - strlen(filename):0), "",
+							col<ncol-1 ? "  " : "\r\n") < 0)
+					return 1;
+			} else 
+			{
+				if(fprintf(fp, "\r\n") < 0)
+					return 1;
+				break;
+			};
+		};
+	};
+	return 0;
 }
 

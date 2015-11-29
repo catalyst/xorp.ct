@@ -30,28 +30,31 @@
 #include "pchsample.h"
 #pragma hdrstop
 
-DWORD
+    DWORD
 CreateReadWriteLock(PREAD_WRITE_LOCK pRWL)
 {
 
     pRWL->RWL_ReaderCount = 0;
 
-    __try {
-        InitializeCriticalSection(&(pRWL)->RWL_ReadWriteBlock);
+    __try 
+    {
+	InitializeCriticalSection(&(pRWL)->RWL_ReadWriteBlock);
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
-        return GetLastError();
+    __except(EXCEPTION_EXECUTE_HANDLER) 
+    {
+	return GetLastError();
     }
 
     pRWL->RWL_ReaderDoneEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
-    if (pRWL->RWL_ReaderDoneEvent != NULL) {
-        return GetLastError();
+    if (pRWL->RWL_ReaderDoneEvent != NULL) 
+    {
+	return GetLastError();
     }
 
     return NO_ERROR;
 }
 
-VOID
+    VOID
 DeleteReadWriteLock(PREAD_WRITE_LOCK pRWL)
 {
 
@@ -61,7 +64,7 @@ DeleteReadWriteLock(PREAD_WRITE_LOCK pRWL)
     pRWL->RWL_ReaderCount = 0;
 }
 
-VOID
+    VOID
 AcquireReadLock(PREAD_WRITE_LOCK pRWL)
 {
 
@@ -70,26 +73,28 @@ AcquireReadLock(PREAD_WRITE_LOCK pRWL)
     LeaveCriticalSection(&pRWL->RWL_ReadWriteBlock);
 }
 
-VOID
+    VOID
 ReleaseReadLock(PREAD_WRITE_LOCK pRWL)
 {
 
-    if (InterlockedDecrement(&pRWL->RWL_ReaderCount) < 0) {
-        SetEvent(pRWL->RWL_ReaderDoneEvent);
+    if (InterlockedDecrement(&pRWL->RWL_ReaderCount) < 0) 
+    {
+	SetEvent(pRWL->RWL_ReaderDoneEvent);
     }
 }
 
-VOID
+    VOID
 AcquireWriteLock(PREAD_WRITE_LOCK pRWL)
 {
 
     EnterCriticalSection(&pRWL->RWL_ReadWriteBlock);
-    if (InterlockedDecrement(&pRWL->RWL_ReaderCount) >= 0) {
-        WaitForSingleObject(pRWL->RWL_ReaderDoneEvent, INFINITE);
+    if (InterlockedDecrement(&pRWL->RWL_ReaderCount) >= 0) 
+    {
+	WaitForSingleObject(pRWL->RWL_ReaderDoneEvent, INFINITE);
     }
 }
 
-VOID
+    VOID
 ReleaseWriteLock(PREAD_WRITE_LOCK pRWL)
 {
 

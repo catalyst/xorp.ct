@@ -32,66 +32,66 @@
 
 
 XrlCliNode::XrlCliNode( const string&	class_name,
-		       const string&	finder_hostname,
-		       uint16_t		finder_port,
-		       const string&	finder_target,
-		       CliNode&		cli_node)
-    : XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
-		   finder_port),
-    XrlCliTargetBase(&xrl_router()),
-      _cli_node(cli_node),
-      _xrl_cli_processor_client(&xrl_router()),
-      _is_finder_alive(false)
+		const string&	finder_hostname,
+		uint16_t		finder_port,
+		const string&	finder_target,
+		CliNode&		cli_node)
+: XrlStdRouter( class_name.c_str(), finder_hostname.c_str(),
+		finder_port),
+	XrlCliTargetBase(&xrl_router()),
+	_cli_node(cli_node),
+	_xrl_cli_processor_client(&xrl_router()),
+	_is_finder_alive(false)
 {
-    _cli_node.set_send_process_command_callback(
-	callback(this, &XrlCliNode::send_process_command));
+	_cli_node.set_send_process_command_callback(
+			callback(this, &XrlCliNode::send_process_command));
 
-    UNUSED(finder_target);
+	UNUSED(finder_target);
 }
 
 //
 // XrlCliNode front-end interface
 //
-int
+	int
 XrlCliNode::enable_cli()
 {
-    int ret_code = XORP_OK;
-    
-    cli_node().enable();
-    
-    return (ret_code);
+	int ret_code = XORP_OK;
+
+	cli_node().enable();
+
+	return (ret_code);
 }
 
-int
+	int
 XrlCliNode::disable_cli()
 {
-    int ret_code = XORP_OK;
-    
-    cli_node().disable();
-    
-    return (ret_code);
+	int ret_code = XORP_OK;
+
+	cli_node().disable();
+
+	return (ret_code);
 }
 
-int
+	int
 XrlCliNode::start_cli()
 {
-    int ret_code = XORP_OK;
-    
-    if (cli_node().start() != XORP_OK)
-	ret_code = XORP_ERROR;
-    
-    return (ret_code);
+	int ret_code = XORP_OK;
+
+	if (cli_node().start() != XORP_OK)
+		ret_code = XORP_ERROR;
+
+	return (ret_code);
 }
 
-int
+	int
 XrlCliNode::stop_cli()
 {
-    int ret_code = XORP_OK;
-    
-    if (cli_node().stop() != XORP_OK)
-	ret_code = XORP_ERROR;
-    
-    return (ret_code);
+	int ret_code = XORP_OK;
+
+	if (cli_node().stop() != XORP_OK)
+		ret_code = XORP_ERROR;
+
+	return (ret_code);
 }
 
 //
@@ -102,10 +102,10 @@ XrlCliNode::stop_cli()
  *
  * Note that this method overwrites an XrlRouter virtual method.
  */
-void
+	void
 XrlCliNode::finder_connect_event()
 {
-    _is_finder_alive = true;
+	_is_finder_alive = true;
 }
 
 /**
@@ -113,291 +113,300 @@ XrlCliNode::finder_connect_event()
  *
  * Note that this method overwrites an XrlRouter virtual method.
  */
-void
+	void
 XrlCliNode::finder_disconnect_event()
 {
-    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+	XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    _is_finder_alive = false;
+	_is_finder_alive = false;
 
-    stop_cli();
+	stop_cli();
 }
 
 XrlCmdError
 XrlCliNode::common_0_1_get_target_name(
-    // Output values, 
-    string&	name)
+		// Output values, 
+		string&	name)
 {
-    name = xrl_router().class_name();
-    return XrlCmdError::OKAY();
+	name = xrl_router().class_name();
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::common_0_1_get_version(
-    // Output values, 
-    string&	version)
+		// Output values, 
+		string&	version)
 {
-    version = XORP_MODULE_VERSION;
-    return XrlCmdError::OKAY();
+	version = XORP_MODULE_VERSION;
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::common_0_1_get_status(
-    // Output values, 
-    uint32_t& status,
-    string&	reason)
+		// Output values, 
+		uint32_t& status,
+		string&	reason)
 {
-    // XXX: Default to PROC_READY status because this probably won't be used.
-    status = PROC_READY;
-    reason = "Ready";
-    return XrlCmdError::OKAY();
+	// XXX: Default to PROC_READY status because this probably won't be used.
+	status = PROC_READY;
+	reason = "Ready";
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCliNode::common_0_1_shutdown()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
+	// TODO: XXX: PAVPAVPAV: implement it!!
+	return XrlCmdError::COMMAND_FAILED("Not implemented yet");
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_enable_cli(
-    // Input values,
-    const bool&	enable)
+		// Input values,
+		const bool&	enable)
 {
-    string error_msg;
-    int ret_value;
+	string error_msg;
+	int ret_value;
 
-    if (enable)
-	ret_value = enable_cli();
-    else
-	ret_value = disable_cli();
-
-    if (ret_value != XORP_OK) {
 	if (enable)
-	    error_msg = "Failed to enable CLI";
+		ret_value = enable_cli();
 	else
-	    error_msg = "Failed to disable CLI";
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
+		ret_value = disable_cli();
 
-    return XrlCmdError::OKAY();
+	if (ret_value != XORP_OK) 
+	{
+		if (enable)
+			error_msg = "Failed to enable CLI";
+		else
+			error_msg = "Failed to disable CLI";
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCliNode::cli_manager_0_1_start_cli()
 {
-    if (start_cli() != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED("Failed to start CLI");
-    }
-    
-    return XrlCmdError::OKAY();
+	if (start_cli() != XORP_OK) 
+	{
+		return XrlCmdError::COMMAND_FAILED("Failed to start CLI");
+	}
+
+	return XrlCmdError::OKAY();
 }
 
-XrlCmdError
+	XrlCmdError
 XrlCliNode::cli_manager_0_1_stop_cli()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop_cli() != XORP_OK) {
-	error_msg = c_format("Failed to stop CLI");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
+	if (stop_cli() != XORP_OK) 
+	{
+		error_msg = c_format("Failed to stop CLI");
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_add_enable_cli_access_from_subnet4(
-    // Input values, 
-    const IPv4Net&	subnet_addr)
+		// Input values, 
+		const IPv4Net&	subnet_addr)
 {
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
-    
-    return XrlCmdError::OKAY();
+	cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_add_enable_cli_access_from_subnet6(
-    // Input values, 
-    const IPv6Net&	subnet_addr)
+		// Input values, 
+		const IPv6Net&	subnet_addr)
 {
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
-    
-    return XrlCmdError::OKAY();
+	cli_node().add_enable_cli_access_from_subnet(IPvXNet(subnet_addr));
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_enable_cli_access_from_subnet4(
-    // Input values, 
-    const IPv4Net&	subnet_addr)
+		// Input values, 
+		const IPv4Net&	subnet_addr)
 {
-    string error_msg;
+	string error_msg;
 
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
-	!= XORP_OK) {
-	error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
-			     cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
+	if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
+			!= XORP_OK) 
+	{
+		error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
+				cstring(subnet_addr));
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_enable_cli_access_from_subnet6(
-    // Input values, 
-    const IPv6Net&	subnet_addr)
+		// Input values, 
+		const IPv6Net&	subnet_addr)
 {
-    string error_msg;
+	string error_msg;
 
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
-	!= XORP_OK) {
-	error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
-			     cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
+	if (cli_node().delete_enable_cli_access_from_subnet(IPvXNet(subnet_addr))
+			!= XORP_OK) 
+	{
+		error_msg = c_format("Failed to delete enabled CLI access from subnet %s",
+				cstring(subnet_addr));
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_add_disable_cli_access_from_subnet4(
-    // Input values, 
-    const IPv4Net&	subnet_addr)
+		// Input values, 
+		const IPv4Net&	subnet_addr)
 {
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
-    
-    return XrlCmdError::OKAY();
+	cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_add_disable_cli_access_from_subnet6(
-    // Input values, 
-    const IPv6Net&	subnet_addr)
+		// Input values, 
+		const IPv6Net&	subnet_addr)
 {
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
-    
-    return XrlCmdError::OKAY();
+	cli_node().add_disable_cli_access_from_subnet(IPvXNet(subnet_addr));
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_disable_cli_access_from_subnet4(
-    // Input values, 
-    const IPv4Net&	subnet_addr)
+		// Input values, 
+		const IPv4Net&	subnet_addr)
 {
-    string error_msg;
+	string error_msg;
 
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
-	!= XORP_OK) {
-	error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
-			     cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
+	if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
+			!= XORP_OK) 
+	{
+		error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
+				cstring(subnet_addr));
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_disable_cli_access_from_subnet6(
-    // Input values, 
-    const IPv6Net&	subnet_addr)
+		// Input values, 
+		const IPv6Net&	subnet_addr)
 {
-    string error_msg;
+	string error_msg;
 
-    //
-    // XXX: we don't need to verify the address family, because we are
-    // handling both IPv4 and IPv6.
-    //
+	//
+	// XXX: we don't need to verify the address family, because we are
+	// handling both IPv4 and IPv6.
+	//
 
-    if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
-	!= XORP_OK) {
-	error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
-			     cstring(subnet_addr));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
+	if (cli_node().delete_disable_cli_access_from_subnet(IPvXNet(subnet_addr))
+			!= XORP_OK) 
+	{
+		error_msg = c_format("Failed to delete disabled CLI access from subnet %s",
+				cstring(subnet_addr));
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+
+	return XrlCmdError::OKAY();
 }
 
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_add_cli_command(
-    // Input values, 
-    const string&	processor_name, 
-    const string&	command_name, 
-    const string&	command_help, 
-    const bool&		is_command_cd, 
-    const string&	command_cd_prompt, 
-    const bool&		is_command_processor)
+		// Input values, 
+		const string&	processor_name, 
+		const string&	command_name, 
+		const string&	command_help, 
+		const bool&		is_command_cd, 
+		const string&	command_cd_prompt, 
+		const bool&		is_command_processor)
 {
-    string error_msg;
-    
-    if (cli_node().add_cli_command(processor_name,
-				   command_name,
-				   command_help,
-				   is_command_cd,
-				   command_cd_prompt,
-				   is_command_processor,
-				   error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    return XrlCmdError::OKAY();
+	string error_msg;
+
+	if (cli_node().add_cli_command(processor_name,
+				command_name,
+				command_help,
+				is_command_cd,
+				command_cd_prompt,
+				is_command_processor,
+				error_msg)
+			!= XORP_OK) 
+	{
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_cli_command(
-    // Input values, 
-    const string&	processor_name, 
-    const string&	command_name
-    )
+		// Input values, 
+		const string&	processor_name, 
+		const string&	command_name
+		)
 {
-    string error_msg;
+	string error_msg;
 
-    if (cli_node().delete_cli_command(processor_name,
-				      command_name,
-				      error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
+	if (cli_node().delete_cli_command(processor_name,
+				command_name,
+				error_msg)
+			!= XORP_OK) 
+	{
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
 
-    return XrlCmdError::OKAY();
+	return XrlCmdError::OKAY();
 }
 
 //
@@ -407,56 +416,57 @@ XrlCliNode::cli_manager_0_1_delete_cli_command(
 //
 // Send a request to a CLI processor
 //
-void
+	void
 XrlCliNode::send_process_command(const string& target,
-				 const string& processor_name,
-				 const string& cli_term_name,
-				 uint32_t cli_session_id,
-				 const vector<string>& command_global_name,
-				 const vector<string>& command_argv)
+		const string& processor_name,
+		const string& cli_term_name,
+		uint32_t cli_session_id,
+		const vector<string>& command_global_name,
+		const vector<string>& command_argv)
 {
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
+	if (! _is_finder_alive)
+		return;		// The Finder is dead
 
-    string command_line = token_vector2line(command_global_name);
-    string args_line = token_vector2line(command_argv);
+	string command_line = token_vector2line(command_global_name);
+	string args_line = token_vector2line(command_argv);
 
-    //
-    // Send the request
-    //
-    _xrl_cli_processor_client.send_process_command(
-	target.c_str(),
-	processor_name,
-	cli_term_name,
-	cli_session_id,
-	command_line,
-	args_line,
-	callback(this, &XrlCliNode::recv_process_command_output));
-    
-    return;
+	//
+	// Send the request
+	//
+	_xrl_cli_processor_client.send_process_command(
+			target.c_str(),
+			processor_name,
+			cli_term_name,
+			cli_session_id,
+			command_line,
+			args_line,
+			callback(this, &XrlCliNode::recv_process_command_output));
+
+	return;
 }
 
 //
 // Process the response of a command processed by a remote CLI processor
 //
-void
+	void
 XrlCliNode::recv_process_command_output(const XrlError& xrl_error,
-					const string *processor_name,
-					const string *cli_term_name,
-					const uint32_t *cli_session_id,
-					const string *command_output)
+		const string *processor_name,
+		const string *cli_term_name,
+		const uint32_t *cli_session_id,
+		const string *command_output)
 {
-    if (xrl_error == XrlError::OKAY()) {
-	cli_node().recv_process_command_output(processor_name,
-					       cli_term_name,
-					       cli_session_id,
-					       command_output);
-	return;
-    }
+	if (xrl_error == XrlError::OKAY()) 
+	{
+		cli_node().recv_process_command_output(processor_name,
+				cli_term_name,
+				cli_session_id,
+				command_output);
+		return;
+	}
 
-    //
-    // TODO: if the command failed because of transport error,
-    // then we should retransmit it.
-    //
-    XLOG_ERROR("Failed to process a command: %s", xrl_error.str().c_str());
+	//
+	// TODO: if the command failed because of transport error,
+	// then we should retransmit it.
+	//
+	XLOG_ERROR("Failed to process a command: %s", xrl_error.str().c_str());
 }

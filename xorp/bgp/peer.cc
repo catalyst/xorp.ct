@@ -46,58 +46,58 @@ uint32_t BGPPeer::_unique_id_allocator = UNIQUE_ID_START;
 
 
 BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
-		 BGPMain *m) 
-    : _unique_id(_unique_id_allocator++),
-      _damping_peer_oscillations(true),
-      _damp_peer_oscillations( 10,	/* restart threshold */
-			      5 * 60,	/* time period */
-			      2 * 60 	/* idle holdtime */)
+		BGPMain *m) 
+: _unique_id(_unique_id_allocator++),
+	_damping_peer_oscillations(true),
+	_damp_peer_oscillations( 10,	/* restart threshold */
+			5 * 60,	/* time period */
+			2 * 60 	/* idle holdtime */)
 {
-    debug_msg("BGPPeer constructor called (1)\n");
+	debug_msg("BGPPeer constructor called (1)\n");
 
-    _localdata = ld;
-    _peerdata = pd;
-    _mainprocess = m;
-    _state = STATEIDLE;
-    _SocketClient = sock;
-    _output_queue_was_busy = false;
-    _handler = NULL;
-    _peername = c_format("Peer-%s", peerdata()->iptuple().str().c_str());
+	_localdata = ld;
+	_peerdata = pd;
+	_mainprocess = m;
+	_state = STATEIDLE;
+	_SocketClient = sock;
+	_output_queue_was_busy = false;
+	_handler = NULL;
+	_peername = c_format("Peer-%s", peerdata()->iptuple().str().c_str());
 
-    zero_stats();
+	zero_stats();
 
-    _current_state = _next_state = _activated = false;
+	_current_state = _next_state = _activated = false;
 }
 
 BGPPeer::~BGPPeer()
 {
-    delete _SocketClient;
-    delete _peerdata;
-    list<AcceptSession *>::iterator i;
-    for (i = _accept_attempt.begin(); i != _accept_attempt.end(); i++)
-	delete (*i);
-    _accept_attempt.clear();
+	delete _SocketClient;
+	delete _peerdata;
+	list<AcceptSession *>::iterator i;
+	for (i = _accept_attempt.begin(); i != _accept_attempt.end(); i++)
+		delete (*i);
+	_accept_attempt.clear();
 }
 
-void
+	void
 BGPPeer::zero_stats()
 {
-    _in_updates = 0;
-    _out_updates = 0;
-    _in_total_messages = 0;
-    _out_total_messages = 0;
-    _last_error[0] = 0;
-    _last_error[1] = 0;
-    _established_transitions = 0;
-    EventLoop::instance().current_time(_established_time);
-    EventLoop::instance().current_time(_in_update_time);
+	_in_updates = 0;
+	_out_updates = 0;
+	_in_total_messages = 0;
+	_out_total_messages = 0;
+	_last_error[0] = 0;
+	_last_error[1] = 0;
+	_established_transitions = 0;
+	EventLoop::instance().current_time(_established_time);
+	EventLoop::instance().current_time(_in_update_time);
 }
 
-void
+	void
 BGPPeer::clear_last_error()
 {
-    _last_error[0] = 0;
-    _last_error[1] = 0;
+	_last_error[0] = 0;
+	_last_error[1] = 0;
 }
 
 /*
@@ -107,444 +107,467 @@ BGPPeer::clear_last_error()
  * Our job now is to decode the message and dispatch it to the
  * state machine.
  */
-bool
+	bool
 BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
-		     size_t length, SocketClient *socket_client)
+		size_t length, SocketClient *socket_client)
 {
-    XLOG_ASSERT(0 == socket_client || _SocketClient == socket_client);
+	XLOG_ASSERT(0 == socket_client || _SocketClient == socket_client);
 
-    PROFILE(if (main()->profile().enabled(profile_message_in))
-		main()->profile().log(profile_message_in,
-				      c_format("message on %s len %u",
-					       str().c_str(),
-					       XORP_UINT_CAST(length))));
-	
-    TIMESPENT();
+	PROFILE(if (main()->profile().enabled(profile_message_in))
+			main()->profile().log(profile_message_in,
+				c_format("message on %s len %u",
+					str().c_str(),
+					XORP_UINT_CAST(length))));
 
-    switch (status) {
-    case BGPPacket::GOOD_MESSAGE:
-	break;
+	TIMESPENT();
 
-    case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
-	notify_peer_of_error(MSGHEADERERR, BADMESSLEN,
-			     buf + BGPPacket::MARKER_SIZE, 2);
-// 	event_tranfatal();
-	TIMESPENT_CHECK();
-	return false;
+	switch (status) 
+	{
+		case BGPPacket::GOOD_MESSAGE:
+			break;
 
-    case BGPPacket::CONNECTION_CLOSED:
- 	// _SocketClient->disconnect();
- 	event_closed();
-	// XLOG_ASSERT(!is_connected());
-	TIMESPENT_CHECK();
-	return false;
-    }
+		case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
+			notify_peer_of_error(MSGHEADERERR, BADMESSLEN,
+					buf + BGPPacket::MARKER_SIZE, 2);
+			// 	event_tranfatal();
+			TIMESPENT_CHECK();
+			return false;
+
+		case BGPPacket::CONNECTION_CLOSED:
+			// _SocketClient->disconnect();
+			event_closed();
+			// XLOG_ASSERT(!is_connected());
+			TIMESPENT_CHECK();
+			return false;
+	}
 
 #ifdef	SAVE_PACKETS
-    // XXX
-    // This is a horrible hack to try and find a problem before the
-    // 1.1 Release.
-    // All packets will be stored in fname, in MRTD format, if they
-    // arrived on an IPv4 peering. 
-    // The route_btoa program can be used to print the packets.
-    // TODO after the release:
-    // 1) Move the structures into a header file in libxorp.
-    // 2) Add an XRL to enable the saving of incoming packets on a
-    // per peer basis.
-    // 3) Handle IPv6 peerings.
-    // 4) Save all the values that are required by mrt_update.
-    // 5) Move all this code into a separate method.
-    // 6) Keep the file open.
+	// XXX
+	// This is a horrible hack to try and find a problem before the
+	// 1.1 Release.
+	// All packets will be stored in fname, in MRTD format, if they
+	// arrived on an IPv4 peering. 
+	// The route_btoa program can be used to print the packets.
+	// TODO after the release:
+	// 1) Move the structures into a header file in libxorp.
+	// 2) Add an XRL to enable the saving of incoming packets on a
+	// per peer basis.
+	// 3) Handle IPv6 peerings.
+	// 4) Save all the values that are required by mrt_update.
+	// 5) Move all this code into a separate method.
+	// 6) Keep the file open.
 
-    string fname = "/tmp/bgpin.mrtd";
+	string fname = "/tmp/bgpin.mrtd";
 
-    FILE *fp = fopen(fname.c_str(), "a");
-    if(0 == fp)
-	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(),
-		   strerror(errno));
+	FILE *fp = fopen(fname.c_str(), "a");
+	if(0 == fp)
+		XLOG_FATAL("fopen of %s failed: %s", fname.c_str(),
+				strerror(errno));
 
-    struct mrt_header {
-	uint32_t time;
-	uint16_t type;
-	uint16_t subtype;
-	uint32_t length;
-    };
+	struct mrt_header 
+	{
+		uint32_t time;
+		uint16_t type;
+		uint16_t subtype;
+		uint32_t length;
+	};
 
-    struct mrt_update {
-	uint16_t source_as;
-	uint16_t dest_as;
-	uint16_t ifindex;
-	uint16_t af;
-	uint32_t source_ip;
-	uint32_t dest_ip;
-    };
+	struct mrt_update 
+	{
+		uint16_t source_as;
+		uint16_t dest_as;
+		uint16_t ifindex;
+		uint16_t af;
+		uint32_t source_ip;
+		uint32_t dest_ip;
+	};
 
-    TimeVal tv;
-    TimerList::system_gettimeofday(&tv);
-    
-    mrt_header mrt_header;
-    mrt_header.time = htonl(tv.sec());
-    mrt_header.type = htons(16);
-    mrt_header.subtype = htons(1);
-    mrt_header.length = htonl(length + sizeof(mrt_update));
-    
-    if(fwrite(&mrt_header, sizeof(mrt_header), 1, fp) != 1)
-	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
+	TimeVal tv;
+	TimerList::system_gettimeofday(&tv);
 
-    mrt_update update;
-    memset(&update, 0, sizeof(update));
-    update.af = htons(1);	/* IPv4 */
+	mrt_header mrt_header;
+	mrt_header.time = htonl(tv.sec());
+	mrt_header.type = htons(16);
+	mrt_header.subtype = htons(1);
+	mrt_header.length = htonl(length + sizeof(mrt_update));
 
-    string peer_addr = peerdata()->iptuple().get_peer_addr();
-    try {
-	update.source_as = htons(peerdata()->as().as());
-	update.source_ip = IPv4(peer_addr.c_str()).addr();
+	if(fwrite(&mrt_header, sizeof(mrt_header), 1, fp) != 1)
+		XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
 
-	if(fwrite(&update, sizeof(update), 1, fp) != 1)
-	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
-		       strerror(errno));
+	mrt_update update;
+	memset(&update, 0, sizeof(update));
+	update.af = htons(1);	/* IPv4 */
 
-	if(fwrite(buf, length, 1, fp) != 1)
-	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
-		       strerror(errno));
-    } catch(InvalidFamily &e) {
-	XLOG_ERROR("%s might not be an IPv4 address %s", peer_addr.c_str(),
-		   e.str().c_str());
-    }
-	
-    fclose(fp);
+	string peer_addr = peerdata()->iptuple().get_peer_addr();
+	try 
+	{
+		update.source_as = htons(peerdata()->as().as());
+		update.source_ip = IPv4(peer_addr.c_str()).addr();
+
+		if(fwrite(&update, sizeof(update), 1, fp) != 1)
+			XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+					strerror(errno));
+
+		if(fwrite(buf, length, 1, fp) != 1)
+			XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+					strerror(errno));
+	} catch(InvalidFamily &e) 
+	{
+		XLOG_ERROR("%s might not be an IPv4 address %s", peer_addr.c_str(),
+				e.str().c_str());
+	}
+
+	fclose(fp);
 #endif
 
-    _in_total_messages++;
-
-    /*
-    ** We should only have a good packet at this point.
-    ** The buffer pointer must be non 0.
-    */
-    XLOG_ASSERT(0 != buf);
-
-    const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
-    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
-    try {
+	_in_total_messages++;
 
 	/*
-	** Check the Marker, total waste of time as it never contains
-	** anything of interest.
-	*/
-	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			marker, BGPPacket::MARKER_SIZE)) {
-	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
-	}
-	
-	switch (type) {
-	case MESSAGETYPEOPEN: {
-	    debug_msg("OPEN Packet RECEIVED\n");
-	    OpenPacket pac(buf, length);
-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
-	    // want unified decode call. now need to get peerdata out.
-	    _peerdata->dump_peer_data();
-	    event_openmess(pac);
-	    TIMESPENT_CHECK();
-	    break;
-	}
-	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
-		      XORP_UINT_CAST(length));
-	    // Check that the length is correct or throw an exception
-	    KeepAlivePacket pac(buf, length);
-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
+	 ** We should only have a good packet at this point.
+	 ** The buffer pointer must be non 0.
+	 */
+	XLOG_ASSERT(0 != buf);
 
-	    // debug_msg("%s", pac.str().c_str());
-	    event_keepmess();
-	    TIMESPENT_CHECK();
-	    break;
-	}
-	case MESSAGETYPEUPDATE: {
-	    debug_msg("UPDATE Packet RECEIVED\n");
-	    _in_updates++;
-	    EventLoop::instance().current_time(_in_update_time);
-	    UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
+	const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+	uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+	try 
+	{
 
-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
+		/*
+		 ** Check the Marker, total waste of time as it never contains
+		 ** anything of interest.
+		 */
+		if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+					marker, BGPPacket::MARKER_SIZE)) 
+		{
+			xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+		}
 
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
+		switch (type) 
+		{
+			case MESSAGETYPEOPEN: 
+				{
+					debug_msg("OPEN Packet RECEIVED\n");
+					OpenPacket pac(buf, length);
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+					// want unified decode call. now need to get peerdata out.
+					_peerdata->dump_peer_data();
+					event_openmess(pac);
+					TIMESPENT_CHECK();
+					break;
+				}
+			case MESSAGETYPEKEEPALIVE: 
+				{
+					debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+							XORP_UINT_CAST(length));
+					// Check that the length is correct or throw an exception
+					KeepAlivePacket pac(buf, length);
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
 
-	    event_recvupdate(pac);
-	    TIMESPENT_CHECK();
-	    if (TIMESPENT_OVERLIMIT()) {
-		XLOG_WARNING("Processing packet took longer than %u second %s",
-			     XORP_UINT_CAST(TIMESPENT_LIMIT),
-			     pac.str().c_str());
-	    }
-	    break;
-	}
-	case MESSAGETYPENOTIFICATION: {
-	    debug_msg("NOTIFICATION Packet RECEIVED\n");
-	    NotificationPacket pac(buf, length);
-	    
-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
+					// debug_msg("%s", pac.str().c_str());
+					event_keepmess();
+					TIMESPENT_CHECK();
+					break;
+				}
+			case MESSAGETYPEUPDATE: 
+				{
+					debug_msg("UPDATE Packet RECEIVED\n");
+					_in_updates++;
+					EventLoop::instance().current_time(_in_update_time);
+					UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
 
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
-	    event_recvnotify(pac);
-	    TIMESPENT_CHECK();
-	    break;
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+
+					event_recvupdate(pac);
+					TIMESPENT_CHECK();
+					if (TIMESPENT_OVERLIMIT()) 
+					{
+						XLOG_WARNING("Processing packet took longer than %u second %s",
+								XORP_UINT_CAST(TIMESPENT_LIMIT),
+								pac.str().c_str());
+					}
+					break;
+				}
+			case MESSAGETYPENOTIFICATION: 
+				{
+					debug_msg("NOTIFICATION Packet RECEIVED\n");
+					NotificationPacket pac(buf, length);
+
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+					event_recvnotify(pac);
+					TIMESPENT_CHECK();
+					break;
+				}
+			default:
+				/*
+				 ** Send a notification to the peer. This is a bad message type.
+				 */
+				XLOG_ERROR("%s Unknown packet type %d",
+						this->str().c_str(), type);
+				notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
+						buf + BGPPacket::TYPE_OFFSET, 1);
+				// 	    event_tranfatal();
+				TIMESPENT_CHECK();
+				return false;
+		}
+	} catch(CorruptMessage& c) 
+	{
+		/*
+		 ** This peer has sent us a bad message. Send a notification
+		 ** and drop the the peering.
+		 */
+		XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
+				c.why().c_str());
+		notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
+		// 	event_tranfatal();
+		TIMESPENT_CHECK();
+		return false;
+	} catch (UnusableMessage& um) 
+	{
+		// the packet wasn't usable for some reason, but also
+		// wasn't so corrupt we need to send a notification -
+		// this is a "silent" error.
+		XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
+				um.why().c_str());
 	}
-	default:
-	    /*
-	    ** Send a notification to the peer. This is a bad message type.
-	    */
-	    XLOG_ERROR("%s Unknown packet type %d",
-		       this->str().c_str(), type);
-	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
-				 buf + BGPPacket::TYPE_OFFSET, 1);
-// 	    event_tranfatal();
-	    TIMESPENT_CHECK();
-	    return false;
-	}
-    } catch(CorruptMessage& c) {
+
+	TIMESPENT_CHECK();
+
 	/*
-	** This peer has sent us a bad message. Send a notification
-	** and drop the the peering.
-	*/
-	XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
-		     c.why().c_str());
-	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
-// 	event_tranfatal();
-	TIMESPENT_CHECK();
-	return false;
-    } catch (UnusableMessage& um) {
-	// the packet wasn't usable for some reason, but also
-	// wasn't so corrupt we need to send a notification -
-	// this is a "silent" error.
-	XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
-		     um.why().c_str());
-    }
+	 ** If we are still connected and supposed to be reading.
+	 */
+	if (!is_connected() || !still_reading()) 
+	{
+		TIMESPENT_CHECK();
+		return false;
+	}
 
-    TIMESPENT_CHECK();
-
-    /*
-    ** If we are still connected and supposed to be reading.
-    */
-    if (!is_connected() || !still_reading()) {
-	TIMESPENT_CHECK();
-	return false;
-    }
-
-    return true;
+	return true;
 }
 
-PeerOutputState
+	PeerOutputState
 BGPPeer::send_message(const BGPPacket& p)
 {
-    debug_msg("%s", p.str().c_str());
+	debug_msg("%s", p.str().c_str());
 
-    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
-		       "Peer %s: Send: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(p)));
+	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+				"Peer %s: Send: %s",
+				peerdata()->iptuple().str().c_str(),
+				cstring(p)));
 
-    uint8_t packet_type = p.type();
+	uint8_t packet_type = p.type();
 
-    if ( packet_type != MESSAGETYPEOPEN &&
-	 packet_type != MESSAGETYPEUPDATE &&
-	 packet_type != MESSAGETYPENOTIFICATION &&
-	 packet_type != MESSAGETYPEKEEPALIVE) {
-	xorp_throw(InvalidPacket,
-		   c_format("Unknown packet type %d\n", packet_type));
+	if ( packet_type != MESSAGETYPEOPEN &&
+			packet_type != MESSAGETYPEUPDATE &&
+			packet_type != MESSAGETYPENOTIFICATION &&
+			packet_type != MESSAGETYPEKEEPALIVE) 
+	{
+		xorp_throw(InvalidPacket,
+				c_format("Unknown packet type %d\n", packet_type));
 
-    }
+	}
 
-    _out_total_messages++;
-    if (packet_type == MESSAGETYPEUPDATE)
-	_out_updates++;
+	_out_total_messages++;
+	if (packet_type == MESSAGETYPEUPDATE)
+		_out_updates++;
 
-    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
-    size_t ccnt = BGPPacket::MAXPACKETSIZE;
+	uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+	size_t ccnt = BGPPacket::MAXPACKETSIZE;
 
-    /*
-    ** This buffer is dynamically allocated and should be freed.
-    */
-    XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
-    debug_msg("Buffer for sent packet is %p\n", buf);
+	/*
+	 ** This buffer is dynamically allocated and should be freed.
+	 */
+	XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
+	debug_msg("Buffer for sent packet is %p\n", buf);
 
 
-    /*
-    ** This write is async. So we can't free the data now,
-    ** we will deal with it in the complete routine.
-    */
-    bool ret = _SocketClient->send_message(buf, ccnt,
-			       callback(this,&BGPPeer::send_message_complete));
+	/*
+	 ** This write is async. So we can't free the data now,
+	 ** we will deal with it in the complete routine.
+	 */
+	bool ret = _SocketClient->send_message(buf, ccnt,
+			callback(this,&BGPPeer::send_message_complete));
 
-    if (ret == false)
-	delete[] buf;
-    if (ret) {
-	int size = _SocketClient->output_queue_size();
-	UNUSED(size);
-	debug_msg("Output queue size is %d\n", size);
-	if (_SocketClient->output_queue_busy()) {
-	    _output_queue_was_busy = true;
-	    return PEER_OUTPUT_BUSY;
+	if (ret == false)
+		delete[] buf;
+	if (ret) 
+	{
+		int size = _SocketClient->output_queue_size();
+		UNUSED(size);
+		debug_msg("Output queue size is %d\n", size);
+		if (_SocketClient->output_queue_busy()) 
+		{
+			_output_queue_was_busy = true;
+			return PEER_OUTPUT_BUSY;
+		} else
+			return PEER_OUTPUT_OK;
 	} else
-	    return PEER_OUTPUT_OK;
-    } else
-	return PEER_OUTPUT_FAIL;
+		return PEER_OUTPUT_FAIL;
 }
 
-void
+	void
 BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    debug_msg("Packet sent, queue size now %d\n",
-	    _SocketClient->output_queue_size());
+	debug_msg("Packet sent, queue size now %d\n",
+			_SocketClient->output_queue_size());
 
-    switch (ev) {
-    case SocketClient::DATA:
-	debug_msg("event: data\n");
-	if (_output_queue_was_busy &&
-	    (_SocketClient->output_queue_busy() == false)) {
-	    debug_msg("Peer: output no longer busy\n");
-	    _output_queue_was_busy = false;
-	    if (_handler != NULL)
-		_handler->output_no_longer_busy();
+	switch (ev) 
+	{
+		case SocketClient::DATA:
+			debug_msg("event: data\n");
+			if (_output_queue_was_busy &&
+					(_SocketClient->output_queue_busy() == false)) 
+			{
+				debug_msg("Peer: output no longer busy\n");
+				_output_queue_was_busy = false;
+				if (_handler != NULL)
+					_handler->output_no_longer_busy();
+			}
+			TIMESPENT_CHECK();
+			/*drop through to next case*/
+		case SocketClient::FLUSHING:
+			debug_msg("event: flushing\n");
+			debug_msg("Freeing Buffer for sent packet: %p\n", buf);
+			delete[] buf;
+			TIMESPENT_CHECK();
+			break;
+		case SocketClient::ERROR:
+			// The most likely cause of an error is that the peer closed
+			// the connection.
+			debug_msg("event: error\n");
+			/* Don't free the message here we'll get it in the flush */
+			// XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
+			// _SocketClient->disconnect();
+			event_closed();
+			// XLOG_ASSERT(!is_connected());
+			TIMESPENT_CHECK();
 	}
-	TIMESPENT_CHECK();
-	/*drop through to next case*/
-    case SocketClient::FLUSHING:
-	debug_msg("event: flushing\n");
-	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
-	delete[] buf;
-	TIMESPENT_CHECK();
-	break;
-    case SocketClient::ERROR:
-	// The most likely cause of an error is that the peer closed
-	// the connection.
-	debug_msg("event: error\n");
-	/* Don't free the message here we'll get it in the flush */
-	// XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
-	// _SocketClient->disconnect();
-	event_closed();
-	// XLOG_ASSERT(!is_connected());
-	TIMESPENT_CHECK();
-    }
 }
 
-void
+	void
 BGPPeer::send_notification(const NotificationPacket& p, bool restart,
-			   bool automatic)
+		bool automatic)
 {
-    debug_msg("%s", p.str().c_str());
+	debug_msg("%s", p.str().c_str());
 
-    XLOG_INFO("Sending: %s", cstring(p));
+	XLOG_INFO("Sending: %s", cstring(p));
 
-    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
-		       "Peer %s: Send: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(p)));
+	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+				"Peer %s: Send: %s",
+				peerdata()->iptuple().str().c_str(),
+				cstring(p)));
 
-    /*
-    ** We need to deal with NOTIFICATION differently from other packets -
-    ** NOTIFICATION is the last packet we send on a connection, and because
-    ** we're using async sends, we need to chain the rest of the
-    ** cleanup on the send complete callback.
-    */
+	/*
+	 ** We need to deal with NOTIFICATION differently from other packets -
+	 ** NOTIFICATION is the last packet we send on a connection, and because
+	 ** we're using async sends, we need to chain the rest of the
+	 ** cleanup on the send complete callback.
+	 */
 
-    /*
-     * First we need to clear the transmit queue - we no longer care
-     * about anything that's in it, and we want to make sure that the
-     * transmit complete callbacks can no longer happen.
-     */
-    flush_transmit_queue();
+	/*
+	 * First we need to clear the transmit queue - we no longer care
+	 * about anything that's in it, and we want to make sure that the
+	 * transmit complete callbacks can no longer happen.
+	 */
+	flush_transmit_queue();
 
-    /*
-    ** Don't read anything more on this connection.
-    */
-    stop_reader();
+	/*
+	 ** Don't read anything more on this connection.
+	 */
+	stop_reader();
 
-    /*
-     * This buffer is dynamically allocated and should be freed.
-     */
-    size_t ccnt = BGPPacket::MAXPACKETSIZE;
-    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+	/*
+	 * This buffer is dynamically allocated and should be freed.
+	 */
+	size_t ccnt = BGPPacket::MAXPACKETSIZE;
+	uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
 
-    XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
-    debug_msg("Buffer for sent packet is %p\n", buf);
+	XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
+	debug_msg("Buffer for sent packet is %p\n", buf);
 
-    /*
-    ** This write is async. So we can't free the data now,
-    ** we will deal with it in the complete routine.  */
-    bool ret =_SocketClient->send_message(buf, ccnt,
-	       callback(this, &BGPPeer::send_notification_complete,
-			restart, automatic));
+	/*
+	 ** This write is async. So we can't free the data now,
+	 ** we will deal with it in the complete routine.  */
+	bool ret =_SocketClient->send_message(buf, ccnt,
+			callback(this, &BGPPeer::send_notification_complete,
+				restart, automatic));
 
-    if (!ret) {
-	delete[] buf;
-	return;
-    }
+	if (!ret) 
+	{
+		delete[] buf;
+		return;
+	}
 
 }
 
-void
+	void
 BGPPeer::send_notification_complete(SocketClient::Event ev,
-				    const uint8_t* buf, bool restart,
-				    bool automatic)
+		const uint8_t* buf, bool restart,
+		bool automatic)
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    switch (ev) {
-    case SocketClient::DATA:
-	debug_msg("Notification sent\n");
-	XLOG_ASSERT(STATESTOPPED == _state);
-	delete[] buf;
-	set_state(STATEIDLE, restart);
-	break;
-    case SocketClient::FLUSHING:
-	delete[] buf;
-	break;
-    case SocketClient::ERROR:
-	debug_msg("Notification not sent\n");
-	XLOG_ASSERT(STATESTOPPED == _state);
-	set_state(STATEIDLE, restart, automatic);
-	/* Don't free the message here we'll get it in the flush */
-	break;
-    }
+	switch (ev) 
+	{
+		case SocketClient::DATA:
+			debug_msg("Notification sent\n");
+			XLOG_ASSERT(STATESTOPPED == _state);
+			delete[] buf;
+			set_state(STATEIDLE, restart);
+			break;
+		case SocketClient::FLUSHING:
+			delete[] buf;
+			break;
+		case SocketClient::ERROR:
+			debug_msg("Notification not sent\n");
+			XLOG_ASSERT(STATESTOPPED == _state);
+			set_state(STATEIDLE, restart, automatic);
+			/* Don't free the message here we'll get it in the flush */
+			break;
+	}
 
-    /* there doesn't appear to be anything we can do at this point if
-       status indicates something went wrong */
+	/* there doesn't appear to be anything we can do at this point if
+	   status indicates something went wrong */
 }
 
 /*
-** Timer callback
-*/
-void
+ ** Timer callback
+ */
+	void
 BGPPeer::hook_stopped()
 {
-    XLOG_ASSERT(STATESTOPPED == _state);
-    XLOG_WARNING("%s Unable to send Notification so taking peer to idle",
-		 this->str().c_str());
+	XLOG_ASSERT(STATESTOPPED == _state);
+	XLOG_WARNING("%s Unable to send Notification so taking peer to idle",
+			this->str().c_str());
 
-    /*
-    ** If the original notification was not an error such as sending a
-    ** CEASE. If we arrived here due to a timeout, something has gone
-    ** wrong so unconditionally set the restart to true.
-    */
-    set_state(STATEIDLE);
+	/*
+	 ** If the original notification was not an error such as sending a
+	 ** CEASE. If we arrived here due to a timeout, something has gone
+	 ** wrong so unconditionally set the restart to true.
+	 */
+	set_state(STATEIDLE);
 }
 
 /*
@@ -565,73 +588,76 @@ BGPPeer::hook_stopped()
 /*
  * start event. No data associated with the event.
  */
-void
+	void
 BGPPeer::event_start()			// EVENTBGPSTART
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    // Compute the type of this peering.
-    const_cast<BGPPeerData*>(peerdata())->compute_peer_type();
+	// Compute the type of this peering.
+	const_cast<BGPPeerData*>(peerdata())->compute_peer_type();
 
-    switch(_state) {
+	switch(_state) 
+	{
 
-    case STATESTOPPED:
-	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
-	// fallthrough now to process the start event
-    case STATEIDLE:
-	// Initalise resources
-	start_connect_retry_timer();
-	set_state(STATECONNECT);
-	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
-	break;
+		case STATESTOPPED:
+			flush_transmit_queue();		// ensure callback can't happen
+			set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
+			// fallthrough now to process the start event
+		case STATEIDLE:
+			// Initalise resources
+			start_connect_retry_timer();
+			set_state(STATECONNECT);
+			connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
+			break;
 
-    // in all other cases, remain in the same state
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-	break;
-    }
+			// in all other cases, remain in the same state
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+			break;
+	}
 }
 
 /*
  * stop event. No data associated with the event.
  */
-void
+	void
 BGPPeer::event_stop(bool restart, bool automatic)	// EVENTBGPSTOP
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+			break;
 
-    case STATECONNECT:
-	_SocketClient->connect_break();
-	clear_connect_retry_timer();
-	/*FALLTHROUGH*/
+		case STATECONNECT:
+			_SocketClient->connect_break();
+			clear_connect_retry_timer();
+			/*FALLTHROUGH*/
 
-    case STATEACTIVE:
-	set_state(STATEIDLE, restart, automatic);
-	break;
+		case STATEACTIVE:
+			set_state(STATEIDLE, restart, automatic);
+			break;
 
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED: {
-	// Send Notification Message with error code of CEASE.
-	NotificationPacket np(CEASE);
-	send_notification(np, restart, automatic);
-	set_state(STATESTOPPED, restart, automatic);
-	break;
-    }
-    case STATESTOPPED:
-	// a second stop will cause us to give up on sending the CEASE
-	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE, restart, automatic);
-	break;
-    }
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED: 
+			{
+				// Send Notification Message with error code of CEASE.
+				NotificationPacket np(CEASE);
+				send_notification(np, restart, automatic);
+				set_state(STATESTOPPED, restart, automatic);
+				break;
+			}
+		case STATESTOPPED:
+			// a second stop will cause us to give up on sending the CEASE
+			flush_transmit_queue();		// ensure callback can't happen
+			set_state(STATEIDLE, restart, automatic);
+			break;
+	}
 }
 
 /*
@@ -640,171 +666,170 @@ BGPPeer::event_stop(bool restart, bool automatic)	// EVENTBGPSTOP
  * and we have a valid socket.
  * The only states from which we enter here are STATECONNECT and STATEACTIVE
  */
-void
+	void
 BGPPeer::event_open()	// EVENTBGPTRANOPEN
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-    case STATESTOPPED:
-    case STATEIDLE:
-	XLOG_FATAL("%s can't get EVENTBGPTRANOPEN in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
+	switch(_state) 
+	{
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+		case STATESTOPPED:
+		case STATEIDLE:
+			XLOG_FATAL("%s can't get EVENTBGPTRANOPEN in state %s",
+					this->str().c_str(),
+					pretty_print_state(_state));
+			break;
 
-    case STATECONNECT:
-    case STATEACTIVE: {
-	if (0 != _peerdata->get_delay_open_time()) {
-	    start_delay_open_timer();
-	    clear_connect_retry_timer();
-	    return;
+		case STATECONNECT:
+		case STATEACTIVE: 
+			{
+				if (0 != _peerdata->get_delay_open_time()) 
+				{
+					start_delay_open_timer();
+					clear_connect_retry_timer();
+					return;
+				}
+
+				OpenPacket open_packet(_peerdata->my_AS_number(),
+						_localdata->get_id(),
+						_peerdata->get_configured_hold_time());
+
+				generate_open_message(open_packet);
+				send_message(open_packet);
+
+				clear_connect_retry_timer();
+				if ((_state == STATEACTIVE) || (_state == STATECONNECT)) 
+				{
+					// Start Holdtimer - four minutes recommended in spec.
+					_peerdata->set_hold_duration(4 * 60);
+					start_hold_timer();
+				}
+				// Change state to OpenSent
+				set_state(STATEOPENSENT);
+				break;
+			}
 	}
-
-	OpenPacket open_packet(_peerdata->my_AS_number(),
-			       _localdata->get_id(),
-			       _peerdata->get_configured_hold_time());
-
-#if	0
-	ParameterList::const_iterator
-	    pi = _peerdata->parameter_sent_list().begin();
-	while(pi != _peerdata->parameter_sent_list().end()) {
-	    if ((*pi)->send())
-		open_packet.add_parameter(*pi);
-	    pi++;
-	}
-#endif
-	generate_open_message(open_packet);
-	send_message(open_packet);
-
-	clear_connect_retry_timer();
-	if ((_state == STATEACTIVE) || (_state == STATECONNECT)) {
-	    // Start Holdtimer - four minutes recommended in spec.
-	    _peerdata->set_hold_duration(4 * 60);
-	    start_hold_timer();
-	}
-	// Change state to OpenSent
-	set_state(STATEOPENSENT);
-	break;
-    }
-    }
 }
 
 /*
  * EVENTBGPTRANCLOSED event. No data associated with the event.
  */
-void
+	void
 BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+			break;
 
-    case STATECONNECT:
-	if (_SocketClient->is_connected())
-	    _SocketClient->connect_break();
-	clear_connect_retry_timer();
-	set_state(STATEIDLE);
-	break;
+		case STATECONNECT:
+			if (_SocketClient->is_connected())
+				_SocketClient->connect_break();
+			clear_connect_retry_timer();
+			set_state(STATEIDLE);
+			break;
 
-    case STATEACTIVE:
-	set_state(STATEIDLE);
-	break;
+		case STATEACTIVE:
+			set_state(STATEIDLE);
+			break;
 
-    case STATEOPENSENT:
-	// Close Connection
-	_SocketClient->disconnect();
-	// Restart ConnectRetry Timer
-	restart_connect_retry_timer();
-	set_state(STATEACTIVE);
-	break;
+		case STATEOPENSENT:
+			// Close Connection
+			_SocketClient->disconnect();
+			// Restart ConnectRetry Timer
+			restart_connect_retry_timer();
+			set_state(STATEACTIVE);
+			break;
 
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-	set_state(STATEIDLE);
-	break;
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+			set_state(STATEIDLE);
+			break;
 
-    case STATESTOPPED:
-	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE);
-	break;
-    }
+		case STATESTOPPED:
+			flush_transmit_queue();		// ensure callback can't happen
+			set_state(STATEIDLE);
+			break;
+	}
 }
 
 /*
  * EVENTBGPCONNOPENFAIL event. No data associated with the event.
  * We can only be in STATECONNECT
  */
-void
+	void
 BGPPeer::event_openfail()			// EVENTBGPCONNOPENFAIL
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATEACTIVE:
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-    case STATESTOPPED:
-	XLOG_FATAL("%s can't get EVENTBGPCONNOPENFAIL in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATEACTIVE:
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+		case STATESTOPPED:
+			XLOG_FATAL("%s can't get EVENTBGPCONNOPENFAIL in state %s",
+					this->str().c_str(),
+					pretty_print_state(_state));
+			break;
 
-    case STATECONNECT:
-	if (_peerdata->get_delay_open_time() == 0) {
-	    //
-	    // If the DelayOpenTimer is not running, we have to go first
-	    // through STATEIDLE.
-	    // XXX: Instead of checking the configured DelayOpenTime value,
-	    // we should check whether the corresponding timer is indeed
-	    // not running. However, there is no dedicated DelayOpenTimer
-	    // (the _idle_hold timer is reused instead), hence we check
-	    // the corresponding DelayOpenTime configured value.
-	    //
-	    set_state(STATEIDLE, false);
+		case STATECONNECT:
+			if (_peerdata->get_delay_open_time() == 0) 
+			{
+				//
+				// If the DelayOpenTimer is not running, we have to go first
+				// through STATEIDLE.
+				// XXX: Instead of checking the configured DelayOpenTime value,
+				// we should check whether the corresponding timer is indeed
+				// not running. However, there is no dedicated DelayOpenTimer
+				// (the _idle_hold timer is reused instead), hence we check
+				// the corresponding DelayOpenTime configured value.
+				//
+				set_state(STATEIDLE, false);
+			}
+			restart_connect_retry_timer();
+			set_state(STATEACTIVE);		// Continue to listen for a connection
+			break;
 	}
-	restart_connect_retry_timer();
-	set_state(STATEACTIVE);		// Continue to listen for a connection
-	break;
-    }
 }
 
 /*
  * EVENTBGPTRANFATALERR event. No data associated with the event.
  */
-void
+	void
 BGPPeer::event_tranfatal()			// EVENTBGPTRANFATALERR
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+			break;
 
-    case STATECONNECT:
-    case STATEACTIVE:
-	set_state(STATEIDLE);
-	break;
+		case STATECONNECT:
+		case STATEACTIVE:
+			set_state(STATEIDLE);
+			break;
 
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-	set_state(STATEIDLE);
-	break;
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+			set_state(STATEIDLE);
+			break;
 
-    case STATESTOPPED:
-	// ensure callback can't happen
-	flush_transmit_queue();
-	set_state(STATEIDLE);
-	break;
-    }
+		case STATESTOPPED:
+			// ensure callback can't happen
+			flush_transmit_queue();
+			set_state(STATEIDLE);
+			break;
+	}
 }
 
 /*
@@ -812,45 +837,47 @@ BGPPeer::event_tranfatal()			// EVENTBGPTRANFATALERR
  * This is a timer hook called from a connection_retry_timer expiring
  * (it is a oneoff timer)
  */
-void
+	void
 BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATESTOPPED:
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATESTOPPED:
+			break;
 
-    case STATECONNECT:
-	restart_connect_retry_timer();
-	_SocketClient->connect_break();	
-	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
-	break;
+		case STATECONNECT:
+			restart_connect_retry_timer();
+			_SocketClient->connect_break();	
+			connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
+			break;
 
-    case STATEACTIVE:
-	restart_connect_retry_timer();
-	set_state(STATECONNECT);
-	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
-	break;
+		case STATEACTIVE:
+			restart_connect_retry_timer();
+			set_state(STATECONNECT);
+			connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
+			break;
 
-    /*
-     * if these happen, we failed to properly cancel a timer (?)
-     */
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED: {
-	// Send Notification Message with error code of FSM error.
-	// XXX this needs to be revised.
-	XLOG_WARNING("%s FSM received EVENTCONNTIMEEXP in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	NotificationPacket np(FSMERROR);
-	send_notification(np);
-	set_state(STATESTOPPED, true);
-	break;
-    }
-    }
+			/*
+			 * if these happen, we failed to properly cancel a timer (?)
+			 */
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED: 
+			{
+				// Send Notification Message with error code of FSM error.
+				// XXX this needs to be revised.
+				XLOG_WARNING("%s FSM received EVENTCONNTIMEEXP in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				NotificationPacket np(FSMERROR);
+				send_notification(np);
+				set_state(STATESTOPPED, true);
+				break;
+			}
+	}
 }
 
 /*
@@ -858,213 +885,227 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
  * Only called by a hold_timer (oneoff) expiring.
  * If it goes off, the connection is over so we do not start the timer again.
  */
-void
+	void
 BGPPeer::event_holdexp()			// EVENTHOLDTIMEEXP
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATESTOPPED:
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATESTOPPED:
+			break;
 
-    case STATECONNECT:
-    case STATEACTIVE:
-	set_state(STATEIDLE);
-	break;
+		case STATECONNECT:
+		case STATEACTIVE:
+			set_state(STATEIDLE);
+			break;
 
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED: {
-	// Send Notification Message with error code of Hold Timer expired.
-	NotificationPacket np(HOLDTIMEEXP);
-	send_notification(np);
-	set_state(STATESTOPPED);
-	break;
-    }
-    }
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED: 
+			{
+				// Send Notification Message with error code of Hold Timer expired.
+				NotificationPacket np(HOLDTIMEEXP);
+				send_notification(np);
+				set_state(STATESTOPPED);
+				break;
+			}
+	}
 }
 
 /*
  * EVENTKEEPALIVEEXP event.
  * A keepalive timer expired.
  */
-void
+	void
 BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATESTOPPED:
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATEOPENSENT:
-	XLOG_FATAL("%s FSM received EVENTKEEPALIVEEXP in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATESTOPPED:
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATEOPENSENT:
+			XLOG_FATAL("%s FSM received EVENTKEEPALIVEEXP in state %s",
+					this->str().c_str(),
+					pretty_print_state(_state));
+			break;
 
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-	start_keepalive_timer();
-	KeepAlivePacket kp;
-	send_message(kp);
-	break;
-    }
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+			start_keepalive_timer();
+			KeepAlivePacket kp;
+			send_message(kp);
+			break;
+	}
 }
 
-void
+	void
 BGPPeer::event_delay_open_exp()
 { 
-    TIMESPENT();
-    
-    switch(_state) {
-    case STATEIDLE:
-    case STATESTOPPED:
-    case STATEOPENSENT:
-    case STATEESTABLISHED: {
-	XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	NotificationPacket np(FSMERROR);
-	send_notification(np);
-	set_state(STATESTOPPED);
-    }
-	break;
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATEOPENCONFIRM: {
-	OpenPacket open_packet(_peerdata->my_AS_number(),
-			       _localdata->get_id(),
-			       _peerdata->get_configured_hold_time());
-	generate_open_message(open_packet);
-	send_message(open_packet);
+	TIMESPENT();
 
-	if ((_state == STATEACTIVE) || (_state == STATECONNECT)) {
-	    // Start Holdtimer - four minutes recommended in spec.
-	    _peerdata->set_hold_duration(4 * 60);
-	    start_hold_timer();
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATESTOPPED:
+		case STATEOPENSENT:
+		case STATEESTABLISHED: 
+			{
+				XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				NotificationPacket np(FSMERROR);
+				send_notification(np);
+				set_state(STATESTOPPED);
+			}
+			break;
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATEOPENCONFIRM: 
+			{
+				OpenPacket open_packet(_peerdata->my_AS_number(),
+						_localdata->get_id(),
+						_peerdata->get_configured_hold_time());
+				generate_open_message(open_packet);
+				send_message(open_packet);
+
+				if ((_state == STATEACTIVE) || (_state == STATECONNECT)) 
+				{
+					// Start Holdtimer - four minutes recommended in spec.
+					_peerdata->set_hold_duration(4 * 60);
+					start_hold_timer();
+				}
+				// Change state to OpenSent
+				set_state(STATEOPENSENT);
+			}
+			break;
 	}
-	// Change state to OpenSent
-	set_state(STATEOPENSENT);
-    }
-	break;
-    }
 }
 
-void
+	void
 BGPPeer::event_idle_hold_exp()
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    XLOG_ASSERT(state() == STATEIDLE);
-    event_start();
+	XLOG_ASSERT(state() == STATEIDLE);
+	event_start();
 }
 
 /*
  * EVENTRECOPENMESS event.
  * We receive an open packet.
  */
-void
+	void
 BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATECONNECT:
-    case STATEACTIVE: {
-	// The only way to get here is due to a delayed open.
-	// Kill the delay open timer and send the open packet.
-	clear_delay_open_timer();
-	OpenPacket open_packet(_peerdata->my_AS_number(),
-			       _localdata->get_id(),
-			       _peerdata->get_configured_hold_time());
-	generate_open_message(open_packet);
-	send_message(open_packet);
-    }
-	/* FALLTHROUGH */
-    case STATEOPENSENT:
-	// Process OPEN MESSAGE
-	try {
-	    check_open_packet(&p);
-	    // We liked the open packet continue, trying to setup session.
-	    KeepAlivePacket kp;
-	    send_message(kp);
+	switch(_state) 
+	{
+		case STATECONNECT:
+		case STATEACTIVE: 
+			{
+				// The only way to get here is due to a delayed open.
+				// Kill the delay open timer and send the open packet.
+				clear_delay_open_timer();
+				OpenPacket open_packet(_peerdata->my_AS_number(),
+						_localdata->get_id(),
+						_peerdata->get_configured_hold_time());
+				generate_open_message(open_packet);
+				send_message(open_packet);
+			}
+			/* FALLTHROUGH */
+		case STATEOPENSENT:
+			// Process OPEN MESSAGE
+			try 
+			{
+				check_open_packet(&p);
+				// We liked the open packet continue, trying to setup session.
+				KeepAlivePacket kp;
+				send_message(kp);
 
-	    // start timers
-	    debug_msg("Starting timers\n");
-	    clear_all_timers();
-	    start_keepalive_timer();
-	    start_hold_timer();
+				// start timers
+				debug_msg("Starting timers\n");
+				clear_all_timers();
+				start_keepalive_timer();
+				start_hold_timer();
 
-	    // Save the parameters from the open packet.
-	    _peerdata->save_parameters(p.parameter_list());
+				// Save the parameters from the open packet.
+				_peerdata->save_parameters(p.parameter_list());
 
-	    // Compare 
-	    _peerdata->open_negotiation();
+				// Compare 
+				_peerdata->open_negotiation();
 
-	    set_state(STATEOPENCONFIRM);
-	} catch(CorruptMessage& c) {
-	    XLOG_WARNING("%s %s", this->str().c_str(), c.why().c_str());
-	    notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
+				set_state(STATEOPENCONFIRM);
+			} catch(CorruptMessage& c) 
+			{
+				XLOG_WARNING("%s %s", this->str().c_str(), c.why().c_str());
+				notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
+			}
+			break;
+
+		case STATEIDLE:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED: 
+			{
+				// Send Notification - FSM error
+				XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				notify_peer_of_error(FSMERROR);
+				break;
+			}
+		case STATESTOPPED:
+			break;
 	}
-	break;
-
-    case STATEIDLE:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED: {
-	// Send Notification - FSM error
-	XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	notify_peer_of_error(FSMERROR);
-	break;
-    }
-    case STATESTOPPED:
-	break;
-    }
 }
 
 /*
  * EVENTRECKEEPALIVEMESS event.
  * We received a keepalive message.
  */
-void
+	void
 BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATECONNECT:
-    case STATEACTIVE:
-	XLOG_FATAL("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATECONNECT:
+		case STATEACTIVE:
+			XLOG_FATAL("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
+					this->str().c_str(),
+					pretty_print_state(_state));
+			break;
 
-    case STATESTOPPED:
-	break;
+		case STATESTOPPED:
+			break;
 
-    case STATEOPENSENT: {
-	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	NotificationPacket np(FSMERROR);
-	send_notification(np);
-	set_state(STATESTOPPED);
-	break;
-    }
-    case STATEOPENCONFIRM:	// this is what we were waiting for.
-	set_state(STATEESTABLISHED);
-	/* FALLTHROUGH */
+		case STATEOPENSENT: 
+			{
+				// Send Notification Message with error code of FSM error.
+				XLOG_WARNING("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				NotificationPacket np(FSMERROR);
+				send_notification(np);
+				set_state(STATESTOPPED);
+				break;
+			}
+		case STATEOPENCONFIRM:	// this is what we were waiting for.
+			set_state(STATEESTABLISHED);
+			/* FALLTHROUGH */
 
-    case STATEESTABLISHED:	// this is a legitimate message.
-	restart_hold_timer();
-	break;
-    }
+		case STATEESTABLISHED:	// this is a legitimate message.
+			restart_hold_timer();
+			break;
+	}
 }
 
 
@@ -1072,168 +1113,182 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
  * EVENTRECUPDATEMESS event.
  * We received an update message.
  */
-void
+	void
 BGPPeer::event_recvupdate(UpdatePacket& p) // EVENTRECUPDATEMESS
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    switch(_state) {
-    case STATEIDLE:
-    case STATECONNECT:
-    case STATEACTIVE: {
-	XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	NotificationPacket np(FSMERROR);
-	send_notification(np);
-	set_state(STATESTOPPED);
-    }
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+		case STATECONNECT:
+		case STATEACTIVE: 
+			{
+				XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				NotificationPacket np(FSMERROR);
+				send_notification(np);
+				set_state(STATESTOPPED);
+			}
+			break;
 
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM: {
-	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
-		     this->str().c_str(),
-		     pretty_print_state(_state));
-	NotificationPacket np(FSMERROR);
-	send_notification(np);
-	set_state(STATESTOPPED);
-	break;
-    }
-    case STATEESTABLISHED: {
-	restart_hold_timer();
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM: 
+			{
+				// Send Notification Message with error code of FSM error.
+				XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
+						this->str().c_str(),
+						pretty_print_state(_state));
+				NotificationPacket np(FSMERROR);
+				send_notification(np);
+				set_state(STATESTOPPED);
+				break;
+			}
+		case STATEESTABLISHED: 
+			{
+				restart_hold_timer();
 
-	// Check that the prefix limit if set will not be exceeded.
-	ConfigVar<uint32_t> &prefix_limit =
-	    const_cast<BGPPeerData *>(peerdata())->get_prefix_limit();
-	if (prefix_limit.get_enabled()) {
-	    if ((_handler->get_prefix_count() + p.nlri_list().size())
-		> prefix_limit.get_var()) {
-		NotificationPacket np(CEASE);
-		send_notification(np);
-		set_state(STATESTOPPED);
-		break;
-	    }
+				// Check that the prefix limit if set will not be exceeded.
+				ConfigVar<uint32_t> &prefix_limit =
+					const_cast<BGPPeerData *>(peerdata())->get_prefix_limit();
+				if (prefix_limit.get_enabled()) 
+				{
+					if ((_handler->get_prefix_count() + p.nlri_list().size())
+							> prefix_limit.get_var()) 
+					{
+						NotificationPacket np(CEASE);
+						send_notification(np);
+						set_state(STATESTOPPED);
+						break;
+					}
+				}
+
+				// process the packet...
+				debug_msg("Process the packet!!!\n");
+				XLOG_ASSERT(_handler);
+				// XXX - Temporary hack until we get programmable filters.
+				const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
+				if (!next_hop.is_zero()) 
+				{
+					FPAList4Ref l = p.pa_list();
+					if (l->nexthop_att()) 
+					{
+						l->replace_nexthop(next_hop);
+					}
+				}
+				_handler->process_update_packet(&p);
+
+				break;
+			}
+
+		case STATESTOPPED:
+			break;
 	}
-
-	// process the packet...
-	debug_msg("Process the packet!!!\n");
-	XLOG_ASSERT(_handler);
-	// XXX - Temporary hack until we get programmable filters.
-	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
-	if (!next_hop.is_zero()) {
-	    FPAList4Ref l = p.pa_list();
-	    if (l->nexthop_att()) {
-		l->replace_nexthop(next_hop);
-	    }
-	}
-	_handler->process_update_packet(&p);
-
-	break;
-    }
-
-    case STATESTOPPED:
-	break;
-    }
 }
 
 /*
  * EVENTRECNOTMESS event.
  * We received a notify message. Currently we ignore the payload.
  */
-void
+	void
 BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 { 
-    TIMESPENT();
+	TIMESPENT();
 
-    XLOG_INFO("%s in state %s received %s",
-	      this->str().c_str(),
-	      pretty_print_state(_state),
-	      p.str().c_str());
+	XLOG_INFO("%s in state %s received %s",
+			this->str().c_str(),
+			pretty_print_state(_state),
+			p.str().c_str());
 
-    _last_error[0] = p.error_code();
-    _last_error[1] = p.error_subcode();
+	_last_error[0] = p.error_code();
+	_last_error[1] = p.error_subcode();
 
-    switch(_state) {
-    case STATEIDLE:
-	XLOG_FATAL("%s FSM received EVENTRECNOTMESS in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
+	switch(_state) 
+	{
+		case STATEIDLE:
+			XLOG_FATAL("%s FSM received EVENTRECNOTMESS in state %s",
+					this->str().c_str(),
+					pretty_print_state(_state));
+			break;
 
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-    case STATEESTABLISHED:
-	set_state(STATEIDLE);
-	break;
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+		case STATEESTABLISHED:
+			set_state(STATEIDLE);
+			break;
 
-    case STATESTOPPED:
-	break;
-    }
+		case STATESTOPPED:
+			break;
+	}
 }
 
-void
+	void
 BGPPeer::generate_open_message(OpenPacket& open)
 {
-    uint8_t last_error_code = _last_error[0];
-    uint8_t last_error_subcode = _last_error[1];
-    bool ignore_cap_optional_parameters = false;
-    ParameterList::const_iterator pi;
+	uint8_t last_error_code = _last_error[0];
+	uint8_t last_error_subcode = _last_error[1];
+	bool ignore_cap_optional_parameters = false;
+	ParameterList::const_iterator pi;
 
-    if ((last_error_code == OPENMSGERROR)
-	&& (last_error_subcode == UNSUPOPTPAR)) {
-	//
-	// XXX: If the last error was Unsupported Optional Parameter, then
-	// don't include the Capabilities Optional Parameter.
-	//
-	ignore_cap_optional_parameters = true;
-    }
-
-    for (pi = _peerdata->parameter_sent_list().begin();
-	 pi != _peerdata->parameter_sent_list().end();
-	 ++pi) {
-	if (ignore_cap_optional_parameters) {
-	    // XXX: ignore the Capabilities Optional Parameters.
-	    const ref_ptr<const BGPParameter>& ref_par = *pi;
-	    const BGPParameter& par = *ref_par;
-	    const BGPCapParameter* cap_par;
-	    cap_par = dynamic_cast<const BGPCapParameter*>(&par);
-	    if (cap_par != NULL)
-		continue;
+	if ((last_error_code == OPENMSGERROR)
+			&& (last_error_subcode == UNSUPOPTPAR)) 
+	{
+		//
+		// XXX: If the last error was Unsupported Optional Parameter, then
+		// don't include the Capabilities Optional Parameter.
+		//
+		ignore_cap_optional_parameters = true;
 	}
-	open.add_parameter(*pi);
-    }
+
+	for (pi = _peerdata->parameter_sent_list().begin();
+			pi != _peerdata->parameter_sent_list().end();
+			++pi) 
+	{
+		if (ignore_cap_optional_parameters) 
+		{
+			// XXX: ignore the Capabilities Optional Parameters.
+			const ref_ptr<const BGPParameter>& ref_par = *pi;
+			const BGPParameter& par = *ref_par;
+			const BGPCapParameter* cap_par;
+			cap_par = dynamic_cast<const BGPCapParameter*>(&par);
+			if (cap_par != NULL)
+				continue;
+		}
+		open.add_parameter(*pi);
+	}
 }
 
 /*
-** A BGP Fatal error has ocurred. Try and send a notification.
-*/
-void
+ ** A BGP Fatal error has ocurred. Try and send a notification.
+ */
+	void
 BGPPeer::notify_peer_of_error(const int error, const int subcode,
 		const uint8_t *data, const size_t len)
 {
-    if (!NotificationPacket::validate_error_code(error, subcode)) {
-	XLOG_WARNING("%s Attempt to send invalid error code %d subcode %d",
-		     this->str().c_str(),
-		     error, subcode); // XXX make it fatal ?
-    }
+	if (!NotificationPacket::validate_error_code(error, subcode)) 
+	{
+		XLOG_WARNING("%s Attempt to send invalid error code %d subcode %d",
+				this->str().c_str(),
+				error, subcode); // XXX make it fatal ?
+	}
 
-    /*
-     * An error has occurred. If we still have a connection to the
-     * peer send a notification of the error.
-     */
-    if (is_connected()) {
-	NotificationPacket np(error, subcode, data, len);
-	send_notification(np);
-	set_state(STATESTOPPED);
-	return;
-    }
+	/*
+	 * An error has occurred. If we still have a connection to the
+	 * peer send a notification of the error.
+	 */
+	if (is_connected()) 
+	{
+		NotificationPacket np(error, subcode, data, len);
+		send_notification(np);
+		set_state(STATESTOPPED);
+		return;
+	}
 
-    // The peer is no longer connected make sure we get to idle.
-    event_tranfatal();
+	// The peer is no longer connected make sure we get to idle.
+	event_tranfatal();
 }
 
 /*
@@ -1242,311 +1297,308 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
  * The argment is the incoming socket descriptor, which
  * must be used or closed by this method.
  */
-void
+	void
 BGPPeer::event_open(const XorpFd sock)
 {
-    debug_msg("Connection attempt: State %d ", _state);
-    if (_state == STATECONNECT || _state == STATEACTIVE) {
-	debug_msg("accepted\n");
-	if (_state == STATECONNECT)
-	    _SocketClient->connect_break();
-	_SocketClient->connected(sock);
-	event_open();
-    } else {
-	debug_msg("rejected\n");
-	XLOG_INFO("%s rejecting connection: current state %s",
-		  this->str().c_str(),
-		  pretty_print_state(_state));
-	comm_sock_close(sock);
-    }
+	debug_msg("Connection attempt: State %d ", _state);
+	if (_state == STATECONNECT || _state == STATEACTIVE) 
+	{
+		debug_msg("accepted\n");
+		if (_state == STATECONNECT)
+			_SocketClient->connect_break();
+		_SocketClient->connected(sock);
+		event_open();
+	} else 
+	{
+		debug_msg("rejected\n");
+		XLOG_INFO("%s rejecting connection: current state %s",
+				this->str().c_str(),
+				pretty_print_state(_state));
+		comm_sock_close(sock);
+	}
 }
 
-void
+	void
 BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 {
-    if (p->Version() != BGPVERSION) {
-	static uint8_t data[2];
-	embed_16(data, BGPVERSION);
-	xorp_throw(CorruptMessage,
-		   c_format("Unsupported BGPVERSION %d", p->Version()),
-		   OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
-    }
+	if (p->Version() != BGPVERSION) 
+	{
+		static uint8_t data[2];
+		embed_16(data, BGPVERSION);
+		xorp_throw(CorruptMessage,
+				c_format("Unsupported BGPVERSION %d", p->Version()),
+				OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
+	}
 
-    if (p->as() != _peerdata->as()) {
-	debug_msg("**** Peer has %s, should have %s ****\n",
-		  p->as().str().c_str(),
-		  _peerdata->as().str().c_str());
-	xorp_throw(CorruptMessage,
-		   c_format("Wrong AS %s expecting %s",
-			    p->as().str().c_str(),
-			    _peerdata->as().str().c_str()),
-		   OPENMSGERROR, BADASPEER);
-    }
+	if (p->as() != _peerdata->as()) 
+	{
+		debug_msg("**** Peer has %s, should have %s ****\n",
+				p->as().str().c_str(),
+				_peerdata->as().str().c_str());
+		xorp_throw(CorruptMessage,
+				c_format("Wrong AS %s expecting %s",
+					p->as().str().c_str(),
+					_peerdata->as().str().c_str()),
+				OPENMSGERROR, BADASPEER);
+	}
 
-    // Must be a valid unicast IP host address.
-    if (!p->id().is_unicast() || p->id().is_zero()) {
-	xorp_throw(CorruptMessage,
-		   c_format("Not a valid unicast IP host address %s",
-			    p->id().str().c_str()),
-		   OPENMSGERROR, BADBGPIDENT);
-    }
+	// Must be a valid unicast IP host address.
+	if (!p->id().is_unicast() || p->id().is_zero()) 
+	{
+		xorp_throw(CorruptMessage,
+				c_format("Not a valid unicast IP host address %s",
+					p->id().str().c_str()),
+				OPENMSGERROR, BADBGPIDENT);
+	}
 
-    // This has to be a valid IPv4 address.
-    _peerdata->set_id(p->id());
+	// This has to be a valid IPv4 address.
+	_peerdata->set_id(p->id());
 
-    // put received parameters into the peer data.
-//     _peerdata->clone_parameters(  p->parameter_list() );
-    // check the received parameters
-#if	0
-    if (_peerdata->unsupported_parameters() == true)
-	xorp_throw(CorruptMessage,
-		   c_format("Unsupported parameters"),
-		   OPENMSGERROR, UNSUPOPTPAR);
-#endif
-    /*
-     * Set the holdtime and keepalive times.
-     *
-     * Internally we store the values in milliseconds. The value sent
-     * on the wire is in seconds. First check that we have been
-     * offered a legal value. If the value is legal convert it to
-     * milliseconds.  Compare the holdtime in the packet against our
-     * configured value and choose the lowest value.
-     *
-     * The spec suggests using a keepalive time of a third the hold
-     * duration.
-     */
-    uint16_t hold_secs = p->HoldTime();
-    if (hold_secs == 1 || hold_secs == 2)
-	xorp_throw(CorruptMessage,
-		   c_format("Illegal holdtime value %d secs", hold_secs),
-		   OPENMSGERROR, UNACCEPTHOLDTIME);
+	/*
+	 * Set the holdtime and keepalive times.
+	 *
+	 * Internally we store the values in milliseconds. The value sent
+	 * on the wire is in seconds. First check that we have been
+	 * offered a legal value. If the value is legal convert it to
+	 * milliseconds.  Compare the holdtime in the packet against our
+	 * configured value and choose the lowest value.
+	 *
+	 * The spec suggests using a keepalive time of a third the hold
+	 * duration.
+	 */
+	uint16_t hold_secs = p->HoldTime();
+	if (hold_secs == 1 || hold_secs == 2)
+		xorp_throw(CorruptMessage,
+				c_format("Illegal holdtime value %d secs", hold_secs),
+				OPENMSGERROR, UNACCEPTHOLDTIME);
 
-    if (_peerdata->get_configured_hold_time() < hold_secs)
-	hold_secs = _peerdata->get_configured_hold_time();
+	if (_peerdata->get_configured_hold_time() < hold_secs)
+		hold_secs = _peerdata->get_configured_hold_time();
 
-    _peerdata->set_hold_duration(hold_secs);
-    _peerdata->set_keepalive_duration(hold_secs / 3);
+	_peerdata->set_hold_duration(hold_secs);
+	_peerdata->set_keepalive_duration(hold_secs / 3);
 
-    /*
-    ** Any unrecognised optional parameters would already have caused
-    ** any exception to be thrown in the open packet decoder.
-    */
+	/*
+	 ** Any unrecognised optional parameters would already have caused
+	 ** any exception to be thrown in the open packet decoder.
+	 */
 
-    _peerdata->dump_peer_data();
-    debug_msg("check_open_packet says it's OK with us\n");
+	_peerdata->dump_peer_data();
+	debug_msg("check_open_packet says it's OK with us\n");
 }
 
 #define	REMOVE_UNNEGOTIATED_NLRI
 inline
-bool
+	bool
 check_multiprotocol_nlri(const UpdatePacket *, const BGPUpdateAttribList& pa,
-			 bool neg)
+		bool neg)
 {
-    if (!pa.empty() && !neg) {
+	if (!pa.empty() && !neg) 
+	{
 #ifdef	REMOVE_UNNEGOTIATED_NLRI
-	// We didn't advertise this capability, so strip this sucker out.
-	const_cast<BGPUpdateAttribList *>(&pa)->clear();
+		// We didn't advertise this capability, so strip this sucker out.
+		const_cast<BGPUpdateAttribList *>(&pa)->clear();
 #else
-	// We didn't advertise this capability, drop peering.
- 	return false;
+		// We didn't advertise this capability, drop peering.
+		return false;
 #endif
-    }
-
-    return true;
-}
-
-
-NotificationPacket *
-BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
-{
-    UNUSED(p);
-    UNUSED(good_nexthop);
-    // return codes
-    // 1 - Malformed Attribute List
-    // 2 - Unrecognized Well-known Attribute
-    // 3 - Missing Well-known Attribute
-    // 4 - Attribute Flags Error
-    // 5 - Attribute Length Error
-    // 6 - Invalid ORIGIN Attribute
-    // 8 - Invalid NEXT-HOP Attribute
-    // 9 - Optional Attribute Error
-    // 10 - Invalid Network Field
-    // 11 - Malformed AS_PATH
-
-    /*
-    ** The maximum message size is 4096 bytes. We don't need an
-    ** explicit check here as the packet construction routines will
-    ** already have generated an error if the maximum size had been
-    ** exceeded.
-    */
-
-
-
-    // XXX Check withdrawn routes are correct.
-
-    return 0;	// all correct.
-}
-
-bool
-BGPPeer::established()
-{
-    debug_msg("%s\n", this->str().c_str());
-
-    if (_localdata == NULL) {
-	XLOG_ERROR("No _localdata");
-	return false;
-    }
-
-    if (_handler == NULL) {
-	// plumb peer into plumbing
-	string peername = "Peer-" + peerdata()->iptuple().str();
-	debug_msg("Peer is called >%s<\n", peername.c_str());
-	_handler = new PeerHandler(peername, this,
-				   _mainprocess->plumbing_unicast(),
-				   _mainprocess->plumbing_multicast());
-    } else {
-	_handler->peering_came_up();
-    }
-
-//     _in_updates = 0;
-//     _out_updates = 0;
-//     _in_total_messages = 0;
-//     _out_total_messages = 0;
-    _established_transitions++;
-    EventLoop::instance().current_time(_established_time);
-    EventLoop::instance().current_time(_in_update_time);
-    return true;
-}
-
-void
-BGPPeer::connected(XorpFd sock)
-{
-    if (!_SocketClient)
-	XLOG_FATAL("%s No socket structure", this->str().c_str());
-
-    /*
-    ** simultaneous open
-    */
-    if (_SocketClient->get_sock() == sock) {
-	debug_msg("Simultaneous open\n");
-	return;
-    }
-
-    /*
-    ** A connection attempt comes in. We already have a valid socket
-    ** so just close the connection attempt and continue. Don't bother
-    ** the state machine.
-    **
-    ** XXX
-    ** Need to check the spec to see if the incoming connection should
-    ** override the existing connection. If we do make this change
-    ** then it may be necessary to deal with the STATESTOPPED
-    ** explictly.
-    */
-//     if (is_connected()) {
-// 	debug_msg("Already connected dropping this connection\n");
-// 	::close(sock);
-// 	return;
-//     }
-//     event_open(sock);
-
-    AcceptSession *connect_attempt = new AcceptSession(*this, sock);
-    _accept_attempt.push_back(connect_attempt);
-    connect_attempt->start();
-}
-
-void
-BGPPeer::remove_accept_attempt(AcceptSession *conn)
-{
-    list<AcceptSession *>::iterator i;
-    for (i = _accept_attempt.begin(); i != _accept_attempt.end(); i++)
-	if (conn == (*i)) {
-	    delete (*i);
-	    _accept_attempt.erase(i);
-	    return;
 	}
 
-    XLOG_UNREACHABLE();
+	return true;
 }
 
-SocketClient *
+
+	NotificationPacket *
+BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
+{
+	UNUSED(p);
+	UNUSED(good_nexthop);
+	// return codes
+	// 1 - Malformed Attribute List
+	// 2 - Unrecognized Well-known Attribute
+	// 3 - Missing Well-known Attribute
+	// 4 - Attribute Flags Error
+	// 5 - Attribute Length Error
+	// 6 - Invalid ORIGIN Attribute
+	// 8 - Invalid NEXT-HOP Attribute
+	// 9 - Optional Attribute Error
+	// 10 - Invalid Network Field
+	// 11 - Malformed AS_PATH
+
+	/*
+	 ** The maximum message size is 4096 bytes. We don't need an
+	 ** explicit check here as the packet construction routines will
+	 ** already have generated an error if the maximum size had been
+	 ** exceeded.
+	 */
+
+
+
+	// XXX Check withdrawn routes are correct.
+
+	return 0;	// all correct.
+}
+
+	bool
+BGPPeer::established()
+{
+	debug_msg("%s\n", this->str().c_str());
+
+	if (_localdata == NULL) 
+	{
+		XLOG_ERROR("No _localdata");
+		return false;
+	}
+
+	if (_handler == NULL) 
+	{
+		// plumb peer into plumbing
+		string peername = "Peer-" + peerdata()->iptuple().str();
+		debug_msg("Peer is called >%s<\n", peername.c_str());
+		_handler = new PeerHandler(peername, this,
+				_mainprocess->plumbing_unicast(),
+				_mainprocess->plumbing_multicast());
+	} else 
+	{
+		_handler->peering_came_up();
+	}
+
+	//     _in_updates = 0;
+	//     _out_updates = 0;
+	//     _in_total_messages = 0;
+	//     _out_total_messages = 0;
+	_established_transitions++;
+	EventLoop::instance().current_time(_established_time);
+	EventLoop::instance().current_time(_in_update_time);
+	return true;
+}
+
+	void
+BGPPeer::connected(XorpFd sock)
+{
+	if (!_SocketClient)
+		XLOG_FATAL("%s No socket structure", this->str().c_str());
+
+	/*
+	 ** simultaneous open
+	 */
+	if (_SocketClient->get_sock() == sock) 
+	{
+		debug_msg("Simultaneous open\n");
+		return;
+	}
+
+	/*
+	 ** A connection attempt comes in. We already have a valid socket
+	 ** so just close the connection attempt and continue. Don't bother
+	 ** the state machine.
+	 **
+	 ** XXX
+	 ** Need to check the spec to see if the incoming connection should
+	 ** override the existing connection. If we do make this change
+	 ** then it may be necessary to deal with the STATESTOPPED
+	 ** explictly.
+	 */
+
+	AcceptSession *connect_attempt = new AcceptSession(*this, sock);
+	_accept_attempt.push_back(connect_attempt);
+	connect_attempt->start();
+}
+
+	void
+BGPPeer::remove_accept_attempt(AcceptSession *conn)
+{
+	list<AcceptSession *>::iterator i;
+	for (i = _accept_attempt.begin(); i != _accept_attempt.end(); i++)
+		if (conn == (*i)) 
+		{
+			delete (*i);
+			_accept_attempt.erase(i);
+			return;
+		}
+
+	XLOG_UNREACHABLE();
+}
+
+	SocketClient *
 BGPPeer::swap_sockets(SocketClient *new_sock)
 {
-    debug_msg("%s Wiring up the accept socket %s\n", str().c_str(),
-	      pretty_print_state(_state));
-    XLOG_ASSERT(_state == STATEACTIVE ||
-		_state == STATECONNECT ||
-		_state == STATEOPENSENT ||
-		_state == STATEOPENCONFIRM);
+	debug_msg("%s Wiring up the accept socket %s\n", str().c_str(),
+			pretty_print_state(_state));
+	XLOG_ASSERT(_state == STATEACTIVE ||
+			_state == STATECONNECT ||
+			_state == STATEOPENSENT ||
+			_state == STATEOPENCONFIRM);
 
-    SocketClient *old_sock = _SocketClient;
-    _SocketClient = new_sock;
-    _SocketClient->set_callback(callback(this, &BGPPeer::get_message));
-    set_state(STATEACTIVE);
-    event_open();
+	SocketClient *old_sock = _SocketClient;
+	_SocketClient = new_sock;
+	_SocketClient->set_callback(callback(this, &BGPPeer::get_message));
+	set_state(STATEACTIVE);
+	event_open();
 
-    return old_sock;
+	return old_sock;
 }
 
-XorpFd
+	XorpFd
 BGPPeer::get_sock()
 {
-    if (_SocketClient != NULL)
-	return _SocketClient->get_sock();
-    else {
-	XorpFd invalidfd;
-	return invalidfd;
-    }
+	if (_SocketClient != NULL)
+		return _SocketClient->get_sock();
+	else 
+	{
+		XorpFd invalidfd;
+		return invalidfd;
+	}
 }
 
-TimeVal
+	TimeVal
 BGPPeer::jitter(const TimeVal& t)
 {
-    if (!_localdata->get_jitter())
-	return t;
+	if (!_localdata->get_jitter())
+		return t;
 
-    // Uniformly distributed between 0.75 and 1.0
-    return random_uniform(TimeVal(t.get_double() * 0.75), t);
+	// Uniformly distributed between 0.75 and 1.0
+	return random_uniform(TimeVal(t.get_double() * 0.75), t);
 }
 
-void
+	void
 BGPPeer::clear_all_timers()
 {
-    clear_connect_retry_timer();
-    clear_hold_timer();
-    clear_keepalive_timer();
-    clear_stopped_timer();
-    clear_delay_open_timer();
-    clear_idle_hold_timer();
+	clear_connect_retry_timer();
+	clear_hold_timer();
+	clear_keepalive_timer();
+	clear_stopped_timer();
+	clear_delay_open_timer();
+	clear_idle_hold_timer();
 }
 
-void
+	void
 BGPPeer::start_connect_retry_timer()
 {
-    debug_msg("Start Connect Retry timer after %u s\n",
-	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
+	debug_msg("Start Connect Retry timer after %u s\n",
+			XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
-    _timer_connect_retry = EventLoop::instance().
-	new_oneoff_after(jitter(TimeVal(_peerdata->get_retry_duration(), 0)),
-			 callback(this, &BGPPeer::event_connexp));
+	_timer_connect_retry = EventLoop::instance().
+		new_oneoff_after(jitter(TimeVal(_peerdata->get_retry_duration(), 0)),
+				callback(this, &BGPPeer::event_connexp));
 }
 
-void
+	void
 BGPPeer::clear_connect_retry_timer()
 {
-    debug_msg("Unschedule Connect Retry timer\n");
+	debug_msg("Unschedule Connect Retry timer\n");
 
-    _timer_connect_retry.unschedule();
+	_timer_connect_retry.unschedule();
 }
 
-void
+	void
 BGPPeer::restart_connect_retry_timer()
 {
-    debug_msg("restart Connect Retry timer after %u s\n",
-	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
+	debug_msg("restart Connect Retry timer after %u s\n",
+			XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
-    clear_connect_retry_timer();
-    start_connect_retry_timer();
+	clear_connect_retry_timer();
+	start_connect_retry_timer();
 }
 
 /*
@@ -1554,876 +1606,904 @@ BGPPeer::restart_connect_retry_timer()
  * if we have negotiated the use of keepalives with the other side
  * (i.e. a non-zero value).
  */
-void
+	void
 BGPPeer::start_hold_timer()
 {
-    uint32_t duration = _peerdata->get_hold_duration();
+	uint32_t duration = _peerdata->get_hold_duration();
 
-    if (duration != 0) {
-	/* Add another second to give the remote keepalive a chance */
-	duration += 1;
-	debug_msg("Holdtimer started %u s\n", XORP_UINT_CAST(duration));
-	_timer_hold_time = EventLoop::instance().
-	    new_oneoff_after(TimeVal(duration, 0),
-	    callback(this, &BGPPeer::event_holdexp));
-    }
+	if (duration != 0) 
+	{
+		/* Add another second to give the remote keepalive a chance */
+		duration += 1;
+		debug_msg("Holdtimer started %u s\n", XORP_UINT_CAST(duration));
+		_timer_hold_time = EventLoop::instance().
+			new_oneoff_after(TimeVal(duration, 0),
+					callback(this, &BGPPeer::event_holdexp));
+	}
 }
 
-void
+	void
 BGPPeer::clear_hold_timer()
 {
-    debug_msg("Holdtimer cleared\n");
+	debug_msg("Holdtimer cleared\n");
 
-    _timer_hold_time.unschedule();
+	_timer_hold_time.unschedule();
 }
 
-void
+	void
 BGPPeer::restart_hold_timer()
 {
-    debug_msg("Holdtimer restarted\n");
-    clear_hold_timer();
-    start_hold_timer();
+	debug_msg("Holdtimer restarted\n");
+	clear_hold_timer();
+	start_hold_timer();
 }
 
-void
+	void
 BGPPeer::start_keepalive_timer()
 {
-    uint32_t duration = _peerdata->get_keepalive_duration();
-    debug_msg("KeepAlive timer started with duration %u s\n",
-	      XORP_UINT_CAST(duration));
+	uint32_t duration = _peerdata->get_keepalive_duration();
+	debug_msg("KeepAlive timer started with duration %u s\n",
+			XORP_UINT_CAST(duration));
 
-    if (duration > 0) {
-	TimeVal delay = jitter(TimeVal(duration, 0));
-	// A keepalive must not be sent more frequently that once a second.
-	delay = delay < TimeVal(1, 0) ? TimeVal(1, 0) : delay;
-	_timer_keep_alive = EventLoop::instance().new_oneoff_after(delay, callback(this, &BGPPeer::event_keepexp));
-    }
+	if (duration > 0) 
+	{
+		TimeVal delay = jitter(TimeVal(duration, 0));
+		// A keepalive must not be sent more frequently that once a second.
+		delay = delay < TimeVal(1, 0) ? TimeVal(1, 0) : delay;
+		_timer_keep_alive = EventLoop::instance().new_oneoff_after(delay, callback(this, &BGPPeer::event_keepexp));
+	}
 }
 
-void
+	void
 BGPPeer::clear_keepalive_timer()
 {
-    debug_msg("KeepAlive timer cleared\n");
+	debug_msg("KeepAlive timer cleared\n");
 
-    _timer_keep_alive.unschedule();
+	_timer_keep_alive.unschedule();
 }
 
-void
+	void
 BGPPeer::start_stopped_timer()
 {
-    /* XXX - Only allow 10 seconds in the stopped state */
-    const int delay = 10;
-    debug_msg("Stopped timer started with duration %d s\n", delay);
+	/* XXX - Only allow 10 seconds in the stopped state */
+	const int delay = 10;
+	debug_msg("Stopped timer started with duration %d s\n", delay);
 
-    _timer_stopped = EventLoop::instance().
-	new_oneoff_after(TimeVal(delay, 0),
-			 callback(this, &BGPPeer::hook_stopped));
+	_timer_stopped = EventLoop::instance().
+		new_oneoff_after(TimeVal(delay, 0),
+				callback(this, &BGPPeer::hook_stopped));
 }
 
-void
+	void
 BGPPeer::clear_stopped_timer()
 {
-    debug_msg("Stopped timer cleared\n");
+	debug_msg("Stopped timer cleared\n");
 
-    _timer_stopped.unschedule();
+	_timer_stopped.unschedule();
 }
 
-void 
+	void 
 BGPPeer::start_idle_hold_timer()
 {
-    if (!_damping_peer_oscillations)
-	return;
+	if (!_damping_peer_oscillations)
+		return;
 
-    _idle_hold = EventLoop::instance().
-	new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
-			 callback(this, &BGPPeer::event_idle_hold_exp));
-    
+	_idle_hold = EventLoop::instance().
+		new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
+				callback(this, &BGPPeer::event_idle_hold_exp));
+
 }
 
-void 
+	void 
 BGPPeer::clear_idle_hold_timer()
 {
-    if (!_damping_peer_oscillations)
-	return;
+	if (!_damping_peer_oscillations)
+		return;
 
-    _idle_hold.unschedule();
+	_idle_hold.unschedule();
 }
 
 bool
 BGPPeer::running_idle_hold_timer() const
 {
-    if (!_damping_peer_oscillations)
-	return false;
+	if (!_damping_peer_oscillations)
+		return false;
 
-    return _idle_hold.scheduled();
+	return _idle_hold.scheduled();
 }
 
-void 
+	void 
 BGPPeer::start_delay_open_timer()
 {
-    _idle_hold = EventLoop::instance().
-	new_oneoff_after(TimeVal(_peerdata->get_delay_open_time(), 0),
-			 callback(this, &BGPPeer::event_delay_open_exp));
-    
+	_idle_hold = EventLoop::instance().
+		new_oneoff_after(TimeVal(_peerdata->get_delay_open_time(), 0),
+				callback(this, &BGPPeer::event_delay_open_exp));
+
 }
 
-void 
+	void 
 BGPPeer::clear_delay_open_timer()
 {
-    _delay_open.unschedule();
+	_delay_open.unschedule();
 }
 
-bool
+	bool
 BGPPeer::release_resources()
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    debug_msg("BGPPeer::release_resources()\n");
+	debug_msg("BGPPeer::release_resources()\n");
 
-    if (_handler != NULL && _handler->peering_is_up())
-	_handler->peering_went_down();
+	if (_handler != NULL && _handler->peering_is_up())
+		_handler->peering_went_down();
 
-    TIMESPENT_CHECK();
+	TIMESPENT_CHECK();
 
-    /*
-    ** Only if we are connected call the disconnect.
-    */
-    if (is_connected())
-	_SocketClient->disconnect();
+	/*
+	 ** Only if we are connected call the disconnect.
+	 */
+	if (is_connected())
+		_SocketClient->disconnect();
 
-    // clear the counters.
-    _in_updates = 0;
-    _out_updates = 0;
-    _in_total_messages = 0;
-    _out_total_messages = 0;
+	// clear the counters.
+	_in_updates = 0;
+	_out_updates = 0;
+	_in_total_messages = 0;
+	_out_total_messages = 0;
 
-    EventLoop::instance().current_time(_established_time);
-    return true;
+	EventLoop::instance().current_time(_established_time);
+	return true;
 }
 
-#if	0
-string
-BGPPeer::str() const
-{
-    return c_format("Peer(%d)-%s",
-		    get_sock(),
-		    peerdata()->iptuple().str().c_str());
-}
-#endif
 
-const char *
+	const char *
 BGPPeer::pretty_print_state(FSMState s)
 {
-    switch (s) {
-    case STATEIDLE:
-	return "IDLE(1)";
-    case STATECONNECT:
-	return "CONNECT(2)";
-    case STATEACTIVE:
-	return "ACTIVE(3)";
-    case STATEOPENSENT:
-	return "OPENSENT(4)";
-    case STATEOPENCONFIRM:
-	return "OPENCONFIRM(5)";
-    case STATEESTABLISHED:
-	return "ESTABLISHED(6)";
-    case STATESTOPPED:
-	return "STOPPED(7)";
-    }
-    return "ERROR";
+	switch (s) 
+	{
+		case STATEIDLE:
+			return "IDLE(1)";
+		case STATECONNECT:
+			return "CONNECT(2)";
+		case STATEACTIVE:
+			return "ACTIVE(3)";
+		case STATEOPENSENT:
+			return "OPENSENT(4)";
+		case STATEOPENCONFIRM:
+			return "OPENCONFIRM(5)";
+		case STATEESTABLISHED:
+			return "ESTABLISHED(6)";
+		case STATESTOPPED:
+			return "STOPPED(7)";
+	}
+	return "ERROR";
 }
 
-void
+	void
 BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 {
-    TIMESPENT();
+	TIMESPENT();
 
-    //XLOG_INFO("Peer %s: Previous state: %s Current state: %s\n",
-    //      peerdata()->iptuple().str().c_str(),
-    //      pretty_print_state(_state),
-    //      pretty_print_state(s));
-    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_state_change),
-		       "Peer %s: Previous state: %s Current state: %s\n",
-		       peerdata()->iptuple().str().c_str(),
-		       pretty_print_state(_state),
-		       pretty_print_state(s)));
+	//XLOG_INFO("Peer %s: Previous state: %s Current state: %s\n",
+	//      peerdata()->iptuple().str().c_str(),
+	//      pretty_print_state(_state),
+	//      pretty_print_state(s));
+	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_state_change),
+				"Peer %s: Previous state: %s Current state: %s\n",
+				peerdata()->iptuple().str().c_str(),
+				pretty_print_state(_state),
+				pretty_print_state(s)));
 
-    FSMState previous_state = _state;
-    _state = s;
+	FSMState previous_state = _state;
+	_state = s;
 
-    if (previous_state == STATESTOPPED && _state != STATESTOPPED)
-	clear_stopped_timer();
+	if (previous_state == STATESTOPPED && _state != STATESTOPPED)
+		clear_stopped_timer();
 
-    switch (_state) {
-    case STATEIDLE:
-	if (previous_state != STATEIDLE) {
-	    // default actions
-	    clear_all_timers();
-	    // Release resources - which includes a disconnect
-	    release_resources();
-	    if (restart) {
-		if (automatic) {
-		    automatic_restart();
-		    start_idle_hold_timer();
-		} else {
-		    /* XXX
-		    ** Connection has been blown away try to
-		    ** reconnect.
-		    */
-		    event_start(); // XXX ouch, recursive call into
-				   // state machine 
-		}
-	    }
+	switch (_state) 
+	{
+		case STATEIDLE:
+			if (previous_state != STATEIDLE) 
+			{
+				// default actions
+				clear_all_timers();
+				// Release resources - which includes a disconnect
+				release_resources();
+				if (restart) 
+				{
+					if (automatic) 
+					{
+						automatic_restart();
+						start_idle_hold_timer();
+					} else 
+					{
+						/* XXX
+						 ** Connection has been blown away try to
+						 ** reconnect.
+						 */
+						event_start(); // XXX ouch, recursive call into
+						// state machine 
+					}
+				}
+			}
+			break;
+		case STATESTOPPED:
+			if (previous_state != STATESTOPPED) 
+			{
+				clear_all_timers();
+				start_stopped_timer();
+			}
+			if (previous_state == STATEESTABLISHED) 
+			{
+				// We'll have an active peerhandler, so we need to inactivate it.
+				XLOG_ASSERT(0 != _handler);
+				_handler->stop();
+			}
+			break;
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATEOPENSENT:
+		case STATEOPENCONFIRM:
+			break;
+		case STATEESTABLISHED:
+			if (STATEESTABLISHED != previous_state)
+				established();
+			break;
 	}
-	break;
-    case STATESTOPPED:
-	if (previous_state != STATESTOPPED) {
-	    clear_all_timers();
-	    start_stopped_timer();
-	}
-	if (previous_state == STATEESTABLISHED) {
-	    // We'll have an active peerhandler, so we need to inactivate it.
-	    XLOG_ASSERT(0 != _handler);
-	    _handler->stop();
-	}
-	break;
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATEOPENSENT:
-    case STATEOPENCONFIRM:
-	break;
-    case STATEESTABLISHED:
-	if (STATEESTABLISHED != previous_state)
-	    established();
-	break;
-    }
 
 }
 
 
-PeerOutputState
+	PeerOutputState
 BGPPeer::send_update_message(const UpdatePacket& p)
 {
-    PeerOutputState queue_state;
-    debug_msg("send_update_message called\n");
-    assert(STATEESTABLISHED == _state);
-    queue_state = send_message(p);
-    debug_msg("send_update_message: queue is state %d\n", queue_state);
-    return queue_state;
+	PeerOutputState queue_state;
+	debug_msg("send_update_message called\n");
+	assert(STATEESTABLISHED == _state);
+	queue_state = send_message(p);
+	debug_msg("send_update_message: queue is state %d\n", queue_state);
+	return queue_state;
 }
 
-bool
+	bool
 BGPPeer::send_netreachability(const BGPUpdateAttrib &n)
 {
-    debug_msg("send_netreachability called\n");
-    UpdatePacket bup;
-    bup.add_nlri(n);
-    return send_message(bup);
+	debug_msg("send_netreachability called\n");
+	UpdatePacket bup;
+	bup.add_nlri(n);
+	return send_message(bup);
 }
 
 uint32_t
 BGPPeer::get_established_time() const
 {
-    TimeVal now;
-    EventLoop::instance().current_time(now);
-    return now.sec() - _established_time.sec();
+	TimeVal now;
+	EventLoop::instance().current_time(now);
+	return now.sec() - _established_time.sec();
 }
 
 void 
 BGPPeer::get_msg_stats(uint32_t& in_updates, 
-		       uint32_t& out_updates, 
-		       uint32_t& in_msgs, 
-		       uint32_t& out_msgs, 
-		       uint16_t& last_error, 
-		       uint32_t& in_update_elapsed) const 
+		uint32_t& out_updates, 
+		uint32_t& in_msgs, 
+		uint32_t& out_msgs, 
+		uint16_t& last_error, 
+		uint32_t& in_update_elapsed) const 
 {
-    in_updates = _in_updates;
-    out_updates = _out_updates;
-    in_msgs = _in_total_messages;
-    out_msgs = _out_total_messages;
-    memcpy(&last_error, _last_error, 2);
-    TimeVal now;
-    EventLoop::instance().current_time(now);
-    in_update_elapsed = now.sec() - _in_update_time.sec();
+	in_updates = _in_updates;
+	out_updates = _out_updates;
+	in_msgs = _in_total_messages;
+	out_msgs = _out_total_messages;
+	memcpy(&last_error, _last_error, 2);
+	TimeVal now;
+	EventLoop::instance().current_time(now);
+	in_update_elapsed = now.sec() - _in_update_time.sec();
 }
 
-bool 
+	bool 
 BGPPeer::remote_ip_ge_than(const BGPPeer& peer)
 {
-    IPvX this_remote_ip(peerdata()->iptuple().get_peer_addr().c_str());
-    IPvX other_remote_ip(peer.peerdata()->iptuple().get_peer_addr().c_str());
+	IPvX this_remote_ip(peerdata()->iptuple().get_peer_addr().c_str());
+	IPvX other_remote_ip(peer.peerdata()->iptuple().get_peer_addr().c_str());
 
-    return (this_remote_ip >= other_remote_ip);     
+	return (this_remote_ip >= other_remote_ip);     
 }
 
-void
+	void
 BGPPeer::automatic_restart()
 {
-    if (!_damping_peer_oscillations)
-	return;
+	if (!_damping_peer_oscillations)
+		return;
 
-    _damp_peer_oscillations.restart();
+	_damp_peer_oscillations.restart();
 }
 
 // Second FSM.
 
-AcceptSession::AcceptSession(BGPPeer& peer, XorpFd sock)
-    : _peer(peer), _sock(sock), _accept_messages(true)
+	AcceptSession::AcceptSession(BGPPeer& peer, XorpFd sock)
+: _peer(peer), _sock(sock), _accept_messages(true)
 {
 
-    const BGPPeerData *pd = peer.peerdata();
+	const BGPPeerData *pd = peer.peerdata();
 
-    bool md5sig = !pd->get_md5_password().empty();
+	bool md5sig = !pd->get_md5_password().empty();
 
-    _socket_client = new SocketClient(pd->iptuple(), md5sig);
+	_socket_client = new SocketClient(pd->iptuple(), md5sig);
 
 
-    _socket_client->set_callback(callback(this,
-					  &AcceptSession::get_message_accept));
+	_socket_client->set_callback(callback(this,
+				&AcceptSession::get_message_accept));
 }
 
 AcceptSession::~AcceptSession()
 {
-    debug_msg("Socket %p\n", _socket_client);
+	debug_msg("Socket %p\n", _socket_client);
 
-    XLOG_ASSERT(BAD_XORPFD == _sock);
-    XLOG_ASSERT(!is_connected());
-    XLOG_ASSERT(!_open_wait.scheduled());
-    delete _socket_client;
-    _socket_client = 0;
+	XLOG_ASSERT(BAD_XORPFD == _sock);
+	XLOG_ASSERT(!is_connected());
+	XLOG_ASSERT(!_open_wait.scheduled());
+	delete _socket_client;
+	_socket_client = 0;
 }
 
-void
+	void
 AcceptSession::start()
 {
-    debug_msg("%s %s\n", str().c_str(),  _peer.pretty_print_state(state()));
+	debug_msg("%s %s\n", str().c_str(),  _peer.pretty_print_state(state()));
 
-    uint32_t hold_duration;
+	uint32_t hold_duration;
 
-    // Note this is the state of the main FSM.
-    switch(state()) {
-    case STATEIDLE:
-	// Drop this connection, we are in idle.
-	debug_msg("rejected\n");
-	XLOG_INFO("%s rejecting connection: current state %s %s",
-		  str().c_str(),
-		  _peer.pretty_print_state(state()),
-		  running_idle_hold_timer() ? "holdtimer running" : "");
-	comm_sock_close(_sock);
-	_sock = BAD_XORPFD;
-	remove();
-	break;
-    case STATEOPENSENT:
-	// Note we are not going to send anything.
-	// Wait for an open message from the peer so that the ID's can
-	// be compared to determine which connection to accept.
-	// Start a timer in case the open never arrives.
-	hold_duration = _peer.peerdata()->get_hold_duration();
-	if (0 == hold_duration) {
-	    hold_duration = 4 * 60;
-	    XLOG_WARNING("Connection collision hold duration is 0 "
-			 "setting to %d seconds", hold_duration);
+	// Note this is the state of the main FSM.
+	switch(state()) 
+	{
+		case STATEIDLE:
+			// Drop this connection, we are in idle.
+			debug_msg("rejected\n");
+			XLOG_INFO("%s rejecting connection: current state %s %s",
+					str().c_str(),
+					_peer.pretty_print_state(state()),
+					running_idle_hold_timer() ? "holdtimer running" : "");
+			comm_sock_close(_sock);
+			_sock = BAD_XORPFD;
+			remove();
+			break;
+		case STATEOPENSENT:
+			// Note we are not going to send anything.
+			// Wait for an open message from the peer so that the ID's can
+			// be compared to determine which connection to accept.
+			// Start a timer in case the open never arrives.
+			hold_duration = _peer.peerdata()->get_hold_duration();
+			if (0 == hold_duration) 
+			{
+				hold_duration = 4 * 60;
+				XLOG_WARNING("Connection collision hold duration is 0 "
+						"setting to %d seconds", hold_duration);
+			}
+			_open_wait = EventLoop::instance().
+				new_oneoff_after(TimeVal(hold_duration, 0),
+						callback(this,
+							&AcceptSession::no_open_received));
+			_socket_client->connected(_sock);
+			_sock = BAD_XORPFD;
+			break;
+		case STATEOPENCONFIRM:
+			// Check the IDs to see what should be done.
+			collision();
+			break;
+		case STATEESTABLISHED:
+			// Send a cease and shutdown this attempt.
+			cease();
+			break;
+		case STATECONNECT:
+		case STATEACTIVE:
+		case STATESTOPPED:
+			// Accept this connection attempt.
+			_socket_client->set_callback(callback(_peer, &BGPPeer::get_message));
+			_peer.event_open(_sock);
+			_sock = BAD_XORPFD;
+			remove();
+			break;
 	}
-	_open_wait = EventLoop::instance().
-	    new_oneoff_after(TimeVal(hold_duration, 0),
-			     callback(this,
-				      &AcceptSession::no_open_received));
-	_socket_client->connected(_sock);
-	_sock = BAD_XORPFD;
-	break;
-    case STATEOPENCONFIRM:
-	// Check the IDs to see what should be done.
-	collision();
-	break;
-    case STATEESTABLISHED:
-	// Send a cease and shutdown this attempt.
-	cease();
-	break;
-    case STATECONNECT:
-    case STATEACTIVE:
-    case STATESTOPPED:
-	// Accept this connection attempt.
-	_socket_client->set_callback(callback(_peer, &BGPPeer::get_message));
-	_peer.event_open(_sock);
-	_sock = BAD_XORPFD;
-	remove();
-	break;
-    }
 }
 
-void
+	void
 AcceptSession::no_open_received()
 {
-    debug_msg("\n");
-    cease();
+	debug_msg("\n");
+	cease();
 }
 
-void
+	void
 AcceptSession::remove()
 {
-    _peer.remove_accept_attempt(this);
+	_peer.remove_accept_attempt(this);
 }
 
-void
+	void
 AcceptSession::send_notification_accept(const NotificationPacket& np)
 {
-    // Don't process any more incoming messages
-    ignore_message();
+	// Don't process any more incoming messages
+	ignore_message();
 
-    if (BAD_XORPFD != _sock) {
-	_socket_client->connected(_sock);
-	_sock = BAD_XORPFD;
-    }
-    _socket_client->stop_reader();
+	if (BAD_XORPFD != _sock) 
+	{
+		_socket_client->connected(_sock);
+		_sock = BAD_XORPFD;
+	}
+	_socket_client->stop_reader();
 
-    // This buffer is dynamically allocated and needs to be freed.
-    size_t ccnt = BGPPacket::MAXPACKETSIZE;
-    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+	// This buffer is dynamically allocated and needs to be freed.
+	size_t ccnt = BGPPacket::MAXPACKETSIZE;
+	uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
 
-    XLOG_ASSERT(np.encode(buf, ccnt, _peer.peerdata()));
-    debug_msg("Buffer for sent packet is %p\n", buf);
+	XLOG_ASSERT(np.encode(buf, ccnt, _peer.peerdata()));
+	debug_msg("Buffer for sent packet is %p\n", buf);
 
-    XLOG_INFO("Sending: %s", cstring(np));
+	XLOG_INFO("Sending: %s", cstring(np));
 
-    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
-		       "Peer %s: Send: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(np)));
-    
-    // Free the buffer in the completion routine.
-    bool ret =_socket_client->send_message(buf, ccnt,
-	       callback(this, &AcceptSession::send_notification_cb));
+	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+				"Peer %s: Send: %s",
+				peerdata()->iptuple().str().c_str(),
+				cstring(np)));
 
-    if (!ret) {
-	delete[] buf;
-	remove();
-	return;
-    }
+	// Free the buffer in the completion routine.
+	bool ret =_socket_client->send_message(buf, ccnt,
+			callback(this, &AcceptSession::send_notification_cb));
+
+	if (!ret) 
+	{
+		delete[] buf;
+		remove();
+		return;
+	}
 }
 
-void
+	void
 AcceptSession::send_notification_cb(SocketClient::Event ev, const uint8_t* buf)
 {
-    switch (ev) {
-    case SocketClient::DATA:
-	debug_msg("Notification sent\n");
-	delete[] buf;
-	break;
-    case SocketClient::FLUSHING:
-	delete[] buf;
-	break;
-    case SocketClient::ERROR:
-	debug_msg("Notification not sent\n");
-	/* Don't free the message here we'll get it in the flush */
-	break;
-    }
+	switch (ev) 
+	{
+		case SocketClient::DATA:
+			debug_msg("Notification sent\n");
+			delete[] buf;
+			break;
+		case SocketClient::FLUSHING:
+			delete[] buf;
+			break;
+		case SocketClient::ERROR:
+			debug_msg("Notification not sent\n");
+			/* Don't free the message here we'll get it in the flush */
+			break;
+	}
 
-    _socket_client->disconnect();
-    
-    remove();
+	_socket_client->disconnect();
+
+	remove();
 }
 
-void
+	void
 AcceptSession::cease()
 {
-    NotificationPacket np(CEASE);
-    send_notification_accept(np);
+	NotificationPacket np(CEASE);
+	send_notification_accept(np);
 }
 
-void
+	void
 AcceptSession::collision()
 {
-    IPv4 id = _peer.id();
-    IPv4 peerid = _peer.peerdata()->id();
+	IPv4 id = _peer.id();
+	IPv4 peerid = _peer.peerdata()->id();
 
-    debug_msg("%s router id %s peerid %s\n", str().c_str(), cstring(id),
-	      cstring(peerid));
+	debug_msg("%s router id %s peerid %s\n", str().c_str(), cstring(id),
+			cstring(peerid));
 
-    // This is a comparison of the IDs in the main state machine not
-    // this one. The BGP that has the largest ID gets to make the
-    // connection.
+	// This is a comparison of the IDs in the main state machine not
+	// this one. The BGP that has the largest ID gets to make the
+	// connection.
 
-    // Dump the other connection and take this one.
-    if (peerid > id) {
-	debug_msg("%s Accepting connect attempt\n", str().c_str());
-	swap_sockets();
-    } else {
-	debug_msg("%s Dropping connect attempt\n", str().c_str());
-    }
+	// Dump the other connection and take this one.
+	if (peerid > id) 
+	{
+		debug_msg("%s Accepting connect attempt\n", str().c_str());
+		swap_sockets();
+	} else 
+	{
+		debug_msg("%s Dropping connect attempt\n", str().c_str());
+	}
 
-    cease();
+	cease();
 }
 
-void
+	void
 AcceptSession::event_openmess_accept(const OpenPacket& p)
 {
-    debug_msg("%s %s\n", str().c_str(), cstring(p));
+	debug_msg("%s %s\n", str().c_str(), cstring(p));
 
-    // While waiting for the open message the state of the main FSM
-    // may have changed.
+	// While waiting for the open message the state of the main FSM
+	// may have changed.
 
-    bool compare = false;
+	bool compare = false;
 
-    switch(state()) {
-    case STATEIDLE:
-	// The peer was taken to idle while we waited for the open message.
-	debug_msg("rejected\n");
-	XLOG_INFO("%s rejecting connection: current state %s",
-		  str().c_str(),
-		  _peer.pretty_print_state(state()));
-	_socket_client->disconnect();
-	remove();
-	break;
-    case STATEACTIVE:
-	// The main FSM is now waiting for a connection so provide
-	// this one, it doesn't have a connection so there is no need
-	// to send a cease().
-	swap_sockets(p);
-	remove();
-	break;
-    case STATECONNECT:
-    case STATEOPENSENT:
-	// We have an open packet on this session that should sort
-	// things out.
-	compare = true;
-	break;
-    case STATEOPENCONFIRM:
-	// If the IDs used in both sessions are the same we don't need
-	// to check the other open packet.
-	compare = true;
-	break;
-    case STATEESTABLISHED:
-	// Send a cease and shutdown this attempt.
+	switch(state()) 
+	{
+		case STATEIDLE:
+			// The peer was taken to idle while we waited for the open message.
+			debug_msg("rejected\n");
+			XLOG_INFO("%s rejecting connection: current state %s",
+					str().c_str(),
+					_peer.pretty_print_state(state()));
+			_socket_client->disconnect();
+			remove();
+			break;
+		case STATEACTIVE:
+			// The main FSM is now waiting for a connection so provide
+			// this one, it doesn't have a connection so there is no need
+			// to send a cease().
+			swap_sockets(p);
+			remove();
+			break;
+		case STATECONNECT:
+		case STATEOPENSENT:
+			// We have an open packet on this session that should sort
+			// things out.
+			compare = true;
+			break;
+		case STATEOPENCONFIRM:
+			// If the IDs used in both sessions are the same we don't need
+			// to check the other open packet.
+			compare = true;
+			break;
+		case STATEESTABLISHED:
+			// Send a cease and shutdown this attempt.
+			cease();
+			break;
+		case STATESTOPPED:
+			// The socket in the main FSM is now shut. So swap in this socket.
+			swap_sockets(p);
+			XLOG_ASSERT(BAD_XORPFD == _socket_client->get_sock());
+			remove();// remove() not cease()
+			break;
+	}
+
+	if (!compare)
+		return;
+
+	IPv4 id = _peer.id();
+	IPv4 peerid = p.id();
+	if (peerid > id) 
+	{
+		debug_msg("%s Accepting connect attempt\n", str().c_str());
+		swap_sockets(p);
+	} else 
+	{
+		debug_msg("%s Dropping connect attempt\n", str().c_str());
+	}
+
+	XLOG_ASSERT(BAD_XORPFD == _sock);
+
 	cease();
-	break;
-    case STATESTOPPED:
-	// The socket in the main FSM is now shut. So swap in this socket.
-	swap_sockets(p);
-	XLOG_ASSERT(BAD_XORPFD == _socket_client->get_sock());
-	remove();// remove() not cease()
-	break;
-    }
-
-    if (!compare)
-	return;
-
-    IPv4 id = _peer.id();
-    IPv4 peerid = p.id();
-    if (peerid > id) {
-	debug_msg("%s Accepting connect attempt\n", str().c_str());
-	swap_sockets(p);
-    } else {
-	debug_msg("%s Dropping connect attempt\n", str().c_str());
-    }
-
-    XLOG_ASSERT(BAD_XORPFD == _sock);
-
-    cease();
 }
 
-void
+	void
 AcceptSession::swap_sockets()
 {
-    debug_msg("%s\n", str().c_str());
+	debug_msg("%s\n", str().c_str());
 
-    if (BAD_XORPFD != _sock) {
-	_socket_client->connected(_sock);
-	_sock = BAD_XORPFD;
-    }
-    _socket_client = _peer.swap_sockets(_socket_client);
-    _socket_client->
-	set_callback(callback(this, &AcceptSession::get_message_accept));
+	if (BAD_XORPFD != _sock) 
+	{
+		_socket_client->connected(_sock);
+		_sock = BAD_XORPFD;
+	}
+	_socket_client = _peer.swap_sockets(_socket_client);
+	_socket_client->
+		set_callback(callback(this, &AcceptSession::get_message_accept));
 }
 
-void
+	void
 AcceptSession::swap_sockets(const OpenPacket& p)
 {
-    swap_sockets();
+	swap_sockets();
 
-    // Either call open message in the main FSM or go through
-    // get_message. Calling get_message ensures all the counters
-    // and profiling information is correct.
-    // If profiling is enabled the open message will be seen twice.
+	// Either call open message in the main FSM or go through
+	// get_message. Calling get_message ensures all the counters
+	// and profiling information is correct.
+	// If profiling is enabled the open message will be seen twice.
 #ifdef	NO_STATS
-    _peer.event_openmess(p);
+	_peer.event_openmess(p);
 #else
-    // This buffer is dynamically allocated and needs to be freed.
-    size_t ccnt = BGPPacket::MAXPACKETSIZE;
-    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
-    XLOG_ASSERT(p.encode(buf, ccnt, NULL));
-    _peer.get_message(BGPPacket::GOOD_MESSAGE, buf, ccnt, 0);
-    delete[] buf;
+	// This buffer is dynamically allocated and needs to be freed.
+	size_t ccnt = BGPPacket::MAXPACKETSIZE;
+	uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+	XLOG_ASSERT(p.encode(buf, ccnt, NULL));
+	_peer.get_message(BGPPacket::GOOD_MESSAGE, buf, ccnt, 0);
+	delete[] buf;
 #endif
 }
 
-void
+	void
 AcceptSession::notify_peer_of_error_accept(const int error,
-					   const int subcode,
-					   const uint8_t *data,
-					   const size_t len)
+		const int subcode,
+		const uint8_t *data,
+		const size_t len)
 {
-    if (!NotificationPacket::validate_error_code(error, subcode)) {
-	XLOG_WARNING("%s Attempt to send invalid error code %d subcode %d",
-		     this->str().c_str(),
-		     error, subcode);
-    }
+	if (!NotificationPacket::validate_error_code(error, subcode)) 
+	{
+		XLOG_WARNING("%s Attempt to send invalid error code %d subcode %d",
+				this->str().c_str(),
+				error, subcode);
+	}
 
-    if (is_connected()) {
-	NotificationPacket np(error, subcode, data, len);
-	send_notification_accept(np);
-	return;
-    }
+	if (is_connected()) 
+	{
+		NotificationPacket np(error, subcode, data, len);
+		send_notification_accept(np);
+		return;
+	}
 }
 
-void
+	void
 AcceptSession::event_tranfatal_accept()
 {
 }
 
-void
+	void
 AcceptSession::event_closed_accept()
 {
-    // The socket is closed so out of here.
-    _socket_client->disconnect();
-    remove();
+	// The socket is closed so out of here.
+	_socket_client->disconnect();
+	remove();
 }
 
-void
+	void
 AcceptSession::event_keepmess_accept()
 {
-    // A keepalive is unexpected send a cease and out of here.
-    cease();
+	// A keepalive is unexpected send a cease and out of here.
+	cease();
 }
 
-void
+	void
 AcceptSession::event_recvupdate_accept(const UpdatePacket& /*p*/)
 {
-    // An update is unexpected send a cease and out of here.
-    cease();
+	// An update is unexpected send a cease and out of here.
+	cease();
 }
 
-void
+	void
 AcceptSession::event_recvnotify_accept(const NotificationPacket& /*p*/)
 {
-    // Can't send a notify in response to a notify just shut the
-    // connection and out of here.
-    _socket_client->disconnect();
-    remove();
+	// Can't send a notify in response to a notify just shut the
+	// connection and out of here.
+	_socket_client->disconnect();
+	remove();
 }
 
-bool
+	bool
 AcceptSession::get_message_accept(BGPPacket::Status status,
-				  const uint8_t *buf,
-				  size_t length,
-				  SocketClient *socket_client)
+		const uint8_t *buf,
+		size_t length,
+		SocketClient *socket_client)
 {
-    XLOG_ASSERT(socket_client == _socket_client);
+	XLOG_ASSERT(socket_client == _socket_client);
 
-    // An open is expected but any packet will break us out of this state.
-    _open_wait.clear();
+	// An open is expected but any packet will break us out of this state.
+	_open_wait.clear();
 
-    if (!accept_message()) {
-	debug_msg("Disregarding messages %#x %u", status,
-		  XORP_UINT_CAST(length));
+	if (!accept_message()) 
+	{
+		debug_msg("Disregarding messages %#x %u", status,
+				XORP_UINT_CAST(length));
+		return true;
+	}
+
+	TIMESPENT();
+
+	switch (status) 
+	{
+		case BGPPacket::GOOD_MESSAGE:
+			break;
+
+		case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
+			notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN,
+					buf + BGPPacket::MARKER_SIZE, 2);
+			// 	event_tranfatal_accept();
+			TIMESPENT_CHECK();
+			debug_msg("Returning false\n");
+			return false;
+
+		case BGPPacket::CONNECTION_CLOSED:
+			event_closed_accept();
+			TIMESPENT_CHECK();
+			debug_msg("Returning false\n");
+			return false;
+	}
+
+	/*
+	 ** We should only have a good packet at this point.
+	 ** The buffer pointer must be non 0.
+	 */
+	XLOG_ASSERT(0 != buf);
+
+	const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+	uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+	try 
+	{
+		/*
+		 ** Check the Marker, total waste of time as it never contains
+		 ** anything of interest.
+		 */
+		if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+					marker, BGPPacket::MARKER_SIZE)) 
+		{
+			xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+		}
+
+		switch (type) 
+		{
+			case MESSAGETYPEOPEN: 
+				{
+					debug_msg("OPEN Packet RECEIVED\n");
+					OpenPacket pac(buf, length);
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+					// want unified decode call. now need to get peerdata out.
+					// 	    _peerdata->dump_peer_data();
+					event_openmess_accept(pac);
+					TIMESPENT_CHECK();
+					break;
+				}
+			case MESSAGETYPEKEEPALIVE: 
+				{
+					debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+							XORP_UINT_CAST(length));
+					// Check that the length is correct or throw an exception
+					KeepAlivePacket pac(buf, length);
+
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// debug_msg(pac.str().c_str());
+					event_keepmess_accept();
+					TIMESPENT_CHECK();
+					break;
+				}
+			case MESSAGETYPEUPDATE: 
+				{
+					debug_msg("UPDATE Packet RECEIVED\n");
+					// 	    _in_updates++;
+					UpdatePacket pac(buf, length, _peer.peerdata(), 
+							_peer.main(), /*do checks*/true);
+
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+					event_recvupdate_accept(pac);
+					TIMESPENT_CHECK();
+					if (TIMESPENT_OVERLIMIT()) 
+					{
+						XLOG_WARNING("Processing packet took longer than %u second %s",
+								XORP_UINT_CAST(TIMESPENT_LIMIT),
+								pac.str().c_str());
+					}
+					break;
+				}
+			case MESSAGETYPENOTIFICATION: 
+				{
+					debug_msg("NOTIFICATION Packet RECEIVED\n");
+					NotificationPacket pac(buf, length);
+
+					PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+								"Peer %s: Receive: %s",
+								peerdata()->iptuple().str().c_str(),
+								cstring(pac)));
+
+					// All decode errors should throw a CorruptMessage.
+					debug_msg("%s", pac.str().c_str());
+					event_recvnotify_accept(pac);
+					TIMESPENT_CHECK();
+					break;
+				}
+			default:
+				/*
+				 ** Send a notification to the peer. This is a bad message type.
+				 */
+				XLOG_ERROR("%s Unknown packet type %d",
+						this->str().c_str(), type);
+				notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE,
+						buf + BGPPacket::TYPE_OFFSET, 1);
+				// 	    event_tranfatal_accept();
+				TIMESPENT_CHECK();
+				debug_msg("Returning false\n");
+				return false;
+		}
+	} catch(CorruptMessage& c) 
+	{
+		/*
+		 ** This peer has sent us a bad message. Send a notification
+		 ** and drop the the peering.
+		 */
+		XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
+				c.why().c_str());
+		notify_peer_of_error_accept(c.error(), c.subcode(), c.data(), c.len());
+		// 	event_tranfatal_accept();
+		TIMESPENT_CHECK();
+		debug_msg("Returning false\n");
+		return false;
+	} catch (UnusableMessage& um) 
+	{
+		// the packet wasn't usable for some reason, but also
+		// wasn't so corrupt we need to send a notification -
+		// this is a "silent" error.
+		XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
+				um.why().c_str());
+	}
+
+	TIMESPENT_CHECK();
+
+	/*
+	 ** If we are still connected and supposed to be reading.
+	 */
+	if (!socket_client->is_connected() || !socket_client->still_reading()) 
+	{
+		TIMESPENT_CHECK();
+		debug_msg("Returning false %s %s socket %p\n",
+				is_connected() ? "connected" : "not connected",
+				still_reading() ? "reading" : "not reading",
+				_socket_client);
+		return false;
+	}
+
 	return true;
-    }
-
-    TIMESPENT();
-
-    switch (status) {
-    case BGPPacket::GOOD_MESSAGE:
-	break;
-
-    case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
-	notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN,
-				    buf + BGPPacket::MARKER_SIZE, 2);
-// 	event_tranfatal_accept();
-	TIMESPENT_CHECK();
-	debug_msg("Returning false\n");
-	return false;
-
-    case BGPPacket::CONNECTION_CLOSED:
-  	event_closed_accept();
-	TIMESPENT_CHECK();
-	debug_msg("Returning false\n");
-	return false;
-    }
-
-    /*
-    ** We should only have a good packet at this point.
-    ** The buffer pointer must be non 0.
-    */
-    XLOG_ASSERT(0 != buf);
-
-    const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
-    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
-    try {
-	/*
-	** Check the Marker, total waste of time as it never contains
-	** anything of interest.
-	*/
-	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			marker, BGPPacket::MARKER_SIZE)) {
-	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
-	}
-	
-	switch (type) {
-	case MESSAGETYPEOPEN: {
-	    debug_msg("OPEN Packet RECEIVED\n");
-	    OpenPacket pac(buf, length);
- 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
-
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
-	    // want unified decode call. now need to get peerdata out.
-// 	    _peerdata->dump_peer_data();
-	    event_openmess_accept(pac);
-	    TIMESPENT_CHECK();
-	    break;
-	}
-	case MESSAGETYPEKEEPALIVE: {
-	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
-		      XORP_UINT_CAST(length));
-	    // Check that the length is correct or throw an exception
-	    KeepAlivePacket pac(buf, length);
-
- 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
-
-	    // debug_msg(pac.str().c_str());
-	    event_keepmess_accept();
-	    TIMESPENT_CHECK();
-	    break;
-	}
-	case MESSAGETYPEUPDATE: {
-	    debug_msg("UPDATE Packet RECEIVED\n");
-// 	    _in_updates++;
-	    UpdatePacket pac(buf, length, _peer.peerdata(), 
-			     _peer.main(), /*do checks*/true);
-
- 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
-
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
-	    event_recvupdate_accept(pac);
-	    TIMESPENT_CHECK();
-	    if (TIMESPENT_OVERLIMIT()) {
-		XLOG_WARNING("Processing packet took longer than %u second %s",
-			     XORP_UINT_CAST(TIMESPENT_LIMIT),
-			     pac.str().c_str());
-	    }
-	    break;
-	}
-	case MESSAGETYPENOTIFICATION: {
-	    debug_msg("NOTIFICATION Packet RECEIVED\n");
-	    NotificationPacket pac(buf, length);
-	    
-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			       "Peer %s: Receive: %s",
-			       peerdata()->iptuple().str().c_str(),
-			       cstring(pac)));
-
-	    // All decode errors should throw a CorruptMessage.
-	    debug_msg("%s", pac.str().c_str());
-	    event_recvnotify_accept(pac);
-	    TIMESPENT_CHECK();
-	    break;
-	}
-	default:
-	    /*
-	    ** Send a notification to the peer. This is a bad message type.
-	    */
-	    XLOG_ERROR("%s Unknown packet type %d",
-		       this->str().c_str(), type);
-	    notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE,
-					buf + BGPPacket::TYPE_OFFSET, 1);
-// 	    event_tranfatal_accept();
-	    TIMESPENT_CHECK();
-	    debug_msg("Returning false\n");
-	    return false;
-	}
-    } catch(CorruptMessage& c) {
-	/*
-	** This peer has sent us a bad message. Send a notification
-	** and drop the the peering.
-	*/
-	XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
-		     c.why().c_str());
-	notify_peer_of_error_accept(c.error(), c.subcode(), c.data(), c.len());
-// 	event_tranfatal_accept();
-	TIMESPENT_CHECK();
-	debug_msg("Returning false\n");
-	return false;
-    } catch (UnusableMessage& um) {
-	// the packet wasn't usable for some reason, but also
-	// wasn't so corrupt we need to send a notification -
-	// this is a "silent" error.
-	XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
-		     um.why().c_str());
-    }
-
-    TIMESPENT_CHECK();
-
-    /*
-    ** If we are still connected and supposed to be reading.
-    */
-    if (!socket_client->is_connected() || !socket_client->still_reading()) {
-	TIMESPENT_CHECK();
-	debug_msg("Returning false %s %s socket %p\n",
-		  is_connected() ? "connected" : "not connected",
-		  still_reading() ? "reading" : "not reading",
-		  _socket_client);
-	return false;
-    }
-
-    return true;
 }
 
 DampPeerOscillations::DampPeerOscillations( uint32_t restart_threshold,
-					   uint32_t time_period,
-					   uint32_t idle_holdtime) 
-    : _restart_threshold(restart_threshold),
-      _time_period(time_period),
-      _idle_holdtime(idle_holdtime),
-      _restart_counter(0)
+		uint32_t time_period,
+		uint32_t idle_holdtime) 
+: _restart_threshold(restart_threshold),
+	_time_period(time_period),
+	_idle_holdtime(idle_holdtime),
+	_restart_counter(0)
 {
 }
 
-void
+	void
 DampPeerOscillations::restart()
 {
-    if (0 == _restart_counter++) {
-	_zero_restart = EventLoop::instance().new_oneoff_after(TimeVal(_time_period, 0),
-			     callback(this,
-				      &DampPeerOscillations::
-				      zero_restart_count));
-	
-    }
+	if (0 == _restart_counter++) 
+	{
+		_zero_restart = EventLoop::instance().new_oneoff_after(TimeVal(_time_period, 0),
+				callback(this,
+					&DampPeerOscillations::
+					zero_restart_count));
+
+	}
 }
 
-void
+	void
 DampPeerOscillations::reset()
 {
-    _zero_restart.unschedule();
-    zero_restart_count();
+	_zero_restart.unschedule();
+	zero_restart_count();
 }
 
-void
+	void
 DampPeerOscillations::zero_restart_count()
 {
-    _restart_counter = 0;
+	_restart_counter = 0;
 }
 
 uint32_t
 DampPeerOscillations::idle_holdtime() const
 {
-    return _restart_counter < _restart_threshold ? 0 : _idle_holdtime;
+	return _restart_counter < _restart_threshold ? 0 : _idle_holdtime;
 }

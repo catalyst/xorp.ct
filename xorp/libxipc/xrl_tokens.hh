@@ -24,13 +24,14 @@
 #ifndef __LIBXIPC_XRL_TOKENS_HH__
 #define __LIBXIPC_XRL_TOKENS_HH__
 
-struct XrlToken {
+struct XrlToken 
+{
     // Protocol - Target separator
     static const char* PROTO_TGT_SEP;
-    
+
     // Target - Command separator
     static const char* TGT_CMD_SEP;
-    
+
     // Command - Arguments separator
     static const char* CMD_ARGS_SEP;
 

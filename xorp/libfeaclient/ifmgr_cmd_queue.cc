@@ -39,12 +39,12 @@ IfMgrCommandSinkBase::~IfMgrCommandSinkBase()
 // IfMgrCommandTee
 
 IfMgrCommandTee::IfMgrCommandTee(IfMgrCommandSinkBase& o1,
-				 IfMgrCommandSinkBase& o2)
-    : _o1(o1), _o2(o2)
+	IfMgrCommandSinkBase& o2)
+: _o1(o1), _o2(o2)
 {
 }
 
-void
+    void
 IfMgrCommandTee::push(const Cmd& cmd)
 {
     _o1.push(cmd);
@@ -54,25 +54,27 @@ IfMgrCommandTee::push(const Cmd& cmd)
 // ----------------------------------------------------------------------------
 // IfMgrCommandDispatcher
 
-IfMgrCommandDispatcher::IfMgrCommandDispatcher(IfMgrIfTree& tree)
-    : _iftree(tree)
+    IfMgrCommandDispatcher::IfMgrCommandDispatcher(IfMgrIfTree& tree)
+: _iftree(tree)
 {
 }
 
-void
+    void
 IfMgrCommandDispatcher::push(const Cmd& cmd)
 {
-    if (_cmd.get() != NULL) {
+    if (_cmd.get() != NULL) 
+    {
 	XLOG_WARNING("Dropping buffered command.");
     }
     _cmd = cmd;
 }
 
-bool
+    bool
 IfMgrCommandDispatcher::execute()
 {
     bool success = false;
-    if (_cmd.get() != NULL) {
+    if (_cmd.get() != NULL) 
+    {
 	success = _cmd->execute(_iftree);
 	_cmd = 0;
     }
@@ -83,7 +85,7 @@ IfMgrCommandDispatcher::execute()
 // ----------------------------------------------------------------------------
 // IfMgrCommandFifoQueue
 
-void
+    void
 IfMgrCommandFifoQueue::push(const Cmd& c)
 {
     _fifo.push_back(c);
@@ -95,7 +97,7 @@ IfMgrCommandFifoQueue::empty() const
     return _fifo.empty();
 }
 
-IfMgrCommandFifoQueue::Cmd&
+    IfMgrCommandFifoQueue::Cmd&
 IfMgrCommandFifoQueue::front()
 {
     return _fifo.front();
@@ -107,7 +109,7 @@ IfMgrCommandFifoQueue::front() const
     return _fifo.front();
 }
 
-void
+    void
 IfMgrCommandFifoQueue::pop_front()
 {
     _fifo.pop_front();
@@ -121,16 +123,19 @@ IfMgrCommandIfClusteringQueue::IfMgrCommandIfClusteringQueue()
     : _current_ifname("rolf harris")
 {}
 
-void
+    void
 IfMgrCommandIfClusteringQueue::push(const Cmd& cmd)
 {
     IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(cmd.get());
     XLOG_ASSERT(ifcmd != NULL);
-    if (ifcmd->ifname() == _current_ifname) {
+    if (ifcmd->ifname() == _current_ifname) 
+    {
 	_current_cmds.push_back(cmd);
-    } else {
+    } else 
+    {
 	_future_cmds.push_back(cmd);
-	if (_current_cmds.empty()) {
+	if (_current_cmds.empty()) 
+	{
 	    change_active_interface();
 	}
     }
@@ -142,7 +147,7 @@ IfMgrCommandIfClusteringQueue::empty() const
     return _current_cmds.empty();
 }
 
-IfMgrCommandIfClusteringQueue::Cmd&
+    IfMgrCommandIfClusteringQueue::Cmd&
 IfMgrCommandIfClusteringQueue::front()
 {
     return _current_cmds.front();
@@ -154,11 +159,12 @@ IfMgrCommandIfClusteringQueue::front() const
     return _current_cmds.front();
 }
 
-void
+    void
 IfMgrCommandIfClusteringQueue::pop_front()
 {
 
-    if (_current_cmds.empty() == false) {
+    if (_current_cmds.empty() == false) 
+    {
 	Cmd& c = _current_cmds.front();
 	IfMgrIfCommandBase* ifcmd =
 	    dynamic_cast<IfMgrIfCommandBase*>(c.get());
@@ -167,7 +173,8 @@ IfMgrCommandIfClusteringQueue::pop_front()
 	_current_cmds.pop_front();
     }
 
-    if (_current_cmds.empty()) {
+    if (_current_cmds.empty()) 
+    {
 	change_active_interface();
     }
 }
@@ -176,26 +183,29 @@ IfMgrCommandIfClusteringQueue::pop_front()
 // Helper predicate class for
 // IfMgrCommandIfClusteringQueue::change_active_interface()
 //
-class InterfaceNameOfQueuedCmdMatches {
-public:
-    InterfaceNameOfQueuedCmdMatches(const string& ifname)
-	: _ifname(ifname)
-    {}
+class InterfaceNameOfQueuedCmdMatches 
+{
+    public:
+	InterfaceNameOfQueuedCmdMatches(const string& ifname)
+	    : _ifname(ifname)
+	{}
 
-    bool operator() (IfMgrCommandIfClusteringQueue::Cmd c) {
-	IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(c.get());
-	XLOG_ASSERT(ifcmd != NULL);
-	return ifcmd->ifname() == _ifname;
-    }
-protected:
-    const string& _ifname;
+	bool operator() (IfMgrCommandIfClusteringQueue::Cmd c) 
+	{
+	    IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(c.get());
+	    XLOG_ASSERT(ifcmd != NULL);
+	    return ifcmd->ifname() == _ifname;
+	}
+    protected:
+	const string& _ifname;
 };
 
-void
+    void
 IfMgrCommandIfClusteringQueue::change_active_interface()
 {
     XLOG_ASSERT(_current_cmds.empty());
-    if (_future_cmds.empty()) {
+    if (_future_cmds.empty()) 
+    {
 	return;
     }
 
@@ -208,7 +218,7 @@ IfMgrCommandIfClusteringQueue::change_active_interface()
     _current_ifname = ifcmd->ifname();
     back_insert_iterator<CmdList> bi(_current_cmds);
     remove_copy_if(_future_cmds.begin(), _future_cmds.end(), bi,
-		   InterfaceNameOfQueuedCmdMatches(_current_ifname));
+	    InterfaceNameOfQueuedCmdMatches(_current_ifname));
 }
 
 
@@ -221,7 +231,8 @@ IfMgrIfTreeToCommands::convert(IfMgrCommandSinkBase& s) const
     const IfMgrIfTree::IfMap& interfaces = _tree.interfaces();
     IfMgrIfTree::IfMap::const_iterator cii;
 
-    for (cii = interfaces.begin(); cii != interfaces.end(); ++cii) {
+    for (cii = interfaces.begin(); cii != interfaces.end(); ++cii) 
+    {
 	IfMgrIfAtomToCommands(cii->second).convert(s);
     }
     s.push(new IfMgrHintTreeComplete());
@@ -246,7 +257,8 @@ IfMgrIfAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 
     const IfMgrIfAtom::VifMap& vifs = _i.vifs();
     IfMgrIfAtom::VifMap::const_iterator cvi;
-    for (cvi = vifs.begin(); cvi != vifs.end(); ++cvi) {
+    for (cvi = vifs.begin(); cvi != vifs.end(); ++cvi) 
+    {
 	IfMgrVifAtomToCommands(_i.name(), cvi->second).convert(s);
     }
 }
@@ -269,14 +281,16 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 
     const IfMgrVifAtom::IPv4Map& v4s = _v.ipv4addrs();
     for (IfMgrVifAtom::IPv4Map::const_iterator cai = v4s.begin();
-	 cai != v4s.end(); ++cai) {
+	    cai != v4s.end(); ++cai) 
+    {
 	IfMgrIPv4AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 
 #ifdef HAVE_IPV6
     const IfMgrVifAtom::IPv6Map& v6s = _v.ipv6addrs();
     for (IfMgrVifAtom::IPv6Map::const_iterator cai = v6s.begin();
-	 cai != v6s.end(); ++cai) {
+	    cai != v6s.end(); ++cai) 
+    {
 	IfMgrIPv6AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 #endif
@@ -293,7 +307,7 @@ IfMgrIPv4AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrIPv4SetPrefix(ifn, vifn, addr, _a.prefix_len()));
     s.push(new IfMgrIPv4SetEnabled(ifn, vifn, addr, _a.enabled()));
     s.push(new IfMgrIPv4SetMulticastCapable(ifn, vifn, addr,
-					    _a.multicast_capable()));
+		_a.multicast_capable()));
     s.push(new IfMgrIPv4SetLoopback(ifn, vifn, addr, _a.loopback()));
     s.push(new IfMgrIPv4SetBroadcast(ifn, vifn, addr, _a.broadcast_addr()));
     s.push(new IfMgrIPv4SetEndpoint(ifn, vifn, addr, _a.endpoint_addr()));
@@ -311,7 +325,7 @@ IfMgrIPv6AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrIPv6SetPrefix(ifn, vifn, addr, _a.prefix_len()));
     s.push(new IfMgrIPv6SetEnabled(ifn, vifn, addr, _a.enabled()));
     s.push(new IfMgrIPv6SetMulticastCapable(ifn, vifn, addr,
-					    _a.multicast_capable()));
+		_a.multicast_capable()));
     s.push(new IfMgrIPv6SetLoopback(ifn, vifn, addr, _a.loopback()));
     s.push(new IfMgrIPv6SetEndpoint(ifn, vifn, addr, _a.endpoint_addr()));
 }

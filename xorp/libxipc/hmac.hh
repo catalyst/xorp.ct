@@ -27,36 +27,40 @@
 
 #include "hmac_md5.h"
 
-class HMAC {
-public:
-    HMAC(const string& key) : _key(key) {}
-    virtual ~HMAC() {}
-    virtual size_t signature_size() const = 0;
-    virtual const string signature(const string& message) const = 0;
-    const string& key() const { return _key; }
+class HMAC 
+{
+    public:
+	HMAC(const string& key) : _key(key) {}
+	virtual ~HMAC() {}
+	virtual size_t signature_size() const = 0;
+	virtual const string signature(const string& message) const = 0;
+	const string& key() const { return _key; }
 
-    virtual HMAC* clone() const = 0;
-protected:
+	virtual HMAC* clone() const = 0;
+    protected:
 
-    const string _key;
+	const string _key;
 };
 
-class HMACMD5 : public HMAC {
-public:
-    HMACMD5(const string& key) : HMAC(key) {}
-    ~HMACMD5() {}
-    size_t signature_size() const { return SIG_SZ; }
-    const string signature(const string& message) const;
+class HMACMD5 : public HMAC 
+{
+    public:
+	HMACMD5(const string& key) : HMAC(key) {}
+	~HMACMD5() {}
+	size_t signature_size() const { return SIG_SZ; }
+	const string signature(const string& message) const;
 
-    virtual HMAC* clone() const {
-	return new HMACMD5(key());
-    }
-protected:
-    uint32_t d8tod32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) const {
-	return (a << 24) | (b << 16) | (c << 8) | d;
-    }
-    static const char* SIG;
-    static const size_t SIG_SZ;
+	virtual HMAC* clone() const 
+	{
+	    return new HMACMD5(key());
+	}
+    protected:
+	uint32_t d8tod32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) const 
+	{
+	    return (a << 24) | (b << 16) | (c << 8) | d;
+	}
+	static const char* SIG;
+	static const size_t SIG_SZ;
 };
 
 #endif // __LIBXIPC_HMAC_HH__

@@ -69,10 +69,10 @@
 
 const string FirewallGetNetfilter::_netfilter_table_name = "filter";
 
-FirewallGetNetfilter::FirewallGetNetfilter(FeaDataPlaneManager& fea_data_plane_manager)
-    : FirewallGet(fea_data_plane_manager),
-      _s4(-1),
-      _s6(-1)
+    FirewallGetNetfilter::FirewallGetNetfilter(FeaDataPlaneManager& fea_data_plane_manager)
+: FirewallGet(fea_data_plane_manager),
+    _s4(-1),
+    _s6(-1)
 {
 }
 
@@ -80,15 +80,16 @@ FirewallGetNetfilter::~FirewallGetNetfilter()
 {
     string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
+    if (stop(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Cannot stop the NETFILTER mechanism to get "
-		   "information about firewall entries from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
+		"information about firewall entries from the underlying "
+		"system: %s",
+		error_msg.c_str());
     }
 }
 
-int
+    int
 FirewallGetNetfilter::start(string& error_msg)
 {
     if (_is_running)
@@ -98,9 +99,10 @@ FirewallGetNetfilter::start(string& error_msg)
     // Check if we have the necessary permission.
     // If not, print a warning and continue without firewall.
     //
-    if (geteuid() != 0) {
+    if (geteuid() != 0) 
+    {
 	XLOG_WARNING("Cannot start the NETFILTER firewall mechanism: "
-		     "must be root; continuing without firewall setup");
+		"must be root; continuing without firewall setup");
 	return (XORP_OK);
     }
 
@@ -108,10 +110,11 @@ FirewallGetNetfilter::start(string& error_msg)
     // Open a raw IPv4 socket that NETFILTER uses for communication
     //
     _s4 = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    if (_s4 < 0) {
+    if (_s4 < 0) 
+    {
 	error_msg = c_format("Could not open a raw IPv4 socket for NETFILTER "
-			     "firewall: %s",
-			     strerror(errno));
+		"firewall: %s",
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -120,10 +123,11 @@ FirewallGetNetfilter::start(string& error_msg)
     // Open a raw IPv6 socket that NETFILTER uses for communication
     //
     _s6 = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
-    if (_s6 < 0) {
+    if (_s6 < 0) 
+    {
 	error_msg = c_format("Could not open a raw IPv6 socket for NETFILTER "
-			     "firewall: %s",
-			     strerror(errno));
+		"firewall: %s",
+		strerror(errno));
 	comm_close(_s4);
 	_s4 = -1;
 	return (XORP_ERROR);
@@ -135,7 +139,7 @@ FirewallGetNetfilter::start(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 FirewallGetNetfilter::stop(string& error_msg)
 {
     int ret_value4 = XORP_OK;
@@ -144,23 +148,27 @@ FirewallGetNetfilter::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (_s4 >= 0) {
+    if (_s4 >= 0) 
+    {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
-	if (ret_value4 != XORP_OK) {
+	if (ret_value4 != XORP_OK) 
+	{
 	    error_msg = c_format("Could not close raw IPv4 socket for "
-				 "NETFILTER firewall: %s",
-				 strerror(errno));
+		    "NETFILTER firewall: %s",
+		    strerror(errno));
 	}
     }
 
-    if (_s6 >= 0) {
+    if (_s6 >= 0) 
+    {
 	ret_value6 = comm_close(_s6);
 	_s6 = -1;
-	if ((ret_value6 != XORP_OK) && (ret_value4 == XORP_OK)) {
+	if ((ret_value6 != XORP_OK) && (ret_value4 == XORP_OK)) 
+	{
 	    error_msg = c_format("Could not close raw IPv6 socket for "
-				 "NETFILTER firewall: %s",
-				 strerror(errno));
+		    "NETFILTER firewall: %s",
+		    strerror(errno));
 	}
     }
 
@@ -172,9 +180,9 @@ FirewallGetNetfilter::stop(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
+	string& error_msg)
 {
     struct ipt_getinfo info4;
     struct ipt_get_entries* entries4_p;
@@ -187,9 +195,10 @@ FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
     // Get information about the size of the table
     //
     socklen = sizeof(info4);
-    if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_INFO, &info4, &socklen) < 0) {
-        error_msg = c_format("Could not get the NETFILTER IPv4 firewall table: "
-			     "%s", strerror(errno));
+    if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_INFO, &info4, &socklen) < 0) 
+    {
+	error_msg = c_format("Could not get the NETFILTER IPv4 firewall table: "
+		"%s", strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -199,29 +208,31 @@ FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
     vector<uint8_t> entries4(sizeof(*entries4_p) + info4.size);
     socklen = entries4.size();
     if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_ENTRIES, &entries4, &socklen)
-	< 0) {
-        error_msg = c_format("Could not get the NETFILTER IPv4 firewall table "
-			     "entries: %s",
-			     strerror(errno));
+	    < 0) 
+    {
+	error_msg = c_format("Could not get the NETFILTER IPv4 firewall table "
+		"entries: %s",
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     //
     // Parse buffer contents for all rules
     //
-    for (size_t i = 0; i < entries4.size(); ) {
+    for (size_t i = 0; i < entries4.size(); ) 
+    {
 	struct ipt_entry* ipt;
 	struct ipt_entry_match* iem;
 	struct ipt_entry_target* iet;
 	struct ipt_standard_target* ist;
 	uint8_t* ptr;
-	
+
 	ipt = reinterpret_cast<struct ipt_entry *>(&entries4[i]);
 	i += ipt->next_offset;
 
-        //
-        // Extract various information from the rule
-        //
+	//
+	// Extract various information from the rule
+	//
 	uint32_t rule_number = FirewallEntry::RULE_NUMBER_DEFAULT;
 	string ifname, vifname;
 	IPvXNet src_network = IPvXNet(IPv4::af());
@@ -248,24 +259,26 @@ FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
 	// XXX: Only standard targets are processed
 	if (strncmp(iet->u.user.name, IPT_STANDARD_TARGET,
 		    sizeof(iet->u.user.name))
-	    != 0) {
+		!= 0) 
+	{
 	    XLOG_WARNING("Ingoring firewall entry with non-standard target %s",
-			 iet->u.user.name);
+		    iet->u.user.name);
 	    continue;
 	}
 	ist = reinterpret_cast<struct ipt_standard_target *>(ptr);
-	switch (ist->verdict) {
-	case (-NF_ACCEPT - 1):
-	    action = FirewallEntry::ACTION_PASS;
-	    break;
-	case (-NF_DROP - 1):
-	    action = FirewallEntry::ACTION_DROP;
-	    break;
-	default:
-	    XLOG_WARNING("Ingoring firewall entry with action %u: "
-			 "unknown action",
-			 ist->verdict);
-	    break;
+	switch (ist->verdict) 
+	{
+	    case (-NF_ACCEPT - 1):
+		action = FirewallEntry::ACTION_PASS;
+		break;
+	    case (-NF_DROP - 1):
+		action = FirewallEntry::ACTION_DROP;
+		break;
+	    default:
+		XLOG_WARNING("Ingoring firewall entry with action %u: "
+			"unknown action",
+			ist->verdict);
+		break;
 	}
 
 	//
@@ -289,59 +302,62 @@ FirewallGetNetfilter::get_table4(list<FirewallEntry>& firewall_entry_list,
 	//
 	// Get the source and destination port number range
 	//
-	for (size_t j = sizeof(*ipt); j < ipt->target_offset; ) {
+	for (size_t j = sizeof(*ipt); j < ipt->target_offset; ) 
+	{
 	    ptr = reinterpret_cast<uint8_t *>(ipt);
 	    ptr += j;
 	    iem = reinterpret_cast<struct ipt_entry_match *>(ptr);
 	    j += iem->u.match_size;
-	    switch (ipt->ip.proto) {
-	    case IPPROTO_TCP:
+	    switch (ipt->ip.proto) 
 	    {
-		struct ipt_tcp* ip_tcp;
-		ip_tcp = reinterpret_cast<struct ipt_tcp *>(iem->data);
-		src_port_begin = ip_tcp->spts[0];
-		src_port_end = ip_tcp->spts[1];
-		dst_port_begin = ip_tcp->dpts[0];
-		dst_port_end = ip_tcp->dpts[1];
-		break;
-	    }
-	    case IPPROTO_UDP:
-	    {
-		struct ipt_udp* ip_udp;
-		ip_udp = reinterpret_cast<struct ipt_udp *>(iem->data);
-		src_port_begin = ip_udp->spts[0];
-		src_port_end = ip_udp->spts[1];
-		dst_port_begin = ip_udp->dpts[0];
-		dst_port_end = ip_udp->dpts[1];
-		break;
-	    }
-	    default:
-		break;
+		case IPPROTO_TCP:
+		    {
+			struct ipt_tcp* ip_tcp;
+			ip_tcp = reinterpret_cast<struct ipt_tcp *>(iem->data);
+			src_port_begin = ip_tcp->spts[0];
+			src_port_end = ip_tcp->spts[1];
+			dst_port_begin = ip_tcp->dpts[0];
+			dst_port_end = ip_tcp->dpts[1];
+			break;
+		    }
+		case IPPROTO_UDP:
+		    {
+			struct ipt_udp* ip_udp;
+			ip_udp = reinterpret_cast<struct ipt_udp *>(iem->data);
+			src_port_begin = ip_udp->spts[0];
+			src_port_end = ip_udp->spts[1];
+			dst_port_begin = ip_udp->dpts[0];
+			dst_port_end = ip_udp->dpts[1];
+			break;
+		    }
+		default:
+		    break;
 	    }
 	}
 
 	//
 	// The interface and vif
 	//
-	if (ipt->ip.iniface[0] != '\0') {
+	if (ipt->ip.iniface[0] != '\0') 
+	{
 	    ifname = string(ipt->ip.iniface);
 	    vifname = ifname;		// XXX: ifname == vifname
 	}
 
 	// Add the entry to the list
 	FirewallEntry firewall_entry(rule_number, ifname, vifname, src_network,
-				     dst_network, ip_protocol, src_port_begin,
-				     src_port_end, dst_port_begin,
-				     dst_port_end, action);
+		dst_network, ip_protocol, src_port_begin,
+		src_port_end, dst_port_begin,
+		dst_port_end, action);
 	firewall_entry_list.push_back(firewall_entry);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
+	string& error_msg)
 {
     struct ip6t_getinfo info6;
     struct ip6t_get_entries* entries6_p;
@@ -354,9 +370,10 @@ FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
     // Get information about the size of the table
     //
     socklen = sizeof(info6);
-    if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_INFO, &info6, &socklen) < 0) {
-        error_msg = c_format("Could not get the NETFILTER IPv6 firewall table: "
-			     "%s", strerror(errno));
+    if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_INFO, &info6, &socklen) < 0) 
+    {
+	error_msg = c_format("Could not get the NETFILTER IPv6 firewall table: "
+		"%s", strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -366,29 +383,31 @@ FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
     vector<uint8_t> entries6(sizeof(*entries6_p) + info6.size);
     socklen = entries6.size();
     if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_ENTRIES, &entries6, &socklen)
-	< 0) {
-        error_msg = c_format("Could not get the NETFILTER IPv6 firewall table "
-			     "entries: %s",
-			     strerror(errno));
+	    < 0) 
+    {
+	error_msg = c_format("Could not get the NETFILTER IPv6 firewall table "
+		"entries: %s",
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     //
     // Parse buffer contents for all rules
     //
-    for (size_t i = 0; i < entries6.size(); ) {
+    for (size_t i = 0; i < entries6.size(); ) 
+    {
 	struct ip6t_entry* ipt;
 	struct ip6t_entry_match* iem;
 	struct ip6t_entry_target* iet;
 	struct ip6t_standard_target* ist;
 	uint8_t* ptr;
-	
+
 	ipt = reinterpret_cast<struct ip6t_entry *>(&entries6[i]);
 	i += ipt->next_offset;
 
-        //
-        // Extract various information from the rule
-        //
+	//
+	// Extract various information from the rule
+	//
 	uint32_t rule_number = FirewallEntry::RULE_NUMBER_DEFAULT;
 	string ifname, vifname;
 	IPvXNet src_network = IPvXNet(IPv6::af());
@@ -415,24 +434,26 @@ FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
 	// XXX: Only standard targets are processed
 	if (strncmp(iet->u.user.name, IP6T_STANDARD_TARGET,
 		    sizeof(iet->u.user.name))
-	    != 0) {
+		!= 0) 
+	{
 	    XLOG_WARNING("Ingoring firewall entry with non-standard target %s",
-			 iet->u.user.name);
+		    iet->u.user.name);
 	    continue;
 	}
 	ist = reinterpret_cast<struct ip6t_standard_target *>(iet->data);
-	switch (ist->verdict) {
-	case (-NF_ACCEPT - 1):
-	    action = FirewallEntry::ACTION_PASS;
-	    break;
-	case (-NF_DROP - 1):
-	    action = FirewallEntry::ACTION_DROP;
-	    break;
-	default:
-	    XLOG_WARNING("Ingoring firewall entry with action %u: "
-			 "unknown action",
-			 ist->verdict);
-	    break;
+	switch (ist->verdict) 
+	{
+	    case (-NF_ACCEPT - 1):
+		action = FirewallEntry::ACTION_PASS;
+		break;
+	    case (-NF_DROP - 1):
+		action = FirewallEntry::ACTION_DROP;
+		break;
+	    default:
+		XLOG_WARNING("Ingoring firewall entry with action %u: "
+			"unknown action",
+			ist->verdict);
+		break;
 	}
 
 	//
@@ -456,50 +477,53 @@ FirewallGetNetfilter::get_table6(list<FirewallEntry>& firewall_entry_list,
 	//
 	// Get the source and destination port number range
 	//
-	for (size_t j = sizeof(*ipt); j < ipt->target_offset; ) {
+	for (size_t j = sizeof(*ipt); j < ipt->target_offset; ) 
+	{
 	    ptr = reinterpret_cast<uint8_t *>(ipt);
 	    ptr += j;
 	    iem = reinterpret_cast<struct ip6t_entry_match *>(ptr);
 	    j += iem->u.match_size;
-	    switch (ipt->ipv6.proto) {
-	    case IPPROTO_TCP:
+	    switch (ipt->ipv6.proto) 
 	    {
-		struct ip6t_tcp* ip_tcp;
-		ip_tcp = reinterpret_cast<struct ip6t_tcp *>(iem->data);
-		src_port_begin = ip_tcp->spts[0];
-		src_port_end = ip_tcp->spts[1];
-		dst_port_begin = ip_tcp->dpts[0];
-		dst_port_end = ip_tcp->dpts[1];
-		break;
-	    }
-	    case IPPROTO_UDP:
-	    {
-		struct ip6t_udp* ip_udp;
-		ip_udp = reinterpret_cast<struct ip6t_udp *>(iem->data);
-		src_port_begin = ip_udp->spts[0];
-		src_port_end = ip_udp->spts[1];
-		dst_port_begin = ip_udp->dpts[0];
-		dst_port_end = ip_udp->dpts[1];
-		break;
-	    }
-	    default:
-		break;
+		case IPPROTO_TCP:
+		    {
+			struct ip6t_tcp* ip_tcp;
+			ip_tcp = reinterpret_cast<struct ip6t_tcp *>(iem->data);
+			src_port_begin = ip_tcp->spts[0];
+			src_port_end = ip_tcp->spts[1];
+			dst_port_begin = ip_tcp->dpts[0];
+			dst_port_end = ip_tcp->dpts[1];
+			break;
+		    }
+		case IPPROTO_UDP:
+		    {
+			struct ip6t_udp* ip_udp;
+			ip_udp = reinterpret_cast<struct ip6t_udp *>(iem->data);
+			src_port_begin = ip_udp->spts[0];
+			src_port_end = ip_udp->spts[1];
+			dst_port_begin = ip_udp->dpts[0];
+			dst_port_end = ip_udp->dpts[1];
+			break;
+		    }
+		default:
+		    break;
 	    }
 	}
 
 	//
 	// The interface and vif
 	//
-	if (ipt->ipv6.iniface[0] != '\0') {
+	if (ipt->ipv6.iniface[0] != '\0') 
+	{
 	    ifname = string(ipt->ipv6.iniface);
 	    vifname = ifname;		// XXX: ifname == vifname
 	}
 
 	// Add the entry to the list
 	FirewallEntry firewall_entry(rule_number, ifname, vifname, src_network,
-				     dst_network, ip_protocol, src_port_begin,
-				     src_port_end, dst_port_begin,
-				     dst_port_end, action);
+		dst_network, ip_protocol, src_port_begin,
+		src_port_end, dst_port_begin,
+		dst_port_end, action);
 	firewall_entry_list.push_back(firewall_entry);
     }
 

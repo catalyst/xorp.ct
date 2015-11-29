@@ -68,33 +68,38 @@
 #include "sockutil.hh"
 
 
-bool
+    bool
 get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 {
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
     sin.sin_family = AF_INET;
 
-    if (getsockname(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) {
-        XLOG_ERROR("getsockname failed: %s", strerror(errno));
+    if (getsockname(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) 
+    {
+	XLOG_ERROR("getsockname failed: %s", strerror(errno));
 	return false;
     }
 
     // Get address
-    if (sin.sin_addr.s_addr != 0) {
+    if (sin.sin_addr.s_addr != 0) 
+    {
 	addr = inet_ntoa(sin.sin_addr);
-    } else {
+    } else 
+    {
 	static in_addr haddr;
-	if (haddr.s_addr == 0) {
+	if (haddr.s_addr == 0) 
+	{
 	    //
 	    // Socket is not associated with any particular to anything...
 	    // ... this is not great.
 	    //
 	    char hname[MAXHOSTNAMELEN + 1];
 	    hname[MAXHOSTNAMELEN] = '\0';
-	    if (gethostname(hname, MAXHOSTNAMELEN) < 0) {
+	    if (gethostname(hname, MAXHOSTNAMELEN) < 0) 
+	    {
 		XLOG_ERROR("gethostname failed: %s",
-			   comm_get_last_error_str());
+			comm_get_last_error_str());
 		return false;
 	    }
 
@@ -102,7 +107,8 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 	    // Check hostname resolves otherwise anything that relies on
 	    // this info is going to have problems.
 	    //
-	    if (address_lookup(hname, haddr) == false) {
+	    if (address_lookup(hname, haddr) == false) 
+	    {
 		XLOG_ERROR("Local hostname %s does not resolve", hname);
 		return false;
 	    }
@@ -114,15 +120,16 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
     return true;
 }
 
-bool
+    bool
 get_remote_socket_details(XorpFd fd, string& addr, string& port)
 {
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
     sin.sin_family = AF_INET;
 
-    if (getpeername(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) {
-        XLOG_ERROR("getsockname failed: %s", strerror(errno));
+    if (getpeername(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) 
+    {
+	XLOG_ERROR("getsockname failed: %s", strerror(errno));
 	return false;
     }
 
@@ -136,7 +143,7 @@ get_remote_socket_details(XorpFd fd, string& addr, string& port)
 }
 
 // XXX: This will go away eventually.
-XorpFd
+    XorpFd
 create_connected_tcp4_socket(const string& addr_slash_port)
 {
     XorpFd sock;
@@ -145,25 +152,29 @@ create_connected_tcp4_socket(const string& addr_slash_port)
     uint16_t port;
     int in_progress;
 
-    if (split_address_slash_port(addr_slash_port, addr, port) == false) {
+    if (split_address_slash_port(addr_slash_port, addr, port) == false) 
+    {
 	XLOG_ERROR("bad address slash port: %s", addr_slash_port.c_str());
 	return sock;
     }
 
-    if (address_lookup(addr, ia) == false) {
+    if (address_lookup(addr, ia) == false) 
+    {
 	XLOG_ERROR("Can't resolve IP address for %s", addr.c_str());
 	return sock;
     }
 
     sock = comm_connect_tcp4(&ia, htons(port), COMM_SOCK_NONBLOCKING,
-			     &in_progress);
-    if (!sock.is_valid()) {
+	    &in_progress);
+    if (!sock.is_valid()) 
+    {
 	return sock;
     }
 
     // Set the receiving socket buffer size in the kernel
     if (comm_sock_set_rcvbuf(sock.getSocket(), SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
-	< SO_RCV_BUF_SIZE_MIN) {
+	    < SO_RCV_BUF_SIZE_MIN) 
+    {
 	comm_close(sock.getSocket());
 	sock.clear();
 	return sock;
@@ -171,7 +182,8 @@ create_connected_tcp4_socket(const string& addr_slash_port)
 
     // Set the sending socket buffer size in the kernel
     if (comm_sock_set_sndbuf(sock.getSocket(), SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
-	< SO_SND_BUF_SIZE_MIN) {
+	    < SO_SND_BUF_SIZE_MIN) 
+    {
 	comm_close(sock.getSocket());
 	sock.clear();
 	return sock;
@@ -180,16 +192,17 @@ create_connected_tcp4_socket(const string& addr_slash_port)
     return sock;
 }
 
-bool
+    bool
 split_address_slash_port(const string& address_slash_port,
-			 string& address, uint16_t& port)
+	string& address, uint16_t& port)
 {
     string::size_type slash = address_slash_port.find(":");
 
     if (slash == string::npos || 			// no slash
-	slash == address_slash_port.size() - 1 ||	// slash is last char
-	slash != address_slash_port.rfind(":")		// multiple slashes
-	) {
+	    slash == address_slash_port.size() - 1 ||	// slash is last char
+	    slash != address_slash_port.rfind(":")		// multiple slashes
+       ) 
+    {
 	return false;
     }
 
@@ -199,23 +212,26 @@ split_address_slash_port(const string& address_slash_port,
     return true;
 }
 
-string
+    string
 address_slash_port(const string& addr, uint16_t port)
 {
     return c_format("%s:%d", addr.c_str(), port);
 }
 
-bool
+    bool
 address_lookup(const string& addr, in_addr& ia)
 {
-    if (inet_pton(AF_INET, addr.c_str(), &ia) == 1) {
+    if (inet_pton(AF_INET, addr.c_str(), &ia) == 1) 
+    {
 	return true;
     }
 
     int retry = 0;
-    do {
+    do 
+    {
 	struct hostent *h = gethostbyname(addr.c_str());
-	if (h == NULL) {
+	if (h == NULL) 
+	{
 #ifdef L_ERROR
 #ifdef HAVE_HSTRERROR
 	    int err = h_errno;
@@ -225,10 +241,11 @@ address_lookup(const string& addr, in_addr& ia)
 	    const char *strerr = comm_get_error_str(err);
 #endif
 	    XLOG_ERROR("Can't resolve IP address for %s: %s %d",
-		       addr.c_str(), strerr, err);
+		    addr.c_str(), strerr, err);
 #endif
 	    return false;
-	} else {
+	} else 
+	{
 	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));
 	    return true;
 	}
@@ -243,7 +260,7 @@ address_lookup(const string& addr, in_addr& ia)
 // Return a vector containing the IPv4 addresses which are currently
 // configured and administratively up on the local host.
 //
-void
+    void
 get_active_ipv4_addrs(vector<IPv4>& addrs)
 {
     //
@@ -256,9 +273,10 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 
     int s, ifnum, lastlen;
     struct ifconf ifconf;
-    
+
     s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s < 0) {
+    if (s < 0) 
+    {
 	XLOG_FATAL("Could not initialize ioctl() socket");
     }
 
@@ -269,20 +287,24 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     ifconf.ifc_buf = NULL;
     lastlen = 0;
     // Loop until SIOCGIFCONF success.
-    for ( ; ; ) {
+    for ( ; ; ) 
+    {
 	ifconf.ifc_len = ifnum * sizeof(struct ifreq);
 	if (ifconf.ifc_buf != NULL)
 	    free(ifconf.ifc_buf);
 	ifconf.ifc_buf = (char*)(malloc(ifconf.ifc_len));
-	if (ioctl(s, SIOCGIFCONF, &ifconf) < 0) {
+	if (ioctl(s, SIOCGIFCONF, &ifconf) < 0) 
+	{
 	    // Check UNPv1, 2e, pp 435 for an explanation why we need this
-	    if ((errno != EINVAL) || (lastlen != 0)) {
+	    if ((errno != EINVAL) || (lastlen != 0)) 
+	    {
 		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
 		free(ifconf.ifc_buf);
 		comm_close(s);
 		return;
 	    }
-	} else {
+	} else 
+	{
 	    if (ifconf.ifc_len == lastlen)
 		break;		// success, len has not changed
 	    lastlen = ifconf.ifc_len;
@@ -302,7 +324,8 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     //
     string if_name;
     size_t offset;
-    for (offset = 0; offset < buffer.size(); ) {
+    for (offset = 0; offset < buffer.size(); ) 
+    {
 	size_t len = 0;
 	struct ifreq ifreq, ifrcopy;
 
@@ -311,24 +334,25 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 	// Get the length of the ifreq entry
 #ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 	len = max(sizeof(struct sockaddr),
-		  static_cast<size_t>(ifreq.ifr_addr.sa_len));
+		static_cast<size_t>(ifreq.ifr_addr.sa_len));
 #else
-	switch (ifreq.ifr_addr.sa_family) {
+	switch (ifreq.ifr_addr.sa_family) 
+	{
 #ifdef HAVE_IPV6
-	case AF_INET6:
-	    len = sizeof(struct sockaddr_in6);
-	    break;
+	    case AF_INET6:
+		len = sizeof(struct sockaddr_in6);
+		break;
 #endif // HAVE_IPV6
-	case AF_INET:
-	default:
-	    len = sizeof(struct sockaddr);
-	    break;
+	    case AF_INET:
+	    default:
+		len = sizeof(struct sockaddr);
+		break;
 	}
 #endif // HAVE_STRUCT_SOCKADDR_SA_LEN
 	len += sizeof(ifreq.ifr_name);
 	len = max(len, sizeof(struct ifreq));
 	offset += len;				// Point to the next entry
-	
+
 	//
 	// Get the interface name
 	//
@@ -336,22 +360,25 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 	strncpy(tmp_if_name, ifreq.ifr_name, sizeof(tmp_if_name) - 1);
 	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
 	char* cptr;
-	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
+	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) 
+	{
 	    // Replace colon with null. Needed because in Solaris and Linux
 	    // the interface name changes for aliases.
 	    *cptr = '\0';
 	}
 	if_name = string(ifreq.ifr_name);
-	
+
 	//
 	// Get the flags
 	//
 	unsigned int flags = 0;
 	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
-	if (ioctl(s, SIOCGIFFLAGS, &ifrcopy) < 0) {
+	if (ioctl(s, SIOCGIFFLAGS, &ifrcopy) < 0) 
+	{
 	    XLOG_ERROR("ioctl(SIOCGIFFLAGS) for interface %s failed: %s",
-		       if_name.c_str(), strerror(errno));
-	} else {
+		    if_name.c_str(), strerror(errno));
+	} else 
+	{
 	    flags = ifrcopy.ifr_flags;
 	}
 
@@ -360,44 +387,50 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 	// XXX: if the address family is zero, then we query the address.
 	//
 	if ((ifreq.ifr_addr.sa_family != AF_INET)
-	    && (ifreq.ifr_addr.sa_family != 0)) {
+		&& (ifreq.ifr_addr.sa_family != 0)) 
+	{
 	    continue;
 	}
-	
+
 	//
 	// Get the IP address
 	//
-        // The default values
+	// The default values
 	IPv4 lcl_addr = IPv4::ZERO();
-	
+
 	struct ifreq ip_ifrcopy;
 	memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
 	ip_ifrcopy.ifr_addr.sa_family = AF_INET;
-	
+
 	// Get the IP address
-	if (ifreq.ifr_addr.sa_family == AF_INET) {
+	if (ifreq.ifr_addr.sa_family == AF_INET) 
+	{
 	    lcl_addr.copy_in(ifreq.ifr_addr);
 	    memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
-	} else {
+	} else 
+	{
 	    // XXX: we need to query the local IP address
 	    XLOG_ASSERT(ifreq.ifr_addr.sa_family == 0);
-	    
+
 #ifdef SIOCGIFADDR
 	    memset(&ifrcopy, 0, sizeof(ifrcopy));
 	    strncpy(ifrcopy.ifr_name, if_name.c_str(),
 		    sizeof(ifrcopy.ifr_name) - 1);
 	    ifrcopy.ifr_addr.sa_family = AF_INET;
-	    if (ioctl(s, SIOCGIFADDR, &ifrcopy) < 0) {
+	    if (ioctl(s, SIOCGIFADDR, &ifrcopy) < 0) 
+	    {
 		// XXX: the interface probably has no address. Ignore.
 		continue;
-	    } else {
+	    } else 
+	    {
 		lcl_addr.copy_in(ifrcopy.ifr_addr);
 		memcpy(&ip_ifrcopy, &ifrcopy, sizeof(ip_ifrcopy));
 	    }
 #endif // SIOCGIFADDR
 	}
 
-	if ((lcl_addr != IPv4::ZERO()) && (flags & IFF_UP)) {
+	if ((lcl_addr != IPv4::ZERO()) && (flags & IFF_UP)) 
+	{
 	    addrs.push_back(lcl_addr);
 	}
     }
@@ -406,7 +439,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 }
 
 // Return true if a given IPv4 address is currently configured in the system.
-bool
+    bool
 is_ip_configured(const in_addr& a)
 {
     vector<IPv4> addrs;
@@ -416,7 +449,8 @@ is_ip_configured(const in_addr& a)
 	return false;
 
     vector<IPv4>::const_iterator i;
-    for (i = addrs.begin(); i != addrs.end(); i++) {
+    for (i = addrs.begin(); i != addrs.end(); i++) 
+    {
 	if (*i == IPv4(a))
 	    return true;
     }
@@ -432,7 +466,7 @@ static in_addr s_if_preferred;
 // The specified address must be configured on an interface which is
 // administratively up.
 //
-bool
+    bool
 set_preferred_ipv4_addr(in_addr new_addr)
 {
     vector<IPv4> addrs;
@@ -442,11 +476,13 @@ set_preferred_ipv4_addr(in_addr new_addr)
 	return false;
 
     vector<IPv4>::const_iterator i;
-    for (i = addrs.begin(); i != addrs.end(); i++) {
-	if (*i == IPv4(new_addr)) {
+    for (i = addrs.begin(); i != addrs.end(); i++) 
+    {
+	if (*i == IPv4(new_addr)) 
+	{
 	    XLOG_INFO(
-		"Changing to address %s for IPv4 based XRL communication.",
-		i->str().c_str());
+		    "Changing to address %s for IPv4 based XRL communication.",
+		    i->str().c_str());
 	    i->copy_out(s_if_preferred);
 	    return true;
 	}
@@ -458,7 +494,7 @@ set_preferred_ipv4_addr(in_addr new_addr)
 //
 // Return the preferred endpoint address for IPv4 based XRL communication.
 //
-in_addr
+    in_addr
 get_preferred_ipv4_addr()
 {
     if (s_if_preferred.s_addr != INADDR_ANY)
@@ -472,8 +508,8 @@ get_preferred_ipv4_addr()
     if (!addrs.empty())
 	addrs[0].copy_out(s_if_preferred);
 
-//     XLOG_INFO("Using address %s for IPv4 based XRL communication.\n",
-// 	      inet_ntoa(s_if_preferred));
+    //     XLOG_INFO("Using address %s for IPv4 based XRL communication.\n",
+    // 	      inet_ntoa(s_if_preferred));
 
     return (s_if_preferred);
 }

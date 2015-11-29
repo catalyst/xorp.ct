@@ -23,24 +23,25 @@
 #ifndef __POLICY_BACKEND_POLICY_PROFILER_HH__
 #define __POLICY_BACKEND_POLICY_PROFILER_HH__
 
-class PolicyProfiler {
-public:
-    typedef uint64_t	TU;
+class PolicyProfiler 
+{
+    public:
+	typedef uint64_t	TU;
 
-    static const unsigned int MAX_SAMPLES = 128;
+	static const unsigned int MAX_SAMPLES = 128;
 
-    PolicyProfiler();
+	PolicyProfiler();
 
-    void     clear();
-    void     start();
-    void     stop();
-    unsigned count();
-    TU	     sample(unsigned idx);
+	void     clear();
+	void     start();
+	void     stop();
+	unsigned count();
+	TU	     sample(unsigned idx);
 
-private:
-    TU		_samples[MAX_SAMPLES];
-    unsigned	_samplec;
-    bool	_stopped;
+    private:
+	TU		_samples[MAX_SAMPLES];
+	unsigned	_samplec;
+	bool	_stopped;
 };
 
 #endif // __POLICY_BACKEND_POLICY_PROFILER_HH__

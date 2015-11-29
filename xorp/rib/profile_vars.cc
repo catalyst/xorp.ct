@@ -28,19 +28,21 @@
 
 #include "profile_vars.hh"
 
-struct profile_vars {
-    string var;
-    string comment;
-} profile_vars[] = {
-    {profile_route_ribin, 	"Routes entering RIB"},
-    {profile_route_rpc_in, 	"Routes being queued for the FEA"},
-    {profile_route_rpc_out, 	"Routes being sent to the FEA"},
+struct profile_vars 
+{
+	string var;
+	string comment;
+} profile_vars[] = 
+{
+	{profile_route_ribin, 	"Routes entering RIB"},
+	{profile_route_rpc_in, 	"Routes being queued for the FEA"},
+	{profile_route_rpc_out, 	"Routes being sent to the FEA"},
 };
 
-void
+	void
 initialize_profiling_variables(Profile& p)
 {
-    for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
-	 i++)
-	p.create(profile_vars[i].var, profile_vars[i].comment);
+	for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
+			i++)
+		p.create(profile_vars[i].var, profile_vars[i].comment);
 }

@@ -38,7 +38,7 @@
 
 static const char TARGET_OLSR[] = "olsr4";   // XRL target name.
 
-int
+    int
 main(int /*argc*/, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -51,14 +51,15 @@ main(int /*argc*/, char **argv)
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
-//     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
+    //     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
     // XXX TODO: implement a command line option which periodically
     // prints OLSR protocol status in a manner near identical to olsrd.
 
-    try {
+    try 
+    {
 
 	string feaname = "fea";
 	string ribname = "rib";
@@ -74,7 +75,8 @@ main(int /*argc*/, char **argv)
 
 	while (olsr.running())
 	    EventLoop::instance().run();
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

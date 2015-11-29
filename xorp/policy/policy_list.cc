@@ -33,20 +33,21 @@
 uint32_t PolicyList::_pe = 0;
 
 PolicyList::PolicyList(const string& p, PolicyType pt,
-		       PolicyMap& pmap, SetMap& smap, VarMap& vmap,
-		       string mod)
-		       : _protocol(p), _type(pt), _pmap(pmap),
-		         _smap(smap), _varmap(vmap), _mod(mod),
-			 _mod_term(NULL), _mod_term_import(NULL),
-			 _mod_term_export(NULL)
+	PolicyMap& pmap, SetMap& smap, VarMap& vmap,
+	string mod)
+: _protocol(p), _type(pt), _pmap(pmap),
+    _smap(smap), _varmap(vmap), _mod(mod),
+    _mod_term(NULL), _mod_term_import(NULL),
+    _mod_term_export(NULL)
 {
-    if (!_mod.empty()) {
-	    _mod_term_import = create_mod(Term::SOURCE);
-	    _mod_term_export = create_mod(Term::DEST);
+    if (!_mod.empty()) 
+    {
+	_mod_term_import = create_mod(Term::SOURCE);
+	_mod_term_export = create_mod(Term::DEST);
     }
 }
 
-Term*
+    Term*
 PolicyList::create_mod(Term::BLOCKS block)
 {
     // We add the modifier term at the beginning of each policy.  If it matches,
@@ -69,7 +70,8 @@ PolicyList::create_mod(Term::BLOCKS block)
 PolicyList::~PolicyList()
 {
     for (PolicyCodeList::iterator i = _policies.begin();
-	 i != _policies.end(); ++i) {
+	    i != _policies.end(); ++i) 
+    {
 
 	PolicyCode& pc = *i;
 
@@ -79,17 +81,18 @@ PolicyList::~PolicyList()
     }
 
     for (POLICIES::iterator i = _pe_policies.begin();
-         i != _pe_policies.end(); ++i)
+	    i != _pe_policies.end(); ++i)
 	_pmap.delete_policy(*i);
 
     delete _mod_term_import;
     delete _mod_term_export;
 }
 
-void
+    void
 PolicyList::push_back(const string& policyname)
 {
-    if (!policyname.empty() && policyname.at(0) == '(') {
+    if (!policyname.empty() && policyname.at(0) == '(') 
+    {
 	add_policy_expression(policyname);
 
 	return;
@@ -99,7 +102,7 @@ PolicyList::push_back(const string& policyname)
     _pmap.add_dependency(policyname, _protocol);
 }
 
-void
+    void
 PolicyList::add_policy_expression(const string& exp)
 {
     // We create an internal policy based on the expression, and execute that
@@ -119,11 +122,14 @@ PolicyList::add_policy_expression(const string& exp)
     oss.str("");
     int state = 0;
 
-    for (string::const_iterator i = exp.begin(); i != exp.end(); ++i) {
+    for (string::const_iterator i = exp.begin(); i != exp.end(); ++i) 
+    {
 	char x = *i;
 
-	if (isalnum(x)) {
-	    if (state == 0) {
+	if (isalnum(x)) 
+	{
+	    if (state == 0) 
+	    {
 		oss << "policy ";
 		state = 1;
 	    }
@@ -159,18 +165,21 @@ PolicyList::add_policy_expression(const string& exp)
     push_back(name);
 }
 
-void
+    void
 PolicyList::compile_policy(PolicyStatement& ps,Code::TargetSet& mod,
-			   uint32_t& tagstart,
-			    map<string, set<uint32_t> >& ptags)
+	uint32_t& tagstart,
+	map<string, set<uint32_t> >& ptags)
 {
     // go throw all the policies present in this list
     for(PolicyCodeList::iterator i = _policies.begin();
-	i != _policies.end(); ++i) {
+	    i != _policies.end(); ++i) 
+    {
 
 	// if the policy is present, then compile it
-        if(ps.name() == (*i).first) {
-	    switch(_type) {
+	if(ps.name() == (*i).first) 
+	{
+	    switch(_type) 
+	    {
 		case IMPORT:
 		    compile_import(i,ps,mod);
 		    break;
@@ -182,12 +191,13 @@ PolicyList::compile_policy(PolicyStatement& ps,Code::TargetSet& mod,
     }
 }
 
-void
+    void
 PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart, map<string, set<uint32_t> >& ptags)
 {
     // go throw all policies in the list
     for (PolicyCodeList::iterator i = _policies.begin();
-	 i != _policies.end(); ++i) {
+	    i != _policies.end(); ++i) 
+    {
 
 	PolicyCode& pc = *i;
 
@@ -199,24 +209,26 @@ PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart, map<string, set<ui
 	// find the policy statement and compile it.
 	PolicyStatement& ps = _pmap.find(pc.first);
 
-	switch(_type) {
-	case IMPORT:
-	    compile_import(i, ps, mod);
-	    break;
+	switch(_type) 
+	{
+	    case IMPORT:
+		compile_import(i, ps, mod);
+		break;
 
-	case EXPORT:
-	    compile_export(i, ps, mod, tagstart, ptags);
-	    break;
+	    case EXPORT:
+		compile_export(i, ps, mod, tagstart, ptags);
+		break;
 	}
     }
 }
 
-string
+    string
 PolicyList::str()
 {
     string ret = "Policy Type: ";
 
-    switch(_type) {
+    switch(_type) 
+    {
 
 	case IMPORT:
 	    ret += "import";
@@ -231,7 +243,8 @@ PolicyList::str()
     ret += "Protocol: " + _protocol + "\n";
 
     for(PolicyCodeList::iterator i = _policies.begin();
-	i != _policies.end(); ++i) {
+	    i != _policies.end(); ++i) 
+    {
 
 	ret += "PolicyName: " + (*i).first + "\n";
 
@@ -247,12 +260,13 @@ PolicyList::str()
     return ret;
 }
 
-void
+    void
 PolicyList::link_code(Code& ret)
 {
     // go through all the policies, and link the code
     for (PolicyCodeList::iterator i = _policies.begin();
-	 i != _policies.end(); ++i) {
+	    i != _policies.end(); ++i) 
+    {
 
 	CodeList* cl = (*i).second;
 
@@ -262,13 +276,14 @@ PolicyList::link_code(Code& ret)
     }
 }
 
-void
+    void
 PolicyList::get_targets(Code::TargetSet& targets)
 {
     // go through all the policies in the list, and return the targets affected
     // by the code.
     for(PolicyCodeList::iterator i = _policies.begin(); i !=
-	_policies.end(); ++i) {
+	    _policies.end(); ++i) 
+    {
 
 	CodeList* cl = (*i).second;
 
@@ -278,13 +293,14 @@ PolicyList::get_targets(Code::TargetSet& targets)
     }
 }
 
-void
+    void
 PolicyList::get_redist_tags(const string& protocol, Code::TagSet& ts)
 {
     // go through all policies and return tags associated with the requested
     // protocol.
     for(PolicyCodeList::iterator i = _policies.begin(); i !=
-	_policies.end(); ++i) {
+	    _policies.end(); ++i) 
+    {
 
 	CodeList* cl = (*i).second;
 
@@ -292,9 +308,9 @@ PolicyList::get_redist_tags(const string& protocol, Code::TagSet& ts)
     }
 }
 
-void
+    void
 PolicyList::semantic_check(PolicyStatement& ps,
-			   VisitorSemantic::PolicyType type)
+	VisitorSemantic::PolicyType type)
 {
     // check if policy makes sense with this instantiation
     // [i.e. protocol and import/export pair].
@@ -311,10 +327,10 @@ PolicyList::semantic_check(PolicyStatement& ps,
     ps.accept(sem_check);
 }
 
-void
+    void
 PolicyList::compile_import(PolicyCodeList::iterator& iter,
-			   PolicyStatement& ps,
-			   Code::TargetSet& modified_targets)
+	PolicyStatement& ps,
+	Code::TargetSet& modified_targets)
 {
     _mod_term = _mod_term_import;
 
@@ -339,7 +355,8 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
     cl->push_back(code);
 
     // if any code was previously stored, delete it
-    if((*iter).second) {
+    if((*iter).second) 
+    {
 	delete (*iter).second;
     }
 
@@ -350,11 +367,11 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
     modified_targets.insert(code->target());
 }
 
-void
+    void
 PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
-			   Code::TargetSet& modified_targets,
-			   uint32_t& tagstart,
-			    map<string, set<uint32_t> >& ptags)
+	Code::TargetSet& modified_targets,
+	uint32_t& tagstart,
+	map<string, set<uint32_t> >& ptags)
 {
     _mod_term = _mod_term_export;
 
@@ -394,20 +411,23 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     // This is needed to cover the case when we delete all policy terms
     // that export from a particular protocol.
     //
-    if ((*iter).second) {
+    if ((*iter).second) 
+    {
 	CodeList* old_cl = (*iter).second;
 	Code::TargetSet old_targets;
 	old_cl->get_targets(old_targets, filter::EXPORT_SOURCEMATCH);
 
 	Code::TargetSet::iterator i;
-	for (i = old_targets.begin(); i != old_targets.end(); ++i) {
+	for (i = old_targets.begin(); i != old_targets.end(); ++i) 
+	{
 	    modified_targets.insert(*i);
 	}
     }
 
     // if we had a codelist get rid of it
-    if ((*iter).second) {
-        delete (*iter).second;
+    if ((*iter).second) 
+    {
+	delete (*iter).second;
     }
     // store new code list
     (*iter).second = cl;
@@ -421,14 +441,15 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
 
     // add the fragments to the code list
     for (vector<Code*>::iterator i = codes.begin();
-         i != codes.end(); ++i) {
+	    i != codes.end(); ++i) 
+    {
 
-        Code* c = *i;
-        cl->push_back(c);
+	Code* c = *i;
+	cl->push_back(c);
 
-        modified_targets.insert(c->target());
+	modified_targets.insert(c->target());
 
-        // keep track of source protocols in export policy code.
-        code->add_source_protocol(c->target().protocol());
+	// keep track of source protocols in export policy code.
+	code->add_source_protocol(c->target().protocol());
     }
 }

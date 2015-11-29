@@ -38,116 +38,118 @@ class RequestState;
 /**
  * @short Listener for XRL's transported by TCP.
  */
-class XrlPFSTCPListener : public XrlPFListener {
-public:
-    XrlPFSTCPListener( XrlDispatcher* xr = 0, uint16_t port = 0)
-	throw (XrlPFConstructorError);
-    virtual ~XrlPFSTCPListener();
+class XrlPFSTCPListener : public XrlPFListener 
+{
+    public:
+	XrlPFSTCPListener( XrlDispatcher* xr = 0, uint16_t port = 0)
+	    throw (XrlPFConstructorError);
+	virtual ~XrlPFSTCPListener();
 
-    virtual const char* address() const	 { return _address_slash_port.c_str(); }
-    virtual const char* protocol() const { return _protocol; }
+	virtual const char* address() const	 { return _address_slash_port.c_str(); }
+	virtual const char* protocol() const { return _protocol; }
 
-    void add_request_handler(STCPRequestHandler* h);
-    void remove_request_handler(const STCPRequestHandler* h);
-    void connect_hook(XorpFd fd, IoEventType type);
-    bool response_pending() const;
+	void add_request_handler(STCPRequestHandler* h);
+	void remove_request_handler(const STCPRequestHandler* h);
+	void connect_hook(XorpFd fd, IoEventType type);
+	bool response_pending() const;
 
-    virtual string toString() const;
+	virtual string toString() const;
 
-protected:
+    protected:
 
-    XorpFd	_sock;
-    string	_address_slash_port;
+	XorpFd	_sock;
+	string	_address_slash_port;
 
-private:
-    list<STCPRequestHandler*>	_request_handlers;
+    private:
+	list<STCPRequestHandler*>	_request_handlers;
 
-    static const char*		_protocol;
+	static const char*		_protocol;
 };
 
 /**
  * @short Sender of Xrls by TCP.
  */
-class XrlPFSTCPSender : public XrlPFSender {
-public:
-    XrlPFSTCPSender(const string& name,  const char* address = 0,
-	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
-	throw (XrlPFConstructorError);
-    virtual ~XrlPFSTCPSender();
+class XrlPFSTCPSender : public XrlPFSender 
+{
+    public:
+	XrlPFSTCPSender(const string& name,  const char* address = 0,
+		TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
+	    throw (XrlPFConstructorError);
+	virtual ~XrlPFSTCPSender();
 
-    bool send(const Xrl& 			x,
-	      bool 				direct_call,
-	      const XrlPFSender::SendCallback& 	cb);
+	bool send(const Xrl& 			x,
+		bool 				direct_call,
+		const XrlPFSender::SendCallback& 	cb);
 
-    bool	        sends_pending() const;
-    bool	        alive() const		    { return _sock.is_valid(); }
-    virtual const char* protocol() const;
-    static const char*  protocol_name()		    { return _protocol; }
-    void	        set_keepalive_time(const TimeVal& time);
-    const TimeVal&	keepalive_time() const	    { return _keepalive_time; }
-    virtual string toString() const; // for debugging
+	bool	        sends_pending() const;
+	bool	        alive() const		    { return _sock.is_valid(); }
+	virtual const char* protocol() const;
+	static const char*  protocol_name()		    { return _protocol; }
+	void	        set_keepalive_time(const TimeVal& time);
+	const TimeVal&	keepalive_time() const	    { return _keepalive_time; }
+	virtual string toString() const; // for debugging
 
-protected:
-    void construct();
+    protected:
+	void construct();
 
-    XorpFd _sock;
+	XorpFd _sock;
 
-private:
-    void die(const char* reason, bool verbose = true);
+    private:
+	void die(const char* reason, bool verbose = true);
 
-    void update_writer(AsyncFileWriter::Event	e,
-		       const uint8_t*		buffer,
-		       size_t 			buffer_bytes,
-		       size_t 			bytes_done);
+	void update_writer(AsyncFileWriter::Event	e,
+		const uint8_t*		buffer,
+		size_t 			buffer_bytes,
+		size_t 			bytes_done);
 
-    RequestState* find_request(uint32_t seqno);
+	RequestState* find_request(uint32_t seqno);
 
-    void read_event(BufferedAsyncReader*	reader,
-		    BufferedAsyncReader::Event	ev,
-		    uint8_t*			buffer,
-		    size_t			buffer_bytes);
+	void read_event(BufferedAsyncReader*	reader,
+		BufferedAsyncReader::Event	ev,
+		uint8_t*			buffer,
+		size_t			buffer_bytes);
 
-    typedef map<uint32_t, ref_ptr<RequestState> > RequestMap;
-    void send_request(RequestState*);
-    void dispose_request(RequestMap::iterator ptr);
+	typedef map<uint32_t, ref_ptr<RequestState> > RequestMap;
+	void send_request(RequestState*);
+	void dispose_request(RequestMap::iterator ptr);
 
-    void start_keepalives();
-    void stop_keepalives();
-    void defer_keepalives();
-    bool send_keepalive();
+	void start_keepalives();
+	void stop_keepalives();
+	void defer_keepalives();
+	bool send_keepalive();
 
-public:
-    static const TimeVal	 DEFAULT_SENDER_KEEPALIVE_PERIOD;
+    public:
+	static const TimeVal	 DEFAULT_SENDER_KEEPALIVE_PERIOD;
 
-private:
-    uint32_t 			 _uid;
+    private:
+	uint32_t 			 _uid;
 
-    // Transmission related
-    AsyncFileWriter*		  _writer;
+	// Transmission related
+	AsyncFileWriter*		  _writer;
 
-    list<ref_ptr<RequestState> > _requests_waiting;	// All requests pending
+	list<ref_ptr<RequestState> > _requests_waiting;	// All requests pending
 
-    RequestMap			 _requests_sent;	// All requests pending
+	RequestMap			 _requests_sent;	// All requests pending
 
-    uint32_t			 _current_seqno;
-    size_t			 _active_bytes;
-    size_t			 _active_requests;
+	uint32_t			 _current_seqno;
+	size_t			 _active_bytes;
+	size_t			 _active_requests;
 
-    // Tunable timer variables
-    TimeVal			_keepalive_time;
+	// Tunable timer variables
+	TimeVal			_keepalive_time;
 
-    // Reception related
-    BufferedAsyncReader*	 _reader;
-    vector<uint8_t>		 _reply;
+	// Reception related
+	BufferedAsyncReader*	 _reader;
+	vector<uint8_t>		 _reply;
 
-    // Keepalive related
-    XorpTimer			 _keepalive_timer;
-    TimeVal			 _keepalive_last_fired;
-    bool			 _keepalive_sent;
+	// Keepalive related
+	XorpTimer			 _keepalive_timer;
+	TimeVal			 _keepalive_last_fired;
+	bool			 _keepalive_sent;
 
-    // General stuff
-    static const char*		 _protocol;
-    static uint32_t		 _next_uid;
+	// General stuff
+	static const char*		 _protocol;
+	static uint32_t		 _next_uid;
 };
 
 #endif // __LIBXIPC_XRL_PF_STCP_HH__

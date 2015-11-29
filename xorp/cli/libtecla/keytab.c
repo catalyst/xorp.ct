@@ -53,48 +53,50 @@ static int _kt_is_emacs_ctrl(const char *string);
  */
 KeyTab *_new_KeyTab(void)
 {
-  KeyTab *kt;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  kt = (KeyTab *) malloc(sizeof(KeyTab));
-  if(!kt) {
-    fprintf(stderr, "new_KeyTab: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to del_KeyTab().
- */
-  kt->size = KT_TABLE_INC;
-  kt->nkey = 0;
-  kt->table = NULL;
-  kt->actions = NULL;
-  kt->smem = NULL;
-/*
- * Allocate the table.
- */
-  kt->table = (KeySym *) malloc(sizeof(kt->table[0]) * kt->size);
-  if(!kt->table) {
-    fprintf(stderr, "new_KeyTab: Insufficient memory for table of size %d.\n",
-	    kt->size);
-    return _del_KeyTab(kt);
-  };
-/*
- * Allocate a hash table of actions.
- */
-  kt->actions = _new_HashTable(NULL, KT_HASH_SIZE, IGNORE_CASE, NULL, 0);
-  if(!kt->actions)
-    return _del_KeyTab(kt);
-/*
- * Allocate a string allocation object. This allows allocation of
- * small strings without fragmenting the heap.
- */
-  kt->smem = _new_StringMem("new_KeyTab", KT_TABLE_INC);
-  if(!kt->smem)
-    return _del_KeyTab(kt);
-  return kt;
+	KeyTab *kt;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	kt = (KeyTab *) malloc(sizeof(KeyTab));
+	if(!kt) 
+	{
+		fprintf(stderr, "new_KeyTab: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to del_KeyTab().
+	 */
+	kt->size = KT_TABLE_INC;
+	kt->nkey = 0;
+	kt->table = NULL;
+	kt->actions = NULL;
+	kt->smem = NULL;
+	/*
+	 * Allocate the table.
+	 */
+	kt->table = (KeySym *) malloc(sizeof(kt->table[0]) * kt->size);
+	if(!kt->table) 
+	{
+		fprintf(stderr, "new_KeyTab: Insufficient memory for table of size %d.\n",
+				kt->size);
+		return _del_KeyTab(kt);
+	};
+	/*
+	 * Allocate a hash table of actions.
+	 */
+	kt->actions = _new_HashTable(NULL, KT_HASH_SIZE, IGNORE_CASE, NULL, 0);
+	if(!kt->actions)
+		return _del_KeyTab(kt);
+	/*
+	 * Allocate a string allocation object. This allows allocation of
+	 * small strings without fragmenting the heap.
+	 */
+	kt->smem = _new_StringMem("new_KeyTab", KT_TABLE_INC);
+	if(!kt->smem)
+		return _del_KeyTab(kt);
+	return kt;
 }
 
 /*.......................................................................
@@ -107,14 +109,15 @@ KeyTab *_new_KeyTab(void)
  */
 KeyTab *_del_KeyTab(KeyTab *kt)
 {
-  if(kt) {
-    if(kt->table)
-      free(kt->table);
-    kt->actions = _del_HashTable(kt->actions);
-    kt->smem = _del_StringMem("del_KeyTab", kt->smem, 1);
-    free(kt);
-  };
-  return NULL;
+	if(kt) 
+	{
+		if(kt->table)
+			free(kt->table);
+		kt->actions = _del_HashTable(kt->actions);
+		kt->smem = _del_StringMem("del_KeyTab", kt->smem, 1);
+		free(kt);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -128,25 +131,26 @@ KeyTab *_del_KeyTab(KeyTab *kt)
  */
 static int _kt_extend_table(KeyTab *kt)
 {
-/*
- * Attempt to increase the size of the table.
- */
-  KeySym *newtab = (KeySym *) realloc(kt->table, sizeof(kt->table[0]) *
-				      (kt->size + KT_TABLE_INC));
-/*
- * Failed?
- */
-  if(!newtab) {
-    fprintf(stderr,
-	    "getline(): Insufficient memory to extend keybinding table.\n");
-    return 1;
-  };
-/*
- * Install the resized table.
- */
-  kt->table = newtab;
-  kt->size += KT_TABLE_INC;
-  return 0;
+	/*
+	 * Attempt to increase the size of the table.
+	 */
+	KeySym *newtab = (KeySym *) realloc(kt->table, sizeof(kt->table[0]) *
+			(kt->size + KT_TABLE_INC));
+	/*
+	 * Failed?
+	 */
+	if(!newtab) 
+	{
+		fprintf(stderr,
+				"getline(): Insufficient memory to extend keybinding table.\n");
+		return 1;
+	};
+	/*
+	 * Install the resized table.
+	 */
+	kt->table = newtab;
+	kt->size += KT_TABLE_INC;
+	return 0;
 }
 
 /*.......................................................................
@@ -164,33 +168,37 @@ static int _kt_extend_table(KeyTab *kt)
  *                         1 - Error.
  */
 int _kt_set_keybinding(KeyTab *kt, KtBinder binder, const char *keyseq,
-		       const char *action)
+		const char *action)
 {
-  KtKeyFn *keyfn; /* The action function */
-/*
- * Check arguments.
- */
-  if(kt==NULL || !keyseq) {
-    fprintf(stderr, "kt_set_keybinding: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * Lookup the function that implements the specified action.
- */
-  if(!action) {
-    keyfn = 0;
-  } else {
-    Symbol *sym = _find_HashSymbol(kt->actions, action);
-    if(!sym) {
-      fprintf(stderr, "getline: Unknown key-binding action: %s\n", action);
-      return 1;
-    };
-    keyfn = (KtKeyFn *) sym->fn;
-  };
-/*
- * Record the action in the table.
- */
-  return _kt_set_keyfn(kt, binder, keyseq, keyfn);
+	KtKeyFn *keyfn; /* The action function */
+	/*
+	 * Check arguments.
+	 */
+	if(kt==NULL || !keyseq) 
+	{
+		fprintf(stderr, "kt_set_keybinding: NULL argument(s).\n");
+		return 1;
+	};
+	/*
+	 * Lookup the function that implements the specified action.
+	 */
+	if(!action) 
+	{
+		keyfn = 0;
+	} else 
+	{
+		Symbol *sym = _find_HashSymbol(kt->actions, action);
+		if(!sym) 
+		{
+			fprintf(stderr, "getline: Unknown key-binding action: %s\n", action);
+			return 1;
+		};
+		keyfn = (KtKeyFn *) sym->fn;
+	};
+	/*
+	 * Record the action in the table.
+	 */
+	return _kt_set_keyfn(kt, binder, keyseq, keyfn);
 }
 
 /*.......................................................................
@@ -208,120 +216,131 @@ int _kt_set_keybinding(KeyTab *kt, KtBinder binder, const char *keyseq,
  *                    1 - Error.
  */
 int _kt_set_keyfn(KeyTab *kt, KtBinder binder, const char *keyseq,
-		  KtKeyFn *keyfn)
+		KtKeyFn *keyfn)
 {
-  const char *kptr;  /* A pointer into keyseq[] */
-  char *binary;      /* The binary version of keyseq[] */
-  int nc;            /* The number of characters in binary[] */
-  int first,last;    /* The first and last entries in the table which */
-                     /*  minimally match. */
-  int size;          /* The size to allocate for the binary string */
-/*
- * Check arguments.
- */
-  if(kt==NULL || !keyseq) {
-    fprintf(stderr, "kt_set_keybinding: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * Work out a pessimistic estimate of how much space will be needed
- * for the binary copy of the string, noting that binary meta characters
- * embedded in the input string get split into two characters.
- */
-  for(size=0,kptr = keyseq; *kptr; kptr++)
-    size += IS_META_CHAR(*kptr) ? 2 : 1;
-/*
- * Allocate a string that has the length of keyseq[].
- */
-  binary = _new_StringMemString(kt->smem, size + 1);
-  if(!binary) {
-    fprintf(stderr,
-	    "gl_get_line: Insufficient memory to record key sequence.\n");
-    return 1;
-  };
-/*
- * Convert control and octal character specifications to binary characters.
- */
-  if(_kt_parse_keybinding_string(keyseq, binary, &nc)) {
-    binary = _del_StringMemString(kt->smem, binary);
-    return 1;
-  };
-/*
- * Lookup the position in the table at which to insert the binding.
- */
-  switch(_kt_lookup_keybinding(kt, binary, nc, &first, &last)) {
-/*
- * If an exact match for the key-sequence is already in the table,
- * simply replace its binding function (or delete the entry if
- * the new binding is 0).
- */
-  case KT_EXACT_MATCH:
-    if(keyfn) {
-      _kt_assign_action(kt->table + first, binder, keyfn);
-    } else {
-      _del_StringMemString(kt->smem, kt->table[first].keyseq);
-      memmove(kt->table + first, kt->table + first + 1,
-	      (kt->nkey - first - 1) * sizeof(kt->table[0]));
-      kt->nkey--;
-    };
-    binary = _del_StringMemString(kt->smem, binary);
-    break;
-/*
- * If an ambiguous match has been found and we are installing a
- * callback, then our new key-sequence would hide all of the ambiguous
- * matches, so we shouldn't allow it.
- */
-  case KT_AMBIG_MATCH:
-    if(keyfn) {
-      fprintf(stderr,
-	      "getline: Can't bind \"%s\", because it's a prefix of another binding.\n",
-	      keyseq);
-      binary = _del_StringMemString(kt->smem, binary);
-      return 1;
-    };
-    break;
-/*
- * If the entry doesn't exist, create it.
- */
-  case KT_NO_MATCH:
-/*
- * Add a new binding?
- */
-    if(keyfn) {
-      KeySym *sym;
-/*
- * We will need a new entry, extend the table if needed.
- */
-      if(kt->nkey + 1 > kt->size) {
-	if(_kt_extend_table(kt)) {
-	  binary = _del_StringMemString(kt->smem, binary);
-	  return 1;
+	const char *kptr;  /* A pointer into keyseq[] */
+	char *binary;      /* The binary version of keyseq[] */
+	int nc;            /* The number of characters in binary[] */
+	int first,last;    /* The first and last entries in the table which */
+	/*  minimally match. */
+	int size;          /* The size to allocate for the binary string */
+	/*
+	 * Check arguments.
+	 */
+	if(kt==NULL || !keyseq) 
+	{
+		fprintf(stderr, "kt_set_keybinding: NULL argument(s).\n");
+		return 1;
 	};
-      };
-/*
- * Make space to insert the new key-sequence before 'last'.
- */
-      if(last < kt->nkey) {
-	memmove(kt->table + last + 1, kt->table + last,
-		(kt->nkey - last) * sizeof(kt->table[0]));
-      };
-/*
- * Insert the new binding in the vacated position.
- */
-      sym = kt->table + last;
-      sym->keyseq = binary;
-      sym->nc = nc;
-      sym->user_fn = sym->term_fn = sym->norm_fn = sym->keyfn = 0;
-      _kt_assign_action(sym, binder, keyfn);
-      kt->nkey++;
-    };
-    break;
-  case KT_BAD_MATCH:
-    binary = _del_StringMemString(kt->smem, binary);
-    return 1;
-    break;
-  };
-  return 0;
+	/*
+	 * Work out a pessimistic estimate of how much space will be needed
+	 * for the binary copy of the string, noting that binary meta characters
+	 * embedded in the input string get split into two characters.
+	 */
+	for(size=0,kptr = keyseq; *kptr; kptr++)
+		size += IS_META_CHAR(*kptr) ? 2 : 1;
+	/*
+	 * Allocate a string that has the length of keyseq[].
+	 */
+	binary = _new_StringMemString(kt->smem, size + 1);
+	if(!binary) 
+	{
+		fprintf(stderr,
+				"gl_get_line: Insufficient memory to record key sequence.\n");
+		return 1;
+	};
+	/*
+	 * Convert control and octal character specifications to binary characters.
+	 */
+	if(_kt_parse_keybinding_string(keyseq, binary, &nc)) 
+	{
+		binary = _del_StringMemString(kt->smem, binary);
+		return 1;
+	};
+	/*
+	 * Lookup the position in the table at which to insert the binding.
+	 */
+	switch(_kt_lookup_keybinding(kt, binary, nc, &first, &last)) 
+	{
+		/*
+		 * If an exact match for the key-sequence is already in the table,
+		 * simply replace its binding function (or delete the entry if
+		 * the new binding is 0).
+		 */
+		case KT_EXACT_MATCH:
+			if(keyfn) 
+			{
+				_kt_assign_action(kt->table + first, binder, keyfn);
+			} else 
+			{
+				_del_StringMemString(kt->smem, kt->table[first].keyseq);
+				memmove(kt->table + first, kt->table + first + 1,
+						(kt->nkey - first - 1) * sizeof(kt->table[0]));
+				kt->nkey--;
+			};
+			binary = _del_StringMemString(kt->smem, binary);
+			break;
+			/*
+			 * If an ambiguous match has been found and we are installing a
+			 * callback, then our new key-sequence would hide all of the ambiguous
+			 * matches, so we shouldn't allow it.
+			 */
+		case KT_AMBIG_MATCH:
+			if(keyfn) 
+			{
+				fprintf(stderr,
+						"getline: Can't bind \"%s\", because it's a prefix of another binding.\n",
+						keyseq);
+				binary = _del_StringMemString(kt->smem, binary);
+				return 1;
+			};
+			break;
+			/*
+			 * If the entry doesn't exist, create it.
+			 */
+		case KT_NO_MATCH:
+			/*
+			 * Add a new binding?
+			 */
+			if(keyfn) 
+			{
+				KeySym *sym;
+				/*
+				 * We will need a new entry, extend the table if needed.
+				 */
+				if(kt->nkey + 1 > kt->size) 
+				{
+					if(_kt_extend_table(kt)) 
+					{
+						binary = _del_StringMemString(kt->smem, binary);
+						return 1;
+					};
+				};
+				/*
+				 * Make space to insert the new key-sequence before 'last'.
+				 */
+				if(last < kt->nkey) 
+				{
+					memmove(kt->table + last + 1, kt->table + last,
+							(kt->nkey - last) * sizeof(kt->table[0]));
+				};
+				/*
+				 * Insert the new binding in the vacated position.
+				 */
+				sym = kt->table + last;
+				sym->keyseq = binary;
+				sym->nc = nc;
+				sym->user_fn = sym->term_fn = sym->norm_fn = sym->keyfn = 0;
+				_kt_assign_action(sym, binder, keyfn);
+				kt->nkey++;
+			};
+			break;
+		case KT_BAD_MATCH:
+			binary = _del_StringMemString(kt->smem, binary);
+			return 1;
+			break;
+	};
+	return 0;
 }
 
 /*.......................................................................
@@ -347,60 +366,64 @@ int _kt_set_keyfn(KeyTab *kt, KtBinder binder, const char *keyseq,
  *                         KT_BAD_MATCH   - An error occurred while searching.
  */
 KtKeyMatch _kt_lookup_keybinding(KeyTab *kt, const char *binary_keyseq, int nc,
-				 int *first, int *last)
+		int *first, int *last)
 {
-  int mid;     /* The index at which to bisect the table */
-  int bot;     /* The lowest index of the table not searched yet */
-  int top;     /* The highest index of the table not searched yet */
-  int test;    /* The return value of strcmp() */
-/*
- * Check the arguments.
- */
-  if(!kt || !binary_keyseq || !first || !last || nc < 0) {
-    fprintf(stderr, "kt_lookup_keybinding: NULL argument(s).\n");
-    return KT_BAD_MATCH;
-  };
-/*
- * Perform a binary search for the key-sequence.
- */
-  bot = 0;
-  top = kt->nkey - 1;
-  while(top >= bot) {
-    mid = (top + bot)/2;
-    test = _kt_compare_strings(kt->table[mid].keyseq, kt->table[mid].nc,
-			   binary_keyseq, nc);
-    if(test > 0)
-      top = mid - 1;
-    else if(test < 0)
-      bot = mid + 1;
-    else {
-      *first = *last = mid;
-      return KT_EXACT_MATCH;
-    };
-  };
-/*
- * An exact match wasn't found, but top is the index just below the
- * index where a match would be found, and bot is the index just above
- * where the match ought to be found.
- */
-  *first = top;
-  *last = bot;
-/*
- * See if any ambiguous matches exist, and if so make *first and *last
- * refer to the first and last matches.
- */
-  if(*last < kt->nkey && kt->table[*last].nc > nc &&
-     _kt_compare_strings(kt->table[*last].keyseq, nc, binary_keyseq, nc)==0) {
-    *first = *last;
-    while(*last+1 < kt->nkey && kt->table[*last+1].nc > nc &&
-	  _kt_compare_strings(kt->table[*last+1].keyseq, nc, binary_keyseq, nc)==0)
-      (*last)++;
-    return KT_AMBIG_MATCH;
-  };
-/*
- * No match.
- */
-  return KT_NO_MATCH;
+	int mid;     /* The index at which to bisect the table */
+	int bot;     /* The lowest index of the table not searched yet */
+	int top;     /* The highest index of the table not searched yet */
+	int test;    /* The return value of strcmp() */
+	/*
+	 * Check the arguments.
+	 */
+	if(!kt || !binary_keyseq || !first || !last || nc < 0) 
+	{
+		fprintf(stderr, "kt_lookup_keybinding: NULL argument(s).\n");
+		return KT_BAD_MATCH;
+	};
+	/*
+	 * Perform a binary search for the key-sequence.
+	 */
+	bot = 0;
+	top = kt->nkey - 1;
+	while(top >= bot) 
+	{
+		mid = (top + bot)/2;
+		test = _kt_compare_strings(kt->table[mid].keyseq, kt->table[mid].nc,
+				binary_keyseq, nc);
+		if(test > 0)
+			top = mid - 1;
+		else if(test < 0)
+			bot = mid + 1;
+		else 
+		{
+			*first = *last = mid;
+			return KT_EXACT_MATCH;
+		};
+	};
+	/*
+	 * An exact match wasn't found, but top is the index just below the
+	 * index where a match would be found, and bot is the index just above
+	 * where the match ought to be found.
+	 */
+	*first = top;
+	*last = bot;
+	/*
+	 * See if any ambiguous matches exist, and if so make *first and *last
+	 * refer to the first and last matches.
+	 */
+	if(*last < kt->nkey && kt->table[*last].nc > nc &&
+			_kt_compare_strings(kt->table[*last].keyseq, nc, binary_keyseq, nc)==0) 
+	{
+		*first = *last;
+		while(*last+1 < kt->nkey && kt->table[*last+1].nc > nc &&
+				_kt_compare_strings(kt->table[*last+1].keyseq, nc, binary_keyseq, nc)==0)
+			(*last)++;
+		return KT_AMBIG_MATCH;
+	};
+	/*
+	 * No match.
+	 */
+	return KT_NO_MATCH;
 }
 
 /*.......................................................................
@@ -430,94 +453,105 @@ KtKeyMatch _kt_lookup_keybinding(KeyTab *kt, const char *binary_keyseq, int nc,
  *                   1 - Error.
  */
 int _kt_parse_keybinding_string(const char *keyseq, char *binary,
-				       int *nc)
+		int *nc)
 {
-  const char *iptr = keyseq;   /* Pointer into keyseq[] */
-  char *optr = binary;         /* Pointer into binary[] */
-/*
- * Parse the input characters until they are exhausted or the
- * output string becomes full.
- */
-  while(*iptr) {
-/*
- * Check for special characters.
- */
-    switch(*iptr) {
-    case '^':        /* A control character specification */
-/*
- * Convert the caret expression into the corresponding control
- * character unless no character follows the caret, in which case
- * record a literal caret.
- */
-      if(iptr[1]) {
-	*optr++ = MAKE_CTRL(iptr[1]);
-	iptr += 2;
-      } else {
-	*optr++ = *iptr++;
-      };
-      break;
-/*
- * A backslash-escaped character?
- */
-    case '\\':
-/*
- * Convert the escape sequence to a binary character.
- */
-      *optr++ = _kt_backslash_escape(iptr+1, &iptr);
-      break;
-/*
- * Possibly an emacs-style meta character?
- */
-    case 'M':
-      if(_kt_is_emacs_meta(iptr)) {
-	*optr++ = GL_ESC_CHAR;
-	iptr += 2;
-      } else {
-	*optr++ = *iptr++;
-      };
-      break;
-/*
- * Possibly an emacs-style control character specification?
- */
-    case 'C':
-      if(_kt_is_emacs_ctrl(iptr)) {
-	*optr++ = MAKE_CTRL(iptr[2]);
-	iptr += 3;
-      } else {
-	*optr++ = *iptr++;
-      };
-      break;
-    default:
+	const char *iptr = keyseq;   /* Pointer into keyseq[] */
+	char *optr = binary;         /* Pointer into binary[] */
+	/*
+	 * Parse the input characters until they are exhausted or the
+	 * output string becomes full.
+	 */
+	while(*iptr) 
+	{
+		/*
+		 * Check for special characters.
+		 */
+		switch(*iptr) 
+		{
+			case '^':        /* A control character specification */
+				/*
+				 * Convert the caret expression into the corresponding control
+				 * character unless no character follows the caret, in which case
+				 * record a literal caret.
+				 */
+				if(iptr[1]) 
+				{
+					*optr++ = MAKE_CTRL(iptr[1]);
+					iptr += 2;
+				} else 
+				{
+					*optr++ = *iptr++;
+				};
+				break;
+				/*
+				 * A backslash-escaped character?
+				 */
+			case '\\':
+				/*
+				 * Convert the escape sequence to a binary character.
+				 */
+				*optr++ = _kt_backslash_escape(iptr+1, &iptr);
+				break;
+				/*
+				 * Possibly an emacs-style meta character?
+				 */
+			case 'M':
+				if(_kt_is_emacs_meta(iptr)) 
+				{
+					*optr++ = GL_ESC_CHAR;
+					iptr += 2;
+				} else 
+				{
+					*optr++ = *iptr++;
+				};
+				break;
+				/*
+				 * Possibly an emacs-style control character specification?
+				 */
+			case 'C':
+				if(_kt_is_emacs_ctrl(iptr)) 
+				{
+					*optr++ = MAKE_CTRL(iptr[2]);
+					iptr += 3;
+				} else 
+				{
+					*optr++ = *iptr++;
+				};
+				break;
+			default:
 
-/*
- * Convert embedded meta characters into an escape character followed
- * by the meta-unmodified character.
- */
-      if(IS_META_CHAR(*iptr)) {
-	*optr++ = GL_ESC_CHAR;
-	*optr++ = META_TO_CHAR(*iptr);
-	iptr++;
-/*
- * To allow keysequences that start with printable characters to
- * be distinguished from the cursor-key keywords, prepend a backslash
- * to the former. This same operation is performed in gl_interpret_char()
- * before looking up a keysequence that starts with a printable character.
- */
-      } else if(iptr==keyseq && !IS_CTRL_CHAR(*iptr) &&
-		strcmp(keyseq, "up") != 0 && strcmp(keyseq, "down") != 0 &&
-		strcmp(keyseq, "left") != 0 && strcmp(keyseq, "right") != 0) {
-	*optr++ = '\\';
-	*optr++ = *iptr++;
-      } else {
-	*optr++ = *iptr++;
-      };
-    };
-  };
-/*
- * How many characters were placed in the output array?
- */
-  *nc = optr - binary;
-  return 0;
+				/*
+				 * Convert embedded meta characters into an escape character followed
+				 * by the meta-unmodified character.
+				 */
+				if(IS_META_CHAR(*iptr)) 
+				{
+					*optr++ = GL_ESC_CHAR;
+					*optr++ = META_TO_CHAR(*iptr);
+					iptr++;
+					/*
+					 * To allow keysequences that start with printable characters to
+					 * be distinguished from the cursor-key keywords, prepend a backslash
+					 * to the former. This same operation is performed in gl_interpret_char()
+					 * before looking up a keysequence that starts with a printable character.
+					 */
+				} else if(iptr==keyseq && !IS_CTRL_CHAR(*iptr) &&
+						strcmp(keyseq, "up") != 0 && strcmp(keyseq, "down") != 0 &&
+						strcmp(keyseq, "left") != 0 && strcmp(keyseq, "right") != 0) 
+				{
+					*optr++ = '\\';
+					*optr++ = *iptr++;
+				} else 
+				{
+					*optr++ = *iptr++;
+				};
+		};
+	};
+	/*
+	 * How many characters were placed in the output array?
+	 */
+	*nc = optr - binary;
+	return 0;
 }
 
 /*.......................................................................
@@ -534,37 +568,41 @@ int _kt_parse_keybinding_string(const char *keyseq, char *binary,
  */
 int _kt_set_action(KeyTab *kt, const char *action, KtKeyFn *fn)
 {
-  Symbol *sym;   /* The symbol table entry of the action */
-/*
- * Check the arguments.
- */
-  if(!kt || !action) {
-    fprintf(stderr, "kt_set_action: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * If no function was provided, delete an existing action.
- */
-  if(!fn) {
-    sym = _del_HashSymbol(kt->actions, action);
-    return 0;
-  };
-/*
- * If the action already exists, replace its action function.
- */
-  sym = _find_HashSymbol(kt->actions, action);
-  if(sym) {
-    sym->fn = (void (*)(void))fn;
-    return 0;
-  };
-/*
- * Add a new action.
- */
-  if(!_new_HashSymbol(kt->actions, action, 0, (void (*)(void))fn, NULL, 0)) {
-    fprintf(stderr, "Insufficient memory to record new key-binding action.\n");
-    return 1;
-  };
-  return 0;
+	Symbol *sym;   /* The symbol table entry of the action */
+	/*
+	 * Check the arguments.
+	 */
+	if(!kt || !action) 
+	{
+		fprintf(stderr, "kt_set_action: NULL argument(s).\n");
+		return 1;
+	};
+	/*
+	 * If no function was provided, delete an existing action.
+	 */
+	if(!fn) 
+	{
+		sym = _del_HashSymbol(kt->actions, action);
+		return 0;
+	};
+	/*
+	 * If the action already exists, replace its action function.
+	 */
+	sym = _find_HashSymbol(kt->actions, action);
+	if(sym) 
+	{
+		sym->fn = (void (*)(void))fn;
+		return 0;
+	};
+	/*
+	 * Add a new action.
+	 */
+	if(!_new_HashSymbol(kt->actions, action, 0, (void (*)(void))fn, NULL, 0)) 
+	{
+		fprintf(stderr, "Insufficient memory to record new key-binding action.\n");
+		return 1;
+	};
+	return 0;
 }
 
 /*.......................................................................
@@ -583,28 +621,29 @@ int _kt_set_action(KeyTab *kt, const char *action, KtKeyFn *fn)
  */
 static int _kt_compare_strings(const char *s1, int n1, const char *s2, int n2)
 {
-  int i;
-/*
- * Find the first character where the two strings differ.
- */
-  for(i=0; i<n1 && i<n2 && s1[i]==s2[i]; i++)
-    ;
-/*
- * Did we hit the end of either string before finding a difference?
- */
-  if(i==n1 || i==n2) {
-    if(n1 == n2)
-      return 0;
-    else if(n1==i)
-      return -1;
-    else
-      return 1;
-  };
-/*
- * Compare the two characters that differed to determine which
- * string is greatest.
- */
-  return s1[i] - s2[i];
+	int i;
+	/*
+	 * Find the first character where the two strings differ.
+	 */
+	for(i=0; i<n1 && i<n2 && s1[i]==s2[i]; i++)
+		;
+	/*
+	 * Did we hit the end of either string before finding a difference?
+	 */
+	if(i==n1 || i==n2) 
+	{
+		if(n1 == n2)
+			return 0;
+		else if(n1==i)
+			return -1;
+		else
+			return 1;
+	};
+	/*
+	 * Compare the two characters that differed to determine which
+	 * string is greatest.
+	 */
+	return s1[i] - s2[i];
 }
 
 /*.......................................................................
@@ -617,31 +656,32 @@ static int _kt_compare_strings(const char *s1, int n1, const char *s2, int n2)
  */
 static void _kt_assign_action(KeySym *sym, KtBinder binder, KtKeyFn *keyfn)
 {
-/*
- * Record the action according to its source.
- */
-  switch(binder) {
-  case KTB_USER:
-    sym->user_fn = keyfn;
-    break;
-  case KTB_TERM:
-    sym->term_fn = keyfn;
-    break;
-  case KTB_NORM:
-  default:
-    sym->norm_fn = keyfn;
-    break;
-  };
-/*
- * Which of the current set of bindings should be used?
- */
-  if(sym->user_fn)
-    sym->keyfn = sym->user_fn;
-  else if(sym->norm_fn)
-    sym->keyfn = sym->norm_fn;
-  else
-    sym->keyfn = sym->term_fn;
-  return;
+	/*
+	 * Record the action according to its source.
+	 */
+	switch(binder) 
+	{
+		case KTB_USER:
+			sym->user_fn = keyfn;
+			break;
+		case KTB_TERM:
+			sym->term_fn = keyfn;
+			break;
+		case KTB_NORM:
+		default:
+			sym->norm_fn = keyfn;
+			break;
+	};
+	/*
+	 * Which of the current set of bindings should be used?
+	 */
+	if(sym->user_fn)
+		sym->keyfn = sym->user_fn;
+	else if(sym->norm_fn)
+		sym->keyfn = sym->norm_fn;
+	else
+		sym->keyfn = sym->term_fn;
+	return;
 }
 
 /*.......................................................................
@@ -653,37 +693,40 @@ static void _kt_assign_action(KeySym *sym, KtBinder binder, KtKeyFn *keyfn)
  */
 void _kt_clear_bindings(KeyTab *kt, KtBinder binder)
 {
-  int oldkey;   /* The index of a key in the original binding table */
-  int newkey;   /* The index of a key in the updated binding table */
-/*
- * If there is no table, then no bindings exist to be deleted.
- */
-  if(!kt)
-    return;
-/*
- * Clear bindings of the given source.
- */
-  for(oldkey=0; oldkey<kt->nkey; oldkey++)
-    _kt_assign_action(kt->table + oldkey, binder, 0);
-/*
- * Delete entries that now don't have a binding from any source.
- */
-  newkey = 0;
-  for(oldkey=0; oldkey<kt->nkey; oldkey++) {
-    KeySym *sym = kt->table + oldkey;
-    if(!sym->keyfn) {
-      _del_StringMemString(kt->smem, sym->keyseq);
-    } else {
-      if(oldkey != newkey)
-	kt->table[newkey] = *sym;
-      newkey++;
-    };
-  };
-/*
- * Record the number of keys that were kept.
- */
-  kt->nkey = newkey;
-  return;
+	int oldkey;   /* The index of a key in the original binding table */
+	int newkey;   /* The index of a key in the updated binding table */
+	/*
+	 * If there is no table, then no bindings exist to be deleted.
+	 */
+	if(!kt)
+		return;
+	/*
+	 * Clear bindings of the given source.
+	 */
+	for(oldkey=0; oldkey<kt->nkey; oldkey++)
+		_kt_assign_action(kt->table + oldkey, binder, 0);
+	/*
+	 * Delete entries that now don't have a binding from any source.
+	 */
+	newkey = 0;
+	for(oldkey=0; oldkey<kt->nkey; oldkey++) 
+	{
+		KeySym *sym = kt->table + oldkey;
+		if(!sym->keyfn) 
+		{
+			_del_StringMemString(kt->smem, sym->keyseq);
+		} else 
+		{
+			if(oldkey != newkey)
+				kt->table[newkey] = *sym;
+			newkey++;
+		};
+	};
+	/*
+	 * Record the number of keys that were kept.
+	 */
+	kt->nkey = newkey;
+	return;
 }
 
 /*.......................................................................
@@ -700,60 +743,61 @@ void _kt_clear_bindings(KeyTab *kt, KtBinder binder)
  */
 static char _kt_backslash_escape(const char *string, const char **endp)
 {
-  char c;  /* The output character */
-/*
- * Is the backslash followed by one or more octal digits?
- */
-  switch(*string) {
-  case '0': case '1': case '2': case '3':
-  case '4': case '5': case '6': case '7':
-    c = strtol(string, (char **)&string, 8);
-    break;
-  case 'a':
-    c = '\a';
-    string++;
-    break;
-  case 'b':
-    c = '\b';
-    string++;
-    break;
-  case 'e': case 'E': /* Escape */
-    c = GL_ESC_CHAR;
-    string++;
-    break;
-  case 'f':
-    c = '\f';
-    string++;
-    break;
-  case 'n':
-    c = '\n';
-    string++;
-    break;
-  case 'r':
-    c = '\r';
-    string++;
-    break;
-  case 't':
-    c = '\t';
-    string++;
-    break;
-  case 'v':
-    c = '\v';
-    string++;
-    break;
-  case '\0':
-    c = '\\';
-    break;
-  default:
-    c = *string++;
-    break;
-  };
-/*
- * Report the character which follows the escape sequence.
- */
-  if(endp)
-    *endp = string;
-  return c;
+	char c;  /* The output character */
+	/*
+	 * Is the backslash followed by one or more octal digits?
+	 */
+	switch(*string) 
+	{
+		case '0': case '1': case '2': case '3':
+		case '4': case '5': case '6': case '7':
+			c = strtol(string, (char **)&string, 8);
+			break;
+		case 'a':
+			c = '\a';
+			string++;
+			break;
+		case 'b':
+			c = '\b';
+			string++;
+			break;
+		case 'e': case 'E': /* Escape */
+			c = GL_ESC_CHAR;
+			string++;
+			break;
+		case 'f':
+			c = '\f';
+			string++;
+			break;
+		case 'n':
+			c = '\n';
+			string++;
+			break;
+		case 'r':
+			c = '\r';
+			string++;
+			break;
+		case 't':
+			c = '\t';
+			string++;
+			break;
+		case 'v':
+			c = '\v';
+			string++;
+			break;
+		case '\0':
+			c = '\\';
+			break;
+		default:
+			c = *string++;
+			break;
+	};
+	/*
+	 * Report the character which follows the escape sequence.
+	 */
+	if(endp)
+		*endp = string;
+	return c;
 }
 
 /*.......................................................................
@@ -770,7 +814,7 @@ static char _kt_backslash_escape(const char *string, const char **endp)
  */
 static int _kt_is_emacs_meta(const char *string)
 {
-  return *string++ == 'M' && *string++ == '-' && *string;
+	return *string++ == 'M' && *string++ == '-' && *string;
 }
 
 /*.......................................................................
@@ -787,7 +831,7 @@ static int _kt_is_emacs_meta(const char *string)
  */
 static int _kt_is_emacs_ctrl(const char *string)
 {
-  return *string++ == 'C' && *string++ == '-' && *string;
+	return *string++ == 'C' && *string++ == '-' && *string;
 }
 
 /*.......................................................................
@@ -803,23 +847,25 @@ static int _kt_is_emacs_ctrl(const char *string)
  *                                  1 - Error.
  */
 int _kt_add_bindings(KeyTab *kt, KtBinder binder, const KtKeyBinding *bindings,
-		     unsigned n)
+		unsigned n)
 {
-  int i;
-/*
- * Check the arguments.
- */
-  if(!kt || !bindings) {
-    fprintf(stderr, "_kt_add_bindings: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * Install the array of bindings.
- */
-  for(i=0; i<n; i++) {
-    if(_kt_set_keybinding(kt, binder, bindings[i].keyseq, bindings[i].action))
-      return 1;
-  };
-  return 0;
+	int i;
+	/*
+	 * Check the arguments.
+	 */
+	if(!kt || !bindings) 
+	{
+		fprintf(stderr, "_kt_add_bindings: NULL argument(s).\n");
+		return 1;
+	};
+	/*
+	 * Install the array of bindings.
+	 */
+	for(i=0; i<n; i++) 
+	{
+		if(_kt_set_keybinding(kt, binder, bindings[i].keyseq, bindings[i].action))
+			return 1;
+	};
+	return 0;
 }
 

@@ -101,7 +101,7 @@ FILE*           pidfile = NULL;
 static void cleanup_and_exit(int errcode);
 
 
-static void
+    static void
 usage(const char* argv0)
 {
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
@@ -132,7 +132,7 @@ usage(const char* argv0)
 #endif
 }
 
-static void
+    static void
 display_defaults()
 {
     fprintf(stderr, "Defaults:\n");
@@ -159,64 +159,66 @@ display_defaults()
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void
+    void
 add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd(cmd);
 }
 
 
-void
+    void
 add_cmd_action_adaptor(const string& cmd, const list<string>& action,
-		       TemplateTree* tt) throw (ParseError)
+	TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
 }
 
 Rtrmgr::Rtrmgr(const string& module_dir, 
-               const string& command_dir, 
-               const string& template_dir, 
-	       const string& xrl_targets_dir,
-	       const string& config_file,
-	       const list<IPv4>& bind_addrs,
-	       uint16_t bind_port,
-	       bool	do_exec,
-	       bool	do_restart,
-	       bool	verbose,
-	       int32_t quit_time,
-	       bool daemon_mode)
-    : _module_dir(module_dir),
-      _command_dir(command_dir),
-      _template_dir(template_dir),
-      _xrl_targets_dir(xrl_targets_dir),
-      _config_file(config_file),
-      _bind_addrs(bind_addrs),
-      _bind_port(bind_port),
-      _do_exec(do_exec),
-      _do_restart(do_restart),
-      _verbose(verbose),
-      _quit_time(quit_time),
-      _daemon_mode(daemon_mode),
-      _ready(false),
-      _mct(NULL),
-      _xrt(NULL)
+	const string& command_dir, 
+	const string& template_dir, 
+	const string& xrl_targets_dir,
+	const string& config_file,
+	const list<IPv4>& bind_addrs,
+	uint16_t bind_port,
+	bool	do_exec,
+	bool	do_restart,
+	bool	verbose,
+	int32_t quit_time,
+	bool daemon_mode)
+: _module_dir(module_dir),
+    _command_dir(command_dir),
+    _template_dir(template_dir),
+    _xrl_targets_dir(xrl_targets_dir),
+    _config_file(config_file),
+    _bind_addrs(bind_addrs),
+    _bind_port(bind_port),
+    _do_exec(do_exec),
+    _do_restart(do_restart),
+    _verbose(verbose),
+    _quit_time(quit_time),
+    _daemon_mode(daemon_mode),
+    _ready(false),
+    _mct(NULL),
+    _xrt(NULL)
 {
 }
 
 Rtrmgr::~Rtrmgr()
 {
     // Delete allocated state
-    if (_mct != NULL) {
+    if (_mct != NULL) 
+    {
 	delete _mct;
 	_mct = NULL;
     }
-    if (_xrt != NULL) {
+    if (_xrt != NULL) 
+    {
 	delete _xrt;
 	_xrt = NULL;
     }
 }
 
-int
+    int
 Rtrmgr::run()
 {
     int errcode = 0;
@@ -229,31 +231,33 @@ Rtrmgr::run()
     // Print various information
     //
     XLOG_TRACE(_verbose, "Configuration fil          := %s\n",
-	       config_file.c_str());
+	    config_file.c_str());
     XLOG_TRACE(_verbose, "Module directory           := %s\n",
-	       module_dir.c_str());
+	    module_dir.c_str());
     XLOG_TRACE(_verbose, "Command directory          := %s\n",
-	       command_dir.c_str());
+	    command_dir.c_str());
     XLOG_TRACE(_verbose, "Templates directory        := %s\n",
-	       template_dir.c_str());
+	    template_dir.c_str());
     XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
-	       bool_c_str(do_exec));
+	    bool_c_str(do_exec));
     XLOG_TRACE(_verbose, "Restart failed processes   := %s\n",
-	       bool_c_str(do_restart));
+	    bool_c_str(do_restart));
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
-	       bool_c_str(_verbose));
+	    bool_c_str(_verbose));
 
 #ifdef DEBUG_XRLDB
 # define DEBUG_XRLDB_INSTANCE	xrldb
     XRLdb* xrldb = 0;
 
     XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
-	       xrl_targets_dir.c_str());
+	    xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Validate XRL syntax        := %s\n",
-	       bool_c_str(true));
-    try {
+	    bool_c_str(true));
+    try 
+    {
 	xrldb = new XRLdb(_xrl_targets_dir, _verbose);
-    } catch (const InitError& e) {
+    } catch (const InitError& e) 
+    {
 	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
 	return (1);
     }
@@ -265,9 +269,10 @@ Rtrmgr::run()
     // Read the router config template files
     //
     MasterTemplateTree* tt = new MasterTemplateTree(xorp_config_root_dir(),
-						    DEBUG_XRLDB_INSTANCE,
-						    _verbose);
-    if (!tt->load_template_tree(_template_dir, errmsg)) {
+	    DEBUG_XRLDB_INSTANCE,
+	    _verbose);
+    if (!tt->load_template_tree(_template_dir, errmsg)) 
+    {
 	XLOG_ERROR("Shutting down due to an init error: %s", errmsg.c_str());
 	return (1);
     }
@@ -279,21 +284,26 @@ Rtrmgr::run()
     // deletion order.
     //
     FinderServer* fs = NULL;
-    try {
+    try 
+    {
 	fs = new FinderServer( FinderConstants::FINDER_DEFAULT_HOST(),
-			      _bind_port);
-	while (_bind_addrs.empty() == false) {
-	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
+		_bind_port);
+	while (_bind_addrs.empty() == false) 
+	{
+	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) 
+	    {
 		XLOG_WARNING("Finder failed to bind interface %s port %d",
-			     _bind_addrs.front().str().c_str(), _bind_port);
+			_bind_addrs.front().str().c_str(), _bind_port);
 	    }
 	    _bind_addrs.pop_front();
 	}
-    } catch (const InvalidPort& i) {
+    } catch (const InvalidPort& i) 
+    {
 	XLOG_ERROR("%s: a finder may already be running.", i.why().c_str());
 	delete tt;
 	return (1);
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
 	delete tt;
 	return (1);
@@ -309,9 +319,10 @@ Rtrmgr::run()
     // Start the module manager
     //
     ModuleManager mmgr( *this, _do_restart, _verbose,
-		       xorp_binary_root_dir(), module_dir);
+	    xorp_binary_root_dir(), module_dir);
 
-    try {
+    try 
+    {
 	//
 	// Read the router startup configuration file,
 	// start the processes required, and initialize them.
@@ -321,14 +332,15 @@ Rtrmgr::run()
 
 	userdb.load_password_file();
 	_xrt = new XrlRtrmgrInterface(xrl_router, userdb, 
-				      randgen, *this);
+		randgen, *this);
 
 	wait_until_xrl_router_is_ready( xrl_router);
 
 
 	_mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
-				    _verbose);
-	if (_daemon_mode) {
+		_verbose);
+	if (_daemon_mode) 
+	{
 	    _mct->set_task_completed(callback(this, &Rtrmgr::daemonize));
 	}
 	//
@@ -342,17 +354,19 @@ Rtrmgr::run()
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
-	if (_quit_time > 0) {
+	if (_quit_time > 0) 
+	{
 	    quit_timer =
 		EventLoop::instance().new_oneoff_after_ms(_quit_time * 1000,
-					      callback(dflt_sig_handler, SIGTERM));
+			callback(dflt_sig_handler, SIGTERM));
 	}
 
 	_ready = true;
 	//
 	// Loop while handling configuration events and signals
 	//
-	while (xorp_do_run) {
+	while (xorp_do_run) 
+	{
 	    fflush(stdout);
 	    EventLoop::instance().run();
 	    if (_mct->config_failed())
@@ -370,14 +384,16 @@ Rtrmgr::run()
 
 	// Wait until changes due to deleting config have finished
 	// being applied.
-	while (EventLoop::instance().events_pending() && (_mct->commit_in_progress())) {
+	while (EventLoop::instance().events_pending() && (_mct->commit_in_progress())) 
+	{
 	    EventLoop::instance().run();
 	}
 	delete _mct;
 	_mct = NULL;
-    } catch (const InitError& e) {
+    } catch (const InitError& e) 
+    {
 	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
-		   e.why().c_str());
+		e.why().c_str());
 	errcode = 1;
     }
 
@@ -386,12 +402,14 @@ Rtrmgr::run()
 
     // Wait until child processes have terminated
     while ((mmgr.is_shutdown_completed() != true)
-	   && EventLoop::instance().events_pending()) {
+	    && EventLoop::instance().events_pending()) 
+    {
 	EventLoop::instance().run();
     }
 
     // Delete the XRL rtrmgr interface
-    if (_xrt != NULL) {
+    if (_xrt != NULL) 
+    {
 	delete _xrt;
 	_xrt = NULL;
     }
@@ -412,7 +430,8 @@ Rtrmgr::run()
 }
 
 bool 
-Rtrmgr::ready() const {
+Rtrmgr::ready() const 
+{
     if (!_ready)
 	return false;
     if (_mct->commit_in_progress())
@@ -420,32 +439,36 @@ Rtrmgr::ready() const {
     return true;
 }
 
-void
+    void
 Rtrmgr::module_status_changed(const string& module_name,
-			      GenericModule::ModuleStatus status)
+	GenericModule::ModuleStatus status)
 {
     _xrt->module_status_changed(module_name, status);
 }
 
-void
+    void
 open_logfile()
 {
-    if (logfilename.empty()) {
+    if (logfilename.empty()) 
+    {
 	fprintf(stderr, "Empty log filename specified\n");
 	return;
     }
     FILE* logfile;
-    if ((logfile = fopen(logfilename.c_str(), "a")) != NULL) {
-       xlog_add_output(logfile);
-    } else {
+    if ((logfile = fopen(logfilename.c_str(), "a")) != NULL) 
+    {
+	xlog_add_output(logfile);
+    } else 
+    {
 	fprintf(stderr, "Failed to open log file %s\n", logfilename.c_str());
     }
 }
 
-void
+    void
 open_syslog()
 {
-    if (syslogspec.empty()) {
+    if (syslogspec.empty()) 
+    {
 	fprintf(stderr, "Empty syslog spec\n");
 	return;
     }
@@ -454,15 +477,19 @@ open_syslog()
 	fprintf(stderr, "Failed to open syslog spec %s\n", logfilename.c_str());
 }
 
-void handle_atexit(void) {
-    if (do_pidfile && pidfilename.size()) {
+void handle_atexit(void) 
+{
+    if (do_pidfile && pidfilename.size()) 
+    {
 	cout << "In rtrmgr atexit, unlinking: " << pidfilename << endl;
 	unlink(pidfilename.c_str());
     }
 }
 
-void write_pidfile() {
-    if (pidfile) {
+void write_pidfile() 
+{
+    if (pidfile) 
+    {
 	fprintf(pidfile, "%u\n", getpid());
 	fflush(pidfile);
 	fclose(pidfile);
@@ -473,7 +500,7 @@ void write_pidfile() {
     }
 }
 
-void
+    void
 Rtrmgr::daemonize()
 {
     // If not daemonizing, do nothing.
@@ -483,14 +510,16 @@ Rtrmgr::daemonize()
     // Daemonize the XORP process. Close open stdio descriptors,
     // but don't chdir -- we need to stay where we're told to go.
     int newpid = xorp_daemonize(DAEMON_NOCHDIR, DAEMON_CLOSE);
-    if (newpid == -1) {
+    if (newpid == -1) 
+    {
 	fprintf(stderr, "Failed to start as a daemon process\n");
 	cleanup_and_exit(1);
     }
 
     // Make sure we open the pid file in the parent, and the
     // log file in the child. Close fds but don't chdir.
-    if (newpid == 0) {
+    if (newpid == 0) 
+    {
 	// We are now in the child, write out our pid file.
 	write_pidfile();
 	return;
@@ -499,7 +528,7 @@ Rtrmgr::daemonize()
     _exit(0);
 }
 
-int
+    int
 main(int argc, char* const argv[])
 {
     int errcode = 0;
@@ -551,170 +580,185 @@ main(int argc, char* const argv[])
     static const char* optstring =
 	"a:b:c:C:dhi:L:l:m:P:p:q:Nn:rt:v" RTRMGR_X_OPT;
     int c;
-    while ((c = getopt(argc, argv, optstring)) != EOF) {
-	switch(c) {
-	case 'd':
-	    daemon_mode = true;    // XXX must come before other options?
-	    break;
-	case 'a':
-	    //
-	    // User is specifying an IPv4 address to accept finder
-	    // connections from.
-	    //
-	    try {
-		add_permitted_host(IPv4(optarg));
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
-		usage(argv[0]);
-		cleanup_and_exit(1);
-	    }
-	    break;
-	case 'C':
-	    command_dir = optarg;
-	    break;
-	case 'l':
-	    do_logfile = true;
-	    logfilename = optarg;
-	    break;
-	case 'L':
-	    do_syslog = true;
-	    syslogspec = optarg;
-	    break;
-	case 'm':
-	    module_dir = optarg;
-	    break;
-	case 'n':
-	    //
-	    // User is specifying a network address to accept finder
-	    // connections from.
-	    //
-	    try {
-		add_permitted_net(IPv4Net(optarg));
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
-		usage(argv[0]);
-		cleanup_and_exit(1);
-	    }
-	    break;
-	case 't':
-	    template_dir = optarg;
-	    break;
-	case 'b':
-	    /* FALLTHROUGH */
-	case 'c':
-	    config_file = optarg;
-	    break;
+    while ((c = getopt(argc, argv, optstring)) != EOF) 
+    {
+	switch(c) 
+	{
+	    case 'd':
+		daemon_mode = true;    // XXX must come before other options?
+		break;
+	    case 'a':
+		//
+		// User is specifying an IPv4 address to accept finder
+		// connections from.
+		//
+		try 
+		{
+		    add_permitted_host(IPv4(optarg));
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
+		    usage(argv[0]);
+		    cleanup_and_exit(1);
+		}
+		break;
+	    case 'C':
+		command_dir = optarg;
+		break;
+	    case 'l':
+		do_logfile = true;
+		logfilename = optarg;
+		break;
+	    case 'L':
+		do_syslog = true;
+		syslogspec = optarg;
+		break;
+	    case 'm':
+		module_dir = optarg;
+		break;
+	    case 'n':
+		//
+		// User is specifying a network address to accept finder
+		// connections from.
+		//
+		try 
+		{
+		    add_permitted_net(IPv4Net(optarg));
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
+		    usage(argv[0]);
+		    cleanup_and_exit(1);
+		}
+		break;
+	    case 't':
+		template_dir = optarg;
+		break;
+	    case 'b':
+		/* FALLTHROUGH */
+	    case 'c':
+		config_file = optarg;
+		break;
 #ifdef DEBUG_XRLDB
-	case 'x':
-	    xrl_targets_dir = optarg;
-	    break;
+	    case 'x':
+		xrl_targets_dir = optarg;
+		break;
 #endif
-	case 'q':
-	    quit_time = atoi(optarg);
-	    break;
-	case 'N':
-	    do_exec = false;
-	    break;
-	case 'r':
-	    //
-	    // Enable failed processes to be restarted by the rtrmgr.
-	    // Note: this option is not recommended, because it does
-	    // not work properly. E.g., if a process fails during
-	    // reconfiguration via xorpsh, then the rtrmgr itself may
-	    // coredump.
-	    //
-	    do_restart = true;
-	    break;
-	case 'v':
-	    verbose = true;
-	    break;
-	case 'P':
-	    do_pidfile = true;
-	    pidfilename = optarg;
-	    break;
-	case 'p':
-	    bind_port = static_cast<uint16_t>(atoi(optarg));
-	    if (bind_port == 0) {
-		fprintf(stderr, "0 is not a valid port.\n");
-		cleanup_and_exit(1);
-	    }
-	    break;
-	case 'i':
-	    //
-	    // User is specifying which interface to bind finder to
-	    //
-	    try {
-		IPv4 bind_addr = IPv4(optarg);
-		in_addr ina;
-		bind_addr.copy_out(ina);
-		if (is_ip_configured(ina) == false) {
-		    fprintf(stderr,
-			    "%s is not the address of an active interface.\n",
+	    case 'q':
+		quit_time = atoi(optarg);
+		break;
+	    case 'N':
+		do_exec = false;
+		break;
+	    case 'r':
+		//
+		// Enable failed processes to be restarted by the rtrmgr.
+		// Note: this option is not recommended, because it does
+		// not work properly. E.g., if a process fails during
+		// reconfiguration via xorpsh, then the rtrmgr itself may
+		// coredump.
+		//
+		do_restart = true;
+		break;
+	    case 'v':
+		verbose = true;
+		break;
+	    case 'P':
+		do_pidfile = true;
+		pidfilename = optarg;
+		break;
+	    case 'p':
+		bind_port = static_cast<uint16_t>(atoi(optarg));
+		if (bind_port == 0) 
+		{
+		    fprintf(stderr, "0 is not a valid port.\n");
+		    cleanup_and_exit(1);
+		}
+		break;
+	    case 'i':
+		//
+		// User is specifying which interface to bind finder to
+		//
+		try 
+		{
+		    IPv4 bind_addr = IPv4(optarg);
+		    in_addr ina;
+		    bind_addr.copy_out(ina);
+		    if (is_ip_configured(ina) == false) 
+		    {
+			fprintf(stderr,
+				"%s is not the address of an active interface.\n",
+				optarg);
+			cleanup_and_exit(1);
+		    }
+		    bind_addrs.push_back(bind_addr);
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid interface address.\n",
 			    optarg);
 		    cleanup_and_exit(1);
 		}
-		bind_addrs.push_back(bind_addr);
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid interface address.\n",
-			optarg);
+		break;
+	    case 'h':
+		/* FALLTHROUGH */
+	    case '?':
+		/* FALLTHROUGH */
+	    default:
+		usage(argv[0]);
+		display_defaults();
 		cleanup_and_exit(1);
-	    }
-	    break;
-	case 'h':
-	    /* FALLTHROUGH */
-	case '?':
-	    /* FALLTHROUGH */
-	default:
-	    usage(argv[0]);
-	    display_defaults();
-	    cleanup_and_exit(1);
 	}
     }
 
     // Open this before we daemonize things, so that it's in the proper relative
     // file system path.
-    if (do_pidfile) {
+    if (do_pidfile) 
+    {
 	pidfile = fopen(pidfilename.c_str(), "w");
-	if (!pidfile) {
+	if (!pidfile) 
+	{
 	    cerr << "ERROR:  Could not open pidfile: " << pidfilename << " error: "
-		 << strerror(errno) << endl;
+		<< strerror(errno) << endl;
 	}
-	else {
-	    if (!daemon_mode) {
+	else 
+	{
+	    if (!daemon_mode) 
+	    {
 		write_pidfile();
 	    }
 	    // else, will write this later when we daemonize.
 	}
     }
-    else {
+    else 
+    {
 	cout << "Not doing pidfile...\n";
     }
 
     // Open the new log facility now so that all output, up to when we
     // daemonize, will go to the specified log facility.
     if (do_logfile || do_syslog)
-        xlog_remove_default_output();
+	xlog_remove_default_output();
     if (do_logfile)
 	open_logfile();
     if (do_syslog)
 	open_syslog();
 
-   
+
 
     //
     // The main procedure
     //
     Rtrmgr rtrmgr(module_dir, command_dir, template_dir, xrl_targets_dir,
-		  config_file, bind_addrs,
-		  bind_port, do_exec, do_restart, verbose, quit_time,
-		  daemon_mode);
+	    config_file, bind_addrs,
+	    bind_port, do_exec, do_restart, verbose, quit_time,
+	    daemon_mode);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);
 #undef RTRMGR_X_OPT
 }
 
-void
+    void
 cleanup_and_exit(int errcode) 
 {
     //

@@ -30,7 +30,7 @@ PolicyProfiler::PolicyProfiler() : _samplec(0), _stopped(true)
 {
 }
 
-void
+    void
 PolicyProfiler::start()
 {
     XLOG_ASSERT(_stopped);
@@ -40,7 +40,7 @@ PolicyProfiler::start()
     _stopped = false;
 }
 
-void
+    void
 PolicyProfiler::stop()
 {
     TU now = SP::sample();
@@ -54,13 +54,13 @@ PolicyProfiler::stop()
     _samplec++;
 }
 
-unsigned
+    unsigned
 PolicyProfiler::count()
 {
     return _samplec;
 }
 
-PolicyProfiler::TU
+    PolicyProfiler::TU
 PolicyProfiler::sample(unsigned idx)
 {
     XLOG_ASSERT(idx < _samplec);
@@ -68,7 +68,7 @@ PolicyProfiler::sample(unsigned idx)
     return _samples[idx];
 }
 
-void
+    void
 PolicyProfiler::clear()
 {
     _samplec = 0;

@@ -29,13 +29,14 @@
 #include "xrl_target.hh"
 
 
-void go() {
+void go() 
+{
 
     setup_dflt_sighandlers();
 
 
     XrlStdRouter rtr(PolicyTarget::policy_target_name.c_str(),
-		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
+	    FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     PolicyTarget policy_target(rtr);
     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);
@@ -54,14 +55,16 @@ int main(int /* argc */, char* argv[])
     xlog_add_default_output();
     xlog_start();
 
-    try {
+    try 
+    {
 	go();
-    } catch (const PolicyException& e) {
+    } catch (const PolicyException& e) 
+    {
 	XLOG_FATAL("PolicyException: %s",e.str().c_str());
     }
-   
+
     xlog_stop();
     xlog_exit();
-	
+
     exit(0);
 }

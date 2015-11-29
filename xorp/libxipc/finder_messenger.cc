@@ -28,8 +28,8 @@
 #include "libxorp/xlog.h"
 
 FinderMessengerBase::FinderMessengerBase( FinderMessengerManager* fmm,
-					 XrlCmdMap& 		 cmds)
-    :  _manager(fmm), _cmds(cmds)
+	XrlCmdMap& 		 cmds)
+:  _manager(fmm), _cmds(cmds)
 {
     //    _manager.messenger_birth_event(this);
     debug_msg("Constructor for %p\n", this);
@@ -41,13 +41,14 @@ FinderMessengerBase::~FinderMessengerBase()
     debug_msg("Destructor for %p\n", this);
 }
 
-bool
+    bool
 FinderMessengerBase::dispatch_xrl_response(uint32_t	   seqno,
-					   const XrlError& xe,
-					   XrlArgs*	   args)
+	const XrlError& xe,
+	XrlArgs*	   args)
 {
     SeqNoResponseMap::iterator i = _expected_responses.find(seqno);
-    if (_expected_responses.end() == i) {
+    if (_expected_responses.end() == i) 
+    {
 	debug_msg("Attempting to make response for invalid seqno\n");
 	return false;
     }
@@ -59,22 +60,22 @@ FinderMessengerBase::dispatch_xrl_response(uint32_t	   seqno,
     return true;
 }
 
-bool
+    bool
 FinderMessengerBase::store_xrl_response(uint32_t seqno,
-					const SendCallback& scb)
+	const SendCallback& scb)
 {
     SeqNoResponseMap::const_iterator ci = _expected_responses.find(seqno);
     if (_expected_responses.end() != ci)
 	return false;	// A callback appears to be registered with seqno
 
     _expected_responses.insert(
-	SeqNoResponseMap::value_type(seqno, ResponseState(seqno, scb, this))
-	);
-    
+	    SeqNoResponseMap::value_type(seqno, ResponseState(seqno, scb, this))
+	    );
+
     return true;
 }
 
-void
+    void
 FinderMessengerBase::response_timeout(uint32_t seqno)
 {
     // Assert that response existed to be dispatched: it shouldn't be able
@@ -82,12 +83,13 @@ FinderMessengerBase::response_timeout(uint32_t seqno)
     XLOG_ASSERT(dispatch_xrl_response(seqno, XrlError::REPLY_TIMED_OUT(), 0));
 }
 
-void
+    void
 FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
 {
     const XrlCmdEntry* ce = command_map().get_handler(xrl.command());
-	
-    if (0 == ce) {
+
+    if (0 == ce) 
+    {
 	reply(seqno, XrlError::NO_SUCH_METHOD(), 0);
 	return;
     }
@@ -95,24 +97,24 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
     // Announce we're about to dispatch an xrl
     if (manager())
 	manager()->messenger_active_event(this);
-    
+
     ce->dispatch(xrl.args(),
-		 callback(this, &FinderMessengerBase::dispatch_xrl_cb, seqno));
+	    callback(this, &FinderMessengerBase::dispatch_xrl_cb, seqno));
 
     // Announce we've dispatched xrl
     if (manager())
 	manager()->messenger_inactive_event(this);
 }
 
-void
+    void
 FinderMessengerBase::dispatch_xrl_cb(const XrlCmdError &e,
-				     const XrlArgs *reply_args,
-				     uint32_t seqno)
+	const XrlArgs *reply_args,
+	uint32_t seqno)
 {
     reply(seqno, e, XrlCmdError::OKAY() == e ? reply_args : NULL);
 }
 
-void
+    void
 FinderMessengerBase::unhook_manager()
 {
     _manager = 0;

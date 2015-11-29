@@ -29,33 +29,34 @@
 /**
  * @short Base class for all policy filters.
  */
-class FilterBase {
-public:
-    virtual ~FilterBase() {}
-    
-    /**
-     * Configure the filter
-     *
-     * @param str filter configuration.
-     */
-    virtual void configure(const string& str) = 0;
+class FilterBase 
+{
+    public:
+	virtual ~FilterBase() {}
 
-    /**
-     * Reset the filter.
-     *
-     * Filter becomes a NO-operation -- default action should
-     * be returned everytime an acceptRoute is called.
-     */
-    virtual void reset() = 0;
+	/**
+	 * Configure the filter
+	 *
+	 * @param str filter configuration.
+	 */
+	virtual void configure(const string& str) = 0;
 
-    /**
-     * See if a route is accepted by the filter.
-     * The route may be modified by the filter [through VarRW].
-     *
-     * @return true if the route is accepted, false otherwise.
-     * @param varrw the VarRW associated with the route being filtered.
-     */
-    virtual bool acceptRoute(VarRW& varrw) = 0;
+	/**
+	 * Reset the filter.
+	 *
+	 * Filter becomes a NO-operation -- default action should
+	 * be returned everytime an acceptRoute is called.
+	 */
+	virtual void reset() = 0;
+
+	/**
+	 * See if a route is accepted by the filter.
+	 * The route may be modified by the filter [through VarRW].
+	 *
+	 * @return true if the route is accepted, false otherwise.
+	 * @param varrw the VarRW associated with the route being filtered.
+	 */
+	virtual bool acceptRoute(VarRW& varrw) = 0;
 };
 
 #endif // __POLICY_BACKEND_FILTER_BASE_HH__

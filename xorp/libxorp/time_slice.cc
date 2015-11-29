@@ -52,17 +52,17 @@
 //
 
 
-TimeSlice::TimeSlice(uint32_t usec_limit, size_t test_iter_frequency)
-    : _test_iter_frequency(test_iter_frequency),
-      _remain_iter(test_iter_frequency)
+	TimeSlice::TimeSlice(uint32_t usec_limit, size_t test_iter_frequency)
+: _test_iter_frequency(test_iter_frequency),
+	_remain_iter(test_iter_frequency)
 {
-    _time_slice_limit = TimeVal(0, usec_limit);
-    TimerList::system_gettimeofday(&_time_slice_start);
+	_time_slice_limit = TimeVal(0, usec_limit);
+	TimerList::system_gettimeofday(&_time_slice_start);
 }
 
-void
+	void
 TimeSlice::reset()
 {
-    TimerList::system_gettimeofday(&_time_slice_start);
-    _remain_iter = _test_iter_frequency;
+	TimerList::system_gettimeofday(&_time_slice_start);
+	_remain_iter = _test_iter_frequency;
 }

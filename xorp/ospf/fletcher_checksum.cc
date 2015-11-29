@@ -28,40 +28,41 @@
 
 
 /*
-** return number modulo 255 most importantly convert negative numbers
-** to a ones complement representation.
-*/
+ ** return number modulo 255 most importantly convert negative numbers
+ ** to a ones complement representation.
+ */
 inline
-int32_t 
+    int32_t 
 onecomp(int32_t a)
 {
-	int32_t res;
+    int32_t res;
 
-	res = a % 255;
+    res = a % 255;
 
-	if(res <= 0)
-		res = 255 + res;
+    if(res <= 0)
+	res = 255 + res;
 
-	return res;
+    return res;
 }
 
 /*
-** generate iso checksums.
-*/
-void
+ ** generate iso checksums.
+ */
+    void
 fletcher_checksum(uint8_t *bufp, size_t len, size_t off,
-		  int32_t& x, int32_t& y)
+	int32_t& x, int32_t& y)
 {
-        int32_t c0 = 0, c1 = 0;
+    int32_t c0 = 0, c1 = 0;
 
-	for(size_t i = 0; i < len; i++) {
-		c0 = bufp[i] + c0;
-		c1 = c1 + c0;
-	}
-	c0 %= 255;
-	c1 %= 255;
+    for(size_t i = 0; i < len; i++) 
+    {
+	c0 = bufp[i] + c0;
+	c1 = c1 + c0;
+    }
+    c0 %= 255;
+    c1 %= 255;
 
-	off += 1;	// C Arrays are from 0 not 1.
-	x = onecomp(-c1 + (len - off) * c0);
-	y = onecomp(c1 - (len - off + 1) * c0);
+    off += 1;	// C Arrays are from 0 not 1.
+    x = onecomp(-c1 + (len - off) * c0);
+    y = onecomp(c1 - (len - off + 1) * c0);
 }

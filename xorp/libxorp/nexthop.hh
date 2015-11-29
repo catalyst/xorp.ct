@@ -57,46 +57,47 @@
  * anything useful, except to provide a generic handle for the
  * specialized subclasses.
  */
-class NextHop {
-public:
-    /**
-     * Default constructor
-     */
-    NextHop() {}
+class NextHop 
+{
+    public:
+	/**
+	 * Default constructor
+	 */
+	NextHop() {}
 
-    /**
-     * Destructor
-     */
-    virtual ~NextHop() {}
+	/**
+	 * Destructor
+	 */
+	virtual ~NextHop() {}
 
-    /**
-     * Get the nexthop type.
-     *
-     * @return the type of the nexthop.  One of:
-<pre>
-   GENERIC_NEXTHOP		0
-   PEER_NEXTHOP			1
-   ENCAPS_NEXTHOP		2
-   EXTERNAL_NEXTHOP		3
-   DISCARD_NEXTHOP		4
-   UNREACHABLE_NEXTHOP		5
-</pre>
-     */
-protected:
-    static string type_str(int type);
+	/**
+	 * Get the nexthop type.
+	 *
+	 * @return the type of the nexthop.  One of:
+	 <pre>
+	 GENERIC_NEXTHOP		0
+	 PEER_NEXTHOP			1
+	 ENCAPS_NEXTHOP		2
+	 EXTERNAL_NEXTHOP		3
+	 DISCARD_NEXTHOP		4
+	 UNREACHABLE_NEXTHOP		5
+	 </pre>
+	 */
+    protected:
+	static string type_str(int type);
 
-public:
-    virtual int type() const = 0;
+    public:
+	virtual int type() const = 0;
 
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    virtual string str() const { return type_str(type()); }
+	/**
+	 * Convert this nexthop from binary form to presentation format.
+	 *
+	 * @return C++ string with the human-readable ASCII representation
+	 * of the nexthop.
+	 */
+	virtual string str() const { return type_str(type()); }
 
-    friend ostream& operator<<(ostream& os, const NextHop& rhs);
+	friend ostream& operator<<(ostream& os, const NextHop& rhs);
 };
 
 
@@ -106,45 +107,46 @@ public:
  * The information contained is the nexthop address.
  */
 template<class A>
-class IPNextHop : public NextHop {
-public:
-    /**
-     * Constructor from an address.
-     *
-     * @param from_ipaddr @ref IPv4 or @ref IPv6 or @ref IPvX address
-     * to initialize nexthop.
-     */
-    IPNextHop(const A &from_ipaddr);
+class IPNextHop : public NextHop 
+{
+    public:
+	/**
+	 * Constructor from an address.
+	 *
+	 * @param from_ipaddr @ref IPv4 or @ref IPv6 or @ref IPvX address
+	 * to initialize nexthop.
+	 */
+	IPNextHop(const A &from_ipaddr);
 
-    virtual ~IPNextHop() { }
+	virtual ~IPNextHop() { }
 
 #ifdef XORP_USE_USTL
-    IPNextHop() { }
+	IPNextHop() { }
 #endif
 
-    /**
-     * Get the address of the nexthop.
-     *
-     * @return the address of the nexthop.
-     */
-    const A& addr() const { return _addr; }
+	/**
+	 * Get the address of the nexthop.
+	 *
+	 * @return the address of the nexthop.
+	 */
+	const A& addr() const { return _addr; }
 
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+	/**
+	 * Convert this nexthop from binary form to presentation format.
+	 *
+	 * @return C++ string with the human-readable ASCII representation
+	 * of the nexthop.
+	 */
+	string str() const;
 
-    /**
-     * Returns pointer to copy of IPNextHop
-     *
-     * Callers ARE RESPONSIBLE for freeing the memory
-     */
+	/**
+	 * Returns pointer to copy of IPNextHop
+	 *
+	 * Callers ARE RESPONSIBLE for freeing the memory
+	 */
 
-protected:
-    const A _addr;
+    protected:
+	const A _addr;
 };
 
 typedef IPNextHop<IPv4> IPv4NextHop;
@@ -159,34 +161,35 @@ typedef IPNextHop<IPvX> IPvXNextHop;
  * neighbors of this router.  Most IGP nexthops should be PeerNextHops.
  */
 template<class A>
-class IPPeerNextHop : public IPNextHop<A> {
-public:
-    /**
-     * Constructor from an address.
-     *
-     * @param ipv4 @ref IPv4 or @ref IPv6 or @ref IPvX address
-     * to initialize nexthop.
-     */
-    IPPeerNextHop(const A &from_addr);
+class IPPeerNextHop : public IPNextHop<A> 
+{
+    public:
+	/**
+	 * Constructor from an address.
+	 *
+	 * @param ipv4 @ref IPv4 or @ref IPv6 or @ref IPvX address
+	 * to initialize nexthop.
+	 */
+	IPPeerNextHop(const A &from_addr);
 
 #ifdef XORP_USE_USTL
-    IPPeerNextHop() { }
+	IPPeerNextHop() { }
 #endif
 
-    /**
-     * Get the type of the nexthop.
-     *
-     * @return the nexthop type.  In this case, it is PEER_NEXTHOP.
-     */
-    int type() const { return PEER_NEXTHOP; }
+	/**
+	 * Get the type of the nexthop.
+	 *
+	 * @return the nexthop type.  In this case, it is PEER_NEXTHOP.
+	 */
+	int type() const { return PEER_NEXTHOP; }
 
-    IPPeerNextHop* get_copy() { return new IPPeerNextHop<A>(*this); }
+	IPPeerNextHop* get_copy() { return new IPPeerNextHop<A>(*this); }
 
-    void* operator new(size_t size);
-    void operator delete(void* ptr);
+	void* operator new(size_t size);
+	void operator delete(void* ptr);
 
-private:
-    static MemoryPool<IPPeerNextHop<A> >& memory_pool();
+    private:
+	static MemoryPool<IPPeerNextHop<A> >& memory_pool();
 };
 
 typedef IPPeerNextHop<IPv4> IPv4PeerNextHop;
@@ -201,28 +204,29 @@ typedef IPPeerNextHop<IPvX> IPvXPeerNextHop;
  * tunnels.
  */
 template<class A>
-class IPEncapsNextHop : public IPNextHop<A> {
-public:
-    /**
-     * Constructor from an address.
-     *
-     * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
-     * to initialize nexthop.
-     */
-    IPEncapsNextHop(const A &from_addr);
+class IPEncapsNextHop : public IPNextHop<A> 
+{
+    public:
+	/**
+	 * Constructor from an address.
+	 *
+	 * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
+	 * to initialize nexthop.
+	 */
+	IPEncapsNextHop(const A &from_addr);
 
-    /**
-     * Get the type of the nexthop.
-     *
-     * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
-     */
-    int type() const { return ENCAPS_NEXTHOP; }
+	/**
+	 * Get the type of the nexthop.
+	 *
+	 * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
+	 */
+	int type() const { return ENCAPS_NEXTHOP; }
 
 
-private:
-    //_cached_peer is the cached copy of the local peer we send the
-    //encapsulated packet to.
-    IPPeerNextHop<A> *_cached_peer;
+    private:
+	//_cached_peer is the cached copy of the local peer we send the
+	//encapsulated packet to.
+	IPPeerNextHop<A> *_cached_peer;
 };
 
 typedef IPEncapsNextHop<IPv4> IPv4EncapsNextHop;
@@ -242,34 +246,35 @@ typedef IPEncapsNextHop<IPvX> IPvXEncapsNextHop;
  * exit router from the AS, or the entry router to the next AS.
  */
 template<class A>
-class IPExternalNextHop : public IPNextHop<A> {
-public:
-    /**
-     * Constructor from an address.
-     *
-     * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
-     * to initialize nexthop.
-     */
-    IPExternalNextHop(const A &from_addr);
+class IPExternalNextHop : public IPNextHop<A> 
+{
+    public:
+	/**
+	 * Constructor from an address.
+	 *
+	 * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
+	 * to initialize nexthop.
+	 */
+	IPExternalNextHop(const A &from_addr);
 
 #ifdef XORP_USE_USTL
-    IPExternalNextHop() { }
+	IPExternalNextHop() { }
 #endif
 
-    /**
-     * Get the type of the nexthop.
-     *
-     * @return the nexthop type.  In this case, it is EXTERNAL_NEXTHOP.
-     */
-    int type() const { return EXTERNAL_NEXTHOP; }
+	/**
+	 * Get the type of the nexthop.
+	 *
+	 * @return the nexthop type.  In this case, it is EXTERNAL_NEXTHOP.
+	 */
+	int type() const { return EXTERNAL_NEXTHOP; }
 
-    IPExternalNextHop* get_copy() { return new IPExternalNextHop<A>(*this); }
+	IPExternalNextHop* get_copy() { return new IPExternalNextHop<A>(*this); }
 
-    void* operator new(size_t size);
-    void operator delete(void* ptr);
+	void* operator new(size_t size);
+	void operator delete(void* ptr);
 
-private:
-    static MemoryPool<IPExternalNextHop<A> >& memory_pool();
+    private:
+	static MemoryPool<IPExternalNextHop<A> >& memory_pool();
 };
 
 typedef IPExternalNextHop<IPv4> IPv4ExternalNextHop;
@@ -283,22 +288,23 @@ typedef IPExternalNextHop<IPvX> IPvXExternalNextHop;
  * Specialization of @ref NextHop for blackholing traffic efficiently.
  */
 template <class A>
-class DiscardNextHop : public IPNextHop<A> {
-public:
-    /**
-     * Default constructor
-     */
-    DiscardNextHop();
+class DiscardNextHop : public IPNextHop<A> 
+{
+    public:
+	/**
+	 * Default constructor
+	 */
+	DiscardNextHop();
 
-    /**
-     * Get the type of the nexthop.
-     *
-     * @return the nexthop type.  In this case, it is DISCARD_NEXTHOP.
-     */
-    int type() const { return DISCARD_NEXTHOP; }
+	/**
+	 * Get the type of the nexthop.
+	 *
+	 * @return the nexthop type.  In this case, it is DISCARD_NEXTHOP.
+	 */
+	int type() const { return DISCARD_NEXTHOP; }
 
 
-private:
+    private:
 
 };
 
@@ -309,22 +315,23 @@ private:
  * ICMP destination unreachable messages.
  */
 template <class A>
-class UnreachableNextHop : public IPNextHop<A> {
-public:
-    /**
-     * Default constructor
-     */
-    UnreachableNextHop();
+class UnreachableNextHop : public IPNextHop<A> 
+{
+    public:
+	/**
+	 * Default constructor
+	 */
+	UnreachableNextHop();
 
-    /**
-     * Get the type of the nexthop.
-     *
-     * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
-     */
-    int type() const { return UNREACHABLE_NEXTHOP; }
+	/**
+	 * Get the type of the nexthop.
+	 *
+	 * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
+	 */
+	int type() const { return UNREACHABLE_NEXTHOP; }
 
 
-private:
+    private:
 
 };
 

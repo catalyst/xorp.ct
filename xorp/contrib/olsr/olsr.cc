@@ -39,12 +39,12 @@
 
 Olsr::Olsr( IO* io)
     :  _io(io),
-      _fm(*this),
-      _nh(*this, _fm),
-      _tm(*this, _fm, _nh),
-      _er(*this, _fm, _nh),
-      _rm(*this, &_fm, &_nh, &_tm, &_er),
-      _reason("Waiting for IO"), _process_status(PROC_STARTUP)
+    _fm(*this),
+    _nh(*this, _fm),
+    _tm(*this, _fm, _nh),
+    _er(*this, _fm, _nh),
+    _rm(*this, &_fm, &_nh, &_tm, &_er),
+    _reason("Waiting for IO"), _process_status(PROC_STARTUP)
 {
     _nh.set_topology_manager(&_tm);
     _fm.set_neighborhood(&_nh);
@@ -58,11 +58,13 @@ Olsr::Olsr( IO* io)
     //initialize_profiling_variables(_profile);
 }
 
-ProcessStatus
+    ProcessStatus
 Olsr::status(string& reason)
 {
-    if (PROC_STARTUP == _process_status) {
-	if (SERVICE_RUNNING == _io->status()) {
+    if (PROC_STARTUP == _process_status) 
+    {
+	if (SERVICE_RUNNING == _io->status()) 
+	{
 	    _process_status = PROC_READY;
 	    _reason = "Running";
 	}
@@ -72,7 +74,7 @@ Olsr::status(string& reason)
     return _process_status;
 }
 
-void
+    void
 Olsr::shutdown()
 {
     _io->shutdown();
@@ -82,52 +84,52 @@ Olsr::shutdown()
 
 // Methods typically called by code in FaceManager (coming out of us).
 
-void
+    void
 Olsr::receive(const string& interface, const string& vif,
-    IPv4 dst, uint16_t dport, IPv4 src, uint16_t sport,
-    uint8_t* data, uint32_t len)
+	IPv4 dst, uint16_t dport, IPv4 src, uint16_t sport,
+	uint8_t* data, uint32_t len)
 {
     XLOG_TRACE(trace()._packets,
-	       "interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
-	       interface.c_str(), vif.c_str(),
-	       cstring(dst), XORP_UINT_CAST(dport),
-	       cstring(src), XORP_UINT_CAST(sport),
-	       data, len);
+	    "interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
+	    interface.c_str(), vif.c_str(),
+	    cstring(dst), XORP_UINT_CAST(dport),
+	    cstring(src), XORP_UINT_CAST(sport),
+	    data, len);
     debug_msg("interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
-	      interface.c_str(), vif.c_str(),
-	      cstring(dst), XORP_UINT_CAST(dport),
-	      cstring(src), XORP_UINT_CAST(sport),
-	      data, len);
+	    interface.c_str(), vif.c_str(),
+	    cstring(dst), XORP_UINT_CAST(dport),
+	    cstring(src), XORP_UINT_CAST(sport),
+	    data, len);
 
     // TODO: Decode packet in order to pretty-print it.
 
     _fm.receive(interface, vif, dst, dport, src, sport, data, len);
 }
 
-bool
+    bool
 Olsr::transmit(const string& interface, const string& vif,
-    const IPv4& dst, const uint16_t& dport,
-    const IPv4& src, const uint16_t& sport,
-    uint8_t* data, const uint32_t& len)
+	const IPv4& dst, const uint16_t& dport,
+	const IPv4& src, const uint16_t& sport,
+	uint8_t* data, const uint32_t& len)
 {
     XLOG_TRACE(trace()._packets,
-	       "interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
-	       interface.c_str(), vif.c_str(),
-	       cstring(dst), XORP_UINT_CAST(dport),
-	       cstring(src), XORP_UINT_CAST(sport),
-	       data, len);
+	    "interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
+	    interface.c_str(), vif.c_str(),
+	    cstring(dst), XORP_UINT_CAST(dport),
+	    cstring(src), XORP_UINT_CAST(sport),
+	    data, len);
     debug_msg("interface %s vif %s dst %s:%u src %s:%u data %p len %u\n",
-	      interface.c_str(), vif.c_str(),
-	      cstring(dst), XORP_UINT_CAST(dport),
-	      cstring(src), XORP_UINT_CAST(sport),
-	      data, len);
+	    interface.c_str(), vif.c_str(),
+	    cstring(dst), XORP_UINT_CAST(dport),
+	    cstring(src), XORP_UINT_CAST(sport),
+	    data, len);
 
     // TODO: Decode packet in order to pretty-print it.
 
     return _io->send(interface, vif, src, sport, dst, dport, data, len);
 }
 
-uint32_t
+    uint32_t
 Olsr::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
@@ -135,46 +137,46 @@ Olsr::get_mtu(const string& interface)
     return _io->get_mtu(interface);
 }
 
-bool
+    bool
 Olsr::get_broadcast_address(const string& interface,
-			    const string& vif,
-			    const IPv4& address,
-			    IPv4& bcast_address)
+	const string& vif,
+	const IPv4& address,
+	IPv4& bcast_address)
 {
     return _io->get_broadcast_address(interface, vif, address, bcast_address);
 }
 
-bool
+    bool
 Olsr::add_route(IPv4Net net, IPv4 nexthop, uint32_t faceid,
-		uint32_t metric, const PolicyTags& policytags)
+	uint32_t metric, const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d policy %s\n",
-	      cstring(net), cstring(nexthop), metric, cstring(policytags));
+	    cstring(net), cstring(nexthop), metric, cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
-	       "Add route "
-	       "Net %s Nexthop %s metric %d policy %s\n",
-	       cstring(net), cstring(nexthop), metric, cstring(policytags));
+	    "Add route "
+	    "Net %s Nexthop %s metric %d policy %s\n",
+	    cstring(net), cstring(nexthop), metric, cstring(policytags));
 
     return _io->add_route(net, nexthop, faceid, metric, policytags);
 }
 
-bool
+    bool
 Olsr::replace_route(IPv4Net net, IPv4 nexthop, uint32_t faceid,
-		    uint32_t metric, const PolicyTags& policytags)
+	uint32_t metric, const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d policy %s\n",
-	      cstring(net), cstring(nexthop), metric, cstring(policytags));
+	    cstring(net), cstring(nexthop), metric, cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
-	       "Replace route "
-	       "Net %s Nexthop %s metric %d policy %s\n",
-	       cstring(net), cstring(nexthop), metric, cstring(policytags));
+	    "Replace route "
+	    "Net %s Nexthop %s metric %d policy %s\n",
+	    cstring(net), cstring(nexthop), metric, cstring(policytags));
 
     return _io->replace_route(net, nexthop, faceid, metric, policytags);
 }
 
-bool
+    bool
 Olsr::delete_route(IPv4Net net)
 {
     debug_msg("Net %s\n", cstring(net));
@@ -184,45 +186,46 @@ Olsr::delete_route(IPv4Net net)
     return _io->delete_route(net);
 }
 
-bool
+    bool
 Olsr::is_vif_broadcast_capable(const string& interface, const string& vif)
 {
     return _io->is_vif_broadcast_capable(interface, vif);
 }
 
-bool
+    bool
 Olsr::is_vif_multicast_capable(const string& interface, const string& vif)
 {
     return _io->is_vif_multicast_capable(interface, vif);
 }
 
-bool
+    bool
 Olsr::enable_address(const string& interface, const string& vif,
-		     const IPv4& address, const uint16_t& port,
-		     const IPv4& all_nodes_address)
+	const IPv4& address, const uint16_t& port,
+	const IPv4& all_nodes_address)
 {
     return _io->enable_address(interface, vif, address, port,
-			       all_nodes_address);
+	    all_nodes_address);
 }
 
-bool
+    bool
 Olsr::disable_address(const string& interface, const string& vif,
-		      const IPv4& address, const uint16_t& port)
+	const IPv4& address, const uint16_t& port)
 {
     return _io->disable_address(interface, vif, address, port);
 }
 
 // Methods typically called by XRL target (going into us).
 
-bool
+    bool
 Olsr::bind_address(const string& interface,
-		   const string& vif,
-		   const IPv4& local_addr,
-		   const uint32_t& local_port,
-		   const IPv4& all_nodes_addr,
-		   const uint32_t& all_nodes_port)
+	const string& vif,
+	const IPv4& local_addr,
+	const uint32_t& local_port,
+	const IPv4& all_nodes_addr,
+	const uint32_t& all_nodes_port)
 {
-    try {
+    try 
+    {
 	OlsrTypes::FaceID faceid = face_manager().create_face(interface, vif);
 
 	face_manager().set_local_addr(faceid, local_addr);
@@ -241,10 +244,11 @@ Olsr::bind_address(const string& interface,
     return false;
 }
 
-bool
+    bool
 Olsr::unbind_address(const string& interface, const string& vif)
 {
-    try {
+    try 
+    {
 	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
 
 	// TODO: xrlio teardown.
@@ -254,27 +258,29 @@ Olsr::unbind_address(const string& interface, const string& vif)
     return false;
 }
 
-bool
+    bool
 Olsr::set_interface_enabled(const string& interface, const string& vif,
-			    const bool enabled)
+	const bool enabled)
 {
-    try {
+    try 
+    {
 	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
 
 	bool success = face_manager().set_face_enabled(faceid, enabled);
 	debug_msg("%s/%s %senabled ok\n",
-		  interface.c_str(), vif.c_str(), success ? "" : "not ");
+		interface.c_str(), vif.c_str(), success ? "" : "not ");
 	return success;
     } catch (...) {}
 
     return false;
 }
 
-bool
+    bool
 Olsr::get_interface_enabled(const string& interface, const string& vif,
-			    bool& enabled)
+	bool& enabled)
 {
-    try {
+    try 
+    {
 	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
 
 	enabled = face_manager().get_face_enabled(faceid);
@@ -285,14 +291,14 @@ Olsr::get_interface_enabled(const string& interface, const string& vif,
     return false;
 }
 
-bool
+    bool
 Olsr::get_interface_stats(const string& interface, const string& vif,
-			  FaceCounters& stats)
+	FaceCounters& stats)
 {
     return face_manager().get_face_stats(interface, vif, stats);
 }
 
-bool
+    bool
 Olsr::clear_database()
 {
     // Clear links first. This will nuke all the neighbors.
@@ -312,29 +318,29 @@ Olsr::clear_database()
     return true;
 }
 
-void
+    void
 Olsr::configure_filter(const uint32_t& filter, const string& conf)
 {
     _policy_filters.configure(filter, conf);
 }
 
-void
+    void
 Olsr::reset_filter(const uint32_t& filter)
 {
     _policy_filters.reset(filter);
 }
 
-void
+    void
 Olsr::push_routes()
 {
     _rm.push_routes();
 }
 
-bool
+    bool
 Olsr::originate_external_route(const IPv4Net& net,
-			       const IPv4& nexthop,
-			       const uint32_t& metric,
-			       const PolicyTags& policytags)
+	const IPv4& nexthop,
+	const uint32_t& metric,
+	const PolicyTags& policytags)
 {
     return _er.originate_hna_route_out(net);
 
@@ -343,10 +349,11 @@ Olsr::originate_external_route(const IPv4Net& net,
     UNUSED(policytags);
 }
 
-bool
+    bool
 Olsr::withdraw_external_route(const IPv4Net& net)
 {
-    try {
+    try 
+    {
 	_er.withdraw_hna_route_out(net);
 	return true;
     } catch (...) {}

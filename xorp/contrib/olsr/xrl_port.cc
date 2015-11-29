@@ -55,24 +55,24 @@
 #endif /* !defined(IPTOS_PREC_INTERNETCONTROL) */
 
 XrlPort::XrlPort(
-    IO*		    io,
-    XrlRouter&	    xrl_router,
-    const string&   ssname,
-    const string&   ifname,
-    const string&   vifname,
-    const IPv4&	    local_addr,
-    const uint16_t  local_port,
-    const IPv4&	    remote_addr)
+	IO*		    io,
+	XrlRouter&	    xrl_router,
+	const string&   ssname,
+	const string&   ifname,
+	const string&   vifname,
+	const IPv4&	    local_addr,
+	const uint16_t  local_port,
+	const IPv4&	    remote_addr)
     : ServiceBase("OlsrXrlPort"),
-      _io(io),
-      _xrl_router(xrl_router),
-      _ss(ssname),
-      _ifname(ifname),
-      _vifname(vifname),
-      _local_addr(local_addr),
-      _local_port(local_port),
-      _pending(false),
-      _is_undirected_broadcast(false)
+    _io(io),
+    _xrl_router(xrl_router),
+    _ss(ssname),
+    _ifname(ifname),
+    _vifname(vifname),
+    _local_addr(local_addr),
+    _local_port(local_port),
+    _pending(false),
+    _is_undirected_broadcast(false)
 {
     if (remote_addr == IPv4::ALL_ONES())
 	_is_undirected_broadcast = true;
@@ -82,7 +82,7 @@ XrlPort::~XrlPort()
 {
 }
 
-int
+    int
 XrlPort::startup()
 {
     debug_msg("%p: startup()\n", this);
@@ -91,16 +91,17 @@ XrlPort::startup()
 
     set_status(SERVICE_STARTING);
 
-    if (startup_socket() == false) {
+    if (startup_socket() == false) 
+    {
 	set_status(SERVICE_FAILED,
-		   "Failed to find appropriate socket server.");
+		"Failed to find appropriate socket server.");
 	return XORP_ERROR;
     }
 
     return XORP_OK;
 }
 
-int
+    int
 XrlPort::shutdown()
 {
     debug_msg("%p: shutdown()\n", this);
@@ -109,26 +110,28 @@ XrlPort::shutdown()
 
     set_status(SERVICE_SHUTTING_DOWN);
 
-    if (request_close() == true) {
+    if (request_close() == true) 
+    {
 	set_status(SERVICE_SHUTDOWN);
     }
 
     return XORP_OK;
 }
 
-bool
+    bool
 XrlPort::startup_socket()
 {
-    if (! request_udp_open_bind_broadcast()) {
+    if (! request_udp_open_bind_broadcast()) 
+    {
 	set_status(SERVICE_FAILED,
-		  "Failed sending UDP broadcast socket open request.");
+		"Failed sending UDP broadcast socket open request.");
 	return false;
     }
 
     return true;
 }
 
-bool
+    bool
 XrlPort::request_udp_open_bind_broadcast()
 {
     XrlSocket4V0p1Client cl(&_xrl_router);
@@ -139,34 +142,36 @@ XrlPort::request_udp_open_bind_broadcast()
     // BSD undirected broadcast have now been moved into the FEA.
     debug_msg("%p: sending udp_open_bind_broadcast\n", this);
     return cl.send_udp_open_bind_broadcast(_ss.c_str(),
-			    _xrl_router.instance_name(),
-			    _ifname,
-			    _vifname,
-			    _local_port,
-			    _local_port,		// XXX
-			    true,			// reuse port
-			    _is_undirected_broadcast,
-			    false,			// don't connect()
-			    callback(this,
-			             &XrlPort::udp_open_bind_broadcast_cb));
+	    _xrl_router.instance_name(),
+	    _ifname,
+	    _vifname,
+	    _local_port,
+	    _local_port,		// XXX
+	    true,			// reuse port
+	    _is_undirected_broadcast,
+	    false,			// don't connect()
+	    callback(this,
+		&XrlPort::udp_open_bind_broadcast_cb));
 }
 
-void
+    void
 XrlPort::udp_open_bind_broadcast_cb(const XrlError& e, const string* psid)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	set_status(SERVICE_FAILED, "Failed to open a UDP socket.");
 	return;
     }
 
     _sockid = *psid;
 
-    if (request_tos() == false) {
+    if (request_tos() == false) 
+    {
 	set_status(SERVICE_FAILED, "Failed to set IP TOS bits.");
     }
 }
 
-bool
+    bool
 XrlPort::request_tos()
 {
     XrlSocket4V0p1Client cl(&_xrl_router);
@@ -179,10 +184,11 @@ XrlPort::request_tos()
 	    callback(this, &XrlPort::tos_cb));
 }
 
-void
+    void
 XrlPort::tos_cb(const XrlError& e)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_WARNING("Failed to set TOS.");
 	return;
     }
@@ -190,7 +196,7 @@ XrlPort::tos_cb(const XrlError& e)
     socket_setup_complete();
 }
 
-void
+    void
 XrlPort::socket_setup_complete()
 {
     _pending = false;
@@ -203,25 +209,26 @@ XrlPort::socket_setup_complete()
 // Close operations.
 //
 
-bool
+    bool
 XrlPort::request_close()
 {
     XrlSocket4V0p1Client cl(&_xrl_router);
 
     debug_msg("%p: sending close\n", this);
     bool success = cl.send_close(_ss.c_str(),
-				 _sockid,
-				 callback(this, &XrlPort::close_cb));
+	    _sockid,
+	    callback(this, &XrlPort::close_cb));
     if (success)
 	_pending = true;
 
     return success;
 }
 
-void
+    void
 XrlPort::close_cb(const XrlError& e)
 {
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	set_status(SERVICE_FAILED, "Failed to close UDP socket.");
     }
 
@@ -235,12 +242,13 @@ XrlPort::close_cb(const XrlError& e)
 // Send operations.
 //
 
-bool
+    bool
 XrlPort::send_to(const IPv4& dst_addr,
-		 const uint16_t dst_port,
-		 const vector<uint8_t>& payload)
+	const uint16_t dst_port,
+	const vector<uint8_t>& payload)
 {
-    if (_pending) {
+    if (_pending) 
+    {
 	XLOG_WARNING("Port %p: send skipped (pending XRL)\n", this);
 	return false;
     }
@@ -248,28 +256,29 @@ XrlPort::send_to(const IPv4& dst_addr,
     XrlSocket4V0p1Client cl(&_xrl_router);
 
     bool success = cl.send_send_to(_ss.c_str(),
-				   _sockid,
-				   dst_addr,
-				   dst_port,
-				   payload,
-				   callback(this, &XrlPort::send_cb));
+	    _sockid,
+	    dst_addr,
+	    dst_port,
+	    payload,
+	    callback(this, &XrlPort::send_cb));
 
     debug_msg("Sent %u bytes to %s:%u from %s:%u\n",
-	      XORP_UINT_CAST(payload.size()),
-	      cstring(dst_addr), XORP_UINT_CAST(dst_port),
-	      cstring(_local_addr), XORP_UINT_CAST(_local_port));
+	    XORP_UINT_CAST(payload.size()),
+	    cstring(dst_addr), XORP_UINT_CAST(dst_port),
+	    cstring(_local_addr), XORP_UINT_CAST(_local_port));
 
     return success;
 }
 
 // TODO: Add an I/O completion notification.
 
-void
+    void
 XrlPort::send_cb(const XrlError& e)
 {
     debug_msg("SendCB %s\n", e.str().c_str());
 
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_WARNING("Failed to send datagram.");
     }
 

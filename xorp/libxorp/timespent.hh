@@ -36,65 +36,66 @@ static const int TIMESPENT_LIMIT = 10;	// Time allowed in seconds.
  * the macros below. Thus allowing file, function and line number
  * information to be captured.
  */
-class TimeSpent {
-public:
-    TimeSpent(const char *function, const char *file, int line, int limit)
-	: _function(function), _file(file), _line(line),
-	  _limit(TimeVal(limit,0))
+class TimeSpent 
+{
+    public:
+	TimeSpent(const char *function, const char *file, int line, int limit)
+	    : _function(function), _file(file), _line(line),
+	    _limit(TimeVal(limit,0))
     {
 	TimerList::system_gettimeofday(&_start);
     }
 
-    /**
-     * @param delta the time that has passed.
-     * @return true if the alloted time has been exceeded.
-     */
-    bool overlimit(TimeVal& delta)
-    {
-	TimeVal now;
-	TimerList::system_gettimeofday(&now);
+	/**
+	 * @param delta the time that has passed.
+	 * @return true if the alloted time has been exceeded.
+	 */
+	bool overlimit(TimeVal& delta)
+	{
+	    TimeVal now;
+	    TimerList::system_gettimeofday(&now);
 
-	delta = now - _start;
+	    delta = now - _start;
 
-	return delta > _limit;
-    }
+	    return delta > _limit;
+	}
 
-    /**
-     * @return true if the alloted time has been exceeded.
-     */
-    bool overlimit()
-    {
-	TimeVal delta;
+	/**
+	 * @return true if the alloted time has been exceeded.
+	 */
+	bool overlimit()
+	{
+	    TimeVal delta;
 
-	return overlimit(delta);
-    }
+	    return overlimit(delta);
+	}
 
-    /**
-     * Has the alloted time been exceeded? If it has print a warning message.
-     */
-    void check(const char *function, const char *file, int line)
-    {
-	TimeVal delta;
-	UNUSED(function);
-	UNUSED(file);
-	UNUSED(line);
+	/**
+	 * Has the alloted time been exceeded? If it has print a warning message.
+	 */
+	void check(const char *function, const char *file, int line)
+	{
+	    TimeVal delta;
+	    UNUSED(function);
+	    UNUSED(file);
+	    UNUSED(line);
 
-	if (overlimit(delta))
-	    XLOG_WARNING("Function %s +%d %s took %s\n", function, line, file,
-		   delta.str().c_str());
-    }
+	    if (overlimit(delta))
+		XLOG_WARNING("Function %s +%d %s took %s\n", function, line, file,
+			delta.str().c_str());
+	}
 
-    ~TimeSpent()
-    {
-	check(_function, _file, _line);
-    }
+	~TimeSpent()
+	{
+	    check(_function, _file, _line);
+	}
 
-private:
-    TimeVal _start;
-    const char *_function;
-    const char *_file;
-    int _line;
-    TimeVal _limit;
+    private:
+	TimeVal _start;
+	const char *_function;
+	const char *_file;
+	int _line;
+	TimeVal _limit;
 };
 
 #ifdef	CHECK_TIME
@@ -102,7 +103,7 @@ private:
  * To be placed in suspect method.
  */
 #define	TIMESPENT()       TimeSpent _t(__FUNCTION__,__FILE__,__LINE__, \
-				       TIMESPENT_LIMIT)
+	TIMESPENT_LIMIT)
 /**
  * Verify that thus far into the method the time limit has not been exceeded.
  *

@@ -41,51 +41,52 @@
 //
 
 
-FibConfigEntryObserverDummy::FibConfigEntryObserverDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntryObserver(fea_data_plane_manager)
+	FibConfigEntryObserverDummy::FibConfigEntryObserverDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigEntryObserver(fea_data_plane_manager)
 {
 }
 
 FibConfigEntryObserverDummy::~FibConfigEntryObserverDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to observe "
-		   "information about forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to observe "
+				"information about forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigEntryObserverDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigEntryObserverDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 FibConfigEntryObserverDummy::receive_data(vector<uint8_t>& buffer)
 {
-    UNUSED(buffer);
+	UNUSED(buffer);
 }

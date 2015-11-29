@@ -37,93 +37,98 @@
 // The mechanism to obtain the information is Dummy (for testing purpose).
 //
 
-FirewallGetDummy::FirewallGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : FirewallGet(fea_data_plane_manager)
+	FirewallGetDummy::FirewallGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: FirewallGet(fea_data_plane_manager)
 {
 }
 
 FirewallGetDummy::~FirewallGetDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to get "
-		   "information about firewall entries from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to get "
+				"information about firewall entries from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FirewallGetDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FirewallGetDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FirewallGetDummy::get_table4(list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
+		string& error_msg)
 {
-    FirewallSetDummy* firewall_set_dummy;
-    FirewallSetDummy::FirewallTrie::const_iterator iter;
+	FirewallSetDummy* firewall_set_dummy;
+	FirewallSetDummy::FirewallTrie::const_iterator iter;
 
-    firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
-    if (firewall_set_dummy == NULL) {
-	error_msg = c_format("Firewall plugin mismatch: expected "
-			     "Dummy firewall set plugin mot found");
-	return (XORP_ERROR);
-    }
+	firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
+	if (firewall_set_dummy == NULL) 
+	{
+		error_msg = c_format("Firewall plugin mismatch: expected "
+				"Dummy firewall set plugin mot found");
+		return (XORP_ERROR);
+	}
 
-    for (iter = firewall_set_dummy->firewall_entries4().begin();
-	 iter != firewall_set_dummy->firewall_entries4().end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = iter->second;
-	firewall_entry_list.push_back(firewall_entry);
-    }
+	for (iter = firewall_set_dummy->firewall_entries4().begin();
+			iter != firewall_set_dummy->firewall_entries4().end();
+			++iter) 
+	{
+		const FirewallEntry& firewall_entry = iter->second;
+		firewall_entry_list.push_back(firewall_entry);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 FirewallGetDummy::get_table6(list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
+		string& error_msg)
 {
-    FirewallSetDummy* firewall_set_dummy;
-    FirewallSetDummy::FirewallTrie::const_iterator iter;
+	FirewallSetDummy* firewall_set_dummy;
+	FirewallSetDummy::FirewallTrie::const_iterator iter;
 
-    firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
-    if (firewall_set_dummy == NULL) {
-	error_msg = c_format("Firewall plugin mismatch: expected "
-			     "Dummy firewall set plugin mot found");
-	return (XORP_ERROR);
-    }
+	firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
+	if (firewall_set_dummy == NULL) 
+	{
+		error_msg = c_format("Firewall plugin mismatch: expected "
+				"Dummy firewall set plugin mot found");
+		return (XORP_ERROR);
+	}
 
-    for (iter = firewall_set_dummy->firewall_entries6().begin();
-	 iter != firewall_set_dummy->firewall_entries6().end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = iter->second;
-	firewall_entry_list.push_back(firewall_entry);
-    }
+	for (iter = firewall_set_dummy->firewall_entries6().begin();
+			iter != firewall_set_dummy->firewall_entries6().end();
+			++iter) 
+	{
+		const FirewallEntry& firewall_entry = iter->second;
+		firewall_entry_list.push_back(firewall_entry);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }

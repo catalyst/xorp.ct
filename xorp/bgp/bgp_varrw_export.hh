@@ -31,27 +31,28 @@
  * where the advertisement is being sent.
  */
 template <class A>
-class BGPVarRWExport : public BGPVarRW<A> {
-public:
-    /**
-     * same as BGPVarRW but returns a different neighbor.
-     *
-     * @param name the name of the filter printed while tracing.
-     * @param neighbor value to return for neighbor variable.
-     */
-    BGPVarRWExport(const string& name, const string& neighbor);
+class BGPVarRWExport : public BGPVarRW<A> 
+{
+	public:
+		/**
+		 * same as BGPVarRW but returns a different neighbor.
+		 *
+		 * @param name the name of the filter printed while tracing.
+		 * @param neighbor value to return for neighbor variable.
+		 */
+		BGPVarRWExport(const string& name, const string& neighbor);
 
-protected:
-    /**
-     * read the neighbor variable---the peer the advertisement is about to be
-     * sent to.
-     *
-     * @return the neighbor variable.
-     */
-     Element* read_neighbor();
+	protected:
+		/**
+		 * read the neighbor variable---the peer the advertisement is about to be
+		 * sent to.
+		 *
+		 * @return the neighbor variable.
+		 */
+		Element* read_neighbor();
 
-private:
-    const string _neighbor;
+	private:
+		const string _neighbor;
 };
 
 #endif // __BGP_BGP_VARRW_EXPORT_HH__

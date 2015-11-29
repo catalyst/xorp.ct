@@ -31,14 +31,15 @@
  * The VarMap registers interest in known protocols. Finally, the filter manager
  * may be informed about which processes are alive.
  */
-class ProcessWatchBase {
-public:
-    virtual ~ProcessWatchBase() {}
+class ProcessWatchBase 
+{
+    public:
+	virtual ~ProcessWatchBase() {}
 
-    /**
-     * @param proto protocol to register interest in.
-     */
-    virtual void add_interest(const string& proto) = 0;
+	/**
+	 * @param proto protocol to register interest in.
+	 */
+	virtual void add_interest(const string& proto) = 0;
 };
 
 #endif // __POLICY_PROCESS_WATCH_BASE_HH__

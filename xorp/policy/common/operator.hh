@@ -25,56 +25,56 @@
 #include "operator_base.hh"
 
 #define DEFINE_OPER(name,human,parent) \
-class name : public parent { \
-public: \
-    static Hash _hash; \
-    name() : parent(_hash) {} \
-    ~name() {} \
-    string str() const { return #human; } \
-    Hash hash() const { return _hash; } \
-    void set_hash(const Hash& x) const { _hash = x; } \
-}; 
+    class name : public parent { \
+	public: \
+		static Hash _hash; \
+	name() : parent(_hash) {} \
+	~name() {} \
+	string str() const { return #human; } \
+	Hash hash() const { return _hash; } \
+	void set_hash(const Hash& x) const { _hash = x; } \
+    }; 
 
 #define DEFINE_UNOPER(name,human) \
-DEFINE_OPER(name,human,UnOper)
+    DEFINE_OPER(name,human,UnOper)
 
 #define DEFINE_BINOPER(name,human) \
-DEFINE_OPER(name,human,BinOper)
+    DEFINE_OPER(name,human,BinOper)
 
 // Logical operators
-DEFINE_BINOPER(OpAnd,AND)
-DEFINE_BINOPER(OpOr,OR)
+    DEFINE_BINOPER(OpAnd,AND)
+    DEFINE_BINOPER(OpOr,OR)
 DEFINE_BINOPER(OpXor,XOR)
 
-// Relational operators
-DEFINE_BINOPER(OpEq,==)
-DEFINE_BINOPER(OpNe,!=)
-DEFINE_BINOPER(OpLt,<)
-DEFINE_BINOPER(OpGt,>)
-DEFINE_BINOPER(OpLe,<=)
+    // Relational operators
+    DEFINE_BINOPER(OpEq,==)
+    DEFINE_BINOPER(OpNe,!=)
+    DEFINE_BINOPER(OpLt,<)
+    DEFINE_BINOPER(OpGt,>)
+    DEFINE_BINOPER(OpLe,<=)
 DEFINE_BINOPER(OpGe,>=)
 
-// Math operators
-DEFINE_BINOPER(OpAdd,+)
-DEFINE_BINOPER(OpSub,-)
-DEFINE_BINOPER(OpMul,*)
-DEFINE_BINOPER(OpDiv,/)
-DEFINE_BINOPER(OpLShift,<<)
-DEFINE_BINOPER(OpRShift,>>)
-DEFINE_BINOPER(OpBitAnd,&)
-DEFINE_BINOPER(OpBitOr,|)
+    // Math operators
+    DEFINE_BINOPER(OpAdd,+)
+    DEFINE_BINOPER(OpSub,-)
+    DEFINE_BINOPER(OpMul,*)
+    DEFINE_BINOPER(OpDiv,/)
+    DEFINE_BINOPER(OpLShift,<<)
+    DEFINE_BINOPER(OpRShift,>>)
+    DEFINE_BINOPER(OpBitAnd,&)
+    DEFINE_BINOPER(OpBitOr,|)
 DEFINE_BINOPER(OpBitXor,^)
 
 
-// Regular expression operator
+    // Regular expression operator
 DEFINE_BINOPER(OpRegex,REGEX)
 
 DEFINE_BINOPER(OpCtr,CTR)
 
 DEFINE_BINOPER(OpNEInt,NON_EMPTY_INTERSECTION)
 
-// Unary operators
-DEFINE_UNOPER(OpNot,NOT)
+    // Unary operators
+    DEFINE_UNOPER(OpNot,NOT)
 DEFINE_UNOPER(OpHead,HEAD)
 
 #endif // __POLICY_COMMON_OPERATOR_HH__

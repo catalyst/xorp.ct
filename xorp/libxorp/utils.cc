@@ -26,7 +26,7 @@
 #include "utils.hh"
 
 
-list<string>
+    list<string>
 split(const string& s, char ch)
 {
     list<string> parts;
@@ -34,7 +34,8 @@ split(const string& s, char ch)
     size_t ix;
 
     ix = s2.find(ch);
-    while (ix != string::npos) {
+    while (ix != string::npos) 
+    {
 	parts.push_back(s2.substr(0, ix));
 	s2 = s2.substr(ix + 1, s2.size() - ix);
 	ix = s2.find(ch);
@@ -44,19 +45,22 @@ split(const string& s, char ch)
     return parts;
 }
 
-string
+    string
 strip_empty_spaces(const string& s)
 {
     string res = s;
 
     // Strip the heading and trailing empty spaces
-    while (!res.empty()) {
+    while (!res.empty()) 
+    {
 	size_t len = res.length();
-	if ((res[0] == ' ') || (res[0] == '\t')) {
+	if ((res[0] == ' ') || (res[0] == '\t')) 
+	{
 	    res = res.substr(1, len - 1);
 	    continue;
 	}
-	if ((res[len - 1] == ' ') || (res[len - 1] == '\t')) {
+	if ((res[len - 1] == ' ') || (res[len - 1] == '\t')) 
+	{
 	    res = res.substr(0, res.length() - 1);
 	    continue;
 	}
@@ -66,7 +70,7 @@ strip_empty_spaces(const string& s)
     return res;
 }
 
-bool
+    bool
 has_empty_space(const string& s)
 {
     string::size_type space;
@@ -82,28 +86,30 @@ has_empty_space(const string& s)
 }
 
 
-const char*
+    const char*
 xorp_basename(const char* argv0)
 {
     const char* p = strrchr(argv0, PATH_DELIMITER_CHAR);
-    if (p != NULL) {
+    if (p != NULL) 
+    {
 	return p + 1;
     }
     return argv0;
 }
 
-FILE*
+    FILE*
 xorp_make_temporary_file(const string& tmp_dir,
-			 const string& filename_template,
-			 string& final_filename,
-			 string& errmsg)
+	const string& filename_template,
+	string& final_filename,
+	string& errmsg)
 {
     char filename[MAXPATHLEN];
     list<string> cand_tmp_dirs;
     char* value;
     FILE* fp;
 
-    if (filename_template.empty()) {
+    if (filename_template.empty()) 
+    {
 	errmsg = "Empty file name template";
 	return (NULL);
     }
@@ -137,7 +143,8 @@ xorp_make_temporary_file(const string& tmp_dir,
     // Find the first directory that allows us to create the temporary file
     //
     list<string>::iterator iter;
-    for (iter = cand_tmp_dirs.begin(); iter != cand_tmp_dirs.end(); ++iter) {
+    for (iter = cand_tmp_dirs.begin(); iter != cand_tmp_dirs.end(); ++iter) 
+    {
 	string tmp_dir = *iter;
 	if (tmp_dir.empty())
 	    continue;
@@ -150,9 +157,9 @@ xorp_make_temporary_file(const string& tmp_dir,
 
 	// Compose the temporary file name and try to create the file
 	string tmp_filename = tmp_dir + PATH_DELIMITER_STRING +
-			      filename_template + ".XXXXXX";
+	    filename_template + ".XXXXXX";
 	snprintf(filename, sizeof(filename)/sizeof(filename[0]), "%s",
-		 tmp_filename.c_str());
+		tmp_filename.c_str());
 
 	int fd = mkstemp(filename);
 	if (fd == -1)
@@ -160,7 +167,8 @@ xorp_make_temporary_file(const string& tmp_dir,
 
 	// Associate a stream with the file descriptor
 	fp = fdopen(fd, "w+");
-	if (fp == NULL) {
+	if (fp == NULL) 
+	{
 	    close(fd);
 	    continue;
 	}

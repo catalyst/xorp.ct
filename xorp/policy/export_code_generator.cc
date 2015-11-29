@@ -29,16 +29,16 @@
 
 
 ExportCodeGenerator::ExportCodeGenerator(
-			const string& proto, 
-			const SourceMatchCodeGenerator::Tags& t,
-			const VarMap& varmap,
-			PolicyMap& pmap) : 
-	CodeGenerator(proto, filter::EXPORT, varmap, pmap), _tags(t)
+	const string& proto, 
+	const SourceMatchCodeGenerator::Tags& t,
+	const VarMap& varmap,
+	PolicyMap& pmap) : 
+    CodeGenerator(proto, filter::EXPORT, varmap, pmap), _tags(t)
 {
     _tags_iter = _tags.begin();
 }
 
-const Element* 
+    const Element* 
 ExportCodeGenerator::visit_term(Term& term)
 {
     XLOG_ASSERT(_tags_iter != _tags.end());
@@ -56,14 +56,16 @@ ExportCodeGenerator::visit_term(Term& term)
     // make sure source block was not empty:
     // tags are linear.. for each term, match the tag in the source block.
     const SourceMatchCodeGenerator::Taginfo& ti = *_tags_iter;
-    if (ti.first) {
-        _os << "LOAD " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
-        _os << "PUSH u32 " << (ti.second) << endl;
-        _os << "<=\n";
-        _os << "ONFALSE_EXIT" << endl;
+    if (ti.first) 
+    {
+	_os << "LOAD " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
+	_os << "PUSH u32 " << (ti.second) << endl;
+	_os << "<=\n";
+	_os << "ONFALSE_EXIT" << endl;
 
 	bool is_redist_tag = true;
-	if (term.from_protocol() == protocol()) {
+	if (term.from_protocol() == protocol()) 
+	{
 	    //
 	    // XXX: If we have an export policy that exports routes
 	    // from a protocol to itself, then don't tag those routes
@@ -77,21 +79,24 @@ ExportCodeGenerator::visit_term(Term& term)
     }
 
     // do dest block
-    for(i = dest.begin(); i != dest.end(); ++i) {
-        (i->second)->accept(*this);
-        _os << "ONFALSE_EXIT" << endl;
+    for(i = dest.begin(); i != dest.end(); ++i) 
+    {
+	(i->second)->accept(*this);
+	_os << "ONFALSE_EXIT" << endl;
     }
 
     //
     // Do the action block.
     // XXX: We generate last the code for the "accept" or "reject" statements.
     //
-    for(i = actions.begin(); i != actions.end(); ++i) {
+    for(i = actions.begin(); i != actions.end(); ++i) 
+    {
 	if ((i->second)->is_accept_or_reject())
 	    continue;
-        (i->second)->accept(*this);
+	(i->second)->accept(*this);
     }
-    for(i = actions.begin(); i != actions.end(); ++i) {
+    for(i = actions.begin(); i != actions.end(); ++i) 
+    {
 	if ((i->second)->is_accept_or_reject())
 	    (i->second)->accept(*this);
     }

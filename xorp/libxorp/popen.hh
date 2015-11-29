@@ -26,8 +26,8 @@
 
 
 pid_t	popen2(const string& command, const list<string>& arguments,
-	       FILE *& outstream, FILE *& errstream,
-	       bool redirect_stderr_to_stdout);
+	FILE *& outstream, FILE *& errstream,
+	bool redirect_stderr_to_stdout);
 int	pclose2(FILE *iop_out, bool dont_wait);
 int	popen2_mark_as_closed(pid_t pid, int wait_status);
 

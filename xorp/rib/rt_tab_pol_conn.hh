@@ -41,52 +41,53 @@
  * policytags on routes to be updated [no route deletion / replacement].
  */
 template<class A>
-class PolicyConnectedTable : public RouteTable<A> {
-public:
-    static const string table_name;
+class PolicyConnectedTable : public RouteTable<A> 
+{
+    public:
+	static const string table_name;
 
-    /**
-     * @param parent parent table.
-     * @param pfs the connected routes policy filters.
-     */
-    PolicyConnectedTable(RouteTable<A>* parent, PolicyFilters& pfs);
-    ~PolicyConnectedTable();
+	/**
+	 * @param parent parent table.
+	 * @param pfs the connected routes policy filters.
+	 */
+	PolicyConnectedTable(RouteTable<A>* parent, PolicyFilters& pfs);
+	~PolicyConnectedTable();
 
-    int add_igp_route(const IPRouteEntry<A>& route);
-    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
-    int add_egp_route(const IPRouteEntry<A>& route);
-    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
+	int add_igp_route(const IPRouteEntry<A>& route);
+	int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+	int add_egp_route(const IPRouteEntry<A>& route);
+	int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
-    TableType type() const { return POLICY_CONNECTED_TABLE; }
+	TableType type() const { return POLICY_CONNECTED_TABLE; }
 
-    string str() const;
+	string str() const;
 
-    /**
-     * Push all the routes through the filter again
-     */
-    void push_routes();
+	/**
+	 * Push all the routes through the filter again
+	 */
+	void push_routes();
 
-private:
-    /**
-     * Route may be modified [its policy tags].
-     * No need to check for route being accepted / rejected -- it is always
-     * accepted [only source match filtering].
-     *
-     * @param r route to filter.
-     */
-    void do_filtering(IPRouteEntry<A>& r);
+    private:
+	/**
+	 * Route may be modified [its policy tags].
+	 * No need to check for route being accepted / rejected -- it is always
+	 * accepted [only source match filtering].
+	 *
+	 * @param r route to filter.
+	 */
+	void do_filtering(IPRouteEntry<A>& r);
 
-    void generic_add_route(const IPRouteEntry<A>& route);
-    void generic_delete_route(const IPRouteEntry<A>* route);
-
-
-    typedef Trie<A, IPRouteEntry<A>* > RouteContainer;
+	void generic_add_route(const IPRouteEntry<A>& route);
+	void generic_delete_route(const IPRouteEntry<A>* route);
 
 
-    RouteContainer	_route_table;	// Copy of routes
-					// we have this so we may push routes.
+	typedef Trie<A, IPRouteEntry<A>* > RouteContainer;
 
-    PolicyFilters&	_policy_filters; // Reference to connected route filters.
+
+	RouteContainer	_route_table;	// Copy of routes
+	// we have this so we may push routes.
+
+	PolicyFilters&	_policy_filters; // Reference to connected route filters.
 };
 
 #endif // __RIB_RT_TAB_POL_CONN_HH__

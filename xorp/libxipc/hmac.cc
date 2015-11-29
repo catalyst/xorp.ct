@@ -34,10 +34,11 @@ HMACMD5::signature(const string& message) const
 {
     uint8_t d[16];	// digest
     hmac_md5((const uint8_t*)message.c_str(), message.size(),
-	     (const uint8_t*)_key.c_str(), _key.size(), d);
+	    (const uint8_t*)_key.c_str(), _key.size(), d);
 
     uint32_t d32[4];
-    for (int i = 0; i < 16; i += 4) {
+    for (int i = 0; i < 16; i += 4) 
+    {
 	d32[i/4] = d8tod32(d[i], d[i + 1], d[i + 2], d[i + 3]);
     }
     return c_format(SIG, d32[0], d32[1], d32[2], d32[3]);

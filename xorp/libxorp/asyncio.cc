@@ -38,36 +38,39 @@
 #include "asyncio.hh"
 
 
-static class TraceAIO {
-public:
-    TraceAIO() {
-	_do_trace = !(getenv("AIOTRACE") == 0);
-    }
-    bool on() const { return _do_trace; }
+static class TraceAIO 
+{
+    public:
+	TraceAIO() 
+	{
+	    _do_trace = !(getenv("AIOTRACE") == 0);
+	}
+	bool on() const { return _do_trace; }
 
-protected:
-    bool _do_trace;
+    protected:
+	bool _do_trace;
 } aio_trace;
 
 
 // ----------------------------------------------------------------------------
 // Utility
 
-bool
+    bool
 is_pseudo_error(const char* name, XorpFd fd, int error_num)
 {
     UNUSED(fd);
     UNUSED(name);
 
-    switch (error_num) {
-    case EINTR:
-	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,
-		     XORP_INT_CAST(fd));
-	return true;
-    case EWOULDBLOCK:
-	XLOG_WARNING("%s (fd = %d) got EWOULDBLOCK, continuing.", name,
-		     XORP_INT_CAST(fd));
-	return true;
+    switch (error_num) 
+    {
+	case EINTR:
+	    XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,
+		    XORP_INT_CAST(fd));
+	    return true;
+	case EWOULDBLOCK:
+	    XLOG_WARNING("%s (fd = %d) got EWOULDBLOCK, continuing.", name,
+		    XORP_INT_CAST(fd));
+	    return true;
     }
     return false;
 }
@@ -77,7 +80,8 @@ AsyncFileOperator::~AsyncFileOperator()
 {
 }
 
-string AsyncFileOperator::toString() const {
+string AsyncFileOperator::toString() const 
+{
     ostringstream oss;
     oss << " fd: " << _fd.str() << " running: " << _running << " last_err: "
 	<< _last_error << " priority: " << _priority << flush;
@@ -88,8 +92,8 @@ string AsyncFileOperator::toString() const {
 // ----------------------------------------------------------------------------
 // AsyncFileReader read method and entry hook
 
-AsyncFileReader::AsyncFileReader( XorpFd fd, int priority)
-    : AsyncFileOperator( fd, priority)
+    AsyncFileReader::AsyncFileReader( XorpFd fd, int priority)
+: AsyncFileOperator( fd, priority)
 {
 }
 
@@ -99,33 +103,35 @@ AsyncFileReader::~AsyncFileReader()
     delete_pointers_list(_buffers);
 }
 
-void
+    void
 AsyncFileReader::add_buffer(uint8_t* b, size_t b_bytes, const Callback& cb)
 {
     assert(b_bytes != 0);
     _buffers.push_back(new BufferInfo(b, b_bytes, cb));
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afr: %p  add_buffer sz: %i  buffers: %i\n",
-		  this, (int)(b_bytes), (int)(_buffers.size()));
+		this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
-void
+    void
 AsyncFileReader::add_buffer_with_offset(uint8_t*	b, 
-					size_t		b_bytes, 
-					size_t		off,
-					const Callback&	cb) 
+	size_t		b_bytes, 
+	size_t		off,
+	const Callback&	cb) 
 {
     assert(off < b_bytes);
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afr: %p  add_buffer_w/offset sz: %i  buffers: %i\n",
-		  this, (int)(b_bytes), (int)(_buffers.size()));
+		this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
 
-void
+    void
 AsyncFileReader::read(XorpFd fd, IoEventType type)
 {
 #ifdef EDGE_TRIGGERED_READ_LATENCY
@@ -143,21 +149,24 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     errno = 0;
     _last_error = 0;
     done = ::read(_fd, head->buffer() + head->offset(),
-		  head->buffer_bytes() - head->offset());
-    if (done < 0) {
+	    head->buffer_bytes() - head->offset());
+    if (done < 0) 
+    {
 	_last_error = errno;
 	XLOG_WARNING("read error: _fd: %i  offset: %i  total-len: %i error: %s\n",
-		     (int)(_fd), (int)(head->offset()), (int)(head->buffer_bytes()),
-		     strerror(errno));
+		(int)(_fd), (int)(head->offset()), (int)(head->buffer_bytes()),
+		strerror(errno));
     }
     errno = 0;
 
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afr: %p Read %d bytes, last-err: %i\n",
-		  this, XORP_INT_CAST(done), _last_error);
+		this, XORP_INT_CAST(done), _last_error);
     }
 
-    if (done < 0 && is_pseudo_error("AsyncFileReader", _fd, _last_error)) {
+    if (done < 0 && is_pseudo_error("AsyncFileReader", _fd, _last_error)) 
+    {
 	return;
     }
     complete_transfer(_last_error, done);
@@ -170,65 +179,75 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     // or be delayed due to latency between the primary thread
     // and the Winsock thread.
     //
-    if (_fd.is_socket() && !_deferred_io_task.scheduled()) {
+    if (_fd.is_socket() && !_deferred_io_task.scheduled()) 
+    {
 	u_long remaining = 0;
 	int result = ioctlsocket(_fd.getSocket(), FIONREAD, &remaining);
-	if (result != SOCKET_ERROR && remaining > 0) {
+	if (result != SOCKET_ERROR && remaining > 0) 
+	{
 	    _deferred_io_task = EventLoop::instance().new_oneoff_task(
-		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
+		    callback(this, &AsyncFileReader::read, _fd, IOT_READ));
 	    XLOG_ASSERT(_deferred_io_task.scheduled());
 	}
-   }
+    }
 #endif // EDGE_TRIGGERED_READ_LATENCY
 }
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
 // variables and buffer list.
-void
+    void
 AsyncFileReader::complete_transfer(int err, ssize_t done)
 {
     // XXX careful after callback is invoked: "this" maybe deleted, so do
     // not reference any object state after callback.
 
-    if (done > 0) {
+    if (done > 0) 
+    {
 	BufferInfo* head = _buffers.front();
 	head->incr_offset(done);
-	if (head->offset() == head->buffer_bytes()) {
+	if (head->offset() == head->buffer_bytes()) 
+	{
 	    _buffers.pop_front();
-	    if (_buffers.empty()) {
+	    if (_buffers.empty()) 
+	    {
 		stop();
 	    }
 	    head->dispatch_callback(DATA);
 	    delete head;
-	} else {
+	} else 
+	{
 	    head->dispatch_callback(DATA);
 	}
 	return;
     }
 
     BufferInfo* head = _buffers.front();
-    if (err != 0 || done < 0) {
+    if (err != 0 || done < 0) 
+    {
 	stop();
 	head->dispatch_callback(OS_ERROR);
-    } else {
+    } else 
+    {
 	head->dispatch_callback(END_OF_FILE);
     }
 }
 
-bool 
+    bool 
 AsyncFileReader::start()
 {
     if (_running)
 	return true;
 
-    if (_buffers.empty() == true) {
+    if (_buffers.empty() == true) 
+    {
 	XLOG_WARNING("Could not start reader - no buffers available");
 	return false;
     }
 
     if (EventLoop::instance().add_ioevent_cb(_fd, IOT_READ,
-			 callback(this, &AsyncFileReader::read),
-			 _priority) == false) {
+		callback(this, &AsyncFileReader::read),
+		_priority) == false) 
+    {
 	XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
 	return false;
     }
@@ -240,7 +259,7 @@ AsyncFileReader::start()
     return _running;
 }
 
-void
+    void
 AsyncFileReader::stop()
 {
     debug_msg("%p stop\n", this);
@@ -254,11 +273,12 @@ AsyncFileReader::stop()
     _running = false;
 }
 
-void
+    void
 AsyncFileReader::flush_buffers()
 {
     stop();
-    while (_buffers.empty() == false) {
+    while (_buffers.empty() == false) 
+    {
 	BufferInfo* head = _buffers.front();
 	_buffers.pop_front();
 	head->dispatch_callback(FLUSHING);
@@ -266,7 +286,8 @@ AsyncFileReader::flush_buffers()
     }
 }
 
-string AsyncFileReader::toString() const {
+string AsyncFileReader::toString() const 
+{
     ostringstream oss;
     oss << AsyncFileOperator::toString() << " buffers: " << _buffers.size() << endl;
     return oss.str();
@@ -281,12 +302,13 @@ string AsyncFileReader::toString() const {
 #endif
 
 AsyncFileWriter::AsyncFileWriter( XorpFd fd, uint32_t coalesce,
-				 int priority)
-    : AsyncFileOperator( fd, priority)
+	int priority)
+: AsyncFileOperator( fd, priority)
 {
     static const uint32_t max_coalesce = 16;
     _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
-    if (_coalesce > max_coalesce) {
+    if (_coalesce > max_coalesce) 
+    {
 	_coalesce = max_coalesce;
     }
     _iov = new iovec[_coalesce];
@@ -301,111 +323,122 @@ AsyncFileWriter::~AsyncFileWriter()
     delete_pointers_list(_buffers);
 }
 
-void
+    void
 AsyncFileWriter::add_buffer(const uint8_t*	b,
-			    size_t		b_bytes,
-			    const Callback&	cb)
+	size_t		b_bytes,
+	const Callback&	cb)
 {
     assert(b_bytes != 0);
     _buffers.push_back(new BufferInfo(b, b_bytes, cb));
 #ifdef EDGE_TRIGGERED_WRITES
-    if (_running && !_deferred_io_task.scheduled()) {
+    if (_running && !_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p  add_buffer sz: %i  buffers: %i\n",
-		  this, (int)(b_bytes), (int)(_buffers.size()));
+		this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
-void
+    void
 AsyncFileWriter::add_buffer_sendto(const uint8_t*	b,
-				   size_t		b_bytes,
-				   const IPvX&		dst_addr,
-				   uint16_t		dst_port,
-				   const Callback&	cb)
+	size_t		b_bytes,
+	const IPvX&		dst_addr,
+	uint16_t		dst_port,
+	const Callback&	cb)
 {
     assert(b_bytes != 0);
     _buffers.push_back(new BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
-    if (_running && !_deferred_io_task.scheduled()) {
+    if (_running && !_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p  add_buffer-sendto sz: %i  buffers: %i\n",
-		  this, (int)(b_bytes), (int)(_buffers.size()));
+		this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
-void
+    void
 AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
-					size_t		b_bytes,
-					size_t		off,
-					const Callback&	cb)
+	size_t		b_bytes,
+	size_t		off,
+	const Callback&	cb)
 {
     assert(off < b_bytes);
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
 #ifdef EDGE_TRIGGERED_WRITES
-    if (_running && !_deferred_io_task.scheduled()) {
+    if (_running && !_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p  add_buffer-w/offset sz: %i  buffers: %i\n",
-		  this, (int)(b_bytes), (int)(_buffers.size()));
+		this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
-void
+    void
 AsyncFileWriter::add_data(const vector<uint8_t>&	data,
-			  const Callback&		cb)
+	const Callback&		cb)
 {
     assert(data.size() != 0);
     _buffers.push_back(new BufferInfo(data, cb));
 #ifdef EDGE_TRIGGERED_WRITES
-    if (_running && !_deferred_io_task.scheduled()) {
+    if (_running && !_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p  add_data sz: %i  buffers: %i\n",
-		  this, (int)(data.size()), (int)(_buffers.size()));
+		this, (int)(data.size()), (int)(_buffers.size()));
     }
 }
 
-void
+    void
 AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
-				 const IPvX&		dst_addr,
-				 uint16_t		dst_port,
-				 const Callback&	cb)
+	const IPvX&		dst_addr,
+	uint16_t		dst_port,
+	const Callback&	cb)
 {
     assert(data.size() != 0);
     _buffers.push_back(new BufferInfo(data, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
-    if (_running && !_deferred_io_task.scheduled()) {
+    if (_running && !_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p  add_data-sendto sz: %i  buffers: %i\n",
-		  this, (int)(data.size()), (int)(_buffers.size()));
+		this, (int)(data.size()), (int)(_buffers.size()));
     }
 }
 
 
-string AsyncFileWriter::toString() const {
+string AsyncFileWriter::toString() const 
+{
     ostringstream oss;
     oss << AsyncFileOperator::toString() << " buffers: " << _buffers.size() << endl;
     return oss.str();
@@ -418,7 +451,7 @@ string AsyncFileWriter::toString() const {
 // change much across UNIX platforms.
 //
 template <typename T, typename U>
-static void
+    static void
 iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
 {
     x_static_assert(sizeof(T*) == sizeof(uint8_t*));
@@ -427,7 +460,7 @@ iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
 }
 
 
-void
+    void
 AsyncFileWriter::write(XorpFd fd, IoEventType type)
 {
     bool is_sendto = false;
@@ -461,11 +494,13 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     // If the buffer is sendto()-type, then send that buffer on its own.
     //
     list<BufferInfo *>::const_iterator i = _buffers.begin();
-    while (i != _buffers.end()) {
+    while (i != _buffers.end()) 
+    {
 	const BufferInfo* bi = *i;
 	is_sendto = bi->is_sendto();
 
-	if (is_sendto && (iov_cnt > 0)) {
+	if (is_sendto && (iov_cnt > 0)) 
+	{
 	    // XXX: Send first all buffers before this sendto()-type
 	    break;
 	}
@@ -477,7 +512,8 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	total_bytes += u_bytes;
 	assert(total_bytes != 0);
 	iov_cnt++;
-	if (is_sendto) {
+	if (is_sendto) 
+	{
 	    dst_addr = bi->dst_addr();
 	    dst_port = bi->dst_port();
 	    break;
@@ -487,68 +523,74 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	++i;
     }
 
-    if (is_sendto) {
+    if (is_sendto) 
+    {
 	//
 	// Use sendto(2) to send the data from the first buffer only
 	//
 	XLOG_ASSERT(! dst_addr.is_zero());
 
-	switch (dst_addr.af()) {
-	case AF_INET:
+	switch (dst_addr.af()) 
 	{
-	    struct sockaddr_in sin;
+	    case AF_INET:
+		{
+		    struct sockaddr_in sin;
 
-	    dst_addr.copy_out(sin);
-	    sin.sin_port = htons(dst_port);
+		    dst_addr.copy_out(sin);
+		    sin.sin_port = htons(dst_port);
 
-	    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
+		    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin),
 			    sizeof(sin));
-	    break;
-	}
+		    break;
+		}
 #ifdef HAVE_IPV6
-	case AF_INET6:
-	{
-	    struct sockaddr_in6 sin6;
+	    case AF_INET6:
+		{
+		    struct sockaddr_in6 sin6;
 
-	    dst_addr.copy_out(sin6);
-	    sin6.sin6_port = htons(dst_port);
+		    dst_addr.copy_out(sin6);
+		    sin6.sin6_port = htons(dst_port);
 
-	    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
+		    done = ::sendto(_fd.getSocket(), (const void*)(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin6),
 			    sizeof(sin6));
-	    break;
-	}
+		    break;
+		}
 #endif // HAVE_IPV6
-	default:
-	    XLOG_ERROR("Address family %d is not supported", dst_addr.af());
-	    done = _iov[0].iov_len;	// XXX: Pretend that the data was sent
-	    break;
+	    default:
+		XLOG_ERROR("Address family %d is not supported", dst_addr.af());
+		done = _iov[0].iov_len;	// XXX: Pretend that the data was sent
+		break;
 	}
 
-	if (done < 0) {
+	if (done < 0) 
+	{
 	    _last_error = errno;
 	}
 
-    } else {
+    } else 
+    {
 	//
 	// Write the data to the socket/file descriptor
 	//
 
-	if ((iov_cnt == 1) && (! mod_signals)) {
+	if ((iov_cnt == 1) && (! mod_signals)) 
+	{
 	    //
 	    // No need for coalesce, so use send(2). This saves us
 	    // two sigaction calls since we can pass the MSG_NOSIGNAL flag.
 	    //
 	    done = ::send(_fd, (const void*)(_iov[0].iov_base),
-			  _iov[0].iov_len, flags);
+		    _iov[0].iov_len, flags);
 	    if (done < 0)
 		_last_error = errno;
-	} else {
+	} else 
+	{
 	    done = ::writev(_fd, _iov, (int)iov_cnt);
 	    if (done < 0)
 		_last_error = errno;
@@ -556,13 +598,15 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	errno = 0;
     }
 
-    if (aio_trace.on()) {
+    if (aio_trace.on()) 
+    {
 	XLOG_INFO("afw: %p Wrote %d of %u bytes, last-err: %i\n",
-		  this, XORP_INT_CAST(done), XORP_UINT_CAST(total_bytes),
-		  _last_error);
+		this, XORP_INT_CAST(done), XORP_UINT_CAST(total_bytes),
+		_last_error);
     }
 
-    if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, _last_error)) {
+    if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, _last_error)) 
+    {
 	XLOG_WARNING("Write error %d\n", _last_error);
 	return;
     }
@@ -570,9 +614,10 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     complete_transfer(done);
 
 #ifdef EDGE_TRIGGERED_WRITES
-    if (!(_buffers.empty() || _deferred_io_task.scheduled())) {
+    if (!(_buffers.empty() || _deferred_io_task.scheduled())) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
@@ -580,11 +625,13 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
 // variables and buffer list.
-void
+    void
 AsyncFileWriter::complete_transfer(ssize_t sdone)
 {
-    if (sdone < 0) {
-	do {
+    if (sdone < 0) 
+    {
+	do 
+	{
 	    // XXX: don't print an error if the error code is EPIPE
 #ifdef EPIPE
 	    if (_last_error == EPIPE)
@@ -615,7 +662,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
     //
     ref_ptr<int> stack_token = _dtoken;
 
-    while (notified != done) {
+    while (notified != done) 
+    {
 	assert(notified <= done);
 	assert(_buffers.empty() == false);
 
@@ -624,7 +672,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 
 	size_t bytes_needed = head->buffer_bytes() - head->offset();
 
-	if (done - notified >= bytes_needed) {
+	if (done - notified >= bytes_needed) 
+	{
 	    //
 	    // All data in this buffer has been written
 	    //
@@ -633,7 +682,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 
 	    // Detach head buffer and update state
 	    _buffers.pop_front();
-	    if (_buffers.empty()) {
+	    if (_buffers.empty()) 
+	    {
 		stop();
 	    }
 
@@ -641,14 +691,16 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 
 	    head->dispatch_callback(DATA);
 	    delete head;
-	    if (stack_token.is_only() == true) {
+	    if (stack_token.is_only() == true) 
+	    {
 		// "this" instance of AsyncFileWriter was deleted by the
 		// calback, return immediately.
 		return;
 	    }
 	    notified += bytes_needed;
 	    continue;
-	} else {
+	} else 
+	{
 	    //
 	    // Not enough data has been written
 	    //
@@ -660,28 +712,31 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
     }
 }
 
-bool
+    bool
 AsyncFileWriter::start()
 {
     if (_running)
 	return true;
 
-    if (_buffers.empty() == true) {
+    if (_buffers.empty() == true) 
+    {
 	XLOG_WARNING("Could not start writer - no buffers available");
 	return false;
     }
 
     if (EventLoop::instance().add_ioevent_cb(_fd, IOT_WRITE,
-			 callback(this, &AsyncFileWriter::write),
-			 _priority) == false) {
+		callback(this, &AsyncFileWriter::write),
+		_priority) == false) 
+    {
 	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
 	return false;
     }
 
 #ifdef EDGE_TRIGGERED_WRITES
-    if (!_deferred_io_task.scheduled()) {
+    if (!_deferred_io_task.scheduled()) 
+    {
 	_deferred_io_task = EventLoop::instance().new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+		callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
     }
 #endif // EDGE_TRIGGERED_WRITES
 
@@ -690,7 +745,7 @@ AsyncFileWriter::start()
     return _running;
 }
 
-void
+    void
 AsyncFileWriter::stop()
 {
     debug_msg("%p stop\n", this);
@@ -702,11 +757,12 @@ AsyncFileWriter::stop()
     _running = false;
 }
 
-void
+    void
 AsyncFileWriter::flush_buffers()
 {
     stop();
-    while (_buffers.empty() == false) {
+    while (_buffers.empty() == false) 
+    {
 	BufferInfo* head = _buffers.front();
 	_buffers.pop_front();
 	head->dispatch_callback(FLUSHING);

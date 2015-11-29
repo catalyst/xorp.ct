@@ -51,85 +51,86 @@
  * most cases be destructed.
  */
 class IfMgrXrlReplicator :
-    public IfMgrCommandSinkBase, public CallbackSafeObject  {
-public:
-    typedef IfMgrCommandSinkBase::Cmd Cmd;
+    public IfMgrCommandSinkBase, public CallbackSafeObject  
+{
+    public:
+	typedef IfMgrCommandSinkBase::Cmd Cmd;
 
-public:
-    /**
-     * Constructor
-     */
-    IfMgrXrlReplicator(XrlSender&	sender,
-		       const string&	xrl_target_name);
+    public:
+	/**
+	 * Constructor
+	 */
+	IfMgrXrlReplicator(XrlSender&	sender,
+		const string&	xrl_target_name);
 
-    /**
-     * Add a command to be sent as an Xrl to the remote target.
-     */
-    void push(const Cmd& cmd);
+	/**
+	 * Add a command to be sent as an Xrl to the remote target.
+	 */
+	void push(const Cmd& cmd);
 
-    /**
-     * Schedule the next Xrl dispatch.
-     */
-    void crank_replicator();
+	/**
+	 * Schedule the next Xrl dispatch.
+	 */
+	void crank_replicator();
 
-    /**
-     * Accessor for xrl target name.
-     */
-    const string& xrl_target_name() const	{ return _tgt; }
+	/**
+	 * Accessor for xrl target name.
+	 */
+	const string& xrl_target_name() const	{ return _tgt; }
 
-    /**
-     * Test whether the queue with the commands is empty.
-     *
-     * @return trie if the queue with the commans is empty, otherwise false.
-     */
-    bool is_empty_queue() const { return (_queue.empty() == true); }
+	/**
+	 * Test whether the queue with the commands is empty.
+	 *
+	 * @return trie if the queue with the commans is empty, otherwise false.
+	 */
+	bool is_empty_queue() const { return (_queue.empty() == true); }
 
-protected:
-    /**
-     * Method invoked when it is time to schedule the next Xrl dispatch.
-     */
-    virtual void crank_manager();
+    protected:
+	/**
+	 * Method invoked when it is time to schedule the next Xrl dispatch.
+	 */
+	virtual void crank_manager();
 
-    /**
-     * Method invoked when the previous Xrl dispatch has completed.
-     */
-    virtual void crank_manager_cb();
+	/**
+	 * Method invoked when the previous Xrl dispatch has completed.
+	 */
+	virtual void crank_manager_cb();
 
-    /**
-     * Method invoked when a command should be added to the manager's queue.
-     */
-    virtual void push_manager_queue();
+	/**
+	 * Method invoked when a command should be added to the manager's queue.
+	 */
+	virtual void push_manager_queue();
 
-    /**
-     * Method invoked when an Xrl dispatch fails.
-     */
-    virtual void xrl_error_event(const XrlError& e);
+	/**
+	 * Method invoked when an Xrl dispatch fails.
+	 */
+	virtual void xrl_error_event(const XrlError& e);
 
-protected:
-    /**
-     * Not implemented
-     */
-    IfMgrXrlReplicator();
+    protected:
+	/**
+	 * Not implemented
+	 */
+	IfMgrXrlReplicator();
 
-    /**
-     * Not implemented
-     */
-    IfMgrXrlReplicator(const IfMgrXrlReplicator&);
+	/**
+	 * Not implemented
+	 */
+	IfMgrXrlReplicator(const IfMgrXrlReplicator&);
 
-    /**
-     * Not implemented
-     */
-    IfMgrXrlReplicator& operator=(const IfMgrXrlReplicator&);
+	/**
+	 * Not implemented
+	 */
+	IfMgrXrlReplicator& operator=(const IfMgrXrlReplicator&);
 
-private:
-    void xrl_cb(const XrlError& e);
+    private:
+	void xrl_cb(const XrlError& e);
 
-protected:
-    XrlSender&		  _s;
-    string		  _tgt;
+    protected:
+	XrlSender&		  _s;
+	string		  _tgt;
 
-    IfMgrCommandFifoQueue _queue;
-    bool		  _pending;
+	IfMgrCommandFifoQueue _queue;
+	bool		  _pending;
 };
 
 
@@ -145,32 +146,33 @@ class IfMgrXrlReplicationManager;
  * which causes their destruction.
  */
 class IfMgrManagedXrlReplicator :
-    public IfMgrXrlReplicator {
-public:
-    IfMgrManagedXrlReplicator(IfMgrXrlReplicationManager& manager,
-			      XrlSender&		 sender,
-			      const string&		 target_name);
+    public IfMgrXrlReplicator 
+{
+    public:
+	IfMgrManagedXrlReplicator(IfMgrXrlReplicationManager& manager,
+		XrlSender&		 sender,
+		const string&		 target_name);
 
-protected:
-    /**
-     * Method invoked when it is time to schedule the next Xrl dispatch.
-     */
-    void crank_manager();
+    protected:
+	/**
+	 * Method invoked when it is time to schedule the next Xrl dispatch.
+	 */
+	void crank_manager();
 
-    /**
-     * Method invoked when the previous Xrl dispatch has completed.
-     */
-    void crank_manager_cb();
+	/**
+	 * Method invoked when the previous Xrl dispatch has completed.
+	 */
+	void crank_manager_cb();
 
-    /**
-     * Method invoked when a command should be added to the manager's queue.
-     */
-    void push_manager_queue();
+	/**
+	 * Method invoked when a command should be added to the manager's queue.
+	 */
+	void push_manager_queue();
 
-    void xrl_error_event(const XrlError& e);
+	void xrl_error_event(const XrlError& e);
 
-private:
-    IfMgrXrlReplicationManager&	_mgr;
+    private:
+	IfMgrXrlReplicationManager&	_mgr;
 };
 
 
@@ -180,62 +182,63 @@ class XrlRouter;
  * @short Class that builds and maintains replicator state for
  * multiple remote targets.
  */
-class IfMgrXrlReplicationManager : public IfMgrCommandSinkBase {
-public:
-    typedef IfMgrCommandSinkBase::Cmd Cmd;
+class IfMgrXrlReplicationManager : public IfMgrCommandSinkBase 
+{
+    public:
+	typedef IfMgrCommandSinkBase::Cmd Cmd;
 
-public:
-    IfMgrXrlReplicationManager(XrlRouter& rtr);
+    public:
+	IfMgrXrlReplicationManager(XrlRouter& rtr);
 
-    ~IfMgrXrlReplicationManager();
+	~IfMgrXrlReplicationManager();
 
-    /**
-     * Add a remote mirror.  The name of the mirror is added to list
-     * of known targets and immediately sent a copy of the
-     * configuration tree.
-     *
-     * @param xrl_target_name target to be added.
-     * @return true on success, false if target already exists.
-     */
-    bool add_mirror(const string& xrl_target_name);
+	/**
+	 * Add a remote mirror.  The name of the mirror is added to list
+	 * of known targets and immediately sent a copy of the
+	 * configuration tree.
+	 *
+	 * @param xrl_target_name target to be added.
+	 * @return true on success, false if target already exists.
+	 */
+	bool add_mirror(const string& xrl_target_name);
 
-    /**
-     * Remove remote mirror.
-     * @param xrl_target_name target to be removed.
-     */
-    bool remove_mirror(const string& xrl_target_name);
+	/**
+	 * Remove remote mirror.
+	 * @param xrl_target_name target to be removed.
+	 */
+	bool remove_mirror(const string& xrl_target_name);
 
-    /**
-     * Apply command to local configuration tree and forward Xrls to
-     * targets to replicate state remotely if application to local tree
-     * succeeds.
-     */
-    void push(const Cmd& c);
+	/**
+	 * Apply command to local configuration tree and forward Xrls to
+	 * targets to replicate state remotely if application to local tree
+	 * succeeds.
+	 */
+	void push(const Cmd& c);
 
-    /**
-     * Method invoked when it is time to schedule the next Xrl dispatch.
-     */
-    void crank_replicators_queue();
+	/**
+	 * Method invoked when it is time to schedule the next Xrl dispatch.
+	 */
+	void crank_replicators_queue();
 
-    /**
-     * Method invoked when the previous Xrl dispatch has completed.
-     */
-    void crank_replicators_queue_cb();
+	/**
+	 * Method invoked when the previous Xrl dispatch has completed.
+	 */
+	void crank_replicators_queue_cb();
 
-    /**
-     * Method invoked when a command should be added to the manager's queue.
-     */
-    void push_manager_queue(IfMgrManagedXrlReplicator* r);
+	/**
+	 * Method invoked when a command should be added to the manager's queue.
+	 */
+	void push_manager_queue(IfMgrManagedXrlReplicator* r);
 
-    const IfMgrIfTree& iftree() const		{ return _iftree; }
+	const IfMgrIfTree& iftree() const		{ return _iftree; }
 
-private:
-    typedef list<IfMgrManagedXrlReplicator*> Outputs;
+    private:
+	typedef list<IfMgrManagedXrlReplicator*> Outputs;
 
-    IfMgrIfTree _iftree;
-    XrlRouter&	_rtr;
-    Outputs	_outputs;
-    Outputs	_replicators_queue;	// Cmd queue with ordered replicators
+	IfMgrIfTree _iftree;
+	XrlRouter&	_rtr;
+	Outputs	_outputs;
+	Outputs	_replicators_queue;	// Cmd queue with ordered replicators
 };
 
 #endif // __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__

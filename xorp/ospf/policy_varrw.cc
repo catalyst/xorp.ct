@@ -43,48 +43,48 @@
 #include "ospf.hh"
 #include "policy_varrw.hh"
 
-template <typename A>
+    template <typename A>
 OspfVarRW<A>::OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric,
-			bool& e_bit, uint32_t& tag, bool& tag_set,
-			PolicyTags& policytags)
-    : _network(network), _nexthop(nexthop), _metric(metric), _e_bit(e_bit),
-      _tag(tag), _tag_set(tag_set), _policytags(policytags)
+	bool& e_bit, uint32_t& tag, bool& tag_set,
+	PolicyTags& policytags)
+: _network(network), _nexthop(nexthop), _metric(metric), _e_bit(e_bit),
+    _tag(tag), _tag_set(tag_set), _policytags(policytags)
 {
 }
 
 template <>
-void
+    void
 OspfVarRW<IPv4>::start_read()
 {
     initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
-				       _network.str().c_str()));
+		_network.str().c_str()));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv4NextHop::id,
-	       _nexthop.str().c_str()));
+		_nexthop.str().c_str()));
 
     start_read_common();
 }
 
 template <>
-void
+    void
 OspfVarRW<IPv6>::start_read()
 {
     initialize(VAR_NETWORK, _ef.create(ElemIPv6Net::id,
-				       _network.str().c_str()));
+		_network.str().c_str()));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv6NextHop::id,
-               _nexthop.str().c_str()));
+		_nexthop.str().c_str()));
 
     start_read_common();
 }
 
 template <typename A>
-void
+    void
 OspfVarRW<A>::start_read_common()
 {
     initialize(VAR_POLICYTAGS, _policytags.element());
     initialize(VAR_METRIC, _ef.create(ElemU32::id,
-				      c_format("%u", _metric).c_str()));
+		c_format("%u", _metric).c_str()));
     initialize(VAR_EBIT, _ef.create(ElemU32::id,
-				    c_format("%u", _e_bit ? 2 : 1).c_str()));
+		c_format("%u", _e_bit ? 2 : 1).c_str()));
 
     // XXX which tag wins?
     Element* element = _policytags.element_tag();
@@ -95,11 +95,11 @@ OspfVarRW<A>::start_read_common()
     delete element;
 
     initialize(VAR_TAG, _ef.create(ElemU32::id,
-				   c_format("%u", _tag).c_str()));
+		c_format("%u", _tag).c_str()));
 }
 
 template <typename A>
-Element* 
+    Element* 
 OspfVarRW<A>::single_read(const Id& /*id*/)
 {
     XLOG_UNREACHABLE();
@@ -108,86 +108,96 @@ OspfVarRW<A>::single_read(const Id& /*id*/)
 }
 
 template <>
-void
+    void
 OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
 {
-    switch (id) {
-    case VAR_NETWORK: {
-	const ElemIPv4Net* eip = dynamic_cast<const ElemIPv4Net*>(&e);
-	XLOG_ASSERT(eip != NULL);
-	_network = IPNet<IPv4>(eip->val());
-    }
-	break;
+    switch (id) 
+    {
+	case VAR_NETWORK: 
+	    {
+		const ElemIPv4Net* eip = dynamic_cast<const ElemIPv4Net*>(&e);
+		XLOG_ASSERT(eip != NULL);
+		_network = IPNet<IPv4>(eip->val());
+	    }
+	    break;
 
-    case VAR_NEXTHOP: {
-	const ElemIPv4NextHop* eip = dynamic_cast<const ElemIPv4NextHop*>(&e);
-	XLOG_ASSERT(eip != NULL);
-	_nexthop = IPv4(eip->val());
-    }
-	break;
+	case VAR_NEXTHOP: 
+	    {
+		const ElemIPv4NextHop* eip = dynamic_cast<const ElemIPv4NextHop*>(&e);
+		XLOG_ASSERT(eip != NULL);
+		_nexthop = IPv4(eip->val());
+	    }
+	    break;
 
-    default:
-	single_write_common(id, e);
-	break;
+	default:
+	    single_write_common(id, e);
+	    break;
     }
 }
 
 template <typename A>
-void
+    void
 OspfVarRW<A>::single_write_common(const Id& id, const Element& e)
 {
-    switch (id) {
-    case VAR_POLICYTAGS:
-	_policytags.set_ptags(e);
-	break;
+    switch (id) 
+    {
+	case VAR_POLICYTAGS:
+	    _policytags.set_ptags(e);
+	    break;
 
-    case VAR_METRIC: {
-	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
-	_metric = u32.val();
-    }
-	break;
+	case VAR_METRIC: 
+	    {
+		const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+		_metric = u32.val();
+	    }
+	    break;
 
-    case VAR_EBIT: {
-	const ElemU32& b = dynamic_cast<const ElemU32&>(e);
-	_e_bit = b.val() == 2 ? true : false;
-    }
+	case VAR_EBIT: 
+	    {
+		const ElemU32& b = dynamic_cast<const ElemU32&>(e);
+		_e_bit = b.val() == 2 ? true : false;
+	    }
 
-	break;
+	    break;
 
-    case VAR_TAG: {
-	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
-	_tag = u32.val();
-	_policytags.set_tag(e);
-    }
-	break;
+	case VAR_TAG: 
+	    {
+		const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+		_tag = u32.val();
+		_policytags.set_tag(e);
+	    }
+	    break;
 
-    default:
-	XLOG_WARNING("Unexpected Id %d %s", id, cstring(e));
+	default:
+	    XLOG_WARNING("Unexpected Id %d %s", id, cstring(e));
     }
 }
 
 template <>
-void
+    void
 OspfVarRW<IPv6>::single_write(const Id& id, const Element& e)
 {
-    switch (id) {
-    case VAR_NETWORK: {
-	const ElemIPv6Net* eip = dynamic_cast<const ElemIPv6Net*>(&e);
-	XLOG_ASSERT(eip != NULL);
-	_network = IPNet<IPv6>(eip->val());
-    }
-	break;
+    switch (id) 
+    {
+	case VAR_NETWORK: 
+	    {
+		const ElemIPv6Net* eip = dynamic_cast<const ElemIPv6Net*>(&e);
+		XLOG_ASSERT(eip != NULL);
+		_network = IPNet<IPv6>(eip->val());
+	    }
+	    break;
 
-    case VAR_NEXTHOP: {
-	const ElemIPv6NextHop* eip = dynamic_cast<const ElemIPv6NextHop*>(&e);
-	XLOG_ASSERT(eip != NULL);
-	_nexthop = IPv6(eip->val());
-    }
-	break;
+	case VAR_NEXTHOP: 
+	    {
+		const ElemIPv6NextHop* eip = dynamic_cast<const ElemIPv6NextHop*>(&e);
+		XLOG_ASSERT(eip != NULL);
+		_nexthop = IPv6(eip->val());
+	    }
+	    break;
 
-    default:
-	single_write_common(id, e);
-	break;
+	default:
+	    single_write_common(id, e);
+	    break;
     }
 }
 

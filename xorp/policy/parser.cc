@@ -30,14 +30,15 @@
 #include "policy_parser.hh"
 
 
-Parser::Nodes* 
+    Parser::Nodes* 
 Parser::parse(const Term::BLOCKS& block, const string& text)
 {
     Nodes* nodes = new Nodes();
-    
+
     // there was an error
-    if(policy_parser::policy_parse(*nodes, block, text, _last_error)) {
-	
+    if(policy_parser::policy_parse(*nodes, block, text, _last_error)) 
+    {
+
 	// delete semi-parsed tree  
 	policy_utils::delete_vector(nodes);
 	return NULL;

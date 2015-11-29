@@ -30,7 +30,8 @@
 
 class XrlErrlet;
 
-enum XrlErrorCode {
+enum XrlErrorCode 
+{
     OKAY		  = 100,
     BAD_ARGS		  = 101,
     COMMAND_FAILED	  = 102,
@@ -53,114 +54,116 @@ enum XrlErrorCode {
  * This class can be sub-classed to provide a sub-set of the known
  * errors, and also to append domain specific errors.
  */
-class XrlError {
-public:
-    /**
-     * The value that should be returned by functions whose execution
-     * completed normally.
-     */
-    static const XrlError& OKAY();
+class XrlError 
+{
+    public:
+	/**
+	 * The value that should be returned by functions whose execution
+	 * completed normally.
+	 */
+	static const XrlError& OKAY();
 
-    /**
-     * The value that should be returned when the arguments in an XRL
-     * do not match what the receiver expected.
-     */
-    static const XrlError& BAD_ARGS();
+	/**
+	 * The value that should be returned when the arguments in an XRL
+	 * do not match what the receiver expected.
+	 */
+	static const XrlError& BAD_ARGS();
 
-    /**
-     * The value that should be returned when the command cannot be
-     * executed by Xrl Target.
-     */
-    static const XrlError& COMMAND_FAILED();
+	/**
+	 * The value that should be returned when the command cannot be
+	 * executed by Xrl Target.
+	 */
+	static const XrlError& COMMAND_FAILED();
 
-    /**
-     * The Xrl Finder process is not running or not ready to resolve
-     * Xrl target names
-     */
-    static const XrlError& NO_FINDER();
+	/**
+	 * The Xrl Finder process is not running or not ready to resolve
+	 * Xrl target names
+	 */
+	static const XrlError& NO_FINDER();
 
-    /**
-     * Returned when an XRL cannot be dispatched because the target name
-     * is not registered in the system.
-     */
-    static const XrlError& RESOLVE_FAILED();
+	/**
+	 * Returned when an XRL cannot be dispatched because the target name
+	 * is not registered in the system.
+	 */
+	static const XrlError& RESOLVE_FAILED();
 
-    /**
-     * Returned when the method within the XRL is not recognized by
-     * the receiver.
-     */
-    static const XrlError& NO_SUCH_METHOD();
+	/**
+	 * Returned when the method within the XRL is not recognized by
+	 * the receiver.
+	 */
+	static const XrlError& NO_SUCH_METHOD();
 
-    /**
-     * Returned when the underlying XRL transport mechanism fails.
-     */
-    static const XrlError& SEND_FAILED();
+	/**
+	 * Returned when the underlying XRL transport mechanism fails.
+	 */
+	static const XrlError& SEND_FAILED();
 
-    /**
-     * Returned when the reply is not returned within the timeout
-     * period of the underlying transport mechanism.
-     */
-    static const XrlError& REPLY_TIMED_OUT();
+	/**
+	 * Returned when the reply is not returned within the timeout
+	 * period of the underlying transport mechanism.
+	 */
+	static const XrlError& REPLY_TIMED_OUT();
 
-    /**
-     * Returned when the underlying XRL transport mechanism fails.
-     */
-    static const XrlError& SEND_FAILED_TRANSIENT();
+	/**
+	 * Returned when the underlying XRL transport mechanism fails.
+	 */
+	static const XrlError& SEND_FAILED_TRANSIENT();
 
-    /**
-     * An error has occurred within the XRL system.  This is usually a sign
-     * of an implementation issue.  This error replaces no longer
-     * existent errors of CORRUPT_XRL, CORRUPT_XRL_RESPONSE, and
-     * BAD_PROTOCOL_VERSION.  The note associated with the error should
-     * contain more information.
-     */
-    static const XrlError& INTERNAL_ERROR();
+	/**
+	 * An error has occurred within the XRL system.  This is usually a sign
+	 * of an implementation issue.  This error replaces no longer
+	 * existent errors of CORRUPT_XRL, CORRUPT_XRL_RESPONSE, and
+	 * BAD_PROTOCOL_VERSION.  The note associated with the error should
+	 * contain more information.
+	 */
+	static const XrlError& INTERNAL_ERROR();
 
-    /**
-     * @return the unique identifer number associated with error.
-     */
-    XrlErrorCode error_code() const;
+	/**
+	 * @return the unique identifer number associated with error.
+	 */
+	XrlErrorCode error_code() const;
 
-    bool isOK() const { return error_code() == ::OKAY; }
+	bool isOK() const { return error_code() == ::OKAY; }
 
-    /**
-     * @return string containing textual description of error.
-     */
-    const char* error_msg() const;
+	/**
+	 * @return string containing textual description of error.
+	 */
+	const char* error_msg() const;
 
-    /**
-     * @return string containing user annotation about source of error
-     * (if set).
-     */
-    const string& note() const { return _note; }
+	/**
+	 * @return string containing user annotation about source of error
+	 * (if set).
+	 */
+	const string& note() const { return _note; }
 
-    /**
-     * @return string containing error_code(), error_msg(), and note().
-     */
-    string str() const {
-	string r = c_format("%d ", error_code()) + error_msg();
-	return note().size() ? (r + " " + note()) : r;
-    }
+	/**
+	 * @return string containing error_code(), error_msg(), and note().
+	 */
+	string str() const 
+	{
+	    string r = c_format("%d ", error_code()) + error_msg();
+	    return note().size() ? (r + " " + note()) : r;
+	}
 
-    /**
-     * @return true if error_code corresponds to known error.
-     */
-    static bool known_code(uint32_t code);
+	/**
+	 * @return true if error_code corresponds to known error.
+	 */
+	static bool known_code(uint32_t code);
 
-    XrlError();
-    XrlError(XrlErrorCode error_code, const string& note = "");
-    XrlError(const XrlError& xe) : _errlet(xe._errlet), _note(xe._note) {}
+	XrlError();
+	XrlError(XrlErrorCode error_code, const string& note = "");
+	XrlError(const XrlError& xe) : _errlet(xe._errlet), _note(xe._note) {}
 
-    /* Strictly for classes that have access to XrlErrlet to construct
-       XrlError's */
-    XrlError(const XrlErrlet& x, const string& note = "") :
-	_errlet(&x), _note(note) {}
+	/* Strictly for classes that have access to XrlErrlet to construct
+	   XrlError's */
+	XrlError(const XrlErrlet& x, const string& note = "") :
+	    _errlet(&x), _note(note) {}
 
-    XrlError(const XrlErrlet*);
+	XrlError(const XrlErrlet*);
 
-protected:
-    const XrlErrlet* _errlet;
-    string	     _note;
+    protected:
+	const XrlErrlet* _errlet;
+	string	     _note;
 };
 
 
@@ -171,56 +174,59 @@ protected:
  *   them with generated values != XrlCmdError::OKAY(), for instance,
  *   is not good for performance or code size either.
  */
-struct XrlCmdError {
-public:
-    /**
-     * The default return value.  Indicates that the arguments to the
-     * XRL method were correct.  Inability to perform operation should
-     * still return OKAY(), but the return list should indicate the
-     * error.
-     */
-    static const XrlCmdError& OKAY() { return _xce_ok; }
+struct XrlCmdError 
+{
+    public:
+	/**
+	 * The default return value.  Indicates that the arguments to the
+	 * XRL method were correct.  Inability to perform operation should
+	 * still return OKAY(), but the return list should indicate the
+	 * error.
+	 */
+	static const XrlCmdError& OKAY() { return _xce_ok; }
 
-    /**
-     * Return value when the method arguments are incorrect.
-     */
-    static const XrlCmdError BAD_ARGS(const string& reason = "") {
-	return XrlError(XrlError::BAD_ARGS().error_code(), reason);
-    }
+	/**
+	 * Return value when the method arguments are incorrect.
+	 */
+	static const XrlCmdError BAD_ARGS(const string& reason = "") 
+	{
+	    return XrlError(XrlError::BAD_ARGS().error_code(), reason);
+	}
 
-    /**
-     * Return value when the method could not be execute.
-     */
-    static const XrlCmdError COMMAND_FAILED(const string& reason = "") {
-	return XrlError(XrlError::COMMAND_FAILED().error_code(), reason);
-    }
+	/**
+	 * Return value when the method could not be execute.
+	 */
+	static const XrlCmdError COMMAND_FAILED(const string& reason = "") 
+	{
+	    return XrlError(XrlError::COMMAND_FAILED().error_code(), reason);
+	}
 
-    /**
-     * Convert to XrlError (needed for XRL protocol families).
-     */
-    operator XrlError() const { return _xrl_error; }
+	/**
+	 * Convert to XrlError (needed for XRL protocol families).
+	 */
+	operator XrlError() const { return _xrl_error; }
 
-    /**
-     * @return string containing representation of command error.
-     */
-    string str() const { return string("XrlCmdError ") + _xrl_error.str(); }
+	/**
+	 * @return string containing representation of command error.
+	 */
+	string str() const { return string("XrlCmdError ") + _xrl_error.str(); }
 
-    /**
-     * @return the unique identifer number associated with error.
-     */
-    XrlErrorCode error_code() const { return _xrl_error.error_code(); }
+	/**
+	 * @return the unique identifer number associated with error.
+	 */
+	XrlErrorCode error_code() const { return _xrl_error.error_code(); }
 
-    bool isOK() const { return _xrl_error.isOK(); }
+	bool isOK() const { return _xrl_error.isOK(); }
 
-    /**
-     * @return note associated with origin of error (i.e., the reason).
-     */
-    const string& note() const { return _xrl_error.note(); }
+	/**
+	 * @return note associated with origin of error (i.e., the reason).
+	 */
+	const string& note() const { return _xrl_error.note(); }
 
-private:
-    XrlCmdError(const XrlError& xe) : _xrl_error(xe) {}
-    XrlError _xrl_error;
-    static XrlCmdError _xce_ok;
+    private:
+	XrlCmdError(const XrlError& xe) : _xrl_error(xe) {}
+	XrlError _xrl_error;
+	static XrlCmdError _xce_ok;
 };
 
 

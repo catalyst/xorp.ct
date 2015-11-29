@@ -27,25 +27,27 @@
 
 #include "ifconfig_transaction.hh"
 
-void
+	void
 IfConfigTransactionManager::pre_commit(uint32_t tid)
 {
-    reset_error();
-    _tid_exec = tid;
+	reset_error();
+	_tid_exec = tid;
 }
 
-void
+	void
 IfConfigTransactionManager::operation_result(bool success,
-					     const TransactionOperation& op)
+		const TransactionOperation& op)
 {
-    if (false == success && _first_error.empty()) {
-	_first_error = c_format("Failed executing: \"%s\"", op.str().c_str());
-	flush(_tid_exec);
-    }
+	if (false == success && _first_error.empty()) 
+	{
+		_first_error = c_format("Failed executing: \"%s\"", op.str().c_str());
+		flush(_tid_exec);
+	}
 }
 
-bool RemoveInterface::dispatch() {
-    if (ifconfig().remove_interface(ifname()) != XORP_OK)
-	return (false);
-    return (true);
+bool RemoveInterface::dispatch() 
+{
+	if (ifconfig().remove_interface(ifname()) != XORP_OK)
+		return (false);
+	return (true);
 }

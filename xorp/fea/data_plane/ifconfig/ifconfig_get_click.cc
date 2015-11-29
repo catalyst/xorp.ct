@@ -41,89 +41,91 @@
 //   http://www.read.cs.ucla.edu/click/
 //
 
-IfConfigGetClick::IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigGet(fea_data_plane_manager),
-      _cs_reader(*(ClickSocket *)this)
+	IfConfigGetClick::IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigGet(fea_data_plane_manager),
+	_cs_reader(*(ClickSocket *)this)
 {
 }
 
 IfConfigGetClick::~IfConfigGetClick()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Click mechanism to get "
-		   "information about network interfaces from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Click mechanism to get "
+				"information about network interfaces from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IfConfigGetClick::start(string& error_msg)
 {
-    if (! ClickSocket::is_enabled())
+	if (! ClickSocket::is_enabled())
+		return (XORP_OK);
+
+	if (_is_running)
+		return (XORP_OK);
+
+	if (ClickSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    if (_is_running)
-	return (XORP_OK);
-
-    if (ClickSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigGetClick::stop(string& error_msg)
 {
-    int ret_value = XORP_OK;
+	int ret_value = XORP_OK;
 
-    if (! _is_running)
-	return (XORP_OK);
+	if (! _is_running)
+		return (XORP_OK);
 
-    ret_value = ClickSocket::stop(error_msg);
+	ret_value = ClickSocket::stop(error_msg);
 
-    _is_running = false;
+	_is_running = false;
 
-    return (ret_value);
+	return (ret_value);
 }
 
-int
+	int
 IfConfigGetClick::pull_config(const IfTree* local_config, IfTree& iftree)
 {
-    UNUSED(local_config);
-    return read_config(iftree);
+	UNUSED(local_config);
+	return read_config(iftree);
 }
 
-int
+	int
 IfConfigGetClick::read_config(IfTree& iftree)
 {
-    //
-    // XXX: Get the tree from the IfConfigSetClick instance.
-    // The reason for that is because it is practically
-    // impossible to read the Click configuration and parse it to restore
-    // the original IfTree state.
-    //
-    IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
-    if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
-	return (XORP_ERROR);
-
-    IfConfigSetClick* ifconfig_set_click;
-    ifconfig_set_click = dynamic_cast<IfConfigSetClick*>(ifconfig_set);
-    if (ifconfig_set_click == NULL) {
 	//
-	// XXX: The IfConfigSet plugin was probably changed to something else
-	// which we don't know how to deal with.
+	// XXX: Get the tree from the IfConfigSetClick instance.
+	// The reason for that is because it is practically
+	// impossible to read the Click configuration and parse it to restore
+	// the original IfTree state.
 	//
-	return (XORP_ERROR);
-    }
+	IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
+	if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
+		return (XORP_ERROR);
 
-    iftree = ifconfig_set_click->iftree();
+	IfConfigSetClick* ifconfig_set_click;
+	ifconfig_set_click = dynamic_cast<IfConfigSetClick*>(ifconfig_set);
+	if (ifconfig_set_click == NULL) 
+	{
+		//
+		// XXX: The IfConfigSet plugin was probably changed to something else
+		// which we don't know how to deal with.
+		//
+		return (XORP_ERROR);
+	}
 
-    return (XORP_OK);
+	iftree = ifconfig_set_click->iftree();
+
+	return (XORP_OK);
 }
 
 

@@ -63,12 +63,13 @@
  * Completion matches are recorded in containers of the following
  * type.
  */
-struct WordCompletion {
-  StringGroup *sg;        /* Memory for a group of strings */
-  int matches_dim;        /* The allocated size of result.matches[] */
-  char errmsg[ERRLEN+1];  /* The error-reporting buffer */
-  CplMatches result;      /* Completions to be returned to the caller */
-  CompleteFile *cf;       /* The resources used for filename completion */
+struct WordCompletion 
+{
+	StringGroup *sg;        /* Memory for a group of strings */
+	int matches_dim;        /* The allocated size of result.matches[] */
+	char errmsg[ERRLEN+1];  /* The error-reporting buffer */
+	CplMatches result;      /* Completions to be returned to the caller */
+	CompleteFile *cf;       /* The resources used for filename completion */
 };
 
 static void cpl_sort_matches(WordCompletion *cpl);
@@ -89,26 +90,27 @@ static int cpl_cmp_suffixes(const void *v1, const void *v2);
  * A pointer to a structure of the following type can be passed to
  * the builtin file-completion callback function to modify its behavior.
  */
-struct CplFileConf {
-  int id;             /* new_CplFileConf() sets this to CFC_ID_CODE */
-  int escaped;        /* If none-zero, backslashes in the input line are */
-                      /*  interpreted as escaping special characters and */
-                      /*  spaces, and any special characters and spaces in */
-                      /*  the listed completions will also be escaped with */
-                      /*  added backslashes. This is the default behaviour. */
-                      /* If zero, backslashes are interpreted as being */
-                      /*  literal parts of the filename, and none are added */
-                      /*  to the completion suffixes. */
-  int file_start;     /* The index in the input line of the first character */
-                      /*  of the filename. If you specify -1 here, */
-                      /*  cpl_file_completions() identifies the */
-                      /*  the start of the filename by looking backwards for */
-                      /*  an unescaped space, or the beginning of the line. */
-  CplCheckFn *chk_fn; /* If not zero, this argument specifies a */
-                      /*  function to call to ask whether a given */
-                      /*  file should be included in the list */
-                      /*  of completions. */
-  void *chk_data;     /* Anonymous data to be passed to check_fn(). */
+struct CplFileConf 
+{
+	int id;             /* new_CplFileConf() sets this to CFC_ID_CODE */
+	int escaped;        /* If none-zero, backslashes in the input line are */
+	/*  interpreted as escaping special characters and */
+	/*  spaces, and any special characters and spaces in */
+	/*  the listed completions will also be escaped with */
+	/*  added backslashes. This is the default behaviour. */
+	/* If zero, backslashes are interpreted as being */
+	/*  literal parts of the filename, and none are added */
+	/*  to the completion suffixes. */
+	int file_start;     /* The index in the input line of the first character */
+	/*  of the filename. If you specify -1 here, */
+	/*  cpl_file_completions() identifies the */
+	/*  the start of the filename by looking backwards for */
+	/*  an unescaped space, or the beginning of the line. */
+	CplCheckFn *chk_fn; /* If not zero, this argument specifies a */
+	/*  function to call to ask whether a given */
+	/*  file should be included in the list */
+	/*  of completions. */
+	void *chk_data;     /* Anonymous data to be passed to check_fn(). */
 };
 
 static void cpl_init_FileConf(CplFileConf *cfc);
@@ -121,53 +123,55 @@ static void cpl_init_FileConf(CplFileConf *cfc);
  */
 WordCompletion *new_WordCompletion(void)
 {
-  WordCompletion *cpl;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  cpl = (WordCompletion *) malloc(sizeof(WordCompletion));
-  if(!cpl) {
-    fprintf(stderr, "new_WordCompletion: Insufficient memory.\n");
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to del_WordCompletion().
- */
-  cpl->sg = NULL;
-  cpl->matches_dim = 0;
-  cpl->result.suffix = NULL;
-  cpl->result.cont_suffix = NULL;
-  cpl->result.matches = NULL;
-  cpl->result.nmatch = 0;
-  cpl->cf = NULL;
-/*
- * Allocate an object that allows a group of strings to be allocated
- * efficiently by placing many of them in contiguous string segments.
- */
-  cpl->sg = _new_StringGroup(_pu_pathname_dim());
-  if(!cpl->sg)
-    return del_WordCompletion(cpl);
-/*
- * Allocate an array for matching completions. This will be extended later
- * if needed.
- */
-  cpl->matches_dim = STR_BLK_FACT;
-  cpl->result.matches = (CplMatch *) malloc(sizeof(cpl->result.matches[0]) *
-					    cpl->matches_dim);
-  if(!cpl->result.matches) {
-    fprintf(stderr,
-     "new_WordCompletion: Insufficient memory to allocate array of matches.\n");
-    return del_WordCompletion(cpl);
-  };
-/*
- * Allocate a filename-completion resource object.
- */
-  cpl->cf = _new_CompleteFile();
-  if(!cpl->cf)
-    return del_WordCompletion(cpl);
-  return cpl;
+	WordCompletion *cpl;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	cpl = (WordCompletion *) malloc(sizeof(WordCompletion));
+	if(!cpl) 
+	{
+		fprintf(stderr, "new_WordCompletion: Insufficient memory.\n");
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to del_WordCompletion().
+	 */
+	cpl->sg = NULL;
+	cpl->matches_dim = 0;
+	cpl->result.suffix = NULL;
+	cpl->result.cont_suffix = NULL;
+	cpl->result.matches = NULL;
+	cpl->result.nmatch = 0;
+	cpl->cf = NULL;
+	/*
+	 * Allocate an object that allows a group of strings to be allocated
+	 * efficiently by placing many of them in contiguous string segments.
+	 */
+	cpl->sg = _new_StringGroup(_pu_pathname_dim());
+	if(!cpl->sg)
+		return del_WordCompletion(cpl);
+	/*
+	 * Allocate an array for matching completions. This will be extended later
+	 * if needed.
+	 */
+	cpl->matches_dim = STR_BLK_FACT;
+	cpl->result.matches = (CplMatch *) malloc(sizeof(cpl->result.matches[0]) *
+			cpl->matches_dim);
+	if(!cpl->result.matches) 
+	{
+		fprintf(stderr,
+				"new_WordCompletion: Insufficient memory to allocate array of matches.\n");
+		return del_WordCompletion(cpl);
+	};
+	/*
+	 * Allocate a filename-completion resource object.
+	 */
+	cpl->cf = _new_CompleteFile();
+	if(!cpl->cf)
+		return del_WordCompletion(cpl);
+	return cpl;
 }
 
 /*.......................................................................
@@ -180,16 +184,18 @@ WordCompletion *new_WordCompletion(void)
  */
 WordCompletion *del_WordCompletion(WordCompletion *cpl)
 {
-  if(cpl) {
-    cpl->sg = _del_StringGroup(cpl->sg);
-    if(cpl->result.matches) {
-      free(cpl->result.matches);
-      cpl->result.matches = NULL;
-      cpl->cf = _del_CompleteFile(cpl->cf);
-    };
-    free(cpl);
-  };
-  return NULL;
+	if(cpl) 
+	{
+		cpl->sg = _del_StringGroup(cpl->sg);
+		if(cpl->result.matches) 
+		{
+			free(cpl->result.matches);
+			cpl->result.matches = NULL;
+			cpl->cf = _del_CompleteFile(cpl->cf);
+		};
+		free(cpl);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -231,62 +237,65 @@ WordCompletion *del_WordCompletion(WordCompletion *cpl)
  *                            1 - Error.
  */
 int cpl_add_completion(WordCompletion *cpl, const char *line,
-		       int word_start, int word_end, const char *suffix,
-		       const char *type_suffix, const char *cont_suffix)
+		int word_start, int word_end, const char *suffix,
+		const char *type_suffix, const char *cont_suffix)
 {
-  CplMatch *match; /* The container of the new match */
-  char *string;    /* A newly allocated copy of the completion string */
-/*
- * Check the arguments.
- */
-  if(!cpl)
-    return 1;
-  if(!suffix)
-    return 0;
-  if(!type_suffix)
-    type_suffix = "";
-  if(!cont_suffix)
-    cont_suffix = "";
-/*
- * Do we need to extend the array of matches[]?
- */
-  if(cpl->result.nmatch+1 > cpl->matches_dim) {
-    int needed = cpl->matches_dim + STR_BLK_FACT;
-    CplMatch *matches = (CplMatch *) realloc(cpl->result.matches,
-			    sizeof(cpl->result.matches[0]) * needed);
-    if(!matches) {
-      strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
-      return 1;
-    };
-    cpl->result.matches = matches;
-    cpl->matches_dim = needed;
-  };
-/*
- * Allocate memory to store the combined completion prefix and the
- * new suffix.
- */
-  string = _sg_alloc_string(cpl->sg, word_end-word_start + strlen(suffix));
-  if(!string) {
-    strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
-    return 1;
-  };
-/*
- * Compose the string.
- */
-  strncpy(string, line + word_start, word_end - word_start);
-  strncpy(string + word_end - word_start, suffix, strlen(suffix)+1);
-/*
- * Record the new match.
- */
-  match = cpl->result.matches + cpl->result.nmatch++;
-  match->completion = string;
-  match->suffix = string + word_end - word_start;
-  match->type_suffix = type_suffix;
-/*
- * Record the continuation suffix.
- */
-  cpl->result.cont_suffix = cont_suffix;
-  return 0;
+	CplMatch *match; /* The container of the new match */
+	char *string;    /* A newly allocated copy of the completion string */
+	/*
+	 * Check the arguments.
+	 */
+	if(!cpl)
+		return 1;
+	if(!suffix)
+		return 0;
+	if(!type_suffix)
+		type_suffix = "";
+	if(!cont_suffix)
+		cont_suffix = "";
+	/*
+	 * Do we need to extend the array of matches[]?
+	 */
+	if(cpl->result.nmatch+1 > cpl->matches_dim) 
+	{
+		int needed = cpl->matches_dim + STR_BLK_FACT;
+		CplMatch *matches = (CplMatch *) realloc(cpl->result.matches,
+				sizeof(cpl->result.matches[0]) * needed);
+		if(!matches) 
+		{
+			strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
+			return 1;
+		};
+		cpl->result.matches = matches;
+		cpl->matches_dim = needed;
+	};
+	/*
+	 * Allocate memory to store the combined completion prefix and the
+	 * new suffix.
+	 */
+	string = _sg_alloc_string(cpl->sg, word_end-word_start + strlen(suffix));
+	if(!string) 
+	{
+		strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
+		return 1;
+	};
+	/*
+	 * Compose the string.
+	 */
+	strncpy(string, line + word_start, word_end - word_start);
+	strncpy(string + word_end - word_start, suffix, strlen(suffix)+1);
+	/*
+	 * Record the new match.
+	 */
+	match = cpl->result.matches + cpl->result.nmatch++;
+	match->completion = string;
+	match->suffix = string + word_end - word_start;
+	match->type_suffix = type_suffix;
+	/*
+	 * Record the continuation suffix.
+	 */
+	cpl->result.cont_suffix = cont_suffix;
+	return 0;
 }
 
 /*.......................................................................
@@ -297,8 +306,8 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
  */
 static void cpl_sort_matches(WordCompletion *cpl)
 {
-  qsort(cpl->result.matches, cpl->result.nmatch,
-	sizeof(cpl->result.matches[0]), cpl_cmp_matches);
+	qsort(cpl->result.matches, cpl->result.nmatch,
+			sizeof(cpl->result.matches[0]), cpl_cmp_matches);
 }
 
 /*.......................................................................
@@ -313,9 +322,9 @@ static void cpl_sort_matches(WordCompletion *cpl)
  */
 static int cpl_cmp_matches(const void *v1, const void *v2)
 {
-  const CplMatch *m1 = (const CplMatch *) v1;
-  const CplMatch *m2 = (const CplMatch *) v2;
-  return strcmp(m1->completion, m2->completion);
+	const CplMatch *m1 = (const CplMatch *) v1;
+	const CplMatch *m2 = (const CplMatch *) v2;
+	return strcmp(m1->completion, m2->completion);
 }
 
 /*.......................................................................
@@ -326,8 +335,8 @@ static int cpl_cmp_matches(const void *v1, const void *v2)
  */
 static void cpl_sort_suffixes(WordCompletion *cpl)
 {
-  qsort(cpl->result.matches, cpl->result.nmatch,
-	sizeof(cpl->result.matches[0]), cpl_cmp_suffixes);
+	qsort(cpl->result.matches, cpl->result.nmatch,
+			sizeof(cpl->result.matches[0]), cpl_cmp_suffixes);
 }
 
 /*.......................................................................
@@ -343,9 +352,9 @@ static void cpl_sort_suffixes(WordCompletion *cpl)
  */
 static int cpl_cmp_suffixes(const void *v1, const void *v2)
 {
-  const CplMatch *m1 = (const CplMatch *) v1;
-  const CplMatch *m2 = (const CplMatch *) v2;
-  return strcmp(m1->suffix, m2->suffix);
+	const CplMatch *m1 = (const CplMatch *) v1;
+	const CplMatch *m2 = (const CplMatch *) v2;
+	return strcmp(m1->suffix, m2->suffix);
 }
 
 /*.......................................................................
@@ -361,57 +370,59 @@ static int cpl_cmp_suffixes(const void *v1, const void *v2)
  */
 static int cpl_common_suffix(WordCompletion *cpl)
 {
-  CplMatches *result;       /* The result container */
-  const char *first, *last; /* The first and last matching suffixes */
-  int length;               /* The length of the common suffix */
-/*
- * Get the container of the array of matching files.
- */
-  result = &cpl->result;
-/*
- * No matching completions?
- */
-  if(result->nmatch < 1)
-    return 0;
-/*
- * Sort th matches into suffix order.
- */
-  cpl_sort_suffixes(cpl);
-/*
- * Given that the array of matches is sorted, the first and last
- * suffixes are those that differ most in their prefixes, so the common
- * prefix of these strings is the longest common prefix of all of the
- * suffixes.
- */
-  first = result->matches[0].suffix;
-  last = result->matches[result->nmatch - 1].suffix;
-/*
- * Find the point at which the first and last matching strings
- * first difffer.
- */
-  while(*first && *first == *last) {
-    first++;
-    last++;
-  };
-/*
- * How long is the common suffix?
- */
-  length = first - result->matches[0].suffix;
-/*
- * Allocate memory to record the common suffix.
- */
-  result->suffix = _sg_alloc_string(cpl->sg, length);
-  if(!result->suffix) {
-    strncpy(cpl->errmsg,
-	   "Insufficient memory to record common completion suffix.", sizeof(cpl->errmsg));
-    return 1;
-  };
-/*
- * Record the common suffix.
- */
-  strncpy(result->suffix, result->matches[0].suffix, length);
-  result->suffix[length] = '\0'; 
-  return 0;
+	CplMatches *result;       /* The result container */
+	const char *first, *last; /* The first and last matching suffixes */
+	int length;               /* The length of the common suffix */
+	/*
+	 * Get the container of the array of matching files.
+	 */
+	result = &cpl->result;
+	/*
+	 * No matching completions?
+	 */
+	if(result->nmatch < 1)
+		return 0;
+	/*
+	 * Sort th matches into suffix order.
+	 */
+	cpl_sort_suffixes(cpl);
+	/*
+	 * Given that the array of matches is sorted, the first and last
+	 * suffixes are those that differ most in their prefixes, so the common
+	 * prefix of these strings is the longest common prefix of all of the
+	 * suffixes.
+	 */
+	first = result->matches[0].suffix;
+	last = result->matches[result->nmatch - 1].suffix;
+	/*
+	 * Find the point at which the first and last matching strings
+	 * first difffer.
+	 */
+	while(*first && *first == *last) 
+	{
+		first++;
+		last++;
+	};
+	/*
+	 * How long is the common suffix?
+	 */
+	length = first - result->matches[0].suffix;
+	/*
+	 * Allocate memory to record the common suffix.
+	 */
+	result->suffix = _sg_alloc_string(cpl->sg, length);
+	if(!result->suffix) 
+	{
+		strncpy(cpl->errmsg,
+				"Insufficient memory to record common completion suffix.", sizeof(cpl->errmsg));
+		return 1;
+	};
+	/*
+	 * Record the common suffix.
+	 */
+	strncpy(result->suffix, result->matches[0].suffix, length);
+	result->suffix[length] = '\0'; 
+	return 0;
 }
 
 /*.......................................................................
@@ -422,21 +433,21 @@ static int cpl_common_suffix(WordCompletion *cpl)
  */
 static void cpl_clear_completions(WordCompletion *cpl)
 {
-/*
- * Discard all of the strings.
- */
-  _clr_StringGroup(cpl->sg);
-/*
- * Record the fact that the array is now empty.
- */
-  cpl->result.nmatch = 0;
-  cpl->result.suffix = NULL;
-  cpl->result.cont_suffix = "";
-/*
- * Also clear the error message.
- */
-  cpl->errmsg[0] = '\0';
-  return;
+	/*
+	 * Discard all of the strings.
+	 */
+	_clr_StringGroup(cpl->sg);
+	/*
+	 * Record the fact that the array is now empty.
+	 */
+	cpl->result.nmatch = 0;
+	cpl->result.suffix = NULL;
+	cpl->result.cont_suffix = "";
+	/*
+	 * Also clear the error message.
+	 */
+	cpl->errmsg[0] = '\0';
+	return;
 }
 
 /*.......................................................................
@@ -464,59 +475,61 @@ static void cpl_clear_completions(WordCompletion *cpl)
  *                           cpl_last_error(cpl).
  */
 CplMatches *cpl_complete_word(WordCompletion *cpl, const char *line,
-				int word_end, void *data, 
-				CplMatchFn *match_fn)
+		int word_end, void *data, 
+		CplMatchFn *match_fn)
 {
-  int line_len = 0;   /* The total length of the input line */
-/*
- * How long is the input line?
- */
-  if (line != NULL)
-    line_len = strlen(line);
-/*
- * Check the arguments.
- */
-  if(!cpl || !line || !match_fn || word_end < 0 || word_end > line_len) {
-    if(cpl)
-      strncpy(cpl->errmsg, "cpl_complete_word: Invalid arguments.", sizeof(cpl->errmsg));
-    return NULL;
-  };
-/*
- * Clear the return container.
- */
-  cpl_clear_completions(cpl);
-/*
- * Have the matching function record possible completion matches in
- * cpl->result.matches.
- */
-  if(match_fn(cpl, data, line, word_end)) {
-    if(cpl->errmsg[0] == '\0')
-      strncpy(cpl->errmsg, "Error completing word.", sizeof(cpl->errmsg));
-    return NULL;
-  };
-/*
- * Record a copy of the common initial part of all of the prefixes
- * in cpl->result.common.
- */
-  if(cpl_common_suffix(cpl))
-    return NULL;
-/*
- * Sort the matches into lexicographic order.
- */
-  cpl_sort_matches(cpl);
-/*
- * Discard any duplicate matches.
- */
-  cpl_zap_duplicates(cpl);
-/*
- * If there is more than one match, discard the continuation suffix.
- */
-  if(cpl->result.nmatch > 1)
-    cpl->result.cont_suffix = "";
-/*
- * Return the array of matches.
- */
-  return &cpl->result;
+	int line_len = 0;   /* The total length of the input line */
+	/*
+	 * How long is the input line?
+	 */
+	if (line != NULL)
+		line_len = strlen(line);
+	/*
+	 * Check the arguments.
+	 */
+	if(!cpl || !line || !match_fn || word_end < 0 || word_end > line_len) 
+	{
+		if(cpl)
+			strncpy(cpl->errmsg, "cpl_complete_word: Invalid arguments.", sizeof(cpl->errmsg));
+		return NULL;
+	};
+	/*
+	 * Clear the return container.
+	 */
+	cpl_clear_completions(cpl);
+	/*
+	 * Have the matching function record possible completion matches in
+	 * cpl->result.matches.
+	 */
+	if(match_fn(cpl, data, line, word_end)) 
+	{
+		if(cpl->errmsg[0] == '\0')
+			strncpy(cpl->errmsg, "Error completing word.", sizeof(cpl->errmsg));
+		return NULL;
+	};
+	/*
+	 * Record a copy of the common initial part of all of the prefixes
+	 * in cpl->result.common.
+	 */
+	if(cpl_common_suffix(cpl))
+		return NULL;
+	/*
+	 * Sort the matches into lexicographic order.
+	 */
+	cpl_sort_matches(cpl);
+	/*
+	 * Discard any duplicate matches.
+	 */
+	cpl_zap_duplicates(cpl);
+	/*
+	 * If there is more than one match, discard the continuation suffix.
+	 */
+	if(cpl->result.nmatch > 1)
+		cpl->result.cont_suffix = "";
+	/*
+	 * Return the array of matches.
+	 */
+	return &cpl->result;
 }
 
 /*.......................................................................
@@ -533,97 +546,106 @@ CplMatches *cpl_complete_word(WordCompletion *cpl, const char *line,
  */
 int cpl_list_completions(CplMatches *result, FILE *fp, int term_width)
 {
-  int maxlen;    /* The length of the longest matching string */
-  int width;     /* The width of a column */
-  int ncol;      /* The number of columns to list */
-  int nrow;      /* The number of rows needed to list all of the matches */
-  int row,col;   /* The row and column being written to */
-  int i;
-  int newline, onewline; /* Flags if the prev/curr string ends on '\n' */
-/*
- * Check the arguments.
- */
-  if(!result || !fp) {
-    fprintf(stderr, "cpl_list_completions: NULL argument(s).\n");
-    return 1;
-  };
-/*
- * Not enough space to list anything?
- */
-  if(term_width < 1)
-    return 0;
-/*
- * Work out the maximum length of the matching strings.
- */
-  maxlen = 0;
-  for(i=0; i<result->nmatch; i++) {
-    CplMatch *match = result->matches + i;
-    int len = strlen(match->completion) +
-              strlen(match->type_suffix);
-    if(len > maxlen)
-      maxlen = len;
-  };
-/*
- * Nothing to list?
- */
-  if(maxlen == 0)
-    return 0;
-/*
- * Split the available terminal width into columns of maxlen + 2 characters.
- */
-  width = maxlen + 2;
-  ncol = term_width / width;
-/*
- * If the column width is greater than the terminal width, the matches will
- * just have to overlap onto the next line.
- */
-  if(ncol < 1)
-    ncol = 1;
-/*
- * How many rows will be needed?
- */
-  nrow = (result->nmatch + ncol - 1) / ncol;
-/*
- * Print the matches out in ncol columns, sorted in row order within each
- * column.
- */
-  onewline = 1;
-  newline = 1;
-  for(row=0; row < nrow; row++) {
-    for(col=0; col < ncol; col++) {
-      int m = col*nrow + row;
-      onewline = newline;
-      newline = 0;
-      if(m < result->nmatch) {
-	CplMatch *match = result->matches + m;
-	/* Compute if the result string ends on '\n' */
-	do {
-	    int len = strlen(match->type_suffix);
-	    if (len) {
-		if (match->type_suffix[len-1] == '\n')
-		    newline = 1;
-		break;
-	    }
-	    len = strlen(match->completion);
-	    if (len) {
-		if (match->type_suffix[len-1] == '\n')
-		    newline = 1;
-		break;
-	    }
-	} while (0);
-	if(fprintf(fp, "%s%-*s%s", match->completion,
-		   (int) (((!onewline) && ncol > 1) ? maxlen - strlen(match->completion):0),
-		   match->type_suffix, newline ? "" : col<ncol-1 ? "  " : "\r\n") < 0)
-	  return 1;
-      } else {
-	if(!onewline && fprintf(fp, "\r\n") < 0)
-	  return 1;
+	int maxlen;    /* The length of the longest matching string */
+	int width;     /* The width of a column */
+	int ncol;      /* The number of columns to list */
+	int nrow;      /* The number of rows needed to list all of the matches */
+	int row,col;   /* The row and column being written to */
+	int i;
+	int newline, onewline; /* Flags if the prev/curr string ends on '\n' */
+	/*
+	 * Check the arguments.
+	 */
+	if(!result || !fp) 
+	{
+		fprintf(stderr, "cpl_list_completions: NULL argument(s).\n");
+		return 1;
+	};
+	/*
+	 * Not enough space to list anything?
+	 */
+	if(term_width < 1)
+		return 0;
+	/*
+	 * Work out the maximum length of the matching strings.
+	 */
+	maxlen = 0;
+	for(i=0; i<result->nmatch; i++) 
+	{
+		CplMatch *match = result->matches + i;
+		int len = strlen(match->completion) +
+			strlen(match->type_suffix);
+		if(len > maxlen)
+			maxlen = len;
+	};
+	/*
+	 * Nothing to list?
+	 */
+	if(maxlen == 0)
+		return 0;
+	/*
+	 * Split the available terminal width into columns of maxlen + 2 characters.
+	 */
+	width = maxlen + 2;
+	ncol = term_width / width;
+	/*
+	 * If the column width is greater than the terminal width, the matches will
+	 * just have to overlap onto the next line.
+	 */
+	if(ncol < 1)
+		ncol = 1;
+	/*
+	 * How many rows will be needed?
+	 */
+	nrow = (result->nmatch + ncol - 1) / ncol;
+	/*
+	 * Print the matches out in ncol columns, sorted in row order within each
+	 * column.
+	 */
+	onewline = 1;
 	newline = 1;
-	break;
-      };
-    };
-  };
-  return 0;
+	for(row=0; row < nrow; row++) 
+	{
+		for(col=0; col < ncol; col++) 
+		{
+			int m = col*nrow + row;
+			onewline = newline;
+			newline = 0;
+			if(m < result->nmatch) 
+			{
+				CplMatch *match = result->matches + m;
+				/* Compute if the result string ends on '\n' */
+				do 
+				{
+					int len = strlen(match->type_suffix);
+					if (len) 
+					{
+						if (match->type_suffix[len-1] == '\n')
+							newline = 1;
+						break;
+					}
+					len = strlen(match->completion);
+					if (len) 
+					{
+						if (match->type_suffix[len-1] == '\n')
+							newline = 1;
+						break;
+					}
+				} while (0);
+				if(fprintf(fp, "%s%-*s%s", match->completion,
+							(int) (((!onewline) && ncol > 1) ? maxlen - strlen(match->completion):0),
+							match->type_suffix, newline ? "" : col<ncol-1 ? "  " : "\r\n") < 0)
+					return 1;
+			} else 
+			{
+				if(!onewline && fprintf(fp, "\r\n") < 0)
+					return 1;
+				newline = 1;
+				break;
+			};
+		};
+	};
+	return 0;
 }
 
 /*.......................................................................
@@ -636,7 +658,7 @@ int cpl_list_completions(CplMatches *result, FILE *fp, int term_width)
  */
 const char *cpl_last_error(WordCompletion *cpl)
 {
-  return cpl ? cpl->errmsg : "NULL WordCompletion argument";
+	return cpl ? cpl->errmsg : "NULL WordCompletion argument";
 }
 
 /*.......................................................................
@@ -651,10 +673,11 @@ const char *cpl_last_error(WordCompletion *cpl)
  */
 void cpl_record_error(WordCompletion *cpl, const char *errmsg)
 {
-  if(cpl && errmsg) {
-    strncpy(cpl->errmsg, errmsg, ERRLEN);
-    cpl->errmsg[ERRLEN] = '\0';
-  };
+	if(cpl && errmsg) 
+	{
+		strncpy(cpl->errmsg, errmsg, ERRLEN);
+		cpl->errmsg[ERRLEN] = '\0';
+	};
 }
 
 /*.......................................................................
@@ -679,70 +702,78 @@ void cpl_record_error(WordCompletion *cpl, const char *errmsg)
  */
 CPL_MATCH_FN(cpl_file_completions)
 {
-  const char *start_path;  /* The pointer to the start of the pathname */
-                           /*  in line[]. */
-  CplFileConf *conf;       /* The new-style configuration object. */
-/*
- * The following configuration object will be used if the caller didn't
- * provide one.
- */
-  CplFileConf default_conf;
-/*
- * This function can be called externally, so check its arguments.
- */
-  if(!cpl)
-    return 1;
-  if(!line || word_end < 0) {
-    strncpy(cpl->errmsg, "cpl_file_completions: Invalid arguments.", sizeof(cpl->errmsg));
-    return 1;
-  };
-/*
- * The 'data' argument is either a CplFileConf pointer, identifiable
- * by having an integer id code as its first member, or the deprecated
- * CplFileArgs pointer, or can be NULL to request the default
- * configuration.
- */
-  if(data && *(int *)data == CFC_ID_CODE) {
-    conf = (CplFileConf *) data;
-  } else {
-/*
- * Select the defaults.
- */
-    conf = &default_conf;
-    cpl_init_FileConf(&default_conf);
-/*
- * If we have been passed an instance of the deprecated CplFileArgs
- * structure, copy its configuration parameters over the defaults.
- */
-    if(data) {
-      CplFileArgs *args = (CplFileArgs *) data;
-      conf->escaped = args->escaped;
-      conf->file_start = args->file_start;
-    };
-  };
-/*
- * Get the start of the filename. If not specified by the caller
- * identify it by searching backwards in the input line for an
- * unescaped space or the start of the line.
- */
-  if(conf->file_start < 0) {
-    start_path = _pu_start_of_path(line, word_end);
-    if(!start_path) {
-      strncpy(cpl->errmsg, "Unable to find the start of the filename.", sizeof(cpl->errmsg));
-      return 1;
-    };
-  } else {
-    start_path = line + conf->file_start;
-  };
-/*
- * Perform the completion.
- */
-  if(_cf_complete_file(cpl, cpl->cf, line, start_path - line, word_end,
-		      conf->escaped, conf->chk_fn, conf->chk_data)) {
-    cpl_record_error(cpl, _cf_last_error(cpl->cf));
-    return 1;
-  };
-  return 0;
+	const char *start_path;  /* The pointer to the start of the pathname */
+	/*  in line[]. */
+	CplFileConf *conf;       /* The new-style configuration object. */
+	/*
+	 * The following configuration object will be used if the caller didn't
+	 * provide one.
+	 */
+	CplFileConf default_conf;
+	/*
+	 * This function can be called externally, so check its arguments.
+	 */
+	if(!cpl)
+		return 1;
+	if(!line || word_end < 0) 
+	{
+		strncpy(cpl->errmsg, "cpl_file_completions: Invalid arguments.", sizeof(cpl->errmsg));
+		return 1;
+	};
+	/*
+	 * The 'data' argument is either a CplFileConf pointer, identifiable
+	 * by having an integer id code as its first member, or the deprecated
+	 * CplFileArgs pointer, or can be NULL to request the default
+	 * configuration.
+	 */
+	if(data && *(int *)data == CFC_ID_CODE) 
+	{
+		conf = (CplFileConf *) data;
+	} else 
+	{
+		/*
+		 * Select the defaults.
+		 */
+		conf = &default_conf;
+		cpl_init_FileConf(&default_conf);
+		/*
+		 * If we have been passed an instance of the deprecated CplFileArgs
+		 * structure, copy its configuration parameters over the defaults.
+		 */
+		if(data) 
+		{
+			CplFileArgs *args = (CplFileArgs *) data;
+			conf->escaped = args->escaped;
+			conf->file_start = args->file_start;
+		};
+	};
+	/*
+	 * Get the start of the filename. If not specified by the caller
+	 * identify it by searching backwards in the input line for an
+	 * unescaped space or the start of the line.
+	 */
+	if(conf->file_start < 0) 
+	{
+		start_path = _pu_start_of_path(line, word_end);
+		if(!start_path) 
+		{
+			strncpy(cpl->errmsg, "Unable to find the start of the filename.", sizeof(cpl->errmsg));
+			return 1;
+		};
+	} else 
+	{
+		start_path = line + conf->file_start;
+	};
+	/*
+	 * Perform the completion.
+	 */
+	if(_cf_complete_file(cpl, cpl->cf, line, start_path - line, word_end,
+				conf->escaped, conf->chk_fn, conf->chk_data)) 
+	{
+		cpl_record_error(cpl, _cf_last_error(cpl->cf));
+		return 1;
+	};
+	return 0;
 }
 
 /*.......................................................................
@@ -757,10 +788,11 @@ CPL_MATCH_FN(cpl_file_completions)
  */
 void cpl_init_FileArgs(CplFileArgs *cfa)
 {
-  if(cfa) {
-    cfa->escaped = 1;
-    cfa->file_start = -1;
-  };
+	if(cfa) 
+	{
+		cfa->escaped = 1;
+		cfa->file_start = -1;
+	};
 }
 
 /*.......................................................................
@@ -773,13 +805,14 @@ void cpl_init_FileArgs(CplFileArgs *cfa)
  */
 static void cpl_init_FileConf(CplFileConf *cfc)
 {
-  if(cfc) {
-    cfc->id = CFC_ID_CODE;
-    cfc->escaped = 1;
-    cfc->file_start = -1;
-    cfc->chk_fn = 0;
-    cfc->chk_data = NULL;
-  };
+	if(cfc) 
+	{
+		cfc->id = CFC_ID_CODE;
+		cfc->escaped = 1;
+		cfc->file_start = -1;
+		cfc->chk_fn = 0;
+		cfc->chk_data = NULL;
+	};
 }
 
 /*.......................................................................
@@ -790,20 +823,20 @@ static void cpl_init_FileConf(CplFileConf *cfc)
  */
 CplFileConf *new_CplFileConf(void)
 {
-  CplFileConf *cfc;  /* The object to be returned */
-/*
- * Allocate the container.
- */
-  cfc = (CplFileConf *)malloc(sizeof(CplFileConf));
-  if(!cfc)
-    return NULL;
-/*
- * Before attempting any operation that might fail, initialize the
- * container at least up to the point at which it can safely be passed
- * to del_CplFileConf().
- */
-  cpl_init_FileConf(cfc);
-  return cfc;
+	CplFileConf *cfc;  /* The object to be returned */
+	/*
+	 * Allocate the container.
+	 */
+	cfc = (CplFileConf *)malloc(sizeof(CplFileConf));
+	if(!cfc)
+		return NULL;
+	/*
+	 * Before attempting any operation that might fail, initialize the
+	 * container at least up to the point at which it can safely be passed
+	 * to del_CplFileConf().
+	 */
+	cpl_init_FileConf(cfc);
+	return cfc;
 }
 
 /*.......................................................................
@@ -816,13 +849,14 @@ CplFileConf *new_CplFileConf(void)
  */
 CplFileConf *del_CplFileConf(CplFileConf *cfc)
 {
-  if(cfc) {
-/*
- * Delete the container.
- */
-    free(cfc);
-  };
-  return NULL;
+	if(cfc) 
+	{
+		/*
+		 * Delete the container.
+		 */
+		free(cfc);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -840,8 +874,8 @@ CplFileConf *del_CplFileConf(CplFileConf *cfc)
  */
 void cfc_literal_escapes(CplFileConf *cfc, int literal)
 {
-  if(cfc)
-    cfc->escaped = !literal;
+	if(cfc)
+		cfc->escaped = !literal;
 }
 
 /*.......................................................................
@@ -859,8 +893,8 @@ void cfc_literal_escapes(CplFileConf *cfc, int literal)
  */
 void cfc_file_start(CplFileConf *cfc, int start_index)
 {
-  if(cfc)
-    cfc->file_start = start_index;
+	if(cfc)
+		cfc->file_start = start_index;
 }
 
 /*.......................................................................
@@ -880,10 +914,11 @@ void cfc_file_start(CplFileConf *cfc, int start_index)
  */
 void cfc_set_check_fn(CplFileConf *cfc, CplCheckFn *chk_fn, void *chk_data)
 {
-  if(cfc) {
-    cfc->chk_fn = chk_fn;
-    cfc->chk_data = chk_data;
-  };
+	if(cfc) 
+	{
+		cfc->chk_fn = chk_fn;
+		cfc->chk_data = chk_data;
+	};
 }
 
 /*.......................................................................
@@ -892,7 +927,7 @@ void cfc_set_check_fn(CplFileConf *cfc, CplCheckFn *chk_fn, void *chk_data)
  */
 CPL_CHECK_FN(cpl_check_exe)
 {
-  return _pu_path_is_exe(pathname);
+	return _pu_path_is_exe(pathname);
 }
 
 /*.......................................................................
@@ -903,47 +938,49 @@ CPL_CHECK_FN(cpl_check_exe)
  */
 static void cpl_zap_duplicates(WordCompletion *cpl)
 {
-  CplMatch *matches;       /* The array of matches */
-  int nmatch;              /* The number of elements in matches[] */
-  const char *completion;  /* The completion string of the last unique match */
-  const char *type_suffix; /* The type of the last unique match */
-  int src;                 /* The index of the match being considered */
-  int dst;                 /* The index at which to record the next */
-                           /*  unique match. */
-/*
- * Get the array of matches and the number of matches that it
- * contains.
- */
-  matches = cpl->result.matches;
-  nmatch = cpl->result.nmatch;
-/*
- * No matches?
- */
-  if(nmatch < 1)
-    return;
-/*
- * Initialize the comparison strings with the first match.
- */
-  completion = matches[0].completion;
-  type_suffix = matches[0].type_suffix;
-/*
- * Go through the array of matches, copying each new unrecorded
- * match at the head of the array, while discarding duplicates.
- */
-  for(src=dst=1; src<nmatch; src++) {
-    CplMatch *match = matches + src;
-    if(strcmp(completion, match->completion) != 0 ||
-       strcmp(type_suffix, match->type_suffix) != 0) {
-      if(src != dst)
-	matches[dst] = *match;
-      dst++;
-      completion = match->completion;
-      type_suffix = match->type_suffix;
-    };
-  };
-/*
- * Record the number of unique matches that remain.
- */
-  cpl->result.nmatch = dst;
-  return;
+	CplMatch *matches;       /* The array of matches */
+	int nmatch;              /* The number of elements in matches[] */
+	const char *completion;  /* The completion string of the last unique match */
+	const char *type_suffix; /* The type of the last unique match */
+	int src;                 /* The index of the match being considered */
+	int dst;                 /* The index at which to record the next */
+	/*  unique match. */
+	/*
+	 * Get the array of matches and the number of matches that it
+	 * contains.
+	 */
+	matches = cpl->result.matches;
+	nmatch = cpl->result.nmatch;
+	/*
+	 * No matches?
+	 */
+	if(nmatch < 1)
+		return;
+	/*
+	 * Initialize the comparison strings with the first match.
+	 */
+	completion = matches[0].completion;
+	type_suffix = matches[0].type_suffix;
+	/*
+	 * Go through the array of matches, copying each new unrecorded
+	 * match at the head of the array, while discarding duplicates.
+	 */
+	for(src=dst=1; src<nmatch; src++) 
+	{
+		CplMatch *match = matches + src;
+		if(strcmp(completion, match->completion) != 0 ||
+				strcmp(type_suffix, match->type_suffix) != 0) 
+		{
+			if(src != dst)
+				matches[dst] = *match;
+			dst++;
+			completion = match->completion;
+			type_suffix = match->type_suffix;
+		};
+	};
+	/*
+	 * Record the number of unique matches that remain.
+	 */
+	cpl->result.nmatch = dst;
+	return;
 }

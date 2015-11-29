@@ -26,9 +26,9 @@
 #include "version_filter.hh"
 
 
-VersionFilters::VersionFilters() : PolicyFilters(
-				    new VersionFilter(VarRW::VAR_FILTER_IM),
-				    new VersionFilter(VarRW::VAR_FILTER_SM),
-				    new VersionFilter(VarRW::VAR_FILTER_EX))
+    VersionFilters::VersionFilters() : PolicyFilters(
+	    new VersionFilter(VarRW::VAR_FILTER_IM),
+	    new VersionFilter(VarRW::VAR_FILTER_SM),
+	    new VersionFilter(VarRW::VAR_FILTER_EX))
 {
 }

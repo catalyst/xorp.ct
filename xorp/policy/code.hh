@@ -37,257 +37,264 @@ typedef map<string, string>    SUBR; // XXX string* would be better...
  * It contains the actual code for the policy, its target, and names of the
  * sets referenced. It also contains the policytags referenced.
  */
-class Code {
-public:
-    /**
-     * @short A target represents where the code should be placed.
-     *
-     * A target consists of a protocol and a filter type. It identifies exactly
-     * which filter of which protocol has to be configured with this code.
-     */
-    class Target {
+class Code 
+{
     public:
 	/**
-	 * Default constructor.
-	 */
-	Target() {}
-
-	/**
-	 * Construct a target [protocol/filter pair].
+	 * @short A target represents where the code should be placed.
 	 *
-	 * @param p target protocol.
-	 * @param f target filter.
+	 * A target consists of a protocol and a filter type. It identifies exactly
+	 * which filter of which protocol has to be configured with this code.
 	 */
-	Target(const string& p, filter::Filter f) : _protocol(p), _filter(f) {}
+	class Target 
+	{
+	    public:
+		/**
+		 * Default constructor.
+		 */
+		Target() {}
+
+		/**
+		 * Construct a target [protocol/filter pair].
+		 *
+		 * @param p target protocol.
+		 * @param f target filter.
+		 */
+		Target(const string& p, filter::Filter f) : _protocol(p), _filter(f) {}
+
+		/**
+		 * Operator to compare Targets. Needed for STL set storage.
+		 *
+		 * @return true if target is less than argument
+		 * @param rhs target to compare with
+		 */
+		bool operator<(const Target& rhs) const;
+
+		bool operator==(const Target& rhs) const;
+		bool operator!=(const Target& rhs) const;
+
+		/**
+		 * Get the protocol.
+		 *
+		 * @return the protocol.
+		 */
+		const string protocol() const { return _protocol; }
+
+		/**
+		 * Set the protocol.
+		 *
+		 * @param protocol the protocol name.
+		 */
+		void set_protocol(const string& protocol) { _protocol = protocol; }
+
+		/**
+		 * Get the filter type.
+		 *
+		 * @return the filter type.
+		 */
+		filter::Filter filter() const { return _filter; }
+
+		/**
+		 * Set the filter type.
+		 *
+		 * @param filter the filter type.
+		 */
+		void set_filter(const filter::Filter& filter) { _filter = filter; }
+
+		/**
+		 * @return string representation of target.
+		 */
+		string str() const;
+
+	    private:
+		string		_protocol;
+		filter::Filter	_filter;
+	};
+
+	typedef set<Target> TargetSet;
+
+	// if it is export filter code, these are the tags used by the code.
+	typedef set<uint32_t> TagSet;
 
 	/**
-	 * Operator to compare Targets. Needed for STL set storage.
+	 * Get the target.
 	 *
-	 * @return true if target is less than argument
-	 * @param rhs target to compare with
+	 * @return a reference to the target.
 	 */
-	bool operator<(const Target& rhs) const;
-
-	bool operator==(const Target& rhs) const;
-	bool operator!=(const Target& rhs) const;
+	const Code::Target& target() const { return _target; }
 
 	/**
-	 * Get the protocol.
+	 * Set the target.
 	 *
-	 * @return the protocol.
+	 * @param target the target.
 	 */
-	const string protocol() const { return _protocol; }
+	void set_target(const Code::Target target) { _target = target; }
 
 	/**
-	 * Set the protocol.
+	 * Set the target protocol.
 	 *
-	 * @param protocol the protocol name.
+	 * @param protocol the target protocol name.
 	 */
-	void set_protocol(const string& protocol) { _protocol = protocol; }
+	void set_target_protocol(const string& protocol);
 
 	/**
-	 * Get the filter type.
+	 * Set the target filter type.
 	 *
-	 * @return the filter type.
+	 * @param filter the target filter type.
 	 */
-	filter::Filter filter() const { return _filter; }
+	void set_target_filter(const filter::Filter& filter);
 
 	/**
-	 * Set the filter type.
+	 * Get the actual code.
 	 *
-	 * @param filter the filter type.
+	 * @return a reference to the actual code.
 	 */
-	void set_filter(const filter::Filter& filter) { _filter = filter; }
+	const string& code() const { return _code; }
 
 	/**
-	 * @return string representation of target.
+	 * Set the actual code.
+	 *
+	 * @param code the actual code.
 	 */
-	string str() const;
+	void set_code(const string& code) { _code = code; }
+
+	/**
+	 * Add to the actual code.
+	 *
+	 * @param code the code to add.
+	 */
+	void add_code(const string& code) { _code += code; }
+
+	/**
+	 * Get the names of the sets referenced by this code.
+	 *
+	 * @return a reference to the names of the sets referenced by this code.
+	 */
+	const set<string> referenced_set_names() const 
+	{
+	    return _referenced_set_names;
+	}
+
+	/**
+	 * Set the names of the sets referenced by this code.
+	 *
+	 * @param set_names the names of the sets referenced by this code.
+	 */
+	void set_referenced_set_names(const set<string>& set_names) 
+	{
+	    _referenced_set_names = set_names;
+	}
+
+	/**
+	 * Add the name of a set referenced by this code.
+	 *
+	 * @param set_name the name of the set referenced by this code.
+	 */
+	void add_referenced_set_name(const string& set_name) 
+	{
+	    _referenced_set_names.insert(set_name);
+	}
+
+	/**
+	 * Remove the names of all sets referenced by this code.
+	 */
+	void clear_referenced_set_names() { _referenced_set_names.clear(); }
+
+	/*
+	 * Get the set of source protocols.
+	 *
+	 * @return a reference to the set of source protocols.
+	 */
+	const set<string>& source_protocols() const { return _source_protocols; }
+
+	/**
+	 * Add a source protocol.
+	 *
+	 * @param protocol the protocol to add.
+	 */
+	void add_source_protocol(const string& protocol) 
+	{
+	    _source_protocols.insert(protocol);
+	}
+
+	/**
+	 * Get the set with all tags.
+	 *
+	 * @return a reference to the set with all tags.
+	 */
+	const Code::TagSet& all_tags() const { return _all_tags; }
+
+	/**
+	 * Get the set with the tags used for route redistribution to other
+	 * protocols.
+	 *
+	 * @return a reference to the set with tags used for route redistribution.
+	 */
+	const Code::TagSet& redist_tags() const { return _redist_tags; }
+
+	/**
+	 * Add a tag.
+	 *
+	 * @param tag the tag to add.
+	 * @param is_redist_tag if true, the tag is used for route redistribution
+	 * to other protocols.
+	 */
+	void add_tag(uint32_t tag, bool is_redist_tag) 
+	{
+	    _all_tags.insert(tag);
+	    if (is_redist_tag)
+		_redist_tags.insert(tag);
+	}
+
+	/**
+	 * Sets _redist_tags with provided set
+	 *
+	 * This function empties _redist_tags and its elements from _all_tags.
+	 * @param redist_tags the redistribution tags to add.
+	 */
+	void set_redistribution_tags(const TagSet& redist_tags);
+
+	/**
+	 * Refreshes redistribution tags if this is code for
+	 * EXPORT_SOURCEMATCH filter. Accurate redistribution
+	 * tags are provided via Code reference in function argument.
+	 *
+	 * It also replaces tags inside policy code.
+	 *
+	 * @param accurate_code Code with accurate redistribution tags.
+	 */
+	void refresh_sm_redistribution_tags(const Code& accurate_code);
+
+	void add_subr(const string& policy, const string& code);
+
+	const SUBR& subr() const;
+
+	/**
+	 * @return string representation of code.
+	 */
+	string str();
+
+	/**
+	 * Appends code to current code. It enables for chunks of code to be
+	 * linked.
+	 *
+	 * @return reference to the updated code.
+	 * @param rhs code to link.
+	 */
+	Code& operator +=(const Code& rhs);
 
     private:
-	string		_protocol;
-	filter::Filter	_filter;
-    };
+	Target	_target;
+	string	_code;
+	set<string>	_referenced_set_names;
 
-    typedef set<Target> TargetSet;
+	// if it is an export filter code, these are source protocols which will
+	// send routes to the target
+	set<string>	_source_protocols;
 
-    // if it is export filter code, these are the tags used by the code.
-    typedef set<uint32_t> TagSet;
-
-    /**
-     * Get the target.
-     *
-     * @return a reference to the target.
-     */
-    const Code::Target& target() const { return _target; }
-
-    /**
-     * Set the target.
-     *
-     * @param target the target.
-     */
-    void set_target(const Code::Target target) { _target = target; }
-
-    /**
-     * Set the target protocol.
-     *
-     * @param protocol the target protocol name.
-     */
-    void set_target_protocol(const string& protocol);
-
-    /**
-     * Set the target filter type.
-     *
-     * @param filter the target filter type.
-     */
-    void set_target_filter(const filter::Filter& filter);
-
-    /**
-     * Get the actual code.
-     *
-     * @return a reference to the actual code.
-     */
-    const string& code() const { return _code; }
-
-    /**
-     * Set the actual code.
-     *
-     * @param code the actual code.
-     */
-    void set_code(const string& code) { _code = code; }
-
-    /**
-     * Add to the actual code.
-     *
-     * @param code the code to add.
-     */
-    void add_code(const string& code) { _code += code; }
-
-    /**
-     * Get the names of the sets referenced by this code.
-     *
-     * @return a reference to the names of the sets referenced by this code.
-     */
-    const set<string> referenced_set_names() const {
-	return _referenced_set_names;
-    }
-
-    /**
-     * Set the names of the sets referenced by this code.
-     *
-     * @param set_names the names of the sets referenced by this code.
-     */
-    void set_referenced_set_names(const set<string>& set_names) {
-	_referenced_set_names = set_names;
-    }
-
-    /**
-     * Add the name of a set referenced by this code.
-     *
-     * @param set_name the name of the set referenced by this code.
-     */
-    void add_referenced_set_name(const string& set_name) {
-	_referenced_set_names.insert(set_name);
-    }
-
-    /**
-     * Remove the names of all sets referenced by this code.
-     */
-    void clear_referenced_set_names() { _referenced_set_names.clear(); }
-
-    /*
-     * Get the set of source protocols.
-     *
-     * @return a reference to the set of source protocols.
-     */
-    const set<string>& source_protocols() const { return _source_protocols; }
-
-    /**
-     * Add a source protocol.
-     *
-     * @param protocol the protocol to add.
-     */
-    void add_source_protocol(const string& protocol) {
-	_source_protocols.insert(protocol);
-    }
-
-    /**
-     * Get the set with all tags.
-     *
-     * @return a reference to the set with all tags.
-     */
-    const Code::TagSet& all_tags() const { return _all_tags; }
-
-    /**
-     * Get the set with the tags used for route redistribution to other
-     * protocols.
-     *
-     * @return a reference to the set with tags used for route redistribution.
-     */
-    const Code::TagSet& redist_tags() const { return _redist_tags; }
-
-    /**
-     * Add a tag.
-     *
-     * @param tag the tag to add.
-     * @param is_redist_tag if true, the tag is used for route redistribution
-     * to other protocols.
-     */
-    void add_tag(uint32_t tag, bool is_redist_tag) {
-	_all_tags.insert(tag);
-	if (is_redist_tag)
-	    _redist_tags.insert(tag);
-    }
-
-    /**
-     * Sets _redist_tags with provided set
-     *
-     * This function empties _redist_tags and its elements from _all_tags.
-     * @param redist_tags the redistribution tags to add.
-     */
-    void set_redistribution_tags(const TagSet& redist_tags);
-
-    /**
-     * Refreshes redistribution tags if this is code for
-     * EXPORT_SOURCEMATCH filter. Accurate redistribution
-     * tags are provided via Code reference in function argument.
-     *
-     * It also replaces tags inside policy code.
-     *
-     * @param accurate_code Code with accurate redistribution tags.
-     */
-    void refresh_sm_redistribution_tags(const Code& accurate_code);
-
-    void add_subr(const string& policy, const string& code);
-
-    const SUBR& subr() const;
-
-    /**
-     * @return string representation of code.
-     */
-    string str();
-
-    /**
-     * Appends code to current code. It enables for chunks of code to be
-     * linked.
-     *
-     * @return reference to the updated code.
-     * @param rhs code to link.
-     */
-    Code& operator +=(const Code& rhs);
-
-private:
-    Target	_target;
-    string	_code;
-    set<string>	_referenced_set_names;
-
-    // if it is an export filter code, these are source protocols which will
-    // send routes to the target
-    set<string>	_source_protocols;
-
-    TagSet	_all_tags;
-    TagSet	_redist_tags;	// The tags used for route redistribution
-    SUBR	_subr;
+	TagSet	_all_tags;
+	TagSet	_redist_tags;	// The tags used for route redistribution
+	SUBR	_subr;
 };
 
 #endif // __POLICY_CODE_HH__

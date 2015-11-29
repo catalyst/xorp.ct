@@ -29,87 +29,89 @@
 
 
 class FibConfigTableGetNetlinkSocket : public FibConfigTableGet,
-				       public NetlinkSocket {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigTableGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public NetlinkSocket 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigTableGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigTableGetNetlinkSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigTableGetNetlinkSocket();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Obtain the IPv4 unicast forwarding table.
-     *
-     * @param fte_list the return-by-reference list with all entries in
-     * the IPv4 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table4(list<Fte4>& fte_list);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /**
-     * Obtain the IPv6 unicast forwarding table.
-     *
-     * @param fte_list the return-by-reference list with all entries in
-     * the IPv6 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table6(list<Fte6>& fte_list);
+		/**
+		 * Obtain the IPv4 unicast forwarding table.
+		 *
+		 * @param fte_list the return-by-reference list with all entries in
+		 * the IPv4 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table4(list<Fte4>& fte_list);
 
-    /**
-     * Parse information about routing table information received from
-     * the underlying system.
-     * 
-     * The information to parse is in NETLINK format
-     * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
-     * @param family the address family to consider only ((e.g., AF_INET
-     * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param iftree the interface tree to use.
-     * @param fte_list the list with the Fte entries to store the result.
-     * @param buffer the buffer with the data to parse.
-     * @param is_nlm_get_only if true, consider only the entries obtained
-     * by RTM_GETROUTE.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see FteX.
-     */
-    static int parse_buffer_netlink_socket(int family, const IfTree& iftree,
-					   list<FteX>& fte_list,
-					   vector<uint8_t>& buffer,
-					   bool is_nlm_get_only, const FibConfig& fibconfig);
+		/**
+		 * Obtain the IPv6 unicast forwarding table.
+		 *
+		 * @param fte_list the return-by-reference list with all entries in
+		 * the IPv6 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table6(list<Fte6>& fte_list);
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl) {
-	return NetlinkSocket::notify_table_id_change(new_tbl);
-    }
+		/**
+		 * Parse information about routing table information received from
+		 * the underlying system.
+		 * 
+		 * The information to parse is in NETLINK format
+		 * (e.g., obtained by netlink(7) sockets mechanism).
+		 * 
+		 * @param family the address family to consider only ((e.g., AF_INET
+		 * or AF_INET6 for IPv4 and IPv6 respectively).
+		 * @param iftree the interface tree to use.
+		 * @param fte_list the list with the Fte entries to store the result.
+		 * @param buffer the buffer with the data to parse.
+		 * @param is_nlm_get_only if true, consider only the entries obtained
+		 * by RTM_GETROUTE.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 * @see FteX.
+		 */
+		static int parse_buffer_netlink_socket(int family, const IfTree& iftree,
+				list<FteX>& fte_list,
+				vector<uint8_t>& buffer,
+				bool is_nlm_get_only, const FibConfig& fibconfig);
 
-private:
-    int get_table(int family, list<FteX>& fte_list);
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl) 
+		{
+			return NetlinkSocket::notify_table_id_change(new_tbl);
+		}
 
-    NetlinkSocketReader	_ns_reader;
+	private:
+		int get_table(int family, list<FteX>& fte_list);
+
+		NetlinkSocketReader	_ns_reader;
 };
 
 #endif

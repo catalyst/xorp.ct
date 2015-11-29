@@ -53,7 +53,7 @@
 
 static map<pid_t, RunCommandBase *> pid2command;
 
-static void
+    static void
 child_handler(int signo)
 {
     XLOG_ASSERT(signo == SIGCHLD);
@@ -66,7 +66,8 @@ child_handler(int signo)
     // we should try non-blocking waitpid() for each pid in the
     // pid2command map.
     //
-    do {
+    do 
+    {
 	pid_t pid = 0;
 	int wait_status = 0;
 	map<pid_t, RunCommandBase *>::iterator iter;
@@ -79,7 +80,8 @@ child_handler(int signo)
 	XLOG_ASSERT(pid > 0);
 	popen2_mark_as_closed(pid, wait_status);
 	iter = pid2command.find(pid);
-	if (iter == pid2command.end()) {
+	if (iter == pid2command.end()) 
+	{
 	    // XXX: we don't know anything about the exited process
 	    continue;
 	}
@@ -89,7 +91,7 @@ child_handler(int signo)
     } while (true);
 }
 
-static string
+    static string
 get_path_bshell()
 {
     return (string(_PATH_BSHELL));
@@ -97,31 +99,31 @@ get_path_bshell()
 }
 
 RunCommand::RunCommand( const string&			command,
-		       const list<string>&		argument_list,
-		       RunCommand::OutputCallback	stdout_cb,
-		       RunCommand::OutputCallback	stderr_cb,
-		       RunCommand::DoneCallback		done_cb,
-		       bool				redirect_stderr_to_stdout,
-		       int task_priority)
-    : RunCommandBase( command, command, task_priority),
-      _stdout_cb(stdout_cb),
-      _stderr_cb(stderr_cb),
-      _done_cb(done_cb),
-      _redirect_stderr_to_stdout(redirect_stderr_to_stdout)
+	const list<string>&		argument_list,
+	RunCommand::OutputCallback	stdout_cb,
+	RunCommand::OutputCallback	stderr_cb,
+	RunCommand::DoneCallback		done_cb,
+	bool				redirect_stderr_to_stdout,
+	int task_priority)
+: RunCommandBase( command, command, task_priority),
+    _stdout_cb(stdout_cb),
+    _stderr_cb(stderr_cb),
+    _done_cb(done_cb),
+    _redirect_stderr_to_stdout(redirect_stderr_to_stdout)
 {
     set_argument_list(argument_list);
 }
 
 RunShellCommand::RunShellCommand( const string&		command,
-				 const string&		argument_string,
-				 RunShellCommand::OutputCallback stdout_cb,
-				 RunShellCommand::OutputCallback stderr_cb,
-				 RunShellCommand::DoneCallback	 done_cb,
-				 int task_priority)
-    : RunCommandBase( get_path_bshell(), command, task_priority),
-      _stdout_cb(stdout_cb),
-      _stderr_cb(stderr_cb),
-      _done_cb(done_cb)
+	const string&		argument_string,
+	RunShellCommand::OutputCallback stdout_cb,
+	RunShellCommand::OutputCallback stderr_cb,
+	RunShellCommand::DoneCallback	 done_cb,
+	int task_priority)
+: RunCommandBase( get_path_bshell(), command, task_priority),
+    _stdout_cb(stdout_cb),
+    _stderr_cb(stderr_cb),
+    _done_cb(done_cb)
 {
     list<string> l;
 
@@ -134,29 +136,29 @@ RunShellCommand::RunShellCommand( const string&		command,
 }
 
 RunCommandBase::RunCommandBase( const string&		command,
-			       const string&		real_command_name,
-			       int task_priority)
-    : _command(command),
-      _real_command_name(real_command_name),
-      _stdout_file_reader(NULL),
-      _stderr_file_reader(NULL),
-      _stdout_stream(NULL),
-      _stderr_stream(NULL),
-      _last_stdout_offset(0),
-      _last_stderr_offset(0),
-      _pid(0),
-      _is_error(false),
-      _is_running(false),
-      _command_is_exited(false),
-      _command_is_signal_terminated(false),
-      _command_is_coredumped(false),
-      _command_is_stopped(false),
-      _command_exit_status(0),
-      _command_term_signal(0),
-      _command_stop_signal(0),
-      _stdout_eof_received(false),
-      _stderr_eof_received(false),
-      _task_priority(task_priority)
+	const string&		real_command_name,
+	int task_priority)
+: _command(command),
+    _real_command_name(real_command_name),
+    _stdout_file_reader(NULL),
+    _stderr_file_reader(NULL),
+    _stdout_stream(NULL),
+    _stderr_stream(NULL),
+    _last_stdout_offset(0),
+    _last_stderr_offset(0),
+    _pid(0),
+    _is_error(false),
+    _is_running(false),
+    _command_is_exited(false),
+    _command_is_signal_terminated(false),
+    _command_is_coredumped(false),
+    _command_is_stopped(false),
+    _command_exit_status(0),
+    _command_term_signal(0),
+    _command_stop_signal(0),
+    _stdout_eof_received(false),
+    _stderr_eof_received(false),
+    _task_priority(task_priority)
 {
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
@@ -169,13 +171,14 @@ RunCommandBase::~RunCommandBase()
     cleanup();
 }
 
-void
+    void
 RunCommandBase::cleanup()
 {
     terminate_with_prejudice();
     close_output();
     // Remove the entry from the pid map and perform other cleanup
-    if (_pid != 0) {
+    if (_pid != 0) 
+    {
 	pid2command.erase(_pid);
 	_pid = 0;
     }
@@ -184,7 +187,7 @@ RunCommandBase::cleanup()
     unblock_child_signals();
 }
 
-int
+    int
 RunCommandBase::block_child_signals()
 {
     //
@@ -198,16 +201,17 @@ RunCommandBase::block_child_signals()
     r = sigaddset(&sigchld_sigset, SIGCHLD);
     XLOG_ASSERT(r >= 0);
 
-    if (sigprocmask(SIG_BLOCK, &sigchld_sigset, NULL) < 0) {
+    if (sigprocmask(SIG_BLOCK, &sigchld_sigset, NULL) < 0) 
+    {
 	XLOG_ERROR("Failed to block SIGCHLD in current signal mask: %s",
-		   strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 RunCommandBase::unblock_child_signals()
 {
     //
@@ -221,16 +225,17 @@ RunCommandBase::unblock_child_signals()
     r = sigaddset(&sigchld_sigset, SIGCHLD);
     XLOG_ASSERT(r >= 0);
 
-    if (sigprocmask(SIG_UNBLOCK, &sigchld_sigset, NULL) < 0) {
+    if (sigprocmask(SIG_UNBLOCK, &sigchld_sigset, NULL) < 0) 
+    {
 	XLOG_ERROR("Failed to unblock SIGCHLD in current signal mask: %s",
-		   strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 RunCommandBase::execute()
 {
     string error_msg;
@@ -242,9 +247,10 @@ RunCommandBase::execute()
     // Save the current execution ID, and set the new execution ID
     //
     _exec_id.save_current_exec_id();
-    if (_exec_id.set_effective_exec_id(error_msg) != XORP_OK) {
+    if (_exec_id.set_effective_exec_id(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Failed to set effective execution ID: %s",
-		   error_msg.c_str());
+		error_msg.c_str());
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
@@ -261,21 +267,25 @@ RunCommandBase::execute()
     //
 
     ifstream tst("XORP_USE_VALGRIND");
-    if (tst) {
+    if (tst) 
+    {
 	string vcmd("/usr/bin/valgrind");
 	list<string> args(_argument_list);
 
 	string uniq;
 	size_t slash = _command.find_last_of("/");
-	if (slash != string::npos) {
+	if (slash != string::npos) 
+	{
 	    uniq = _command.substr(slash + 1);
 	}
-	else {
+	else 
+	{
 	    uniq = _command;
 	}
 
 	char* value = getenv("XORP_FINDER_SERVER_PORT");
-	if (value != NULL) {
+	if (value != NULL) 
+	{
 	    uniq.append("-");
 	    uniq.append(value);
 	}
@@ -294,14 +304,16 @@ RunCommandBase::execute()
 	tst.close();
 
 	_pid = popen2(vcmd, args, _stdout_stream, _stderr_stream,
-		      redirect_stderr_to_stdout());
+		redirect_stderr_to_stdout());
     }
-    else {
+    else 
+    {
 	_pid = popen2(_command, _argument_list, _stdout_stream, _stderr_stream,
-		      redirect_stderr_to_stdout());
+		redirect_stderr_to_stdout());
     }
 
-    if (_stdout_stream == NULL) {
+    if (_stdout_stream == NULL) 
+    {
 	XLOG_ERROR("Failed to execute command \"%s\"", _command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
@@ -314,28 +326,30 @@ RunCommandBase::execute()
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader( XorpFd(fileno(_stdout_stream)),
-					      task_priority());
+	    task_priority());
     _stdout_file_reader->add_buffer(
-	_stdout_buffer,
-	BUF_SIZE,
-	callback(this, &RunCommandBase::append_data));
-    if (! _stdout_file_reader->start()) {
+	    _stdout_buffer,
+	    BUF_SIZE,
+	    callback(this, &RunCommandBase::append_data));
+    if (! _stdout_file_reader->start()) 
+    {
 	XLOG_ERROR("Failed to start a stdout reader for command \"%s\"",
-		   _command.c_str());
+		_command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
 
     _stderr_file_reader = new AsyncFileReader( XorpFd(fileno(_stderr_stream)),
-					      task_priority());
+	    task_priority());
     _stderr_file_reader->add_buffer(
-	_stderr_buffer,
-	BUF_SIZE,
-	callback(this, &RunCommandBase::append_data));
-    if (! _stderr_file_reader->start()) {
+	    _stderr_buffer,
+	    BUF_SIZE,
+	    callback(this, &RunCommandBase::append_data));
+    if (! _stderr_file_reader->start()) 
+    {
 	XLOG_ERROR("Failed to start a stderr reader for command \"%s\"",
-		   _command.c_str());
+		_command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
@@ -356,23 +370,24 @@ RunCommandBase::execute()
     return (XORP_OK);
 }
 
-void
+    void
 RunCommandBase::terminate()
 {
     terminate_process(false);
 }
 
-void
+    void
 RunCommandBase::terminate_with_prejudice()
 {
     terminate_process(true);
 }
 
-void
+    void
 RunCommandBase::terminate_process(bool with_prejudice)
 {
     // Kill the process group
-    if (0 != _pid) {
+    if (0 != _pid) 
+    {
 	if (with_prejudice)
 	    killpg(_pid, SIGKILL);
 	else
@@ -380,7 +395,7 @@ RunCommandBase::terminate_process(bool with_prejudice)
     }
 }
 
-void
+    void
 RunCommandBase::wait_status_changed(int wait_status)
 {
     set_command_status(wait_status);
@@ -391,16 +406,18 @@ RunCommandBase::wait_status_changed(int wait_status)
     //
     // TODO: Temporary print any errors and catch any exceptions
     // (for debugging purpose).
-    try {
+    try 
+    {
 	errno = 0;
 	_done_timer.schedule_now();
-    } catch(...) {
+    } catch(...) 
+    {
 	XLOG_ERROR("Error scheduling RunCommand::_done_timer: %d", errno);
 	xorp_catch_standard_exceptions();
     }
 }
 
-void
+    void
 RunCommandBase::close_output()
 {
     //
@@ -412,24 +429,27 @@ RunCommandBase::close_output()
     close_stdout_output();
 }
 
-void
+    void
 RunCommandBase::close_stdout_output()
 {
-    if (_stdout_file_reader != NULL) {
+    if (_stdout_file_reader != NULL) 
+    {
 	delete _stdout_file_reader;
 	_stdout_file_reader = NULL;
     }
 
-    if (_stdout_stream != NULL) {
+    if (_stdout_stream != NULL) 
+    {
 	pclose2(_stdout_stream, true);
 	_stdout_stream = NULL;
     }
 }
 
-void
+    void
 RunCommandBase::close_stderr_output()
 {
-    if (_stderr_file_reader != NULL) {
+    if (_stderr_file_reader != NULL) 
+    {
 	delete _stderr_file_reader;
 	_stderr_file_reader = NULL;
     }
@@ -441,7 +461,7 @@ RunCommandBase::close_stderr_output()
     _stderr_stream = NULL;
 }
 
-void
+    void
 RunCommandBase::set_command_status(int status)
 {
     // Reset state
@@ -454,17 +474,20 @@ RunCommandBase::set_command_status(int status)
     _command_stop_signal = 0;
 
     // Set the command status
-    if (status >= 0) {
+    if (status >= 0) 
+    {
 	_command_is_exited = WIFEXITED(status);
 	_command_is_signal_terminated = WIFSIGNALED(status);
 	_command_is_stopped = WIFSTOPPED(status);
 	if (_command_is_exited)
 	    _command_exit_status = WEXITSTATUS(status);
-	if (_command_is_signal_terminated) {
+	if (_command_is_signal_terminated) 
+	{
 	    _command_term_signal = WTERMSIG(status);
 	    _command_is_coredumped = WCOREDUMP(status);
 	}
-	if (_command_is_stopped) {
+	if (_command_is_stopped) 
+	{
 	    _command_stop_signal = WSTOPSIG(status);
 	}
     }
@@ -473,26 +496,29 @@ RunCommandBase::set_command_status(int status)
 	stopped_cb_dispatch(_command_stop_signal);
 }
 
-void
+    void
 RunCommandBase::append_data(AsyncFileOperator::Event	event,
-			    const uint8_t*		buffer,
-			    size_t			/* buffer_bytes */,
-			    size_t			offset)
+	const uint8_t*		buffer,
+	size_t			/* buffer_bytes */,
+	size_t			offset)
 {
     size_t* last_offset_ptr = NULL;
     bool is_stdout = false;
 
-    if (buffer == _stdout_buffer) {
+    if (buffer == _stdout_buffer) 
+    {
 	is_stdout = true;
 	last_offset_ptr = &_last_stdout_offset;
-    } else {
+    } else 
+    {
 	XLOG_ASSERT(buffer == _stderr_buffer);
 	is_stdout = false;
 	last_offset_ptr = &_last_stderr_offset;
     }
 
     if ((event != AsyncFileOperator::END_OF_FILE)
-	&& (event != AsyncFileOperator::DATA)) {
+	    && (event != AsyncFileOperator::DATA)) 
+    {
 	//
 	// Something bad happened.
 	// XXX: ideally we'd figure out what.
@@ -511,54 +537,66 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
     //
     XLOG_ASSERT(offset >= *last_offset_ptr);
 
-    if (offset != *last_offset_ptr) {
+    if (offset != *last_offset_ptr) 
+    {
 	const char* p   = (const char*)buffer + *last_offset_ptr;
 	size_t      len = offset - *last_offset_ptr;
 	debug_msg("len = %u\n", XORP_UINT_CAST(len));
-	if (!_is_error) {
+	if (!_is_error) 
+	{
 	    if (is_stdout)
 		stdout_cb_dispatch(string(p, len));
 	    else
 		stderr_cb_dispatch(string(p, len));
-	} else {
+	} else 
+	{
 	    _error_msg.append(p, p + len);
 	}
 	*last_offset_ptr = offset;
     }
 
-    if (offset == BUF_SIZE) {
+    if (offset == BUF_SIZE) 
+    {
 	// The buffer is exhausted
 	*last_offset_ptr = 0;
-	if (is_stdout) {
+	if (is_stdout) 
+	{
 	    memset(_stdout_buffer, 0, BUF_SIZE);
 	    _stdout_file_reader->add_buffer(
-		_stdout_buffer,
-		BUF_SIZE,
-		callback(this, &RunCommandBase::append_data));
+		    _stdout_buffer,
+		    BUF_SIZE,
+		    callback(this, &RunCommandBase::append_data));
 	    _stdout_file_reader->start();
-	} else {
+	} else 
+	{
 	    memset(_stderr_buffer, 0, BUF_SIZE);
 	    _stderr_file_reader->add_buffer(
-		_stderr_buffer,
-		BUF_SIZE,
-		callback(this, &RunCommandBase::append_data));
+		    _stderr_buffer,
+		    BUF_SIZE,
+		    callback(this, &RunCommandBase::append_data));
 	    _stderr_file_reader->start();
 	}
     }
 
-    if (event == AsyncFileOperator::END_OF_FILE) {
-	if (is_stdout) {
+    if (event == AsyncFileOperator::END_OF_FILE) 
+    {
+	if (is_stdout) 
+	{
 	    _stdout_eof_received = true;
-	} else {
+	} else 
+	{
 	    _stderr_eof_received = true;
 	}
-	do {
+	do 
+	{
 	    if (_stdout_eof_received
-		&& (_stderr_eof_received || redirect_stderr_to_stdout())) {
+		    && (_stderr_eof_received || redirect_stderr_to_stdout())) 
+	    {
 		io_done(event, 0);
 		break;
 	    }
-	    if ((! is_stdout) && _stderr_eof_received) {
+	    if ((! is_stdout) && _stderr_eof_received) 
+	    {
 		close_stderr_output();
 		break;
 	    }
@@ -568,21 +606,23 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
     }
 }
 
-void
+    void
 RunCommandBase::io_done(AsyncFileOperator::Event event, int error_code)
 {
-    if (event != AsyncFileOperator::END_OF_FILE) {
+    if (event != AsyncFileOperator::END_OF_FILE) 
+    {
 	string prefix, suffix;
 
 	_is_error = true;
-	if (_error_msg.size()) {
+	if (_error_msg.size()) 
+	{
 	    prefix = "[";
 	    suffix = "]";
 	}
 	_error_msg += prefix;
 	_error_msg += c_format("Command \"%s\" terminated because of "
-			       "unexpected event (event = 0x%x error = %d).",
-			       _real_command_name.c_str(), event, error_code);
+		"unexpected event (event = 0x%x error = %d).",
+		_real_command_name.c_str(), event, error_code);
 	_error_msg += suffix;
 	terminate_with_prejudice();
     }
@@ -592,7 +632,7 @@ RunCommandBase::io_done(AsyncFileOperator::Event event, int error_code)
     done(_done_timer);
 }
 
-void
+    void
 RunCommandBase::done(XorpTimer& done_timer)
 {
     string prefix, suffix, reason;
@@ -611,36 +651,41 @@ RunCommandBase::done(XorpTimer& done_timer)
     _done_timer.unschedule();
     _is_running = false;
 
-    if (_error_msg.size()) {
+    if (_error_msg.size()) 
+    {
 	prefix = "[";
 	suffix = "]";
     }
     _error_msg += prefix;
 
-    if (_command_is_exited && (_command_exit_status != 0)) {
+    if (_command_is_exited && (_command_exit_status != 0)) 
+    {
 	_is_error = true;
 	if (! reason.empty())
 	    reason += "; ";
 	reason += c_format("exited with exit status %d",
-			   _command_exit_status);
+		_command_exit_status);
     }
-    if (_command_is_signal_terminated) {
+    if (_command_is_signal_terminated) 
+    {
 	_is_error = true;
 	if (! reason.empty())
 	    reason += "; ";
 	reason += c_format("terminated with signal %d",
-			   _command_term_signal);
+		_command_term_signal);
     }
-    if (_command_is_coredumped) {
+    if (_command_is_coredumped) 
+    {
 	_is_error = true;
 	if (! reason.empty())
 	    reason += "; ";
 	reason += c_format("aborted with a core dump");
     }
-    if (! reason.empty()) {
+    if (! reason.empty()) 
+    {
 	_error_msg += c_format("Command \"%s\": %s.",
-			       _real_command_name.c_str(),
-			       reason.c_str());
+		_real_command_name.c_str(),
+		reason.c_str());
     }
 
     _error_msg += suffix;
@@ -653,49 +698,49 @@ RunCommandBase::done(XorpTimer& done_timer)
     // delete this;
 }
 
-void
+    void
 RunCommandBase::set_exec_id(const ExecId& v)
 {
     _exec_id = v;
 }
 
-RunCommandBase::ExecId::ExecId()
-    : _uid(0),
-      _gid(0),
-      _is_uid_set(false),
-      _is_gid_set(false),
-      _saved_uid(0),
-      _saved_gid(0),
-      _is_exec_id_saved(false)
+    RunCommandBase::ExecId::ExecId()
+: _uid(0),
+    _gid(0),
+    _is_uid_set(false),
+    _is_gid_set(false),
+    _saved_uid(0),
+    _saved_gid(0),
+    _is_exec_id_saved(false)
 {
 
 }
 
-RunCommandBase::ExecId::ExecId(uid_t uid)
-    : _uid(uid),
-      _gid(0),
-      _is_uid_set(true),
-      _is_gid_set(false),
-      _saved_uid(0),
-      _saved_gid(0),
-      _is_exec_id_saved(false)
+    RunCommandBase::ExecId::ExecId(uid_t uid)
+: _uid(uid),
+    _gid(0),
+    _is_uid_set(true),
+    _is_gid_set(false),
+    _saved_uid(0),
+    _saved_gid(0),
+    _is_exec_id_saved(false)
 {
 
 }
 
-RunCommandBase::ExecId::ExecId(uid_t uid, gid_t gid)
-    : _uid(uid),
-      _gid(gid),
-      _is_uid_set(true),
-      _is_gid_set(true),
-      _saved_uid(0),
-      _saved_gid(0),
-      _is_exec_id_saved(false)
+    RunCommandBase::ExecId::ExecId(uid_t uid, gid_t gid)
+: _uid(uid),
+    _gid(gid),
+    _is_uid_set(true),
+    _is_gid_set(true),
+    _saved_uid(0),
+    _saved_gid(0),
+    _is_exec_id_saved(false)
 {
 
 }
 
-void
+    void
 RunCommandBase::ExecId::save_current_exec_id()
 {
     _saved_uid = getuid();
@@ -709,22 +754,24 @@ RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
     if (! _is_exec_id_saved)
 	return (XORP_OK);	// Nothing to do, because nothing was saved
 
-    if (seteuid(saved_uid()) != 0) {
+    if (seteuid(saved_uid()) != 0) 
+    {
 	error_msg = c_format("Cannot restore saved user ID to %u: %s",
-			     XORP_UINT_CAST(saved_uid()), strerror(errno));
+		XORP_UINT_CAST(saved_uid()), strerror(errno));
 	return (XORP_ERROR);
     }
 
-    if (setegid(saved_gid()) != 0) {
+    if (setegid(saved_gid()) != 0) 
+    {
 	error_msg = c_format("Cannot restore saved group ID to %u: %s",
-			     XORP_UINT_CAST(saved_gid()), strerror(errno));
+		XORP_UINT_CAST(saved_gid()), strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 {
     if (! is_set())
@@ -733,10 +780,12 @@ RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
     //
     // Set the effective group ID
     //
-    if (is_gid_set() && (gid() != saved_gid())) {
-	if (setegid(gid()) != 0) {
+    if (is_gid_set() && (gid() != saved_gid())) 
+    {
+	if (setegid(gid()) != 0) 
+	{
 	    error_msg = c_format("Cannot set the effective group ID to %u: %s",
-				 XORP_UINT_CAST(gid()), strerror(errno));
+		    XORP_UINT_CAST(gid()), strerror(errno));
 	    return (XORP_ERROR);
 	}
     }
@@ -744,10 +793,12 @@ RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
     //
     // Set the effective user ID
     //
-    if (is_uid_set() && (uid() != saved_uid())) {
-	if (seteuid(uid()) != 0) {
+    if (is_uid_set() && (uid() != saved_uid())) 
+    {
+	if (seteuid(uid()) != 0) 
+	{
 	    error_msg = c_format("Cannot set effective user ID to %u: %s",
-				 XORP_UINT_CAST(uid()), strerror(errno));
+		    XORP_UINT_CAST(uid()), strerror(errno));
 	    return (XORP_ERROR);
 	}
     }
@@ -761,7 +812,7 @@ RunCommandBase::ExecId::is_set() const
     return (is_uid_set() || is_gid_set());
 }
 
-void
+    void
 RunCommandBase::ExecId::reset()
 {
     _uid = 0;

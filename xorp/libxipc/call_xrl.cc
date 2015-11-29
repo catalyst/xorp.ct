@@ -41,32 +41,36 @@ static int wait_time = 1000;	// Time to wait for the callback in ms.
 static int retry_count = 0;	// Number of times to resend xrl on error.
 static bool stdin_forever = false;
 
-enum {
+enum 
+{
     // Return values from call_xrl
     OK = 0, BADXRL = -1, NOCALLBACK = -2
 };
 
-static void
+    static void
 response_handler(const XrlError& e,
-		 XrlArgs*	 response,
-		 bool*		 done_flag,
-		 bool* 		 resolve_failed,
-		 Xrl*		 xrl)
+	XrlArgs*	 response,
+	bool*		 done_flag,
+	bool* 		 resolve_failed,
+	Xrl*		 xrl)
 {
     UNUSED(xrl);
 
-    if (e == XrlError::RESOLVE_FAILED()) {
+    if (e == XrlError::RESOLVE_FAILED()) 
+    {
 	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
-		   e.str().c_str(), xrl->str().c_str());
+		e.str().c_str(), xrl->str().c_str());
 	*resolve_failed = true;
 	return;
     }
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
-		   e.str().c_str(), xrl->str().c_str());
+		e.str().c_str(), xrl->str().c_str());
 	exit(3);
     }
-    if (!response->str().empty()) {
+    if (!response->str().empty()) 
+    {
 	printf("%s\n", response->str().c_str());
 	fflush(stdout);
     }
@@ -86,10 +90,11 @@ void usage()
 	    "  -w <time ms>         Time to wait for a callback\n");
 }
 
-static int
+    static int
 call_xrl( XrlRouter& router, const char* request)
 {
-    try {
+    try 
+    {
 	Xrl x(request);
 
 	int tries;
@@ -99,82 +104,94 @@ call_xrl( XrlRouter& router, const char* request)
 	done = false;
 	resolve_failed = true;
 
-	while (xorp_do_run && done == false && tries <= retry_count) {
+	while (xorp_do_run && done == false && tries <= retry_count) 
+	{
 	    resolve_failed = false;
 	    router.send(x, callback(&response_handler,
-				    &done,
-				    &resolve_failed,
-				    &x));
-	    
+			&done,
+			&resolve_failed,
+			&x));
+
 	    bool timed_out = false;
 	    XorpTimer timeout = EventLoop::instance().set_flag_after_ms(wait_time, &timed_out);
-	    while (xorp_do_run && timed_out == false && done == false) {
+	    while (xorp_do_run && timed_out == false && done == false) 
+	    {
 		// NB we don't test for resolve failed here because if
 		// resolved failed we want to wait before retrying.
 		EventLoop::instance().run();
 	    }
 	    tries++;
 
-	    if (resolve_failed) {
+	    if (resolve_failed) 
+	    {
 		sleep(1);
 		continue;
 	    }
-	    
-	    if (timed_out) {
+
+	    if (timed_out) 
+	    {
 		XLOG_WARNING("request: %s no response waited %d ms", request,
-			     wait_time);
+			wait_time);
 		continue;
 	    }
 
-	    if (router.connected() == false) {
+	    if (router.connected() == false) 
+	    {
 		XLOG_ERROR("Lost connection to finder\n");
 		xorp_do_run = 0;
 		break;
 	    }
 	}//while
 
-	if (resolve_failed) {
+	if (resolve_failed) 
+	{
 	    XLOG_WARNING("request: %s resolve failed", request);
 	}
-	
- 	if (false == done && true == resolve_failed)
+
+	if (false == done && true == resolve_failed)
 	    XLOG_WARNING("request: %s failed after %d retries",
-			 request, retry_count);
+		    request, retry_count);
 	return done == true ? OK : NOCALLBACK;
-    } catch(const InvalidString& s) {
+    } catch(const InvalidString& s) 
+    {
 	cerr << s.str() << endl;
 	return BADXRL;
     }
 }
 
-static void
+    static void
 preprocess_file(XrlParserFileInput& xfp)
 {
-    try {
-	while (!xfp.eof()) {
+    try 
+    {
+	while (!xfp.eof()) 
+	{
 	    string l;
 	    if (xfp.getline(l) == false) continue;
 	    /* if preprocessing only print line and continue. */
 	    cout << l << endl;
 	}
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 }
 
-static int
+    static int
 input_file( XrlRouter&	       router,
-	   XrlParserFileInput& xfp)
+	XrlParserFileInput& xfp)
 {
 
-    while (!xfp.eof()) {
+    while (!xfp.eof()) 
+    {
 	string l;
 	if (xfp.getline(l) == true) continue;
 	/* if line length is zero or line looks like a preprocessor directive
 	 * continue. */
 	if (l.length() == 0 || l[0] == '#') continue;
 	int err = call_xrl( router, l.c_str());
-	if (err) {
+	if (err) 
+	{
 	    cerr << xfp.stack_trace() << endl;
 	    cerr << "Xrl failed: " << l;
 	    return err;
@@ -183,30 +200,38 @@ input_file( XrlRouter&	       router,
     return 0;
 }
 
-static int
+    static int
 input_files( XrlRouter&	router,
-	    int		argc,
-	    char* const argv[],
-	    bool	pponly)
+	int		argc,
+	char* const argv[],
+	bool	pponly)
 {
-    do {
-	if (argc == 0 || argv[0][0] == '-') {
-	    do {
+    do 
+    {
+	if (argc == 0 || argv[0][0] == '-') 
+	{
+	    do 
+	    {
 		XrlParserFileInput xfp(&cin);
-		if (pponly) {
+		if (pponly) 
+		{
 		    preprocess_file(xfp);
-		} else {
+		} else 
+		{
 		    int err = input_file( router, xfp);
 		    if (err)
 			return err;
 		}
 		TimerList::system_sleep(TimeVal(0, 250000));
 	    } while (stdin_forever);
-	} else {
+	} else 
+	{
 	    XrlParserFileInput xfp(argv[0]);
-	    if (pponly) {
+	    if (pponly) 
+	    {
 		preprocess_file(xfp);
-	    } else {
+	    } else 
+	    {
 		input_file( router, xfp);
 	    }
 	}
@@ -216,30 +241,32 @@ input_files( XrlRouter&	router,
     return 0;
 }
 
-static int
+    static int
 input_cmds( XrlRouter&  router,
-	   int	       argc,
-	   char* const argv[])
+	int	       argc,
+	char* const argv[])
 {
-    for (int i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) 
+    {
 	int err = call_xrl( router, argv[i]);
-	switch (err) {
-	case OK:
-	    break;
-	case BADXRL:
-	    XLOG_ERROR("Bad XRL syntax: %s\nStopping.", argv[i]);
-	    return err;
-	    break;
-	case NOCALLBACK:
-	    XLOG_ERROR("No callback: %s\nStopping.", argv[i]);
-	    return err;
-	    break;
+	switch (err) 
+	{
+	    case OK:
+		break;
+	    case BADXRL:
+		XLOG_ERROR("Bad XRL syntax: %s\nStopping.", argv[i]);
+		return err;
+		break;
+	    case NOCALLBACK:
+		XLOG_ERROR("No callback: %s\nStopping.", argv[i]);
+		return err;
+		break;
 	}
     }
     return 0;
 }
 
-int
+    int
 main(int argc, char* const argv[])
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -259,35 +286,38 @@ main(int argc, char* const argv[])
     uint16_t port = FinderConstants::FINDER_DEFAULT_PORT();
     int c;
     char *tmpport;
-    while ((c = getopt(argc, argv, "F:Efir:w:")) != -1) {
-	switch (c) {
-	case 'E':
-	    pponly = true;
-	    fileinput = true;
-	    break;
-	case 'f':
-	    fileinput = true;
-	    break;
-	case 'i':
-	    stdin_forever = true;
-	    break;
-	case 'r':
-	    retry_count = atoi(optarg);
-	    break;
-	case 'w':
-	    wait_time = atoi(optarg) * 1000;
-	    break;
-	case 'F':
-	    finder_host = optarg;
-	    tmpport = strchr(optarg, ':');
-	    if (tmpport != NULL) {
-		*tmpport++ = '\0';
-		port = atoi(tmpport);
-	    }
-	    break;
-	default:
-	    usage();
-	    return -1;
+    while ((c = getopt(argc, argv, "F:Efir:w:")) != -1) 
+    {
+	switch (c) 
+	{
+	    case 'E':
+		pponly = true;
+		fileinput = true;
+		break;
+	    case 'f':
+		fileinput = true;
+		break;
+	    case 'i':
+		stdin_forever = true;
+		break;
+	    case 'r':
+		retry_count = atoi(optarg);
+		break;
+	    case 'w':
+		wait_time = atoi(optarg) * 1000;
+		break;
+	    case 'F':
+		finder_host = optarg;
+		tmpport = strchr(optarg, ':');
+		if (tmpport != NULL) 
+		{
+		    *tmpport++ = '\0';
+		    port = atoi(tmpport);
+		}
+		break;
+	    default:
+		usage();
+		return -1;
 	}
     }
     argc -= optind;
@@ -296,37 +326,48 @@ main(int argc, char* const argv[])
     setup_dflt_sighandlers();
 
     int rv = 0;
-    try {
+    try 
+    {
 	XrlStdRouter router( ROUTER_NAME, finder_host.c_str(), port);
 
 	router.finalize();
 
-	while (xorp_do_run && !router.failed() && !router.ready()) {
+	while (xorp_do_run && !router.failed() && !router.ready()) 
+	{
 	    EventLoop::instance().run();
 	}
 
-	if (router.failed()) {
+	if (router.failed()) 
+	{
 	    XLOG_ERROR("Router failed to communicate with finder.\n");
 	    rv = 1;
 	}
-	else if (!router.ready()) {
+	else if (!router.ready()) 
+	{
 	    XLOG_ERROR("Connected to finder, but did not become ready.\n");
 	    rv = 2;
 	}
-	else {
-	    if (fileinput) {
-		if (input_files( router, argc, argv, pponly)) {
+	else 
+	{
+	    if (fileinput) 
+	    {
+		if (input_files( router, argc, argv, pponly)) 
+		{
 		    rv = -1;
 		}
-	    } else if (argc != 0) {
-		if (input_cmds( router, argc, argv)) {
+	    } else if (argc != 0) 
+	    {
+		if (input_cmds( router, argc, argv)) 
+		{
 		    rv = -1;
 		}
-	    } else {
+	    } else 
+	    {
 		usage();
 	    }
 	}
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

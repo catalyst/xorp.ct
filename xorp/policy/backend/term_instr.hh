@@ -39,50 +39,52 @@
 class TermInstr :
     public NONCOPYABLE
 {
-public:
-    /**
-     * @param name term name.
-     * @param instr list of instructions of this term. Caller must not delete.
-     */
-    TermInstr(const string& name, vector<Instruction*>* instr) :
+    public:
+	/**
+	 * @param name term name.
+	 * @param instr list of instructions of this term. Caller must not delete.
+	 */
+	TermInstr(const string& name, vector<Instruction*>* instr) :
 	    _name(name) { 
 
-	_instrc	= instr->size();
-	_instructions = new Instruction*[_instrc];
+		_instrc	= instr->size();
+		_instructions = new Instruction*[_instrc];
 
-	vector<Instruction*>::iterator iter;
-	int i = 0;
+		vector<Instruction*>::iterator iter;
+		int i = 0;
 
-	for (iter = instr->begin(); iter != instr->end(); iter++) {
-	    _instructions[i] = *iter;
-	    i++;
+		for (iter = instr->begin(); iter != instr->end(); iter++) 
+		{
+		    _instructions[i] = *iter;
+		    i++;
+		}
+
+		delete instr;
+	    }
+
+	~TermInstr() 
+	{
+	    for (int i = 0; i < _instrc; i++)
+		delete _instructions[i];
+	    delete [] _instructions;
 	}
-	
-	delete instr;
-    }
-    
-    ~TermInstr() {
-	for (int i = 0; i < _instrc; i++)
-	    delete _instructions[i];
-	delete [] _instructions;
-    }
 
-    /**
-     * @return the instructions of this term. Caller must not delete.
-     */
-    Instruction** instructions() { return _instructions; }
+	/**
+	 * @return the instructions of this term. Caller must not delete.
+	 */
+	Instruction** instructions() { return _instructions; }
 
-    /**
-     * @return name of the term
-     */
-    const string& name() { return _name; }
+	/**
+	 * @return name of the term
+	 */
+	const string& name() { return _name; }
 
-    int instrc() { return _instrc; }
+	int instrc() { return _instrc; }
 
-private:
-    string _name;
-    Instruction** _instructions;
-    int		  _instrc;
+    private:
+	string _name;
+	Instruction** _instructions;
+	int		  _instrc;
 };
 
 #endif // __POLICY_BACKEND_TERM_INSTR_HH__

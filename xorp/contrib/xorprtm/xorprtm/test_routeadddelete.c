@@ -40,7 +40,7 @@
 
 extern void print_rtmsg(struct rt_msghdr *, int);       /* XXX client_rtmsg.c */
 
-void
+    void
 try_add_route_with_wait_and_delete(void)
 {
     DWORD result;
@@ -53,14 +53,16 @@ try_add_route_with_wait_and_delete(void)
     int nbytes;
     int i;
 
-    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) {
+    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) 
+    {
 	fprintf(stderr, "No named pipe instances available.\n");
 	return;
     }
 
     h_pipe = CreateFileA(XORPRTM_PIPENAME, GENERIC_READ | GENERIC_WRITE,
-			 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (h_pipe == INVALID_HANDLE_VALUE) {
+	    0, NULL, OPEN_EXISTING, 0, NULL);
+    if (h_pipe == INVALID_HANDLE_VALUE) 
+    {
 	result = GetLastError();
 	fprintf(stderr, "error opening pipe: %d\n", result);
 	return;
@@ -70,14 +72,16 @@ try_add_route_with_wait_and_delete(void)
 
     msgsize = sizeof(*msg) + (sizeof(struct sockaddr_storage) * 3);
     msg = malloc(msgsize);
-    if (msg == NULL) {
+    if (msg == NULL) 
+    {
 	fprintf(stderr, "cannot allocate routing socket message\n");
 	CloseHandle(h_pipe);
 	return;
     }
 
     dmsg = malloc(msgsize);
-    if (dmsg == NULL) {
+    if (dmsg == NULL) 
+    {
 	fprintf(stderr, "cannot allocate routing socket message\n");
 	free(msg);
 	CloseHandle(h_pipe);
@@ -132,13 +136,16 @@ try_add_route_with_wait_and_delete(void)
 
     /* Try to add a route 3 times to test callbacks */
     i = 0;
-    do {
+    do 
+    {
 	fprintf(stderr, "attempting to add a route\n", GetLastError());
 	result = WriteFile(h_pipe, msg, msgsize, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d writing to pipe\n", GetLastError());
 	    break;
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "sent request %d\n", i);
 	    print_rtmsg(msg, nbytes);
 	}
@@ -149,10 +156,12 @@ try_add_route_with_wait_and_delete(void)
 	/* XXX 'msg' is reused twice for reading replies to both
 	 * RTM_ADD and RTM_DELTE commands. */
 	result = ReadFile(h_pipe, msg, msgsize, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d reading from pipe\n", GetLastError());
 	    break;
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "got reply %d, printing\n", i);
 	    print_rtmsg(msg, nbytes);
 	}
@@ -162,10 +171,12 @@ try_add_route_with_wait_and_delete(void)
 
 	fprintf(stderr, "attempting to delete a route\n", GetLastError());
 	result = WriteFile(h_pipe, dmsg, dmsg->rtm_msglen, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d writing to pipe\n", GetLastError());
 	    break;
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "sent request %d\n", i);
 	    print_rtmsg(dmsg, nbytes);
 	}
@@ -174,10 +185,12 @@ try_add_route_with_wait_and_delete(void)
 
 	/* Block and read a single reply. */
 	result = ReadFile(h_pipe, dmsg, msgsize, &nbytes, NULL);
-	if (result == 0) {
+	if (result == 0) 
+	{
 	    fprintf(stderr, "error %d reading from pipe\n", GetLastError());
 	    break;
-	} else {
+	} else 
+	{
 	    fprintf(stderr, "got reply %d, printing\n", i);
 	    print_rtmsg(dmsg, nbytes);
 	}
@@ -189,7 +202,7 @@ try_add_route_with_wait_and_delete(void)
     free(msg);
 }
 
-int
+    int
 main(int argc, char *argv[])
 {
     try_add_route_with_wait_and_delete();

@@ -22,43 +22,45 @@
 #include "policy/backend/policy_filters.hh"
 #include "policy/backend/policytags.hh"
 
-class WrapperVarRW : public SingleVarRW {
-public:
-    // Some of the following should be treated read-only when
-    // importing routes into WRAPPER.
-    enum {
-        VAR_NETWORK = VAR_PROTOCOL,     // Destination (RO)
-        VAR_NEXTHOP,                    // Next-hop (RW)
-        VAR_METRIC,                     // Metric (RW)
+class WrapperVarRW : public SingleVarRW 
+{
+	public:
+		// Some of the following should be treated read-only when
+		// importing routes into WRAPPER.
+		enum 
+		{
+			VAR_NETWORK = VAR_PROTOCOL,     // Destination (RO)
+			VAR_NEXTHOP,                    // Next-hop (RW)
+			VAR_METRIC,                     // Metric (RW)
 
-        VAR_VTYPE,      // Which part of WRAPPER this route came from. (RO)
-        VAR_ORIGINATOR, // main address of the advertising node. (RO)
-        VAR_MAINADDR,   // main address of the destination. (RO)
+			VAR_VTYPE,      // Which part of WRAPPER this route came from. (RO)
+			VAR_ORIGINATOR, // main address of the advertising node. (RO)
+			VAR_MAINADDR,   // main address of the destination. (RO)
 
-        VAR_WRAPPERMAX     // must be last.
-    };
+			VAR_WRAPPERMAX     // must be last.
+		};
 
-    WrapperVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
-                 IPv4& originator, IPv4& main_addr, uint32_t vtype,
-                 PolicyTags& policytags);
+		WrapperVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
+				IPv4& originator, IPv4& main_addr, uint32_t vtype,
+				PolicyTags& policytags);
 
-    // SingleVarRW inteface:
-    void start_read();
-    Element* single_read(const Id& id);
-    void single_write(const Id& id, const Element& e);
+		// SingleVarRW inteface:
+		void start_read();
+		Element* single_read(const Id& id);
+		void single_write(const Id& id, const Element& e);
 
-private:
-    IPv4Net&    _network;
-    IPv4&       _nexthop;
-    uint32_t&   _metric;
+	private:
+		IPv4Net&    _network;
+		IPv4&       _nexthop;
+		uint32_t&   _metric;
 
-    IPv4&       _originator;
-    IPv4&       _main_addr;
-    uint32_t&   _vtype;
+		IPv4&       _originator;
+		IPv4&       _main_addr;
+		uint32_t&   _vtype;
 
-    PolicyTags& _policytags;
+		PolicyTags& _policytags;
 
-    ElementFactory _ef;
+		ElementFactory _ef;
 };
 
 #endif // __WRAPPER_POLICY_VARRRW_HH__

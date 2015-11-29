@@ -37,7 +37,8 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
     XLOG_ASSERT(alist.size() > 0);
 
     // go through all the atoms in the list
-    for (unsigned i = 0; i < alist.size(); ++i) {
+    for (unsigned i = 0; i < alist.size(); ++i) 
+    {
 	const XrlAtom& atom = alist.get(i);
 
 	// only support u32's
@@ -46,7 +47,8 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
 
 	uint32_t val = atom.uint32();
 
-	if (i == 0) {
+	if (i == 0) 
+	{
 	    _tag = val;
 	    continue;
 	}
@@ -56,19 +58,20 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
     }
 }
 
-void
+    void
 PolicyTags::set_ptags(const Element& element)
 {
     // we only support set elements
     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
     if (!es)
 	xorp_throw(PolicyTagsError, 
-		   string("Element is not a set: ") + element.type());
+		string("Element is not a set: ") + element.type());
 
     _tags.clear();
 
     // go through all the set elements.
-    for (ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {
+    for (ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) 
+    {
 	const ElemU32& x = *i;
 
 	// all ElemSet elements are represented as string, so convert and
@@ -86,7 +89,7 @@ PolicyTags::str() const
 	oss << *i << ", ";
 
     string res = oss.str();
-    
+
     unsigned len = res.length();
     if(len < 2)
 	return res;
@@ -109,12 +112,13 @@ PolicyTags::xrl_atomlist() const
 
     alist.append(XrlAtom(_tag));
 
-    for(Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
+    for(Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) 
+    {
 	uint32_t tag = *i;
 
 	alist.append(XrlAtom(tag));
     }
-    
+
     return alist;
 }
 
@@ -122,7 +126,8 @@ Element*
 PolicyTags::element() const
 {
     ElemSetU32* s = new ElemSetU32;
-    for (Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
+    for (Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) 
+    {
 	ElemU32 e(*i);
 	s->insert(e);
     }
@@ -135,7 +140,7 @@ PolicyTags::element_tag() const
     return new ElemU32(_tag);
 }
 
-void
+    void
 PolicyTags::set_tag(const Element& e)
 {
     uint32_t val = dynamic_cast<const ElemU32&>(e).val();
@@ -143,12 +148,12 @@ PolicyTags::set_tag(const Element& e)
     _tag = val;
 }
 
-void
+    void
 PolicyTags::insert(const PolicyTags& ptags)
 {
     // go through all the elements in ptags and insert them.
     for(Set::const_iterator i = ptags._tags.begin();
-	i != ptags._tags.end(); ++i)
+	    i != ptags._tags.end(); ++i)
 
 	_tags.insert(*i);
 }
@@ -161,13 +166,13 @@ PolicyTags::contains_atleast_one(const PolicyTags& tags) const
     // The two sets must not be dis-joint.
     // The intersection must contain atleast one element.
     set_intersection(tags._tags.begin(), tags._tags.end(),
-		     _tags.begin(), _tags.end(),
-		     insert_iterator<Set>(output,output.begin()));
-	
+	    _tags.begin(), _tags.end(),
+	    insert_iterator<Set>(output,output.begin()));
+
     return !output.empty();
 }
 
-void
+    void
 PolicyTags::insert(uint32_t tag)
 {
     _tags.insert(tag);

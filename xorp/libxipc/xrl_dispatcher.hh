@@ -29,31 +29,33 @@ typedef
 XorpCallback2<void, const XrlError &, const XrlArgs *>::RefPtr
 XrlDispatcherCallback;
 
-class XrlDispatcher : public XrlCmdMap {
-public:
-    struct XI {
-	XI(const XrlCmdEntry* c) : _cmd(c), _new(true) {}
+class XrlDispatcher : public XrlCmdMap 
+{
+    public:
+	struct XI 
+	{
+	    XI(const XrlCmdEntry* c) : _cmd(c), _new(true) {}
 
-	Xrl		    _xrl;
-	const XrlCmdEntry*  _cmd;
-	bool		    _new;
-    };
+	    Xrl		    _xrl;
+	    const XrlCmdEntry*  _cmd;
+	    bool		    _new;
+	};
 
-    XrlDispatcher(const char* class_name)
-	: XrlCmdMap(class_name)
-    {}
-    virtual ~XrlDispatcher() {}
+	XrlDispatcher(const char* class_name)
+	    : XrlCmdMap(class_name)
+	{}
+	virtual ~XrlDispatcher() {}
 
-    virtual XI*	       lookup_xrl(const string& name) const;
-    virtual void dispatch_xrl(const string& method_name,
-			      const XrlArgs& in,
-			      XrlDispatcherCallback out) const;
-    void dispatch_xrl_fast(const XI& xi,
-			   XrlDispatcherCallback out) const;
+	virtual XI*	       lookup_xrl(const string& name) const;
+	virtual void dispatch_xrl(const string& method_name,
+		const XrlArgs& in,
+		XrlDispatcherCallback out) const;
+	void dispatch_xrl_fast(const XI& xi,
+		XrlDispatcherCallback out) const;
 
-private:
-    void dispatch_cb(const XrlCmdError &, const XrlArgs *,
-		     XrlDispatcherCallback resp) const;
+    private:
+	void dispatch_cb(const XrlCmdError &, const XrlArgs *,
+		XrlDispatcherCallback resp) const;
 };
 
 #endif // __LIBXIPC_XRL_DISPATCHER_HH__

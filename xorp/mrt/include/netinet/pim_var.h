@@ -45,7 +45,8 @@
 /*
  * PIM statistics kept in the kernel
  */
-struct pimstat {
+struct pimstat 
+{
 	u_quad_t pims_rcv_total_msgs;	   /* total PIM messages received    */
 	u_quad_t pims_rcv_total_bytes;	   /* total PIM bytes received	     */
 	u_quad_t pims_rcv_tooshort;	   /* rcvd with too few bytes	     */

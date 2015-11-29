@@ -34,7 +34,8 @@
 #include "policy/policy_module.h"
 #include "operator_base.hh"
 
-enum {
+enum 
+{
     HASH_ELEM_INT32 = 1,
     HASH_ELEM_U32,
     HASH_ELEM_COM32,
@@ -64,27 +65,28 @@ enum {
 /**
  * @short 32bit signed integer.
  */
-class ElemInt32 : public Element {
-public:
-    /**
-     * The identifier [type] of the element.
-     */
-    static const char* id;
-    static Hash _hash;
+class ElemInt32 : public Element 
+{
+    public:
+	/**
+	 * The identifier [type] of the element.
+	 */
+	static const char* id;
+	static Hash _hash;
 
-    ElemInt32() : Element(_hash) {}
+	ElemInt32() : Element(_hash) {}
 
-    /**
-     * Construct via c-style string.
-     *
-     * This is necessary in order to create elements via the ElementFactory.
-     * If c_str is null, then the element is assigned a default value. Null
-     * c_str is used by the semantic checker, to obtain "dummy" elements for
-     * validity checks.
-     *
-     * @param c_str initialize via string, or assign default value if null.
-     */
-    ElemInt32(const char* c_str) : Element(_hash)
+	/**
+	 * Construct via c-style string.
+	 *
+	 * This is necessary in order to create elements via the ElementFactory.
+	 * If c_str is null, then the element is assigned a default value. Null
+	 * c_str is used by the semantic checker, to obtain "dummy" elements for
+	 * validity checks.
+	 *
+	 * @param c_str initialize via string, or assign default value if null.
+	 */
+	ElemInt32(const char* c_str) : Element(_hash)
     {
 	if (c_str)
 	    _val = strtol(c_str,NULL,10);
@@ -92,43 +94,46 @@ public:
 	    _val = 0;
     }
 
-    ElemInt32(const int32_t val) : Element(_hash), _val(val) {}
+	ElemInt32(const int32_t val) : Element(_hash), _val(val) {}
 
-    /**
-     * @return string representation of integer
-     */
-    string str() const {
-	return policy_utils::to_str(_val);
-    }
+	/**
+	 * @return string representation of integer
+	 */
+	string str() const 
+	{
+	    return policy_utils::to_str(_val);
+	}
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemInt32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemInt32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    /**
-     * @return value of the element.
-     */
-    int32_t val() const { return _val; }
+	/**
+	 * @return value of the element.
+	 */
+	int32_t val() const { return _val; }
 
-    const char* type() const { return id; }
+	const char* type() const { return id; }
 
-private:
-    int32_t _val;
+    private:
+	int32_t _val;
 };
 
 /**
  * @short 32bit unsigned integer.
  */
-class ElemU32 : public Element {
-public:
-    static const char* id;
-    static Hash _hash;
+class ElemU32 : public Element 
+{
+    public:
+	static const char* id;
+	static Hash _hash;
 
-    ElemU32() : Element(_hash) {}
+	ElemU32() : Element(_hash) {}
 
-    ElemU32(const char* c_str) : Element(_hash)
+	ElemU32(const char* c_str) : Element(_hash)
     {
 	if (c_str)
 	    _val = strtoul(c_str,NULL,10); 
@@ -136,27 +141,28 @@ public:
 	    _val = 0;
     }
 
-    ElemU32(const uint32_t val) : Element(_hash), _val(val) {}
+	ElemU32(const uint32_t val) : Element(_hash), _val(val) {}
 
-    string str() const
-    {
-	return policy_utils::to_str(_val);
-    }
+	string str() const
+	{
+	    return policy_utils::to_str(_val);
+	}
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemU32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemU32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    uint32_t val() const { return _val; }
-    const char* type() const { return id; }
+	uint32_t val() const { return _val; }
+	const char* type() const { return id; }
 
-    bool operator==(const ElemU32& rhs) const { return _val == rhs._val; }
-    bool operator<(const ElemU32& rhs) const { return _val < rhs._val; }
+	bool operator==(const ElemU32& rhs) const { return _val == rhs._val; }
+	bool operator<(const ElemU32& rhs) const { return _val < rhs._val; }
 
-private:
-    uint32_t _val;
+    private:
+	uint32_t _val;
 };
 
 /**
@@ -166,44 +172,47 @@ private:
  *  "X:"   -> ((uint16_t) X) << 16
  *  "X:Y"  -> (((uint16_t) X) << 16) + (uint16_t) Y
  */
-class ElemCom32 : public Element {
-public:
-    static const char* id;
-    static Hash _hash;
+class ElemCom32 : public Element 
+{
+    public:
+	static const char* id;
+	static Hash _hash;
 
-    ElemCom32() : Element(_hash) {}
-    ElemCom32(const char*);		// in element.cc
-    ElemCom32(const uint32_t val) : Element(_hash), _val(val) {}
+	ElemCom32() : Element(_hash) {}
+	ElemCom32(const char*);		// in element.cc
+	ElemCom32(const uint32_t val) : Element(_hash), _val(val) {}
 
-    string str() const;			// in element.cc
-    uint32_t val() const { return _val; }
-    const char* type() const { return id; }
+	string str() const;			// in element.cc
+	uint32_t val() const { return _val; }
+	const char* type() const { return id; }
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemCom32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemCom32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    bool operator==(const ElemCom32& rhs) const { return _val == rhs._val; }
-    bool operator<(const ElemCom32& rhs) const { return _val < rhs._val; }
+	bool operator==(const ElemCom32& rhs) const { return _val == rhs._val; }
+	bool operator<(const ElemCom32& rhs) const { return _val < rhs._val; }
 
 
-private:
-    uint32_t _val;
+    private:
+	uint32_t _val;
 };
 
 /**
  * @short string element.
  */
-class ElemStr : public Element {
-public:
-    static const char* id;
-    static Hash _hash;
+class ElemStr : public Element 
+{
+    public:
+	static const char* id;
+	static Hash _hash;
 
-    ElemStr() : Element(_hash) {}
+	ElemStr() : Element(_hash) {}
 
-    ElemStr(const char* val) : Element(_hash)
+	ElemStr(const char* val) : Element(_hash)
     {
 	if (val)
 	    _val = val;
@@ -211,36 +220,38 @@ public:
 	    _val = "";
     }
 
-    ElemStr(const string& str) : Element(_hash), _val(str) {}
+	ElemStr(const string& str) : Element(_hash), _val(str) {}
 
-    string str() const { return _val; }
-    string val() const { return _val; }
-    const char* type() const { return id; }
+	string str() const { return _val; }
+	string val() const { return _val; }
+	const char* type() const { return id; }
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemStr: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemStr: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    bool operator==(const ElemStr& rhs) const { return _val == rhs._val; }
-    bool operator<(const ElemStr& rhs) const { return _val < rhs._val; }
+	bool operator==(const ElemStr& rhs) const { return _val == rhs._val; }
+	bool operator<(const ElemStr& rhs) const { return _val < rhs._val; }
 
-private:
-    string _val;
+    private:
+	string _val;
 };
 
 /**
  * @short boolean element.
  */
-class ElemBool : public Element {
-public:
-    static const char* id;
-    static Hash _hash;
+class ElemBool : public Element 
+{
+    public:
+	static const char* id;
+	static Hash _hash;
 
-    ElemBool() : Element(_hash) {}
+	ElemBool() : Element(_hash) {}
 
-    ElemBool(const char* c_str) : Element(_hash)
+	ElemBool(const char* c_str) : Element(_hash)
     {
 	if (c_str && (strcmp(c_str,"true") == 0) )
 	    _val = true;
@@ -248,29 +259,30 @@ public:
 	    _val = false;
     }
 
-    ElemBool(const bool val) : Element(_hash), _val(val) {}
+	ElemBool(const bool val) : Element(_hash), _val(val) {}
 
-    string str() const
-    {
-	if (_val)
-	    return "true";
-	else
-	    return "false";
-    }	    
+	string str() const
+	{
+	    if (_val)
+		return "true";
+	    else
+		return "false";
+	}	    
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemBool: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemBool: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    bool val() const { return _val; }
-    const char* type() const { return id; }
+	bool val() const { return _val; }
+	const char* type() const { return id; }
 
-    bool operator==(const ElemBool& rhs) const { return _val == rhs._val; }
+	bool operator==(const ElemBool& rhs) const { return _val == rhs._val; }
 
-private:
-    bool _val;
+    private:
+	bool _val;
 };
 
 
@@ -282,36 +294,41 @@ private:
  * They also must support various relational operators such as ==.
  */
 template<class T>
-class ElemAny : public Element {
-public:
-    
-    /**
-     * @short exception thrown if c-stype string initialization fails.
-     */
-    class ElemInitError : public PolicyException {
+class ElemAny : public Element 
+{
     public:
-	ElemInitError(const char* file, size_t line, const string& init_why = "")   
-	    : PolicyException("ElemInitError", file, line, init_why) {}  
+
+	/**
+	 * @short exception thrown if c-stype string initialization fails.
+	 */
+	class ElemInitError : public PolicyException 
+    {
+	public:
+	    ElemInitError(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("ElemInitError", file, line, init_why) {}  
     };
 
 
-    static const char* id;
-    static Hash _hash;
+	static const char* id;
+	static Hash _hash;
 
-    ElemAny() : Element(_hash), _val() {}
-    ElemAny(const T& val) : Element(_hash), _val(val) {}
+	ElemAny() : Element(_hash), _val() {}
+	ElemAny(const T& val) : Element(_hash), _val(val) {}
 
-    /**
-     * If the c-style constructor of the wrapped class throws and exception,
-     * it is caught and an ElemInitError exception is thrown. The original
-     * exception is lost.
-     */
-    ElemAny(const char* c_str) : Element(_hash), _val()
+	/**
+	 * If the c-style constructor of the wrapped class throws and exception,
+	 * it is caught and an ElemInitError exception is thrown. The original
+	 * exception is lost.
+	 */
+	ElemAny(const char* c_str) : Element(_hash), _val()
     {
-	if (c_str) {
-	    try {
+	if (c_str) 
+	{
+	    try 
+	    {
 		_val = T(c_str);
-	    } catch (...) {
+	    } catch (...) 
+	    {
 		string err = "Unable to initialize element of type ";
 		err += id;
 		err += " with ";
@@ -320,259 +337,283 @@ public:
 		xorp_throw(ElemInitError, err);
 
 	    }
-	    
+
 	}
 	// else leave it to the default value
     }
 
-    /**
-     * Invokes the == operator on the actual classes being wrapped.
-     *
-     * @return whether the two values are equal.
-     * @param rhs element to compare with.
-     */
-    bool operator==(const ElemAny<T>& rhs) const {
-	return _val == rhs._val;
-    }
+	/**
+	 * Invokes the == operator on the actual classes being wrapped.
+	 *
+	 * @return whether the two values are equal.
+	 * @param rhs element to compare with.
+	 */
+	bool operator==(const ElemAny<T>& rhs) const 
+	{
+	    return _val == rhs._val;
+	}
 
-    /**
-     * Invoke the < operator in the wrapped class.
-     *
-     * @return whether this is less than argument.
-     * @param rhs element to compare with.
-     */
-    bool operator<(const ElemAny<T>& rhs) const {
-	return _val < rhs._val;
-    }
-    
-    /**
-     * Invokes the str() method of the actual class being wrapped.
-     *
-     * @return string representation of element.
-     */
-    string str() const { return _val.str(); }
+	/**
+	 * Invoke the < operator in the wrapped class.
+	 *
+	 * @return whether this is less than argument.
+	 * @param rhs element to compare with.
+	 */
+	bool operator<(const ElemAny<T>& rhs) const 
+	{
+	    return _val < rhs._val;
+	}
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "wrapped: hash: " << (int)(hash()) << " val: " << _val.str() << " id: " << id << flush;
-	return oss.str();
-    }
+	/**
+	 * Invokes the str() method of the actual class being wrapped.
+	 *
+	 * @return string representation of element.
+	 */
+	string str() const { return _val.str(); }
 
-    /**
-     * @return the actual object of the class being wrapped.
-     */
-    const T& val() const { return _val; }
-    
-    const char* type() const { return id; }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "wrapped: hash: " << (int)(hash()) << " val: " << _val.str() << " id: " << id << flush;
+	    return oss.str();
+	}
 
-private:
-    T _val;
+	/**
+	 * @return the actual object of the class being wrapped.
+	 */
+	const T& val() const { return _val; }
+
+	const char* type() const { return id; }
+
+    private:
+	T _val;
 };
 
 template<class T>
-class ElemRefAny : public Element {
-public:
-    /**
-     * @short exception thrown if c-stype string initialization fails.
-     */
-    class ElemInitError : public PolicyException {
+class ElemRefAny : public Element 
+{
     public:
-	ElemInitError(const char* file, size_t line, const string& init_why = "")   
-	    : PolicyException("ElemInitError", file, line, init_why) {}
+	/**
+	 * @short exception thrown if c-stype string initialization fails.
+	 */
+	class ElemInitError : public PolicyException 
+    {
+	public:
+	    ElemInitError(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("ElemInitError", file, line, init_why) {}
     };
 
-    
-    static const char* id;
-    static Hash _hash;
 
-    ElemRefAny() : Element(_hash), _val(new T()), _free(true) {}
-    ElemRefAny(const T& val) : Element(_hash), _val(&val), _free(false) {}
-    ElemRefAny(const T& val, bool f) : Element(_hash), _val(&val), _free(f) {}
+	static const char* id;
+	static Hash _hash;
 
-    ~ElemRefAny() { if (_free) delete _val; }
+	ElemRefAny() : Element(_hash), _val(new T()), _free(true) {}
+	ElemRefAny(const T& val) : Element(_hash), _val(&val), _free(false) {}
+	ElemRefAny(const T& val, bool f) : Element(_hash), _val(&val), _free(f) {}
 
-    /**
-     * If the c-style constructor of the wrapped class throws and exception,
-     * it is caught and an ElemInitError exception is thrown. The original
-     * exception is lost.
-     */
-    ElemRefAny(const char* c_str) : Element(_hash), _val(NULL), _free(false)
+	~ElemRefAny() { if (_free) delete _val; }
+
+	/**
+	 * If the c-style constructor of the wrapped class throws and exception,
+	 * it is caught and an ElemInitError exception is thrown. The original
+	 * exception is lost.
+	 */
+	ElemRefAny(const char* c_str) : Element(_hash), _val(NULL), _free(false)
     {
-        if (c_str) {
-            try {
-                _val = new T(c_str);
-                _free = true;
-            } catch(...) {
-                string err = "Unable to initialize element of type ";
-                err += id;
-                err += " with ";
-                err += c_str;
+	if (c_str) 
+	{
+	    try 
+	    {
+		_val = new T(c_str);
+		_free = true;
+	    } catch(...) 
+	    {
+		string err = "Unable to initialize element of type ";
+		err += id;
+		err += " with ";
+		err += c_str;
 
-                xorp_throw(ElemInitError, err);
+		xorp_throw(ElemInitError, err);
 
-            }
+	    }
 
-        }
+	}
 	// else leave it to the default value
-	else {
+	else 
+	{
 	    _val = new T();
 	    _free = true;
-        }
+	}
     }
 
-    /**
-     * Invokes the == operator on the actual classes being wrapped.
-     *
-     * @return whether the two values are equal.
-     * @param rhs element to compare with.
-     */
-    bool operator==(const ElemRefAny<T>& rhs) const {
-        return (*_val) == rhs.val();
-    }
+	/**
+	 * Invokes the == operator on the actual classes being wrapped.
+	 *
+	 * @return whether the two values are equal.
+	 * @param rhs element to compare with.
+	 */
+	bool operator==(const ElemRefAny<T>& rhs) const 
+	{
+	    return (*_val) == rhs.val();
+	}
 
-    /**
-     * Invoke the < operator in the wrapped class.
-     *
-     * @return whether this is less than argument.
-     * @param rhs element to compare with.
-     */
-    bool operator<(const ElemRefAny<T>& rhs) const {
-        return (*_val) < rhs.val();
-    }
+	/**
+	 * Invoke the < operator in the wrapped class.
+	 *
+	 * @return whether this is less than argument.
+	 * @param rhs element to compare with.
+	 */
+	bool operator<(const ElemRefAny<T>& rhs) const 
+	{
+	    return (*_val) < rhs.val();
+	}
 
-    /**
-     * Invokes the str() method of the actual class being wrapped.
-     *
-     * @return string representation of element.
-     */
-    string str() const { return _val->str(); }
+	/**
+	 * Invokes the str() method of the actual class being wrapped.
+	 *
+	 * @return string representation of element.
+	 */
+	string str() const { return _val->str(); }
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "wrapped-ref: hash: " << (int)(hash()) << " val: " << _val->str() << " id: " << id << flush;
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "wrapped-ref: hash: " << (int)(hash()) << " val: " << _val->str() << " id: " << id << flush;
+	    return oss.str();
+	}
 
-    /**
-     * @return the actual object of the class being wrapped.
-     */
-    const T& val() const { return *_val; }
+	/**
+	 * @return the actual object of the class being wrapped.
+	 */
+	const T& val() const { return *_val; }
 
-    const char* type() const { return id; }
+	const char* type() const { return id; }
 
-    ElemRefAny(const ElemRefAny<T>& copy) : Element(_hash) {
+	ElemRefAny(const ElemRefAny<T>& copy) : Element(_hash) 
+    {
 	_val = copy._val;
 	_free = copy._free;
 	copy._free = false;
     }
 
-private:
-    ElemRefAny& operator=(const ElemRefAny<T>&);
+    private:
+	ElemRefAny& operator=(const ElemRefAny<T>&);
 
-    const T* _val;
-    mutable bool _free;
+	const T* _val;
+	mutable bool _free;
 };
 
 template<class A>
-class ElemNet : public Element {
-public:
-    enum Mod {
-	MOD_NONE,
-	MOD_EXACT,
-	MOD_SHORTER,
-	MOD_ORSHORTER,
-	MOD_LONGER,
-	MOD_ORLONGER,
-	MOD_NOT
-    };
+class ElemNet : public Element 
+{
+    public:
+	enum Mod 
+	{
+	    MOD_NONE,
+	    MOD_EXACT,
+	    MOD_SHORTER,
+	    MOD_ORSHORTER,
+	    MOD_LONGER,
+	    MOD_ORLONGER,
+	    MOD_NOT
+	};
 
-    static const char*	id;
-    static Hash		_hash;
+	static const char*	id;
+	static Hash		_hash;
 
-    ElemNet();
-    ElemNet(const char*);
-    ElemNet(const A&);
-    ElemNet(const ElemNet<A>&);	    // copyable
-    ~ElemNet();
+	ElemNet();
+	ElemNet(const char*);
+	ElemNet(const A&);
+	ElemNet(const ElemNet<A>&);	    // copyable
+	~ElemNet();
 
-    string	    str() const;
-    const char*	    type() const;
-    const A&	    val() const;
-    static Mod	    str_to_mod(const char* p);
-    static string   mod_to_str(Mod mod);
-    BinOper&	    op() const;
+	string	    str() const;
+	const char*	    type() const;
+	const A&	    val() const;
+	static Mod	    str_to_mod(const char* p);
+	static string   mod_to_str(Mod mod);
+	BinOper&	    op() const;
 
-    bool	operator<(const ElemNet<A>& rhs) const;
-    bool	operator==(const ElemNet<A>& rhs) const;
+	bool	operator<(const ElemNet<A>& rhs) const;
+	bool	operator==(const ElemNet<A>& rhs) const;
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemNet: hash: " << (int)(hash()) << " id: " << id << " mod: " << (int)(_mod);
-	if (_net) {
-	    oss << " net: " << _net->str();
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemNet: hash: " << (int)(hash()) << " id: " << id << " mod: " << (int)(_mod);
+	    if (_net) 
+	    {
+		oss << " net: " << _net->str();
+	    }
+	    if (_op) 
+	    {
+		oss << " op: " << _op->str();
+	    }
+	    return oss.str();
 	}
-	if (_op) {
-	    oss << " op: " << _op->str();
-	}
-	return oss.str();
-    }
 
 #ifdef XORP_USE_USTL
-    ElemNet& operator=(const ElemNet<A>& rhs) {
-	if (this != &rhs) {
-	    if (_net) {
-		delete _net;
+	ElemNet& operator=(const ElemNet<A>& rhs) 
+	{
+	    if (this != &rhs) 
+	    {
+		if (_net) 
+		{
+		    delete _net;
+		}
+		_net = new A(*rhs._net);
+		_mod = rhs._mod;
+		_op = rhs._op;
 	    }
-	    _net = new A(*rhs._net);
-	    _mod = rhs._mod;
-	    _op = rhs._op;
+	    return *this;
 	}
-	return *this;
-    }
 #else
-private:
-    ElemNet& operator=(const ElemNet<A>&);	// not assignable
+    private:
+	ElemNet& operator=(const ElemNet<A>&);	// not assignable
 #endif
 
-    const A*		_net;
-    Mod			_mod;
-    mutable BinOper*	_op;
+	const A*		_net;
+	Mod			_mod;
+	mutable BinOper*	_op;
 };
 
 template <class A>
-class ElemNextHop : public Element {
-public:
-    enum Var {
-	VAR_NONE,
-	VAR_DISCARD,
-	VAR_NEXT_TABLE,
-	VAR_PEER_ADDRESS,
-	VAR_REJECT,
-	VAR_SELF
-    };
+class ElemNextHop : public Element 
+{
+    public:
+	enum Var 
+	{
+	    VAR_NONE,
+	    VAR_DISCARD,
+	    VAR_NEXT_TABLE,
+	    VAR_PEER_ADDRESS,
+	    VAR_REJECT,
+	    VAR_SELF
+	};
 
-    static const char*	id;
-    static Hash		_hash;
+	static const char*	id;
+	static Hash		_hash;
 
-    ElemNextHop(const char*);
-    ElemNextHop();
-    ElemNextHop(const A& nh);
+	ElemNextHop(const char*);
+	ElemNextHop();
+	ElemNextHop(const A& nh);
 
-    string	str() const;
-    const char*	type() const;
-    Var		var() const;
-    const A&	addr() const;
-    const A&	val() const; // for relop compatibility
+	string	str() const;
+	const char*	type() const;
+	Var		var() const;
+	const A&	addr() const;
+	const A&	val() const; // for relop compatibility
 
-    string dbgstr() const {
-	ostringstream oss;
-	oss << "ElemNextHop: hash: " << (int)(hash()) << " id: " << id << " var: " << (int)(_var) << " addr: " << _addr.str();
-	return oss.str();
-    }
+	string dbgstr() const 
+	{
+	    ostringstream oss;
+	    oss << "ElemNextHop: hash: " << (int)(hash()) << " id: " << id << " var: " << (int)(_var) << " addr: " << _addr.str();
+	    return oss.str();
+	}
 
-private:
-    Var	_var;
-    A	_addr;
+    private:
+	Var	_var;
+	A	_addr;
 };
 
 // User defined types

@@ -27,209 +27,226 @@
 #include "parser.hh"
 
 
-enum XrlCompletion {
-    XRL_PENDING = 0,	// hack - corresponds with success for Parser::execute
-    SUCCESS     = 1,
-    XRL_FAILED  = -1
+enum XrlCompletion 
+{
+	XRL_PENDING = 0,	// hack - corresponds with success for Parser::execute
+	SUCCESS     = 1,
+	XRL_FAILED  = -1
 };
 
 // Simple handler - most of RIB interface just returns true/false
 
-static void
+	static void
 pass_fail_handler(const XrlError& e, XrlCompletion* c)
 {
-    if (e == XrlError::OKAY()) {
-	*c = SUCCESS;
-    } else {
-	*c = XRL_FAILED;
-	cerr << "Xrl Failed: " << e.str() << endl;
-    }
-    cout << "PassFailHander " << ((*c > 0) ? "SUCCES" : "FAILED") << endl;
+	if (e == XrlError::OKAY()) 
+	{
+		*c = SUCCESS;
+	} else 
+	{
+		*c = XRL_FAILED;
+		cerr << "Xrl Failed: " << e.str() << endl;
+	}
+	cout << "PassFailHander " << ((*c > 0) ? "SUCCES" : "FAILED") << endl;
 }
 
 // ----------------------------------------------------------------------------
 // XRL Commands (NB fewer than number of direct commands)
 
-class XrlInterfaceRouteAddCommand : public InterfaceRouteAddCommand {
-public:
-    XrlInterfaceRouteAddCommand( XrlRibV0p1Client& xrl_client,
-		       XrlCompletion&	 completion)
-	: InterfaceRouteAddCommand(),
- 	   _xrl_client(xrl_client), _completion(completion) {}
+class XrlInterfaceRouteAddCommand : public InterfaceRouteAddCommand 
+{
+	public:
+		XrlInterfaceRouteAddCommand( XrlRibV0p1Client& xrl_client,
+				XrlCompletion&	 completion)
+			: InterfaceRouteAddCommand(),
+			_xrl_client(xrl_client), _completion(completion) {}
 
-    int execute() {
-	cout << "InterfaceRouteAddCommand::execute " << _tablename << " " << _vif_name << " " << _net.str()
-	     << " " << _nexthop.str() << endl;
+		int execute() 
+		{
+			cout << "InterfaceRouteAddCommand::execute " << _tablename << " " << _vif_name << " " << _net.str()
+				<< " " << _nexthop.str() << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
 
-	PolicyTags pt;
+			PolicyTags pt;
 
-	_xrl_client.send_add_interface_route4(
-	    "rib", _tablename, unicast, multicast, _net, _nexthop, "", _vif_name, _metric,
-	    pt.xrl_atomlist(),	// XXX: no policy
-	    callback(&pass_fail_handler, &_completion));
+			_xrl_client.send_add_interface_route4(
+					"rib", _tablename, unicast, multicast, _net, _nexthop, "", _vif_name, _metric,
+					pt.xrl_atomlist(),	// XXX: no policy
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
-class XrlRouteAddCommand : public RouteAddCommand {
-public:
-    XrlRouteAddCommand( XrlRibV0p1Client& xrl_client,
-		       XrlCompletion&	 completion)
-	: RouteAddCommand(),
- 	   _xrl_client(xrl_client), _completion(completion) {}
+class XrlRouteAddCommand : public RouteAddCommand 
+{
+	public:
+		XrlRouteAddCommand( XrlRibV0p1Client& xrl_client,
+				XrlCompletion&	 completion)
+			: RouteAddCommand(),
+			_xrl_client(xrl_client), _completion(completion) {}
 
-    int execute() {
-	cout << "RouteAddCommand::execute " << _tablename << " " << _net.str()
-	     << " " << _nexthop.str() << endl;
+		int execute() 
+		{
+			cout << "RouteAddCommand::execute " << _tablename << " " << _net.str()
+				<< " " << _nexthop.str() << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
 
-	PolicyTags pt;
+			PolicyTags pt;
 
-	_xrl_client.send_add_route4(
-	    "rib", _tablename, unicast, multicast, _net, _nexthop, _metric,
-	    pt.xrl_atomlist(),	// XXX: no policy
-	    callback(&pass_fail_handler, &_completion));
+			_xrl_client.send_add_route4(
+					"rib", _tablename, unicast, multicast, _net, _nexthop, _metric,
+					pt.xrl_atomlist(),	// XXX: no policy
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
-class XrlRouteDeleteCommand : public RouteDeleteCommand {
-public:
-    XrlRouteDeleteCommand( XrlRibV0p1Client&	xrl_client,
-			  XrlCompletion&	completion)
-	: RouteDeleteCommand(),
-	   _xrl_client(xrl_client), _completion(completion) {}
+class XrlRouteDeleteCommand : public RouteDeleteCommand 
+{
+	public:
+		XrlRouteDeleteCommand( XrlRibV0p1Client&	xrl_client,
+				XrlCompletion&	completion)
+			: RouteDeleteCommand(),
+			_xrl_client(xrl_client), _completion(completion) {}
 
-    int execute() {
-	cout << "RouteDeleteCommand::execute " << _tablename << " "
-	     << _net.str() << endl;
+		int execute() 
+		{
+			cout << "RouteDeleteCommand::execute " << _tablename << " "
+				<< _net.str() << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
 
-	_xrl_client.send_delete_route4(
-	    "rib", _tablename, unicast, multicast, _net,
-	    callback(&pass_fail_handler, &_completion));
+			_xrl_client.send_delete_route4(
+					"rib", _tablename, unicast, multicast, _net,
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&     _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&     _completion;
 };
 
-class XrlAddIGPTableCommand : public AddIGPTableCommand {
-public:
-    XrlAddIGPTableCommand( XrlRibV0p1Client& xrl_client,
-			  XrlCompletion&    completion) :
-	AddIGPTableCommand(),  _xrl_client(xrl_client),
-	_completion(completion) {}
+class XrlAddIGPTableCommand : public AddIGPTableCommand 
+{
+	public:
+		XrlAddIGPTableCommand( XrlRibV0p1Client& xrl_client,
+				XrlCompletion&    completion) :
+			AddIGPTableCommand(),  _xrl_client(xrl_client),
+			_completion(completion) {}
 
-    int execute() {
-	cout << "AddIGPTableCommand::execute " << _tablename << endl;
+		int execute() 
+		{
+			cout << "AddIGPTableCommand::execute " << _tablename << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
 
-	_xrl_client.send_add_igp_table4(
-	    "rib", _tablename, "", "", unicast, multicast,
-	    callback(&pass_fail_handler, &_completion));
+			_xrl_client.send_add_igp_table4(
+					"rib", _tablename, "", "", unicast, multicast,
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
-class XrlDeleteIGPTableCommand : public DeleteIGPTableCommand {
-public:
-    XrlDeleteIGPTableCommand( XrlRibV0p1Client&	xrl_client,
-			     XrlCompletion&	completion) :
-	DeleteIGPTableCommand(),
-	 _xrl_client(xrl_client), _completion(completion) {}
+class XrlDeleteIGPTableCommand : public DeleteIGPTableCommand 
+{
+	public:
+		XrlDeleteIGPTableCommand( XrlRibV0p1Client&	xrl_client,
+				XrlCompletion&	completion) :
+			DeleteIGPTableCommand(),
+			_xrl_client(xrl_client), _completion(completion) {}
 
-    int execute() {
-	cout << "DeleteIGPTableCommand::execute " << _tablename << endl;
+		int execute() 
+		{
+			cout << "DeleteIGPTableCommand::execute " << _tablename << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
 
-	_xrl_client.send_delete_igp_table4(
-	    "rib", _tablename, "", "", unicast, multicast,
-	    callback(&pass_fail_handler, &_completion)
-	    );
+			_xrl_client.send_delete_igp_table4(
+					"rib", _tablename, "", "", unicast, multicast,
+					callback(&pass_fail_handler, &_completion)
+					);
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
-class XrlAddEGPTableCommand : public AddEGPTableCommand {
-public:
-    XrlAddEGPTableCommand( XrlRibV0p1Client& xrl_client,
-			  XrlCompletion&    completion) :
-	AddEGPTableCommand(),  _xrl_client(xrl_client),
-	_completion(completion) {}
-    int execute() {
-	cout << "AddEGPTableCommand::execute " << _tablename << endl;
+class XrlAddEGPTableCommand : public AddEGPTableCommand 
+{
+	public:
+		XrlAddEGPTableCommand( XrlRibV0p1Client& xrl_client,
+				XrlCompletion&    completion) :
+			AddEGPTableCommand(),  _xrl_client(xrl_client),
+			_completion(completion) {}
+		int execute() 
+		{
+			cout << "AddEGPTableCommand::execute " << _tablename << endl;
 
-	_completion = XRL_PENDING;
+			_completion = XRL_PENDING;
 
-	bool unicast = true, multicast = false;
-	_xrl_client.send_add_egp_table4(
-	    "rib", _tablename, "", "", unicast, multicast,
-	    callback(&pass_fail_handler, &_completion));
+			bool unicast = true, multicast = false;
+			_xrl_client.send_add_egp_table4(
+					"rib", _tablename, "", "", unicast, multicast,
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
-class XrlDeleteEGPTableCommand : public DeleteEGPTableCommand {
-public:
-    XrlDeleteEGPTableCommand( XrlRibV0p1Client&	xrl_client,
-			     XrlCompletion&	completion) :
-	DeleteEGPTableCommand(),  _xrl_client(xrl_client),
-	_completion(completion) {}
-    int execute() {
-	cout << "DeleteEGPTableCommand::execute " << _tablename << endl;
+class XrlDeleteEGPTableCommand : public DeleteEGPTableCommand 
+{
+	public:
+		XrlDeleteEGPTableCommand( XrlRibV0p1Client&	xrl_client,
+				XrlCompletion&	completion) :
+			DeleteEGPTableCommand(),  _xrl_client(xrl_client),
+			_completion(completion) {}
+		int execute() 
+		{
+			cout << "DeleteEGPTableCommand::execute " << _tablename << endl;
 
-	_completion = XRL_PENDING;
-	bool unicast = true, multicast = false;
-	_xrl_client.send_delete_egp_table4(
-	    "rib", _tablename, "", "", unicast, multicast,
-	    callback(&pass_fail_handler, &_completion));
+			_completion = XRL_PENDING;
+			bool unicast = true, multicast = false;
+			_xrl_client.send_delete_egp_table4(
+					"rib", _tablename, "", "", unicast, multicast,
+					callback(&pass_fail_handler, &_completion));
 
-	return _completion;
-    }
+			return _completion;
+		}
 
-private:
-    XrlRibV0p1Client& _xrl_client;
-    XrlCompletion&    _completion;
+	private:
+		XrlRibV0p1Client& _xrl_client;
+		XrlCompletion&    _completion;
 };
 
 #endif // __RIB_PARSER_XRL_CMDS_HH__

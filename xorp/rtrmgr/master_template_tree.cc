@@ -32,58 +32,59 @@
 
 
 MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
-				       XRLdb* xrldb,
-				       bool verbose) throw (InitError)
-    : TemplateTree(xorp_root_dir, verbose),
-      _xrldb(xrldb)
+		XRLdb* xrldb,
+		bool verbose) throw (InitError)
+: TemplateTree(xorp_root_dir, verbose),
+	_xrldb(xrldb)
 {
 
 }
 
-bool 
+	bool 
 MasterTemplateTree::load_template_tree(const string& config_template_dir,
-					string& error_msg)
+		string& error_msg)
 {
-    if (TemplateTree::load_template_tree(config_template_dir, error_msg)
-	!= true) {
-	return (false);
-    }
+	if (TemplateTree::load_template_tree(config_template_dir, error_msg)
+			!= true) 
+	{
+		return (false);
+	}
 
-    if (expand_master_template_tree(error_msg) != true)
-	return (false);
+	if (expand_master_template_tree(error_msg) != true)
+		return (false);
 
-    if (check_master_template_tree(error_msg) != true)
-	return (false);
+	if (check_master_template_tree(error_msg) != true)
+		return (false);
 
-    return (true);
+	return (true);
 }
 
-bool
+	bool
 MasterTemplateTree::expand_master_template_tree(string& error_msg)
 {
-    // Expand the template tree
-    return root_node()->expand_master_template_tree(error_msg);
+	// Expand the template tree
+	return root_node()->expand_master_template_tree(error_msg);
 }
 
-bool
+	bool
 MasterTemplateTree::check_master_template_tree(string& error_msg)
 {
-    // Verify the template tree
-    return root_node()->check_master_template_tree(error_msg);
+	// Verify the template tree
+	return root_node()->check_master_template_tree(error_msg);
 }
 
-void
+	void
 MasterTemplateTree::add_cmd(char* cmd) throw (ParseError)
 {
-    MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
-    n->add_cmd(string(cmd), *this);
+	MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
+	n->add_cmd(string(cmd), *this);
 }
 
-void
+	void
 MasterTemplateTree::add_cmd_action(const string& cmd, 
-				   const list<string>& action)
-    throw (ParseError)
+		const list<string>& action)
+throw (ParseError)
 {
-    MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
-    n->add_action(cmd, action, _xrldb);
+	MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
+	n->add_action(cmd, action, _xrldb);
 }

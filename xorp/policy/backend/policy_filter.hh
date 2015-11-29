@@ -45,55 +45,56 @@ class PolicyFilter :
     public NONCOPYABLE,
     public FilterBase
 {
-public:
-    /**
-     * @short Exception thrown on configuration error.
-     */
-    class ConfError : public PolicyException {
     public:
-        ConfError(const char* file, size_t line, const string& init_why = "")
-            : PolicyException("ConfError", file, line, init_why) {}   
+	/**
+	 * @short Exception thrown on configuration error.
+	 */
+	class ConfError : public PolicyException 
+    {
+	public:
+	    ConfError(const char* file, size_t line, const string& init_why = "")
+		: PolicyException("ConfError", file, line, init_why) {}   
     };
 
-    PolicyFilter();
-    ~PolicyFilter();
-    
-    /**
-     * Configure the filter
-     *
-     * @param str filter configuration.
-     */
-    void configure(const string& str);
+	PolicyFilter();
+	~PolicyFilter();
 
-    /**
-     * Reset the filter.
-     *
-     * Filter becomes a NO-operation -- default action should
-     * be returned everytime an acceptRoute is called.
-     */
-    void reset();
+	/**
+	 * Configure the filter
+	 *
+	 * @param str filter configuration.
+	 */
+	void configure(const string& str);
 
-    /**
-     * See if a route is accepted by the filter.
-     * The route may be modified by the filter [through VarRW].
-     *
-     * @return true if the route is accepted, false otherwise.
-     * @param varrw the VarRW associated with the route being filtered.
-     */
-    bool acceptRoute(VarRW& varrw);
+	/**
+	 * Reset the filter.
+	 *
+	 * Filter becomes a NO-operation -- default action should
+	 * be returned everytime an acceptRoute is called.
+	 */
+	void reset();
+
+	/**
+	 * See if a route is accepted by the filter.
+	 * The route may be modified by the filter [through VarRW].
+	 *
+	 * @return true if the route is accepted, false otherwise.
+	 * @param varrw the VarRW associated with the route being filtered.
+	 */
+	bool acceptRoute(VarRW& varrw);
 
 #ifndef XORP_DISABLE_PROFILE
-    void set_profiler_exec(PolicyProfiler* profiler);
+	void set_profiler_exec(PolicyProfiler* profiler);
 #endif
 
-private:
-    vector<PolicyInstr*>*   _policies;
-    SetManager		    _sman;
-    IvExec		    _exec;
+    private:
+	vector<PolicyInstr*>*   _policies;
+	SetManager		    _sman;
+	IvExec		    _exec;
 #ifndef XORP_DISABLE_PROFILE
-    PolicyProfiler*	    _profiler_exec;
+	PolicyProfiler*	    _profiler_exec;
 #endif
-    SUBR*		    _subr;
+	SUBR*		    _subr;
 };
 
 typedef ref_ptr<PolicyFilter> RefPf;

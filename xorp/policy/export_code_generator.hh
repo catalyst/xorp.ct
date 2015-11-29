@@ -34,23 +34,24 @@
  * instead.
  *
  */
-class ExportCodeGenerator : public CodeGenerator {
-public:
-    /**
-     * @param proto Protocol for which code will be generated.
-     * @param t information on which tags should be used.
-     * @param varmap varmap.
-     */
-    ExportCodeGenerator(const string& proto, 
-			const SourceMatchCodeGenerator::Tags& t,
-			const VarMap& varmap,
-			PolicyMap& pmap);
+class ExportCodeGenerator : public CodeGenerator 
+{
+    public:
+	/**
+	 * @param proto Protocol for which code will be generated.
+	 * @param t information on which tags should be used.
+	 * @param varmap varmap.
+	 */
+	ExportCodeGenerator(const string& proto, 
+		const SourceMatchCodeGenerator::Tags& t,
+		const VarMap& varmap,
+		PolicyMap& pmap);
 
-    const Element* visit_term(Term& term);
+	const Element* visit_term(Term& term);
 
-private:
-    const SourceMatchCodeGenerator::Tags& _tags;
-    SourceMatchCodeGenerator::Tags::const_iterator _tags_iter;
+    private:
+	const SourceMatchCodeGenerator::Tags& _tags;
+	SourceMatchCodeGenerator::Tags::const_iterator _tags_iter;
 };
 
 #endif // __POLICY_EXPORT_CODE_GENERATOR_HH__

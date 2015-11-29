@@ -33,49 +33,50 @@
 
 BGPMain::BGPMain()
 {
-    _local_data = new LocalData;
-    _xrl_router = NULL;
+	_local_data = new LocalData;
+	_xrl_router = NULL;
 }
 
-BGPMain::~BGPMain() {
-    /*
-    ** Any xrl events added by the destruction of the rib_ipc_hander
-    ** are soaked up before destroying the xrl_router.
-    */
-    if (_xrl_router != NULL)
-	while(_xrl_router->pending())
-	    EventLoop::instance().run();
-    delete _local_data;
+BGPMain::~BGPMain() 
+{
+	/*
+	 ** Any xrl events added by the destruction of the rib_ipc_hander
+	 ** are soaked up before destroying the xrl_router.
+	 */
+	if (_xrl_router != NULL)
+		while(_xrl_router->pending())
+			EventLoop::instance().run();
+	delete _local_data;
 }
 
-int
+	int
 BGPMain::startup()
 {
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 BGPMain::shutdown()
 {
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-void
+	void
 BGPMain::status_change(ServiceBase*	service,
-		       ServiceStatus	old_status,
-		       ServiceStatus	new_status)
+		ServiceStatus	old_status,
+		ServiceStatus	new_status)
 {
-    UNUSED(service);
-    UNUSED(old_status);
-    UNUSED(new_status);
+	UNUSED(service);
+	UNUSED(old_status);
+	UNUSED(new_status);
 }
 
-void
+	void
 BGPMain::tree_complete()
 {
 }
 
-void
+	void
 BGPMain::updates_made()
 {
 }
@@ -83,121 +84,121 @@ BGPMain::updates_made()
 bool
 BGPMain::interface_address4(const IPv4& /*address*/) const
 {
-    return false;
+	return false;
 }
 
 bool
 BGPMain::interface_address6(const IPv6& /*address*/) const
 {
-    return false;
+	return false;
 }
 
 bool
 BGPMain::interface_address_prefix_len4(const IPv4& /*address*/,
-				       uint32_t& /*prefix_len*/) const
+		uint32_t& /*prefix_len*/) const
 {
-    return false;
+	return false;
 }
 
 bool
 BGPMain::interface_address_prefix_len6(const IPv6& /*address*/,
-				       uint32_t& /*prefix_len*/) const
+		uint32_t& /*prefix_len*/) const
 {
-    return false;
+	return false;
 }
 
-void
+	void
 BGPMain::main_loop()
 {
 }	
 
-void 
+	void 
 BGPMain::local_config(const uint32_t&, const IPv4&, bool)
 {
 }
 
 /*
-** Callback registered with the asyncio code.
-*/
-void 
+ ** Callback registered with the asyncio code.
+ */
+	void 
 BGPMain::connect_attempt(XorpFd, IoEventType, string, uint16_t)
 {
 }
 
-void
+	void
 BGPMain::attach_peer(BGPPeer*)
 {
 }
 
-void
+	void
 BGPMain::detach_peer(BGPPeer*)
 {
 }	
 
 /*
-** Find this peer if it exists.
-*/
-BGPPeer *
+ ** Find this peer if it exists.
+ */
+	BGPPeer *
 BGPMain::find_peer(const Iptuple&)
 {
-    return 0;
+	return 0;
 }
 
-bool
+	bool
 BGPMain::create_peer(BGPPeerData *)
 {
-    return false;
+	return false;
 }
 
-bool
+	bool
 BGPMain::delete_peer(const Iptuple&)
 {
-    return false;
+	return false;
 }
 
-bool
+	bool
 BGPMain::enable_peer(const Iptuple&)
 {
-    return false;
+	return false;
 }
 
-bool
+	bool
 BGPMain::disable_peer(const Iptuple&)
 {
-    return false;
+	return false;
 }
 
-bool
+	bool
 BGPMain::register_ribname(const string&)
 {
-    return false;
+	return false;
 }
 
-XorpFd
+	XorpFd
 BGPMain::create_listener(const Iptuple&)
 {
-    XorpFd tmpfd;
+	XorpFd tmpfd;
 
-    return (tmpfd);
+	return (tmpfd);
 }
 
-LocalData*
+	LocalData*
 BGPMain::get_local_data()
 {
-    return 0;
+	return 0;
 }
 
-void
+	void
 BGPMain::start_server(const Iptuple&)
 {
 }
 
-void
+	void
 BGPMain::stop_server(const Iptuple&)
 {
 }
 
-void
+	void
 BGPMain::stop_all_servers()
 {
 }

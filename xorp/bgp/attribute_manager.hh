@@ -36,23 +36,27 @@ class PathAttributeList;
  * forces the right comparison.
  */
 template <class A>
-class Att_Ptr_Cmp {
-public:
-    bool operator() (const PAListRef<A>& a, const PAListRef<A>& b) const {
-/*	printf("Att_Ptr_Cmp [%s] < [%s] ?\n", a->attribute()->str().c_str(),
-	b->attribute()->str().c_str());*/
+class Att_Ptr_Cmp 
+{
+	public:
+		bool operator() (const PAListRef<A>& a, const PAListRef<A>& b) const 
+		{
+			/*	printf("Att_Ptr_Cmp [%s] < [%s] ?\n", a->attribute()->str().c_str(),
+				b->attribute()->str().c_str());*/
 #ifdef OLDWAY
-	if (*(a->attribute()) < *(b->attribute())) {
-	    //	    printf("true\n");
-	    return true;
-	} else {
-	    //	    printf("false\n");
-	    return false;
-	}
+			if (*(a->attribute()) < *(b->attribute())) 
+			{
+				//	    printf("true\n");
+				return true;
+			} else 
+			{
+				//	    printf("false\n");
+				return false;
+			}
 #else
-	return a < b;
+			return a < b;
 #endif
-    }
+		}
 };
 
 /**
@@ -64,18 +68,20 @@ public:
  * handled for you if no-one else is still referencing a copy.
  */
 template <class A>
-class AttributeManager {
-public:
-    AttributeManager();
-    PAListRef<A> add_attribute_list(PAListRef<A>& attribute_list);
-    void delete_attribute_list(PAListRef<A>& attribute_list);
-    int number_of_managed_atts() const {
-	return _attribute_lists.size();
-    }
-private:
-    // set above for explanation of Att_Ptr_Cmp
-    set <PAListRef<A>, Att_Ptr_Cmp<A> > _attribute_lists;
-    int _total_references;
+class AttributeManager 
+{
+	public:
+		AttributeManager();
+		PAListRef<A> add_attribute_list(PAListRef<A>& attribute_list);
+		void delete_attribute_list(PAListRef<A>& attribute_list);
+		int number_of_managed_atts() const 
+		{
+			return _attribute_lists.size();
+		}
+	private:
+		// set above for explanation of Att_Ptr_Cmp
+		set <PAListRef<A>, Att_Ptr_Cmp<A> > _attribute_lists;
+		int _total_references;
 };
 
 #endif // __BGP_ATTRIBUTE_MANAGER_HH__

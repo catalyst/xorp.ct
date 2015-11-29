@@ -25,60 +25,61 @@
 #include "fea/fibconfig_table_get.hh"
 
 
-class FibConfigTableGetDummy : public FibConfigTableGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigTableGetDummy(FeaDataPlaneManager& fea_data_plane_manager);
+class FibConfigTableGetDummy : public FibConfigTableGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigTableGetDummy(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigTableGetDummy();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigTableGetDummy();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Obtain the IPv4 unicast forwarding table.
-     *
-     * @param fte_list the return-by-reference list with all entries in
-     * the IPv4 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table4(list<Fte4>& fte_list);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Obtain the IPv6 unicast forwarding table.
-     *
-     * @param fte_list the return-by-reference list with all entries in
-     * the IPv6 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table6(list<Fte6>& fte_list);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
-    
-private:
+		/**
+		 * Obtain the IPv4 unicast forwarding table.
+		 *
+		 * @param fte_list the return-by-reference list with all entries in
+		 * the IPv4 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table4(list<Fte4>& fte_list);
+
+		/**
+		 * Obtain the IPv6 unicast forwarding table.
+		 *
+		 * @param fte_list the return-by-reference list with all entries in
+		 * the IPv6 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table6(list<Fte6>& fte_list);
+
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
+
+	private:
 };
 
 #endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_DUMMY_HH__

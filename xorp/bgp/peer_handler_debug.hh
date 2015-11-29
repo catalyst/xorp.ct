@@ -26,48 +26,50 @@
 
 #include "peer_handler.hh"
 
-class DebugPeerHandler : public PeerHandler {
-public:
-    DebugPeerHandler(BGPPeer *peer);
+class DebugPeerHandler : public PeerHandler 
+{
+	public:
+		DebugPeerHandler(BGPPeer *peer);
 
-    ~DebugPeerHandler();
+		~DebugPeerHandler();
 
-    int start_packet();
-    /* add_route and delete_route are called to propagate a route *to*
-       the RIB. */
-    int add_route(const SubnetRoute<IPv4> &rt,
-                          FPAList4Ref& pa_list,
-                          bool ibgp, Safi safi);
-    int add_route(const SubnetRoute<IPv6> &rt,
-                          FPAList6Ref& pa_list,
-                          bool ibgp, Safi safi);
-    int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp,
-                              const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
-                              FPAList4Ref& pa_list,
-                              Safi safi);
-    int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
-                              const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
-                              FPAList6Ref& pa_list,
-                              Safi safi);
-    int delete_route(const SubnetRoute<IPv4> &rt,
-                             FPAList4Ref& pa_list,
-                             bool new_ibgp,
-                             Safi safi);
-    int delete_route(const SubnetRoute<IPv6> &rt,
-                             FPAList6Ref& pa_list,
-                             bool new_ibgp,
-                             Safi safi);
-    PeerOutputState push_packet();
+		int start_packet();
+		/* add_route and delete_route are called to propagate a route *to*
+		   the RIB. */
+		int add_route(const SubnetRoute<IPv4> &rt,
+				FPAList4Ref& pa_list,
+				bool ibgp, Safi safi);
+		int add_route(const SubnetRoute<IPv6> &rt,
+				FPAList6Ref& pa_list,
+				bool ibgp, Safi safi);
+		int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp,
+				const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
+				FPAList4Ref& pa_list,
+				Safi safi);
+		int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
+				const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
+				FPAList6Ref& pa_list,
+				Safi safi);
+		int delete_route(const SubnetRoute<IPv4> &rt,
+				FPAList4Ref& pa_list,
+				bool new_ibgp,
+				Safi safi);
+		int delete_route(const SubnetRoute<IPv6> &rt,
+				FPAList6Ref& pa_list,
+				bool new_ibgp,
+				Safi safi);
+		PeerOutputState push_packet();
 
-    void set_output_file(FILE *file) {_ofile = file;}
-    void set_canned_response(PeerOutputState state) {
-	_canned_response = state;
-    }
-private:
-    void print_route(const SubnetRoute<IPv4>& route, FPAList4Ref palist) const;
-    void print_route(const SubnetRoute<IPv6>& route, FPAList6Ref palist) const;
-    FILE *_ofile;
-    PeerOutputState _canned_response;
+		void set_output_file(FILE *file) {_ofile = file;}
+		void set_canned_response(PeerOutputState state) 
+		{
+			_canned_response = state;
+		}
+	private:
+		void print_route(const SubnetRoute<IPv4>& route, FPAList4Ref palist) const;
+		void print_route(const SubnetRoute<IPv6>& route, FPAList6Ref palist) const;
+		FILE *_ofile;
+		PeerOutputState _canned_response;
 };
 
 #endif // __BGP_PEER_HANDLER_DEBUG_HH__

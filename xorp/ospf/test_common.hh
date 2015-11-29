@@ -27,27 +27,29 @@
  * Compute legal values for the options fields.
  */
 inline
-uint32_t
+    uint32_t
 compute_options(OspfTypes::Version version, OspfTypes::AreaType area_type)
 {
     // Set/UnSet E-Bit.
     Options options(version, 0);
-    switch(area_type) {
-    case OspfTypes::NORMAL:
-	options.set_e_bit(true);
-	break;
-    case OspfTypes::STUB:
-    case OspfTypes::NSSA:
-	options.set_e_bit(false);
-	break;
+    switch(area_type) 
+    {
+	case OspfTypes::NORMAL:
+	    options.set_e_bit(true);
+	    break;
+	case OspfTypes::STUB:
+	case OspfTypes::NSSA:
+	    options.set_e_bit(false);
+	    break;
     }
 
-    switch (version) {
-    case OspfTypes::V2:
-	break;
-    case OspfTypes::V3:
-	options.set_v6_bit(true);
-	break;
+    switch (version) 
+    {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    options.set_v6_bit(true);
+	    break;
     }
 
     return options.get_options();
@@ -56,7 +58,8 @@ compute_options(OspfTypes::Version version, OspfTypes::AreaType area_type)
 /**
  * The type fields when saving an LSA database.
  */
-enum TLV {
+enum TLV 
+{
     TLV_VERSION = 1,	// The first entry in a file 4 byte version number.
     TLV_SYSTEM_INFO = 2,// A string defining the creation system. 
     TLV_OSPF_VERSION = 3,// The OSPF version that the database came from.

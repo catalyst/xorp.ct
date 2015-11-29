@@ -50,67 +50,69 @@ template<class A>
 class PolicyRedistClient { };
 
 template<>
-class PolicyRedistClient<IPv4> {
-public:
-    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+class PolicyRedistClient<IPv4> 
+{
+    public:
+	PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
 
-    bool send_delete_route(const char*	dst_xrl_target_name,
-	const IPv4Net&	network,
-	const bool&	unicast,
-	const bool&	multicast,
-	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
-    {
-	return this->_redist_client.send_delete_route4(dst_xrl_target_name,
-		network, unicast, multicast, cb);
-    }
+	bool send_delete_route(const char*	dst_xrl_target_name,
+		const IPv4Net&	network,
+		const bool&	unicast,
+		const bool&	multicast,
+		const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+	{
+	    return this->_redist_client.send_delete_route4(dst_xrl_target_name,
+		    network, unicast, multicast, cb);
+	}
 
-    bool send_add_route(const char*	dst_xrl_target_name,
-	const IPv4Net&	network,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv4&	nexthop,
-	const uint32_t&	metric,
-	const XrlAtomList&	policytags,
-	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
-    {
-	return this->_redist_client.send_add_route4(dst_xrl_target_name,
-		network, unicast, multicast, nexthop, metric, policytags, cb);
-    }
+	bool send_add_route(const char*	dst_xrl_target_name,
+		const IPv4Net&	network,
+		const bool&	unicast,
+		const bool&	multicast,
+		const IPv4&	nexthop,
+		const uint32_t&	metric,
+		const XrlAtomList&	policytags,
+		const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+	{
+	    return this->_redist_client.send_add_route4(dst_xrl_target_name,
+		    network, unicast, multicast, nexthop, metric, policytags, cb);
+	}
 
-protected:
-    XrlPolicyRedist4V0p1Client _redist_client;
+    protected:
+	XrlPolicyRedist4V0p1Client _redist_client;
 };
 
 template<>
-class PolicyRedistClient<IPv6> {
-public:
-    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+class PolicyRedistClient<IPv6> 
+{
+    public:
+	PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
 
-    bool send_delete_route(const char*	dst_xrl_target_name,
-	const IPv6Net&	network,
-	const bool&	unicast,
-	const bool&	multicast,
-	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
-    {
-	return this->_redist_client.send_delete_route6(dst_xrl_target_name,
-		network, unicast, multicast, cb);
-    }
+	bool send_delete_route(const char*	dst_xrl_target_name,
+		const IPv6Net&	network,
+		const bool&	unicast,
+		const bool&	multicast,
+		const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+	{
+	    return this->_redist_client.send_delete_route6(dst_xrl_target_name,
+		    network, unicast, multicast, cb);
+	}
 
-    bool send_add_route(const char*	dst_xrl_target_name,
-	const IPv6Net&	network,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6&	nexthop,
-	const uint32_t&	metric,
-	const XrlAtomList&	policytags,
-	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
-    {
-	return this->_redist_client.send_add_route6(dst_xrl_target_name,
-		network, unicast, multicast, nexthop, metric, policytags, cb);
-    }
+	bool send_add_route(const char*	dst_xrl_target_name,
+		const IPv6Net&	network,
+		const bool&	unicast,
+		const bool&	multicast,
+		const IPv6&	nexthop,
+		const uint32_t&	metric,
+		const XrlAtomList&	policytags,
+		const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+	{
+	    return this->_redist_client.send_add_route6(dst_xrl_target_name,
+		    network, unicast, multicast, nexthop, metric, policytags, cb);
+	}
 
-protected:
-    XrlPolicyRedist6V0p1Client _redist_client;
+    protected:
+	XrlPolicyRedist6V0p1Client _redist_client;
 };
 
 /**
@@ -121,82 +123,83 @@ protected:
  * being added or deleted.
  */
 template<class A>
-class PolicyRedistTable : public RouteTable<A> {
-public:
-    static const string table_name;
+class PolicyRedistTable : public RouteTable<A> 
+{
+    public:
+	static const string table_name;
 
-    PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr, PolicyRedistMap&,
-		      bool multicast);
+	PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr, PolicyRedistMap&,
+		bool multicast);
 
-    int add_igp_route(const IPRouteEntry<A>& router);
-    int add_egp_route(const IPRouteEntry<A>& router);
-    int delete_igp_route(const IPRouteEntry<A>* route, bool);
-    int delete_egp_route(const IPRouteEntry<A>* route, bool);
+	int add_igp_route(const IPRouteEntry<A>& router);
+	int add_egp_route(const IPRouteEntry<A>& router);
+	int delete_igp_route(const IPRouteEntry<A>* route, bool);
+	int delete_egp_route(const IPRouteEntry<A>* route, bool);
 
-    TableType type() const { return POLICY_REDIST_TABLE; }
-    string str() const;
+	TableType type() const { return POLICY_REDIST_TABLE; }
+	string str() const;
 
-    void xrl_cb(const XrlError&, string);
+	void xrl_cb(const XrlError&, string);
 
-    /**
-     * If policy-tags of a route changed, this table will need to figure out
-     * which protocol should stop advertising a route, and which protocol
-     * should continue or start.
-     *
-     * @param route the route with its new policy tags.
-     * @param prevtags the previous policytags of the route.
-     * @param caller the table which invoked this method.
-     */
-    void replace_policytags(const IPRouteEntry<A>& route,
-                            const PolicyTags& prevtags);
-
-
-private:
-    typedef set<string> Set;
-
-    /**
-     * Start a redistribution of a route.
-     *
-     * @param route route to redistribute.
-     * @param protos the set of protocols which should do the redistribution.
-     */
-    void add_redist(const IPRouteEntry<A>& route, const Set& protos);
-
-    /**
-     * End a route redistribution.
-     *
-     * @param route the route which should no longer be redistributed.
-     * @param protos the protocols which should stop advertising the route.
-     */
-    void del_redist(const IPRouteEntry<A>& route, const Set& protos);
-
-    /**
-     * Start a route redistribution.
-     *
-     * @param route route to be redistributed.
-     * @param proto protocol which should advertise route.
-     */
-    void add_redist(const IPRouteEntry<A>& route, const string& proto);
-
-    /**
-     * End a route redistribution.
-     *
-     * @param route route which should no longer be redistributed.
-     * @param proto protocol which should stop advertising the route.
-     */
-    void del_redist(const IPRouteEntry<A>& route, const string& proto);
-
-    void generic_add_route(const IPRouteEntry<A>& router);
-    void generic_delete_route(const IPRouteEntry<A>* route);
+	/**
+	 * If policy-tags of a route changed, this table will need to figure out
+	 * which protocol should stop advertising a route, and which protocol
+	 * should continue or start.
+	 *
+	 * @param route the route with its new policy tags.
+	 * @param prevtags the previous policytags of the route.
+	 * @param caller the table which invoked this method.
+	 */
+	void replace_policytags(const IPRouteEntry<A>& route,
+		const PolicyTags& prevtags);
 
 
-    XrlRouter&			_xrl_router;
+    private:
+	typedef set<string> Set;
 
-    PolicyRedistMap&		_redist_map;
+	/**
+	 * Start a redistribution of a route.
+	 *
+	 * @param route route to redistribute.
+	 * @param protos the set of protocols which should do the redistribution.
+	 */
+	void add_redist(const IPRouteEntry<A>& route, const Set& protos);
 
-    PolicyRedistClient<A>	_redist_client;
+	/**
+	 * End a route redistribution.
+	 *
+	 * @param route the route which should no longer be redistributed.
+	 * @param protos the protocols which should stop advertising the route.
+	 */
+	void del_redist(const IPRouteEntry<A>& route, const Set& protos);
 
-    bool			_multicast;
+	/**
+	 * Start a route redistribution.
+	 *
+	 * @param route route to be redistributed.
+	 * @param proto protocol which should advertise route.
+	 */
+	void add_redist(const IPRouteEntry<A>& route, const string& proto);
+
+	/**
+	 * End a route redistribution.
+	 *
+	 * @param route route which should no longer be redistributed.
+	 * @param proto protocol which should stop advertising the route.
+	 */
+	void del_redist(const IPRouteEntry<A>& route, const string& proto);
+
+	void generic_add_route(const IPRouteEntry<A>& router);
+	void generic_delete_route(const IPRouteEntry<A>* route);
+
+
+	XrlRouter&			_xrl_router;
+
+	PolicyRedistMap&		_redist_map;
+
+	PolicyRedistClient<A>	_redist_client;
+
+	bool			_multicast;
 };
 
 #endif // __RIB_RT_TAB_POL_REDIST_HH__

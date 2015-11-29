@@ -41,7 +41,7 @@ class XrlJobBase;
  * @param ip_version IP version number.
  * @return pointer to character string containing XRL target name on
  * success, NULL if an invalid IP version number.
-*/
+ */
 const char* default_xrl_target(uint32_t ip_version);
 
 /**
@@ -63,8 +63,8 @@ uint32_t rip_name_to_ip_version(const char* rip_name);
  * @return true on success, false if host_colon_port is invalid.
  */
 bool parse_finder_args(const string&	host_colon_port,
-		       string&		host,
-		       uint16_t&	port);
+		string&		host,
+		uint16_t&	port);
 
 
 // ----------------------------------------------------------------------------
@@ -75,37 +75,37 @@ bool parse_finder_args(const string&	host_colon_port,
  */
 class XrlJobQueue : public ServiceBase
 {
-public:
-    typedef ref_ptr<XrlJobBase> Job;
+	public:
+		typedef ref_ptr<XrlJobBase> Job;
 
-public:
-    XrlJobQueue( const string& 	finder_host,
-		uint16_t 	finder_port,
-		const string& 	tgtname);
-    ~XrlJobQueue();
+	public:
+		XrlJobQueue( const string& 	finder_host,
+				uint16_t 	finder_port,
+				const string& 	tgtname);
+		~XrlJobQueue();
 
-    int startup();
-    int shutdown();
-    void dispatch_complete(const XrlError& xe, const XrlJobBase* cmd);
+		int startup();
+		int shutdown();
+		void dispatch_complete(const XrlError& xe, const XrlJobBase* cmd);
 
-    XrlSender* sender()			{ return _rtr; }
-    const string& target() const	{ return _tgt; }
-    void enqueue(const Job& cmd)	{ _jobs.push_back(cmd); }
+		XrlSender* sender()			{ return _rtr; }
+		const string& target() const	{ return _tgt; }
+		void enqueue(const Job& cmd)	{ _jobs.push_back(cmd); }
 
-protected:
-    bool xrl_router_ready_poll();
+	protected:
+		bool xrl_router_ready_poll();
 
-    void process_next_job();
+		void process_next_job();
 
-protected:
-    string 		_fhost;	// Finder host
-    uint16_t 		_fport;	// Finder port
-    string		_tgt; 	// Xrl target to for jobs
+	protected:
+		string 		_fhost;	// Finder host
+		uint16_t 		_fport;	// Finder port
+		string		_tgt; 	// Xrl target to for jobs
 
-    list<Job> 		_jobs;
-    XrlStdRouter* 	_rtr;
-    XorpTimer		_rtr_poll;	// Timer used to poll XrlRouter::ready
-    uint32_t		_rtr_poll_cnt;	// Number of timer XrlRouter polled.
+		list<Job> 		_jobs;
+		XrlStdRouter* 	_rtr;
+		XorpTimer		_rtr_poll;	// Timer used to poll XrlRouter::ready
+		uint32_t		_rtr_poll_cnt;	// Number of timer XrlRouter polled.
 };
 
 /**
@@ -114,19 +114,19 @@ protected:
  * Non-copyable due to inheriting from CallbackSafeObject.
  */
 class XrlJobBase :
-    public CallbackSafeObject
+	public CallbackSafeObject
 {
-public:
-    XrlJobBase(XrlJobQueue& q) : _q(q) {}
+	public:
+		XrlJobBase(XrlJobQueue& q) : _q(q) {}
 
-    virtual ~XrlJobBase() {}
-    virtual bool dispatch() = 0;
+		virtual ~XrlJobBase() {}
+		virtual bool dispatch() = 0;
 
-protected:
-    XrlJobQueue& queue() { return _q; }
+	protected:
+		XrlJobQueue& queue() { return _q; }
 
-private:
-    XrlJobQueue& _q;
+	private:
+		XrlJobQueue& _q;
 };
 
 #endif // __RIP_TOOLS_COMMON_HH__

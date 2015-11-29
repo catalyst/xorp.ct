@@ -30,23 +30,24 @@
 
 #include "template_tree_node.hh"
 
-class MasterTemplateTreeNode : public TemplateTreeNode {
-public:
-    /* normally we'll just call the TemplateTreeNode constructor directly*/
-    MasterTemplateTreeNode(TemplateTree& template_tree, 
-			   TemplateTreeNode* parent, 
-			   const string& path, const string& varname)
-	: TemplateTreeNode(template_tree, parent, path, varname)
-    {}
+class MasterTemplateTreeNode : public TemplateTreeNode 
+{
+	public:
+		/* normally we'll just call the TemplateTreeNode constructor directly*/
+		MasterTemplateTreeNode(TemplateTree& template_tree, 
+				TemplateTreeNode* parent, 
+				const string& path, const string& varname)
+			: TemplateTreeNode(template_tree, parent, path, varname)
+		{}
 
-    void add_cmd(const string& cmd, TemplateTree& tt) throw (ParseError);
-    void add_action(const string& cmd, const list<string>& action_list,
-		    const XRLdb* xrldb) throw (ParseError);
-    bool expand_master_template_tree(string& error_msg);
-    bool check_master_template_tree(string& error_msg) const;
+		void add_cmd(const string& cmd, TemplateTree& tt) throw (ParseError);
+		void add_action(const string& cmd, const list<string>& action_list,
+				const XRLdb* xrldb) throw (ParseError);
+		bool expand_master_template_tree(string& error_msg);
+		bool check_master_template_tree(string& error_msg) const;
 
-protected:
-private:
+	protected:
+	private:
 };
 
 

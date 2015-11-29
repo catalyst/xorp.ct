@@ -26,26 +26,28 @@
 /**
  * All the trace variables in one place.
  */
-struct Trace {
+struct Trace 
+{
     Trace() : _input_errors(true),
-	      _interface_events(false),
-	      _neighbour_events(false),
-	      _spt(false),
-	      _import_policy(false),
-	      _export_policy(false),
-	      _virtual_link(false),
-	      _find_interface_address(false),
-	      _routes(false),
-	      _retransmit(false),
-	      _election(false),
-	      _packets(false)
+    _interface_events(false),
+    _neighbour_events(false),
+    _spt(false),
+    _import_policy(false),
+    _export_policy(false),
+    _virtual_link(false),
+    _find_interface_address(false),
+    _routes(false),
+    _retransmit(false),
+    _election(false),
+    _packets(false)
 	      // Don't forget to add new variables to the all() method.
-	{}
+    {}
 
     /*
      * Set all flags
      */
-    void all(bool val) {
+    void all(bool val) 
+    {
 	_input_errors = _interface_events = _neighbour_events = _spt = 
 	    _import_policy = _export_policy = _virtual_link = 
 	    _find_interface_address = _routes = _retransmit = _election = 

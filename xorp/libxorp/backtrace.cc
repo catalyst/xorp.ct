@@ -51,7 +51,7 @@ static _xorp_backtrace_free(const char **data);
  * @return pointer to an array of char*, allocated with malloc().
  */
 extern "C"
-const char **
+    const char **
 xorp_backtrace_alloc()
 {
 #ifdef DEBUG_BACKTRACE
@@ -62,7 +62,7 @@ xorp_backtrace_alloc()
 }
 
 extern "C"
-void
+    void
 xorp_backtrace_free(const char **data)
 {
 #ifdef DEBUG_BACKTRACE
@@ -117,7 +117,7 @@ xorp_backtrace_free(const char **data)
 #ifdef DEBUG_BACKTRACE
 static const int BACKTRACE_MAX = 128;
 
-static const char **
+    static const char **
 _xorp_backtrace_alloc()
 {
 #if defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS)
@@ -129,7 +129,8 @@ _xorp_backtrace_alloc()
     assert(entries != NULL);
 
     nentries = backtrace(entries, BACKTRACE_MAX);
-    if (nentries == 0) {
+    if (nentries == 0) 
+    {
 	free(entries);
 	return (NULL);
     }
@@ -165,7 +166,8 @@ _xorp_backtrace_alloc()
 
 #ifdef HAVE___CXA_DEMANGLE
 
-    for (i = 0; i < ) {
+    for (i = 0; i < ) 
+    {
 
     }
 
@@ -174,23 +176,23 @@ _xorp_backtrace_alloc()
     // TODO: munge the args in each line.
     for (i = 0, cp = syms, np = final; i < nentries; i++, cp++, final++)
 	final = strdup(*cp);
-	/* If out of heap space, all bets are off. */
-	assert(*final != NULL);
-    }
-    *cp = NULL;
+    /* If out of heap space, all bets are off. */
+    assert(*final != NULL);
+}
+*cp = NULL;
 
 #endif /* HAVE___CXA_DEMANGLE */
 
-    return (final);
+return (final);
 #else /* ! (defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS)) */
 
-    return (NULL);
+return (NULL);
 #endif /* defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS) */
 }
 
 // XXX: CONSTIFY
 
-static void
+    static void
 _xorp_backtrace_free(const char **data)
 {
     char **cp;

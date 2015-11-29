@@ -25,73 +25,74 @@
 #include "fea/firewall_get.hh"
 
 
-class FirewallGetIpfw2 : public FirewallGet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FirewallGetIpfw2(FeaDataPlaneManager& fea_data_plane_manager);
+class FirewallGetIpfw2 : public FirewallGet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FirewallGetIpfw2(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FirewallGetIpfw2();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FirewallGetIpfw2();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Obtain the IPv4 firewall table.
-     *
-     * @param firewall_entry_list the return-by-reference list with all
-     * entries in the IPv4 firewall table.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table4(list<FirewallEntry>& firewall_entry_list,
-			   string& error_msg);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /**
-     * Obtain the IPv6 firewall table.
-     *
-     * @param firewall_entry_list the return-by-reference list with all
-     * entries in the IPv6 firewall table.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int get_table6(list<FirewallEntry>& firewall_entry_list,
-			   string& error_msg);
+		/**
+		 * Obtain the IPv4 firewall table.
+		 *
+		 * @param firewall_entry_list the return-by-reference list with all
+		 * entries in the IPv4 firewall table.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table4(list<FirewallEntry>& firewall_entry_list,
+				string& error_msg);
 
-private:
-    /**
-     * Obtain the firewall table for a specific address family.
-     *
-     * @param family the address family.
-     * @param firewall_entry_list the return-by-reference list with all
-     * entries in the firewall table for the given address family.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int get_table(int family, list<FirewallEntry>& firewall_entry_list,
-		  string& error_msg);
+		/**
+		 * Obtain the IPv6 firewall table.
+		 *
+		 * @param firewall_entry_list the return-by-reference list with all
+		 * entries in the IPv6 firewall table.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int get_table6(list<FirewallEntry>& firewall_entry_list,
+				string& error_msg);
 
-    int		_s4;		// The socket for firewall access
+	private:
+		/**
+		 * Obtain the firewall table for a specific address family.
+		 *
+		 * @param family the address family.
+		 * @param firewall_entry_list the return-by-reference list with all
+		 * entries in the firewall table for the given address family.
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int get_table(int family, list<FirewallEntry>& firewall_entry_list,
+				string& error_msg);
+
+		int		_s4;		// The socket for firewall access
 };
 
 #endif // __FEA_DATA_PLANE_FIREWALL_FIREWALL_GET_IPFW2_HH__

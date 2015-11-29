@@ -32,9 +32,9 @@
 
 
 UnexpandedProgram::UnexpandedProgram(const MasterConfigTreeNode& node,
-				     const ProgramAction& action) 
-    : _node(node),
-      _action(action)
+		const ProgramAction& action) 
+: _node(node),
+	_action(action)
 {
 }
 
@@ -49,19 +49,20 @@ UnexpandedProgram::~UnexpandedProgram()
 string
 UnexpandedProgram::expand(string& errmsg) const
 {
-    string request;
+	string request;
 
-    if (_action.expand_program_variables(_node, request, errmsg) != XORP_OK) {
-	debug_msg("Failed to expand program variables: %s\n", errmsg.c_str());
-	return string("");
-    }
-    debug_msg("Program expanded to %s\n", request.c_str());
+	if (_action.expand_program_variables(_node, request, errmsg) != XORP_OK) 
+	{
+		debug_msg("Failed to expand program variables: %s\n", errmsg.c_str());
+		return string("");
+	}
+	debug_msg("Program expanded to %s\n", request.c_str());
 
-    return (request);
+	return (request);
 }
 
 string
 UnexpandedProgram::str() const
 {
-    return _action.str();
+	return _action.str();
 }

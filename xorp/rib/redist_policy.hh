@@ -30,19 +30,20 @@
  * Logical Operators as well as route attibute operators are defined.
  */
 template <typename A>
-class RedistPolicy {
-public:
-    /**
-     * Determine whether route should be accepted for redistribution.
-     *
-     * @param ipr route to be examined.
-     *
-     * @return true if route should be accepted for redistribution, false
-     *         otherwise.
-     */
-    virtual bool accept(const IPRouteEntry<A>& ipr) const = 0;
+class RedistPolicy 
+{
+	public:
+		/**
+		 * Determine whether route should be accepted for redistribution.
+		 *
+		 * @param ipr route to be examined.
+		 *
+		 * @return true if route should be accepted for redistribution, false
+		 *         otherwise.
+		 */
+		virtual bool accept(const IPRouteEntry<A>& ipr) const = 0;
 
-    virtual ~RedistPolicy() {};
+		virtual ~RedistPolicy() {};
 };
 
 /**
@@ -50,23 +51,23 @@ public:
  */
 template <typename A>
 class RedistUnaryOp :
-    public NONCOPYABLE
+	public NONCOPYABLE
 {
-public:
-    /**
-     * Constructor.
-     *
-     * @param policy policy object allocated with new.
-     */
-    RedistUnaryOp(const RedistPolicy<A>* policy) : _p1(policy) {}
-    ~RedistUnaryOp() { delete _p1; }
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param policy policy object allocated with new.
+		 */
+		RedistUnaryOp(const RedistPolicy<A>* policy) : _p1(policy) {}
+		~RedistUnaryOp() { delete _p1; }
 
-private:
-    // The following are not implemented
-    RedistUnaryOp();
+	private:
+		// The following are not implemented
+		RedistUnaryOp();
 
-protected:
-    const RedistPolicy<A>* _p1;
+	protected:
+		const RedistPolicy<A>* _p1;
 };
 
 /**
@@ -74,29 +75,29 @@ protected:
  */
 template <typename A>
 class RedistBinaryOp :
-    public NONCOPYABLE,
-    public RedistPolicy<A>
+	public NONCOPYABLE,
+	public RedistPolicy<A>
 {
-public:
-    /**
-     * Constructor.
-     *
-     * @param one policy object allocated with new.
-     * @param two policy object allocated with new.
-     *
-     * Note: destructor deletes supplied policy objects.
-     */
-    RedistBinaryOp(RedistPolicy<A>* one, RedistPolicy<A>* two)
-	: _p1(one), _p2(two) {}
-    ~RedistBinaryOp() { delete _p1; delete _p2; }
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param one policy object allocated with new.
+		 * @param two policy object allocated with new.
+		 *
+		 * Note: destructor deletes supplied policy objects.
+		 */
+		RedistBinaryOp(RedistPolicy<A>* one, RedistPolicy<A>* two)
+			: _p1(one), _p2(two) {}
+		~RedistBinaryOp() { delete _p1; delete _p2; }
 
-private:
-    // The following are not implemented
-    RedistBinaryOp();
+	private:
+		// The following are not implemented
+		RedistBinaryOp();
 
-protected:
-    const RedistPolicy<A>* _p1;
-    const RedistPolicy<A>* _p2;
+	protected:
+		const RedistPolicy<A>* _p1;
+		const RedistPolicy<A>* _p2;
 };
 
 
@@ -104,40 +105,43 @@ protected:
  * @short Logical-Not for Redistribution Policy objects.
  */
 template <typename A>
-class RedistLogicalNot : public RedistUnaryOp<A> {
-public:
-    RedistLogicalNot(const RedistPolicy<A>* p) : RedistUnaryOp<A>(p) {}
-    bool accept() const { return ! this->_p1->accept(); }
+class RedistLogicalNot : public RedistUnaryOp<A> 
+{
+	public:
+		RedistLogicalNot(const RedistPolicy<A>* p) : RedistUnaryOp<A>(p) {}
+		bool accept() const { return ! this->_p1->accept(); }
 };
 
 /**
  * @short Logical-And for Redistribution Policy objects.
  */
 template <typename A>
-class RedistLogicalAnd : public RedistBinaryOp<A> {
-public:
-    RedistLogicalAnd(const RedistPolicy<A>* p1, const RedistPolicy<A>* p2)
-	: RedistBinaryOp<A>(p1, p2)
-    {}
-    bool accept(const IPRouteEntry<A>& ipr)
-    {
-	return this->_p1->accept(ipr) && this->_p2->accept(ipr);
-    }
+class RedistLogicalAnd : public RedistBinaryOp<A> 
+{
+	public:
+		RedistLogicalAnd(const RedistPolicy<A>* p1, const RedistPolicy<A>* p2)
+			: RedistBinaryOp<A>(p1, p2)
+		{}
+		bool accept(const IPRouteEntry<A>& ipr)
+		{
+			return this->_p1->accept(ipr) && this->_p2->accept(ipr);
+		}
 };
 
 /**
  * @short Logical-And for Redistribution Policy objects.
  */
 template <typename A>
-class RedistLogicalOr : public RedistBinaryOp<A> {
-public:
-    RedistLogicalOr(const RedistPolicy<A>* one, const RedistPolicy<A>* two)
-	: RedistBinaryOp<A>(one, two)
-    {}
-    bool accept(const IPRouteEntry<A>& ipr)
-    {
-	return this->_p1->accept(ipr) || this->_p2->accept(ipr);
-    }
+class RedistLogicalOr : public RedistBinaryOp<A> 
+{
+	public:
+		RedistLogicalOr(const RedistPolicy<A>* one, const RedistPolicy<A>* two)
+			: RedistBinaryOp<A>(one, two)
+		{}
+		bool accept(const IPRouteEntry<A>& ipr)
+		{
+			return this->_p1->accept(ipr) || this->_p2->accept(ipr);
+		}
 };
 
 
@@ -149,13 +153,14 @@ public:
 template <typename A>
 class IsOfProtocol : public RedistPolicy<A>
 {
-public:
-    IsOfProtocol(const Protocol& p) : _protocol(p) {}
-    bool accept(const IPRouteEntry<A>& ipr) const {
-	return *(ipr.protocol()) == _protocol;
-    }
-private:
-    Protocol _protocol;
+	public:
+		IsOfProtocol(const Protocol& p) : _protocol(p) {}
+		bool accept(const IPRouteEntry<A>& ipr) const 
+		{
+			return *(ipr.protocol()) == _protocol;
+		}
+	private:
+		Protocol _protocol;
 };
 
 /**
@@ -166,11 +171,12 @@ private:
 template <typename A>
 class IsIGP : public RedistPolicy<A>
 {
-public:
-    IsIGP() {}
-    bool accept(const IPRouteEntry<A>& ipr) const {
-	return ipr.protocol_type() == IGP;
-    }
+	public:
+		IsIGP() {}
+		bool accept(const IPRouteEntry<A>& ipr) const 
+		{
+			return ipr.protocol_type() == IGP;
+		}
 };
 
 /**
@@ -181,11 +187,12 @@ public:
 template <typename A>
 class IsEGP : public RedistPolicy<A>
 {
-public:
-    IsEGP() {}
-    bool accept(const IPRouteEntry<A>& ipr) const {
-	return ipr.protocol_type() == EGP;
-    }
+	public:
+		IsEGP() {}
+		bool accept(const IPRouteEntry<A>& ipr) const 
+		{
+			return ipr.protocol_type() == EGP;
+		}
 };
 
 #endif // __RIB_REDIST_POLICY_HH__

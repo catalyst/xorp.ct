@@ -34,62 +34,65 @@
 #include "xrl_target.hh"
 
 
-int
+	int
 main(int /*argc*/, char **argv)
 {
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
-    // Enable verbose tracing via configuration to increase the tracing level
-//     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
-//     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
+	XorpUnexpectedHandler x(xorp_unexpected_handler);
+	//
+	// Initialize and start xlog
+	//
+	xlog_init(argv[0], NULL);
+	xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+	// XXX: verbosity of the error messages temporary increased
+	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+	xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
+	// Enable verbose tracing via configuration to increase the tracing level
+	//     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
+	//     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
+	xlog_add_default_output();
+	xlog_start();
 
-    comm_init();
+	comm_init();
 
-    setup_dflt_sighandlers();
+	setup_dflt_sighandlers();
 
-    try {
+	try 
+	{
 
-// 	signal(SIGINT, terminate_main_loop);
+		// 	signal(SIGINT, terminate_main_loop);
 
-	BGPMain bgp;
+		BGPMain bgp;
 
-	/*
-	** By default assume there is a rib running.
-	*/
- 	bgp.register_ribname("rib");
+		/*
+		 ** By default assume there is a rib running.
+		 */
+		bgp.register_ribname("rib");
 
-	/*
-	** Wait for our local configuration information and for the
-	** FEA and RIB to start.
-	*/
-	while (xorp_do_run && bgp.get_xrl_target()->waiting()) {
-	    EventLoop::instance().run();
+		/*
+		 ** Wait for our local configuration information and for the
+		 ** FEA and RIB to start.
+		 */
+		while (xorp_do_run && bgp.get_xrl_target()->waiting()) 
+		{
+			EventLoop::instance().run();
+		}
+
+		/*
+		 ** Check we shouldn't be exiting.
+		 */
+		if (!bgp.get_xrl_target()->done())
+			bgp.main_loop();
+	} catch(...) 
+	{
+		xorp_catch_standard_exceptions();
 	}
 
-	/*
-	** Check we shouldn't be exiting.
-	*/
- 	if (!bgp.get_xrl_target()->done())
- 	   bgp.main_loop();
-    } catch(...) {
-	xorp_catch_standard_exceptions();
-    }
-
-    //
-    // Gracefully stop and exit xlog
-    //
-    xlog_stop();
-    xlog_exit();
-    comm_exit();
-    debug_msg("Bye!\n");
-    return 0;
+	//
+	// Gracefully stop and exit xlog
+	//
+	xlog_stop();
+	xlog_exit();
+	comm_exit();
+	debug_msg("Bye!\n");
+	return 0;
 }

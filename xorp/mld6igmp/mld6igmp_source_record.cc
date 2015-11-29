@@ -66,12 +66,12 @@
  * Return value: 
  **/
 Mld6igmpSourceRecord::Mld6igmpSourceRecord(Mld6igmpGroupRecord& group_record,
-					   const IPvX& source)
-    : _group_record(group_record),
-      _source(source),
-      _query_retransmission_count(0)
+		const IPvX& source)
+: _group_record(group_record),
+	_source(source),
+	_query_retransmission_count(0)
 {
-    
+
 }
 
 /**
@@ -90,22 +90,22 @@ Mld6igmpSourceRecord::~Mld6igmpSourceRecord()
  *
  * @param timeval the timeout interval of the source timer.
  */
-void
+	void
 Mld6igmpSourceRecord::set_source_timer(const TimeVal& timeval)
 {
 
-    _source_timer = EventLoop::instance().new_oneoff_after(
-	timeval,
-	callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
+	_source_timer = EventLoop::instance().new_oneoff_after(
+			timeval,
+			callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
 }
 
 /**
  * Cancel the source timer.
  */
-void
+	void
 Mld6igmpSourceRecord::cancel_source_timer()
 {
-    _source_timer.unschedule();
+	_source_timer.unschedule();
 }
 
 /**
@@ -114,29 +114,30 @@ Mld6igmpSourceRecord::cancel_source_timer()
  * @param timeval the timeout interval the source timer should be
  * lowered to.
  */
-void
+	void
 Mld6igmpSourceRecord::lower_source_timer(const TimeVal& timeval)
 {
-    TimeVal timeval_remaining;
+	TimeVal timeval_remaining;
 
-    //
-    // Lower the source timer
-    //
-    _source_timer.time_remaining(timeval_remaining);
-    if (timeval < timeval_remaining) {
-	_source_timer = EventLoop::instance().new_oneoff_after(
-	    timeval,
-	    callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
-    }
+	//
+	// Lower the source timer
+	//
+	_source_timer.time_remaining(timeval_remaining);
+	if (timeval < timeval_remaining) 
+	{
+		_source_timer = EventLoop::instance().new_oneoff_after(
+				timeval,
+				callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
+	}
 }
 
 /**
  * Timeout: the source timer has expired.
  */
-void
+	void
 Mld6igmpSourceRecord::source_timer_timeout()
 {
-    _group_record.source_expired(this);
+	_group_record.source_expired(this);
 }
 
 /**
@@ -147,11 +148,11 @@ Mld6igmpSourceRecord::source_timer_timeout()
 uint32_t
 Mld6igmpSourceRecord::timeout_sec() const
 {
-    TimeVal tv;
-    
-    _source_timer.time_remaining(tv);
-    
-    return (tv.sec());
+	TimeVal tv;
+
+	_source_timer.time_remaining(tv);
+
+	return (tv.sec());
 }
 
 /**
@@ -159,8 +160,8 @@ Mld6igmpSourceRecord::timeout_sec() const
  *
  * @param group_record the group record this set belongs to.
  */
-Mld6igmpSourceSet::Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record)
-    : _group_record(group_record)
+	Mld6igmpSourceSet::Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record)
+: _group_record(group_record)
 {
 
 }
@@ -170,7 +171,7 @@ Mld6igmpSourceSet::Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record)
  */
 Mld6igmpSourceSet::~Mld6igmpSourceSet()
 {
-    // XXX: don't delete the payload, because it might be used elsewhere
+	// XXX: don't delete the payload, because it might be used elsewhere
 }
 
 /**
@@ -180,37 +181,38 @@ Mld6igmpSourceSet::~Mld6igmpSourceSet()
  * @return the corresponding source record (@ref Mld6igmpSourceRecord)
  * if found, otherwise NULL.
  */
-Mld6igmpSourceRecord*
+	Mld6igmpSourceRecord*
 Mld6igmpSourceSet::find_source_record(const IPvX& source)
 {
-    Mld6igmpSourceSet::iterator iter = this->find(source);
+	Mld6igmpSourceSet::iterator iter = this->find(source);
 
-    if (iter != this->end())
-	return (iter->second);
+	if (iter != this->end())
+		return (iter->second);
 
-    return (NULL);
+	return (NULL);
 }
 
 /**
  * Delete the payload of the set, and clear the set itself.
  */
-void
+	void
 Mld6igmpSourceSet::delete_payload_and_clear()
 {
-    Mld6igmpSourceSet::iterator iter;
+	Mld6igmpSourceSet::iterator iter;
 
-    //
-    // Delete the payload of the set
-    //
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	Mld6igmpSourceRecord* source_record = iter->second;
-	delete source_record;
-    }
+	//
+	// Delete the payload of the set
+	//
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		Mld6igmpSourceRecord* source_record = iter->second;
+		delete source_record;
+	}
 
-    //
-    // Clear the set itself
-    //
-    this->clear();
+	//
+	// Clear the set itself
+	//
+	this->clear();
 }
 
 /**
@@ -219,23 +221,24 @@ Mld6igmpSourceSet::delete_payload_and_clear()
  * @param other the right-hand operand.
  * @return the assigned set.
  */
-Mld6igmpSourceSet&
+	Mld6igmpSourceSet&
 Mld6igmpSourceSet::operator=(const Mld6igmpSourceSet& other)
 {
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet::const_iterator iter;
 
-    XLOG_ASSERT(&_group_record == &(other._group_record));
+	XLOG_ASSERT(&_group_record == &(other._group_record));
 
-    this->clear();
+	this->clear();
 
-    //
-    // Copy the payload of the set
-    //
-    for (iter = other.begin(); iter != other.end(); ++iter) {
-	insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Copy the payload of the set
+	//
+	for (iter = other.begin(); iter != other.end(); ++iter) 
+	{
+		insert(make_pair(iter->first, iter->second));
+	}
 
-    return (*this);
+	return (*this);
 }
 
 /**
@@ -245,22 +248,23 @@ Mld6igmpSourceSet::operator=(const Mld6igmpSourceSet& other)
  * @return the union of two sets. Note that if an element is in
  * both sets, we use the value from the first set.
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator+(const Mld6igmpSourceSet& other)
 {
-    Mld6igmpSourceSet result(*this);	// XXX: all elements from the first set
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet result(*this);	// XXX: all elements from the first set
+	Mld6igmpSourceSet::const_iterator iter;
 
-    //
-    // Insert all elements from the second set that are not in the first set
-    //
-    for (iter = other.begin(); iter != other.end(); ++iter) {
-	const IPvX& ipvx = iter->first;
-	if (result.find(ipvx) == result.end())
-	    result.insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Insert all elements from the second set that are not in the first set
+	//
+	for (iter = other.begin(); iter != other.end(); ++iter) 
+	{
+		const IPvX& ipvx = iter->first;
+		if (result.find(ipvx) == result.end())
+			result.insert(make_pair(iter->first, iter->second));
+	}
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -271,25 +275,27 @@ Mld6igmpSourceSet::operator+(const Mld6igmpSourceSet& other)
  * @return the union of two sets. Note that if an element is not in the
  * first set, then it is created (see @ref Mld6igmpSourceRecord).
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator+(const set<IPvX>& other)
 {
-    Mld6igmpSourceSet result(*this);	// XXX: all elements from the first set
-    set<IPvX>::const_iterator iter;
-    Mld6igmpSourceRecord* source_record;
+	Mld6igmpSourceSet result(*this);	// XXX: all elements from the first set
+	set<IPvX>::const_iterator iter;
+	Mld6igmpSourceRecord* source_record;
 
-    //
-    // Insert all elements from the second set that are not in the first set
-    //
-    for (iter = other.begin(); iter != other.end(); ++iter) {
-	const IPvX& ipvx = *iter;
-	if (result.find(ipvx) == result.end()) {
-	    source_record = new Mld6igmpSourceRecord(_group_record, ipvx);
-	    result.insert(make_pair(ipvx, source_record));
+	//
+	// Insert all elements from the second set that are not in the first set
+	//
+	for (iter = other.begin(); iter != other.end(); ++iter) 
+	{
+		const IPvX& ipvx = *iter;
+		if (result.find(ipvx) == result.end()) 
+		{
+			source_record = new Mld6igmpSourceRecord(_group_record, ipvx);
+			result.insert(make_pair(ipvx, source_record));
+		}
 	}
-    }
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -299,22 +305,23 @@ Mld6igmpSourceSet::operator+(const set<IPvX>& other)
  * @return the intersection of two sets. Note that we use the values
  * from the first set.
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator*(const Mld6igmpSourceSet& other)
 {
-    Mld6igmpSourceSet result(_group_record);
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet result(_group_record);
+	Mld6igmpSourceSet::const_iterator iter;
 
-    //
-    // Insert all elements from the first set that are also in the second set
-    //
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	const IPvX& ipvx = iter->first;
-	if (other.find(ipvx) != other.end())
-	    result.insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Insert all elements from the first set that are also in the second set
+	//
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		const IPvX& ipvx = iter->first;
+		if (other.find(ipvx) != other.end())
+			result.insert(make_pair(iter->first, iter->second));
+	}
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -325,22 +332,23 @@ Mld6igmpSourceSet::operator*(const Mld6igmpSourceSet& other)
  * @return the intersection of two sets. Note that we use the values
  * from the first set.
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator*(const set<IPvX>& other)
 {
-    Mld6igmpSourceSet result(_group_record);
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet result(_group_record);
+	Mld6igmpSourceSet::const_iterator iter;
 
-    //
-    // Insert all elements from the first set that are also in the second set
-    //
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	const IPvX& ipvx = iter->first;
-	if (other.find(ipvx) != other.end())
-	    result.insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Insert all elements from the first set that are also in the second set
+	//
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		const IPvX& ipvx = iter->first;
+		if (other.find(ipvx) != other.end())
+			result.insert(make_pair(iter->first, iter->second));
+	}
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -350,22 +358,23 @@ Mld6igmpSourceSet::operator*(const set<IPvX>& other)
  * @return the elements from the first set (after the elements from
  * the right-hand set have been removed).
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator-(const Mld6igmpSourceSet& other)
 {
-    Mld6igmpSourceSet result(_group_record);
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet result(_group_record);
+	Mld6igmpSourceSet::const_iterator iter;
 
-    //
-    // Insert all elements from the first set that are not in the second set
-    //
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	const IPvX& ipvx = iter->first;
-	if (other.find(ipvx) == other.end())
-	    result.insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Insert all elements from the first set that are not in the second set
+	//
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		const IPvX& ipvx = iter->first;
+		if (other.find(ipvx) == other.end())
+			result.insert(make_pair(iter->first, iter->second));
+	}
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -376,22 +385,23 @@ Mld6igmpSourceSet::operator-(const Mld6igmpSourceSet& other)
  * @return the elements from the first set (after the elements from
  * the right-hand set have been removed).
  */
-Mld6igmpSourceSet
+	Mld6igmpSourceSet
 Mld6igmpSourceSet::operator-(const set<IPvX>& other)
 {
-    Mld6igmpSourceSet result(_group_record);
-    Mld6igmpSourceSet::const_iterator iter;
+	Mld6igmpSourceSet result(_group_record);
+	Mld6igmpSourceSet::const_iterator iter;
 
-    //
-    // Insert all elements from the first set that are not in the second set
-    //
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	const IPvX& ipvx = iter->first;
-	if (other.find(ipvx) == other.end())
-	    result.insert(make_pair(iter->first, iter->second));
-    }
+	//
+	// Insert all elements from the first set that are not in the second set
+	//
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		const IPvX& ipvx = iter->first;
+		if (other.find(ipvx) == other.end())
+			result.insert(make_pair(iter->first, iter->second));
+	}
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -401,21 +411,23 @@ Mld6igmpSourceSet::operator-(const set<IPvX>& other)
  * be set.
  * @param timeval the timeout interval of the source timer.
  */
-void
+	void
 Mld6igmpSourceSet::set_source_timer(const set<IPvX>& sources,
-				    const TimeVal& timeval)
+		const TimeVal& timeval)
 {
-    set<IPvX>::const_iterator iter;
-    Mld6igmpSourceSet::iterator record_iter;
+	set<IPvX>::const_iterator iter;
+	Mld6igmpSourceSet::iterator record_iter;
 
-    for (iter = sources.begin(); iter != sources.end(); ++iter) {
-	const IPvX& ipvx = *iter;
-	record_iter = this->find(ipvx);
-	if (record_iter != this->end()) {
-	    Mld6igmpSourceRecord* source_record = record_iter->second;
-	    source_record->set_source_timer(timeval);
+	for (iter = sources.begin(); iter != sources.end(); ++iter) 
+	{
+		const IPvX& ipvx = *iter;
+		record_iter = this->find(ipvx);
+		if (record_iter != this->end()) 
+		{
+			Mld6igmpSourceRecord* source_record = record_iter->second;
+			source_record->set_source_timer(timeval);
+		}
 	}
-    }
 }
 
 /**
@@ -423,15 +435,16 @@ Mld6igmpSourceSet::set_source_timer(const set<IPvX>& sources,
  *
  * @param timeval the timeout interval of the source timer.
  */
-void
+	void
 Mld6igmpSourceSet::set_source_timer(const TimeVal& timeval)
 {
-    Mld6igmpSourceSet::iterator iter;
+	Mld6igmpSourceSet::iterator iter;
 
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	Mld6igmpSourceRecord* source_record = iter->second;
-	source_record->set_source_timer(timeval);
-    }
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		Mld6igmpSourceRecord* source_record = iter->second;
+		source_record->set_source_timer(timeval);
+	}
 }
 
 /**
@@ -440,34 +453,37 @@ Mld6igmpSourceSet::set_source_timer(const TimeVal& timeval)
  * @param sources the set of source addresses whose source timer will
  * be canceled.
  */
-void
+	void
 Mld6igmpSourceSet::cancel_source_timer(const set<IPvX>& sources)
 {
-    set<IPvX>::const_iterator iter;
-    Mld6igmpSourceSet::iterator record_iter;
+	set<IPvX>::const_iterator iter;
+	Mld6igmpSourceSet::iterator record_iter;
 
-    for (iter = sources.begin(); iter != sources.end(); ++iter) {
-	const IPvX& ipvx = *iter;
-	record_iter = this->find(ipvx);
-	if (record_iter != this->end()) {
-	    Mld6igmpSourceRecord* source_record = record_iter->second;
-	    source_record->cancel_source_timer();
+	for (iter = sources.begin(); iter != sources.end(); ++iter) 
+	{
+		const IPvX& ipvx = *iter;
+		record_iter = this->find(ipvx);
+		if (record_iter != this->end()) 
+		{
+			Mld6igmpSourceRecord* source_record = record_iter->second;
+			source_record->cancel_source_timer();
+		}
 	}
-    }
 }
 
 /**
  * Cancel the source timer for all source addresses.
  */
-void
+	void
 Mld6igmpSourceSet::cancel_source_timer()
 {
-    Mld6igmpSourceSet::iterator iter;
+	Mld6igmpSourceSet::iterator iter;
 
-    for (iter = this->begin(); iter != this->end(); ++iter) {
-	Mld6igmpSourceRecord* source_record = iter->second;
-	source_record->cancel_source_timer();
-    }
+	for (iter = this->begin(); iter != this->end(); ++iter) 
+	{
+		Mld6igmpSourceRecord* source_record = iter->second;
+		source_record->cancel_source_timer();
+	}
 }
 
 /**
@@ -477,21 +493,23 @@ Mld6igmpSourceSet::cancel_source_timer()
  * @param timeval the timeout interval the source timer should be
  * lowered to.
  */
-void
+	void
 Mld6igmpSourceSet::lower_source_timer(const set<IPvX>& sources,
-				      const TimeVal& timeval)
+		const TimeVal& timeval)
 {
-    set<IPvX>::const_iterator iter;
-    Mld6igmpSourceSet::iterator record_iter;
+	set<IPvX>::const_iterator iter;
+	Mld6igmpSourceSet::iterator record_iter;
 
-    for (iter = sources.begin(); iter != sources.end(); ++iter) {
-	const IPvX& ipvx = *iter;
-	record_iter = this->find(ipvx);
-	if (record_iter != this->end()) {
-	    Mld6igmpSourceRecord* source_record = record_iter->second;
-	    source_record->lower_source_timer(timeval);
+	for (iter = sources.begin(); iter != sources.end(); ++iter) 
+	{
+		const IPvX& ipvx = *iter;
+		record_iter = this->find(ipvx);
+		if (record_iter != this->end()) 
+		{
+			Mld6igmpSourceRecord* source_record = record_iter->second;
+			source_record->lower_source_timer(timeval);
+		}
 	}
-    }
 }
 
 /**
@@ -502,16 +520,17 @@ Mld6igmpSourceSet::lower_source_timer(const set<IPvX>& sources,
 set<IPvX>
 Mld6igmpSourceSet::extract_source_addresses() const
 {
-    set<IPvX> sources;
-    Mld6igmpSourceSet::const_iterator record_iter;
+	set<IPvX> sources;
+	Mld6igmpSourceSet::const_iterator record_iter;
 
-    for (record_iter = this->begin();
-	 record_iter != this->end();
-	 ++record_iter) {
-	const Mld6igmpSourceRecord* source_record = record_iter->second;
-	const IPvX& ipvx = source_record->source();
-	sources.insert(ipvx);
-    }
+	for (record_iter = this->begin();
+			record_iter != this->end();
+			++record_iter) 
+	{
+		const Mld6igmpSourceRecord* source_record = record_iter->second;
+		const IPvX& ipvx = source_record->source();
+		sources.insert(ipvx);
+	}
 
-    return (sources);
+	return (sources);
 }

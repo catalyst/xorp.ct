@@ -86,61 +86,69 @@ const string FirewallSetNetfilter::_netfilter_chain_output = "OUTPUT";
 //
 
 // IPv4: The error rule at the beginning and the end of a chain
-struct local_ipv4_ipt_error_target {
+struct local_ipv4_ipt_error_target 
+{
     struct ipt_entry_target		entry_target;
     char				error[IPT_TABLE_MAXNAMELEN];
 };
 
 // IPv4: The start of a chain
-struct local_ipv4_iptcb_chain_start {
+struct local_ipv4_iptcb_chain_start 
+{
     struct ipt_entry			entry;
     struct local_ipv4_ipt_error_target	error_target;
 };
 
 // IPv4: The end of a chain
-struct local_ipv4_iptcb_chain_foot {
+struct local_ipv4_iptcb_chain_foot 
+{
     struct ipt_entry			entry;
     struct ipt_standard_target		standard_target;
 };
 
 // IPv4: The end of a table
-struct local_ipv4_iptcb_chain_error {
+struct local_ipv4_iptcb_chain_error 
+{
     struct ipt_entry			entry;
     struct local_ipv4_ipt_error_target	error_target;
 };
 
 // IPv6: The error rule at the beginning and the end
-struct local_ipv6_ipt_error_target {
+struct local_ipv6_ipt_error_target 
+{
     struct ip6t_entry_target		entry_target;
     char				error[IP6T_TABLE_MAXNAMELEN];
 };
 
 // IPv6: The start of a chain
-struct local_ipv6_iptcb_chain_start {
+struct local_ipv6_iptcb_chain_start 
+{
     struct ip6t_entry			entry;
     struct local_ipv6_ipt_error_target	error_target;
 };
 
 // IPv6: The end of a chain
-struct local_ipv6_iptcb_chain_foot {
+struct local_ipv6_iptcb_chain_foot 
+{
     struct ip6t_entry			entry;
     struct ip6t_standard_target		standard_target;
 };
 
 // IPv6: The end of a table
-struct local_ipv6_iptcb_chain_error {
+struct local_ipv6_iptcb_chain_error 
+{
     struct ip6t_entry			entry;
     struct local_ipv6_ipt_error_target	error_target;
 };
 
 
-FirewallSetNetfilter::FirewallSetNetfilter(FeaDataPlaneManager& fea_data_plane_manager)
-    : FirewallSet(fea_data_plane_manager),
-      _s4(-1),
-      _s6(-1),
-      _num_entries(0),
-      _head_offset(0),
-      _foot_offset(0)
+    FirewallSetNetfilter::FirewallSetNetfilter(FeaDataPlaneManager& fea_data_plane_manager)
+: FirewallSet(fea_data_plane_manager),
+    _s4(-1),
+    _s6(-1),
+    _num_entries(0),
+    _head_offset(0),
+    _foot_offset(0)
 {
 }
 
@@ -148,14 +156,15 @@ FirewallSetNetfilter::~FirewallSetNetfilter()
 {
     string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
+    if (stop(error_msg) != XORP_OK) 
+    {
 	XLOG_ERROR("Cannot stop the NETFILTER mechanism to set "
-		   "firewall information into the underlying system: %s",
-		   error_msg.c_str());
+		"firewall information into the underlying system: %s",
+		error_msg.c_str());
     }
 }
 
-int
+    int
 FirewallSetNetfilter::start(string& error_msg)
 {
     if (_is_running)
@@ -165,9 +174,10 @@ FirewallSetNetfilter::start(string& error_msg)
     // Check if we have the necessary permission.
     // If not, print a warning and continue without firewall.
     //
-    if (geteuid() != 0) {
+    if (geteuid() != 0) 
+    {
 	XLOG_WARNING("Cannot start the NETFILTER firewall mechanism: "
-		     "must be root; continuing without firewall setup");
+		"must be root; continuing without firewall setup");
 	return (XORP_OK);
     }
 
@@ -175,10 +185,11 @@ FirewallSetNetfilter::start(string& error_msg)
     // Open a raw IPv4 socket that NETFILTER uses for communication
     //
     _s4 = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    if (_s4 < 0) {
+    if (_s4 < 0) 
+    {
 	error_msg = c_format("Could not open a raw IPv4 socket for NETFILTER "
-			     "firewall: %s",
-			     strerror(errno));
+		"firewall: %s",
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -187,10 +198,11 @@ FirewallSetNetfilter::start(string& error_msg)
     // Open a raw IPv6 socket that NETFILTER uses for communication
     //
     _s6 = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
-    if (_s6 < 0) {
+    if (_s6 < 0) 
+    {
 	error_msg = c_format("Could not open a raw IPv6 socket for NETFILTER "
-			     "firewall: %s",
-			     strerror(errno));
+		"firewall: %s",
+		strerror(errno));
 	comm_close(_s4);
 	_s4 = -1;
 	return (XORP_ERROR);
@@ -202,7 +214,7 @@ FirewallSetNetfilter::start(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::stop(string& error_msg)
 {
     int ret_value4 = XORP_OK;
@@ -211,23 +223,27 @@ FirewallSetNetfilter::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (_s4 >= 0) {
+    if (_s4 >= 0) 
+    {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
-	if (ret_value4 != XORP_OK) {
+	if (ret_value4 != XORP_OK) 
+	{
 	    error_msg = c_format("Could not close raw IPv4 socket for "
-				 "NETFILTER firewall: %s",
-				 strerror(errno));
+		    "NETFILTER firewall: %s",
+		    strerror(errno));
 	}
     }
 
-    if (_s6 >= 0) {
+    if (_s6 >= 0) 
+    {
 	ret_value6 = comm_close(_s6);
 	_s6 = -1;
-	if ((ret_value6 != XORP_OK) && (ret_value4 == XORP_OK)) {
+	if ((ret_value6 != XORP_OK) && (ret_value4 == XORP_OK)) 
+	{
 	    error_msg = c_format("Could not close raw IPv6 socket for "
-				 "NETFILTER firewall: %s",
-				 strerror(errno));
+		    "NETFILTER firewall: %s",
+		    strerror(errno));
 	}
     }
 
@@ -239,12 +255,12 @@ FirewallSetNetfilter::stop(string& error_msg)
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::update_entries(
-    const list<FirewallEntry>& added_entries,
-    const list<FirewallEntry>& replaced_entries,
-    const list<FirewallEntry>& deleted_entries,
-    string& error_msg)
+	const list<FirewallEntry>& added_entries,
+	const list<FirewallEntry>& replaced_entries,
+	const list<FirewallEntry>& deleted_entries,
+	string& error_msg)
 {
     list<FirewallEntry>::const_iterator iter;
     bool has_ipv4 = false;
@@ -254,8 +270,9 @@ FirewallSetNetfilter::update_entries(
     // The entries to add
     //
     for (iter = added_entries.begin();
-	 iter != added_entries.end();
-	 ++iter) {
+	    iter != added_entries.end();
+	    ++iter) 
+    {
 	const FirewallEntry& firewall_entry = *iter;
 	if (firewall_entry.is_ipv4())
 	    has_ipv4 = true;
@@ -269,8 +286,9 @@ FirewallSetNetfilter::update_entries(
     // The entries to replace
     //
     for (iter = replaced_entries.begin();
-	 iter != replaced_entries.end();
-	 ++iter) {
+	    iter != replaced_entries.end();
+	    ++iter) 
+    {
 	const FirewallEntry& firewall_entry = *iter;
 	if (firewall_entry.is_ipv4())
 	    has_ipv4 = true;
@@ -284,8 +302,9 @@ FirewallSetNetfilter::update_entries(
     // The entries to delete
     //
     for (iter = deleted_entries.begin();
-	 iter != deleted_entries.end();
-	 ++iter) {
+	    iter != deleted_entries.end();
+	    ++iter) 
+    {
 	const FirewallEntry& firewall_entry = *iter;
 	if (firewall_entry.is_ipv4())
 	    has_ipv4 = true;
@@ -298,11 +317,13 @@ FirewallSetNetfilter::update_entries(
     //
     // Push the entries
     //
-    if (has_ipv4) {
+    if (has_ipv4) 
+    {
 	if (push_entries4(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
-    if (has_ipv6) {
+    if (has_ipv6) 
+    {
 	if (push_entries6(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
@@ -310,31 +331,31 @@ FirewallSetNetfilter::update_entries(
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::set_table4(const list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
+	string& error_msg)
 {
     list<FirewallEntry> empty_list;
 
     _firewall_entries4.clear();
 
     return (update_entries(firewall_entry_list, empty_list, empty_list,
-			   error_msg));
+		error_msg));
 }
 
-int
+    int
 FirewallSetNetfilter::set_table6(const list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
+	string& error_msg)
 {
     list<FirewallEntry> empty_list;
 
     _firewall_entries6.clear();
 
     return (update_entries(firewall_entry_list, empty_list, empty_list,
-			   error_msg));
+		error_msg));
 }
 
-int
+    int
 FirewallSetNetfilter::delete_all_entries4(string& error_msg)
 {
     _firewall_entries4.clear();
@@ -342,7 +363,7 @@ FirewallSetNetfilter::delete_all_entries4(string& error_msg)
     return (push_entries4(error_msg));
 }
 
-int
+    int
 FirewallSetNetfilter::delete_all_entries6(string& error_msg)
 {
     _firewall_entries6.clear();
@@ -350,9 +371,9 @@ FirewallSetNetfilter::delete_all_entries6(string& error_msg)
     return (push_entries6(error_msg));
 }
 
-int
+    int
 FirewallSetNetfilter::add_entry(const FirewallEntry& firewall_entry,
-				string& error_msg)
+	string& error_msg)
 {
     FirewallTrie::iterator iter;
     FirewallTrie* ftp = NULL;
@@ -370,9 +391,11 @@ FirewallSetNetfilter::add_entry(const FirewallEntry& firewall_entry,
     // Note that the replace_entry() implementation relies on this.
     //
     iter = ftp->find(key);
-    if (iter == ftp->end()) {
+    if (iter == ftp->end()) 
+    {
 	ftp->insert(make_pair(key, firewall_entry));
-    } else {
+    } else 
+    {
 	FirewallEntry& fe_tmp = iter->second;
 	fe_tmp = firewall_entry;
     }
@@ -380,9 +403,9 @@ FirewallSetNetfilter::add_entry(const FirewallEntry& firewall_entry,
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::replace_entry(const FirewallEntry& firewall_entry,
-				    string& error_msg)
+	string& error_msg)
 {
     //
     // XXX: The add_entry() method implementation covers the replace_entry()
@@ -391,9 +414,9 @@ FirewallSetNetfilter::replace_entry(const FirewallEntry& firewall_entry,
     return (add_entry(firewall_entry, error_msg));
 }
 
-int
+    int
 FirewallSetNetfilter::delete_entry(const FirewallEntry& firewall_entry,
-				   string& error_msg)
+	string& error_msg)
 {
     FirewallTrie::iterator iter;
     FirewallTrie* ftp = NULL;
@@ -406,7 +429,8 @@ FirewallSetNetfilter::delete_entry(const FirewallEntry& firewall_entry,
 
     // Find the entry
     iter = ftp->find(key);
-    if (iter == ftp->end()) {
+    if (iter == ftp->end()) 
+    {
 	error_msg = c_format("Entry not found");
 	return (XORP_ERROR);
     }
@@ -415,7 +439,7 @@ FirewallSetNetfilter::delete_entry(const FirewallEntry& firewall_entry,
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::push_entries4(string& error_msg)
 {
     vector<uint8_t> buffer;
@@ -447,9 +471,10 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
     memset(&info, 0, sizeof(info));
     strncpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
     socklen = sizeof(info);
-    if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_INFO, &info, &socklen) < 0) {
+    if (getsockopt(_s4, IPPROTO_IP, IPT_SO_GET_INFO, &info, &socklen) < 0) 
+    {
 	error_msg = c_format("Could not get the NETFILTER IPv4 firewall table: "
-			     "%s", strerror(errno));
+		"%s", strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -479,8 +504,9 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
 
     // The INPUT chain
     if (encode_chain4(_netfilter_chain_input, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP_LOCAL_IN] = _head_offset - sizeof(*ipr);
@@ -488,8 +514,9 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
 
     // The FORWARD chain
     if (encode_chain4(_netfilter_chain_forward, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP_FORWARD] = _head_offset - sizeof(*ipr);
@@ -497,8 +524,9 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
 
     // The OUTPUT chain
     if (encode_chain4(_netfilter_chain_output, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP_LOCAL_OUT] = _head_offset - sizeof(*ipr);
@@ -536,16 +564,17 @@ FirewallSetNetfilter::push_entries4(string& error_msg)
 
     socklen = next_data_index;
     if (setsockopt(_s4, IPPROTO_IP, IPT_SO_SET_REPLACE, &buffer[0], socklen)
-	< 0) {
+	    < 0) 
+    {
 	error_msg = c_format("Could not set NETFILTER firewall entries: %s",
-			     strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::push_entries6(string& error_msg)
 {
     vector<uint8_t> buffer;
@@ -577,9 +606,10 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
     memset(&info, 0, sizeof(info));
     strncpy(info.name, _netfilter_table_name.c_str(), sizeof(info.name));
     socklen = sizeof(info);
-    if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_INFO, &info, &socklen) < 0) {
+    if (getsockopt(_s6, IPPROTO_IPV6, IP6T_SO_GET_INFO, &info, &socklen) < 0) 
+    {
 	error_msg = c_format("Could not get the NETFILTER IPv6 firewall table: "
-			     "%s", strerror(errno));
+		"%s", strerror(errno));
 	return (XORP_ERROR);
     }
 
@@ -609,8 +639,9 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
 
     // The INPUT chain
     if (encode_chain6(_netfilter_chain_input, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP6_LOCAL_IN] = _head_offset - sizeof(*ipr);
@@ -618,8 +649,9 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
 
     // The FORWARD chain
     if (encode_chain6(_netfilter_chain_forward, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP6_FORWARD] = _head_offset - sizeof(*ipr);
@@ -627,8 +659,9 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
 
     // The OUTPUT chain
     if (encode_chain6(_netfilter_chain_output, buffer, next_data_index,
-		      error_msg)
-	!= XORP_OK) {
+		error_msg)
+	    != XORP_OK) 
+    {
 	return (XORP_ERROR);
     }
     ipr->hook_entry[NF_IP6_LOCAL_OUT] = _head_offset - sizeof(*ipr);
@@ -669,20 +702,21 @@ FirewallSetNetfilter::push_entries6(string& error_msg)
     //
     socklen = next_data_index;
     if (setsockopt(_s6, IPPROTO_IPV6, IP6T_SO_SET_REPLACE, &buffer[0], socklen)
-	< 0) {
+	    < 0) 
+    {
 	error_msg = c_format("Could not set NETFILTER firewall entries: %s",
-			     strerror(errno));
+		strerror(errno));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::encode_chain4(const string& chain_name,
-				    vector<uint8_t>& buffer,
-				    size_t& next_data_index,
-				    string& error_msg)
+	vector<uint8_t>& buffer,
+	size_t& next_data_index,
+	string& error_msg)
 {
     uint8_t* ptr;
 
@@ -695,7 +729,8 @@ FirewallSetNetfilter::encode_chain4(const string& chain_name,
 
     _head_offset = next_data_index;		// XXX
 
-    if (is_user_defined_chain) {
+    if (is_user_defined_chain) 
+    {
 	struct local_ipv4_iptcb_chain_start* head;
 	string chain_name;	// XXX: user-defined
 
@@ -718,15 +753,18 @@ FirewallSetNetfilter::encode_chain4(const string& chain_name,
     //
     // Encode all entries one-by-one if the FORWARD chain
     //
-    if (chain_name == _netfilter_chain_forward) {
+    if (chain_name == _netfilter_chain_forward) 
+    {
 	FirewallTrie::const_iterator iter;
 	for (iter = _firewall_entries4.begin();
-	     iter != _firewall_entries4.end();
-	     ++iter) {
+		iter != _firewall_entries4.end();
+		++iter) 
+	{
 	    const FirewallEntry& firewall_entry = iter->second;
 	    if (encode_entry4(firewall_entry, buffer, next_data_index,
-			      error_msg)
-		!= XORP_OK) {
+			error_msg)
+		    != XORP_OK) 
+	    {
 		return (XORP_ERROR);
 	    }
 	}
@@ -761,11 +799,11 @@ FirewallSetNetfilter::encode_chain4(const string& chain_name,
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::encode_chain6(const string& chain_name,
-				    vector<uint8_t>& buffer,
-				    size_t& next_data_index,
-				    string& error_msg)
+	vector<uint8_t>& buffer,
+	size_t& next_data_index,
+	string& error_msg)
 {
     uint8_t* ptr;
 
@@ -778,7 +816,8 @@ FirewallSetNetfilter::encode_chain6(const string& chain_name,
 
     _head_offset = next_data_index;		// XXX
 
-    if (is_user_defined_chain) {
+    if (is_user_defined_chain) 
+    {
 	struct local_ipv6_iptcb_chain_start* head;
 	string chain_name;	// XXX: user-defined
 
@@ -801,15 +840,18 @@ FirewallSetNetfilter::encode_chain6(const string& chain_name,
     //
     // Encode all entries one-by-one if the FORWARD chain
     //
-    if (chain_name == _netfilter_chain_forward) {
+    if (chain_name == _netfilter_chain_forward) 
+    {
 	FirewallTrie::const_iterator iter;
 	for (iter = _firewall_entries6.begin();
-	     iter != _firewall_entries6.end();
-	     ++iter) {
+		iter != _firewall_entries6.end();
+		++iter) 
+	{
 	    const FirewallEntry& firewall_entry = iter->second;
 	    if (encode_entry6(firewall_entry, buffer, next_data_index,
-			      error_msg)
-		!= XORP_OK) {
+			error_msg)
+		    != XORP_OK) 
+	    {
 		return (XORP_ERROR);
 	    }
 	}
@@ -845,11 +887,11 @@ FirewallSetNetfilter::encode_chain6(const string& chain_name,
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
-				    vector<uint8_t>& buffer,
-				    size_t& next_data_index,
-				    string& error_msg)
+	vector<uint8_t>& buffer,
+	size_t& next_data_index,
+	string& error_msg)
 {
     struct ipt_entry* ipt = NULL;
     struct ipt_entry_match* iem = NULL;
@@ -885,13 +927,13 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     const IPvX& src_addr = firewall_entry.src_network().masked_addr();
     src_addr.copy_out(ipt->ip.src);
     IPvX src_mask = IPvX::make_prefix(src_addr.af(),
-				      firewall_entry.src_network().prefix_len());
+	    firewall_entry.src_network().prefix_len());
     src_mask.copy_out(ipt->ip.smsk);
 
     const IPvX& dst_addr = firewall_entry.dst_network().masked_addr();
     dst_addr.copy_out(ipt->ip.dst);
     IPvX dst_mask = IPvX::make_prefix(dst_addr.af(),
-				      firewall_entry.dst_network().prefix_len());
+	    firewall_entry.dst_network().prefix_len());
     dst_mask.copy_out(ipt->ip.dmsk);
 
     //
@@ -899,7 +941,8 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     //
     // XXX: On this platform, ifname == vifname
     //
-    if (! firewall_entry.vifname().empty()) {
+    if (! firewall_entry.vifname().empty()) 
+    {
 	strncpy(ipt->ip.iniface, firewall_entry.vifname().c_str(),
 		sizeof(ipt->ip.iniface));
     }
@@ -907,42 +950,44 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     //
     // Set the source and destination port number ranges
     //
-    if ((ipt->ip.proto == IPPROTO_TCP) || (ipt->ip.proto == IPPROTO_UDP)) {
+    if ((ipt->ip.proto == IPPROTO_TCP) || (ipt->ip.proto == IPPROTO_UDP)) 
+    {
 	ptr = reinterpret_cast<uint8_t *>(ipt);
 	ptr += ipt->target_offset;
 	iem = reinterpret_cast<struct ipt_entry_match *>(ptr);
 	iem->u.match_size = _ALIGN(sizeof(*iem));
-	switch (ipt->ip.proto) {
-	case IPPROTO_TCP:
+	switch (ipt->ip.proto) 
 	{
-	    struct ipt_tcp* ip_tcp;
-	    ip_tcp = reinterpret_cast<struct ipt_tcp *>(iem->data);
-	    ip_tcp->spts[0] = firewall_entry.src_port_begin();
-	    ip_tcp->spts[1] = firewall_entry.src_port_end();
-	    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
-	    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
+	    case IPPROTO_TCP:
+		{
+		    struct ipt_tcp* ip_tcp;
+		    ip_tcp = reinterpret_cast<struct ipt_tcp *>(iem->data);
+		    ip_tcp->spts[0] = firewall_entry.src_port_begin();
+		    ip_tcp->spts[1] = firewall_entry.src_port_end();
+		    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
+		    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
-		    sizeof(iem->u.user.name));
-	    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
-	    break;
-	}
-	case IPPROTO_UDP:
-	{
-	    struct ipt_udp* ip_udp;
-	    ip_udp = reinterpret_cast<struct ipt_udp *>(iem->data);
-	    ip_udp->spts[0] = firewall_entry.src_port_begin();
-	    ip_udp->spts[1] = firewall_entry.src_port_end();
-	    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
-	    ip_udp->dpts[1] = firewall_entry.dst_port_end();
+		    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
+			    sizeof(iem->u.user.name));
+		    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
+		    break;
+		}
+	    case IPPROTO_UDP:
+		{
+		    struct ipt_udp* ip_udp;
+		    ip_udp = reinterpret_cast<struct ipt_udp *>(iem->data);
+		    ip_udp->spts[0] = firewall_entry.src_port_begin();
+		    ip_udp->spts[1] = firewall_entry.src_port_end();
+		    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
+		    ip_udp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
-		    sizeof(iem->u.user.name));
-	    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
-	    break;
-	}
-	default:
-	    break;
+		    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
+			    sizeof(iem->u.user.name));
+		    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
+		    break;
+		}
+	    default:
+		break;
 	}
 	ipt->target_offset += iem->u.match_size;
     }
@@ -956,24 +1001,25 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     ist->target.u.user.target_size = XT_ALIGN(sizeof(*ist));
     strncpy(ist->target.u.user.name, IPT_STANDARD_TARGET,
 	    sizeof(ist->target.u.user.name));
-    switch (firewall_entry.action()) {
-    case FirewallEntry::ACTION_PASS:
-	ist->verdict = -NF_ACCEPT - 1;
-	break;
-    case FirewallEntry::ACTION_DROP:
-	ist->verdict = -NF_DROP - 1;
-	break;
-    case FirewallEntry::ACTION_REJECT:
-	// XXX: NETFILTER doesn't distinguish between packet DROP and REJECT
-	ist->verdict = -NF_DROP - 1;
-	break;
-    case FirewallEntry::ACTION_ANY:
-    case FirewallEntry::ACTION_NONE:
-	break;
-    default:
-	XLOG_FATAL("Unknown firewall entry action code: %u",
-		   firewall_entry.action());
-	break;
+    switch (firewall_entry.action()) 
+    {
+	case FirewallEntry::ACTION_PASS:
+	    ist->verdict = -NF_ACCEPT - 1;
+	    break;
+	case FirewallEntry::ACTION_DROP:
+	    ist->verdict = -NF_DROP - 1;
+	    break;
+	case FirewallEntry::ACTION_REJECT:
+	    // XXX: NETFILTER doesn't distinguish between packet DROP and REJECT
+	    ist->verdict = -NF_DROP - 1;
+	    break;
+	case FirewallEntry::ACTION_ANY:
+	case FirewallEntry::ACTION_NONE:
+	    break;
+	default:
+	    XLOG_FATAL("Unknown firewall entry action code: %u",
+		    firewall_entry.action());
+	    break;
     }
     ipt->next_offset = ipt->target_offset + ist->target.u.user.target_size;
 
@@ -983,11 +1029,11 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     return (XORP_OK);
 }
 
-int
+    int
 FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
-				    vector<uint8_t>& buffer,
-				    size_t& next_data_index,
-				    string& error_msg)
+	vector<uint8_t>& buffer,
+	size_t& next_data_index,
+	string& error_msg)
 {
     struct ip6t_entry* ipt = NULL;
     struct ip6t_entry_match* iem = NULL;
@@ -1023,13 +1069,13 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     const IPvX& src_addr = firewall_entry.src_network().masked_addr();
     src_addr.copy_out(ipt->ipv6.src);
     IPvX src_mask = IPvX::make_prefix(src_addr.af(),
-				      firewall_entry.src_network().prefix_len());
+	    firewall_entry.src_network().prefix_len());
     src_mask.copy_out(ipt->ipv6.smsk);
 
     const IPvX& dst_addr = firewall_entry.dst_network().masked_addr();
     dst_addr.copy_out(ipt->ipv6.dst);
     IPvX dst_mask = IPvX::make_prefix(dst_addr.af(),
-				      firewall_entry.dst_network().prefix_len());
+	    firewall_entry.dst_network().prefix_len());
     dst_mask.copy_out(ipt->ipv6.dmsk);
 
     //
@@ -1037,7 +1083,8 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     //
     // XXX: On this platform, ifname == vifname
     //
-    if (! firewall_entry.vifname().empty()) {
+    if (! firewall_entry.vifname().empty()) 
+    {
 	strncpy(ipt->ipv6.iniface, firewall_entry.vifname().c_str(),
 		sizeof(ipt->ipv6.iniface));
     }
@@ -1045,42 +1092,44 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     //
     // Set the source and destination port number ranges
     //
-    if ((ipt->ipv6.proto == IPPROTO_TCP) || (ipt->ipv6.proto == IPPROTO_UDP)) {
+    if ((ipt->ipv6.proto == IPPROTO_TCP) || (ipt->ipv6.proto == IPPROTO_UDP)) 
+    {
 	ptr = reinterpret_cast<uint8_t *>(ipt);
 	ptr += ipt->target_offset;
 	iem = reinterpret_cast<struct ip6t_entry_match *>(ptr);
 	iem->u.match_size = _ALIGN(sizeof(*iem));
-	switch (ipt->ipv6.proto) {
-	case IPPROTO_TCP:
+	switch (ipt->ipv6.proto) 
 	{
-	    struct ip6t_tcp* ip_tcp;
-	    ip_tcp = reinterpret_cast<struct ip6t_tcp *>(iem->data);
-	    ip_tcp->spts[0] = firewall_entry.src_port_begin();
-	    ip_tcp->spts[1] = firewall_entry.src_port_end();
-	    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
-	    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
+	    case IPPROTO_TCP:
+		{
+		    struct ip6t_tcp* ip_tcp;
+		    ip_tcp = reinterpret_cast<struct ip6t_tcp *>(iem->data);
+		    ip_tcp->spts[0] = firewall_entry.src_port_begin();
+		    ip_tcp->spts[1] = firewall_entry.src_port_end();
+		    ip_tcp->dpts[0] = firewall_entry.dst_port_begin();
+		    ip_tcp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
-		    sizeof(iem->u.user.name));
-	    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
-	    break;
-	}
-	case IPPROTO_UDP:
-	{
-	    struct ip6t_udp* ip_udp;
-	    ip_udp = reinterpret_cast<struct ip6t_udp *>(iem->data);
-	    ip_udp->spts[0] = firewall_entry.src_port_begin();
-	    ip_udp->spts[1] = firewall_entry.src_port_end();
-	    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
-	    ip_udp->dpts[1] = firewall_entry.dst_port_end();
+		    strncpy(iem->u.user.name, _netfilter_match_tcp.c_str(),
+			    sizeof(iem->u.user.name));
+		    iem->u.match_size += _ALIGN(sizeof(*ip_tcp));
+		    break;
+		}
+	    case IPPROTO_UDP:
+		{
+		    struct ip6t_udp* ip_udp;
+		    ip_udp = reinterpret_cast<struct ip6t_udp *>(iem->data);
+		    ip_udp->spts[0] = firewall_entry.src_port_begin();
+		    ip_udp->spts[1] = firewall_entry.src_port_end();
+		    ip_udp->dpts[0] = firewall_entry.dst_port_begin();
+		    ip_udp->dpts[1] = firewall_entry.dst_port_end();
 
-	    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
-		    sizeof(iem->u.user.name));
-	    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
-	    break;
-	}
-	default:
-	    break;
+		    strncpy(iem->u.user.name, _netfilter_match_udp.c_str(),
+			    sizeof(iem->u.user.name));
+		    iem->u.match_size += _ALIGN(sizeof(*ip_udp));
+		    break;
+		}
+	    default:
+		break;
 	}
 	ipt->target_offset += iem->u.match_size;
     }
@@ -1094,24 +1143,25 @@ FirewallSetNetfilter::encode_entry6(const FirewallEntry& firewall_entry,
     ist->target.u.user.target_size = XT_ALIGN(sizeof(*ist));
     strncpy(ist->target.u.user.name, IP6T_STANDARD_TARGET,
 	    sizeof(ist->target.u.user.name));
-    switch (firewall_entry.action()) {
-    case FirewallEntry::ACTION_PASS:
-	ist->verdict = -NF_ACCEPT - 1;
-	break;
-    case FirewallEntry::ACTION_DROP:
-	ist->verdict = -NF_DROP - 1;
-	break;
-    case FirewallEntry::ACTION_REJECT:
-	// XXX: NETFILTER doesn't distinguish between packet DROP and REJECT
-	ist->verdict = -NF_DROP - 1;
-	break;
-    case FirewallEntry::ACTION_ANY:
-    case FirewallEntry::ACTION_NONE:
-	break;
-    default:
-	XLOG_FATAL("Unknown firewall entry action code: %u",
-		   firewall_entry.action());
-	break;
+    switch (firewall_entry.action()) 
+    {
+	case FirewallEntry::ACTION_PASS:
+	    ist->verdict = -NF_ACCEPT - 1;
+	    break;
+	case FirewallEntry::ACTION_DROP:
+	    ist->verdict = -NF_DROP - 1;
+	    break;
+	case FirewallEntry::ACTION_REJECT:
+	    // XXX: NETFILTER doesn't distinguish between packet DROP and REJECT
+	    ist->verdict = -NF_DROP - 1;
+	    break;
+	case FirewallEntry::ACTION_ANY:
+	case FirewallEntry::ACTION_NONE:
+	    break;
+	default:
+	    XLOG_FATAL("Unknown firewall entry action code: %u",
+		    firewall_entry.action());
+	    break;
     }
     ipt->next_offset = ipt->target_offset + ist->target.u.user.target_size;
 

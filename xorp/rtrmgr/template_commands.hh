@@ -38,119 +38,123 @@
 class XorpClient;
 class XRLdb;
 
-class Action {
-public:
-    Action(TemplateTreeNode& template_tree_node, const list<string>& action);
-    virtual ~Action() {};
+class Action 
+{
+	public:
+		Action(TemplateTreeNode& template_tree_node, const list<string>& action);
+		virtual ~Action() {};
 
-    enum ActionCharType { VAR, NON_VAR, QUOTE, ASSIGN };
+		enum ActionCharType { VAR, NON_VAR, QUOTE, ASSIGN };
 
-    string str() const;
-    TemplateTreeNode& template_tree_node() { return _template_tree_node; }
-    const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
-    virtual bool expand_action(string& error_msg);
-    virtual bool check_referred_variables(string& error_msg) const;
+		string str() const;
+		TemplateTreeNode& template_tree_node() { return _template_tree_node; }
+		const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
+		virtual bool expand_action(string& error_msg);
+		virtual bool check_referred_variables(string& error_msg) const;
 
-protected:
-    list<string> _action;
-    list<string> _split_cmd;
-    list<string> _referred_variables;
-    TemplateTreeNode& _template_tree_node;
+	protected:
+		list<string> _action;
+		list<string> _split_cmd;
+		list<string> _referred_variables;
+		TemplateTreeNode& _template_tree_node;
 };
 
-class XrlAction : public Action {
-public:
-    XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
-	      const XRLdb* xrldb) throw (ParseError);
+class XrlAction : public Action 
+{
+	public:
+		XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
+				const XRLdb* xrldb) throw (ParseError);
 
-    virtual bool expand_action(string& error_msg);
-    int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
-		XrlRouter::XrlCallback cb) const;
-    template<class TreeNode> Xrl* expand_xrl_variables(const TreeNode& tn,
-						       string& error_msg) const;
-    const string& request() const { return _request; }
-    const string& xrl_return_spec() const { return _response; }
-    string related_module() const;
-    string affected_module() const;
+		virtual bool expand_action(string& error_msg);
+		int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
+				XrlRouter::XrlCallback cb) const;
+		template<class TreeNode> Xrl* expand_xrl_variables(const TreeNode& tn,
+				string& error_msg) const;
+		const string& request() const { return _request; }
+		const string& xrl_return_spec() const { return _response; }
+		string related_module() const;
+		string affected_module() const;
 
-private:
+	private:
 #ifdef DEBUG_XRLDB
-    bool check_xrl_is_valid(const list<string>& action,
-			    const XRLdb* xrldb, string& error_msg);
+		bool check_xrl_is_valid(const list<string>& action,
+				const XRLdb* xrldb, string& error_msg);
 #endif
-    template<class TreeNode> bool expand_vars(const TreeNode& tn,
-					      const string& s, 
-					      string& result) const;
+		template<class TreeNode> bool expand_vars(const TreeNode& tn,
+				const string& s, 
+				string& result) const;
 
-    string		_module_name;
-    list<string>	_split_request;
-    string		_request;
-    list<string>	_split_response;
-    string		_response;
-    const XRLdb*	_xrldb;
+		string		_module_name;
+		list<string>	_split_request;
+		string		_request;
+		list<string>	_split_response;
+		string		_response;
+		const XRLdb*	_xrldb;
 };
 
-class ProgramAction : public Action {
-public:
-    ProgramAction(TemplateTreeNode& template_tree_node,
-		  const list<string>& action) throw (ParseError);
+class ProgramAction : public Action 
+{
+	public:
+		ProgramAction(TemplateTreeNode& template_tree_node,
+				const list<string>& action) throw (ParseError);
 
-    virtual bool expand_action(string& error_msg);
-    int execute(const MasterConfigTreeNode&	ctn,
-		TaskManager&			task_manager,
-		TaskProgramItem::ProgramCallback program_cb) const;
-    template<class TreeNode> int expand_program_variables(const TreeNode& tn,
-							  string& result,
-							  string& error_msg) const;
-    string related_module() const;
-    string affected_module() const;
-    const string& request() const { return _request; }
-    const string& stdout_variable_name() const { return _stdout_variable_name; }
-    const string& stderr_variable_name() const { return _stderr_variable_name; }
+		virtual bool expand_action(string& error_msg);
+		int execute(const MasterConfigTreeNode&	ctn,
+				TaskManager&			task_manager,
+				TaskProgramItem::ProgramCallback program_cb) const;
+		template<class TreeNode> int expand_program_variables(const TreeNode& tn,
+				string& result,
+				string& error_msg) const;
+		string related_module() const;
+		string affected_module() const;
+		const string& request() const { return _request; }
+		const string& stdout_variable_name() const { return _stdout_variable_name; }
+		const string& stderr_variable_name() const { return _stderr_variable_name; }
 
-private:
-    bool check_program_is_valid(const list<string>& action, string& error_msg);
-    void parse_program_response(const string& part) throw (ParseError);
+	private:
+		bool check_program_is_valid(const list<string>& action, string& error_msg);
+		void parse_program_response(const string& part) throw (ParseError);
 
-    string		_module_name;
-    list<string>	_split_request;
-    string		_request;
-    list<string>	_split_response;
-    string		_response;
-    string		_stdout_variable_name;
-    string		_stderr_variable_name;
+		string		_module_name;
+		list<string>	_split_request;
+		string		_request;
+		list<string>	_split_response;
+		string		_response;
+		string		_stdout_variable_name;
+		string		_stderr_variable_name;
 };
 
-class Command : public BaseCommand {
-public:
-    Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
-    virtual ~Command();
+class Command : public BaseCommand 
+{
+	public:
+		Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
+		virtual ~Command();
 
-    void add_action(const list<string>& action, const XRLdb* xrldb)
-	throw (ParseError);
-    int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
-    void xrl_action_complete(const XrlError& err,
-			     XrlArgs* xrl_args,
-			     MasterConfigTreeNode* ctn,
-			     Action* action) const;
-    bool process_xrl_action_return_arguments(XrlArgs* xrl_args,
-					     MasterConfigTreeNode* ctn,
-					     Action* action) const;
-    void program_action_complete(bool success,
-				 const string& command_stdout,
-				 const string& command_stderr,
-				 bool do_exec,
-				 MasterConfigTreeNode* ctn,
-				 string stdout_variable_name,
-				 string stderr_variable_name) const;
-    set<string> affected_modules() const;
-    bool affects_module(const string& module) const;
-    virtual string str() const;
-    virtual bool expand_actions(string& error_msg);
-    virtual bool check_referred_variables(string& error_msg) const;
+		void add_action(const list<string>& action, const XRLdb* xrldb)
+			throw (ParseError);
+		int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
+		void xrl_action_complete(const XrlError& err,
+				XrlArgs* xrl_args,
+				MasterConfigTreeNode* ctn,
+				Action* action) const;
+		bool process_xrl_action_return_arguments(XrlArgs* xrl_args,
+				MasterConfigTreeNode* ctn,
+				Action* action) const;
+		void program_action_complete(bool success,
+				const string& command_stdout,
+				const string& command_stderr,
+				bool do_exec,
+				MasterConfigTreeNode* ctn,
+				string stdout_variable_name,
+				string stderr_variable_name) const;
+		set<string> affected_modules() const;
+		bool affects_module(const string& module) const;
+		virtual string str() const;
+		virtual bool expand_actions(string& error_msg);
+		virtual bool check_referred_variables(string& error_msg) const;
 
-protected:
-    list<Action*>	_actions;
+	protected:
+		list<Action*>	_actions;
 };
 
 

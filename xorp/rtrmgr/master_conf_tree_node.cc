@@ -34,46 +34,46 @@
 
 extern int booterror(const char *s) throw (ParseError);
 
-MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
-    : ConfigTreeNode(verbose),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
+    MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
+: ConfigTreeNode(verbose),
+    _actions_pending(0),
+    _actions_succeeded(true),
+    _cmd_that_failed(NULL)
 {
 
 }
 
 MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
-					   const string& path,
-					   const TemplateTreeNode* ttn,
-					   MasterConfigTreeNode* parent,
-					   const ConfigNodeId& node_id,
-					   uid_t user_id,
-					   bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id,
-		     /* clientid */ 0, verbose),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
+	const string& path,
+	const TemplateTreeNode* ttn,
+	MasterConfigTreeNode* parent,
+	const ConfigNodeId& node_id,
+	uid_t user_id,
+	bool verbose)
+: ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id,
+	/* clientid */ 0, verbose),
+    _actions_pending(0),
+    _actions_succeeded(true),
+    _cmd_that_failed(NULL)
 {
 }
 
-MasterConfigTreeNode::MasterConfigTreeNode(const MasterConfigTreeNode& ctn)
-    : ConfigTreeNode(ctn),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL)
+    MasterConfigTreeNode::MasterConfigTreeNode(const MasterConfigTreeNode& ctn)
+: ConfigTreeNode(ctn),
+    _actions_pending(0),
+    _actions_succeeded(true),
+    _cmd_that_failed(NULL)
 {
 }
 
-ConfigTreeNode*
+    ConfigTreeNode*
 MasterConfigTreeNode::create_node(const string& segment, const string& path,
-				  const TemplateTreeNode* ttn,
-				  ConfigTreeNode* parent_node,
-				  const ConfigNodeId& node_id,
-				  uid_t user_id,
-				  uint32_t clientid,
-				  bool verbose)
+	const TemplateTreeNode* ttn,
+	ConfigTreeNode* parent_node,
+	const ConfigNodeId& node_id,
+	uid_t user_id,
+	uint32_t clientid,
+	bool verbose)
 {
     UNUSED(clientid);
     MasterConfigTreeNode *new_node, *parent;
@@ -84,12 +84,13 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
 	XLOG_ASSERT(parent != NULL);
 
     new_node = new MasterConfigTreeNode(segment, path, ttn, parent,
-					node_id, user_id, verbose);
+	    node_id, user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
 
-ConfigTreeNode*
-MasterConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
+    ConfigTreeNode*
+MasterConfigTreeNode::create_node(const ConfigTreeNode& ctn) 
+{
     MasterConfigTreeNode *new_node;
     const MasterConfigTreeNode *orig;
 
@@ -102,16 +103,17 @@ MasterConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
 }
 
 
-void
+    void
 MasterConfigTreeNode::command_status_callback(const Command* cmd, bool success)
 {
     debug_msg("command_status_callback node %s cmd %s\n",
-	      _segname.c_str(), cmd->str().c_str());
+	    _segname.c_str(), cmd->str().c_str());
     debug_msg("actions_pending = %d\n", _actions_pending);
 
     XLOG_ASSERT(_actions_pending > 0);
 
-    if (_actions_succeeded && (success == false)) {
+    if (_actions_succeeded && (success == false)) 
+    {
 	_actions_succeeded = false;
 	_cmd_that_failed = cmd;
     }
@@ -122,22 +124,26 @@ MasterConfigTreeNode::command_status_callback(const Command* cmd, bool success)
 void
 MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 {
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	// XXX: ignore deprecated subtrees
 	if (_template_tree_node->is_deprecated())
 	    return;
     }
 
     if ((_template_tree_node != NULL)
-	&& (!_existence_committed || !_value_committed)) {
+	    && (!_existence_committed || !_value_committed)) 
+    {
 	const BaseCommand *base_cmd = NULL;
 	const Command *cmd = NULL;
 	set<string> modules;
 	set<string>::const_iterator iter;
 
-	if (_deleted) {
+	if (_deleted) 
+	{
 	    base_cmd = _template_tree_node->const_command("%delete");
-	    if (base_cmd == NULL) {
+	    if (base_cmd == NULL) 
+	    {
 		// No need to go to children
 		return;
 	    }
@@ -149,26 +155,31 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	    return;
 	}
 
-	if (!_existence_committed) {
+	if (!_existence_committed) 
+	{
 	    if (! _template_tree_node->module_name().empty())
 		changed_modules.insert(_template_tree_node->module_name());
 	    base_cmd = _template_tree_node->const_command("%create");
-	    if (base_cmd != NULL) {
+	    if (base_cmd != NULL) 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
 	    base_cmd = _template_tree_node->const_command("%activate");
-	    if (base_cmd != NULL) {
+	    if (base_cmd != NULL) 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
-	} else if (!_value_committed) {
+	} else if (!_value_committed) 
+	{
 	    base_cmd = _template_tree_node->const_command("%set");
-	    if (base_cmd != NULL) {
+	    if (base_cmd != NULL) 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -176,7 +187,8 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	    }
 
 	    base_cmd = _template_tree_node->const_command("%get");
-	    if (base_cmd != NULL) {
+	    if (base_cmd != NULL) 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -184,7 +196,8 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 	    }
 
 	    base_cmd = _template_tree_node->const_command("%update");
-	    if (base_cmd != NULL) {
+	    if (base_cmd != NULL) 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		modules = cmd->affected_modules();
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -194,7 +207,8 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
     }
 
     list<ConfigTreeNode*>::const_iterator li;
-    for (li = _children.begin(); li != _children.end(); ++li) {
+    for (li = _children.begin(); li != _children.end(); ++li) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*li);
 	child->find_changed_modules(changed_modules);
     }
@@ -203,18 +217,21 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 void
 MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 {
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	// XXX: ignore deprecated subtrees
 	if (_template_tree_node->is_deprecated())
 	    return;
     }
 
-    if (_deleted) {
+    if (_deleted) 
+    {
 	// XXX: ignore deleted subtrees
 	return;
     }
 
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	const BaseCommand *base_cmd;
 	const Command *cmd;
 	set<string> modules;
@@ -228,28 +245,32 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 	    active_modules.insert(_template_tree_node->module_name());
 
 	base_cmd = _template_tree_node->const_command("%create");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%activate");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%update");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%set");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -257,7 +278,8 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 	}
 
 	base_cmd = _template_tree_node->const_command("%get");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -269,7 +291,8 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
     // Process the subtree
     //
     list<ConfigTreeNode*>::const_iterator li;
-    for (li = _children.begin(); li != _children.end(); ++li) {
+    for (li = _children.begin(); li != _children.end(); ++li) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*li);
 	child->find_active_modules(active_modules);
     }
@@ -278,41 +301,46 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 void
 MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 {
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	// XXX: ignore deprecated subtrees
 	if (_template_tree_node->is_deprecated())
 	    return;
     }
 
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	const BaseCommand *base_cmd = NULL;
 	const Command *cmd = NULL;
 	set<string> modules;
 	set<string>::const_iterator iter;
 
-        //
-        // XXX: If the module's top-level node is in the configuration, then
-        // the module is added to the list.
-        //
-        if (_template_tree_node->is_module_root_node())
-            all_modules.insert(_template_tree_node->module_name());
+	//
+	// XXX: If the module's top-level node is in the configuration, then
+	// the module is added to the list.
+	//
+	if (_template_tree_node->is_module_root_node())
+	    all_modules.insert(_template_tree_node->module_name());
 
 	base_cmd = _template_tree_node->const_command("%create");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%activate");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
 	base_cmd = _template_tree_node->const_command("%update");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -320,7 +348,8 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	}
 
 	base_cmd = _template_tree_node->const_command("%get");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -328,7 +357,8 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	}
 
 	base_cmd = _template_tree_node->const_command("%set");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
 	    modules = cmd->affected_modules();
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
@@ -336,13 +366,14 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	}
     }
     list<ConfigTreeNode*>::const_iterator li;
-    for (li = _children.begin(); li != _children.end(); ++li) {
+    for (li = _children.begin(); li != _children.end(); ++li) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*li);
 	child->find_all_modules(all_modules);
     }
 }
 
-void
+    void
 MasterConfigTreeNode::initialize_commit()
 {
     _actions_pending = 0;
@@ -351,48 +382,43 @@ MasterConfigTreeNode::initialize_commit()
     _sync_cmds.clear();
 
     list<ConfigTreeNode *>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+    for (iter = _children.begin(); iter != _children.end(); ++iter) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*iter);
 	child->initialize_commit();
     }
 }
 
-bool
+    bool
 MasterConfigTreeNode::children_changed()
 {
     if (_existence_committed == false || _value_committed == false)
 	return true;
     list<ConfigTreeNode *>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+    for (iter = _children.begin(); iter != _children.end(); ++iter) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*iter);
-	if (child->children_changed()) {
+	if (child->children_changed()) 
+	{
 	    return true;
 	}
     }
     return false;
 }
 
-bool
+    bool
 MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
-				     bool do_commit,
-				     int depth, int last_depth,
-				     string& error_msg,
-				     bool& needs_activate,
-				     bool& needs_update)
+	bool do_commit,
+	int depth, int last_depth,
+	string& error_msg,
+	bool& needs_activate,
+	bool& needs_update)
 {
     bool success = true;
     const BaseCommand *base_cmd = NULL;
     const Command *cmd = NULL;
     bool changes_made = false;
 
-    //if (do_commit) {
-    //XLOG_INFO("*****COMMIT CHANGES node >%s< >%s<, do_commit: %i"
-    //	  "  existence_committed: %i  value_committed: %i "
-    //	  " children_changed: %i\n",
-    //	  _path.c_str(), _value.c_str(), (int)(do_commit),
-    //	  (int)(_existence_committed), (int)(_value_committed),
-    //	  (int)(children_changed()));
-    //}
     if (do_commit)
 	debug_msg("do_commit\n");
     if (_existence_committed == false)
@@ -400,7 +426,8 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     if (_value_committed == false)
 	debug_msg("_value_committed == false\n");
 
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	// XXX: ignore deprecated subtrees
 	if (_template_tree_node->is_deprecated())
 	    return success;
@@ -409,36 +436,45 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     // Don't bother to recurse if no child node has any changes to commit.
     // Calling this every time is rather inefficient, but for the
     // scales we're talking about, it's not a big deal.
-    if (children_changed() == false) {
+    if (children_changed() == false) 
+    {
 	debug_msg("No children changed\n");
 	return success;
-    } else {
+    } else 
+    {
 	debug_msg("Children have changed\n");
     }
 
 
     // The root node has a NULL template
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	// Do we have to start any modules to implement this functionality
 	base_cmd = _template_tree_node->const_command("%modinfo");
 	const ModuleCommand* modcmd
 	    = dynamic_cast<const ModuleCommand*>(base_cmd);
-	if (modcmd != NULL) {
-	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
+	if (modcmd != NULL) 
+	{
+	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) 
+	    {
 		error_msg = c_format("Start Transaction failed for "
-				     "module %s\n",
-				     modcmd->module_name().c_str());
+			"module %s\n",
+			modcmd->module_name().c_str());
 		return false;
 	    }
 	}
-	if ((_existence_committed == false || _value_committed == false)) {
+	if ((_existence_committed == false || _value_committed == false)) 
+	{
 	    debug_msg("we have changes to handle\n");
 	    // First handle deletions
-	    if (_deleted) {
-		if (do_commit == false) {
+	    if (_deleted) 
+	    {
+		if (do_commit == false) 
+		{
 		    // No point in checking further
 		    return true;
-		} else {
+		} else 
+		{
 		    //
 		    // We expect a deleted node here to have previously
 		    // had its existence committed.
@@ -449,15 +485,17 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    XLOG_ASSERT(_existence_committed);
 		    XLOG_ASSERT(!_value_committed);
 		    base_cmd = _template_tree_node->const_command("%delete");
-		    if (base_cmd != NULL) {
+		    if (base_cmd != NULL) 
+		    {
 			cmd = reinterpret_cast<const Command*>(base_cmd);
 			int actions = cmd->execute(*this, task_manager);
-			if (actions < 0) {
+			if (actions < 0) 
+			{
 			    // Bad stuff happenned
 			    // XXX now what?
 			    error_msg = "Something went wrong.\n";
 			    error_msg += c_format("The problem was with \"%s\"\n",
-						  path().c_str());
+				    path().c_str());
 			    error_msg += "WARNING: Partially commited changes exist\n";
 			    XLOG_WARNING("%s\n", error_msg.c_str());
 			    return false;
@@ -467,23 +505,27 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			return true;
 		    }
 		}
-	    } else {
+	    } else 
+	    {
 		// Check any %allow commands that might prevent us
 		// going any further
 		base_cmd = _template_tree_node->const_command("%allow");
-		if (base_cmd == NULL) {
+		if (base_cmd == NULL) 
+		{
 		    // Try allow-range
 		    base_cmd
 			= _template_tree_node->const_command("%allow-range");
 		}
-		if (base_cmd != NULL) {
+		if (base_cmd != NULL) 
+		{
 		    const AllowCommand* allow_cmd;
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
 		    debug_msg("found ALLOW command: %s\n",
-			      allow_cmd->str().c_str());
+			    allow_cmd->str().c_str());
 		    if (allow_cmd->verify_variables(*this, error_msg)
-			!= true) {
+			    != true) 
+		    {
 			//
 			// Commit_changes should always be run first
 			// with do_commit not set, so there can be no
@@ -491,8 +533,8 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			//
 			// XLOG_ASSERT(do_commit == false);
 			error_msg = c_format("Bad value for \"%s\": %s; ",
-					     path().c_str(),
-					     error_msg.c_str());
+				path().c_str(),
+				error_msg.c_str());
 			error_msg += "No changes have been committed. ";
 			error_msg += "Correct this error and try again.";
 			XLOG_WARNING("%s\n", error_msg.c_str());
@@ -502,30 +544,34 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		// Check that the operator is OK
 		base_cmd =
 		    _template_tree_node->const_command("%allow-operator");
-		if (base_cmd == NULL) {
+		if (base_cmd == NULL) 
+		{
 		    /* no explicit command, so only ":" is allowed */
-		    if (_operator != OP_NONE && _operator != OP_ASSIGN) {
+		    if (_operator != OP_NONE && _operator != OP_ASSIGN) 
+		    {
 			error_msg = c_format("Bad operator for \"%s\": "
-					     "operator %s was specified, "
-					     "only ':' is allowed\n",
-					     path().c_str(),
-					     operator_to_str(_operator).c_str());
+				"operator %s was specified, "
+				"only ':' is allowed\n",
+				path().c_str(),
+				operator_to_str(_operator).c_str());
 			error_msg += "No changes have been committed. ";
 			error_msg += "Correct this error and try again.";
 			XLOG_WARNING("%s\n", error_msg.c_str());
 			return false;
 		    }
-		} else {
+		} else 
+		{
 		    const AllowCommand* allow_cmd;
 		    debug_msg("found ALLOW command: %s\n",
-			      cmd->str().c_str());
+			    cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
 		    if (allow_cmd->verify_variables(*this, error_msg)
-			!= true) {
+			    != true) 
+		    {
 			error_msg = c_format("Bad operator for \"%s\": %s; ",
-					     path().c_str(),
-					     error_msg.c_str());
+				path().c_str(),
+				error_msg.c_str());
 			error_msg += "No changes have been committed. ";
 			error_msg += "Correct this error and try again.";
 			XLOG_WARNING("%s\n", error_msg.c_str());
@@ -543,16 +589,19 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    base_cmd = _template_tree_node->const_command("%create");
 		if (base_cmd == NULL)
 		    base_cmd = _template_tree_node->const_command("%set");
-		if (base_cmd == NULL) {
+		if (base_cmd == NULL) 
+		{
 		    debug_msg("no appropriate command found\n");
-		} else {
+		} else 
+		{
 		    cmd = reinterpret_cast<const Command*>(base_cmd);
 		    debug_msg("found commands: %s\n",
-			      cmd->str().c_str());
+			    cmd->str().c_str());
 		    int actions = cmd->execute(*this, task_manager);
-		    if (actions < 0) {
+		    if (actions < 0) 
+		    {
 			error_msg = c_format("Parameter error for \"%s\"\n",
-					     path().c_str());
+				path().c_str());
 			error_msg += "No changes have been committed.\n";
 			error_msg += "Correct this error and try again.\n";
 			XLOG_WARNING("%s\n", error_msg.c_str());
@@ -571,19 +620,21 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     iter = sorted_children.begin();
     if (changes_made)
 	last_depth = depth;
-    while (iter != sorted_children.end()) {
+    while (iter != sorted_children.end()) 
+    {
 	prev_iter = iter;
 	++iter;
 	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
 	string child_error_msg;
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*prev_iter);
 	success = child->commit_changes(task_manager, do_commit,
-					depth + 1, last_depth,
-					child_error_msg,
-					needs_activate,
-					needs_update);
+		depth + 1, last_depth,
+		child_error_msg,
+		needs_activate,
+		needs_update);
 	error_msg += child_error_msg;
-	if (success == false) {
+	if (success == false) 
+	{
 	    return false;
 	}
     }
@@ -591,16 +642,19 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     //
     // Take care of %activate and %update commands on the way back out.
     //
-    do {
+    do 
+    {
 	if (_deleted)
 	    break;
 	if (_template_tree_node == NULL)
 	    break;
 
 	// The %get command
-	if (_value_committed == false) {
+	if (_value_committed == false) 
+	{
 	    base_cmd = _template_tree_node->const_command("%get");
-	    if (base_cmd) {
+	    if (base_cmd) 
+	    {
 		debug_msg("found commands: %s. Adding it to sync map\n", cmd->str().c_str());
 		MasterConfigTreeNode* module_root = dynamic_cast<MasterConfigTreeNode*>(this->module_root_node());
 		XLOG_ASSERT(module_root);
@@ -610,19 +664,23 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	}
 
 	// The %activate command
-	if (needs_activate || (_existence_committed == false)) {
+	if (needs_activate || (_existence_committed == false)) 
+	{
 	    base_cmd = _template_tree_node->const_command("%activate");
-	    if (base_cmd == NULL) {
+	    if (base_cmd == NULL) 
+	    {
 		if (_existence_committed == false)
 		    needs_activate = true;
-	    } else {
+	    } else 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		debug_msg("found commands: %s\n", cmd->str().c_str());
 		needs_activate = false;
 		int actions = cmd->execute(*this, task_manager);
-		if (actions < 0) {
+		if (actions < 0) 
+		{
 		    error_msg = c_format("Parameter error for \"%s\"\n",
-					 path().c_str());
+			    path().c_str());
 		    error_msg += "No changes have been committed.\n";
 		    error_msg += "Correct this error and try again.\n";
 		    XLOG_WARNING("%s\n", error_msg.c_str());
@@ -634,19 +692,23 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	}
 
 	// The %update command
-	if (needs_update || (_value_committed == false)) {
+	if (needs_update || (_value_committed == false)) 
+	{
 	    base_cmd = _template_tree_node->const_command("%update");
-	    if (base_cmd == NULL) {
+	    if (base_cmd == NULL) 
+	    {
 		if (_value_committed == false)
 		    needs_update = true;
-	    } else {
+	    } else 
+	    {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		debug_msg("found commands: %s\n", cmd->str().c_str());
 		needs_update = false;
 		int actions = cmd->execute(*this, task_manager);
-		if (actions < 0) {
+		if (actions < 0) 
+		{
 		    error_msg = c_format("Parameter error for \"%s\"\n",
-					 path().c_str());
+			    path().c_str());
 		    error_msg += "No changes have been committed.\n";
 		    error_msg += "Correct this error and try again.\n";
 		    XLOG_WARNING("%s\n", error_msg.c_str());
@@ -660,15 +722,19 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	break;
     } while (false);
 
-    if (_template_tree_node != NULL) {
+    if (_template_tree_node != NULL) 
+    {
 	base_cmd = _template_tree_node->const_command("%modinfo");
-	if (base_cmd != NULL) {
+	if (base_cmd != NULL) 
+	{
 	    const ModuleCommand* modcmd
 		= dynamic_cast<const ModuleCommand*>(base_cmd);
-	    if (modcmd != NULL) {
-		if (modcmd->end_transaction(*this, task_manager) != XORP_OK) {
+	    if (modcmd != NULL) 
+	    {
+		if (modcmd->end_transaction(*this, task_manager) != XORP_OK) 
+		{
 		    error_msg = c_format("End Transaction failed for module %s\n",
-					 modcmd->module_name().c_str());
+			    modcmd->module_name().c_str());
 		    return false;
 		}
 	    }
@@ -683,12 +749,6 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	}
     }
 
-    //if (do_commit) {
-    //    if (error_msg.size())
-    //        XLOG_INFO("Result: %s\n", error_msg.c_str());
-    //    XLOG_INFO("COMMIT, leaving node >%s<, segname: %s  actions_pending: %d\n",
-    //	  _path.c_str(), _segname.c_str(), _actions_pending);
-    //}
 
     return success;
 }
@@ -697,23 +757,27 @@ bool
 MasterConfigTreeNode::check_commit_status(string& error_msg) const
 {
     debug_msg("ConfigTreeNode::check_commit_status %s\n",
-	      _segname.c_str());
+	    _segname.c_str());
 
-    if ((_existence_committed == false) || (_value_committed == false)) {
+    if ((_existence_committed == false) || (_value_committed == false)) 
+    {
 	XLOG_ASSERT(_actions_pending == 0);
-	if (_actions_succeeded == false) {
+	if (_actions_succeeded == false) 
+	{
 	    error_msg = "WARNING: Commit Failed\n";
 	    error_msg += c_format("  Error in %s command for %s\n",
-				  _cmd_that_failed->str().c_str(),
-				  _path.c_str());
+		    _cmd_that_failed->str().c_str(),
+		    _path.c_str());
 	    error_msg += c_format("  State may be partially committed - "
-				  "suggest reverting to previous state\n");
+		    "suggest reverting to previous state\n");
 	    return false;
 	}
-	if (_deleted) {
+	if (_deleted) 
+	{
 	    const BaseCommand* cmd
 		= _template_tree_node->const_command("%delete");
-	    if (cmd != NULL) {
+	    if (cmd != NULL) 
+	    {
 		//
 		// No need to check the children if we succeeded in
 		// deleting this node.
@@ -725,7 +789,8 @@ MasterConfigTreeNode::check_commit_status(string& error_msg) const
 
     list<ConfigTreeNode *>::const_iterator iter;
     bool result = true;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+    for (iter = _children.begin(); iter != _children.end(); ++iter) 
+    {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*iter);
 	debug_msg("  child: %s\n", child->path().c_str());
 	result = child->check_commit_status(error_msg);
@@ -736,13 +801,14 @@ MasterConfigTreeNode::check_commit_status(string& error_msg) const
     return result;
 }
 
-void
+    void
 MasterConfigTreeNode::finalize_commit()
 {
     debug_msg("MasterConfigTreeNode::finalize_commit %s\n",
-	      _segname.c_str());
+	    _segname.c_str());
 
-    if (_deleted) {
+    if (_deleted) 
+    {
 	debug_msg("node deleted\n");
 
 	//
@@ -757,7 +823,8 @@ MasterConfigTreeNode::finalize_commit()
 	// No point in going further
 	return;
     }
-    if ((_existence_committed == false) || (_value_committed == false)) {
+    if ((_existence_committed == false) || (_value_committed == false)) 
+    {
 	debug_msg("node finalized\n");
 
 	XLOG_ASSERT(_actions_pending == 0);
@@ -778,7 +845,8 @@ MasterConfigTreeNode::finalize_commit()
     //
     list<ConfigTreeNode *>::iterator iter, prev_iter;
     iter = _children.begin();
-    while (iter != _children.end()) {
+    while (iter != _children.end()) 
+    {
 	prev_iter = iter;
 	++iter;
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*prev_iter);
@@ -786,7 +854,7 @@ MasterConfigTreeNode::finalize_commit()
     }
 }
 
-void
+    void
 MasterConfigTreeNode::increment_actions_pending(const int increment = 1)
 {
     XLOG_ASSERT(increment >= 0);
@@ -794,7 +862,7 @@ MasterConfigTreeNode::increment_actions_pending(const int increment = 1)
 }
 
 
-void
+    void
 MasterConfigTreeNode::add_sync_cmd(MasterConfigTreeNode* node, const Command* cmd)
 {
     /**
@@ -808,15 +876,17 @@ MasterConfigTreeNode::add_sync_cmd(MasterConfigTreeNode* node, const Command* cm
     _sync_cmds[node] = cmd;
 }
 
-bool
+    bool
 MasterConfigTreeNode::sync(TaskManager& task_manager)
 {
     XLOG_ASSERT(this == module_root_node());
     map<MasterConfigTreeNode*, const Command*>::iterator iter;
 
-    for (iter = _sync_cmds.begin(); iter != _sync_cmds.end(); ++iter) {
+    for (iter = _sync_cmds.begin(); iter != _sync_cmds.end(); ++iter) 
+    {
 	int ret = iter->second->execute(*(iter->first), task_manager);
-	if (ret < 0) {
+	if (ret < 0) 
+	{
 	    string error_msg;
 	    error_msg = c_format("Parameter error for \"%s\"\n",
 		    iter->first->path().c_str());

@@ -30,49 +30,50 @@
 
 
 class IfConfigGetClick : public IfConfigGet,
-			 public ClickSocket {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager);
+	public ClickSocket 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigGetClick();
-    
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigGetClick();
 
-    /**
-     * Pull the network interface information from the underlying system.
-     * 
-     * @param iftree the IfTree storage to store the pulled information.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int pull_config(const IfTree* local_config, IfTree& iftree);
-    
-private:
-    int read_config(IfTree& iftree);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    ClickSocketReader	_cs_reader;
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
+
+		/**
+		 * Pull the network interface information from the underlying system.
+		 * 
+		 * @param iftree the IfTree storage to store the pulled information.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int pull_config(const IfTree* local_config, IfTree& iftree);
+
+	private:
+		int read_config(IfTree& iftree);
+
+		ClickSocketReader	_cs_reader;
 };
 
 #endif // click

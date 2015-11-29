@@ -29,35 +29,37 @@
 #include "policy/backend/policytags.hh"
 
 template <typename A>
-class OspfVarRW : public SingleVarRW {
- public:
-    enum {
-	VAR_NETWORK = VAR_PROTOCOL,
-	VAR_NEXTHOP,
-	VAR_METRIC,
-	VAR_EBIT,
-    };
+class OspfVarRW : public SingleVarRW 
+{
+    public:
+	enum 
+	{
+	    VAR_NETWORK = VAR_PROTOCOL,
+	    VAR_NEXTHOP,
+	    VAR_METRIC,
+	    VAR_EBIT,
+	};
 
-    OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric, bool& e_bit,
-	      uint32_t& tag, bool& tag_set, PolicyTags& policytags);
+	OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric, bool& e_bit,
+		uint32_t& tag, bool& tag_set, PolicyTags& policytags);
 
-    // SingleVarRW inteface:
-    void	start_read();
-    Element*	single_read(const Id& id);
-    void	single_write(const Id& id, const Element& e);
+	// SingleVarRW inteface:
+	void	start_read();
+	Element*	single_read(const Id& id);
+	void	single_write(const Id& id, const Element& e);
 
- private:
-    void start_read_common();
-    void single_write_common(const Id& id, const Element& e);
+    private:
+	void start_read_common();
+	void single_write_common(const Id& id, const Element& e);
 
-    IPNet<A>&	    _network;
-    A&		    _nexthop;
-    uint32_t&	    _metric;
-    bool&	    _e_bit;
-    uint32_t&	    _tag;
-    bool&	    _tag_set;
-    PolicyTags&	    _policytags;
-    ElementFactory  _ef;
+	IPNet<A>&	    _network;
+	A&		    _nexthop;
+	uint32_t&	    _metric;
+	bool&	    _e_bit;
+	uint32_t&	    _tag;
+	bool&	    _tag_set;
+	PolicyTags&	    _policytags;
+	ElementFactory  _ef;
 };
 
 #endif // __OSPF_POLICY_VARRRW_HH__

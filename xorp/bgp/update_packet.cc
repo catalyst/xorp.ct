@@ -31,260 +31,271 @@
 #include "packet.hh"
 #include "peer.hh"
 
-void
+	void
 dump_bytes(const uint8_t *d, size_t l)
 {
-        printf("DEBUG_BYTES FN : %p %u\n", d, XORP_UINT_CAST(l));
+	printf("DEBUG_BYTES FN : %p %u\n", d, XORP_UINT_CAST(l));
 	for (u_int i=0;i<l;i++)
-	    printf("%x ",*((const char *)d + i));
+		printf("%x ",*((const char *)d + i));
 	printf("\n");
 }
 
 /* **************** UpdatePacket *********************** */
 
-UpdatePacket::UpdatePacket()
-    : _pa_list(new FastPathAttributeList<IPv4>())
+	UpdatePacket::UpdatePacket()
+: _pa_list(new FastPathAttributeList<IPv4>())
 {
-    _Type = MESSAGETYPEUPDATE;
+	_Type = MESSAGETYPEUPDATE;
 }
 
 UpdatePacket::~UpdatePacket()
 {
 }
 
-void
+	void
 UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
 {
-    _nlri_list.push_back(nlri);
+	_nlri_list.push_back(nlri);
 }
 
-void
+	void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
-    _pa_list->add_path_attribute(pa);
+	_pa_list->add_path_attribute(pa);
 }
 
-void
+	void
 UpdatePacket::add_pathatt(PathAttribute *pa)
 {
-    _pa_list->add_path_attribute(pa);
+	_pa_list->add_path_attribute(pa);
 }
 
-void
+	void
 UpdatePacket::replace_pathattribute_list(FPAList4Ref& pa_list)
 {
-    _pa_list = pa_list;
+	_pa_list = pa_list;
 }
 
 
-void
+	void
 UpdatePacket::add_withdrawn(const BGPUpdateAttrib& wdr)
 {
-    _wr_list.push_back(wdr);
+	_wr_list.push_back(wdr);
 }
 
 bool 
 UpdatePacket::big_enough() const
 {
-    /* is the packet now large enough that we'd be best to send the
-       part we already have before it exceeds the 4K size limit? */
-    //XXXX needs additional tests for v6
+	/* is the packet now large enough that we'd be best to send the
+	   part we already have before it exceeds the 4K size limit? */
+	//XXXX needs additional tests for v6
 
-    //quick and dirty check
-    if (((_wr_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %u\n", XORP_UINT_CAST(_wr_list.size()));
-	debug_msg("nlri size = %u\n", XORP_UINT_CAST(_wr_list.size()));
-	return true;
-    }
-    return false;
+	//quick and dirty check
+	if (((_wr_list.size() + _nlri_list.size())* 4) > 2048) 
+	{
+		debug_msg("withdrawn size = %u\n", XORP_UINT_CAST(_wr_list.size()));
+		debug_msg("nlri size = %u\n", XORP_UINT_CAST(_wr_list.size()));
+		return true;
+	}
+	return false;
 }
 
 bool
 UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
 {
-    XLOG_ASSERT( (_nlri_list.empty()) ||  !(_pa_list->is_empty()) );
-    XLOG_ASSERT(d != 0);
-    XLOG_ASSERT(len != 0);
-    debug_msg("UpdatePacket::encode: len=%u\n", (uint32_t)len);
+	XLOG_ASSERT( (_nlri_list.empty()) ||  !(_pa_list->is_empty()) );
+	XLOG_ASSERT(d != 0);
+	XLOG_ASSERT(len != 0);
+	debug_msg("UpdatePacket::encode: len=%u\n", (uint32_t)len);
 
-    size_t i, pa_len = 0;
-    size_t wr_len = wr_list().wire_size();
-    size_t nlri_len = nlri_list().wire_size();
+	size_t i, pa_len = 0;
+	size_t wr_len = wr_list().wire_size();
+	size_t nlri_len = nlri_list().wire_size();
 
-    // compute packet length
-    pa_len = BGPPacket::MAXPACKETSIZE;
-    uint8_t pa_list_buf[pa_len];
-    if (_pa_list->is_empty() ) {
-	pa_len = 0;
-    } else {
-	if (_pa_list->encode(pa_list_buf, pa_len, peerdata) == false) {
-	    XLOG_WARNING("failed to encode update - no space for pa list\n");
-	    return false;
+	// compute packet length
+	pa_len = BGPPacket::MAXPACKETSIZE;
+	uint8_t pa_list_buf[pa_len];
+	if (_pa_list->is_empty() ) 
+	{
+		pa_len = 0;
+	} else 
+	{
+		if (_pa_list->encode(pa_list_buf, pa_len, peerdata) == false) 
+		{
+			XLOG_WARNING("failed to encode update - no space for pa list\n");
+			return false;
+		}
 	}
-    }
 
 
-    size_t desired_len = BGPPacket::MINUPDATEPACKET + wr_len + pa_len
-	+ nlri_len;
-    if (len < desired_len) {
-	abort(); ///XXXX
-	XLOG_WARNING("failed to encode update, desired_len=%u, len=%u, wr=%u, pa=%u, nlri=%u\n",
-		     (uint32_t)desired_len, (uint32_t)len, 
-		     (uint32_t)wr_len, (uint32_t)pa_len, (uint32_t)nlri_len);
-	return false;
-    }
+	size_t desired_len = BGPPacket::MINUPDATEPACKET + wr_len + pa_len
+		+ nlri_len;
+	if (len < desired_len) 
+	{
+		abort(); ///XXXX
+		XLOG_WARNING("failed to encode update, desired_len=%u, len=%u, wr=%u, pa=%u, nlri=%u\n",
+				(uint32_t)desired_len, (uint32_t)len, 
+				(uint32_t)wr_len, (uint32_t)pa_len, (uint32_t)nlri_len);
+		return false;
+	}
 
-    len = desired_len;
+	len = desired_len;
 
-    if (len > BGPPacket::MAXPACKETSIZE)		// XXX
-	XLOG_FATAL("Attempt to encode a packet that is too big");
+	if (len > BGPPacket::MAXPACKETSIZE)		// XXX
+		XLOG_FATAL("Attempt to encode a packet that is too big");
 
-    debug_msg("Withdrawn Routes: %u Net Reach: %u length: %u\n",
-	      XORP_UINT_CAST(_wr_list.size()),
-	      XORP_UINT_CAST(_nlri_list.size()),
-	      XORP_UINT_CAST(len));
-    d = basic_encode(len, d);	// allocate buffer and fill header
+	debug_msg("Withdrawn Routes: %u Net Reach: %u length: %u\n",
+			XORP_UINT_CAST(_wr_list.size()),
+			XORP_UINT_CAST(_nlri_list.size()),
+			XORP_UINT_CAST(len));
+	d = basic_encode(len, d);	// allocate buffer and fill header
 
-    // fill withdraw list length (bytes)
-    d[BGPPacket::COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
-    d[BGPPacket::COMMON_HEADER_LEN + 1] = wr_len & 0xff;
+	// fill withdraw list length (bytes)
+	d[BGPPacket::COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
+	d[BGPPacket::COMMON_HEADER_LEN + 1] = wr_len & 0xff;
 
-    // fill withdraw list
-    i = BGPPacket::COMMON_HEADER_LEN + 2;
-    wr_list().encode(wr_len, d + i);
-    i += wr_len;
+	// fill withdraw list
+	i = BGPPacket::COMMON_HEADER_LEN + 2;
+	wr_list().encode(wr_len, d + i);
+	i += wr_len;
 
-    // fill pathattribute length (bytes)
-    d[i++] = (pa_len >> 8) & 0xff;
-    d[i++] = pa_len & 0xff;
+	// fill pathattribute length (bytes)
+	d[i++] = (pa_len >> 8) & 0xff;
+	d[i++] = pa_len & 0xff;
 
-    memcpy(d+i, pa_list_buf, pa_len);
-    i += pa_len;
+	memcpy(d+i, pa_list_buf, pa_len);
+	i += pa_len;
 
-    // fill NLRI list
-    nlri_list().encode(nlri_len, d+i);
-    i += nlri_len;
-    return true;
+	// fill NLRI list
+	nlri_list().encode(nlri_len, d+i);
+	i += nlri_len;
+	return true;
 }
 
 UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l, 
-			   const BGPPeerData* peerdata,
-			   BGPMain *mainprocess,
-			   bool do_checks) throw(CorruptMessage,UnusableMessage)
+		const BGPPeerData* peerdata,
+		BGPMain *mainprocess,
+		bool do_checks) throw(CorruptMessage,UnusableMessage)
 {
-    debug_msg("UpdatePacket constructor called\n");
-    _Type = MESSAGETYPEUPDATE;
-    if (l < BGPPacket::MINUPDATEPACKET)
-	xorp_throw(CorruptMessage,
-		   c_format("Update Message too short %d", l),
-		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
-    d += BGPPacket::COMMON_HEADER_LEN;		// move past header
-    size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
-    if (BGPPacket::MINUPDATEPACKET + wr_len > l)
-	xorp_throw(CorruptMessage,
-		   c_format("Unreachable routes length is bogus %u > %u",
-			    XORP_UINT_CAST(wr_len),
-			    XORP_UINT_CAST(l - BGPPacket::MINUPDATEPACKET)),
-		   UPDATEMSGERR, MALATTRLIST);
-    
-    size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
-    if (BGPPacket::MINUPDATEPACKET + pa_len + wr_len > l)
-	xorp_throw(CorruptMessage,
-		   c_format("Pathattr length is bogus %u > %u",
-			    XORP_UINT_CAST(pa_len),
-			    XORP_UINT_CAST(l - wr_len - BGPPacket::MINUPDATEPACKET)),
-		UPDATEMSGERR, MALATTRLIST);
+	debug_msg("UpdatePacket constructor called\n");
+	_Type = MESSAGETYPEUPDATE;
+	if (l < BGPPacket::MINUPDATEPACKET)
+		xorp_throw(CorruptMessage,
+				c_format("Update Message too short %d", l),
+				MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
+	d += BGPPacket::COMMON_HEADER_LEN;		// move past header
+	size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
+	if (BGPPacket::MINUPDATEPACKET + wr_len > l)
+		xorp_throw(CorruptMessage,
+				c_format("Unreachable routes length is bogus %u > %u",
+					XORP_UINT_CAST(wr_len),
+					XORP_UINT_CAST(l - BGPPacket::MINUPDATEPACKET)),
+				UPDATEMSGERR, MALATTRLIST);
 
-    size_t nlri_len = l - BGPPacket::MINUPDATEPACKET - pa_len - wr_len;
+	size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
+	if (BGPPacket::MINUPDATEPACKET + pa_len + wr_len > l)
+		xorp_throw(CorruptMessage,
+				c_format("Pathattr length is bogus %u > %u",
+					XORP_UINT_CAST(pa_len),
+					XORP_UINT_CAST(l - wr_len - BGPPacket::MINUPDATEPACKET)),
+				UPDATEMSGERR, MALATTRLIST);
 
-    // Start of decoding of withdrawn routes.
-    d += 2;	// point to the routes.
-    _wr_list.decode(d, wr_len);
-    d += wr_len;
+	size_t nlri_len = l - BGPPacket::MINUPDATEPACKET - pa_len - wr_len;
 
-    // Start of decoding of Path Attributes
-    d += 2; // move past Total Path Attributes Length field
+	// Start of decoding of withdrawn routes.
+	d += 2;	// point to the routes.
+	_wr_list.decode(d, wr_len);
+	d += wr_len;
 
-    size_t used = pa_len;
-    _pa_list = new FastPathAttributeList<IPv4>();
-    _pa_list->load_raw_data(d, used, peerdata, 
-			    (nlri_len > 0), mainprocess, do_checks);
-    d += used;
+	// Start of decoding of Path Attributes
+	d += 2; // move past Total Path Attributes Length field
 
-    // Start of decoding of Network Reachability
-    _nlri_list.decode(d, nlri_len);
-    /* End of decoding of Network Reachability */
-    debug_msg("No of withdrawn routes %u. "
-	      "No of networks %u.\n",
-	      XORP_UINT_CAST(_wr_list.size()),
-	      XORP_UINT_CAST(_nlri_list.size()));
+	size_t used = pa_len;
+	_pa_list = new FastPathAttributeList<IPv4>();
+	_pa_list->load_raw_data(d, used, peerdata, 
+			(nlri_len > 0), mainprocess, do_checks);
+	d += used;
+
+	// Start of decoding of Network Reachability
+	_nlri_list.decode(d, nlri_len);
+	/* End of decoding of Network Reachability */
+	debug_msg("No of withdrawn routes %u. "
+			"No of networks %u.\n",
+			XORP_UINT_CAST(_wr_list.size()),
+			XORP_UINT_CAST(_nlri_list.size()));
 }
 
 string
 UpdatePacket::str() const
 {
-    string s = "Update Packet\n";
-    debug_msg("No of withdrawn routes %u. "
-		"No of networks %u.\n",
-	      XORP_UINT_CAST(_wr_list.size()),
-	      XORP_UINT_CAST(_nlri_list.size()));
+	string s = "Update Packet\n";
+	debug_msg("No of withdrawn routes %u. "
+			"No of networks %u.\n",
+			XORP_UINT_CAST(_wr_list.size()),
+			XORP_UINT_CAST(_nlri_list.size()));
 
-    if (!_wr_list.empty())
-	s += _wr_list.str("Withdrawn");
+	if (!_wr_list.empty())
+		s += _wr_list.str("Withdrawn");
 
-    if (!_pa_list->is_empty()) {
-	s += _pa_list->str();
-	s += "\n";
-    }
-    
-    s += _nlri_list.str("Nlri");
-    return s;
+	if (!_pa_list->is_empty()) 
+	{
+		s += _pa_list->str();
+		s += "\n";
+	}
+
+	s += _nlri_list.str("Nlri");
+	return s;
 }
 
 /*
  * Helper function used when sorting Path Attribute lists.
  */
 inline
-bool
+	bool
 compare_path_attributes(PathAttribute *a, PathAttribute *b)
 {
-    return *a < *b;
+	return *a < *b;
 }
 
 bool 
 UpdatePacket::operator==(const UpdatePacket& him) const 
 {
-    debug_msg("compare %s and %s", this->str().c_str(), him.str().c_str());
+	debug_msg("compare %s and %s", this->str().c_str(), him.str().c_str());
 
-    if (_wr_list != him.wr_list())
-	return false;
+	if (_wr_list != him.wr_list())
+		return false;
 
 
-    bool him_empty = him._pa_list->is_empty();
-    bool me_empty = _pa_list->is_empty();
+	bool him_empty = him._pa_list->is_empty();
+	bool me_empty = _pa_list->is_empty();
 
-    if (me_empty) {
-	if (!him_empty) {
-	    return false;
+	if (me_empty) 
+	{
+		if (!him_empty) 
+		{
+			return false;
+		}
+	} else 
+	{
+		int count = 0;
+		for (int i=0; i < MAX_ATTRIBUTE; i++)
+			if (_pa_list->find_attribute_by_type((PathAttType)i) != 0) 
+				count++;
+		if (him_empty) 
+		{
+			return false;
+		}
+
+		if ( !(*_pa_list == *(him._pa_list)) ) 
+		{
+			return false;
+		}
 	}
-    } else {
-	int count = 0;
-	for (int i=0; i < MAX_ATTRIBUTE; i++)
-	    if (_pa_list->find_attribute_by_type((PathAttType)i) != 0) 
-		count++;
-	if (him_empty) {
-            return false;
-	}
- 
-	if ( !(*_pa_list == *(him._pa_list)) ) {
-	    return false;
-	}
-    }
 
-    //net layer reachability equals
-    if (_nlri_list != him.nlri_list())
-	return false;
+	//net layer reachability equals
+	if (_nlri_list != him.nlri_list())
+		return false;
 
-    return true;
+	return true;
 }
 

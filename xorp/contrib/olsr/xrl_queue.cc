@@ -46,16 +46,16 @@
 #include "libxipc/xrl_router.hh"
 #include "xrl_queue.hh"
 
-XrlQueue::XrlQueue( XrlRouter& xrl_router)
-    : _io(0),  _xrl_router(xrl_router), _flying(0)
+    XrlQueue::XrlQueue( XrlRouter& xrl_router)
+: _io(0),  _xrl_router(xrl_router), _flying(0)
 {
 }
 
 
-void
+    void
 XrlQueue::queue_add_route(string ribname, const IPv4Net& net,
-			  const IPv4& nexthop, uint32_t nexthop_id,
-			  uint32_t metric, const PolicyTags& policytags)
+	const IPv4& nexthop, uint32_t nexthop_id,
+	uint32_t metric, const PolicyTags& policytags)
 {
     Queued q;
 
@@ -67,9 +67,9 @@ XrlQueue::queue_add_route(string ribname, const IPv4Net& net,
     q.metric = metric;
     q.comment =
 	c_format("add_route: ribname %s net %s nexthop %s",
-		 ribname.c_str(),
-		 cstring(net),
-		 cstring(nexthop));
+		ribname.c_str(),
+		cstring(net),
+		cstring(nexthop));
     q.policytags = policytags;
 
     _xrl_queue.push_back(q);
@@ -77,7 +77,7 @@ XrlQueue::queue_add_route(string ribname, const IPv4Net& net,
     start();
 }
 
-void
+    void
 XrlQueue::queue_delete_route(string ribname, const IPv4Net& net)
 {
     Queued q;
@@ -86,21 +86,21 @@ XrlQueue::queue_delete_route(string ribname, const IPv4Net& net)
     q.ribname = ribname;
     q.net = net;
     q.comment = c_format("delete_route: ribname %s net %s",
-			 ribname.c_str(),
-			 cstring(net));
+	    ribname.c_str(),
+	    cstring(net));
 
     _xrl_queue.push_back(q);
 
     start();
 }
 
-bool
+    bool
 XrlQueue::busy()
 {
     return 0 != _flying;
 }
 
-void
+    void
 XrlQueue::start()
 {
     if (maximum_number_inflight())
@@ -108,14 +108,13 @@ XrlQueue::start()
 
     // Now there are no outstanding XRLs try and send as many of the queued
     // route commands as possible as possible.
-    for (;;) {
+    for (;;) 
+    {
 	debug_msg("queue length %u\n", XORP_UINT_CAST(_xrl_queue.size()));
 
-	if (_xrl_queue.empty()) {
+	if (_xrl_queue.empty()) 
+	{
 	    debug_msg("Output no longer busy\n");
-#if	0
-	    _rib_ipc_handler.output_no_longer_busy();
-#endif
 	    return;
 	}
 
@@ -130,7 +129,8 @@ XrlQueue::start()
 	const char *protocol = "olsr";
 	bool sent = sendit_spec(q, protocol);
 
-	if (sent) {
+	if (sent) 
+	{
 	    _flying++;
 	    _xrl_queue.pop_front();
 	    if (maximum_number_inflight())
@@ -151,7 +151,7 @@ XrlQueue::start()
     }
 }
 
-bool
+    bool
 XrlQueue::sendit_spec(Queued& q, const char* protocol)
 {
     bool sent;
@@ -160,76 +160,79 @@ XrlQueue::sendit_spec(Queued& q, const char* protocol)
 
     XrlRibV0p1Client rib(&_xrl_router);
 
-    if (q.add) {
+    if (q.add) 
+    {
 	debug_msg("adding route from %s peer to rib\n", protocol);
 	sent = rib.
 	    send_add_route4(q.ribname.c_str(),
-			    protocol,
-			    unicast, multicast,
-			    q.net, q.nexthop, q.metric,
-			    q.policytags.xrl_atomlist(),
-			    callback(this,
-				     &XrlQueue::route_command_done,
-				     q.comment));
+		    protocol,
+		    unicast, multicast,
+		    q.net, q.nexthop, q.metric,
+		    q.policytags.xrl_atomlist(),
+		    callback(this,
+			&XrlQueue::route_command_done,
+			q.comment));
 	if (!sent)
 	    XLOG_WARNING("scheduling add route %s failed",
-			 cstring(q.net));
-    } else {
+		    cstring(q.net));
+    } else 
+    {
 	debug_msg("deleting route from %s peer to rib\n", protocol);
 
 	sent = rib.
 	    send_delete_route4(q.ribname.c_str(),
-			       protocol,
-			       unicast, multicast,
-			       q.net,
-			       callback(this,
-					&XrlQueue::route_command_done,
-					q.comment));
+		    protocol,
+		    unicast, multicast,
+		    q.net,
+		    callback(this,
+			&XrlQueue::route_command_done,
+			q.comment));
 	if (!sent)
 	    XLOG_WARNING("scheduling delete route %s failed",
-			 cstring(q.net));
+		    cstring(q.net));
     }
 
     return sent;
 }
 
-void
+    void
 XrlQueue::route_command_done(const XrlError& error,
-			     const string comment)
+	const string comment)
 {
     _flying--;
     debug_msg("callback %s %s\n", comment.c_str(), cstring(error));
 
-    switch (error.error_code()) {
-    case OKAY:
-	break;
+    switch (error.error_code()) 
+    {
+	case OKAY:
+	    break;
 
-    case REPLY_TIMED_OUT:
-	// We should really be using a reliable transport where
-	// this error cannot happen. But it has so lets retry if we can.
-	XLOG_WARNING("callback: %s %s",  comment.c_str(), cstring(error));
-	break;
+	case REPLY_TIMED_OUT:
+	    // We should really be using a reliable transport where
+	    // this error cannot happen. But it has so lets retry if we can.
+	    XLOG_WARNING("callback: %s %s",  comment.c_str(), cstring(error));
+	    break;
 
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-    case SEND_FAILED_TRANSIENT:
-    case NO_SUCH_METHOD:
-	XLOG_ERROR("callback: %s %s",  comment.c_str(), cstring(error));
-	break;
+	case RESOLVE_FAILED:
+	case SEND_FAILED:
+	case SEND_FAILED_TRANSIENT:
+	case NO_SUCH_METHOD:
+	    XLOG_ERROR("callback: %s %s",  comment.c_str(), cstring(error));
+	    break;
 
-    case NO_FINDER:
-	// XXX - Temporarily code dump if this condition occurs.
-	XLOG_FATAL("NO FINDER");
-//	_olsr.finder_death(__FILE__, __LINE__);
-	break;
+	case NO_FINDER:
+	    // XXX - Temporarily code dump if this condition occurs.
+	    XLOG_FATAL("NO FINDER");
+	    //	_olsr.finder_death(__FILE__, __LINE__);
+	    break;
 
-    case BAD_ARGS:
-    case COMMAND_FAILED:
-    case INTERNAL_ERROR:
-	// XXX - Make this XLOG_FATAL when this has been debugged.
-	// TODO 40.
-	XLOG_ERROR("callback: %s %s",  comment.c_str(), cstring(error));
-	break;
+	case BAD_ARGS:
+	case COMMAND_FAILED:
+	case INTERNAL_ERROR:
+	    // XXX - Make this XLOG_FATAL when this has been debugged.
+	    // TODO 40.
+	    XLOG_ERROR("callback: %s %s",  comment.c_str(), cstring(error));
+	    break;
     }
 
     // Fire off more requests.

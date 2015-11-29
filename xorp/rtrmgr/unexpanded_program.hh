@@ -33,28 +33,29 @@ class ProgramAction;
 // request.
 //
 
-class UnexpandedProgram {
-public:
-    UnexpandedProgram(const MasterConfigTreeNode& node,
-		      const ProgramAction& action);
-    ~UnexpandedProgram();
+class UnexpandedProgram 
+{
+	public:
+		UnexpandedProgram(const MasterConfigTreeNode& node,
+				const ProgramAction& action);
+		~UnexpandedProgram();
 
-    /**
-     * Expand the variables in the unexpanded program, and create a
-     * program string that we can actually send.
-     * 
-     * @param errmsg the error message (if error).
-     * 
-     * @return the string with the program that we can execute, or an
-     * empty string if error.
-     */
-    string expand(string& errmsg) const;
+		/**
+		 * Expand the variables in the unexpanded program, and create a
+		 * program string that we can actually send.
+		 * 
+		 * @param errmsg the error message (if error).
+		 * 
+		 * @return the string with the program that we can execute, or an
+		 * empty string if error.
+		 */
+		string expand(string& errmsg) const;
 
-    string str() const;
+		string str() const;
 
-private:
-    const MasterConfigTreeNode& _node;
-    const ProgramAction& _action;
+	private:
+		const MasterConfigTreeNode& _node;
+		const ProgramAction& _action;
 };
 
 #endif // __RTRMGR_UNEXPANDED_PROGRAM_HH__

@@ -34,7 +34,7 @@ static void start()
 {
 
     XrlStdRouter rtr( VrrpTarget::vrrp_target_name.c_str(),
-		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
+	    FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
     VrrpTarget vrrp(rtr);
 
@@ -53,9 +53,11 @@ int main(int argc, char* argv[])
     xlog_add_default_output();
     xlog_start();
 
-    try {
+    try 
+    {
 	start();
-    } catch(const VrrpException& e) {
+    } catch(const VrrpException& e) 
+    {
 	XLOG_FATAL("VrrpException: %s", e.str().c_str());
     }
 

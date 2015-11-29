@@ -28,43 +28,43 @@
 #include "xorp.h"
 #include "vif.hh"
 
-VifAddr::VifAddr(const IPvX& ipvx_addr)
-    : _addr(ipvx_addr),
-      _subnet_addr(ipvx_addr.af()),
-      _broadcast_addr(ipvx_addr.af()),
-      _peer_addr(ipvx_addr.af())
+	VifAddr::VifAddr(const IPvX& ipvx_addr)
+: _addr(ipvx_addr),
+	_subnet_addr(ipvx_addr.af()),
+	_broadcast_addr(ipvx_addr.af()),
+	_peer_addr(ipvx_addr.af())
 {
 }
 
 #ifdef XORP_USE_USTL
-VifAddr::VifAddr()
-    : _addr(AF_INET),
-      _subnet_addr(AF_INET),
-      _broadcast_addr(AF_INET),
-      _peer_addr(AF_INET)
+	VifAddr::VifAddr()
+: _addr(AF_INET),
+	_subnet_addr(AF_INET),
+	_broadcast_addr(AF_INET),
+	_peer_addr(AF_INET)
 {
 }
 #endif
 
 VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
-		 const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)
-    : _addr(ipvx_addr),
-      _subnet_addr(ipvxnet_subnet_addr),
-      _broadcast_addr(ipvx_broadcast_addr),
-      _peer_addr(ipvx_peer_addr)
+		const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)
+: _addr(ipvx_addr),
+	_subnet_addr(ipvxnet_subnet_addr),
+	_broadcast_addr(ipvx_broadcast_addr),
+	_peer_addr(ipvx_peer_addr)
 {
 }
 
 bool
 VifAddr::is_same_subnet(const IPvXNet& ipvxnet) const
 {
-    return (_subnet_addr.contains(ipvxnet));
+	return (_subnet_addr.contains(ipvxnet));
 }
 
 bool
 VifAddr::is_same_subnet(const IPvX& ipvx_addr) const
 {
-    return (_subnet_addr.contains(ipvx_addr));
+	return (_subnet_addr.contains(ipvx_addr));
 }
 
 //
@@ -74,63 +74,64 @@ VifAddr::is_same_subnet(const IPvX& ipvx_addr) const
 string
 VifAddr::str() const
 {
-    ostringstream oss;
-    oss << "addr: " << _addr.str() << " subnet: " << _subnet_addr.str()
-	<< " broadcast: " << _broadcast_addr.str() << " peer: " << _peer_addr.str();
+	ostringstream oss;
+	oss << "addr: " << _addr.str() << " subnet: " << _subnet_addr.str()
+		<< " broadcast: " << _broadcast_addr.str() << " peer: " << _peer_addr.str();
 
-    return oss.str();
+	return oss.str();
 }
 
 bool
 VifAddr::operator==(const VifAddr& other) const
 {
-    return ((addr() == other.addr())
-	    && (subnet_addr() == other.subnet_addr())
-	    && (broadcast_addr() == other.broadcast_addr())
-	    && (peer_addr() == other.peer_addr()));
+	return ((addr() == other.addr())
+			&& (subnet_addr() == other.subnet_addr())
+			&& (broadcast_addr() == other.broadcast_addr())
+			&& (peer_addr() == other.peer_addr()));
 }
 
 //
 // Vif constructor
 //
-Vif::Vif(const string& vifname, const string& ifname)
-    : _name(vifname), _ifname(ifname)
+	Vif::Vif(const string& vifname, const string& ifname)
+: _name(vifname), _ifname(ifname)
 {
-    set_pif_index(0);
-    set_vif_index(0);
-    set_pim_register(false);
-    set_p2p(false);
-    set_loopback(false);
-    set_discard(false);
-    set_unreachable(false);
-    set_management(false);
-    set_multicast_capable(false);
-    set_broadcast_capable(false);
-    set_underlying_vif_up(false);
-    set_is_fake(false);
-    set_mtu(0);
+	set_pif_index(0);
+	set_vif_index(0);
+	set_pim_register(false);
+	set_p2p(false);
+	set_loopback(false);
+	set_discard(false);
+	set_unreachable(false);
+	set_management(false);
+	set_multicast_capable(false);
+	set_broadcast_capable(false);
+	set_underlying_vif_up(false);
+	set_is_fake(false);
+	set_mtu(0);
 }
 
 //
 // Vif copy constructor
 //
-Vif::Vif(const Vif& vif) : BugCatcher(vif) {
-    _name = vif.name();
-    _ifname = vif.ifname();
-    set_pif_index(vif.pif_index());
-    set_vif_index(vif.vif_index());
-    _addr_list = vif.addr_list();
-    set_pim_register(vif.is_pim_register());
-    set_p2p(vif.is_p2p());
-    set_loopback(vif.is_loopback());
-    set_discard(vif.is_discard());
-    set_unreachable(vif.is_unreachable());
-    set_management(vif.is_management());
-    set_multicast_capable(vif.is_multicast_capable());
-    set_broadcast_capable(vif.is_broadcast_capable());
-    set_underlying_vif_up(vif.is_underlying_vif_up());
-    set_is_fake(vif.is_fake());
-    set_mtu(vif.mtu());
+Vif::Vif(const Vif& vif) : BugCatcher(vif) 
+{
+	_name = vif.name();
+	_ifname = vif.ifname();
+	set_pif_index(vif.pif_index());
+	set_vif_index(vif.vif_index());
+	_addr_list = vif.addr_list();
+	set_pim_register(vif.is_pim_register());
+	set_p2p(vif.is_p2p());
+	set_loopback(vif.is_loopback());
+	set_discard(vif.is_discard());
+	set_unreachable(vif.is_unreachable());
+	set_management(vif.is_management());
+	set_multicast_capable(vif.is_multicast_capable());
+	set_broadcast_capable(vif.is_broadcast_capable());
+	set_underlying_vif_up(vif.is_underlying_vif_up());
+	set_is_fake(vif.is_fake());
+	set_mtu(vif.mtu());
 }
 
 //
@@ -148,232 +149,249 @@ Vif::~Vif()
 string
 Vif::str() const
 {
-    string r;
+	string r;
 
-    // The vif name
-    r += "Vif[";
-    r += _name;
-    r += "]";
+	// The vif name
+	r += "Vif[";
+	r += _name;
+	r += "]";
 
-    // The physical and virtual indexes
-    r += " pif_index: ";
-    r += c_format("%d", pif_index());
-    r += " vif_index: ";
-    r += c_format("%d", vif_index());
+	// The physical and virtual indexes
+	r += " pif_index: ";
+	r += c_format("%d", pif_index());
+	r += " vif_index: ";
+	r += c_format("%d", vif_index());
 
-    // The list of addresses
-    list<VifAddr>::const_iterator iter;
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	r += " ";
-	r += iter->str();
-    }
+	// The list of addresses
+	list<VifAddr>::const_iterator iter;
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		r += " ";
+		r += iter->str();
+	}
 
-    // The flags
-    r += " Flags:";
-    if (is_p2p())
-	r += " P2P";
-    if (is_pim_register())
-	r += " PIM_REGISTER";
-    if (is_multicast_capable())
-	r += " MULTICAST";
-    if (is_broadcast_capable())
-	r += " BROADCAST";
-    if (is_loopback())
-	r += " LOOPBACK";
-    if (is_discard())
-	r += " DISCARD";
-    if (is_unreachable())
-	r += " UNREACHABLE";
-    if (is_management())
-	r += " MANAGEMENT";
-    if (is_underlying_vif_up())
-	r += " UNDERLYING_VIF_UP";
-    if (is_fake())
-	r += " FAKE";
-    r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
+	// The flags
+	r += " Flags:";
+	if (is_p2p())
+		r += " P2P";
+	if (is_pim_register())
+		r += " PIM_REGISTER";
+	if (is_multicast_capable())
+		r += " MULTICAST";
+	if (is_broadcast_capable())
+		r += " BROADCAST";
+	if (is_loopback())
+		r += " LOOPBACK";
+	if (is_discard())
+		r += " DISCARD";
+	if (is_unreachable())
+		r += " UNREACHABLE";
+	if (is_management())
+		r += " MANAGEMENT";
+	if (is_underlying_vif_up())
+		r += " UNDERLYING_VIF_UP";
+	if (is_fake())
+		r += " FAKE";
+	r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
 
-    return r;
+	return r;
 }
 
 bool
 Vif::operator==(const Vif& other) const
 {
-    return ((name() == other.name())
-	    && (pif_index() == other.pif_index())
-	    && (vif_index() == other.vif_index())
-	    && (addr_list() == other.addr_list())
-	    && (is_pim_register() == other.is_pim_register())
-	    && (is_p2p() == other.is_p2p())
-	    && (is_loopback() == other.is_loopback())
-	    && (is_discard() == other.is_discard())
-	    && (is_unreachable() == other.is_unreachable())
-	    && (is_management() == other.is_management())
-	    && (is_multicast_capable() == other.is_multicast_capable())
-	    && (is_broadcast_capable() == other.is_broadcast_capable())
-	    && (is_underlying_vif_up() == other.is_underlying_vif_up())
-	    && (is_fake() == other.is_fake())
-	    && (mtu() == other.mtu()));
+	return ((name() == other.name())
+			&& (pif_index() == other.pif_index())
+			&& (vif_index() == other.vif_index())
+			&& (addr_list() == other.addr_list())
+			&& (is_pim_register() == other.is_pim_register())
+			&& (is_p2p() == other.is_p2p())
+			&& (is_loopback() == other.is_loopback())
+			&& (is_discard() == other.is_discard())
+			&& (is_unreachable() == other.is_unreachable())
+			&& (is_management() == other.is_management())
+			&& (is_multicast_capable() == other.is_multicast_capable())
+			&& (is_broadcast_capable() == other.is_broadcast_capable())
+			&& (is_underlying_vif_up() == other.is_underlying_vif_up())
+			&& (is_fake() == other.is_fake())
+			&& (mtu() == other.mtu()));
 }
 
 const IPvX *
 Vif::addr_ptr() const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	const VifAddr *vif_addr = &(*iter);
-	if (vif_addr->addr().is_unicast())
-	    return (&vif_addr->addr());
-    }
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		const VifAddr *vif_addr = &(*iter);
+		if (vif_addr->addr().is_unicast())
+			return (&vif_addr->addr());
+	}
 
-    return (NULL);
+	return (NULL);
 }
 
-int
+	int
 Vif::add_address(const VifAddr& vif_addr)
 {
-    if (is_my_vif_addr(vif_addr))
-	return (XORP_ERROR);
+	if (is_my_vif_addr(vif_addr))
+		return (XORP_ERROR);
 
-    _addr_list.push_back(vif_addr);
-    return (XORP_OK);
+	_addr_list.push_back(vif_addr);
+	return (XORP_OK);
 }
 
-int
+	int
 Vif::add_address(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
-		 const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)
+		const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)
 {
-    const VifAddr vif_addr(ipvx_addr, ipvxnet_subnet_addr,
-			   ipvx_broadcast_addr, ipvx_peer_addr);
-    return add_address(vif_addr);
+	const VifAddr vif_addr(ipvx_addr, ipvxnet_subnet_addr,
+			ipvx_broadcast_addr, ipvx_peer_addr);
+	return add_address(vif_addr);
 }
 
-int
+	int
 Vif::add_address(const IPvX& ipvx_addr)
 {
-    const VifAddr vif_addr(ipvx_addr);
-    return add_address(vif_addr);
+	const VifAddr vif_addr(ipvx_addr);
+	return add_address(vif_addr);
 }
 
-int
+	int
 Vif::delete_address(const IPvX& ipvx_addr)
 {
-    list<VifAddr>::iterator iter;
+	list<VifAddr>::iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_my_addr(ipvx_addr)) {
-	    _addr_list.erase(iter);
-	    return (XORP_OK);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_my_addr(ipvx_addr)) 
+		{
+			_addr_list.erase(iter);
+			return (XORP_OK);
+		}
 	}
-    }
 
-    return (XORP_ERROR);
+	return (XORP_ERROR);
 }
 
-VifAddr *
+	VifAddr *
 Vif::find_address(const IPvX& ipvx_addr)
 {
-    list<VifAddr>::iterator iter;
+	list<VifAddr>::iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_my_addr(ipvx_addr)) {
-	    return &(*iter);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_my_addr(ipvx_addr)) 
+		{
+			return &(*iter);
+		}
 	}
-    }
 
-    return (NULL);
+	return (NULL);
 }
 
 const VifAddr *
 Vif::find_address(const IPvX& ipvx_addr) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_my_addr(ipvx_addr)) {
-	    return &(*iter);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_my_addr(ipvx_addr)) 
+		{
+			return &(*iter);
+		}
 	}
-    }
 
-    return (NULL);
+	return (NULL);
 }
 
 bool
 Vif::is_my_addr(const IPvX& ipvx_addr) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_my_addr(ipvx_addr)) {
-	    return (true);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_my_addr(ipvx_addr)) 
+		{
+			return (true);
+		}
 	}
-    }
 
-    return (false);
+	return (false);
 }
 
 bool
 Vif::is_my_vif_addr(const VifAddr& vif_addr) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	const VifAddr& tmp_vif_addr = *iter;
-	if (tmp_vif_addr == vif_addr)
-	    return (true);
-    }
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		const VifAddr& tmp_vif_addr = *iter;
+		if (tmp_vif_addr == vif_addr)
+			return (true);
+	}
 
-    return (false);
+	return (false);
 }
 
 bool
 Vif::is_same_subnet(const IPvXNet& ipvxnet) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    if (is_pim_register())
-	return (false);
+	if (is_pim_register())
+		return (false);
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_subnet(ipvxnet)) {
-	    return (true);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_same_subnet(ipvxnet)) 
+		{
+			return (true);
+		}
 	}
-    }
 
-    return (false);
+	return (false);
 }
 
 bool
 Vif::is_same_subnet(const IPvX& ipvx_addr) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    if (is_pim_register())
-	return (false);
+	if (is_pim_register())
+		return (false);
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_subnet(ipvx_addr)) {
-	    return (true);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_same_subnet(ipvx_addr)) 
+		{
+			return (true);
+		}
 	}
-    }
 
-    return (false);
+	return (false);
 }
 
 bool
 Vif::is_same_p2p(const IPvX& ipvx_addr) const
 {
-    list<VifAddr>::const_iterator iter;
+	list<VifAddr>::const_iterator iter;
 
-    if (is_pim_register() || (! is_p2p()))
-	return (false);
+	if (is_pim_register() || (! is_p2p()))
+		return (false);
 
-    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_my_addr(ipvx_addr)
-	    || ((iter)->peer_addr() == ipvx_addr)) {
-	    return (true);
+	for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) 
+	{
+		if ((iter)->is_my_addr(ipvx_addr)
+				|| ((iter)->peer_addr() == ipvx_addr)) 
+		{
+			return (true);
+		}
 	}
-    }
 
-    return (false);
+	return (false);
 }

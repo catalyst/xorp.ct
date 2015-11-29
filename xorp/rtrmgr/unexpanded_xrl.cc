@@ -32,17 +32,17 @@
 
 
 UnexpandedXrl::UnexpandedXrl(const MasterConfigTreeNode& node,
-			     const XrlAction& action)
-    : _node(node),
-      _action(action),
-      _xrl(NULL)
+		const XrlAction& action)
+: _node(node),
+	_action(action),
+	_xrl(NULL)
 {
 }
 
 UnexpandedXrl::~UnexpandedXrl()
 {
-    if (_xrl != NULL)
-	delete _xrl;
+	if (_xrl != NULL)
+		delete _xrl;
 }
 
 /**
@@ -52,19 +52,21 @@ UnexpandedXrl::~UnexpandedXrl()
 Xrl*
 UnexpandedXrl::expand(string& errmsg) const
 {
-    string request;
+	string request;
 
-    // Remove the old expanded XRL, because it may be obsolete
-    if (_xrl != NULL) {
-	delete _xrl;
-	_xrl = NULL;
-    }
+	// Remove the old expanded XRL, because it may be obsolete
+	if (_xrl != NULL) 
+	{
+		delete _xrl;
+		_xrl = NULL;
+	}
 
-    _xrl = _action.expand_xrl_variables(_node, errmsg);
-    if (_xrl == NULL) {
-	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
-    }
-    return _xrl;
+	_xrl = _action.expand_xrl_variables(_node, errmsg);
+	if (_xrl == NULL) 
+	{
+		debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
+	}
+	return _xrl;
 }
 
 /**
@@ -73,11 +75,11 @@ UnexpandedXrl::expand(string& errmsg) const
 string
 UnexpandedXrl::return_spec() const
 {
-    return _action.xrl_return_spec();
+	return _action.xrl_return_spec();
 }
 
 string
 UnexpandedXrl::str() const
 {
-    return _action.str();
+	return _action.str();
 }

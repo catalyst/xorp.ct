@@ -36,28 +36,29 @@ template <class A>
 const string PolicyRedistTable<A>::table_name = "policy-redist-table";
 
 
-template <class A>
+    template <class A>
 PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
-					PolicyRedistMap& rmap,
-					bool multicast)
-    : RouteTable<A>(table_name),
-      _xrl_router(rtr),
-      _redist_map(rmap),
-      _redist_client(&_xrl_router),
-      _multicast(multicast)
+	PolicyRedistMap& rmap,
+	bool multicast)
+: RouteTable<A>(table_name),
+    _xrl_router(rtr),
+    _redist_map(rmap),
+    _redist_client(&_xrl_router),
+    _multicast(multicast)
 {
-    if (parent->next_table() != NULL) {
-        this->set_next_table(parent->next_table());
+    if (parent->next_table() != NULL) 
+    {
+	this->set_next_table(parent->next_table());
     }
     parent->set_next_table(this);
 }
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("[RIB] PolicyRedistTable ADD ROUTE: %s\n",
-	      route.str().c_str());
+	    route.str().c_str());
 
     // get protocols involved in redistribution with these tags
     set<string> protos;
@@ -69,7 +70,7 @@ PolicyRedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-int
+    int
 PolicyRedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 {
     this->generic_add_route(route);
@@ -80,7 +81,7 @@ PolicyRedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-int
+    int
 PolicyRedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 {
     this->generic_add_route(route);
@@ -91,13 +92,13 @@ PolicyRedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 }
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyRedistTable DELETE ROUTE: %s\n",
-	      route->str().c_str());
+	    route->str().c_str());
 
     // get protocols involved in redistribution of this route
     set<string> protos;
@@ -109,7 +110,7 @@ PolicyRedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 }
 
 template <class A>
-int
+    int
 PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
@@ -120,7 +121,7 @@ PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 }
 
 template <class A>
-int
+    int
 PolicyRedistTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
@@ -146,9 +147,9 @@ PolicyRedistTable<A>::str() const
 
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
-				 const Set& protos)
+	const Set& protos)
 {
     // send a redistribution request for all protocols in the set.
     for (Set::const_iterator i = protos.begin(); i != protos.end(); ++i)
@@ -157,9 +158,9 @@ PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
 
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
-				 const Set& protos)
+	const Set& protos)
 {
     // stop redistribution for all protocols in set.
     for (Set::const_iterator i = protos.begin(); i != protos.end(); ++i)
@@ -168,52 +169,54 @@ PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
 
 
 template <class A>
-void
-PolicyRedistTable<A>::xrl_cb(const XrlError& e, string action) {
+    void
+PolicyRedistTable<A>::xrl_cb(const XrlError& e, string action) 
+{
     UNUSED(action);
-    if (e != XrlError::OKAY()) {
+    if (e != XrlError::OKAY()) 
+    {
 	XLOG_WARNING("Unable to complete XRL: %s", action.c_str());
     }
 }
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
-				    const string& proto)
+	const string& proto)
 {
     string error = "add_route for " + A::ip_version_str() + " " + proto + " route: " + route.str();
 
     debug_msg("[RIB] PolicyRedistTable add_redist %s %s to %s\n",
-	A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
+	    A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
 
     _redist_client.send_add_route(proto.c_str(), route.net(),
-				    !_multicast, _multicast, // XXX
-				    route.nexthop_addr(), route.metric(),
-				    route.policytags().xrl_atomlist(),
-				    callback(this, &PolicyRedistTable<A>::xrl_cb, error));
+	    !_multicast, _multicast, // XXX
+	    route.nexthop_addr(), route.metric(),
+	    route.policytags().xrl_atomlist(),
+	    callback(this, &PolicyRedistTable<A>::xrl_cb, error));
 }
 
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
-				    const string& proto)
+	const string& proto)
 {
     string error = "del_route for " + A::ip_version_str() + " " + proto + " route: " + route.str();
 
     debug_msg("[RIB] PolicyRedistTable del_redist %s %s to %s\n",
-	A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
+	    A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
 
     _redist_client.send_delete_route(proto.c_str(), route.net(),
-				       !_multicast, _multicast,	// XXX
-				       callback(this, &PolicyRedistTable<A>::xrl_cb, error));
+	    !_multicast, _multicast,	// XXX
+	    callback(this, &PolicyRedistTable<A>::xrl_cb, error));
 }
 
 
 template <class A>
-void
+    void
 PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
-					 const PolicyTags& prevtags)
+	const PolicyTags& prevtags)
 {
     set<string> del_protos;
     set<string> add_protos;
@@ -230,7 +233,7 @@ PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
 
     // commit changes
     if (!del_protos.empty())
-        del_redist(route, del_protos);
+	del_redist(route, del_protos);
     if (!add_protos.empty())
 	add_redist(route, add_protos);
 }

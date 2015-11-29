@@ -38,37 +38,37 @@
 class ProtocolMap :
     public NONCOPYABLE
 {
-public:
-    ProtocolMap();
+    public:
+	ProtocolMap();
 
-    /**
-     * Determine the XRL target for a protocol.
-     *
-     * @return the XRL target for the protocol.
-     * @param protocol the protocol for which the XRL target is wanted.
-     */
-    const string& xrl_target(const string& protocol);
+	/**
+	 * Determine the XRL target for a protocol.
+	 *
+	 * @return the XRL target for the protocol.
+	 * @param protocol the protocol for which the XRL target is wanted.
+	 */
+	const string& xrl_target(const string& protocol);
 
-    /**
-     * Set the XRL target for a protocol.
-     *
-     * @param protocol the protocol for which the XRL target needs to be set.
-     * @param target the XRL target for the protocol.
-     */
-    void set_xrl_target(const string& protocol, const string& target);
+	/**
+	 * Set the XRL target for a protocol.
+	 *
+	 * @param protocol the protocol for which the XRL target needs to be set.
+	 * @param target the XRL target for the protocol.
+	 */
+	void set_xrl_target(const string& protocol, const string& target);
 
-    /**
-     * Return internal protocol name based on XRL target.
-     *
-     * @return protocol name.
-     * @param target the XRL target for the protocol.
-     */
-    const string& protocol(const string& target);
+	/**
+	 * Return internal protocol name based on XRL target.
+	 *
+	 * @return protocol name.
+	 * @param target the XRL target for the protocol.
+	 */
+	const string& protocol(const string& target);
 
-private:
-    typedef map<string, string> Map;
+    private:
+	typedef map<string, string> Map;
 
-    Map _map;
+	Map _map;
 };
 
 #endif // __POLICY_PROTOCOL_MAP_HH__

@@ -39,70 +39,75 @@ class RMRule;
 /**
  * @short RouteMap route filter (not yet working).
  */
-class RouteMap {
-public:
-    RouteMap(const string& mapname);
-    int add_rule(RMRule* rule);
-    string str() const;
+class RouteMap 
+{
+	public:
+		RouteMap(const string& mapname);
+		int add_rule(RMRule* rule);
+		string str() const;
 
-private:
-    string		_mapname;
-    list<RMRule* >	_ruleset;
+	private:
+		string		_mapname;
+		list<RMRule* >	_ruleset;
 };
 
 /**
  * @short RouteMap rule (not yet working).
  */
-class RMRule {
-public:
-    RMRule(int seq, RMMatch* match, RMAction* action);
-    int seq() const { return _seq; }
-    string str() const;
+class RMRule 
+{
+	public:
+		RMRule(int seq, RMMatch* match, RMAction* action);
+		int seq() const { return _seq; }
+		string str() const;
 
-    bool operator<(const RMRule& other) const { return (seq() < other.seq()); }
+		bool operator<(const RMRule& other) const { return (seq() < other.seq()); }
 
-private:
-    int		_seq;
-    RMMatch*	_match;
-    RMAction*	_action;
+	private:
+		int		_seq;
+		RMMatch*	_match;
+		RMAction*	_action;
 };
 
 /**
  * @short RouteMap conditional (not yet working).
  */
-class RMMatch {
-public:
-    RMMatch();
-    virtual ~RMMatch() {};
-    virtual string str() const = 0;
-    virtual bool match_route(const RouteEntry& re) const = 0;
+class RMMatch 
+{
+	public:
+		RMMatch();
+		virtual ~RMMatch() {};
+		virtual string str() const = 0;
+		virtual bool match_route(const RouteEntry& re) const = 0;
 
-private:
+	private:
 };
 
 /**
  * @short RouteMap conditional (not yet working).
  */
-class RMMatchIPAddr : public RMMatch {
-public:
-    RMMatchIPAddr(const IPv4Net& ipv4net);
-    ~RMMatchIPAddr() {};
-    string str() const;
-    bool match_route(const RouteEntry& re) const;
+class RMMatchIPAddr : public RMMatch 
+{
+	public:
+		RMMatchIPAddr(const IPv4Net& ipv4net);
+		~RMMatchIPAddr() {};
+		string str() const;
+		bool match_route(const RouteEntry& re) const;
 
-private:
-    IPv4Net _ipv4net;
+	private:
+		IPv4Net _ipv4net;
 };
 
 /**
  * @short RouteMap action (not yet working).
  */
-class RMAction {
-public:
-    RMAction();
-    string str() const;
+class RMAction 
+{
+	public:
+		RMAction();
+		string str() const;
 
-private:
+	private:
 };
 
 #endif // __RIB_ROUTEMAP_HH__

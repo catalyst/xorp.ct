@@ -27,35 +27,36 @@
 #include "fea/ifconfig_property.hh"
 
 
-class IfConfigPropertyLinux : public IfConfigProperty {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigPropertyLinux(FeaDataPlaneManager& fea_data_plane_manager);
+class IfConfigPropertyLinux : public IfConfigProperty 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigPropertyLinux(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigPropertyLinux();
-    
-private:
-    /**
-     * Test whether the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    virtual bool test_have_ipv4() const;
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigPropertyLinux();
 
-    /**
-     * Test whether the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    virtual bool test_have_ipv6() const;
+	private:
+		/**
+		 * Test whether the underlying system supports IPv4.
+		 * 
+		 * @return true if the underlying system supports IPv4, otherwise false.
+		 */
+		virtual bool test_have_ipv4() const;
+
+		/**
+		 * Test whether the underlying system supports IPv6.
+		 * 
+		 * @return true if the underlying system supports IPv6, otherwise false.
+		 */
+		virtual bool test_have_ipv6() const;
 };
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_LINUX_HH__

@@ -64,11 +64,11 @@
  * PimScopeZoneId constructor.
  **/
 PimScopeZoneId::PimScopeZoneId(const IPvXNet& scope_zone_prefix,
-			       bool is_scope_zone)
-    : _scope_zone_prefix(scope_zone_prefix),
-      _is_scope_zone(is_scope_zone)
+		bool is_scope_zone)
+: _scope_zone_prefix(scope_zone_prefix),
+	_is_scope_zone(is_scope_zone)
 {
-    
+
 }
 
 /**
@@ -81,8 +81,8 @@ PimScopeZoneId::PimScopeZoneId(const IPvXNet& scope_zone_prefix,
 bool
 PimScopeZoneId::operator==(const PimScopeZoneId& other) const
 {
-    return ((scope_zone_prefix() == other.scope_zone_prefix())
-	    && (is_scope_zone() == other.is_scope_zone()));
+	return ((scope_zone_prefix() == other.scope_zone_prefix())
+			&& (is_scope_zone() == other.is_scope_zone()));
 }
 
 /**
@@ -97,9 +97,9 @@ PimScopeZoneId::operator==(const PimScopeZoneId& other) const
 bool
 PimScopeZoneId::is_overlap(const PimScopeZoneId& other) const
 {
-    return (is_scope_zone()
-	    && other.is_scope_zone()
-	    && scope_zone_prefix().is_overlap(other.scope_zone_prefix()));
+	return (is_scope_zone()
+			&& other.is_scope_zone()
+			&& scope_zone_prefix().is_overlap(other.scope_zone_prefix()));
 }
 
 /**
@@ -114,7 +114,7 @@ PimScopeZoneId::is_overlap(const PimScopeZoneId& other) const
 bool
 PimScopeZoneId::contains(const IPvXNet& ipvxnet) const
 {
-    return (scope_zone_prefix().contains(ipvxnet));
+	return (scope_zone_prefix().contains(ipvxnet));
 }
 
 /**
@@ -129,7 +129,7 @@ PimScopeZoneId::contains(const IPvXNet& ipvxnet) const
 bool
 PimScopeZoneId::contains(const IPvX& ipvx) const
 {
-    return (scope_zone_prefix().contains(ipvx));
+	return (scope_zone_prefix().contains(ipvx));
 }
 
 /**
@@ -143,8 +143,8 @@ PimScopeZoneId::contains(const IPvX& ipvx) const
 string
 PimScopeZoneId::str() const
 {
-    return (c_format("%s(%s)", _scope_zone_prefix.str().c_str(),
-		     _is_scope_zone? "scoped" : "non-scoped"));
+	return (c_format("%s(%s)", _scope_zone_prefix.str().c_str(),
+				_is_scope_zone? "scoped" : "non-scoped"));
 }
 
 /**
@@ -153,10 +153,10 @@ PimScopeZoneId::str() const
  * 
  * PimScopeZoneTable constructor.
  **/
-PimScopeZoneTable::PimScopeZoneTable(PimNode& pim_node)
-    : _pim_node(pim_node)
+	PimScopeZoneTable::PimScopeZoneTable(PimNode& pim_node)
+: _pim_node(pim_node)
 {
-    
+
 }
 
 /**
@@ -168,7 +168,7 @@ PimScopeZoneTable::PimScopeZoneTable(PimNode& pim_node)
  **/
 PimScopeZoneTable::~PimScopeZoneTable()
 {
-    
+
 }
 
 /**
@@ -178,28 +178,30 @@ PimScopeZoneTable::~PimScopeZoneTable()
  * 
  * Add a scope zone.
  **/
-void
+	void
 PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix,
-				  uint32_t vif_index)
+		uint32_t vif_index)
 {
-    // Test first if we have that scope zone already
-    list<PimScopeZone>::iterator iter;
-    for (iter = _pim_scope_zone_list.begin();
-	 iter != _pim_scope_zone_list.end();
-	 ++iter) {
-	PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) {
-	    // We already have entry for this scope zone
-	    pim_scope_zone.set_scoped_vif(vif_index, true);
-	    return;
+	// Test first if we have that scope zone already
+	list<PimScopeZone>::iterator iter;
+	for (iter = _pim_scope_zone_list.begin();
+			iter != _pim_scope_zone_list.end();
+			++iter) 
+	{
+		PimScopeZone& pim_scope_zone = *iter;
+		if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) 
+		{
+			// We already have entry for this scope zone
+			pim_scope_zone.set_scoped_vif(vif_index, true);
+			return;
+		}
 	}
-    }
-    
-    // Add the new scope
-    Mifset scoped_vifs;
-    scoped_vifs.set(vif_index);
-    PimScopeZone pim_scope_zone(scope_zone_prefix, scoped_vifs);
-    _pim_scope_zone_list.push_back(pim_scope_zone);
+
+	// Add the new scope
+	Mifset scoped_vifs;
+	scoped_vifs.set(vif_index);
+	PimScopeZone pim_scope_zone(scope_zone_prefix, scoped_vifs);
+	_pim_scope_zone_list.push_back(pim_scope_zone);
 }
 
 /**
@@ -209,25 +211,27 @@ PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix,
  * 
  * Delete a scope zone.
  **/
-void
+	void
 PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix,
-				     uint32_t vif_index)
+		uint32_t vif_index)
 {
-    // Find the scope zone and delete it
-    list<PimScopeZone>::iterator iter;
-    for (iter = _pim_scope_zone_list.begin();
-	 iter != _pim_scope_zone_list.end();
-	 ++iter) {
-	PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) {
-	    // Found
-	    pim_scope_zone.set_scoped_vif(vif_index, false);
-	    // If last scope zone boundary, remove the entry
-	    if (pim_scope_zone.is_empty())
-		_pim_scope_zone_list.erase(iter);
-	    return;
+	// Find the scope zone and delete it
+	list<PimScopeZone>::iterator iter;
+	for (iter = _pim_scope_zone_list.begin();
+			iter != _pim_scope_zone_list.end();
+			++iter) 
+	{
+		PimScopeZone& pim_scope_zone = *iter;
+		if (pim_scope_zone.is_same_scope_zone(scope_zone_prefix)) 
+		{
+			// Found
+			pim_scope_zone.set_scoped_vif(vif_index, false);
+			// If last scope zone boundary, remove the entry
+			if (pim_scope_zone.is_empty())
+				_pim_scope_zone_list.erase(iter);
+			return;
+		}
 	}
-    }
 }
 
 /**
@@ -243,16 +247,17 @@ PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix,
 bool
 PimScopeZoneTable::is_scoped(const IPvX& addr, uint32_t vif_index) const
 {
-    list<PimScopeZone>::const_iterator iter;
-    for (iter = _pim_scope_zone_list.begin();
-	 iter != _pim_scope_zone_list.end();
-	 ++iter) {
-	const PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.is_scoped(addr, vif_index))
-	    return (true);
-    }
-    
-    return (false);
+	list<PimScopeZone>::const_iterator iter;
+	for (iter = _pim_scope_zone_list.begin();
+			iter != _pim_scope_zone_list.end();
+			++iter) 
+	{
+		const PimScopeZone& pim_scope_zone = *iter;
+		if (pim_scope_zone.is_scoped(addr, vif_index))
+			return (true);
+	}
+
+	return (false);
 }
 
 /**
@@ -268,21 +273,22 @@ PimScopeZoneTable::is_scoped(const IPvX& addr, uint32_t vif_index) const
  **/
 bool
 PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
-			     uint32_t vif_index) const
+		uint32_t vif_index) const
 {
-    if (! zone_id.is_scope_zone())
+	if (! zone_id.is_scope_zone())
+		return (false);
+
+	list<PimScopeZone>::const_iterator iter;
+	for (iter = _pim_scope_zone_list.begin();
+			iter != _pim_scope_zone_list.end();
+			++iter) 
+	{
+		const PimScopeZone& pim_scope_zone = *iter;
+		if (pim_scope_zone.is_scoped(zone_id, vif_index))
+			return (true);
+	}
+
 	return (false);
-    
-    list<PimScopeZone>::const_iterator iter;
-    for (iter = _pim_scope_zone_list.begin();
-	 iter != _pim_scope_zone_list.end();
-	 ++iter) {
-	const PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.is_scoped(zone_id, vif_index))
-	    return (true);
-    }
-    
-    return (false);
 }
 
 /**
@@ -297,16 +303,17 @@ PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
 bool
 PimScopeZoneTable::is_zone_border_router(const IPvXNet& group_prefix) const
 {
-    list<PimScopeZone>::const_iterator iter;
-    for (iter = _pim_scope_zone_list.begin();
-	 iter != _pim_scope_zone_list.end();
-	 ++iter) {
-	const PimScopeZone& pim_scope_zone = *iter;
-	if (pim_scope_zone.scope_zone_prefix().contains(group_prefix))
-	    return (true);
-    }
-    
-    return (false);
+	list<PimScopeZone>::const_iterator iter;
+	for (iter = _pim_scope_zone_list.begin();
+			iter != _pim_scope_zone_list.end();
+			++iter) 
+	{
+		const PimScopeZone& pim_scope_zone = *iter;
+		if (pim_scope_zone.scope_zone_prefix().contains(group_prefix))
+			return (true);
+	}
+
+	return (false);
 }
 
 /**
@@ -317,11 +324,11 @@ PimScopeZoneTable::is_zone_border_router(const IPvXNet& group_prefix) const
  * PimScopeZone constructor.
  **/
 PimScopeZone::PimScopeZone(const IPvXNet& scope_zone_prefix,
-			   const Mifset& scoped_vifs)
-    : _scope_zone_prefix(scope_zone_prefix),
-      _scoped_vifs(scoped_vifs)
+		const Mifset& scoped_vifs)
+: _scope_zone_prefix(scope_zone_prefix),
+	_scoped_vifs(scoped_vifs)
 {
-    
+
 }
 
 /**
@@ -332,7 +339,7 @@ PimScopeZone::PimScopeZone(const IPvXNet& scope_zone_prefix,
  **/
 PimScopeZone::~PimScopeZone()
 {
-    
+
 }
 
 /**
@@ -343,15 +350,16 @@ PimScopeZone::~PimScopeZone()
  * 
  * Set or reset an interface as a boundary for this scope zone.
  **/
-void
+	void
 PimScopeZone::set_scoped_vif(uint32_t vif_index, bool v)
 {
-    if (vif_index < _scoped_vifs.size()) {
-	if (v)
-	    _scoped_vifs.set(vif_index);
-	else
-	    _scoped_vifs.reset(vif_index);
-    }
+	if (vif_index < _scoped_vifs.size()) 
+	{
+		if (v)
+			_scoped_vifs.set(vif_index);
+		else
+			_scoped_vifs.reset(vif_index);
+	}
 }
 
 /**
@@ -366,10 +374,10 @@ PimScopeZone::set_scoped_vif(uint32_t vif_index, bool v)
 bool
 PimScopeZone::is_scoped(const IPvX& addr, uint32_t vif_index) const
 {
-    if (! _scope_zone_prefix.contains(addr))
-	return (false);
-    
-    return (is_set(vif_index));
+	if (! _scope_zone_prefix.contains(addr))
+		return (false);
+
+	return (is_set(vif_index));
 }
 
 /**
@@ -384,17 +392,17 @@ PimScopeZone::is_scoped(const IPvX& addr, uint32_t vif_index) const
  **/
 bool
 PimScopeZone::is_scoped(const PimScopeZoneId& zone_id,
-			uint32_t vif_index) const
+		uint32_t vif_index) const
 {
-    if (! zone_id.is_scope_zone())
-	return (false);
-    
-    // XXX: scoped zones don't nest, hence if the scope zone prefixes
-    // do overlap, then there is scoping.
-    if (! _scope_zone_prefix.is_overlap(zone_id.scope_zone_prefix()))
-	return (false);
-    
-    return (is_set(vif_index));
+	if (! zone_id.is_scope_zone())
+		return (false);
+
+	// XXX: scoped zones don't nest, hence if the scope zone prefixes
+	// do overlap, then there is scoping.
+	if (! _scope_zone_prefix.is_overlap(zone_id.scope_zone_prefix()))
+		return (false);
+
+	return (is_set(vif_index));
 }
 
 /**
@@ -409,9 +417,9 @@ PimScopeZone::is_scoped(const PimScopeZoneId& zone_id,
 bool
 PimScopeZone::is_set(uint32_t vif_index) const
 {
-    if (vif_index < _scoped_vifs.size())
-	return (_scoped_vifs.test(vif_index));
-    return (false);
+	if (vif_index < _scoped_vifs.size())
+		return (_scoped_vifs.test(vif_index));
+	return (false);
 }
 
 /**
@@ -427,5 +435,5 @@ PimScopeZone::is_set(uint32_t vif_index) const
 bool
 PimScopeZone::is_same_scope_zone(const IPvXNet& scope_zone_prefix) const
 {
-    return (_scope_zone_prefix == scope_zone_prefix);
+	return (_scope_zone_prefix == scope_zone_prefix);
 }

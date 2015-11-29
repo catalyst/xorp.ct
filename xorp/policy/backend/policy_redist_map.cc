@@ -25,14 +25,16 @@
 #include "policy_redist_map.hh"
 #include "policy/common/policy_utils.hh"
 
-PolicyRedistMap::PolicyRedistMap() {
+PolicyRedistMap::PolicyRedistMap() 
+{
 }
 
-PolicyRedistMap::~PolicyRedistMap() {
+PolicyRedistMap::~PolicyRedistMap() 
+{
     reset();
 }
 
-void
+    void
 PolicyRedistMap::remove(const string& protocol)
 {
     Map::iterator i = _map.find(protocol);
@@ -41,14 +43,16 @@ PolicyRedistMap::remove(const string& protocol)
     _map.erase(protocol);
 }
 
-void
-PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) {
+    void
+PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) 
+{
     PolicyTags* ptags;
 
     Map::iterator i = _map.find(protocol);
 
     // create new policytags [first time we insert]
-    if(i == _map.end()) {
+    if(i == _map.end()) 
+    {
 	ptags = new PolicyTags(tags);
 	_map[protocol] = ptags;
 	return;
@@ -60,20 +64,23 @@ PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) {
     ptags->insert(tags);
 }
 
-void
-PolicyRedistMap::reset() {
+    void
+PolicyRedistMap::reset() 
+{
     // clear it ALL
     policy_utils::clear_map(_map);
 }
 
-void
-PolicyRedistMap::get_protocols(set<string>& out, const PolicyTags& tags) {
+    void
+PolicyRedistMap::get_protocols(set<string>& out, const PolicyTags& tags) 
+{
 
     // XXX: maybe caller would like to control this
     out.clear();
 
     // go through all our tags.
-    for(Map::iterator i = _map.begin(); i != _map.end(); ++i) {
+    for(Map::iterator i = _map.begin(); i != _map.end(); ++i) 
+    {
 	PolicyTags* ptags = (*i).second;
 
 	// if atleast one tag in the taglist for this protocol is present in the

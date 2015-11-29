@@ -29,109 +29,111 @@
 
 
 class FibConfigEntryGetNetlinkSocket : public FibConfigEntryGet,
-				       public NetlinkSocket {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigEntryGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public NetlinkSocket 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigEntryGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigEntryGetNetlinkSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigEntryGetNetlinkSocket();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Lookup an IPv4 route by destination address.
-     *
-     * @param dst host address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /**
-     * Lookup an IPv4 route by network address.
-     *
-     * @param dst network address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
+		/**
+		 * Lookup an IPv4 route by destination address.
+		 *
+		 * @param dst host address to resolve.
+		 * @param fte return-by-reference forwarding table entry.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
-    /**
-     * Lookup an IPv6 route by destination address.
-     *
-     * @param dst host address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
+		/**
+		 * Lookup an IPv4 route by network address.
+		 *
+		 * @param dst network address to resolve.
+		 * @param fte return-by-reference forwarding table entry.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
-    /**
-     * Lookup an IPv6 route by network address.
-     *
-     * @param dst network address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+		/**
+		 * Lookup an IPv6 route by destination address.
+		 *
+		 * @param dst host address to resolve.
+		 * @param fte return-by-reference forwarding table entry.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
-    /**
-     * Parse information about forwarding entry information received from
-     * the underlying system.
-     * 
-     * The information to parse is in NETLINK format
-     * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
-     * @param iftree the interface tree to use.
-     * @param fte the Fte storage to store the parsed information.
-     * @param buffer the buffer with the data to parse.
-     * @param is_nlm_get_only if true, consider only the entries obtained
-     * by RTM_GETROUTE.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see FteX.
-     */
-    static int parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
-					   vector<uint8_t>& buffer,
-					   bool is_nlm_get_only, const FibConfig& fibconfig);
+		/**
+		 * Lookup an IPv6 route by network address.
+		 *
+		 * @param dst network address to resolve.
+		 * @param fte return-by-reference forwarding table entry.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl) {
-	return NetlinkSocket::notify_table_id_change(new_tbl);
-    }
+		/**
+		 * Parse information about forwarding entry information received from
+		 * the underlying system.
+		 * 
+		 * The information to parse is in NETLINK format
+		 * (e.g., obtained by netlink(7) sockets mechanism).
+		 * 
+		 * @param iftree the interface tree to use.
+		 * @param fte the Fte storage to store the parsed information.
+		 * @param buffer the buffer with the data to parse.
+		 * @param is_nlm_get_only if true, consider only the entries obtained
+		 * by RTM_GETROUTE.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 * @see FteX.
+		 */
+		static int parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
+				vector<uint8_t>& buffer,
+				bool is_nlm_get_only, const FibConfig& fibconfig);
 
-private:
-    /**
-     * Lookup a route by destination address.
-     *
-     * @param dst host address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int lookup_route_by_dest(const IPvX& dst, FteX& fte);
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl) 
+		{
+			return NetlinkSocket::notify_table_id_change(new_tbl);
+		}
 
-    NetlinkSocketReader	_ns_reader;
+	private:
+		/**
+		 * Lookup a route by destination address.
+		 *
+		 * @param dst host address to resolve.
+		 * @param fte return-by-reference forwarding table entry.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int lookup_route_by_dest(const IPvX& dst, FteX& fte);
+
+		NetlinkSocketReader	_ns_reader;
 };
 
 #endif

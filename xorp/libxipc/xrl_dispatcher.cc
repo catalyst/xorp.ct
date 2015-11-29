@@ -31,33 +31,36 @@
 // ----------------------------------------------------------------------------
 // Xrl Tracing central
 
-static class TraceXrl {
-public:
-    TraceXrl() {
-	_do_trace = !(getenv("XRLDISPATCHTRACE") == 0);
-    }
-    bool on() const { return _do_trace; }
-    operator bool() { return _do_trace; }
+static class TraceXrl 
+{
+    public:
+	TraceXrl() 
+	{
+	    _do_trace = !(getenv("XRLDISPATCHTRACE") == 0);
+	}
+	bool on() const { return _do_trace; }
+	operator bool() { return _do_trace; }
 
-protected:
-    bool _do_trace;
+    protected:
+	bool _do_trace;
 } xrl_trace;
 
 #define trace_xrl_dispatch(p, x) 					      \
-do {									      \
-    if (xrl_trace.on()) XLOG_INFO("%s", (string(p) + x).c_str());	      \
-} while (0)
+    do {									      \
+	if (xrl_trace.on()) XLOG_INFO("%s", (string(p) + x).c_str());	      \
+    } while (0)
 
 // ----------------------------------------------------------------------------
 // XrlDispatcher methods
 
 void
 XrlDispatcher::dispatch_xrl(const string&  method_name,
-			    const XrlArgs& inputs,
-			    XrlDispatcherCallback outputs) const
+	const XrlArgs& inputs,
+	XrlDispatcherCallback outputs) const
 {
     const XrlCmdEntry* c = get_handler(method_name.c_str());
-    if (c == 0) {
+    if (c == 0) 
+    {
 	trace_xrl_dispatch("dispatch_xrl (invalid) ", method_name);
 	debug_msg("No handler for %s\n", method_name.c_str());
 	return outputs->dispatch(XrlError::NO_SUCH_METHOD(), NULL);
@@ -80,7 +83,7 @@ XrlDispatcher::lookup_xrl(const string& name) const
 
 void
 XrlDispatcher::dispatch_xrl_fast(const XI& xi,
-				 XrlDispatcherCallback outputs) const
+	XrlDispatcherCallback outputs) const
 {
     trace_xrl_dispatch("dispatch_xrl_fast ", xi._xrl.str());
     XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
@@ -90,8 +93,8 @@ XrlDispatcher::dispatch_xrl_fast(const XI& xi,
 
 void
 XrlDispatcher::dispatch_cb(const XrlCmdError &err,
-			   const XrlArgs *outputs,
-			   XrlDispatcherCallback resp) const
+	const XrlArgs *outputs,
+	XrlDispatcherCallback resp) const
 {
     resp->dispatch(err, outputs);
 }

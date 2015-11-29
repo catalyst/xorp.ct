@@ -64,18 +64,18 @@
 #define	MLD_QUERY_INTERVAL			125
 #define	MLD_QUERY_RESPONSE_INTERVAL		10
 #define	MLD_MULTICAST_LISTENER_INTERVAL		(MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-						+ MLD_QUERY_RESPONSE_INTERVAL)
+		* MLD_QUERY_INTERVAL	      \
+		+ MLD_QUERY_RESPONSE_INTERVAL)
 #define	MLD_OTHER_QUERIER_PRESENT_INTERVAL	(MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-					+ MLD_QUERY_RESPONSE_INTERVAL / 2)
+		* MLD_QUERY_INTERVAL	      \
+		+ MLD_QUERY_RESPONSE_INTERVAL / 2)
 #define	MLD_STARTUP_QUERY_INTERVAL		(MLD_QUERY_INTERVAL / 4)
 #define	MLD_STARTUP_QUERY_COUNT			MLD_ROBUSTNESS_VARIABLE
 #define	MLD_LAST_LISTENER_QUERY_INTERVAL	1
 #define	MLD_LAST_LISTENER_QUERY_COUNT		MLD_ROBUSTNESS_VARIABLE
 #define MLD_OLDER_VERSION_HOST_PRESENT_INTERVAL (MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-						+ MLD_QUERY_RESPONSE_INTERVAL)
+		* MLD_QUERY_INTERVAL	      \
+		+ MLD_QUERY_RESPONSE_INTERVAL)
 #ifndef MLD_TIMER_SCALE
 /* the MLD max. response delay is in 1000th of seconds */
 #define MLD_TIMER_SCALE				1000
@@ -210,25 +210,25 @@
  */
 #ifdef MLDV2_LISTENER_REPORT
 #define MLDV2TYPE2ASCII(t)						\
-(((t) == MLDV2_LISTENER_REPORT) ?					\
-    "MLDV2_LISTENER_REPORT"						\
-    : "MLD_type_unknown")
+	(((t) == MLDV2_LISTENER_REPORT) ?					\
+	 "MLDV2_LISTENER_REPORT"						\
+	 : "MLD_type_unknown")
 #else
 #define MLDV2TYPE2ASCII(t)	"MLD_type_unknown"
 #endif
 
 #define MLDTYPE2ASCII(t)						\
-(((t) == MLD_LISTENER_QUERY) ?						\
-    "MLD_LISTENER_QUERY"						\
-    : ((t) == MLD_LISTENER_REPORT) ?					\
-	"MLD_LISTENER_REPORT"						\
-	: ((t) == MLD_LISTENER_DONE) ?					\
-	    "MLD_LISTENER_DONE"						\
-	    : ((t) == MLD_MTRACE_RESP) ?				\
-		"MLD_MTRACE_RESP"					\
-		: ((t) == MLD_MTRACE) ?					\
-		    "MLD_MTRACE"					\
-		    : MLDV2TYPE2ASCII(t))
+	(((t) == MLD_LISTENER_QUERY) ?						\
+	 "MLD_LISTENER_QUERY"						\
+	 : ((t) == MLD_LISTENER_REPORT) ?					\
+	 "MLD_LISTENER_REPORT"						\
+	 : ((t) == MLD_LISTENER_DONE) ?					\
+	 "MLD_LISTENER_DONE"						\
+	 : ((t) == MLD_MTRACE_RESP) ?				\
+	 "MLD_MTRACE_RESP"					\
+	 : ((t) == MLD_MTRACE) ?					\
+	 "MLD_MTRACE"					\
+	 : MLDV2TYPE2ASCII(t))
 
 /*
  * Global variables

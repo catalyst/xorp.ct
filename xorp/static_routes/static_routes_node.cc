@@ -36,11 +36,11 @@
 
 StaticRoutesNode::StaticRoutesNode()
     : ServiceBase("StaticRoutes"),
-      _protocol_name("static"),		// TODO: must be known by RIB
-      _is_enabled(true),		// XXX: enabled by default
-      _startup_requests_n(0),
-      _shutdown_requests_n(0),
-      _is_log_trace(true)		// XXX: default to print trace logs
+    _protocol_name("static"),		// TODO: must be known by RIB
+    _is_enabled(true),		// XXX: enabled by default
+    _startup_requests_n(0),
+    _shutdown_requests_n(0),
+    _is_log_trace(true)		// XXX: default to print trace logs
 {
     set_node_status(PROC_STARTUP);
 }
@@ -50,17 +50,19 @@ StaticRoutesNode::~StaticRoutesNode()
     shutdown();
 }
 
-int
+    int
 StaticRoutesNode::startup()
 {
     //
     // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
-	|| (ServiceBase::status() == SERVICE_RUNNING)) {
+	    || (ServiceBase::status() == SERVICE_RUNNING)) 
+    {
 	return (XORP_OK);
     }
-    if (ServiceBase::status() != SERVICE_READY) {
+    if (ServiceBase::status() != SERVICE_READY) 
+    {
 	return (XORP_ERROR);
     }
 
@@ -89,22 +91,24 @@ StaticRoutesNode::startup()
     return (XORP_OK);
 }
 
-int
+    int
 StaticRoutesNode::shutdown()
 {
     //
     // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
-	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
-	|| (ServiceBase::status() == SERVICE_FAILED)) {
+	    || (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	    || (ServiceBase::status() == SERVICE_FAILED)) 
+    {
 	return (XORP_OK);
     }
     if ((ServiceBase::status() != SERVICE_RUNNING)
-	&& (ServiceBase::status() != SERVICE_STARTING)
-	&& (ServiceBase::status() != SERVICE_PAUSING)
-	&& (ServiceBase::status() != SERVICE_PAUSED)
-	&& (ServiceBase::status() != SERVICE_RESUMING)) {
+	    && (ServiceBase::status() != SERVICE_STARTING)
+	    && (ServiceBase::status() != SERVICE_PAUSING)
+	    && (ServiceBase::status() != SERVICE_PAUSED)
+	    && (ServiceBase::status() != SERVICE_RESUMING)) 
+    {
 	return (XORP_ERROR);
     }
 
@@ -141,22 +145,25 @@ StaticRoutesNode::shutdown()
     return (XORP_OK);
 }
 
-void
+    void
 StaticRoutesNode::status_change(ServiceBase*  service,
-				ServiceStatus old_status,
-				ServiceStatus new_status)
+	ServiceStatus old_status,
+	ServiceStatus new_status)
 {
-    if (service == this) {
+    if (service == this) 
+    {
 	// My own status has changed
 	if ((old_status == SERVICE_STARTING)
-	    && (new_status == SERVICE_RUNNING)) {
+		&& (new_status == SERVICE_RUNNING)) 
+	{
 	    // The startup process has completed
 	    set_node_status(PROC_READY);
 	    return;
 	}
 
 	if ((old_status == SERVICE_SHUTTING_DOWN)
-	    && (new_status == SERVICE_SHUTDOWN)) {
+		&& (new_status == SERVICE_SHUTDOWN)) 
+	{
 	    // The shutdown process has completed
 	    set_node_status(PROC_DONE);
 	    return;
@@ -168,22 +175,24 @@ StaticRoutesNode::status_change(ServiceBase*  service,
 	return;
     }
 
-    if (service == ifmgr_mirror_service_base()) {
+    if (service == ifmgr_mirror_service_base()) 
+    {
 	if ((old_status == SERVICE_SHUTTING_DOWN)
-	    && (new_status == SERVICE_SHUTDOWN)) {
+		&& (new_status == SERVICE_SHUTDOWN)) 
+	{
 	    decr_shutdown_requests_n();
 	}
     }
 }
 
-void
+    void
 StaticRoutesNode::incr_startup_requests_n()
 {
     _startup_requests_n++;
     XLOG_ASSERT(_startup_requests_n > 0);
 }
 
-void
+    void
 StaticRoutesNode::decr_startup_requests_n()
 {
     XLOG_ASSERT(_startup_requests_n > 0);
@@ -192,14 +201,14 @@ StaticRoutesNode::decr_startup_requests_n()
     update_status();
 }
 
-void
+    void
 StaticRoutesNode::incr_shutdown_requests_n()
 {
     _shutdown_requests_n++;
     XLOG_ASSERT(_shutdown_requests_n > 0);
 }
 
-void
+    void
 StaticRoutesNode::decr_shutdown_requests_n()
 {
     XLOG_ASSERT(_shutdown_requests_n > 0);
@@ -208,13 +217,14 @@ StaticRoutesNode::decr_shutdown_requests_n()
     update_status();
 }
 
-void
+    void
 StaticRoutesNode::update_status()
 {
     //
     // Test if the startup process has completed
     //
-    if (ServiceBase::status() == SERVICE_STARTING) {
+    if (ServiceBase::status() == SERVICE_STARTING) 
+    {
 	if (_startup_requests_n > 0)
 	    return;
 
@@ -227,7 +237,8 @@ StaticRoutesNode::update_status()
     //
     // Test if the shutdown process has completed
     //
-    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) 
+    {
 	if (_shutdown_requests_n > 0)
 	    return;
 
@@ -240,58 +251,60 @@ StaticRoutesNode::update_status()
     //
     // Test if we have failed
     //
-    if (ServiceBase::status() == SERVICE_FAILED) {
+    if (ServiceBase::status() == SERVICE_FAILED) 
+    {
 	set_node_status(PROC_DONE);
 	return;
     }
 }
 
-ProcessStatus
+    ProcessStatus
 StaticRoutesNode::node_status(string& reason_msg)
 {
     ProcessStatus status = _node_status;
 
     // Set the return message with the reason
     reason_msg = "";
-    switch (status) {
-    case PROC_NULL:
-	// Can't be running and in this state
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_STARTUP:
-	// Get the message about the startup progress
-	reason_msg = c_format("Waiting for %u startup events",
-			      XORP_UINT_CAST(_startup_requests_n));
-	break;
-    case PROC_NOT_READY:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_READY:
-	reason_msg = c_format("Node is READY");
-	break;
-    case PROC_SHUTDOWN:
-	// Get the message about the shutdown progress
-	reason_msg = c_format("Waiting for %u shutdown events",
-			      XORP_UINT_CAST(_shutdown_requests_n));
-	break;
-    case PROC_FAILED:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_DONE:
-	// Process has completed operation
-	break;
-    default:
-	// Unknown status
-	XLOG_UNREACHABLE();
-	break;
+    switch (status) 
+    {
+	case PROC_NULL:
+	    // Can't be running and in this state
+	    XLOG_UNREACHABLE();
+	    break;
+	case PROC_STARTUP:
+	    // Get the message about the startup progress
+	    reason_msg = c_format("Waiting for %u startup events",
+		    XORP_UINT_CAST(_startup_requests_n));
+	    break;
+	case PROC_NOT_READY:
+	    // XXX: this state is unused
+	    XLOG_UNREACHABLE();
+	    break;
+	case PROC_READY:
+	    reason_msg = c_format("Node is READY");
+	    break;
+	case PROC_SHUTDOWN:
+	    // Get the message about the shutdown progress
+	    reason_msg = c_format("Waiting for %u shutdown events",
+		    XORP_UINT_CAST(_shutdown_requests_n));
+	    break;
+	case PROC_FAILED:
+	    // XXX: this state is unused
+	    XLOG_UNREACHABLE();
+	    break;
+	case PROC_DONE:
+	    // Process has completed operation
+	    break;
+	default:
+	    // Unknown status
+	    XLOG_UNREACHABLE();
+	    break;
     }
-    
+
     return (status);
 }
 
-void
+    void
 StaticRoutesNode::tree_complete()
 {
     decr_startup_requests_n();
@@ -302,7 +315,7 @@ StaticRoutesNode::tree_complete()
     updates_made();
 }
 
-void
+    void
 StaticRoutesNode::updates_made()
 {
     StaticRoutesNode::Table::iterator route_iter;
@@ -311,14 +324,16 @@ StaticRoutesNode::updates_made()
     list<McastRoute *>::iterator mpending_iter;
 
     for (route_iter = _static_routes.begin();
-	 route_iter != _static_routes.end();
-	 ++route_iter) {
+	    route_iter != _static_routes.end();
+	    ++route_iter) 
+    {
 	StaticRoute& static_route = route_iter->second;
 	bool is_old_up = false;
 	bool is_new_up = false;
 	string old_ifname, old_vifname, new_ifname, new_vifname;
 
-	if (static_route.is_interface_route()) {
+	if (static_route.is_interface_route()) 
+	{
 	    //
 	    // Calculate whether the interface was UP before and now.
 	    //
@@ -327,58 +342,67 @@ StaticRoutesNode::updates_made()
 
 	    if_atom = _iftree.find_interface(static_route.ifname());
 	    vif_atom = _iftree.find_vif(static_route.ifname(),
-					static_route.vifname());
+		    static_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
-		&& (! if_atom->no_carrier())
-		&& (vif_atom != NULL) && (vif_atom->enabled())) {
+		    && (! if_atom->no_carrier())
+		    && (vif_atom != NULL) && (vif_atom->enabled())) 
+	    {
 		is_old_up = true;
 	    }
 
 	    if_atom = ifmgr_iftree().find_interface(static_route.ifname());
 	    vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
-					       static_route.vifname());
+		    static_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
-		&& (! if_atom->no_carrier())
-		&& (vif_atom != NULL) && (vif_atom->enabled())) {
+		    && (! if_atom->no_carrier())
+		    && (vif_atom != NULL) && (vif_atom->enabled())) 
+	    {
 		is_new_up = true;
 	    }
-	} else {
+	} else 
+	{
 	    //
 	    // Calculate whether the next-hop router was directly connected
 	    // before and now.
 	    //
 	    if (_iftree.is_directly_connected(static_route.nexthop(),
-					      old_ifname,
-					      old_vifname)) {
+			old_ifname,
+			old_vifname)) 
+	    {
 		is_old_up = true;
 	    }
 	    if (ifmgr_iftree().is_directly_connected(static_route.nexthop(),
-						     new_ifname,
-						     new_vifname)) {
+			new_ifname,
+			new_vifname)) 
+	    {
 		is_new_up = true;
 	    }
 	}
 
 	if ((is_old_up == is_new_up)
-	    && (old_ifname == new_ifname)
-	    && (old_vifname == new_vifname)) {
+		&& (old_ifname == new_ifname)
+		&& (old_vifname == new_vifname)) 
+	{
 	    continue;			// Nothing changed
 	}
 
-	if ((! is_old_up) && (! is_new_up)) {
+	if ((! is_old_up) && (! is_new_up)) 
+	{
 	    //
 	    // The interface s still down, so nothing to do
 	    //
 	    continue;
 	}
-	if ((! is_old_up) && (is_new_up)) {
+	if ((! is_old_up) && (is_new_up)) 
+	{
 	    //
 	    // The interface is now up, hence add the route
 	    //
 	    add_routes.push_back(&static_route);
 	    continue;
 	}
-	if ((is_old_up) && (! is_new_up)) {
+	if ((is_old_up) && (! is_new_up)) 
+	{
 	    //
 	    // The interface went down, hence cancel all pending requests,
 	    // and withdraw the route.
@@ -386,7 +410,8 @@ StaticRoutesNode::updates_made()
 	    delete_routes.push_back(&static_route);
 	    continue;
 	}
-	if (is_old_up && is_new_up) {
+	if (is_old_up && is_new_up) 
+	{
 	    //
 	    // The interface remains up, hence probably the interface or
 	    // the vif name has changed.
@@ -402,8 +427,9 @@ StaticRoutesNode::updates_made()
     list<McastRoute *> add_mroutes, replace_mroutes, delete_mroutes;
     map<IPvX, McastRoute>::iterator mroute_iter;
     for (mroute_iter = _mcast_routes.begin();
-	 mroute_iter != _mcast_routes.end();
-	 ++mroute_iter) {
+	    mroute_iter != _mcast_routes.end();
+	    ++mroute_iter) 
+    {
 	McastRoute& static_route = mroute_iter->second;
 	bool is_old_up = false;
 	bool is_new_up = false;
@@ -417,42 +443,48 @@ StaticRoutesNode::updates_made()
 
 	if_atom = _iftree.find_interface(static_route.ifname());
 	vif_atom = _iftree.find_vif(static_route.ifname(),
-				    static_route.vifname());
+		static_route.vifname());
 	if ((if_atom != NULL) && (if_atom->enabled())
-	    && (! if_atom->no_carrier())
-	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+		&& (! if_atom->no_carrier())
+		&& (vif_atom != NULL) && (vif_atom->enabled())) 
+	{
 	    is_old_up = true;
 	}
 
 	if_atom = ifmgr_iftree().find_interface(static_route.ifname());
 	vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
-					   static_route.vifname());
+		static_route.vifname());
 	if ((if_atom != NULL) && (if_atom->enabled())
-	    && (! if_atom->no_carrier())
-	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+		&& (! if_atom->no_carrier())
+		&& (vif_atom != NULL) && (vif_atom->enabled())) 
+	{
 	    is_new_up = true;
 	}
 
 	if ((is_old_up == is_new_up)
-	    && (old_ifname == new_ifname)
-	    && (old_vifname == new_vifname)) {
+		&& (old_ifname == new_ifname)
+		&& (old_vifname == new_vifname)) 
+	{
 	    continue;			// Nothing changed
 	}
 
-	if ((! is_old_up) && (! is_new_up)) {
+	if ((! is_old_up) && (! is_new_up)) 
+	{
 	    //
 	    // The interface is still down, so nothing to do
 	    //
 	    continue;
 	}
-	if ((! is_old_up) && (is_new_up)) {
+	if ((! is_old_up) && (is_new_up)) 
+	{
 	    //
 	    // The interface is now up, hence add the route
 	    //
 	    add_mroutes.push_back(&static_route);
 	    continue;
 	}
-	if ((is_old_up) && (! is_new_up)) {
+	if ((is_old_up) && (! is_new_up)) 
+	{
 	    //
 	    // The interface went down, hence cancel all pending requests,
 	    // and withdraw the route.
@@ -460,7 +492,8 @@ StaticRoutesNode::updates_made()
 	    delete_mroutes.push_back(&static_route);
 	    continue;
 	}
-	if (is_old_up && is_new_up) {
+	if (is_old_up && is_new_up) 
+	{
 	    //
 	    // The interface remains up, hence probably the interface or
 	    // the vif name has changed.
@@ -481,8 +514,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "add route" requests
     //
     for (pending_iter = add_routes.begin();
-	 pending_iter != add_routes.end();
-	 ++pending_iter) {
+	    pending_iter != add_routes.end();
+	    ++pending_iter) 
+    {
 	StaticRoute& orig_route = *(*pending_iter);
 	StaticRoute copy_route = orig_route;
 	prepare_route_for_transmission(orig_route, copy_route);
@@ -494,8 +528,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "replace route" requests
     //
     for (pending_iter = replace_routes.begin();
-	 pending_iter != replace_routes.end();
-	 ++pending_iter) {
+	    pending_iter != replace_routes.end();
+	    ++pending_iter) 
+    {
 	StaticRoute& orig_route = *(*pending_iter);
 	StaticRoute copy_route = orig_route;
 	// First delete the route, then add the route
@@ -512,8 +547,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "delete route" requests
     //
     for (pending_iter = delete_routes.begin();
-	 pending_iter != delete_routes.end();
-	 ++pending_iter) {
+	    pending_iter != delete_routes.end();
+	    ++pending_iter) 
+    {
 	StaticRoute& orig_route = *(*pending_iter);
 	cancel_rib_route_change(orig_route);
 	StaticRoute copy_route = orig_route;
@@ -527,8 +563,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "add mroute" requests
     //
     for (mpending_iter = add_mroutes.begin();
-	 mpending_iter != add_mroutes.end();
-	 ++mpending_iter) {
+	    mpending_iter != add_mroutes.end();
+	    ++mpending_iter) 
+    {
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_add_route();
@@ -539,8 +576,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "replace mroute" requests
     //
     for (mpending_iter = replace_mroutes.begin();
-	 mpending_iter != replace_mroutes.end();
-	 ++mpending_iter) {
+	    mpending_iter != replace_mroutes.end();
+	    ++mpending_iter) 
+    {
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_replace_route();
@@ -551,8 +589,9 @@ StaticRoutesNode::updates_made()
     // Process all pending "delete mroute" requests
     //
     for (mpending_iter = delete_mroutes.begin();
-	 mpending_iter != delete_mroutes.end();
-	 ++mpending_iter) {
+	    mpending_iter != delete_mroutes.end();
+	    ++mpending_iter) 
+    {
 	McastRoute& orig_route = *(*mpending_iter);
 	cancel_mfea_mfc_change(orig_route);
 	McastRoute copy_route = orig_route;
@@ -570,16 +609,18 @@ StaticRoutesNode::updates_made()
  *
  * @param enable if true then enable node operation, otherwise disable it.
  */
-void
+    void
 StaticRoutesNode::set_enabled(bool enable)
 {
     if (enable == is_enabled())
 	return;			// XXX: nothing changed
 
-    if (enable) {
+    if (enable) 
+    {
 	_is_enabled = true;
 	push_pull_rib_routes(true);
-    } else {
+    } else 
+    {
 	push_pull_rib_routes(false);
 	_is_enabled = false;
     }
@@ -604,15 +645,15 @@ StaticRoutesNode::set_enabled(bool enable)
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::add_route4(bool unicast, bool multicast,
-			     const IPv4Net& network, const IPv4& nexthop,
-			     const string& ifname, const string& vifname,
-			     uint32_t metric, bool is_backup_route,
-			     string& error_msg)
+	const IPv4Net& network, const IPv4& nexthop,
+	const string& ifname, const string& vifname,
+	uint32_t metric, bool is_backup_route,
+	string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric, is_backup_route);
+	    ifname, vifname, metric, is_backup_route);
 
     static_route.set_add_route();
 
@@ -638,15 +679,15 @@ StaticRoutesNode::add_route4(bool unicast, bool multicast,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::add_route6(bool unicast, bool multicast,
-			     const IPv6Net& network, const IPv6& nexthop,
-			     const string& ifname, const string& vifname,
-			     uint32_t metric, bool is_backup_route,
-			     string& error_msg)
+	const IPv6Net& network, const IPv6& nexthop,
+	const string& ifname, const string& vifname,
+	uint32_t metric, bool is_backup_route,
+	string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric, is_backup_route);
+	    ifname, vifname, metric, is_backup_route);
 
     static_route.set_add_route();
 
@@ -672,15 +713,15 @@ StaticRoutesNode::add_route6(bool unicast, bool multicast,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::replace_route4(bool unicast, bool multicast,
-				 const IPv4Net& network, const IPv4& nexthop,
-				 const string& ifname, const string& vifname,
-				 uint32_t metric, bool is_backup_route,
-				 string& error_msg)
+	const IPv4Net& network, const IPv4& nexthop,
+	const string& ifname, const string& vifname,
+	uint32_t metric, bool is_backup_route,
+	string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric, is_backup_route);
+	    ifname, vifname, metric, is_backup_route);
 
     static_route.set_replace_route();
 
@@ -706,15 +747,15 @@ StaticRoutesNode::replace_route4(bool unicast, bool multicast,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::replace_route6(bool unicast, bool multicast,
-				 const IPv6Net& network, const IPv6& nexthop,
-				 const string& ifname, const string& vifname,
-				 uint32_t metric, bool is_backup_route,
-				 string& error_msg)
+	const IPv6Net& network, const IPv6& nexthop,
+	const string& ifname, const string& vifname,
+	uint32_t metric, bool is_backup_route,
+	string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric, is_backup_route);
+	    ifname, vifname, metric, is_backup_route);
 
     static_route.set_replace_route();
 
@@ -739,14 +780,14 @@ StaticRoutesNode::replace_route6(bool unicast, bool multicast,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::delete_route4(bool unicast, bool multicast,
-				const IPv4Net& network, const IPv4& nexthop,
-				const string& ifname, const string& vifname,
-				bool is_backup_route, string& error_msg)
+	const IPv4Net& network, const IPv4& nexthop,
+	const string& ifname, const string& vifname,
+	bool is_backup_route, string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, 0, is_backup_route);
+	    ifname, vifname, 0, is_backup_route);
 
     static_route.set_delete_route();
 
@@ -771,14 +812,14 @@ StaticRoutesNode::delete_route4(bool unicast, bool multicast,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::delete_route6(bool unicast, bool multicast,
-				const IPv6Net& network, const IPv6& nexthop,
-				const string& ifname, const string& vifname,
-				bool is_backup_route, string& error_msg)
+	const IPv6Net& network, const IPv6& nexthop,
+	const string& ifname, const string& vifname,
+	bool is_backup_route, string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, 0, is_backup_route);
+	    ifname, vifname, 0, is_backup_route);
 
     static_route.set_delete_route();
 
@@ -786,17 +827,20 @@ StaticRoutesNode::delete_route6(bool unicast, bool multicast,
 }
 
 int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
-				       const IPv4& input_ip, const string& output_ifs,
-				       uint32_t distance, string& error_msg) {
+	const IPv4& input_ip, const string& output_ifs,
+	uint32_t distance, string& error_msg) 
+{
     map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
-    if (iter == _mcast_routes.end()) {
+    if (iter == _mcast_routes.end()) 
+    {
 	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
 	_mcast_routes[mcast_addr] = mr;
 	McastRoute copy_route = mr;
 	copy_route.set_add_route();
 	inform_mfea(copy_route, "add-mcast-route4");
     }
-    else {
+    else 
+    {
 	error_msg.append("Mcast-Route: " + mcast_addr.str() + " already exists!\n");
 	return XORP_ERROR;
     }
@@ -804,14 +848,17 @@ int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& inp
 }
 
 int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
-					   const IPv4& input_ip, const string& output_ifs,
-					   uint32_t distance, string& error_msg) {
+	const IPv4& input_ip, const string& output_ifs,
+	uint32_t distance, string& error_msg) 
+{
     UNUSED(error_msg);
 
     McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
     map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
-    if (iter == _mcast_routes.end()) {
-	if (iter->second == mr) {
+    if (iter == _mcast_routes.end()) 
+    {
+	if (iter->second == mr) 
+	{
 	    // no changes
 	    return XORP_OK;
 	}
@@ -828,11 +875,13 @@ int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string&
 
 
 int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const IPv4& input_ip,
-					  string& error_msg) {
+	string& error_msg) 
+{
     UNUSED(error_msg);
 
     map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
-    if (iter != _mcast_routes.end()) {
+    if (iter != _mcast_routes.end()) 
+    {
 	_mcast_routes.erase(mcast_addr);
 
 	McastRoute mr(mcast_addr, input_ip);
@@ -852,36 +901,41 @@ int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const IPv4& in
  * @return a table iterator to the route. If the route is not found,
  * the iterator will point to the end of the table.
  */
-StaticRoutesNode::Table::iterator
+    StaticRoutesNode::Table::iterator
 StaticRoutesNode::find_route(StaticRoutesNode::Table& table,
-			     const StaticRoute& key_route)
+	const StaticRoute& key_route)
 {
     StaticRoutesNode::Table::iterator iter;
 
     iter = table.find(key_route.network());
-    for ( ; iter != table.end(); ++iter) {
+    for ( ; iter != table.end(); ++iter) 
+    {
 	StaticRoute& orig_route = iter->second;
 	if (orig_route.network() != key_route.network())
 	    break;
 
 	// Check whether the route attributes match
 	if ((orig_route.unicast() != key_route.unicast())
-	    || (orig_route.multicast() != key_route.multicast())) {
+		|| (orig_route.multicast() != key_route.multicast())) 
+	{
 	    continue;
 	}
-	if (orig_route.is_backup_route() != key_route.is_backup_route()) {
+	if (orig_route.is_backup_route() != key_route.is_backup_route()) 
+	{
 	    continue;
 	}
 
-	if (! key_route.is_backup_route()) {
+	if (! key_route.is_backup_route()) 
+	{
 	    // XXX: There can be a single (primary) route to a destination
 	    return (iter);
 	}
 
 	// A backup route: check the next-hop information
 	if ((orig_route.ifname() == key_route.ifname())
-	    && (orig_route.vifname() == key_route.vifname())
-	    && (orig_route.nexthop() == key_route.nexthop())) {
+		&& (orig_route.vifname() == key_route.vifname())
+		&& (orig_route.nexthop() == key_route.nexthop())) 
+	{
 	    // XXX: Exact route found
 	    return (iter);
 	}
@@ -898,21 +952,23 @@ StaticRoutesNode::find_route(StaticRoutesNode::Table& table,
  * @return a table iterator to the route. If the route is not found,
  * the iterator will point to the end of the table.
  */
-StaticRoutesNode::Table::iterator
+    StaticRoutesNode::Table::iterator
 StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
-					   const StaticRoute& key_route)
+	const StaticRoute& key_route)
 {
     StaticRoutesNode::Table::iterator iter, best_iter = table.end();
 
     iter = table.find(key_route.network());
-    for ( ; iter != table.end(); ++iter) {
+    for ( ; iter != table.end(); ++iter) 
+    {
 	StaticRoute& orig_route = iter->second;
 	if (orig_route.network() != key_route.network())
 	    break;
 
 	// Check whether the route attributes match
 	if ((orig_route.unicast() != key_route.unicast())
-	    || (orig_route.multicast() != key_route.multicast())) {
+		|| (orig_route.multicast() != key_route.multicast())) 
+	{
 	    continue;
 	}
 
@@ -920,7 +976,8 @@ StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
 	if (! orig_route.is_accepted_by_rib())
 	    continue;
 
-	if (best_iter == table.end()) {
+	if (best_iter == table.end()) 
+	{
 	    // The first matching route
 	    best_iter = iter;
 	    continue;
@@ -928,7 +985,8 @@ StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
 
 	// Select the route with the better metric
 	StaticRoute& best_route = best_iter->second;
-	if (orig_route.metric() < best_route.metric()) {
+	if (orig_route.metric() < best_route.metric()) 
+	{
 	    best_iter = iter;
 	    continue;
 	}
@@ -945,9 +1003,9 @@ StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::add_route(const StaticRoute& static_route,
-			    string& error_msg)
+	string& error_msg)
 {
     StaticRoute updated_route = static_route;
 
@@ -959,10 +1017,11 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     //
     // Check the entry
     //
-    if (updated_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) 
+    {
 	error_msg = c_format("Cannot add route for %s: %s",
-			     updated_route.network().str().c_str(),
-			     error_msg.c_str());
+		updated_route.network().str().c_str(),
+		error_msg.c_str());
 	return XORP_ERROR;
     }
 
@@ -970,13 +1029,14 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     // Check if the route was added already
     //
     StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
-							updated_route);
-    if (iter != _static_routes.end()) {
+	    updated_route);
+    if (iter != _static_routes.end()) 
+    {
 	error_msg = c_format("Cannot add %s route for %s: "
-			     "the route already exists",
-			     (updated_route.unicast())?
-			     "unicast" : "multicast",
-			     updated_route.network().str().c_str());
+		"the route already exists",
+		(updated_route.unicast())?
+		"unicast" : "multicast",
+		updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
@@ -984,7 +1044,7 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     // Add the route
     //
     iter = _static_routes.insert(make_pair(updated_route.network(),
-					   updated_route));
+		updated_route));
 
     //
     // Create a copy of the route and inform the RIB if necessary
@@ -1009,9 +1069,9 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::replace_route(const StaticRoute& static_route,
-				string& error_msg)
+	string& error_msg)
 {
     StaticRoute updated_route = static_route;
 
@@ -1023,10 +1083,11 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     //
     // Check the entry
     //
-    if (updated_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) 
+    {
 	error_msg = c_format("Cannot replace route for %s: %s",
-			     updated_route.network().str().c_str(),
-			     error_msg.c_str());
+		updated_route.network().str().c_str(),
+		error_msg.c_str());
 	return XORP_ERROR;
     }
 
@@ -1034,21 +1095,23 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     // Find the route and replace it.
     //
     StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
-							updated_route);
-    if (iter == _static_routes.end()) {
+	    updated_route);
+    if (iter == _static_routes.end()) 
+    {
 	//
 	// Couldn't find the route to replace
 	//
 	error_msg = c_format("Cannot replace route for %s: "
-			     "no such route",
-			     updated_route.network().str().c_str());
+		"no such route",
+		updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
     //
     // Route found. Overwrite its value.
     //
-    do {
+    do 
+    {
 	StaticRoute& orig_route = iter->second;
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
@@ -1064,16 +1127,22 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 	// XXX: If necessary, change the type of the route.
 	// E.g., "replace route" may become "add route" or "delete route".
 	//
-	if (copy_route.is_accepted_by_rib()) {
-	    if (was_accepted) {
+	if (copy_route.is_accepted_by_rib()) 
+	{
+	    if (was_accepted) 
+	    {
 		copy_route.set_replace_route();
-	    } else {
+	    } else 
+	    {
 		copy_route.set_add_route();
 	    }
-	} else {
-	    if (was_accepted) {
+	} else 
+	{
+	    if (was_accepted) 
+	    {
 		copy_route.set_delete_route();
-	    } else {
+	    } else 
+	    {
 		return XORP_OK;
 	    }
 	}
@@ -1095,9 +1164,9 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-int
+    int
 StaticRoutesNode::delete_route(const StaticRoute& static_route,
-			       string& error_msg)
+	string& error_msg)
 {
     StaticRoute updated_route = static_route;
 
@@ -1109,10 +1178,11 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     //
     // Check the entry
     //
-    if (updated_route.is_valid_entry(error_msg) != true) {
+    if (updated_route.is_valid_entry(error_msg) != true) 
+    {
 	error_msg = c_format("Cannot delete route for %s: %s",
-			     updated_route.network().str().c_str(),
-			     error_msg.c_str());
+		updated_route.network().str().c_str(),
+		error_msg.c_str());
 	return XORP_ERROR;
     }
 
@@ -1122,15 +1192,16 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     // delete all routes to the same destination.
     //
     StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
-							updated_route);
-    if (iter == _static_routes.end()) {
+	    updated_route);
+    if (iter == _static_routes.end()) 
+    {
 	//
 	// Couldn't find the route to delete
 	//
 	error_msg = c_format("Cannot delete %s route for %s: "
-			     "no such route",
-			     (updated_route.unicast())? "unicast" : "multicast",
-			     updated_route.network().str().c_str());
+		"no such route",
+		(updated_route.unicast())? "unicast" : "multicast",
+		updated_route.network().str().c_str());
 	return XORP_ERROR;
     }
 
@@ -1143,24 +1214,28 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     list<StaticRoute> delete_routes;
 
     iter = _static_routes.find(updated_route.network());
-    while (iter != _static_routes.end()) {
+    while (iter != _static_routes.end()) 
+    {
 	StaticRoutesNode::Table::iterator orig_iter = iter;
 	StaticRoute& orig_route = orig_iter->second;
 	++iter;
-	
+
 	if (orig_route.network() != updated_route.network())
 	    break;
 
 	if ((orig_route.unicast() != updated_route.unicast())
-	    || (orig_route.multicast() != updated_route.multicast())) {
+		|| (orig_route.multicast() != updated_route.multicast())) 
+	{
 	    continue;
 	}
 
-	if (updated_route.is_backup_route()) {
+	if (updated_route.is_backup_route()) 
+	{
 	    if ((orig_route.is_backup_route() != updated_route.is_backup_route())
-		|| (orig_route.ifname() != updated_route.ifname())
-		|| (orig_route.vifname() != updated_route.vifname())
-		|| (orig_route.nexthop() != updated_route.nexthop())) {
+		    || (orig_route.ifname() != updated_route.ifname())
+		    || (orig_route.vifname() != updated_route.vifname())
+		    || (orig_route.nexthop() != updated_route.nexthop())) 
+	    {
 		continue;
 	    }
 	}
@@ -1175,8 +1250,9 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 
     list<StaticRoute>::iterator delete_iter;
     for (delete_iter = delete_routes.begin();
-	 delete_iter != delete_routes.end();
-	 ++delete_iter) {
+	    delete_iter != delete_routes.end();
+	    ++delete_iter) 
+    {
 	StaticRoute& orig_route = *delete_iter;		// XXX: actually a copy
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
@@ -1213,11 +1289,13 @@ StaticRoute::is_valid_entry(string& error_msg) const
     //
     // Check the unicast and multicast flags
     //
-    if ((_unicast == false) && (_multicast == false)) {
+    if ((_unicast == false) && (_multicast == false)) 
+    {
 	error_msg = "the route is neither unicast nor multicast";
 	return false;
     }
-    if ((_unicast == true) && (_multicast == true)) {
+    if ((_unicast == true) && (_multicast == true)) 
+    {
 	error_msg = "the route must be either unicast or multicast";
 	return false;
     }
@@ -1237,24 +1315,26 @@ StaticRoute::is_accepted_by_rib() const
     return (is_accepted_by_nexthop() && (! is_filtered()));
 }
 
-void
+    void
 StaticRoutesNode::configure_filter(const uint32_t& filter, const string& conf)
 {
     _policy_filters.configure(filter, conf);
 }
 
-void
-StaticRoutesNode::reset_filter(const uint32_t& filter) {
+    void
+StaticRoutesNode::reset_filter(const uint32_t& filter) 
+{
     _policy_filters.reset(filter);
 }
 
-void
+    void
 StaticRoutesNode::push_routes()
 {
     StaticRoutesNode::Table::iterator iter;
 
     // XXX: not a background task
-    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
+    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) 
+    {
 	StaticRoute& orig_route = iter->second;
 	bool was_accepted = orig_route.is_accepted_by_rib();
 
@@ -1268,16 +1348,22 @@ StaticRoutesNode::push_routes()
 	// XXX: If necessary, change the type of the route.
 	// E.g., "replace route" may become "add route" or "delete route".
 	//
-	if (copy_route.is_accepted_by_rib()) {
-	    if (was_accepted) {
+	if (copy_route.is_accepted_by_rib()) 
+	{
+	    if (was_accepted) 
+	    {
 		copy_route.set_replace_route();
-	    } else {
+	    } else 
+	    {
 		copy_route.set_add_route();
 	    }
-	} else {
-	    if (was_accepted) {
+	} else 
+	{
+	    if (was_accepted) 
+	    {
 		copy_route.set_delete_route();
-	    } else {
+	    } else 
+	    {
 		continue;
 	    }
 	}
@@ -1289,13 +1375,14 @@ StaticRoutesNode::push_routes()
     }
 }
 
-void
+    void
 StaticRoutesNode::push_pull_rib_routes(bool is_push)
 {
     StaticRoutesNode::Table::iterator iter;
 
     // XXX: not a background task
-    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
+    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) 
+    {
 	StaticRoute& orig_route = iter->second;
 
 	//
@@ -1310,9 +1397,11 @@ StaticRoutesNode::push_pull_rib_routes(bool is_push)
 	if (! copy_route.is_accepted_by_rib())
 	    continue;
 
-	if (is_push) {
+	if (is_push) 
+	{
 	    copy_route.set_add_route();
-	} else {
+	} else 
+	{
 	    copy_route.set_delete_route();
 	}
 
@@ -1326,7 +1415,8 @@ StaticRoutesNode::push_pull_rib_routes(bool is_push)
 bool
 StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
 {
-    if (route.is_interface_route()) {
+    if (route.is_interface_route()) 
+    {
 	const IfMgrIfAtom* if_atom;
 	const IfMgrVifAtom* vif_atom;
 	bool is_up = false;
@@ -1334,16 +1424,20 @@ StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
 	if_atom = _iftree.find_interface(route.ifname());
 	vif_atom = _iftree.find_vif(route.ifname(), route.vifname());
 	if ((if_atom != NULL) && (if_atom->enabled())
-	    && (! if_atom->no_carrier())
-	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+		&& (! if_atom->no_carrier())
+		&& (vif_atom != NULL) && (vif_atom->enabled())) 
+	{
 	    is_up = true;
 	}
-	if (is_up) {
+	if (is_up) 
+	{
 	    return (true);
 	}
-    } else {
+    } else 
+    {
 	string ifname, vifname;
-	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname)) {
+	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname)) 
+	{
 	    return (true);
 	}
     }
@@ -1351,9 +1445,9 @@ StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
     return (false);
 }
 
-void
+    void
 StaticRoutesNode::prepare_route_for_transmission(StaticRoute& orig_route,
-						 StaticRoute& copy_route)
+	StaticRoute& copy_route)
 {
     //
     // We do not want to modify original route, so we may re-filter routes on
@@ -1372,7 +1466,7 @@ StaticRoutesNode::prepare_route_for_transmission(StaticRoute& orig_route,
     orig_route.set_accepted_by_nexthop(accepted_by_nexthop);
 }
 
-void
+    void
 StaticRoutesNode::inform_rib(const StaticRoute& route)
 {
     StaticRoute modified_route(route);
@@ -1386,9 +1480,11 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
     //
     // Set the pointer to the appropriate table with the winning routes
     //
-    if (route.unicast()) {
+    if (route.unicast()) 
+    {
 	winning_routes_ptr = &_winning_routes_unicast;
-    } else {
+    } else 
+    {
 	winning_routes_ptr = &_winning_routes_multicast;
     }
 
@@ -1403,38 +1499,46 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
     // If yes, then update the table with the winning routes.
     //
     bool do_inform = false;
-    if (route.is_add_route() || route.is_replace_route()) {
-	if (route.is_accepted_by_rib()) {
+    if (route.is_add_route() || route.is_replace_route()) 
+    {
+	if (route.is_accepted_by_rib()) 
+	{
 	    XLOG_ASSERT(best_iter != _static_routes.end());
 	    StaticRoute& best_route = best_iter->second;
 
-	    if (route.is_same_route(best_route)) {
+	    if (route.is_same_route(best_route)) 
+	    {
 		//
 		// If there was already a route sent to the RIB, then
 		// an "add" route should become a "replace" route.
 		//
-		if (old_winning_iter != winning_routes_ptr->end()) {
-		    if (route.is_add_route()) {
+		if (old_winning_iter != winning_routes_ptr->end()) 
+		{
+		    if (route.is_add_route()) 
+		    {
 			modified_route.set_replace_route();
 		    }
 		    winning_routes_ptr->erase(old_winning_iter);
 		}
 		winning_routes_ptr->insert(make_pair(modified_route.network(),
-						     modified_route));
+			    modified_route));
 		do_inform = true;
-	    } else {
+	    } else 
+	    {
 		//
 		// Check whether the best route is now different. If yes, then
 		// send the current best route instead (as a "replace" route).
 		//
-		if (old_winning_iter != winning_routes_ptr->end()) {
+		if (old_winning_iter != winning_routes_ptr->end()) 
+		{
 		    const StaticRoute& old_winning_route = old_winning_iter->second;
-		    if (! best_route.is_same_route(old_winning_route)) {
+		    if (! best_route.is_same_route(old_winning_route)) 
+		    {
 			winning_routes_ptr->erase(old_winning_iter);
 			modified_route = best_route;
 			modified_route.set_replace_route();
 			winning_routes_ptr->insert(make_pair(modified_route.network(),
-							     modified_route));
+				    modified_route));
 			do_inform = true;
 		    }
 		}
@@ -1442,27 +1546,31 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 	}
     }
 
-    if (route.is_delete_route()) {
-	if (old_winning_iter != winning_routes_ptr->end()) {
+    if (route.is_delete_route()) 
+    {
+	if (old_winning_iter != winning_routes_ptr->end()) 
+	{
 	    StaticRoute& old_winning_route = old_winning_iter->second;
-	    if (route.is_same_route(old_winning_route)) {
+	    if (route.is_same_route(old_winning_route)) 
+	    {
 		winning_routes_ptr->erase(old_winning_iter);
 		do_inform = true;
 		//
 		// Check whether there is another best route. If yes, then
 		// send the current best route instead (as a "replace" route).
 		//
-		if (best_iter != _static_routes.end()) {
+		if (best_iter != _static_routes.end()) 
+		{
 		    StaticRoute& best_route = best_iter->second;
 		    modified_route = best_route;
 		    modified_route.set_replace_route();
 		    winning_routes_ptr->insert(make_pair(modified_route.network(),
-							 modified_route));
+				modified_route));
 		}
 	    }
 	}
     }
-    
+
     //
     // Inform the RIB about the change
     //
@@ -1471,7 +1579,7 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 }
 
 
-void
+    void
 StaticRoutesNode::inform_mfea(const McastRoute& route, const char* dbg)
 {
     if (! is_enabled())
@@ -1489,7 +1597,7 @@ StaticRoutesNode::inform_mfea(const McastRoute& route, const char* dbg)
  * @param route the route to update.
  * @return true if the route was updated, otherwise false.
  */
-bool
+    bool
 StaticRoutesNode::update_route(const IfMgrIfTree& iftree, StaticRoute& route)
 {
     UNUSED(iftree);
@@ -1498,18 +1606,19 @@ StaticRoutesNode::update_route(const IfMgrIfTree& iftree, StaticRoute& route)
     return (false);
 }
 
-bool
+    bool
 StaticRoutesNode::do_filtering(StaticRoute& route)
 {
-    try {
+    try 
+    {
 	StaticRoutesVarRW varrw(route);
 
 	// Import filtering
 	bool accepted;
 
 	debug_msg("[STATIC] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT),
-		  route.network().str().c_str());
+		filter::filter2str(filter::IMPORT),
+		route.network().str().c_str());
 	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
 	route.set_filtered(!accepted);
@@ -1522,13 +1631,14 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 
 	// Export source-match filtering
 	debug_msg("[STATIC] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
-		  route.network().str().c_str());
+		filter::filter2str(filter::EXPORT_SOURCEMATCH),
+		route.network().str().c_str());
 
 	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return accepted;
-    } catch(const PolicyException& e) {
+    } catch(const PolicyException& e) 
+    {
 	XLOG_FATAL("PolicyException: %s", e.str().c_str());
 
 	// FIXME: What do we do ?
@@ -1536,21 +1646,24 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
     }
 }
 
-string StaticRouteBase::str() const {
+string StaticRouteBase::str() const 
+{
     ostringstream oss;
     oss << "RouteType: ";
-    switch (_route_type) {
-    case IDLE_ROUTE: oss << "IDLE "; break;
-    case ADD_ROUTE: oss << "ADD "; break;
-    case REPLACE_ROUTE: oss << "REPLACE "; break;
-    case DELETE_ROUTE: oss << "DELETE "; break;
-    default: oss << "UNKNOWN(" << _route_type << ") "; break;
+    switch (_route_type) 
+    {
+	case IDLE_ROUTE: oss << "IDLE "; break;
+	case ADD_ROUTE: oss << "ADD "; break;
+	case REPLACE_ROUTE: oss << "REPLACE "; break;
+	case DELETE_ROUTE: oss << "DELETE "; break;
+	default: oss << "UNKNOWN(" << _route_type << ") "; break;
     }
     oss << " ignored: " << _is_ignored;
     return oss.str();
 }
 
-string McastRoute::str() const {
+string McastRoute::str() const 
+{
     ostringstream oss;
     oss << StaticRouteBase::str() << endl;
     oss << "mcast-addr: " << _mcast_addr.str() << " ifname: " << _ifname
@@ -1559,7 +1672,8 @@ string McastRoute::str() const {
     return oss.str();
 }
 
-bool McastRoute::operator==(const McastRoute& other) const {
+bool McastRoute::operator==(const McastRoute& other) const 
+{
     if (this == &other)
 	return true;
     return (_route_type == other._route_type && // from base class

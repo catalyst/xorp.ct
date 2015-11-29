@@ -79,15 +79,16 @@ static xlog_verbose_t	xlog_verbose_level[XLOG_LEVEL_MAX];
  * XXX: the log level names below has to be consistent with the XLOG_LEVEL_*
  * values.
  */
-static const char	*xlog_level_names[XLOG_LEVEL_MAX] = {
-				"FATAL",
-				"ERROR",
-				"WARNING",
-				"INFO",
-				"TRACE",
-				/* XXX: temp, to be removed; see Bugzilla entry 795 */
-				"RTRMGR_ONLY_NO_PREAMBLE",
-			};
+static const char	*xlog_level_names[XLOG_LEVEL_MAX] = 
+{
+    "FATAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "TRACE",
+    /* XXX: temp, to be removed; see Bugzilla entry 795 */
+    "RTRMGR_ONLY_NO_PREAMBLE",
+};
 
 
 /*
@@ -95,8 +96,8 @@ static const char	*xlog_level_names[XLOG_LEVEL_MAX] = {
  */
 
 static void	xlog_record_va(xlog_level_t log_level, const char* module_name,
-			       const char *where, const char* format,
-			       va_list ap);
+	const char *where, const char* format,
+	va_list ap);
 static int	xlog_write(FILE* fp, const char* fmt, ...);
 static int	xlog_write_va(FILE* fp, const char* fmt, va_list ap);
 static int	xlog_flush(FILE* fp);
@@ -118,7 +119,7 @@ static int	xlog_flush(FILE* fp);
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_init(const char *argv0, const char *preamble_message)
 {
     const char* process_name;
@@ -129,7 +130,8 @@ xlog_init(const char *argv0, const char *preamble_message)
 
     pid = getpid();
 
-    if (process_name_string != NULL) {
+    if (process_name_string != NULL) 
+    {
 	free(process_name_string);
 	process_name_string = NULL;
     }
@@ -147,7 +149,8 @@ xlog_init(const char *argv0, const char *preamble_message)
     xlog_set_preamble(preamble_message);
 
     /* Enable all log messages by default, and set default verbose level */
-    for (level = XLOG_LEVEL_MIN; level < XLOG_LEVEL_MAX; level++) {
+    for (level = XLOG_LEVEL_MIN; level < XLOG_LEVEL_MAX; level++) 
+    {
 	xlog_enable(level);
 	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
@@ -169,7 +172,7 @@ xlog_init(const char *argv0, const char *preamble_message)
  *
  * Return value: 0 on success, othewise -1.
  **/
-int
+    int
 xlog_exit(void)
 {
     int i;
@@ -184,16 +187,19 @@ xlog_exit(void)
     /* Reset local variables */
     init_flag = 0;
     pid = 0;
-    if (process_name_string != NULL) {
+    if (process_name_string != NULL) 
+    {
 	free (process_name_string);
 	process_name_string = NULL;
     }
-    if (preamble_string != NULL) {
+    if (preamble_string != NULL) 
+    {
 	free (preamble_string);
 	preamble_string = NULL;
     }
 
-    for (i = 0; i < MAX_XLOG_OUTPUTS; i++) {
+    for (i = 0; i < MAX_XLOG_OUTPUTS; i++) 
+    {
 	xlog_outputs_file[i] = NULL;
 	xlog_outputs_func[i] = NULL;
 	xlog_outputs_obj[i] = NULL;
@@ -202,7 +208,8 @@ xlog_exit(void)
     xlog_output_func_count = 0;
     fp_default = 0;
 
-    for (level = XLOG_LEVEL_MIN; level < XLOG_LEVEL_MAX; level++) {
+    for (level = XLOG_LEVEL_MIN; level < XLOG_LEVEL_MAX; level++) 
+    {
 	xlog_disable(level);
 	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
@@ -222,7 +229,7 @@ xlog_exit(void)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_start(void)
 {
     if (! init_flag)
@@ -244,7 +251,7 @@ xlog_start(void)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_stop(void)
 {
     if (! start_flag)
@@ -255,7 +262,7 @@ xlog_stop(void)
     return (0);
 }
 
-int
+    int
 xlog_is_running(void)
 {
     return start_flag;
@@ -271,7 +278,7 @@ xlog_is_running(void)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_enable(xlog_level_t log_level)
 {
     if (XLOG_LEVEL_MAX <= log_level)
@@ -292,7 +299,7 @@ xlog_enable(xlog_level_t log_level)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_disable(xlog_level_t log_level)
 {
     if (XLOG_LEVEL_MAX <= log_level)
@@ -313,16 +320,18 @@ xlog_disable(xlog_level_t log_level)
  *
  * Set the preamble string for the log entries.
  **/
-void
+    void
 xlog_set_preamble(const char* text)
 {
     /* Free the memory for the old preamble */
-    if (preamble_string != NULL) {
+    if (preamble_string != NULL) 
+    {
 	free(preamble_string);
 	preamble_string = NULL;
     }
     /* Duplicate the new preamble string */
-    if (text != NULL) {
+    if (text != NULL) 
+    {
 	preamble_string = strdup(text);
     }
 }
@@ -333,7 +342,7 @@ xlog_set_preamble(const char* text)
  * Get the process name as set by xlog_init.
  * Return value: pointer to process name on success, NULL otherwise.
  **/
-const char*
+    const char*
 xlog_process_name()
 {
     return process_name_string;
@@ -348,7 +357,7 @@ xlog_process_name()
  * Applies for all type of messages except for %XLOG_LEVEL_FATAL
  * which always is set to the most verbose level.
  **/
-void
+    void
 xlog_set_verbose(xlog_verbose_t verbose_level)
 {
     int i;
@@ -356,7 +365,8 @@ xlog_set_verbose(xlog_verbose_t verbose_level)
     if (XLOG_VERBOSE_HIGH < verbose_level)
 	verbose_level = XLOG_VERBOSE_HIGH;
 
-    for (i = 0; i < XLOG_LEVEL_MAX; i++) {
+    for (i = 0; i < XLOG_LEVEL_MAX; i++) 
+    {
 	if (i == XLOG_LEVEL_FATAL)
 	    continue;		/* XXX: XLOG_LEVEL_FATAL cannot be changed */
 	/* XXX: temp, to be removed; see Bugzilla entry 795 */
@@ -377,7 +387,7 @@ xlog_set_verbose(xlog_verbose_t verbose_level)
  * Note: %XLOG_LEVEL_FATAL verbosity cannot be changed, and is
  * always set to the most verbose level.
  **/
-void
+    void
 xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
 {
     if (XLOG_LEVEL_MAX <= log_level)
@@ -386,7 +396,7 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
     if (log_level == XLOG_LEVEL_FATAL)
 	return;			/* XXX: XLOG_LEVEL_FATAL cannot be changed */
 
-	/* XXX: temp, to be removed; see Bugzilla entry 795 */
+    /* XXX: temp, to be removed; see Bugzilla entry 795 */
     if (log_level == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
 	return;
 
@@ -396,14 +406,14 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
     xlog_verbose_level[log_level] = verbose_level;
 }
 
-void
+    void
 _xlog_with_level(int log_level, const char *module_name, int line, const char *file,
-		 const char *function, const char *fmt, ...)
+	const char *function, const char *fmt, ...)
 {
     va_list ap;
     static char where_buf[8000]; // we are single threaded, global buffer is good enough.
     snprintf(where_buf, sizeof(where_buf), "%s:%d %s",
-	     file, line, (function) ? function : "(unknown_func)");
+	    file, line, (function) ? function : "(unknown_func)");
     va_start(ap, fmt);
     xlog_record_va(log_level, module_name, where_buf, fmt, ap);
     va_end(ap);
@@ -427,9 +437,9 @@ _xlog_with_level(int log_level, const char *module_name, int line, const char *f
  *
  * Write a log message.
  **/
-static void
+    static void
 xlog_record_va(xlog_level_t log_level, const char *module_name,
-	       const char *where, const char *format, va_list ap)
+	const char *where, const char *format, va_list ap)
 {
     const char	*preamble_lead;
     const char	*process_name_lead;
@@ -441,7 +451,8 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     sig_t	sigpipe_handler;
 #endif
 
-    if (! start_flag) {
+    if (! start_flag) 
+    {
 	if (! init_flag)
 	    fprintf(stderr,
 		    "Logging must be initialized first by xlog_init()\n");
@@ -469,44 +480,47 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     process_name_lead = (process_name_string) ? process_name_string : "";
 
     /* Special case for the pre-amble level */
-    if (log_level == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE) {
+    if (log_level == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE) 
+    {
 	x_asprintf(&buf_preamble_ptr, "");
     }
-    else {
+    else 
+    {
 	/*
 	 * Prepare the preamble string to write.
 	 * XXX: we need to prepare it once, otherwise the time may be
 	 * different when we write to more than one outputs.
 	 */
-	switch (xlog_verbose_level[log_level]) {
-	case XLOG_VERBOSE_LOW:	/* The minimum log information */
-	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
-		       xlog_localtime2string(),
-		       xlog_level_names[log_level],
-		       process_name_lead,
-		       module_name);
-	    break;
+	switch (xlog_verbose_level[log_level]) 
+	{
+	    case XLOG_VERBOSE_LOW:	/* The minimum log information */
+		x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
+			xlog_localtime2string(),
+			xlog_level_names[log_level],
+			process_name_lead,
+			module_name);
+		break;
 
-	case XLOG_VERBOSE_MEDIUM:	/* Add preamble string if non-NULL */
-	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s %s ] ",
-		       xlog_localtime2string(),
-		       preamble_lead,
-		       xlog_level_names[log_level],
-		       process_name_lead,
-		       module_name);
-	    break;
+	    case XLOG_VERBOSE_MEDIUM:	/* Add preamble string if non-NULL */
+		x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s %s ] ",
+			xlog_localtime2string(),
+			preamble_lead,
+			xlog_level_names[log_level],
+			process_name_lead,
+			module_name);
+		break;
 
-	case XLOG_VERBOSE_HIGH:	/* Most verbose */
-	default:
-	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s:%d %s %s ] ",
-		       xlog_localtime2string(),
-		       preamble_lead,
-		       xlog_level_names[log_level],
-		       process_name_lead,
-		       (int)pid,
-		       module_name,
-		       where);
-	    break;
+	    case XLOG_VERBOSE_HIGH:	/* Most verbose */
+	    default:
+		x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s:%d %s %s ] ",
+			xlog_localtime2string(),
+			preamble_lead,
+			xlog_level_names[log_level],
+			process_name_lead,
+			(int)pid,
+			module_name,
+			where);
+		break;
 	}
     }
 
@@ -516,7 +530,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     x_vasprintf(&buf_payload_ptr, format, ap);
 
     if ((buf_preamble_ptr == NULL)
-	&& ((buf_payload_ptr == NULL) || buf_payload_ptr[0] == '\0'))
+	    && ((buf_payload_ptr == NULL) || buf_payload_ptr[0] == '\0'))
 	goto cleanup_label;
 
     /*
@@ -525,15 +539,17 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
      * output string, because the XLOG message format implies it.
      */
     buf_output_size = x_asprintf(&buf_output_ptr, "%s%s\n",
-				 buf_preamble_ptr, buf_payload_ptr);
+	    buf_preamble_ptr, buf_payload_ptr);
     if ((buf_output_ptr == NULL)
-	|| (buf_output_ptr[0] == '\0')
-	|| (buf_output_size < 0)) {
+	    || (buf_output_ptr[0] == '\0')
+	    || (buf_output_size < 0)) 
+    {
 	goto cleanup_label;
     }
 
     /* Remove our '\n' from the end if the payload itself already has one */
-    if (buf_output_size >= 2) {
+    if (buf_output_size >= 2) 
+    {
 	char n1, n2;
 	n1 = buf_output_ptr[buf_output_size - 2];
 	n2 = buf_output_ptr[buf_output_size - 1];
@@ -544,9 +560,11 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     /*
      * Write to the file descriptors
      */
-    for (i = 0; i < xlog_output_file_count; ) {
+    for (i = 0; i < xlog_output_file_count; ) 
+    {
 	FILE *fp = xlog_outputs_file[i];
-	if (xlog_write(fp, "%s", buf_output_ptr) || xlog_flush(fp)) {
+	if (xlog_write(fp, "%s", buf_output_ptr) || xlog_flush(fp)) 
+	{
 	    xlog_remove_output(fp);
 	    continue;
 	}
@@ -556,17 +574,19 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     /*
      * Write to the functions
      */
-    for (i = 0; i < xlog_output_func_count; ) {
+    for (i = 0; i < xlog_output_func_count; ) 
+    {
 	xlog_output_func_t func = xlog_outputs_func[i];
 	void *obj = xlog_outputs_obj[i];
-	if (func(obj, log_level, buf_output_ptr) < 0) {
+	if (func(obj, log_level, buf_output_ptr) < 0) 
+	{
 	    xlog_remove_output_func(func, obj);
 	    continue;
 	}
 	i++;
     }
 
- cleanup_label:
+cleanup_label:
     /*
      * Cleanup
      */
@@ -591,7 +611,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
  *
  * Return value: 0 on success, otherwise -1.
  **/
-static int
+    static int
 xlog_write(FILE* fp, const char* fmt, ...)
 {
     va_list ap;
@@ -614,11 +634,12 @@ xlog_write(FILE* fp, const char* fmt, ...)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-static int
+    static int
 xlog_write_va(FILE* fp, const char* fmt, va_list ap)
 {
     assert(fp != NULL);
-    if (vfprintf(fp, fmt, ap) < 0) {
+    if (vfprintf(fp, fmt, ap) < 0) 
+    {
 	return (-1);
     }
 
@@ -633,7 +654,7 @@ xlog_write_va(FILE* fp, const char* fmt, va_list ap)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-static int
+    static int
 xlog_flush(FILE* fp)
 {
     if (! fflush(fp))
@@ -656,17 +677,20 @@ xlog_flush(FILE* fp)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_add_output(FILE* fp)
 {
     size_t i;
 
-    for (i = 0; i < xlog_output_file_count; i++) {
-	if (xlog_outputs_file[i] == fp) {
+    for (i = 0; i < xlog_output_file_count; i++) 
+    {
+	if (xlog_outputs_file[i] == fp) 
+	{
 	    return (0);
 	}
     }
-    if (i < MAX_XLOG_OUTPUTS) {
+    if (i < MAX_XLOG_OUTPUTS) 
+    {
 	xlog_outputs_file[i] = fp;
 	xlog_output_file_count++;
 	return (0);
@@ -683,14 +707,17 @@ xlog_add_output(FILE* fp)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_remove_output(FILE* fp)
 {
     size_t i, j;
 
-    for (i = 0; i < xlog_output_file_count; i++) {
-	if (xlog_outputs_file[i] == fp) {
-	    for(j = i + 1; j < xlog_output_file_count; j++) {
+    for (i = 0; i < xlog_output_file_count; i++) 
+    {
+	if (xlog_outputs_file[i] == fp) 
+	{
+	    for(j = i + 1; j < xlog_output_file_count; j++) 
+	    {
 		xlog_outputs_file[j - 1] = xlog_outputs_file[j];
 	    }
 	    xlog_output_file_count--;
@@ -710,18 +737,21 @@ xlog_remove_output(FILE* fp)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_add_output_func(xlog_output_func_t func, void *obj)
 {
     size_t i;
 
-    for (i = 0; i < xlog_output_func_count; i++) {
+    for (i = 0; i < xlog_output_func_count; i++) 
+    {
 	if ((xlog_outputs_func[i] == func)
-	    && (xlog_outputs_obj[i] == obj)) {
+		&& (xlog_outputs_obj[i] == obj)) 
+	{
 	    return (0);
 	}
     }
-    if (i < MAX_XLOG_OUTPUTS) {
+    if (i < MAX_XLOG_OUTPUTS) 
+    {
 	xlog_outputs_func[i] = func;
 	xlog_outputs_obj[i] = obj;
 	xlog_output_func_count++;
@@ -740,15 +770,18 @@ xlog_add_output_func(xlog_output_func_t func, void *obj)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_remove_output_func(xlog_output_func_t func, void *obj)
 {
     size_t i, j;
 
-    for (i = 0; i < xlog_output_func_count; i++) {
+    for (i = 0; i < xlog_output_func_count; i++) 
+    {
 	if ((xlog_outputs_func[i] == func)
-	    && (xlog_outputs_obj[i] == obj)) {
-	    for(j = i + 1; j < xlog_output_func_count; j++) {
+		&& (xlog_outputs_obj[i] == obj)) 
+	{
+	    for(j = i + 1; j < xlog_output_func_count; j++) 
+	    {
 		xlog_outputs_func[j - 1] = xlog_outputs_func[j];
 		xlog_outputs_obj[j - 1] = xlog_outputs_obj[j];
 	    }
@@ -771,7 +804,7 @@ xlog_remove_output_func(xlog_output_func_t func, void *obj)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_add_default_output(void)
 {
 
@@ -787,8 +820,10 @@ xlog_add_default_output(void)
      * Attempt to open default output stream, console first in case
      * we are root, then stderr.
      */
-    for (i = 0; fp_default == NULL && i < ndefaults; i++) {
-	if ((fp_default = fopen(defaults[i], "w")) != NULL) {
+    for (i = 0; fp_default == NULL && i < ndefaults; i++) 
+    {
+	if ((fp_default = fopen(defaults[i], "w")) != NULL) 
+	{
 	    return (xlog_add_output(fp_default));
 	}
     }
@@ -804,12 +839,13 @@ xlog_add_default_output(void)
  *
  * Return value: 0 on success, otherwise -1.
  **/
-int
+    int
 xlog_remove_default_output(void)
 {
     int r = 0;
 
-    if (fp_default != NULL) {
+    if (fp_default != NULL) 
+    {
 	r = xlog_remove_output(fp_default);
 	fclose (fp_default);
 	fp_default = NULL;
@@ -832,7 +868,7 @@ xlog_remove_default_output(void)
  * the format described above.
  * XXX: This function uses a BSD-specific function, gettimeofday().
  **/
-const char *
+    const char *
 xlog_localtime2string(void)
 {
     static char ret_buf[64];
@@ -844,7 +880,8 @@ xlog_localtime2string(void)
     clock = tv.tv_sec;
     tm = localtime(&clock);
     time_t sofar = strftime(ret_buf, sizeof(ret_buf), "%Y/%m/%d %H:%M:%S", tm);
-    if (sofar == 0) {
+    if (sofar == 0) 
+    {
 	snprintf(ret_buf, sizeof(ret_buf), "strftime ERROR");
 	return (ret_buf);
     }
@@ -883,7 +920,7 @@ xlog_localtime2string(void)
  * be renamed to vasprintf() and asprintf() and go somewhere else,
  * something like "compat.c" .
  **/
-int
+    int
 x_vasprintf(char **ret, const char *format, va_list ap)
 {
     size_t i, buf_size = 1024 + 1;
@@ -893,7 +930,8 @@ x_vasprintf(char **ret, const char *format, va_list ap)
     va_list temp;
 #endif
 
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) 
+    {
 	/*
 	 * XXX: two iterations should be sufficient to compute the
 	 * buffer size and allocate it, but anyway we try one more time
@@ -909,14 +947,15 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	 * the AMD 64 it is required.
 	 */
 #ifdef HAVE_VA_COPY
- 	va_copy(temp, ap);
+	va_copy(temp, ap);
 	ret_size = vsnprintf(buf_ptr, buf_size, format, temp);
 #else
 	ret_size = vsnprintf(buf_ptr, buf_size, format, ap);
 #endif
 	if (ret_size < 0)
 	    break;		/* Cannot format the string */
-	if ((size_t)ret_size < buf_size) {
+	if ((size_t)ret_size < buf_size) 
+	{
 	    *ret = buf_ptr;
 	    return (ret_size);
 	}
@@ -954,7 +993,7 @@ x_vasprintf(char **ret, const char *format, va_list ap)
  * storage when it is no longer needed. If sufficient space cannot
  * be allocated, will return -1 and set @ret to be a NULL pointer.
  **/
-int
+    int
 x_asprintf(char **ret, const char *format, ...)
 {
     va_list ap;
@@ -974,72 +1013,76 @@ x_asprintf(char **ret, const char *format, ...)
  */
 
 #if defined(HAVE_SYSLOG_H) && defined(HAVE_SYSLOG)
-typedef struct _code {
-	const char	*c_name;
-	int32_t		c_val;
+typedef struct _code 
+{
+    const char	*c_name;
+    int32_t		c_val;
 } SYSLOG_CODE;
 
-static SYSLOG_CODE prioritynames[] = {
-	{ "alert",	LOG_ALERT,	},
-	{ "crit",	LOG_CRIT,	},
-	{ "debug",	LOG_DEBUG,	},
-	{ "emerg",	LOG_EMERG,	},
-	{ "err",	LOG_ERR,	},
-	{ "info",	LOG_INFO,	},
-	{ "notice",	LOG_NOTICE,	},
-	{ "warning",	LOG_WARNING,	},
-	{ NULL,		-1,		}
+static SYSLOG_CODE prioritynames[] = 
+{
+    { "alert",	LOG_ALERT,	},
+    { "crit",	LOG_CRIT,	},
+    { "debug",	LOG_DEBUG,	},
+    { "emerg",	LOG_EMERG,	},
+    { "err",	LOG_ERR,	},
+    { "info",	LOG_INFO,	},
+    { "notice",	LOG_NOTICE,	},
+    { "warning",	LOG_WARNING,	},
+    { NULL,		-1,		}
 };
 
-static SYSLOG_CODE facilitynames[] = {
-	{ "auth",	LOG_AUTH,	},
-	{ "cron", 	LOG_CRON,	},
-	{ "daemon",	LOG_DAEMON,	},
-	{ "kern",	LOG_KERN,	},
-	{ "lpr",	LOG_LPR,	},
-	{ "mail",	LOG_MAIL,	},
-	{ "news",	LOG_NEWS,	},
-	{ "user",	LOG_USER,	},
-	{ "uucp",	LOG_UUCP,	},
-	{ "local0",	LOG_LOCAL0,	},
-	{ "local1",	LOG_LOCAL1,	},
-	{ "local2",	LOG_LOCAL2,	},
-	{ "local3",	LOG_LOCAL3,	},
-	{ "local4",	LOG_LOCAL4,	},
-	{ "local5",	LOG_LOCAL5,	},
-	{ "local6",	LOG_LOCAL6,	},
-	{ "local7",	LOG_LOCAL7,	},
-	{ NULL,		-1,		}
+static SYSLOG_CODE facilitynames[] = 
+{
+    { "auth",	LOG_AUTH,	},
+    { "cron", 	LOG_CRON,	},
+    { "daemon",	LOG_DAEMON,	},
+    { "kern",	LOG_KERN,	},
+    { "lpr",	LOG_LPR,	},
+    { "mail",	LOG_MAIL,	},
+    { "news",	LOG_NEWS,	},
+    { "user",	LOG_USER,	},
+    { "uucp",	LOG_UUCP,	},
+    { "local0",	LOG_LOCAL0,	},
+    { "local1",	LOG_LOCAL1,	},
+    { "local2",	LOG_LOCAL2,	},
+    { "local3",	LOG_LOCAL3,	},
+    { "local4",	LOG_LOCAL4,	},
+    { "local5",	LOG_LOCAL5,	},
+    { "local6",	LOG_LOCAL6,	},
+    { "local7",	LOG_LOCAL7,	},
+    { NULL,		-1,		}
 };
 
-static int32_t
+    static int32_t
 xlog_level_to_syslog_priority(xlog_level_t xloglevel)
 {
 
-    switch (xloglevel) {
-    case XLOG_LEVEL_FATAL:
-	return (LOG_CRIT);
-	break;
-    case XLOG_LEVEL_ERROR:
-	return (LOG_ERR);
-	break;
-    case XLOG_LEVEL_WARNING:
-	return (LOG_WARNING);
-	break;
-    case XLOG_LEVEL_INFO:
-	return (LOG_INFO);
-	break;
-    case XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE:
-	/* XXX: temp, to be removed; see Bugzilla entry 795 */
-	return (LOG_INFO);
-	break;
-    default:
-	XLOG_UNREACHABLE();
+    switch (xloglevel) 
+    {
+	case XLOG_LEVEL_FATAL:
+	    return (LOG_CRIT);
+	    break;
+	case XLOG_LEVEL_ERROR:
+	    return (LOG_ERR);
+	    break;
+	case XLOG_LEVEL_WARNING:
+	    return (LOG_WARNING);
+	    break;
+	case XLOG_LEVEL_INFO:
+	    return (LOG_INFO);
+	    break;
+	case XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE:
+	    /* XXX: temp, to be removed; see Bugzilla entry 795 */
+	    return (LOG_INFO);
+	    break;
+	default:
+	    XLOG_UNREACHABLE();
     }
     return (-1);
 }
 
-static int
+    static int
 xlog_syslog_output_func(void *obj, xlog_level_t level, const char *msg)
 {
     int32_t facility = (intptr_t)obj;
@@ -1053,7 +1096,7 @@ xlog_syslog_output_func(void *obj, xlog_level_t level, const char *msg)
 /*
  * Parse <facility.priority>.
  */
-static int
+    static int
 xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
 {
     int retval;
@@ -1075,8 +1118,10 @@ xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
 
     facname = tmpspec;
     xfacility = -1;
-    for (i = 0, sc = &facilitynames[0]; sc->c_val != -1;  ++sc, ++i) {
-	if (0 == strcasecmp(sc->c_name, facname)) {
+    for (i = 0, sc = &facilitynames[0]; sc->c_val != -1;  ++sc, ++i) 
+    {
+	if (0 == strcasecmp(sc->c_name, facname)) 
+	{
 	    xfacility = i;
 	    break;
 	}
@@ -1086,18 +1131,22 @@ xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
 
     *facility = xfacility;
 
-    if (priname != NULL && ++priname != '\0') {
-	    xpriority = -1;
-	    for (i = 0, sc = &prioritynames[0]; sc->c_val != -1; ++sc, ++i) {
-		if (0 == strcasecmp(sc->c_name, priname)) {
-		    xpriority = i;
-		    break;
-		}
+    if (priname != NULL && ++priname != '\0') 
+    {
+	xpriority = -1;
+	for (i = 0, sc = &prioritynames[0]; sc->c_val != -1; ++sc, ++i) 
+	{
+	    if (0 == strcasecmp(sc->c_name, priname)) 
+	    {
+		xpriority = i;
+		break;
 	    }
-	    if (xpriority == -1) {
-		goto out;
-	    }
-	    *priority = xpriority;
+	}
+	if (xpriority == -1) 
+	{
+	    goto out;
+	}
+	*priority = xpriority;
     } else
 	*priority = LOG_WARNING;
 
@@ -1107,7 +1156,7 @@ out:
     return (retval);
 }
 
-int
+    int
 xlog_add_syslog_output(const char *syslogspec)
 {
     int32_t facility = -1;
@@ -1123,7 +1172,7 @@ xlog_add_syslog_output(const char *syslogspec)
 }
 
 #else /* !(HAVE_SYSLOG_H && HAVE_SYSLOG) */
-int
+    int
 xlog_add_syslog_output(const char *syslogspec)
 {
     return (-1);

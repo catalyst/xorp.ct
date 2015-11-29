@@ -49,7 +49,7 @@
 #include "permits.hh"
 
 
-static bool
+    static bool
 print_twirl()
 {
     static const char t[] = { '\\', '|', '/', '-' };
@@ -63,7 +63,7 @@ print_twirl()
     return true;
 }
 
-static void
+    static void
 usage()
 {
     fprintf(stderr, "Usage: finder [-hv] "
@@ -73,7 +73,7 @@ usage()
 	    "[-i <interface>]\n");
 }
 
-static void
+    static void
 finder_main(int argc, char* const argv[])
 {
     bool	run_verbose = false;
@@ -83,78 +83,89 @@ finder_main(int argc, char* const argv[])
     setup_dflt_sighandlers();
 
     int ch;
-    while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
-	switch (ch) {
-	case 'a':
-	    //
-	    // User is specifying an IPv4 address to accept finder
-	    // connections from.
-	    //
-	    try {
-		add_permitted_host(IPv4(optarg));
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
-		usage();
-		exit(-1);
-	    }
-	    break;
-	case 'i':
-	    //
-	    // User is specifying which interface to bind finder to
-	    //
-	    try {
-		IPv4 bind_addr = IPv4(optarg);
-		in_addr ina;
-		bind_addr.copy_out(ina);
-		if (is_ip_configured(ina) == false) {
-		    fprintf(stderr,
-			    "%s is not the address of an active interface.\n",
-			    optarg);
+    while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) 
+    {
+	switch (ch) 
+	{
+	    case 'a':
+		//
+		// User is specifying an IPv4 address to accept finder
+		// connections from.
+		//
+		try 
+		{
+		    add_permitted_host(IPv4(optarg));
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
+		    usage();
 		    exit(-1);
 		}
-		bind_addrs.push_back(bind_addr);
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid interface address.\n",
-			optarg);
+		break;
+	    case 'i':
+		//
+		// User is specifying which interface to bind finder to
+		//
+		try 
+		{
+		    IPv4 bind_addr = IPv4(optarg);
+		    in_addr ina;
+		    bind_addr.copy_out(ina);
+		    if (is_ip_configured(ina) == false) 
+		    {
+			fprintf(stderr,
+				"%s is not the address of an active interface.\n",
+				optarg);
+			exit(-1);
+		    }
+		    bind_addrs.push_back(bind_addr);
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid interface address.\n",
+			    optarg);
+		    usage();
+		    exit(-1);
+		}
+		break;
+	    case 'n':
+		//
+		// User is specifying a network address to accept finder
+		// connections from.
+		//
+		try 
+		{
+		    add_permitted_net(IPv4Net(optarg));
+		} catch (const InvalidString&) 
+		{
+		    fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
+		    usage();
+		    exit(-1);
+		}
+		break;
+	    case 'p':
+		bind_port = static_cast<uint16_t>(atoi(optarg));
+		if (bind_port == 0) 
+		{
+		    fprintf(stderr, "0 is not a valid port.\n");
+		    exit(-1);
+		}
+		break;
+	    case 'v':
+		fprintf(stderr, "Finder\n");
+		run_verbose = true;
+		break;
+	    case 'h':
+	    default:
 		usage();
 		exit(-1);
-	    }
-	    break;
-	case 'n':
-	    //
-	    // User is specifying a network address to accept finder
-	    // connections from.
-	    //
-	    try {
-		add_permitted_net(IPv4Net(optarg));
-	    } catch (const InvalidString&) {
-		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
-		usage();
-		exit(-1);
-	    }
-	    break;
-	case 'p':
-	    bind_port = static_cast<uint16_t>(atoi(optarg));
-	    if (bind_port == 0) {
-		fprintf(stderr, "0 is not a valid port.\n");
-		exit(-1);
-	    }
-	    break;
-	case 'v':
-	    fprintf(stderr, "Finder\n");
-	    run_verbose = true;
-	    break;
-	case 'h':
-	default:
-	    usage();
-	    exit(-1);
 	}
     }
 
     argc -= optind;
     argv += optind;
 
-    if (argc != 0) {
+    if (argc != 0) 
+    {
 	usage();
 	exit(-1);
     }
@@ -163,17 +174,21 @@ finder_main(int argc, char* const argv[])
     // Add preferred ipc address on host
     //
     XorpUnexpectedHandler x(xorp_unexpected_handler);
-    try {
+    try 
+    {
 	FinderServer fs( FinderConstants::FINDER_DEFAULT_HOST(), bind_port);
 
 	list<IPv4>::const_iterator ci = bind_addrs.begin();
-	while (ci != bind_addrs.end()) {
-	    if (fs.add_binding(*ci, bind_port) == false) {
+	while (ci != bind_addrs.end()) 
+	{
+	    if (fs.add_binding(*ci, bind_port) == false) 
+	    {
 		XLOG_WARNING("Failed to bind interface %s port %d\n",
-			     ci->str().c_str(), bind_port);
-	    } else if (run_verbose) {
+			ci->str().c_str(), bind_port);
+	    } else if (run_verbose) 
+	    {
 		XLOG_INFO("Finder bound to interface %s port %d\n",
-			  ci->str().c_str(), bind_port);
+			ci->str().c_str(), bind_port);
 	    }
 	    ++ci;
 	}
@@ -181,23 +196,27 @@ finder_main(int argc, char* const argv[])
 	if (run_verbose)
 	    twirl = EventLoop::instance().new_periodic_ms(250, callback(print_twirl));
 
-	while (xorp_do_run) {
+	while (xorp_do_run) 
+	{
 	    EventLoop::instance().run();
 	}
-    } catch (const InvalidPort& i) {
+    } catch (const InvalidPort& i) 
+    {
 	XLOG_ERROR("%s: a finder may already be running.\n",
-		   i.why().c_str());
+		i.why().c_str());
 	exit(-1);
-    } catch (const InvalidAddress& i) {
+    } catch (const InvalidAddress& i) 
+    {
 	XLOG_ERROR("Invalid finder server adddress: %s.\n",
-		   i.why().c_str());
+		i.why().c_str());
 	exit(-1);
-    } catch (...) {
+    } catch (...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 }
 
-int
+    int
 main(int argc, char * const argv[])
 {
     //

@@ -26,19 +26,20 @@
 #include "libxorp/xorp.h"
 #include "visitor_dep.hh"
 
-VisitorDep::VisitorDep(SetMap& setmap, PolicyMap& pmap) 
-			    : _setmap(setmap), _pmap(pmap)
+    VisitorDep::VisitorDep(SetMap& setmap, PolicyMap& pmap) 
+: _setmap(setmap), _pmap(pmap)
 {
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
     PolicyStatement::TermContainer::iterator i;
 
     // go throgh all terms
-    for (i = terms.begin(); i != terms.end(); ++i) {
+    for (i = terms.begin(); i != terms.end(); ++i) 
+    {
 	(i->second)->accept(*this);
     }
 
@@ -47,7 +48,7 @@ VisitorDep::visit(PolicyStatement& policy)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
@@ -57,28 +58,32 @@ VisitorDep::visit(Term& term)
     Term::Nodes::iterator i;
 
     // do source block
-    for(i = source.begin(); i != source.end(); ++i) {
-        (i->second)->accept(*this);
+    for(i = source.begin(); i != source.end(); ++i) 
+    {
+	(i->second)->accept(*this);
     }
 
     // do dest block
-    for(i = dest.begin(); i != dest.end(); ++i) {
-        (i->second)->accept(*this);
+    for(i = dest.begin(); i != dest.end(); ++i) 
+    {
+	(i->second)->accept(*this);
 
     }
 
     // do action block
-    for(i = actions.begin(); i != actions.end(); ++i) {
-        (i->second)->accept(*this);
+    for(i = actions.begin(); i != actions.end(); ++i) 
+    {
+	(i->second)->accept(*this);
     }
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeSet& node)
 {
     // see if set exists
-    try {
+    try 
+    {
 	_setmap.getSet(node.setid());
 
 	// track sets this policy uses
@@ -86,20 +91,21 @@ VisitorDep::visit(NodeSet& node)
     } 
     // it doesn't
     catch(const PolicyException& e) {	
-        ostringstream error;
-        error << "Set not found: " << node.setid() << " at line " << node.line();
-    
-        xorp_throw(sem_error, error.str());
+	ostringstream error;
+	error << "Set not found: " << node.setid() << " at line " << node.line();
+
+	xorp_throw(sem_error, error.str());
     }
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorDep::visit(NodeSubr& node)
 {
     string policy = node.policy();
 
-    if (!_pmap.exists(policy)) {
+    if (!_pmap.exists(policy)) 
+    {
 	ostringstream err;
 
 	err << "Policy not found: " << policy << " at line " << node.line();
@@ -112,13 +118,13 @@ VisitorDep::visit(NodeSubr& node)
     return NULL;
 }
 
-void
+    void
 VisitorDep::commit_deps(PolicyStatement& policy)
 {
     policy.set_dependency(_sets, _policies);
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeUn& node)
 {
     // check arg
@@ -126,7 +132,7 @@ VisitorDep::visit(NodeUn& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeBin& node)
 {
     // check args
@@ -135,7 +141,7 @@ VisitorDep::visit(NodeBin& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeAssign& node)
 {
     // check arg
@@ -143,37 +149,37 @@ VisitorDep::visit(NodeAssign& node)
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeVar& /* node */)
 {
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeElem& /* node */)
 {
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeAccept& /* node */)
 {
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeReject& /* node */)
 {
     return NULL;
 }
 
-const Element* 
+    const Element* 
 VisitorDep::visit(NodeProto& /* node */)
 {
     return NULL;
 }
 
-const Element*
+    const Element*
 VisitorDep::visit(NodeNext& /* node */)
 {
     return NULL;

@@ -36,141 +36,148 @@
 #include "policy_utils.hh"
 
 
-namespace policy_utils {
-
-void
-strip_ws(string& in)
+namespace policy_utils 
 {
-    in.erase(std::remove_if(in.begin(), in.end(), (int(*)(int))isspace), in.end());
-}
 
-void
-str_to_list(const string& in, list<string>& out)
-{
-    string::size_type pos1 = 0;	// beginning of token
-    string::size_type pos2 = 0;	// end of token
+    void
+	strip_ws(string& in)
+	{
+	    in.erase(std::remove_if(in.begin(), in.end(), (int(*)(int))isspace), in.end());
+	}
 
-    string in_copy(in);
-    strip_ws(in_copy);
+    void
+	str_to_list(const string& in, list<string>& out)
+	{
+	    string::size_type pos1 = 0;	// beginning of token
+	    string::size_type pos2 = 0;	// end of token
 
-    string::size_type len = in_copy.length();
-    string token;
+	    string in_copy(in);
+	    strip_ws(in_copy);
 
-    while(pos1 < len) {
+	    string::size_type len = in_copy.length();
+	    string token;
 
-	// find delimiter
-        pos2 = in_copy.find(",",pos1);
+	    while(pos1 < len) 
+	    {
 
-	// none found, so treat end of string as delim
-        if(pos2 == string::npos) {
-                token = in_copy.substr(pos1,len-pos1);
+		// find delimiter
+		pos2 = in_copy.find(",",pos1);
 
-                out.push_back(token);
-                return;
-        }
+		// none found, so treat end of string as delim
+		if(pos2 == string::npos) 
+		{
+		    token = in_copy.substr(pos1,len-pos1);
 
-	// grab token [delimiter found].
-        token = in_copy.substr(pos1,pos2-pos1);
-        out.push_back(token);
-        pos1 = pos2+1;
-    }
-}
+		    out.push_back(token);
+		    return;
+		}
 
-void
-str_to_set(const string& in, set<string>& out)
-{
-    list<string> tmp;
+		// grab token [delimiter found].
+		token = in_copy.substr(pos1,pos2-pos1);
+		out.push_back(token);
+		pos1 = pos2+1;
+	    }
+	}
 
-    // XXX: slow
-    str_to_list(in,tmp);
+    void
+	str_to_set(const string& in, set<string>& out)
+	{
+	    list<string> tmp;
 
-    for(list<string>::iterator i = tmp.begin();
-	i != tmp.end(); ++i)
+	    // XXX: slow
+	    str_to_list(in,tmp);
 
-	// since it is a set, dups will be removed.
-	out.insert(*i);
-}
+	    for(list<string>::iterator i = tmp.begin();
+		    i != tmp.end(); ++i)
 
-void
-read_file(const string& fname, string& out)
-{
-    char buff[4096];
-    int rd;
+		// since it is a set, dups will be removed.
+		out.insert(*i);
+	}
 
-    string err;
+    void
+	read_file(const string& fname, string& out)
+	{
+	    char buff[4096];
+	    int rd;
 
-    // open file
-    FILE* f = fopen(fname.c_str(),"r");
-    if(!f) {
-        err += "Unable to open file " + fname + ": ";
-        err += strerror(errno);
+	    string err;
 
-        xorp_throw(PolicyUtilsErr, err);
-    }
+	    // open file
+	    FILE* f = fopen(fname.c_str(),"r");
+	    if(!f) 
+	    {
+		err += "Unable to open file " + fname + ": ";
+		err += strerror(errno);
 
-    buff[0] = 0;
+		xorp_throw(PolicyUtilsErr, err);
+	    }
 
-    // read file
-    while(!feof(f)) {
-        rd = fread(buff,1,sizeof(buff)-1,f);
-        if(rd == 0)
-            break;
-        if(rd < 0) {
-            err += "Unable to read file " + fname + ": ";
-            err += strerror(errno);
+	    buff[0] = 0;
 
-            fclose(f);
-            xorp_throw(PolicyUtilsErr, err);
-        }
+	    // read file
+	    while(!feof(f)) 
+	    {
+		rd = fread(buff,1,sizeof(buff)-1,f);
+		if(rd == 0)
+		    break;
+		if(rd < 0) 
+		{
+		    err += "Unable to read file " + fname + ": ";
+		    err += strerror(errno);
 
-	// append to content of file to out
-        buff[rd] = 0;
-        out += buff;
-    }
+		    fclose(f);
+		    xorp_throw(PolicyUtilsErr, err);
+		}
 
-    fclose(f);
-    return;
-}
+		// append to content of file to out
+		buff[rd] = 0;
+		out += buff;
+	    }
 
-unsigned
-count_nl(const char* x)
-{
-    const char* end = &x[strlen(x)];
-    unsigned nl = 0;
+	    fclose(f);
+	    return;
+	}
 
-    for(const char* ptr = x; ptr < end; ptr++)
-	if(*ptr == '\n')
-	    nl++;
+    unsigned
+	count_nl(const char* x)
+	{
+	    const char* end = &x[strlen(x)];
+	    unsigned nl = 0;
 
-    return nl;
-}
+	    for(const char* ptr = x; ptr < end; ptr++)
+		if(*ptr == '\n')
+		    nl++;
 
-bool
-regex(const string& str, const string& reg)
-{
-    // compile the regex
-    regex_t re;
-    int res = regcomp(&re, reg.c_str(), REG_EXTENDED);
+	    return nl;
+	}
 
-    if (res) {
-	char tmp[128];
-	string err;
+    bool
+	regex(const string& str, const string& reg)
+	{
+	    // compile the regex
+	    regex_t re;
+	    int res = regcomp(&re, reg.c_str(), REG_EXTENDED);
 
-	regerror(res, &re, tmp, sizeof(tmp));
-	regfree(&re);
+	    if (res) 
+	    {
+		char tmp[128];
+		string err;
 
-	err = "Unable to compile regex (" + reg;
-	err += "): ";
-	err += tmp;
+		regerror(res, &re, tmp, sizeof(tmp));
+		regfree(&re);
 
-	xorp_throw(PolicyUtilsErr, err);
-    }
+		err = "Unable to compile regex (" + reg;
+		err += "): ";
+		err += tmp;
 
-    // execute the regex [XXX: check for errors!!]
-    bool result = !regexec(&re, str.c_str(), 0, 0, 0);
-    regfree(&re);
+		xorp_throw(PolicyUtilsErr, err);
+	    }
 
-    return result;
-}
+	    // execute the regex [XXX: check for errors!!]
+	    bool result = !regexec(&re, str.c_str(), 0, 0, 0);
+	    regfree(&re);
+
+	    return result;
+	}
 
 } // namespace

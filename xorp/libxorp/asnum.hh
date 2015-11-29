@@ -63,194 +63,219 @@
  * An AsNum must always be initialized, so the default constructor
  * is never called.
  */
-class AsNum {
-public:
-    static const uint16_t AS_INVALID = 0;	// XXX IANA-reserved
-    static const uint16_t AS_TRAN = 23456;	// IANA
+class AsNum 
+{
+    public:
+	static const uint16_t AS_INVALID = 0;	// XXX IANA-reserved
+	static const uint16_t AS_TRAN = 23456;	// IANA
 
-    /**
-     * Constructor.
-     * @param value the value to assign to this AS number.
-     */
-    explicit AsNum(const uint32_t value) : _as(value)	{
-    }
- 
-    explicit AsNum(const uint16_t value) : _as(value)	{}
-
-    explicit AsNum(int value)				{
-	assert(value >= 0 && value <= 0xffff);
-	_as = value;
+	/**
+	 * Constructor.
+	 * @param value the value to assign to this AS number.
+	 */
+	explicit AsNum(const uint32_t value) : _as(value)	
+    {
     }
 
-    /**
-     * construct from a 2-byte buffer in memory
-     */
-    explicit AsNum(const uint8_t *d)			{
-	_as = (d[0] << 8) + d[1];
-    }
+	explicit AsNum(const uint16_t value) : _as(value)	{}
 
-    /**
-     * construct from a 2-byte buffer in memory or a 4 byte buffer (in
-     * net byte order).
-     *
-     * The 4byte parameter is mostly to distinguish this from the
-     * 2-byte constructor above.
-     */
-    explicit AsNum(const uint8_t *d, bool fourbyte)	{
-	if (fourbyte) {
-	    // 4 byte version
-	    memcpy(&_as, d, 4);
-	    _as = htonl(_as);
-	} else {
-	    // 2 byte version
+	explicit AsNum(int value)				
+	{
+	    assert(value >= 0 && value <= 0xffff);
+	    _as = value;
+	}
+
+	/**
+	 * construct from a 2-byte buffer in memory
+	 */
+	explicit AsNum(const uint8_t *d)			
+	{
 	    _as = (d[0] << 8) + d[1];
 	}
-    }
 
-    /**
-     * construct from a string, either as a decimal number in the
-     * range 1-65535, or as two decimal numbers x.y, where x and y are
-     * in the range 0-65535 
-     */
-    explicit AsNum(const string& as_str) throw(InvalidString) {
-	bool four_byte = false;
-	bool seen_digit = false;
-	for (uint32_t i = 0; i < as_str.size(); i++) {
-	    if (as_str[i] == '.') {
-		if (four_byte || seen_digit == false) {
-		    // more than one dot, or no number before the first dot.
+	/**
+	 * construct from a 2-byte buffer in memory or a 4 byte buffer (in
+	 * net byte order).
+	 *
+	 * The 4byte parameter is mostly to distinguish this from the
+	 * 2-byte constructor above.
+	 */
+	explicit AsNum(const uint8_t *d, bool fourbyte)	
+	{
+	    if (fourbyte) 
+	    {
+		// 4 byte version
+		memcpy(&_as, d, 4);
+		_as = htonl(_as);
+	    } else 
+	    {
+		// 2 byte version
+		_as = (d[0] << 8) + d[1];
+	    }
+	}
+
+	/**
+	 * construct from a string, either as a decimal number in the
+	 * range 1-65535, or as two decimal numbers x.y, where x and y are
+	 * in the range 0-65535 
+	 */
+	explicit AsNum(const string& as_str) throw(InvalidString) 
+	{
+	    bool four_byte = false;
+	    bool seen_digit = false;
+	    for (uint32_t i = 0; i < as_str.size(); i++) 
+	    {
+		if (as_str[i] == '.') 
+		{
+		    if (four_byte || seen_digit == false) 
+		    {
+			// more than one dot, or no number before the first dot.
+			xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+				    as_str.c_str()));
+		    } else 
+		    {
+			four_byte = true;
+			seen_digit = false;
+		    }
+		} else if (!isdigit(as_str[i])) 
+		{
+		    // got some disallowed character
 		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
-						       as_str.c_str()));
-		} else {
-		    four_byte = true;
-		    seen_digit = false;
+				as_str.c_str()));
+		} else 
+		{
+		    seen_digit = true;
 		}
-	    } else if (!isdigit(as_str[i])) {
-		// got some disallowed character
+	    }
+	    if (seen_digit == false) 
+	    {
+		// either no digit here, or no digit after the dot
 		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
-						   as_str.c_str()));
-	    } else {
-		seen_digit = true;
+			    as_str.c_str()));
+	    }
+
+	    // got here, so the text is in the right format
+	    if (!four_byte) 
+	    {
+		_as = atoi(as_str.c_str());
+		if (_as < 1 || _as > 65535) 
+		{
+		    // out of range
+		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+				as_str.c_str()));
+		}
+	    } else 
+	    {
+		uint32_t upper = strtoul(as_str.c_str(), NULL, 10);
+		uint32_t lower = strtoul(strchr(as_str.c_str(), '.') + 1, 
+			NULL, 10);
+		if  (upper > 65535 || lower > 65535) 
+		{
+		    // out of range
+		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+				as_str.c_str()));
+		}
+		_as = (upper << 16) | lower;
 	    }
 	}
-	if (seen_digit == false) {
-	    // either no digit here, or no digit after the dot
-	    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
-					       as_str.c_str()));
+
+
+	/**
+	 * Get the non-extended AS number value.
+	 * 
+	 * @return the non-extended AS number value.
+	 */
+	uint16_t as() const					
+	{
+	    return extended() ? AS_TRAN : _as;
 	}
-	
-	// got here, so the text is in the right format
-	if (!four_byte) {
-	    _as = atoi(as_str.c_str());
-	    if (_as < 1 || _as > 65535) {
-		// out of range
-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
-					       as_str.c_str()));
-	    }
-	} else {
-	    uint32_t upper = strtoul(as_str.c_str(), NULL, 10);
-	    uint32_t lower = strtoul(strchr(as_str.c_str(), '.') + 1, 
-				     NULL, 10);
-	    if  (upper > 65535 || lower > 65535) {
-		// out of range
-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
-					       as_str.c_str()));
-	    }
-	    _as = (upper << 16) | lower;
+
+	/**
+	 * Get the extended AS number value.
+	 * 
+	 * @return the extended AS number value.
+	 */
+	uint32_t as4() const				{ return _as; }
+
+	/**
+	 * copy the 16-bit value into a 2-byte memory buffer
+	 */
+	void copy_out(uint8_t *d) const			
+	{
+	    uint16_t x = as();
+	    d[0] = (x >> 8) & 0xff;
+	    d[1] = x & 0xff;
 	}
-    }
 
+	/**
+	 * copy the 32-bit value into a 4-byte network byte order memory buffer
+	 */
+	void copy_out4(uint8_t *d) const			
+	{
+	    // note - buffer may be unaligned, so use memcpy
+	    uint32_t x = htonl(_as);
+	    memcpy(d, &x, 4);
+	}
 
-    /**
-     * Get the non-extended AS number value.
-     * 
-     * @return the non-extended AS number value.
-     */
-    uint16_t as() const					{
-	return extended() ? AS_TRAN : _as;
-    }
+	/**
+	 * Test if this is an extended AS number.
+	 * 
+	 * @return true if this is an extended AS number.
+	 */
+	bool extended() const				{ return _as>0xffff;};
 
-    /**
-     * Get the extended AS number value.
-     * 
-     * @return the extended AS number value.
-     */
-    uint32_t as4() const				{ return _as; }
+	/**
+	 * Equality Operator
+	 * 
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically same as the
+	 * right-hand operand.
+	 */
+	bool operator==(const AsNum& x) const		{ return _as == x._as; }
 
-    /**
-     * copy the 16-bit value into a 2-byte memory buffer
-     */
-    void copy_out(uint8_t *d) const			{
-	uint16_t x = as();
-	d[0] = (x >> 8) & 0xff;
-	d[1] = x & 0xff;
-    }
+	/**
+	 * Less-Than Operator
+	 * @return true if the left-hand operand is numerically smaller than the
+	 * right-hand operand.
+	 */
+	bool operator<(const AsNum& x) const		{ return _as < x._as; }
 
-    /**
-     * copy the 32-bit value into a 4-byte network byte order memory buffer
-     */
-    void copy_out4(uint8_t *d) const			{
-	// note - buffer may be unaligned, so use memcpy
-	uint32_t x = htonl(_as);
-	memcpy(d, &x, 4);
-    }
+	/**
+	 * Convert this AS number from binary form to presentation format.
+	 * 
+	 * @return C++ string with the human-readable ASCII representation
+	 * of the AS number.
+	 */
+	string str() const					
+	{
+	    if (extended())
+		return c_format("AS/%u.%u", (_as >> 16)&0xffff, _as&0xffff);
+	    else 
+		return c_format("AS/%u", XORP_UINT_CAST(_as));
+	}
 
-    /**
-     * Test if this is an extended AS number.
-     * 
-     * @return true if this is an extended AS number.
-     */
-    bool extended() const				{ return _as>0xffff;};
-    
-    /**
-     * Equality Operator
-     * 
-     * @param other the right-hand operand to compare against.
-     * @return true if the left-hand operand is numerically same as the
-     * right-hand operand.
-     */
-    bool operator==(const AsNum& x) const		{ return _as == x._as; }
+	string short_str() const					
+	{
+	    if (extended())
+		return c_format("%u.%u", (_as >> 16)&0xffff, _as&0xffff);
+	    else
+		return c_format("%u", XORP_UINT_CAST(_as));
+	}
 
-    /**
-     * Less-Than Operator
-     * @return true if the left-hand operand is numerically smaller than the
-     * right-hand operand.
-     */
-    bool operator<(const AsNum& x) const		{ return _as < x._as; }
-    
-    /**
-     * Convert this AS number from binary form to presentation format.
-     * 
-     * @return C++ string with the human-readable ASCII representation
-     * of the AS number.
-     */
-    string str() const					{
-	if (extended())
-	    return c_format("AS/%u.%u", (_as >> 16)&0xffff, _as&0xffff);
-	else 
-	    return c_format("AS/%u", XORP_UINT_CAST(_as));
-    }
-
-    string short_str() const					{
-	if (extended())
+	string fourbyte_str() const 
+	{
+	    // this version forces the long canonical format
 	    return c_format("%u.%u", (_as >> 16)&0xffff, _as&0xffff);
-	else
-	    return c_format("%u", XORP_UINT_CAST(_as));
-    }
+	}
 
-    string fourbyte_str() const {
-	// this version forces the long canonical format
-	return c_format("%u.%u", (_as >> 16)&0xffff, _as&0xffff);
-    }
-    
-private:
-    uint32_t _as;		// The value of the AS number
+    private:
+	uint32_t _as;		// The value of the AS number
 
 #ifdef XORP_USE_USTL
-public:
-    AsNum() { };
+    public:
+	AsNum() { };
 #else
-    AsNum(); // forbidden
+	AsNum(); // forbidden
 #endif
 
 };

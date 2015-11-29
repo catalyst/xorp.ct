@@ -31,43 +31,44 @@ PolicyMap::find(const string& name) const
     return _deps.find(name);
 }
 
-bool 
+    bool 
 PolicyMap::exists(const string& name)
 {
     return _deps.exists(name);
 }
 
-void 
+    void 
 PolicyMap::create(const string& name,SetMap& smap)
 {
     PolicyStatement* ps = new PolicyStatement(name, smap, *this);
 
-    if (!_deps.create(name,ps)) {
+    if (!_deps.create(name,ps)) 
+    {
 	delete ps;
 	xorp_throw(PolicyMapError,
-		   "Can't create policy " + name + " : already exists");
+		"Can't create policy " + name + " : already exists");
     }
 }
 
-void 
+    void 
 PolicyMap::delete_policy(const string& name)
 {
     _deps.remove(name);
 }
 
-void 
+    void 
 PolicyMap::add_dependency(const string& policyname, const string& protocol)
 {
     _deps.add_dependency(policyname,protocol);
 }
 
-void 
+    void 
 PolicyMap::del_dependency(const string& policyname, const string& protocol)
 {
     _deps.del_dependency(policyname,protocol);
 }
 
-string
+    string
 PolicyMap::str()
 {
     ostringstream out;
@@ -76,7 +77,8 @@ PolicyMap::str()
     // go through all policies and print them
     Dep::Map::const_iterator i = _deps.get_iterator();
 
-    while (_deps.has_next(i)) {
+    while (_deps.has_next(i)) 
+    {
 	Dep::ObjPair p = _deps.next(i);
 
 	// XXX hack! lame! [anyway this is only for debug]
@@ -87,7 +89,7 @@ PolicyMap::str()
     return out.str();
 }
 
-void
+    void
 PolicyMap::policy_deps(const string& policy, DEPS& deps)
 {
     // XXX we mix protocol names and policy names =(
@@ -95,7 +97,8 @@ PolicyMap::policy_deps(const string& policy, DEPS& deps)
 
     _deps.get_deps(policy, tmp);
 
-    for (DEPS::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+    for (DEPS::iterator i = tmp.begin(); i != tmp.end(); ++i) 
+    {
 	const string& name = *i;
 
 	if (exists(name))
@@ -103,7 +106,7 @@ PolicyMap::policy_deps(const string& policy, DEPS& deps)
     }
 }
 
-void
+    void
 PolicyMap::policies(KEYS& out)
 {
     _deps.keys(out);

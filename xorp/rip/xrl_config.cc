@@ -24,27 +24,27 @@
 static const char* _rib_name = "rib";
 static const char* _fea_name = "fea";
 
-const char*
+	const char*
 xrl_rib_name()
 {
-    return _rib_name;
+	return _rib_name;
 }
 
-const char*
+	const char*
 xrl_fea_name()
 {
-    return _fea_name;
+	return _fea_name;
 }
 
-void
+	void
 set_xrl_rib_name(const char* n)
 {
-    _rib_name = n;
+	_rib_name = n;
 }
 
-void
+	void
 set_xrl_fea_name(const char* n)
 {
-    _fea_name = n;
+	_fea_name = n;
 }
 

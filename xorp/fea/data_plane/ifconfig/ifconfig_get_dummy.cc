@@ -38,71 +38,73 @@
 //
 
 
-IfConfigGetDummy::IfConfigGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigGet(fea_data_plane_manager)
+	IfConfigGetDummy::IfConfigGetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigGet(fea_data_plane_manager)
 {
 }
 
 IfConfigGetDummy::~IfConfigGetDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to get "
-		   "information about network interfaces from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to get "
+				"information about network interfaces from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IfConfigGetDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigGetDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 IfConfigGetDummy::pull_config(const IfTree* local_config, IfTree& iftree)
 {
-    UNUSED(local_config);
-    //
-    // XXX: Get the tree from the IfConfigSetDummy instance.
-    //
-    IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
-    if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
-	return (XORP_ERROR);
-
-    IfConfigSetDummy* ifconfig_set_dummy;
-    ifconfig_set_dummy = dynamic_cast<IfConfigSetDummy*>(ifconfig_set);
-    if (ifconfig_set_dummy == NULL) {
+	UNUSED(local_config);
 	//
-	// XXX: The IfConfigSet plugin was probably changed to something else
-	// which we don't know how to deal with.
+	// XXX: Get the tree from the IfConfigSetDummy instance.
 	//
-	return (XORP_ERROR);
-    }
+	IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
+	if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
+		return (XORP_ERROR);
 
-    iftree = ifconfig_set_dummy->iftree();
+	IfConfigSetDummy* ifconfig_set_dummy;
+	ifconfig_set_dummy = dynamic_cast<IfConfigSetDummy*>(ifconfig_set);
+	if (ifconfig_set_dummy == NULL) 
+	{
+		//
+		// XXX: The IfConfigSet plugin was probably changed to something else
+		// which we don't know how to deal with.
+		//
+		return (XORP_ERROR);
+	}
 
-    return (XORP_OK);
+	iftree = ifconfig_set_dummy->iftree();
+
+	return (XORP_OK);
 }

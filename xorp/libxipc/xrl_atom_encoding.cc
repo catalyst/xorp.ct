@@ -37,11 +37,12 @@
 // Characters that require escaping
 static const char ESCAPE_CHARS[] = "[]&=+%$,;{}# ";
 
-inline static bool
+    inline static bool
 needs_escape(char c)
 {
     size_t n = sizeof(ESCAPE_CHARS) / sizeof(ESCAPE_CHARS[0]);
-    for (size_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) 
+    {
 	if (ESCAPE_CHARS[i] == c)
 	    return true;
     }
@@ -54,13 +55,15 @@ needs_escape(char c)
 static uint8_t	escape_table[256 >> 3];
 static bool	escape_table_inited;
 
-static void
+    static void
 init_escape_table()
 {
     for (int i = 0; i < 8; i++)
 	escape_table[i] = 0;
-    for (int i = 0; i < 256; i++) {
-	if (needs_escape(i)) {
+    for (int i = 0; i < 256; i++) 
+    {
+	if (needs_escape(i)) 
+	{
 	    escape_table[i>>3] |= 1 << (i & 0x07);
 	}
     }
@@ -71,7 +74,7 @@ init_escape_table()
 // chars and some bit shifting arithmetic - char_index = i >> 3
 // bit_index = i & 0x07
 
-inline static bool
+    inline static bool
 fast_needs_escape(char c)
 {
     bool n = (escape_table[((uint8_t)c)>>3] & (1 << ((uint8_t)c & 0x07)));
@@ -81,18 +84,20 @@ fast_needs_escape(char c)
 
 // ----------------------------------------------------------------------------
 
-inline static bool
+    inline static bool
 is_a_quote(char c)
 {
     return (c == '%' || c == '+');
 }
 
-inline void
+    inline void
 escape_encode(char c, char*& buf)
 {
-    if (c == ' ') {
+    if (c == ' ') 
+    {
 	*buf++ = '+';
-    } else {
+    } else 
+    {
 	*buf++ = '%';
 	int v = (c & 0xf0) >> 4;
 	if (v < 10) 
@@ -107,7 +112,7 @@ escape_encode(char c, char*& buf)
     }
 }
 
-inline static char
+    inline static char
 hex_digit(char c)
 {
     if (c >= '0' && c <= '9')
@@ -119,17 +124,19 @@ hex_digit(char c)
     return 0x1f;
 }
 
-inline static ssize_t
+    inline static ssize_t
 escape_decode(const char* c, char& out)
 {
-    if (*c == '+') {
+    if (*c == '+') 
+    {
 	out = ' ';
 	return 1;
     }
     assert(*c == '%');
     char h = hex_digit(*(c + 1));
     char l = hex_digit(*(c + 2));
-    if (h <= 15 && l <= 15) {
+    if (h <= 15 && l <= 15) 
+    {
 	char c = char(h * 16 + l);
 	out = c;
 	return 3;
@@ -137,7 +144,7 @@ escape_decode(const char* c, char& out)
     return -1;
 }
 
-string
+    string
 xrlatom_encode_value(const char* val, size_t val_bytes)
 {
     if (!escape_table_inited) init_escape_table();
@@ -151,9 +158,11 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
     string out;			 // output string
 
     char encoded_data[val_bytes * 4 + 1];
-    while (reg_start != val_end) {
+    while (reg_start != val_end) 
+    {
 	reg_end = reg_start;
-	while (reg_end != val_end && fast_needs_escape(*reg_end) == false) {
+	while (reg_end != val_end && fast_needs_escape(*reg_end) == false) 
+	{
 	    reg_end++;
 	}
 	out.append(reg_start, reg_end);
@@ -162,13 +171,15 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 	reg_start = reg_end;
 	char *next_code = &encoded_data[0];
 	bool escaped = false;
-	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) {
+	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) 
+	{
 	    //out.append(escape_encode(*reg_start));
 	    escape_encode(*reg_start, next_code);
 	    reg_start++;
 	    escaped = true;
 	}
-	if (escaped) {
+	if (escaped) 
+	{
 	    *next_code='\0';
 	    out.append(encoded_data);
 	}
@@ -176,7 +187,7 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
     return out;
 }
 
-ssize_t
+    ssize_t
 xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
 {
     out.resize(0);
@@ -186,25 +197,30 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
     const char* reg_end;
 
     reg_start = input;
-    while (reg_start < input_end) {
+    while (reg_start < input_end) 
+    {
 	// Copy non-escaped sequences as a block
 	reg_end = reg_start;
-	while (reg_end < input_end && is_a_quote(*reg_end) == false) {
+	while (reg_end < input_end && is_a_quote(*reg_end) == false) 
+	{
 	    reg_end++;
 	}
 	out.insert(out.end(), reg_start, reg_end);
 
 	// Deal with escaped sequences one at a time
 	reg_start = reg_end;
-	while (reg_start < input_end && is_a_quote(*reg_start) == true) {
-	    if (*reg_start == '%' && reg_start + 3 > input_end) {
+	while (reg_start < input_end && is_a_quote(*reg_start) == true) 
+	{
+	    if (*reg_start == '%' && reg_start + 3 > input_end) 
+	    {
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);
 	    }
 	    char c = 0;
 	    ssize_t skip = escape_decode(reg_start, c);
 	    out.insert(out.end(), c);
-	    if (skip < 1) {
+	    if (skip < 1) 
+	    {
 		// Decoding failed return position of failure
 		return (reg_start - input);
 	    }
@@ -216,9 +232,9 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
 
 // The code for this function is essentially cut-and-paste of above with
 // minor edits.  Could probably be templatized
-ssize_t
+    ssize_t
 xrlatom_decode_value(const char* input, size_t input_bytes,
-		     vector<uint8_t>& out)
+	vector<uint8_t>& out)
 {
     out.resize(0);
 
@@ -227,27 +243,32 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
     const char* reg_end;
 
     reg_start = input;
-    while (reg_start < input_end) {
+    while (reg_start < input_end) 
+    {
 	// Copy non-escaped sequences as a block
 	reg_end = reg_start;
-	while (reg_end < input_end && is_a_quote(*reg_end) == false) {
+	while (reg_end < input_end && is_a_quote(*reg_end) == false) 
+	{
 	    reg_end++;
 	}
 	out.insert(out.end(),
-		   reinterpret_cast<const uint8_t*>(reg_start),
-		   reinterpret_cast<const uint8_t*>(reg_end));
+		reinterpret_cast<const uint8_t*>(reg_start),
+		reinterpret_cast<const uint8_t*>(reg_end));
 
 	// Deal with escaped sequences one at a time
 	reg_start = reg_end;
-	while (reg_start < input_end && is_a_quote(*reg_start) == true) {
-	    if (*reg_start == '%' && reg_start + 3 > input_end) {
+	while (reg_start < input_end && is_a_quote(*reg_start) == true) 
+	{
+	    if (*reg_start == '%' && reg_start + 3 > input_end) 
+	    {
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);
 	    }
 	    char c = 0;
 	    ssize_t skip = escape_decode(reg_start, c);
 	    out.insert(out.end(), c);
-	    if (skip < 1) {
+	    if (skip < 1) 
+	    {
 		// Decoding failed return position of failure
 		return (reg_start - input);
 	    }
@@ -259,7 +280,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 
 #ifdef TEST_XRLATOM_ENCODING
 
-void
+    void
 test_decode(const string& encoded, int expected_failure_position)
 {
     string decoded;
@@ -267,7 +288,7 @@ test_decode(const string& encoded, int expected_failure_position)
     assert(failure == expected_failure_position);
 }
 
-void
+    void
 test_encode_and_decode(const string& s)
 {
     string decoded, encoded;

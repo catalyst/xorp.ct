@@ -26,14 +26,14 @@
 #include "bgp_module.h"
 #include "route_table_policy_im.hh"
 
-template <class A>
+    template <class A>
 PolicyTableImport<A>::PolicyTableImport(const string& tablename, 
-				        const Safi& safi,
-					BGPRouteTable<A>* parent,
-					PolicyFilters& pfs,
-					const A& peer,
-					const A& self)
-    : PolicyTable<A>(tablename, safi, parent, pfs, filter::IMPORT)
+	const Safi& safi,
+	BGPRouteTable<A>* parent,
+	PolicyFilters& pfs,
+	const A& peer,
+	const A& self)
+: PolicyTable<A>(tablename, safi, parent, pfs, filter::IMPORT)
 {
     this->_parent = parent;
     this->_varrw->set_peer(peer);
@@ -44,10 +44,10 @@ PolicyTableImport<A>::PolicyTableImport(const string& tablename,
 
 
 template <class A>
-int
+    int
 PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
-				 BGPRouteTable<A>* caller,
-				 const PeerHandler* dump_peer)
+	BGPRouteTable<A>* caller,
+	const PeerHandler* dump_peer)
 {
     // XXX: policy route dumping IS A HACK!
 
@@ -57,7 +57,7 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
 
     // it is a "policy dump"
     XLOG_ASSERT(caller == this->_parent);
-    
+
     debug_msg("[BGP] Policy route dump: %s\n\n", rtmsg.str().c_str());
 
 
@@ -66,9 +66,9 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
     SubnetRoute<A>* copy_old_route = new SubnetRoute<A>(*rtmsg.route());
     copy_old_route->set_parent_route(NULL);
     InternalMessage<A> *old_rtmsg = new InternalMessage<A>(copy_old_route,
-							   old_fpa_list,
-							   rtmsg.origin_peer(),
-							   rtmsg.genid());
+	    old_fpa_list,
+	    rtmsg.origin_peer(),
+	    rtmsg.genid());
     old_rtmsg->set_copied();
 
     // we want current filter
@@ -79,18 +79,19 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
 
     InternalMessage<A> *new_rtmsg = 0;
     SubnetRoute<A>* copy_new_route = 0;
-    if (new_accepted) {
+    if (new_accepted) 
+    {
 	// we don't want anyone downstream to mess with the metadata
 	// on the route in RibIn
 	//	copy_new_route = new SubnetRoute<A>(*rtmsg.route());
 	//	copy_new_route->set_parent_route(NULL);
 	//	new_rtmsg = new InternalMessage<A>(copy_new_route,
 	new_rtmsg = new InternalMessage<A>(rtmsg.route(),
-					   rtmsg.attributes(),
-					   rtmsg.origin_peer(),
-					   rtmsg.genid());
+		rtmsg.attributes(),
+		rtmsg.origin_peer(),
+		rtmsg.genid());
     }
-    
+
     debug_msg("[BGP] Policy route dump accepted: %d\n", new_accepted);
 
     BGPRouteTable<A>* next = this->_next_table;
@@ -99,15 +100,19 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
 
     int res = XORP_OK;
 
-    if (new_accepted) {
-	if (!old_accepted) {
+    if (new_accepted) 
+    {
+	if (!old_accepted) 
+	{
 	    debug_msg("[BGP] Policy add_route [accepted, was filtered]");
 	    res = next->add_route(*new_rtmsg, this);
-	} else {
+	} else 
+	{
 	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
-		      old_rtmsg->str().c_str(), new_rtmsg->str().c_str());
+		    old_rtmsg->str().c_str(), new_rtmsg->str().c_str());
 
-	    if (new_rtmsg->attributes() == old_rtmsg->attributes()) {
+	    if (new_rtmsg->attributes() == old_rtmsg->attributes()) 
+	    {
 		// no change.
 		copy_new_route->unref();
 		delete new_rtmsg;
@@ -124,7 +129,7 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
 	    // current filters
 	    for (int i = 1; i < 3; i++)
 		new_rtmsg->route()->set_policyfilter(i, RefPf());
-	
+
 	    res = next->add_route(*new_rtmsg, this);
 
 	    // XXX this won't work.  We need to keep original filter pointers on
@@ -133,12 +138,15 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
 	    // route which still has pointer to original parent, which now has
 	    // null pointers, in the case we sent them in the new route which
 	    // has same parent.  [it's a mess... fix soon]
-//	    res = next->replace_route(*fmsg, *new_msg, this);
+	    //	    res = next->replace_route(*fmsg, *new_msg, this);
 	}
-    } else {
+    } else 
+    {
 	// not accepted
-	if (!old_accepted) {
-	} else {
+	if (!old_accepted) 
+	{
+	} else 
+	{
 	    //
 	    // XXX: A hack propagating the "not-winner route" flag back to
 	    // the original route.

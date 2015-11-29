@@ -66,19 +66,19 @@
 #define	IGMP_QUERY_INTERVAL			125
 #define	IGMP_QUERY_RESPONSE_INTERVAL		10
 #define	IGMP_GROUP_MEMBERSHIP_INTERVAL		(IGMP_ROBUSTNESS_VARIABLE     \
-						* IGMP_QUERY_INTERVAL	      \
-						+ IGMP_QUERY_RESPONSE_INTERVAL)
+		* IGMP_QUERY_INTERVAL	      \
+		+ IGMP_QUERY_RESPONSE_INTERVAL)
 #define	IGMP_OTHER_QUERIER_PRESENT_INTERVAL	(IGMP_ROBUSTNESS_VARIABLE     \
-						* IGMP_QUERY_INTERVAL	      \
-					+ IGMP_QUERY_RESPONSE_INTERVAL / 2)
+		* IGMP_QUERY_INTERVAL	      \
+		+ IGMP_QUERY_RESPONSE_INTERVAL / 2)
 #define	IGMP_STARTUP_QUERY_INTERVAL		(IGMP_QUERY_INTERVAL / 4)
 #define	IGMP_STARTUP_QUERY_COUNT		IGMP_ROBUSTNESS_VARIABLE
 #define	IGMP_LAST_MEMBER_QUERY_INTERVAL		1
 #define	IGMP_LAST_MEMBER_QUERY_COUNT		IGMP_ROBUSTNESS_VARIABLE
 #define IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT	400
 #define IGMP_OLDER_VERSION_HOST_PRESENT_INTERVAL (IGMP_ROBUSTNESS_VARIABLE    \
-						* IGMP_QUERY_INTERVAL	      \
-						+ IGMP_QUERY_RESPONSE_INTERVAL)
+		* IGMP_QUERY_INTERVAL	      \
+		+ IGMP_QUERY_RESPONSE_INTERVAL)
 #ifndef IGMP_TIMER_SCALE
 /* the igmp code field is in 10th of seconds */
 #define IGMP_TIMER_SCALE			10
@@ -92,7 +92,7 @@
 #define DVMRP_PROBE		1	/* for finding neighbors             */
 #define DVMRP_REPORT		2	/* for reporting some or all routes  */
 #define DVMRP_ASK_NEIGHBORS	3	/* sent by mapper, asking for a list */
-					/* of this router's neighbors.	     */
+/* of this router's neighbors.	     */
 #define DVMRP_NEIGHBORS		4	/* response to such a request	     */
 #define DVMRP_ASK_NEIGHBORS2	5	/* as above, want new format reply   */
 #define DVMRP_NEIGHBORS2	6
@@ -250,31 +250,31 @@
  */
 #ifdef IGMP_V3_MEMBERSHIP_REPORT
 #define IGMPV3TYPE2ASCII(t)						\
-(((t) == IGMP_V3_MEMBERSHIP_REPORT) ?					\
-    "IGMP_V3_MEMBERSHIP_REPORT"						\
-    : "IGMP_type_unknown")
+	(((t) == IGMP_V3_MEMBERSHIP_REPORT) ?					\
+	 "IGMP_V3_MEMBERSHIP_REPORT"						\
+	 : "IGMP_type_unknown")
 #else
 #define IGMPV3TYPE2ASCII(t)	"IGMP_type_unknown"
 #endif
 
 #define IGMPTYPE2ASCII(t)						\
-(((t) == IGMP_MEMBERSHIP_QUERY) ?					\
-    "IGMP_MEMBERSHIP_QUERY"						\
-    : ((t) == IGMP_V1_MEMBERSHIP_REPORT) ?				\
-	"IGMP_V1_MEMBERSHIP_REPORT"					\
-	: ((t) == IGMP_V2_MEMBERSHIP_REPORT) ?				\
-	    "IGMP_V2_MEMBERSHIP_REPORT"					\
-	    : ((t) == IGMP_V2_LEAVE_GROUP) ?				\
-		"IGMP_V2_LEAVE_GROUP"					\
-		: ((t) == IGMP_DVMRP) ?					\
-		    "IGMP_DVMRP"					\
-		    : ((t) == IGMP_PIM) ?				\
-			"IGMP_PIM"					\
-			: ((t) == IGMP_MTRACE_RESP) ?			\
-			    "IGMP_MTRACE_RESP"				\
-			    : ((t) == IGMP_MTRACE) ?			\
-				"IGMP_MTRACE"				\
-				: IGMPV3TYPE2ASCII(t))
+	(((t) == IGMP_MEMBERSHIP_QUERY) ?					\
+	 "IGMP_MEMBERSHIP_QUERY"						\
+	 : ((t) == IGMP_V1_MEMBERSHIP_REPORT) ?				\
+	 "IGMP_V1_MEMBERSHIP_REPORT"					\
+	 : ((t) == IGMP_V2_MEMBERSHIP_REPORT) ?				\
+	 "IGMP_V2_MEMBERSHIP_REPORT"					\
+	 : ((t) == IGMP_V2_LEAVE_GROUP) ?				\
+	 "IGMP_V2_LEAVE_GROUP"					\
+	 : ((t) == IGMP_DVMRP) ?					\
+	 "IGMP_DVMRP"					\
+	 : ((t) == IGMP_PIM) ?				\
+	 "IGMP_PIM"					\
+	 : ((t) == IGMP_MTRACE_RESP) ?			\
+	 "IGMP_MTRACE_RESP"				\
+	 : ((t) == IGMP_MTRACE) ?			\
+	 "IGMP_MTRACE"				\
+	 : IGMPV3TYPE2ASCII(t))
 
 /*
  * Global variables

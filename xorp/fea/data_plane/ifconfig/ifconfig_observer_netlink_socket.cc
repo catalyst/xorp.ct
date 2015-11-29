@@ -50,120 +50,125 @@
 //
 
 
-IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigObserver(fea_data_plane_manager),
-      NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
-      NetlinkSocketObserver(*(NetlinkSocket *)this)
+	IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigObserver(fea_data_plane_manager),
+	NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
+	NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 }
 
 IfConfigObserverNetlinkSocket::~IfConfigObserverNetlinkSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
-		   "information about network interfaces from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
+				"information about network interfaces from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 IfConfigObserverNetlinkSocket::start(string& error_msg)
 {
-    uint32_t nl_groups = 0;
+	uint32_t nl_groups = 0;
 
-    if (_is_running)
-	return (XORP_OK);
+	if (_is_running)
+		return (XORP_OK);
 
-    //
-    // Listen to the netlink multicast group for network interfaces status
-    // and IPv4 addresses.
-    //
-    if (fea_data_plane_manager().have_ipv4()) 
-	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
+	//
+	// Listen to the netlink multicast group for network interfaces status
+	// and IPv4 addresses.
+	//
+	if (fea_data_plane_manager().have_ipv4()) 
+		nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
 #ifdef HAVE_IPV6
-    //
-    // Listen to the netlink multicast group for network interfaces status
-    // and IPv6 addresses.
-    //
-    if (fea_data_plane_manager().have_ipv6())
-	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
+	//
+	// Listen to the netlink multicast group for network interfaces status
+	// and IPv6 addresses.
+	//
+	if (fea_data_plane_manager().have_ipv6())
+		nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
 #endif // HAVE_IPV6
 
-    //
-    // Set the netlink multicast groups to listen for on the netlink socket
-    //
-    NetlinkSocket::set_nl_groups(nl_groups);
+	//
+	// Set the netlink multicast groups to listen for on the netlink socket
+	//
+	NetlinkSocket::set_nl_groups(nl_groups);
 
-    if (NetlinkSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+	if (NetlinkSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
 
-    _is_running = true;
+	_is_running = true;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 IfConfigObserverNetlinkSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (NetlinkSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (NetlinkSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 IfConfigObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
-    bool modified = false;
-    int nl_errno = 0;
-    // Pre-processing cleanup
-    ifconfig().system_config().finalize_state();
+	bool modified = false;
+	int nl_errno = 0;
+	// Pre-processing cleanup
+	ifconfig().system_config().finalize_state();
 
-    if (IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(
-	    ifconfig(), ifconfig().system_config(), buffer, modified, nl_errno)
-	!= XORP_OK) {
-	return;
-    }
-
-    // TODO:  If the parse_buffer call above didn't modify anything, is the vlan pull
-    // below actually needed?
-    //
-    // Get the VLAN vif info
-    //
-    IfConfigVlanGet* ifconfig_vlan_get;
-    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
-    if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
-	    != XORP_OK) {
-	    XLOG_ERROR("Unknown error while pulling VLAN information");
+	if (IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(
+				ifconfig(), ifconfig().system_config(), buffer, modified, nl_errno)
+			!= XORP_OK) 
+	{
+		return;
 	}
-    }
 
-    if (modified) {
+	// TODO:  If the parse_buffer call above didn't modify anything, is the vlan pull
+	// below actually needed?
 	//
-	// Propagate the changes from the system config to the merged config
+	// Get the VLAN vif info
 	//
-	IfTree& merged_config = ifconfig().merged_config();
-	merged_config.align_with_observed_changes(ifconfig().system_config(),
-						  ifconfig().user_config());
-	ifconfig().report_updates(merged_config);
-	merged_config.finalize_state();
-    }
+	IfConfigVlanGet* ifconfig_vlan_get;
+	ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+	if (ifconfig_vlan_get != NULL) 
+	{
+		if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
+				!= XORP_OK) 
+		{
+			XLOG_ERROR("Unknown error while pulling VLAN information");
+		}
+	}
+
+	if (modified) 
+	{
+		//
+		// Propagate the changes from the system config to the merged config
+		//
+		IfTree& merged_config = ifconfig().merged_config();
+		merged_config.align_with_observed_changes(ifconfig().system_config(),
+				ifconfig().user_config());
+		ifconfig().report_updates(merged_config);
+		merged_config.finalize_state();
+	}
 }
 
-void
+	void
 IfConfigObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

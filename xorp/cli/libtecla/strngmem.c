@@ -35,9 +35,10 @@
 #include "strngmem.h"
 #include "freelist.h"
 
-struct StringMem {
-  unsigned long nmalloc;  /* The number of strings allocated with malloc */
-  FreeList *fl;           /* The free-list */
+struct StringMem 
+{
+	unsigned long nmalloc;  /* The number of strings allocated with malloc */
+	FreeList *fl;           /* The free-list */
 };
 
 /*.......................................................................
@@ -59,43 +60,46 @@ struct StringMem {
  */
 StringMem *_new_StringMem(const char *caller, unsigned blocking_factor)
 {
-  StringMem *sm;    /* The container to be returned. */
-/*
- * Check arguments.
- */
-  if(blocking_factor < 1) {
-    if(caller) {
-      fprintf(stderr, "_new_StringMem (%s): Bad blocking factor (%d).\n",
-	      caller, blocking_factor);
-    };
-    return NULL;
-  };
-/*
- * Allocate the container.
- */
-  sm = (StringMem *) malloc(sizeof(StringMem));
-  if(!sm) {
-    if(caller)
-      fprintf(stderr, "_new_StringMem (%s): Insufficient memory.\n", caller);
-    return NULL;
-  };
-/*
- * Before attempting any operation that might fail, initialize
- * the container at least up to the point at which it can safely
- * be passed to _del_StringMem().
- */
-  sm->nmalloc = 0;
-  sm->fl = NULL;
-/*
- * Allocate the free-list.
- */
-  sm->fl = _new_FreeList(caller, SM_STRLEN, blocking_factor);
-  if(!sm->fl)
-    return _del_StringMem(caller, sm, 1);
-/*
- * Return the free-list container.
- */
-  return sm;
+	StringMem *sm;    /* The container to be returned. */
+	/*
+	 * Check arguments.
+	 */
+	if(blocking_factor < 1) 
+	{
+		if(caller) 
+		{
+			fprintf(stderr, "_new_StringMem (%s): Bad blocking factor (%d).\n",
+					caller, blocking_factor);
+		};
+		return NULL;
+	};
+	/*
+	 * Allocate the container.
+	 */
+	sm = (StringMem *) malloc(sizeof(StringMem));
+	if(!sm) 
+	{
+		if(caller)
+			fprintf(stderr, "_new_StringMem (%s): Insufficient memory.\n", caller);
+		return NULL;
+	};
+	/*
+	 * Before attempting any operation that might fail, initialize
+	 * the container at least up to the point at which it can safely
+	 * be passed to _del_StringMem().
+	 */
+	sm->nmalloc = 0;
+	sm->fl = NULL;
+	/*
+	 * Allocate the free-list.
+	 */
+	sm->fl = _new_FreeList(caller, SM_STRLEN, blocking_factor);
+	if(!sm->fl)
+		return _del_StringMem(caller, sm, 1);
+	/*
+	 * Return the free-list container.
+	 */
+	return sm;
 }
 
 /*.......................................................................
@@ -117,25 +121,27 @@ StringMem *_new_StringMem(const char *caller, unsigned blocking_factor)
  */
 StringMem *_del_StringMem(const char *caller, StringMem *sm, int force)
 {
-  if(sm) {
-/*
- * Check whether any strings have not been returned to the free-list.
- */
-    if(!force && (sm->nmalloc > 0 || _busy_FreeListNodes(sm->fl) > 0)) {
-      if(caller)
-	fprintf(stderr, "_del_StringMem (%s): Free-list in use.\n", caller);
-      return NULL;
-    };
-/*
- * Delete the free-list.
- */
-    sm->fl = _del_FreeList(caller, sm->fl, force);
-/*
- * Delete the container.
- */
-    free(sm);
-  };
-  return NULL;
+	if(sm) 
+	{
+		/*
+		 * Check whether any strings have not been returned to the free-list.
+		 */
+		if(!force && (sm->nmalloc > 0 || _busy_FreeListNodes(sm->fl) > 0)) 
+		{
+			if(caller)
+				fprintf(stderr, "_del_StringMem (%s): Free-list in use.\n", caller);
+			return NULL;
+		};
+		/*
+		 * Delete the free-list.
+		 */
+		sm->fl = _del_FreeList(caller, sm->fl, force);
+		/*
+		 * Delete the container.
+		 */
+		free(sm);
+	};
+	return NULL;
 }
 
 /*.......................................................................
@@ -149,40 +155,42 @@ StringMem *_del_StringMem(const char *caller, StringMem *sm, int force)
  */
 char *_new_StringMemString(StringMem *sm, size_t length)
 {
-  char *string;   /* The string to be returned */
-  int was_malloc; /* True if malloc was used to allocate the string */
-/*
- * Check arguments.
- */
-  if(!sm)
-    return NULL;
-  if(length < 1)
-    length = 1;
-/*
- * Allocate the new node from the free list if possible.
- */
-  if(length < SM_STRLEN) {
-    string = (char *)_new_FreeListNode(sm->fl);
-    if(!string)
-      return NULL;
-    was_malloc = 0;
-  } else {
-    string = (char *) malloc(length+1); /* Leave room for the flag byte */
-    if(!string)
-      return NULL;
-/*
- * Count malloc allocations.
- */
-    was_malloc = 1;
-    sm->nmalloc++;
-  };
-/*
- * Use the first byte of the string to record whether the string was
- * allocated with malloc or from the free-list. Then return the rest
- * of the string for use by the user.
- */
-  string[0] = (char) was_malloc;
-  return string + 1;
+	char *string;   /* The string to be returned */
+	int was_malloc; /* True if malloc was used to allocate the string */
+	/*
+	 * Check arguments.
+	 */
+	if(!sm)
+		return NULL;
+	if(length < 1)
+		length = 1;
+	/*
+	 * Allocate the new node from the free list if possible.
+	 */
+	if(length < SM_STRLEN) 
+	{
+		string = (char *)_new_FreeListNode(sm->fl);
+		if(!string)
+			return NULL;
+		was_malloc = 0;
+	} else 
+	{
+		string = (char *) malloc(length+1); /* Leave room for the flag byte */
+		if(!string)
+			return NULL;
+		/*
+		 * Count malloc allocations.
+		 */
+		was_malloc = 1;
+		sm->nmalloc++;
+	};
+	/*
+	 * Use the first byte of the string to record whether the string was
+	 * allocated with malloc or from the free-list. Then return the rest
+	 * of the string for use by the user.
+	 */
+	string[0] = (char) was_malloc;
+	return string + 1;
 }
 
 /*.......................................................................
@@ -197,30 +205,33 @@ char *_new_StringMemString(StringMem *sm, size_t length)
  */
 char *_del_StringMemString(StringMem *sm, char *s)
 {
-  int was_malloc;  /* True if the string originally came from malloc() */
-/*
- * Is there anything to be deleted?
- */
-  if(s && sm) {
-/*
- * Retrieve the true string pointer. This is one less than the one
- * returned by _new_StringMemString() because the first byte of the
- * allocated memory is reserved by _new_StringMemString as a flag byte
- * to say whether the memory was allocated from the free-list or directly
- * from malloc().
- */
-    s--;
-/*
- * Get the origination flag.
- */
-    was_malloc = s[0];
-    if(was_malloc) {
-      free(s);
-      s = NULL;
-      sm->nmalloc--;
-    } else {
-      s = (char *) _del_FreeListNode(sm->fl, s);
-    };
-  };
-  return NULL;
+	int was_malloc;  /* True if the string originally came from malloc() */
+	/*
+	 * Is there anything to be deleted?
+	 */
+	if(s && sm) 
+	{
+		/*
+		 * Retrieve the true string pointer. This is one less than the one
+		 * returned by _new_StringMemString() because the first byte of the
+		 * allocated memory is reserved by _new_StringMemString as a flag byte
+		 * to say whether the memory was allocated from the free-list or directly
+		 * from malloc().
+		 */
+		s--;
+		/*
+		 * Get the origination flag.
+		 */
+		was_malloc = s[0];
+		if(was_malloc) 
+		{
+			free(s);
+			s = NULL;
+			sm->nmalloc--;
+		} else 
+		{
+			s = (char *) _del_FreeListNode(sm->fl, s);
+		};
+	};
+	return NULL;
 }

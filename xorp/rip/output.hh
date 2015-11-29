@@ -54,99 +54,99 @@ template <typename A>
 class OutputBase :
     public NONCOPYABLE
 {
-public:
-    typedef A		Addr;
-    typedef IPNet<A>	Net;
+    public:
+	typedef A		Addr;
+	typedef IPNet<A>	Net;
 
-public:
-    OutputBase( Port<A>&		port,
-	       PacketQueue<A>&	pkt_queue,
-	       const A&		ip_addr,
-	       uint16_t		ip_port);
+    public:
+	OutputBase( Port<A>&		port,
+		PacketQueue<A>&	pkt_queue,
+		const A&		ip_addr,
+		uint16_t		ip_port);
 
-    virtual ~OutputBase() {};
+	virtual ~OutputBase() {};
 
-    /**
-     * Accessor for destination IP address applied to output packets.
-     */
-    const A& ip_addr() const			{ return _ip_addr; }
+	/**
+	 * Accessor for destination IP address applied to output packets.
+	 */
+	const A& ip_addr() const			{ return _ip_addr; }
 
-    /**
-     * Accessor for destination IP port applied to output packets.
-     */
-    uint16_t ip_port() const			{ return _ip_port; }
+	/**
+	 * Accessor for destination IP port applied to output packets.
+	 */
+	uint16_t ip_port() const			{ return _ip_port; }
 
-    /**
-     * @return true if output process is generating packets.
-     */
-    bool running() const;
+	/**
+	 * @return true if output process is generating packets.
+	 */
+	bool running() const;
 
-    /**
-     * Start packet train if sufficient data is available.  This instance
-     * will remain in "running" so long as data is available and will
-     * continue to generate packets until the data is exhausted.
-     */
-    void start();
+	/**
+	 * Start packet train if sufficient data is available.  This instance
+	 * will remain in "running" so long as data is available and will
+	 * continue to generate packets until the data is exhausted.
+	 */
+	void start();
 
-    /**
-     * Stop packet train.
-     */
-    void stop();
+	/**
+	 * Stop packet train.
+	 */
+	void stop();
 
-    /**
-     * Get number of packets placed on packet queue for output.
-     */
-    void packets_sent() const			{ return _pkts_out; }
+	/**
+	 * Get number of packets placed on packet queue for output.
+	 */
+	void packets_sent() const			{ return _pkts_out; }
 
-protected:
-    /**
-     * Accessor for the inter-packet gap the output process should when
-     * generating packet trains.
-     */
-    uint32_t interpacket_gap_ms() const;
+    protected:
+	/**
+	 * Accessor for the inter-packet gap the output process should when
+	 * generating packet trains.
+	 */
+	uint32_t interpacket_gap_ms() const;
 
-    /**
-     * Derived classes should implement this to start output processing.
-     * It is invoked when start() is called.
-     */
-    virtual void start_output_processing() = 0;
+	/**
+	 * Derived classes should implement this to start output processing.
+	 * It is invoked when start() is called.
+	 */
+	virtual void start_output_processing() = 0;
 
-    /**
-     * Derived classes should implement this to stop output processing.
-     * It is invoked when stop() is called.
-     */
-    virtual void stop_output_processing() = 0;
+	/**
+	 * Derived classes should implement this to stop output processing.
+	 * It is invoked when stop() is called.
+	 */
+	virtual void stop_output_processing() = 0;
 
-    /**
-     * Output packet if suitable data is available, and place it in
-     * the PacketQueue associated with this instance.  Should data still be
-     * available after packet is generated then implementations of this
-     * method should reschedule a call to output_packet after
-     * interpacket_gap_ms milliseconds.
-     */
-    virtual void output_packet() = 0;
+	/**
+	 * Output packet if suitable data is available, and place it in
+	 * the PacketQueue associated with this instance.  Should data still be
+	 * available after packet is generated then implementations of this
+	 * method should reschedule a call to output_packet after
+	 * interpacket_gap_ms milliseconds.
+	 */
+	virtual void output_packet() = 0;
 
-    void incr_packets_sent()			{ _pkts_out++; }
+	void incr_packets_sent()			{ _pkts_out++; }
 
-protected:
-    Port<A>&		_port;	    // Port associated with output
-    PacketQueue<A>&	_pkt_queue; // Place for generated packets to go
-    const A		_ip_addr;   // IP address for output packets
-    const uint16_t	_ip_port;   // IP port for output packets
-    XorpTimer		_op_timer;  // Timer invoking output_packet()
-    uint32_t		_pkts_out;  // Packets sent
+    protected:
+	Port<A>&		_port;	    // Port associated with output
+	PacketQueue<A>&	_pkt_queue; // Place for generated packets to go
+	const A		_ip_addr;   // IP address for output packets
+	const uint16_t	_ip_port;   // IP port for output packets
+	XorpTimer		_op_timer;  // Timer invoking output_packet()
+	uint32_t		_pkts_out;  // Packets sent
 
-    PolicyFilters&	_policy_filters;	// Global policy filters
+	PolicyFilters&	_policy_filters;	// Global policy filters
 };
 
-template <typename A>
+    template <typename A>
 OutputBase<A>::OutputBase( Port<A>&	  port,
-			  PacketQueue<A>& pkt_queue,
-			  const A&	  ip_addr,
-			  uint16_t	  ip_port)
-    :  _port(port), _pkt_queue(pkt_queue),
-      _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0),
-      _policy_filters(port.port_manager().system().policy_filters())
+	PacketQueue<A>& pkt_queue,
+	const A&	  ip_addr,
+	uint16_t	  ip_port)
+:  _port(port), _pkt_queue(pkt_queue),
+    _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0),
+    _policy_filters(port.port_manager().system().policy_filters())
 {
 }
 
@@ -158,7 +158,7 @@ OutputBase<A>::running() const
 }
 
 template <typename A>
-inline void
+    inline void
 OutputBase<A>::start()
 {
     if (running() == false)
@@ -166,7 +166,7 @@ OutputBase<A>::start()
 }
 
 template <typename A>
-inline void
+    inline void
 OutputBase<A>::stop()
 {
     stop_output_processing();

@@ -26,28 +26,29 @@
 #include "common/element_base.hh"
 #include "policy_statement.hh"
 
-template <class T>
+    template <class T>
 Dependency<T>::Dependency()
 {
 }
 
-template <class T>
+    template <class T>
 Dependency<T>::~Dependency()
 {
     clear();
 }
 
 template <class T>
-void
+    void
 Dependency<T>::clear()
 {
-    for (typename Map::iterator i = _map.begin(); i != _map.end(); ++i) {
-        Pair* p = (*i).second;
-	
+    for (typename Map::iterator i = _map.begin(); i != _map.end(); ++i) 
+    {
+	Pair* p = (*i).second;
+
 	if (p->first != NULL)
 	    delete p->first;
 
-        delete p;
+	delete p;
     }
 
     _map.clear();
@@ -61,12 +62,12 @@ Dependency<T>::exists(const string& objectname) const
 }
 
 template <class T>
-bool
+    bool
 Dependency<T>::create(const string& objectname, T* object)
 {
     if (exists(objectname))
 	return false;
-	
+
     Pair* p = new Pair(object, DependencyList());
 
     _map[objectname] = p;
@@ -75,28 +76,29 @@ Dependency<T>::create(const string& objectname, T* object)
 }
 
 template <class T>
-void
+    void
 Dependency<T>::remove(const string& objectname)
 {
     typename Map::iterator i = _map.find(objectname);
 
     if (i == _map.end())
 	xorp_throw(DependencyError,
-		   "Dependency remove: Cannot find object " + objectname);
-	
+		"Dependency remove: Cannot find object " + objectname);
+
     Pair* p = (*i).second;
 
     DependencyList& s = (*p).second;
 
     // check if object is in use
-    if (!s.empty()) {
+    if (!s.empty()) 
+    {
 	ostringstream oss;
 
 	oss << "Dependency remove: Object " << objectname << " in use by: ";
 
 	for (DependencyList::iterator j = s.begin(); j != s.end(); ++j)
 	    oss << *j << " ";
-		
+
 	xorp_throw(DependencyError, oss.str());
     }
 
@@ -110,7 +112,7 @@ Dependency<T>::remove(const string& objectname)
 }
 
 template <class T>
-void
+    void
 Dependency<T>::add_dependency(const string& objectname, const string& dep)
 {
     Pair* p = findDepend(objectname);
@@ -121,7 +123,7 @@ Dependency<T>::add_dependency(const string& objectname, const string& dep)
 }
 
 template <class T>
-void
+    void
 Dependency<T>::del_dependency(const string& objectname, const string& dep)
 {
     Pair* p = findDepend(objectname);
@@ -169,7 +171,7 @@ Dependency<T>::get_deps(const string& objectname, set<string>& deps) const
 }
 
 template <class T>
-void
+    void
 Dependency<T>::update_object(const string& objectname,T* obj)
 {
     Pair* p = findDepend(objectname);
@@ -201,10 +203,10 @@ typename Dependency<T>::ObjPair
 Dependency<T>::next(typename Map::const_iterator& i) const
 {
     if (i == _map.end())
-        xorp_throw(DependencyError, "No more objects");
-	
+	xorp_throw(DependencyError, "No more objects");
+
     Pair* p = (*i).second;
-	
+
     const T* obj = p->first;
 
     ObjPair ret((*i).first,*obj);
@@ -220,10 +222,11 @@ Dependency<T>::keys(KEYS& out) const
 {
     typename Map::const_iterator i = get_iterator();
 
-    while (has_next(i)) {
-        ObjPair op(next(i));
+    while (has_next(i)) 
+    {
+	ObjPair op(next(i));
 
-        out.insert(op.name);
+	out.insert(op.name);
     }
 }
 
@@ -235,7 +238,7 @@ Dependency<T>::findDepend(const string& objectname) const
 
     if (i == _map.end())
 	xorp_throw(DependencyError,
-		   "Dependency: Cannot find object of name " + objectname);
+		"Dependency: Cannot find object of name " + objectname);
 
     return (*i).second;    
 }

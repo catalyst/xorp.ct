@@ -33,34 +33,35 @@
  * filter.
  */
 template <class A>
-class PolicyTableImport : public PolicyTable<A> {
-public:
-    /**
-     * @param tablename name of the table.
-     * @param safi the safe.
-     * @param parent parent table.
-     * @param pfs a reference to the global policy filters.
-     */
-    PolicyTableImport(const string& tablename, 
-		      const Safi& safi,
-		      BGPRouteTable<A>* parent,
-		      PolicyFilters& pfs,
-		      const A& peer,
-		      const A& self);
+class PolicyTableImport : public PolicyTable<A> 
+{
+    public:
+	/**
+	 * @param tablename name of the table.
+	 * @param safi the safe.
+	 * @param parent parent table.
+	 * @param pfs a reference to the global policy filters.
+	 */
+	PolicyTableImport(const string& tablename, 
+		const Safi& safi,
+		BGPRouteTable<A>* parent,
+		PolicyFilters& pfs,
+		const A& peer,
+		const A& self);
 
-    /**
-     * If dump_peer is null, then it is a policy route dump and we need to deal
-     * with it.
-     *
-     * @param rtmsg route being dumped.
-     * @param caller table that called this method.
-     * @param dump_peer peer we are dumping to. If policy dump,
-     * it will be NULL.
-     * @return ADD_FILTERED if route is rejected. XORP_OK otherwise.
-     */
-    int route_dump(InternalMessage<A> &rtmsg,
-                   BGPRouteTable<A> *caller,
-                   const PeerHandler *dump_peer);
+	/**
+	 * If dump_peer is null, then it is a policy route dump and we need to deal
+	 * with it.
+	 *
+	 * @param rtmsg route being dumped.
+	 * @param caller table that called this method.
+	 * @param dump_peer peer we are dumping to. If policy dump,
+	 * it will be NULL.
+	 * @return ADD_FILTERED if route is rejected. XORP_OK otherwise.
+	 */
+	int route_dump(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller,
+		const PeerHandler *dump_peer);
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_IM_HH__

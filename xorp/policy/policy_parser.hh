@@ -34,26 +34,27 @@
  * The nature of lex and yacc causes global variables / functions to be present.
  * Here such methods and functions are grouped under one namespace.
  */
-namespace policy_parser {
+namespace policy_parser 
+{
 
-/**
- * Parser a policy.
- *
- * Caller is responsible for deleting nodes created from a partial parse due to
- * errors.
- *
- * @return 0 on success.
- * @param outnodes where parse tree will be stored.
- * @param block the policy block [source, action, dest] which is being parsed.
- * @param conf configuration to parse.
- * @param outerr on error, this buffer will be filled with an error message.
- */
-int policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block,
-	         const string& conf, string& outerr);
+    /**
+     * Parser a policy.
+     *
+     * Caller is responsible for deleting nodes created from a partial parse due to
+     * errors.
+     *
+     * @return 0 on success.
+     * @param outnodes where parse tree will be stored.
+     * @param block the policy block [source, action, dest] which is being parsed.
+     * @param conf configuration to parse.
+     * @param outerr on error, this buffer will be filled with an error message.
+     */
+    int policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block,
+	    const string& conf, string& outerr);
 
-// THESE SHOULD NOT BE TOUCHED!
-extern vector<Node*>* _parser_nodes;
-extern unsigned _parser_lineno;
+    // THESE SHOULD NOT BE TOUCHED!
+    extern vector<Node*>* _parser_nodes;
+    extern unsigned _parser_lineno;
 
 } // namespace
 

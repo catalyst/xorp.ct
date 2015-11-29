@@ -26,17 +26,19 @@
 #include "libxorp/exceptions.hh"
 
 
-class InitError : public XorpReasonedException {
-public:
-    InitError(const char* file, size_t line, const string init_why = "")
-	: XorpReasonedException("InitError", file, line, init_why) {}
+class InitError : public XorpReasonedException 
+{
+	public:
+		InitError(const char* file, size_t line, const string init_why = "")
+			: XorpReasonedException("InitError", file, line, init_why) {}
 };
 
-class ParseError : public XorpReasonedException {
-public:
-    ParseError(const char* file, size_t line, const string& reason)
-	: XorpReasonedException("ParseError", file, line, reason)
-    {}
+class ParseError : public XorpReasonedException 
+{
+	public:
+		ParseError(const char* file, size_t line, const string& reason)
+			: XorpReasonedException("ParseError", file, line, reason)
+		{}
 };
 
 #endif // __RTRMGR_RTRMGR_ERROR_HH__

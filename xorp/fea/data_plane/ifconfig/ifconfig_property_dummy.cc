@@ -37,8 +37,8 @@
 //
 
 
-IfConfigPropertyDummy::IfConfigPropertyDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigProperty(fea_data_plane_manager)
+	IfConfigPropertyDummy::IfConfigPropertyDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: IfConfigProperty(fea_data_plane_manager)
 {
 }
 
@@ -49,11 +49,11 @@ IfConfigPropertyDummy::~IfConfigPropertyDummy()
 bool
 IfConfigPropertyDummy::test_have_ipv4() const
 {
-    return (true);
+	return (true);
 }
 
 bool
 IfConfigPropertyDummy::test_have_ipv6() const
 {
-    return (true);
+	return (true);
 }

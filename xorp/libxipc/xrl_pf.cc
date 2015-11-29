@@ -26,8 +26,8 @@
 // ----------------------------------------------------------------------------
 // XrlPFListener
 
-XrlPFListener::XrlPFListener( XrlDispatcher* d)
-    :  _dispatcher(d)
+    XrlPFListener::XrlPFListener( XrlDispatcher* d)
+:  _dispatcher(d)
 {
 }
 
@@ -35,10 +35,11 @@ XrlPFListener::~XrlPFListener()
 {
 }
 
-bool
+    bool
 XrlPFListener::set_dispatcher(const XrlDispatcher* d)
 {
-    if (_dispatcher == 0) {
+    if (_dispatcher == 0) 
+    {
 	_dispatcher = d;
 	return true;
     }
@@ -48,8 +49,8 @@ XrlPFListener::set_dispatcher(const XrlDispatcher* d)
 // ----------------------------------------------------------------------------
 // XrlPFSender
 
-XrlPFSender::XrlPFSender(const string& name,  const char* address)
-	:  _address(address), _name(name)
+    XrlPFSender::XrlPFSender(const string& name,  const char* address)
+:  _address(address), _name(name)
 {
 }
 
@@ -58,7 +59,8 @@ XrlPFSender::~XrlPFSender()
     // XXX put a debug_msg() here; we are now deleted through shared_ptr.
 }
 
-string XrlPFSender::toString() const {
+string XrlPFSender::toString() const 
+{
     ostringstream oss;
     oss << _name << ": address: " << _address << " alive: " << alive();
     return oss.str();

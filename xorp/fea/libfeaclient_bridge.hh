@@ -48,52 +48,53 @@ class XrlRouter;
  * is made aware of this object through @ref iftree.  Failure to
  * call method before an update is received will cause a fatal error.
  */
-class LibFeaClientBridge : public IfConfigUpdateReporterBase {
-public:
-    LibFeaClientBridge(XrlRouter& rtr,
-		       IfConfigUpdateReplicator& update_replicator);
-    ~LibFeaClientBridge();
+class LibFeaClientBridge : public IfConfigUpdateReporterBase 
+{
+	public:
+		LibFeaClientBridge(XrlRouter& rtr,
+				IfConfigUpdateReplicator& update_replicator);
+		~LibFeaClientBridge();
 
-    /**
-     * Add named Xrl target to list to receive libfeaclient updates.
-     *
-     * @param xrl_target_instance_name Xrl target instance name.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_libfeaclient_mirror(const string& xrl_target_instance_name);
+		/**
+		 * Add named Xrl target to list to receive libfeaclient updates.
+		 *
+		 * @param xrl_target_instance_name Xrl target instance name.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int add_libfeaclient_mirror(const string& xrl_target_instance_name);
 
-    /**
-     * Remove named Xrl target from the list to receive libfeaclient updates.
-     *
-     * @param xrl_target_instance_name Xrl target instance name.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int remove_libfeaclient_mirror(const string& xrl_target_instance_name);
+		/**
+		 * Remove named Xrl target from the list to receive libfeaclient updates.
+		 *
+		 * @param xrl_target_instance_name Xrl target instance name.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		int remove_libfeaclient_mirror(const string& xrl_target_instance_name);
 
-protected:
-    void interface_update(const string& ifname,
-			  const Update& update);
+	protected:
+		void interface_update(const string& ifname,
+				const Update& update);
 
-    void vif_update(const string& ifname,
-		    const string& vifname,
-		    const Update& update);
+		void vif_update(const string& ifname,
+				const string& vifname,
+				const Update& update);
 
-    void vifaddr4_update(const string& ifname,
-			 const string& vifname,
-			 const IPv4&   addr,
-			 const Update& update);
+		void vifaddr4_update(const string& ifname,
+				const string& vifname,
+				const IPv4&   addr,
+				const Update& update);
 #ifdef HAVE_IPV6
 
-    void vifaddr6_update(const string& ifname,
-			 const string& vifname,
-			 const IPv6&   addr,
-			 const Update& update);
+		void vifaddr6_update(const string& ifname,
+				const string& vifname,
+				const IPv6&   addr,
+				const Update& update);
 #endif
 
-    void updates_completed();
+		void updates_completed();
 
-protected:
-    IfMgrXrlReplicationManager* _rm;
+	protected:
+		IfMgrXrlReplicationManager* _rm;
 };
 
 #endif // __FEA_LIBFEACLIENT_BRIDGE_HH__

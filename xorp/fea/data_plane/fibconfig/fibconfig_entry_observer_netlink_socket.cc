@@ -49,85 +49,86 @@
 // The mechanism to observe the information is netlink(7) sockets.
 //
 
-FibConfigEntryObserverNetlinkSocket::FibConfigEntryObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntryObserver(fea_data_plane_manager),
-      NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
-      NetlinkSocketObserver(*(NetlinkSocket *)this)
+	FibConfigEntryObserverNetlinkSocket::FibConfigEntryObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigEntryObserver(fea_data_plane_manager),
+	NetlinkSocket( fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
+	NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 }
 
 FibConfigEntryObserverNetlinkSocket::~FibConfigEntryObserverNetlinkSocket()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
-		   "information about forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to observe "
+				"information about forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigEntryObserverNetlinkSocket::start(string& error_msg)
 {
-    uint32_t nl_groups = 0;
+	uint32_t nl_groups = 0;
 
-    if (_is_running)
-	return (XORP_OK);
+	if (_is_running)
+		return (XORP_OK);
 
-    //
-    // Listen to the netlink multicast group for IPv4 forwarding entries
-    //
-    if (fea_data_plane_manager().have_ipv4())
-	nl_groups |= RTMGRP_IPV4_ROUTE;
+	//
+	// Listen to the netlink multicast group for IPv4 forwarding entries
+	//
+	if (fea_data_plane_manager().have_ipv4())
+		nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
-    //
-    // Listen to the netlink multicast group for IPv6 forwarding entries
-    //
-    if (fea_data_plane_manager().have_ipv6())
-	nl_groups |= RTMGRP_IPV6_ROUTE;
+	//
+	// Listen to the netlink multicast group for IPv6 forwarding entries
+	//
+	if (fea_data_plane_manager().have_ipv6())
+		nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
 
-    //
-    // Set the netlink multicast groups to listen for on the netlink socket
-    //
-    NetlinkSocket::set_nl_groups(nl_groups);
+	//
+	// Set the netlink multicast groups to listen for on the netlink socket
+	//
+	NetlinkSocket::set_nl_groups(nl_groups);
 
-    if (NetlinkSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+	if (NetlinkSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
 
-    _is_running = true;
+	_is_running = true;
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryObserverNetlinkSocket::stop(string& error_msg)
 {
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	if (NetlinkSocket::stop(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    if (NetlinkSocket::stop(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-void
+	void
 FibConfigEntryObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
-    // TODO: XXX: PAVPAVPAV: use it?
-    UNUSED(buffer);
+	// TODO: XXX: PAVPAVPAV: use it?
+	UNUSED(buffer);
 }
 
-void
+	void
 FibConfigEntryObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
-    receive_data(buffer);
+	receive_data(buffer);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

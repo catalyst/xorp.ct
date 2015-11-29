@@ -28,62 +28,65 @@
 #include "routemap.hh"
 
 
-RouteMap::RouteMap(const string& mapname)
-    : _mapname(mapname)
+	RouteMap::RouteMap(const string& mapname)
+: _mapname(mapname)
 {
 }
 
-int
+	int
 RouteMap::add_rule(RMRule* rule)
 {
-    
-    list<RMRule* >::iterator iter;
-    for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) {
-	cout << "comparing new rule " << rule->seq() << " with " 
-	     << (*iter)->seq() << "\n";
-	if (rule->seq() < (*iter)->seq()) {
-	    cout << "here1\n";
-	    _ruleset.insert(iter, rule);
-	    return XORP_OK;
+
+	list<RMRule* >::iterator iter;
+	for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) 
+	{
+		cout << "comparing new rule " << rule->seq() << " with " 
+			<< (*iter)->seq() << "\n";
+		if (rule->seq() < (*iter)->seq()) 
+		{
+			cout << "here1\n";
+			_ruleset.insert(iter, rule);
+			return XORP_OK;
+		}
 	}
-    }
-    cout << "here2\n";
-    _ruleset.push_back(rule);
-    return XORP_OK;
+	cout << "here2\n";
+	_ruleset.push_back(rule);
+	return XORP_OK;
 }
 
 string
 RouteMap::str() const
 {
-    string result;
-    
-    list<RMRule* >::const_iterator iter;
-    for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) {
-	result += "route-map " + _mapname + (*iter)->str() + "!\n";
-    }
-    return result;
+	string result;
+
+	list<RMRule* >::const_iterator iter;
+	for (iter = _ruleset.begin(); iter != _ruleset.end(); ++iter) 
+	{
+		result += "route-map " + _mapname + (*iter)->str() + "!\n";
+	}
+	return result;
 }
 
 RMRule::RMRule(int seq, RMMatch* match, RMAction* action)
 {
-  _seq = seq;
-  _match = match;
-  _action = action;
+	_seq = seq;
+	_match = match;
+	_action = action;
 }
 
 string 
 RMRule::str() const
 {
-    string result;
-    char buf[20];
-    
-    snprintf(buf, 20, "%d", _seq);
-    result = " permit ";
-    result += buf;
-    result += "\n";
-    result += "  " + _match->str() + "\n";
-    result += "  " + _action->str() + "\n";
-    return result;
+	string result;
+	char buf[20];
+
+	snprintf(buf, 20, "%d", _seq);
+	result = " permit ";
+	result += buf;
+	result += "\n";
+	result += "  " + _match->str() + "\n";
+	result += "  " + _action->str() + "\n";
+	return result;
 }
 
 RMMatch::RMMatch()
@@ -92,35 +95,35 @@ RMMatch::RMMatch()
 
 RMMatchIPAddr::RMMatchIPAddr(const IPv4Net& ipv4net)
 {
-    _ipv4net = ipv4net;
+	_ipv4net = ipv4net;
 }
 
 string
 RMMatchIPAddr::str() const
 {
-    string result;
-    
-    result = "match ip-address " + _ipv4net.str();
-    return result;
+	string result;
+
+	result = "match ip-address " + _ipv4net.str();
+	return result;
 }
 
 bool
 RMMatchIPAddr::match_route(const RouteEntry& re) const
 {
-    cout << "comparing " << re.str() << "\n";
-    return true;
+	cout << "comparing " << re.str() << "\n";
+	return true;
 }
 
 RMAction::RMAction()
 {
-    // nothing happens here
+	// nothing happens here
 }
 
 string 
 RMAction::str() const
 {
-    string result;
-    
-    result = "no modification";
-    return result;
+	string result;
+
+	result = "no modification";
+	return result;
 }

@@ -30,42 +30,43 @@
 #include "rib.hh"
 #include "route.hh"
 
-template<class A>
+    template<class A>
 RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
-		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net, uint16_t admin_distance)
-    : _vif(vif), _protocol(protocol),
-      _admin_distance(admin_distance), _metric(metric),
-      _policytags(new PolicyTags(policytags)), _net(net)
+	uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net, uint16_t admin_distance)
+: _vif(vif), _protocol(protocol),
+    _admin_distance(admin_distance), _metric(metric),
+    _policytags(new PolicyTags(policytags)), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
 }
 
-template<class A>
+    template<class A>
 RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
-			uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
-    : _vif(vif), _protocol(protocol),
-      _admin_distance(admin_distance), _metric(metric),
-      _policytags(new PolicyTags()), _net(net)
+	uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
+: _vif(vif), _protocol(protocol),
+    _admin_distance(admin_distance), _metric(metric),
+    _policytags(new PolicyTags()), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
 }
 
-template<class A>
+    template<class A>
 RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
-			uint32_t metric, smart_ptr<PolicyTags>& policytags,
-			const IPNet<A>& net, uint16_t admin_distance)
-    : _vif(vif), _protocol(protocol),
-      _admin_distance(admin_distance), _metric(metric),
-      _policytags(policytags), _net(net)
+	uint32_t metric, smart_ptr<PolicyTags>& policytags,
+	const IPNet<A>& net, uint16_t admin_distance)
+: _vif(vif), _protocol(protocol),
+    _admin_distance(admin_distance), _metric(metric),
+    _policytags(policytags), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
 }
 
-template<class A>
-RouteEntry<A>::RouteEntry(const RouteEntry& r) {
+    template<class A>
+RouteEntry<A>::RouteEntry(const RouteEntry& r) 
+{
     _vif = r._vif;
     if (_vif)
 	_vif->incr_usage_counter();
@@ -76,8 +77,9 @@ RouteEntry<A>::RouteEntry(const RouteEntry& r) {
     _net = r._net;
 }
 
-template<class A>
-RouteEntry<A>& RouteEntry<A>::operator=(const RouteEntry<A>& r) {
+    template<class A>
+RouteEntry<A>& RouteEntry<A>::operator=(const RouteEntry<A>& r) 
+{
     if (this == &r)
 	return *this;
     if (_vif)
@@ -93,7 +95,7 @@ RouteEntry<A>& RouteEntry<A>::operator=(const RouteEntry<A>& r) {
     return *this;
 }
 
-template<class A>
+    template<class A>
 RouteEntry<A>::~RouteEntry()
 {
     if (_vif != NULL)
@@ -117,14 +119,14 @@ IPRouteEntry<A>::str() const
 }
 
 template<class A>
-void*
+    void*
 IPRouteEntry<A>::operator new(size_t/* size*/)
 {
     return memory_pool().alloc();
 }
 
 template<class A>
-void
+    void
 IPRouteEntry<A>::operator delete(void* ptr)
 {
     memory_pool().free(ptr);
@@ -132,7 +134,7 @@ IPRouteEntry<A>::operator delete(void* ptr)
 
 template<class A>
 inline
-MemoryPool<IPRouteEntry<A> >&
+    MemoryPool<IPRouteEntry<A> >&
 IPRouteEntry<A>::memory_pool()
 {
     static MemoryPool<IPRouteEntry<A> > mp;
@@ -140,14 +142,14 @@ IPRouteEntry<A>::memory_pool()
 }
 
 template<class A>
-void*
+    void*
 ResolvedIPRouteEntry<A>::operator new(size_t/* size*/)
 {
     return memory_pool().alloc();
 }
 
 template<class A>
-void
+    void
 ResolvedIPRouteEntry<A>::operator delete(void* ptr)
 {
     memory_pool().free(ptr);
@@ -155,7 +157,7 @@ ResolvedIPRouteEntry<A>::operator delete(void* ptr)
 
 template<class A>
 inline
-MemoryPool<ResolvedIPRouteEntry<A> >&
+    MemoryPool<ResolvedIPRouteEntry<A> >&
 ResolvedIPRouteEntry<A>::memory_pool()
 {
     static MemoryPool<ResolvedIPRouteEntry<A> > mp;
@@ -163,14 +165,14 @@ ResolvedIPRouteEntry<A>::memory_pool()
 }
 
 template<class A>
-void*
+    void*
 UnresolvedIPRouteEntry<A>::operator new(size_t/* size*/)
 {
     return memory_pool().alloc();
 }
 
 template<class A>
-void
+    void
 UnresolvedIPRouteEntry<A>::operator delete(void* ptr)
 {
     memory_pool().free(ptr);
@@ -178,15 +180,16 @@ UnresolvedIPRouteEntry<A>::operator delete(void* ptr)
 
 template<class A>
 inline
-MemoryPool<UnresolvedIPRouteEntry<A> >&
+    MemoryPool<UnresolvedIPRouteEntry<A> >&
 UnresolvedIPRouteEntry<A>::memory_pool()
 {
     static MemoryPool<UnresolvedIPRouteEntry<A> > mp;
     return mp;
 }
 
-template<class A>
-IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
+    template<class A>
+IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) 
+{
     if (this == &r)
 	return *this;
     RouteEntry<A>::operator=(r);
@@ -195,15 +198,17 @@ IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
 }
 
 
-template<class A>
-ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) {
+    template<class A>
+ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) 
+{
     _resolving_parent = r._resolving_parent;
     _egp_parent = r._egp_parent;
     _backlink = r._backlink;
 }
 
-template<class A>
-ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRouteEntry<A>& r) {
+    template<class A>
+ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRouteEntry<A>& r) 
+{
     if (this == &r)
 	return *this;
     IPRouteEntry<A>::operator=(r);

@@ -33,9 +33,9 @@
 
 
 FinderTcpMessenger::FinderTcpMessenger( FinderMessengerManager*	mm,
-				       XorpFd			sock,
-				       XrlCmdMap&		cmds)
-    : FinderMessengerBase( mm, cmds), FinderTcpBase( sock)
+	XorpFd			sock,
+	XrlCmdMap&		cmds)
+: FinderMessengerBase( mm, cmds), FinderTcpBase( sock)
 {
     if (manager())
 	manager()->messenger_birth_event(this);
@@ -48,17 +48,18 @@ FinderTcpMessenger::~FinderTcpMessenger()
     drain_queue();
 }
 
-bool
+    bool
 FinderTcpMessenger::read_event(int	      errval,
-			       const uint8_t* data,
-			       uint32_t	      data_bytes)
+	const uint8_t* data,
+	uint32_t	      data_bytes)
 {
-    if (errval != 0) {
+    if (errval != 0) 
+    {
 	/* An error has occurred, the FinderTcpBase class will close
 	 * connection following this notification.
 	 */
 	debug_msg("Got errval %d, data %p, data_bytes %u\n",
-		  errval, data, XORP_UINT_CAST(data_bytes));
+		errval, data, XORP_UINT_CAST(data_bytes));
 	return true;
     }
 
@@ -69,25 +70,33 @@ FinderTcpMessenger::read_event(int	      errval,
     string s((const char*)(data), data_bytes);
 
     string ex;
-    try {
-	try {
+    try 
+    {
+	try 
+	{
 	    ParsedFinderXrlMessage fm(s.c_str());
 	    dispatch_xrl(fm.seqno(), fm.xrl());
 	    return true;
-	} catch (const WrongFinderMessageType&) {
+	} catch (const WrongFinderMessageType&) 
+	{
 	    ParsedFinderXrlResponse fm(s.c_str());
 	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
 	    return true;
 	}
-    } catch (const InvalidString& e) {
+    } catch (const InvalidString& e) 
+    {
 	ex = e.str();
-    } catch (const BadFinderMessageFormat& e) {
+    } catch (const BadFinderMessageFormat& e) 
+    {
 	ex = e.str();
-    } catch (const WrongFinderMessageType& e) {
+    } catch (const WrongFinderMessageType& e) 
+    {
 	ex = e.str();
-    } catch (const XorpException& e) {
+    } catch (const XorpException& e) 
+    {
 	ex = e.str();
-    } catch (...) {
+    } catch (...) 
+    {
 	ex = "Unexpected ?";
     }
     XLOG_ERROR("Got exception %s, closing connection", ex.c_str());
@@ -95,21 +104,24 @@ FinderTcpMessenger::read_event(int	      errval,
     return false;
 }
 
-bool
+    bool
 FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
 {
     FinderXrlMessage* msg = new FinderXrlMessage(xrl);
 
-    if (store_xrl_response(msg->seqno(), scb) == false) {
+    if (store_xrl_response(msg->seqno(), scb) == false) 
+    {
 	XLOG_ERROR("Could not store xrl response\n");
 	delete msg;
 	return false;
     }
 
-    if (_out_queue.empty()) {
+    if (_out_queue.empty()) 
+    {
 	_out_queue.push_back(msg);
 	push_queue();
-    } else {
+    } else 
+    {
 	_out_queue.push_back(msg);
     }
 
@@ -122,34 +134,36 @@ FinderTcpMessenger::pending() const
     return (false == _out_queue.empty());
 }
 
-void
+    void
 FinderTcpMessenger::reply(uint32_t	  seqno,
-			  const XrlError& xe,
-			  const XrlArgs*  args)
+	const XrlError& xe,
+	const XrlArgs*  args)
 {
     FinderXrlResponse* msg = new FinderXrlResponse(seqno, xe, args);
-    if (_out_queue.empty()) {
+    if (_out_queue.empty()) 
+    {
 	_out_queue.push_back(msg);
 	push_queue();
-    } else {
+    } else 
+    {
 	_out_queue.push_back(msg);
     }
 }
 
-inline static const uint8_t*
+    inline static const uint8_t*
 get_data(const FinderMessageBase& fm)
 {
     const char* p = fm.str().c_str();
     return reinterpret_cast<const uint8_t*>(p);
 }
 
-inline static uint32_t
+    inline static uint32_t
 get_data_bytes(const FinderMessageBase& fm)
 {
     return fm.str().size();
 }
 
-void
+    void
 FinderTcpMessenger::push_queue()
 {
     XLOG_ASSERT(false == _out_queue.empty());
@@ -164,33 +178,37 @@ FinderTcpMessenger::push_queue()
      * queue to drain.
      */
     const size_t qs = _out_queue.size();
-    if (qs >= OUTQUEUE_BLOCK_READ_HI_MARK && true == read_enabled()) {
+    if (qs >= OUTQUEUE_BLOCK_READ_HI_MARK && true == read_enabled()) 
+    {
 	set_read_enabled(false);
 	XLOG_WARNING("Blocking input queue, output queue hi water mark "
-		     "reached.");
-    } else if (qs == OUTQUEUE_BLOCK_READ_LO_MARK && false == read_enabled()) {
+		"reached.");
+    } else if (qs == OUTQUEUE_BLOCK_READ_LO_MARK && false == read_enabled()) 
+    {
 	set_read_enabled(true);
 	XLOG_WARNING("Unblocking input queue, output queue lo water mark "
-		     "reached.");
+		"reached.");
     }
 }
 
-void
+    void
 FinderTcpMessenger::drain_queue()
 {
-    while (false == _out_queue.empty()) {
+    while (false == _out_queue.empty()) 
+    {
 	delete _out_queue.front();
 	_out_queue.pop_front();
     }
 }
 
-void
+    void
 FinderTcpMessenger::write_event(int 		errval,
-				const uint8_t*	data,
-				uint32_t	data_bytes)
+	const uint8_t*	data,
+	uint32_t	data_bytes)
 {
     XLOG_ASSERT(false == _out_queue.empty());
-    if (errval != 0) {
+    if (errval != 0) 
+    {
 	/* Tcp connection will be closed shortly */
 	return;
     }
@@ -202,14 +220,14 @@ FinderTcpMessenger::write_event(int 		errval,
 	push_queue();
 }
 
-void
+    void
 FinderTcpMessenger::close_event()
 {
     if (manager())
 	manager()->messenger_stopped_event(this);
 }
 
-void
+    void
 FinderTcpMessenger::error_event()
 {
     delete this;
@@ -221,12 +239,12 @@ FinderTcpMessenger::error_event()
 //
 
 FinderTcpListener::FinderTcpListener( FinderMessengerManager& mm,
-				     XrlCmdMap&		     cmds,
-				     IPv4		     interface,
-				     uint16_t		     port,
-				     bool		     en)
+	XrlCmdMap&		     cmds,
+	IPv4		     interface,
+	uint16_t		     port,
+	bool		     en)
     throw (InvalidAddress, InvalidPort)
-    : FinderTcpListenerBase( interface, port, en), _mm(mm), _cmds(cmds)
+: FinderTcpListenerBase( interface, port, en), _mm(mm), _cmds(cmds)
 {
 }
 
@@ -234,7 +252,7 @@ FinderTcpListener::~FinderTcpListener()
 {
 }
 
-bool
+    bool
 FinderTcpListener::connection_event(XorpFd sock)
 {
     FinderTcpMessenger* m =
@@ -252,17 +270,17 @@ FinderTcpListener::connection_event(XorpFd sock)
 //
 
 FinderTcpConnector::FinderTcpConnector( FinderMessengerManager&	mm,
-				       XrlCmdMap&		cmds,
-				       IPv4			host,
-				       uint16_t 		port)
-    :  _mm(mm), _cmds(cmds), _host(host), _port(port)
+	XrlCmdMap&		cmds,
+	IPv4			host,
+	uint16_t 		port)
+:  _mm(mm), _cmds(cmds), _host(host), _port(port)
 {}
 
 FinderTcpConnector::~FinderTcpConnector()
 {
 }
 
-int
+    int
 FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 {
     struct in_addr host_ia;
@@ -270,8 +288,9 @@ FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 
     int in_progress = 0;
     XorpFd sock = comm_connect_tcp4(&host_ia, htons(_port),
-			       COMM_SOCK_NONBLOCKING, &in_progress);
-    if (!sock.is_valid()) {
+	    COMM_SOCK_NONBLOCKING, &in_progress);
+    if (!sock.is_valid()) 
+    {
 	created_messenger = 0;
 	int last_error = comm_get_last_error();
 	XLOG_ASSERT(0 != last_error);
@@ -301,23 +320,25 @@ FinderTcpConnector::finder_port() const
 //
 
 FinderTcpAutoConnector::FinderTcpAutoConnector( FinderMessengerManager& real_manager,
-				XrlCmdMap&		cmds,
-				IPv4			host,
-				uint16_t		port,
-				bool			en,
-				uint32_t 		give_up_ms
-				)
-    : FinderTcpConnector( *this, cmds, host, port),
-      _real_manager(real_manager), _connected(false), _connect_failed(false),
-      _enabled(en), _once_active(false), _last_error(0), _consec_error(0)
+	XrlCmdMap&		cmds,
+	IPv4			host,
+	uint16_t		port,
+	bool			en,
+	uint32_t 		give_up_ms
+	)
+: FinderTcpConnector( *this, cmds, host, port),
+    _real_manager(real_manager), _connected(false), _connect_failed(false),
+    _enabled(en), _once_active(false), _last_error(0), _consec_error(0)
 {
-    if (en) {
+    if (en) 
+    {
 	start_timer();
-	if (give_up_ms) {
+	if (give_up_ms) 
+	{
 	    _giveup_timer =
 		EventLoop::instance().new_oneoff_after_ms(give_up_ms,
 			callback(this,
-				 &FinderTcpAutoConnector::set_enabled, false));
+			    &FinderTcpAutoConnector::set_enabled, false));
 	}
     }
 }
@@ -328,23 +349,27 @@ FinderTcpAutoConnector::~FinderTcpAutoConnector()
     set_enabled(false);
 }
 
-void
+    void
 FinderTcpAutoConnector::set_enabled(bool en)
 {
-    if (_enabled == en) {
+    if (_enabled == en) 
+    {
 	return;
     }
 
     _enabled = en;
-    if (_connected) {
+    if (_connected) 
+    {
 	// timer better not be running since we're connected
 	XLOG_ASSERT(false == _retry_timer.scheduled());
 	return;
     }
 
-    if (false == _enabled) {
+    if (false == _enabled) 
+    {
 	stop_timer();
-    } else {
+    } else 
+    {
 	start_timer();
     }
 }
@@ -367,7 +392,7 @@ FinderTcpAutoConnector::connect_failed() const
     return _connect_failed;
 }
 
-void
+    void
 FinderTcpAutoConnector::do_auto_connect()
 {
     XLOG_ASSERT(false == _connected);
@@ -376,23 +401,27 @@ FinderTcpAutoConnector::do_auto_connect()
 
     FinderTcpMessenger* fm;
     int r = connect(fm);
-    if (r == 0) {
+    if (r == 0) 
+    {
 	XLOG_ASSERT(fm != 0);
 	_consec_error = 0;
 	_connected = true;
-    } else {
+    } else 
+    {
 	XLOG_ASSERT(fm == 0);
 	_connect_failed = true;
-	if (r != _last_error) {
+	if (r != _last_error) 
+	{
 	    XLOG_ERROR("Failed to connect to %s/%u: %s",
-		       _host.str().c_str(), _port, strerror(r));
+		    _host.str().c_str(), _port, strerror(r));
 	    _consec_error = 0;
 	    _last_error = r;
-	} else if ((++_consec_error % CONNECT_FAILS_BEFORE_LOGGING) == 0) {
+	} else if ((++_consec_error % CONNECT_FAILS_BEFORE_LOGGING) == 0) 
+	{
 	    XLOG_ERROR("Failed %u times to connect to %s/%u: %s",
-		       XORP_UINT_CAST(_consec_error), _host.str().c_str(), 
-		       XORP_UINT_CAST(_port),
-		       strerror(r));
+		    XORP_UINT_CAST(_consec_error), _host.str().c_str(), 
+		    XORP_UINT_CAST(_port),
+		    strerror(r));
 	    _consec_error = 0;
 	}
 	_connected = false;
@@ -401,30 +430,30 @@ FinderTcpAutoConnector::do_auto_connect()
     _last_error = r;
 }
 
-void
+    void
 FinderTcpAutoConnector::start_timer(uint32_t ms)
 {
     XLOG_ASSERT(false == _retry_timer.scheduled());
     XLOG_ASSERT(false == _connected);
     _retry_timer =
 	EventLoop::instance().new_oneoff_after_ms(
-	    ms, callback(this, &FinderTcpAutoConnector::do_auto_connect));
+		ms, callback(this, &FinderTcpAutoConnector::do_auto_connect));
 }
 
-void
+    void
 FinderTcpAutoConnector::stop_timer()
 {
     _retry_timer.unschedule();
 }
 
-void
+    void
 FinderTcpAutoConnector::messenger_birth_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_birth_event(m);
     //    set_enabled(false);
 }
 
-void
+    void
 FinderTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_death_event(m);
@@ -433,20 +462,20 @@ FinderTcpAutoConnector::messenger_death_event(FinderMessengerBase* m)
 	start_timer(CONNECT_RETRY_PAUSE_MS);
 }
 
-void
+    void
 FinderTcpAutoConnector::messenger_active_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_active_event(m);
     _once_active = true;
 }
 
-void
+    void
 FinderTcpAutoConnector::messenger_inactive_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_inactive_event(m);
 }
 
-void
+    void
 FinderTcpAutoConnector::messenger_stopped_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_stopped_event(m);

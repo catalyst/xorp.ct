@@ -39,33 +39,34 @@ typedef map<string, PolicyInstr*>   SUBR;
  * The nature of lex and yacc causes global variables / functions to be present.
  * Here such methods and functions are grouped under one namespace.
  */
-namespace policy_backend_parser {
+namespace policy_backend_parser 
+{
 
-typedef vector<PolicyInstr*>	    POLICIES;
+    typedef vector<PolicyInstr*>	    POLICIES;
 
-/**
- * Parses a backend policy configuration.
- *
- * Caller is responsible for deleting partially parsed policies and sets.
- *
- * @return 0 on success. Otherwise, outerr is filled with error message.
- * @param outpolicies the parse tree of all policies.
- * @param outsets the pair of set-name / content.
- * @param conf the configuration to parse.
- * @param outerr string filled with parse error message, on error.
- */
-int policy_backend_parse(vector<PolicyInstr*>& outpolicies,
-                         map<string,Element*>& outsets,
-			 SUBR& outsubr,
-                         const string& conf,
-                         string& outerr);
+    /**
+     * Parses a backend policy configuration.
+     *
+     * Caller is responsible for deleting partially parsed policies and sets.
+     *
+     * @return 0 on success. Otherwise, outerr is filled with error message.
+     * @param outpolicies the parse tree of all policies.
+     * @param outsets the pair of set-name / content.
+     * @param conf the configuration to parse.
+     * @param outerr string filled with parse error message, on error.
+     */
+    int policy_backend_parse(vector<PolicyInstr*>& outpolicies,
+	    map<string,Element*>& outsets,
+	    SUBR& outsubr,
+	    const string& conf,
+	    string& outerr);
 
-extern vector<PolicyInstr*>*	_yy_policies;
-extern map<string,Element*>*	_yy_sets;
-extern vector<TermInstr*>*	_yy_terms;
-extern vector<Instruction*>*	_yy_instructions;
-extern bool			_yy_trace;
-extern SUBR*			_yy_subr;
+    extern vector<PolicyInstr*>*	_yy_policies;
+    extern map<string,Element*>*	_yy_sets;
+    extern vector<TermInstr*>*	_yy_terms;
+    extern vector<Instruction*>*	_yy_instructions;
+    extern bool			_yy_trace;
+    extern SUBR*			_yy_subr;
 
 } // namespace
 

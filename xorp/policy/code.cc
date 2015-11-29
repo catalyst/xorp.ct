@@ -69,19 +69,19 @@ Code::Target::str() const
     return ret;
 }
 
-void
+    void
 Code::set_target_protocol(const string& protocol)
 {
     _target.set_protocol(protocol);
 }
 
-void
+    void
 Code::set_target_filter(const filter::Filter& filter)
 {
     _target.set_filter(filter);
 }
 
-string
+    string
 Code::str()
 {
     string ret = "TARGET proto: " + _target.protocol();
@@ -94,8 +94,9 @@ Code::str()
     ret += "SETS:";
 
     for (set<string>::iterator i = _referenced_set_names.begin();
-	 i != _referenced_set_names.end();
-	 ++i) {
+	    i != _referenced_set_names.end();
+	    ++i) 
+    {
 	ret += " " + *i;
     }
 
@@ -104,7 +105,7 @@ Code::str()
     return ret;
 }
 
-Code&
+    Code&
 Code::operator+=(const Code& rhs)
 {
     // may only add for same target
@@ -116,24 +117,28 @@ Code::operator+=(const Code& rhs)
 
     // add any new sets.
     for (set<string>::const_iterator i = rhs._referenced_set_names.begin();
-	 i != rhs._referenced_set_names.end();
-	 ++i) {
+	    i != rhs._referenced_set_names.end();
+	    ++i) 
+    {
 	_referenced_set_names.insert(*i);
     }
 
     // add tags
     for (TagSet::const_iterator i = rhs._all_tags.begin();
-	 i != rhs._all_tags.end(); ++i) {
+	    i != rhs._all_tags.end(); ++i) 
+    {
 	_all_tags.insert(*i);
     }
     for (TagSet::const_iterator i = rhs._redist_tags.begin();
-	 i != rhs._redist_tags.end(); ++i) {
+	    i != rhs._redist_tags.end(); ++i) 
+    {
 	_redist_tags.insert(*i);
     }
 
     // add protos
     for (set<string>::const_iterator i = rhs._source_protocols.begin();
-	 i != rhs._source_protocols.end(); ++i) {
+	    i != rhs._source_protocols.end(); ++i) 
+    {
 	_source_protocols.insert(*i);
     }
 
@@ -143,21 +148,22 @@ Code::operator+=(const Code& rhs)
     return *this;
 }
 
-void
+    void
 Code::set_redistribution_tags(const TagSet& redist_tags)
 {
-	TagSet::iterator iter;
+    TagSet::iterator iter;
 
-	for (iter = _redist_tags.begin(); iter != _redist_tags.end(); ++iter) {
-	    _all_tags.erase(*iter);
-	}
-	_redist_tags.clear();
+    for (iter = _redist_tags.begin(); iter != _redist_tags.end(); ++iter) 
+    {
+	_all_tags.erase(*iter);
+    }
+    _redist_tags.clear();
 
-	_redist_tags = redist_tags;
-	_all_tags.insert(_redist_tags.begin(), _redist_tags.end());
+    _redist_tags = redist_tags;
+    _all_tags.insert(_redist_tags.begin(), _redist_tags.end());
 }
 
-void
+    void
 Code::refresh_sm_redistribution_tags(const Code& accurate_code)
 {
     if (!(_target == accurate_code._target && _target.filter() == filter::EXPORT_SOURCEMATCH))
@@ -165,13 +171,15 @@ Code::refresh_sm_redistribution_tags(const Code& accurate_code)
 
     TagSet::iterator iter;
 
-    if (_redist_tags != accurate_code.redist_tags()) {
+    if (_redist_tags != accurate_code.redist_tags()) 
+    {
 
 	set_redistribution_tags(accurate_code.redist_tags());
 
 	ElemSetU32 element_set;
 	for (set<uint32_t>::const_iterator iter = _redist_tags.begin();
-		iter != _redist_tags.end(); ++iter) {
+		iter != _redist_tags.end(); ++iter) 
+	{
 	    ElemU32 e(*iter);
 	    element_set.insert(e);
 	}
@@ -179,7 +187,8 @@ Code::refresh_sm_redistribution_tags(const Code& accurate_code)
 	string policy_set_str("PUSH set_u32 ");
 	string::size_type position;
 	for (position = _code.find(policy_set_str); position != string::npos;
-		position = _code.find(policy_set_str, position)) {
+		position = _code.find(policy_set_str, position)) 
+	{
 	    position += policy_set_str.size();
 	    string::size_type num_chars = _code.find("\n", position) - position;
 
@@ -189,7 +198,7 @@ Code::refresh_sm_redistribution_tags(const Code& accurate_code)
     }
 }
 
-void
+    void
 Code::add_subr(const string& policy, const string& code)
 {
     _subr[policy] = code;

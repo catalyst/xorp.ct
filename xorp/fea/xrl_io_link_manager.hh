@@ -30,40 +30,41 @@ class XrlRouter;
  * @short A class that is the bridge between the raw link I/O communications
  * and the XORP XRL interface.
  */
-class XrlIoLinkManager : public IoLinkManagerReceiver {
-public:
-    /**
-     * Constructor.
-     */
-    XrlIoLinkManager(IoLinkManager& io_link_manager, XrlRouter& xrl_router);
+class XrlIoLinkManager : public IoLinkManagerReceiver 
+{
+	public:
+		/**
+		 * Constructor.
+		 */
+		XrlIoLinkManager(IoLinkManager& io_link_manager, XrlRouter& xrl_router);
 
-    /**
-     * Destructor.
-     */
-    virtual ~XrlIoLinkManager();
+		/**
+		 * Destructor.
+		 */
+		virtual ~XrlIoLinkManager();
 
-    /**
-     * Data received event.
-     *
-     * @param receiver_name the name of the receiver to send the
-     * link-level packet to.
-     * @param header the link-level header information.
-     * @param payload the payload, everything after the link-level header.
-     */
-    void recv_event(const string&		receiver_name,
-		    const struct MacHeaderInfo&	header,
-		    const vector<uint8_t>&	payload);
+		/**
+		 * Data received event.
+		 *
+		 * @param receiver_name the name of the receiver to send the
+		 * link-level packet to.
+		 * @param header the link-level header information.
+		 * @param payload the payload, everything after the link-level header.
+		 */
+		void recv_event(const string&		receiver_name,
+				const struct MacHeaderInfo&	header,
+				const vector<uint8_t>&	payload);
 
-private:
-    XrlRouter&		xrl_router() { return _xrl_router; }
+	private:
+		XrlRouter&		xrl_router() { return _xrl_router; }
 
-    /**
-     * Method to be called by XRL sending filter invoker
-     */
-    void xrl_send_recv_cb(const XrlError& xrl_error, string receiver_name);
+		/**
+		 * Method to be called by XRL sending filter invoker
+		 */
+		void xrl_send_recv_cb(const XrlError& xrl_error, string receiver_name);
 
-    IoLinkManager&	_io_link_manager;
-    XrlRouter&		_xrl_router;
+		IoLinkManager&	_io_link_manager;
+		XrlRouter&		_xrl_router;
 };
 
 #endif // __FEA_XRL_IO_LINK_MANAGER_HH__

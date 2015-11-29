@@ -33,20 +33,21 @@
 template<class A>
 class DumpIterator;
 
-enum RouteTableType {
-    RIB_IN_TABLE = 1,
-    RIB_OUT_TABLE = 2,
-    CACHE_TABLE = 3,
-    DECISION_TABLE = 4,
-    FANOUT_TABLE = 5,
-    FILTER_TABLE = 6,
-    DELETION_TABLE = 7,
-    DUMP_TABLE = 8,
-    NHLOOKUP_TABLE = 9,
-    DEBUG_TABLE = 10,
-    POLICY_TABLE = 11,
-    AGGREGATION_TABLE = 12,
-    DAMPING_TABLE = 13
+enum RouteTableType 
+{
+	RIB_IN_TABLE = 1,
+	RIB_OUT_TABLE = 2,
+	CACHE_TABLE = 3,
+	DECISION_TABLE = 4,
+	FANOUT_TABLE = 5,
+	FILTER_TABLE = 6,
+	DELETION_TABLE = 7,
+	DUMP_TABLE = 8,
+	NHLOOKUP_TABLE = 9,
+	DEBUG_TABLE = 10,
+	POLICY_TABLE = 11,
+	AGGREGATION_TABLE = 12,
+	DAMPING_TABLE = 13
 };
 
 #define MAX_TABLE_TYPE 13
@@ -73,69 +74,72 @@ enum RouteTableType {
  */
 
 template<class A>
-class BGPRouteTable {
-public:
-    BGPRouteTable(string tablename, Safi safi);
-    virtual ~BGPRouteTable();
-    virtual int add_route(InternalMessage<A> &rtmsg, 
-			  BGPRouteTable<A> *caller) = 0;
-    virtual int replace_route(InternalMessage<A> &old_rtmsg, 
-			      InternalMessage<A> &new_rtmsg, 
-			      BGPRouteTable<A> *caller) = 0;
-    virtual int delete_route(InternalMessage<A> &rtmsg, 
-			     BGPRouteTable<A> *caller) = 0;
-    virtual int route_dump(InternalMessage<A> &rtmsg, 
-			   BGPRouteTable<A> *caller,
-			   const PeerHandler *dump_peer);
-    virtual int push(BGPRouteTable<A> *caller) = 0;
+class BGPRouteTable 
+{
+	public:
+		BGPRouteTable(string tablename, Safi safi);
+		virtual ~BGPRouteTable();
+		virtual int add_route(InternalMessage<A> &rtmsg, 
+				BGPRouteTable<A> *caller) = 0;
+		virtual int replace_route(InternalMessage<A> &old_rtmsg, 
+				InternalMessage<A> &new_rtmsg, 
+				BGPRouteTable<A> *caller) = 0;
+		virtual int delete_route(InternalMessage<A> &rtmsg, 
+				BGPRouteTable<A> *caller) = 0;
+		virtual int route_dump(InternalMessage<A> &rtmsg, 
+				BGPRouteTable<A> *caller,
+				const PeerHandler *dump_peer);
+		virtual int push(BGPRouteTable<A> *caller) = 0;
 
-    virtual const 
-    SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				 uint32_t& genid,
-				 FPAListRef& pa_list) const = 0;
+		virtual const 
+			SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+					uint32_t& genid,
+					FPAListRef& pa_list) const = 0;
 
-    virtual void route_used(const SubnetRoute<A>* /*route*/, 
-			    bool /*in_use*/){
-	abort();
-    }
+		virtual void route_used(const SubnetRoute<A>* /*route*/, 
+				bool /*in_use*/)
+		{
+			abort();
+		}
 
-    void set_next_table(BGPRouteTable<A>* table) {
-	_next_table = table;
-    }
-    BGPRouteTable<A> *next_table() { return _next_table;}
+		void set_next_table(BGPRouteTable<A>* table) 
+		{
+			_next_table = table;
+		}
+		BGPRouteTable<A> *next_table() { return _next_table;}
 
-    /* parent is only supposed to be called on single-parent tables*/
-    virtual BGPRouteTable<A> *parent() { return _parent; }
-    virtual void set_parent(BGPRouteTable<A> *parent) { _parent = parent; }
+		/* parent is only supposed to be called on single-parent tables*/
+		virtual BGPRouteTable<A> *parent() { return _parent; }
+		virtual void set_parent(BGPRouteTable<A> *parent) { _parent = parent; }
 
-    virtual RouteTableType type() const = 0;
-    const string& tablename() const {return _tablename;}
-    virtual string str() const = 0;
+		virtual RouteTableType type() const = 0;
+		const string& tablename() const {return _tablename;}
+		virtual string str() const = 0;
 
-    /* mechanisms to implement flow control in the output plumbing */
-    virtual void wakeup();
-    virtual bool get_next_message(BGPRouteTable *) {abort(); return false; }
+		/* mechanisms to implement flow control in the output plumbing */
+		virtual void wakeup();
+		virtual bool get_next_message(BGPRouteTable *) {abort(); return false; }
 
-    virtual bool dump_next_route(DumpIterator<A>& dump_iter);
-    /**
-     * Notification that the status of this next hop has changed.
-     *
-     * @param bgp_nexthop The next hop that has changed.
-     */
-    virtual void igp_nexthop_changed(const A& bgp_nexthop);
+		virtual bool dump_next_route(DumpIterator<A>& dump_iter);
+		/**
+		 * Notification that the status of this next hop has changed.
+		 *
+		 * @param bgp_nexthop The next hop that has changed.
+		 */
+		virtual void igp_nexthop_changed(const A& bgp_nexthop);
 
-    virtual void peering_went_down(const PeerHandler *peer, uint32_t genid,
-				   BGPRouteTable<A> *caller);
-    virtual void peering_down_complete(const PeerHandler *peer, uint32_t genid,
-				       BGPRouteTable<A> *caller);
-    virtual void peering_came_up(const PeerHandler *peer, uint32_t genid,
-				 BGPRouteTable<A> *caller);
+		virtual void peering_went_down(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		virtual void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
+		virtual void peering_came_up(const PeerHandler *peer, uint32_t genid,
+				BGPRouteTable<A> *caller);
 
-    Safi safi() const {return _safi; }
-protected:
-    BGPRouteTable<A> *_next_table, *_parent;
-    string _tablename;
-    const Safi _safi;
+		Safi safi() const {return _safi; }
+	protected:
+		BGPRouteTable<A> *_next_table, *_parent;
+		string _tablename;
+		const Safi _safi;
 };
 
 #endif // __BGP_ROUTE_TABLE_BASE_HH__

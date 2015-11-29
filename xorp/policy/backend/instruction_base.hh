@@ -31,22 +31,23 @@
  * An instruction is an operation a policy filter may execute. Such as pushing
  * an element on the stack.
  */
-class Instruction {
-public:
-    virtual ~Instruction() {}
+class Instruction 
+{
+    public:
+	virtual ~Instruction() {}
 
-    /**
-     * Pass the current instruction to the visitor.
-     *
-     * @param v visitor to use on instruction.
-     */
-    virtual void accept(InstrVisitor& v) = 0;
+	/**
+	 * Pass the current instruction to the visitor.
+	 *
+	 * @param v visitor to use on instruction.
+	 */
+	virtual void accept(InstrVisitor& v) = 0;
 };
 
 // macro ugliness to make instruction visitable [usable by visitor].
 #define INSTR_VISITABLE() \
-void accept(InstrVisitor& v) { \
-    v.visit(*this); \
-}
+    void accept(InstrVisitor& v) { \
+	v.visit(*this); \
+    }
 
 #endif // __POLICY_BACKEND_INSTRUCTION_BASE_HH__

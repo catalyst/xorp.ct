@@ -41,164 +41,173 @@
 //
 
 
-FibConfigEntryGetClick::FibConfigEntryGetClick(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigEntryGet(fea_data_plane_manager),
-      _cs_reader(*(ClickSocket *)this)
+	FibConfigEntryGetClick::FibConfigEntryGetClick(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigEntryGet(fea_data_plane_manager),
+	_cs_reader(*(ClickSocket *)this)
 {
 }
 
 FibConfigEntryGetClick::~FibConfigEntryGetClick()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Click mechanism to get "
-		   "information about forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Click mechanism to get "
+				"information about forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigEntryGetClick::start(string& error_msg)
 {
-    if (! ClickSocket::is_enabled())
+	if (! ClickSocket::is_enabled())
+		return (XORP_OK);
+
+	if (_is_running)
+		return (XORP_OK);
+
+	if (ClickSocket::start(error_msg) != XORP_OK)
+		return (XORP_ERROR);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    if (_is_running)
-	return (XORP_OK);
-
-    if (ClickSocket::start(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryGetClick::stop(string& error_msg)
 {
-    int ret_value = XORP_OK;
+	int ret_value = XORP_OK;
 
-    if (! _is_running)
-	return (XORP_OK);
+	if (! _is_running)
+		return (XORP_OK);
 
-    ret_value = ClickSocket::stop(error_msg);
+	ret_value = ClickSocket::stop(error_msg);
 
-    _is_running = false;
+	_is_running = false;
 
-    return (ret_value);
+	return (ret_value);
 }
 
-int
+	int
 FibConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
-    list<Fte4> fte_list4;
-    bool found = false;
+	list<Fte4> fte_list4;
+	bool found = false;
 
-    //
-    // XXX: Get the whole table, and then scan it entry-by-entry
-    // for the longest-prefix match.
-    // TODO: This implementation is very inefficient.
-    //
-    if (fibconfig().get_table4(fte_list4) != XORP_OK)
-	return (XORP_ERROR);
+	//
+	// XXX: Get the whole table, and then scan it entry-by-entry
+	// for the longest-prefix match.
+	// TODO: This implementation is very inefficient.
+	//
+	if (fibconfig().get_table4(fte_list4) != XORP_OK)
+		return (XORP_ERROR);
 
-    list<Fte4>::iterator iter4;
-    for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) {
-	Fte4& fte4 = *iter4;
-	if (! fte4.net().contains(dst))
-	    continue;
-	if ((! found) || fte.net().contains(fte4.net())) {
-	    fte = fte4;
-	    found = true;
+	list<Fte4>::iterator iter4;
+	for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) 
+	{
+		Fte4& fte4 = *iter4;
+		if (! fte4.net().contains(dst))
+			continue;
+		if ((! found) || fte.net().contains(fte4.net())) 
+		{
+			fte = fte4;
+			found = true;
+		}
 	}
-    }
 
-    if (! found)
-	return (XORP_ERROR);
-    return (XORP_OK);
+	if (! found)
+		return (XORP_ERROR);
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
-    list<Fte4> fte_list4;
+	list<Fte4> fte_list4;
 
-    //
-    // XXX: Get the whole table, and then scan it entry-by-entry
-    // for the exact match.
-    // TODO: This implementation is very inefficient.
-    //
-    if (fibconfig().get_table4(fte_list4) != XORP_OK)
-	return (XORP_ERROR);
+	//
+	// XXX: Get the whole table, and then scan it entry-by-entry
+	// for the exact match.
+	// TODO: This implementation is very inefficient.
+	//
+	if (fibconfig().get_table4(fte_list4) != XORP_OK)
+		return (XORP_ERROR);
 
-    list<Fte4>::iterator iter4;
-    for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) {
-	Fte4& fte4 = *iter4;
-	if (fte4.net() == dst) {
-	    fte = fte4;
-	    return (XORP_OK);
+	list<Fte4>::iterator iter4;
+	for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) 
+	{
+		Fte4& fte4 = *iter4;
+		if (fte4.net() == dst) 
+		{
+			fte = fte4;
+			return (XORP_OK);
+		}
 	}
-    }
 
-    return (XORP_ERROR);
+	return (XORP_ERROR);
 }
 
-int
+	int
 FibConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
-    list<Fte6> fte_list6;
-    bool found = false;
+	list<Fte6> fte_list6;
+	bool found = false;
 
-    //
-    // XXX: Get the whole table, and then scan it entry-by-entry
-    // for the longest-prefix match.
-    // TODO: This implementation is very inefficient.
-    //
-    if (fibconfig().get_table6(fte_list6) != XORP_OK)
-	return (XORP_ERROR);
+	//
+	// XXX: Get the whole table, and then scan it entry-by-entry
+	// for the longest-prefix match.
+	// TODO: This implementation is very inefficient.
+	//
+	if (fibconfig().get_table6(fte_list6) != XORP_OK)
+		return (XORP_ERROR);
 
-    list<Fte6>::iterator iter6;
-    for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) {
-	Fte6& fte6 = *iter6;
-	if (! fte6.net().contains(dst))
-	    continue;
-	if ((! found) || fte.net().contains(fte6.net())) {
-	    fte = fte6;
-	    found = true;
+	list<Fte6>::iterator iter6;
+	for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) 
+	{
+		Fte6& fte6 = *iter6;
+		if (! fte6.net().contains(dst))
+			continue;
+		if ((! found) || fte.net().contains(fte6.net())) 
+		{
+			fte = fte6;
+			found = true;
+		}
 	}
-    }
 
-    if (! found)
-	return (XORP_ERROR);
-    return (XORP_OK);
+	if (! found)
+		return (XORP_ERROR);
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
-    list<Fte6> fte_list6;
+	list<Fte6> fte_list6;
 
-    //
-    // XXX: Get the whole table, and then scan it entry-by-entry
-    // for the longest-prefix match.
-    // TODO: This implementation is very inefficient.
-    //
-    if (fibconfig().get_table6(fte_list6) != XORP_OK)
-	return (XORP_ERROR);
+	//
+	// XXX: Get the whole table, and then scan it entry-by-entry
+	// for the longest-prefix match.
+	// TODO: This implementation is very inefficient.
+	//
+	if (fibconfig().get_table6(fte_list6) != XORP_OK)
+		return (XORP_ERROR);
 
-    list<Fte6>::iterator iter6;
-    for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) {
-	Fte6& fte6 = *iter6;
-	if (fte6.net() == dst) {
-	    fte = fte6;
-	    return (XORP_OK);
+	list<Fte6>::iterator iter6;
+	for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) 
+	{
+		Fte6& fte6 = *iter6;
+		if (fte6.net() == dst) 
+		{
+			fte = fte6;
+			return (XORP_OK);
+		}
 	}
-    }
 
-    return (XORP_ERROR);
+	return (XORP_ERROR);
 }
 
 

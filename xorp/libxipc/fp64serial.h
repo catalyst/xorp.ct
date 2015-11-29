@@ -27,11 +27,12 @@
 #include "fp64.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
-  extern uint_fast64_t fp64enc(fp64_t);
-  extern fp64_t fp64dec(uint_fast64_t);
+    extern uint_fast64_t fp64enc(fp64_t);
+    extern fp64_t fp64dec(uint_fast64_t);
 
 #ifdef __cplusplus
 }

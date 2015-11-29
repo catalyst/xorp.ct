@@ -42,13 +42,13 @@
 
 #include "ospf.hh"
 
-template <typename A>
+    template <typename A>
 Ospf<A>::Ospf(OspfTypes::Version version,  IO<A>* io)
     : _version(version), _testing(false),
-      _io(io), _reason("Waiting for IO"), _process_status(PROC_STARTUP),
-      _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
-      _instance_id(0), _router_id(0),
-      _rfc1583_compatibility(false)
+    _io(io), _reason("Waiting for IO"), _process_status(PROC_STARTUP),
+    _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
+    _instance_id(0), _router_id(0),
+    _rfc1583_compatibility(false)
 {
     // Register the LSAs and packets with the associated decoder.
     initialise_lsa_decoder(version, _lsa_decoder);
@@ -73,25 +73,27 @@ Ospf<A>::Ospf(OspfTypes::Version version,  IO<A>* io)
  * packet.
  */
 template <typename A>
-void 
+    void 
 Ospf<A>::receive(const string& interface, const string& vif,
-		 A dst, A src, uint8_t* data, uint32_t len)
+	A dst, A src, uint8_t* data, uint32_t len)
 {
     XLOG_TRACE(trace()._packets, 
-	       "Ospf::received packet, Interface %s Vif %s dst %s src %s data %p len %u\n",
-	      interface.c_str(), vif.c_str(),
-	      dst.str().c_str(), src.str().c_str(),
-	      data, len);
+	    "Ospf::received packet, Interface %s Vif %s dst %s src %s data %p len %u\n",
+	    interface.c_str(), vif.c_str(),
+	    dst.str().c_str(), src.str().c_str(),
+	    data, len);
 
     Packet *packet;
-    try {
+    try 
+    {
 	// If the transport is IPv6 then the checksum verification has
 	// to include the pseudo header. In the IPv4 case this
 	// function is a noop.
 	ipv6_checksum_verify<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
-				_io->get_ip_protocol_number());
+		_io->get_ip_protocol_number());
 	packet = _packet_decoder.decode(data, len);
-    } catch(InvalidPacket& e) {
+    } catch(InvalidPacket& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return;
     }
@@ -100,10 +102,12 @@ Ospf<A>::receive(const string& interface, const string& vif,
     // We have a packet and its good.
 
     bool packet_accepted = false;
-    try {
+    try 
+    {
 	packet_accepted = _peer_manager.receive(interface, vif, dst, src,
-						packet);
-    } catch(BadPeer& e) {
+		packet);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
     }
 
@@ -112,11 +116,11 @@ Ospf<A>::receive(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::enable_interface_vif(const string& interface, const string& vif)
 {
     XLOG_TRACE(trace()._packets, "Enable Interface %s Vif %s\n",
-	       interface.c_str(), vif.c_str());
+	    interface.c_str(), vif.c_str());
 
     if (string(VLINK) == interface)
 	return true;
@@ -125,11 +129,11 @@ Ospf<A>::enable_interface_vif(const string& interface, const string& vif)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 {
     XLOG_WARNING("Disable Interface %s Vif %s\n",
-		 interface.c_str(), vif.c_str());
+	    interface.c_str(), vif.c_str());
 
     if (string(VLINK) == interface)
 	return true;
@@ -138,7 +142,7 @@ Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::enabled(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -147,11 +151,11 @@ Ospf<A>::enabled(const string& interface, const string& vif)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::enabled(const string& interface, const string& vif, A address)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
+	    vif.c_str(), cstring(address));
 
     return _io->is_address_enabled(interface, vif, address);
 }
@@ -159,7 +163,7 @@ Ospf<A>::enabled(const string& interface, const string& vif, A address)
 template <typename A>
 bool
 Ospf<A>::get_addresses(const string& interface, const string& vif,
-		       list<A>& addresses) const
+	list<A>& addresses) const
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
@@ -167,9 +171,9 @@ Ospf<A>::get_addresses(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::get_link_local_address(const string& interface, const string& vif,
-				A& address)
+	A& address)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
@@ -177,26 +181,29 @@ Ospf<A>::get_link_local_address(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::get_interface_id(const string& interface, const string& vif, 
-			  uint32_t& interface_id)
+	uint32_t& interface_id)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     string concat = interface + "/" + vif;
 
-    if (0 == _iidmap.count(concat)) {
+    if (0 == _iidmap.count(concat)) 
+    {
 	if (string(VLINK) == interface)
 	    interface_id = 100000;
 	else
 	    _io->get_interface_id(interface, interface_id);
 
 	bool match;
-	do {
+	do 
+	{
 	    match = false;
 	    typename map<string, uint32_t>::iterator i;
 	    for(i = _iidmap.begin(); i != _iidmap.end(); i++)
-		if ((*i).second == interface_id) {
+		if ((*i).second == interface_id) 
+		{
 		    interface_id++;
 		    match = true;
 		    break;
@@ -210,7 +217,7 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
     XLOG_ASSERT(OspfTypes::UNUSED_INTERFACE_ID != interface_id);
 
     debug_msg("Interface %s Vif %s ID = %u\n", interface.c_str(), vif.c_str(),
-	      interface_id);
+	    interface_id);
 
     _io->set_interface_mapping(interface_id, interface, vif);
 
@@ -218,34 +225,37 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::get_interface_vif_by_interface_id(uint32_t interface_id,
-					   string& interface, string& vif)
+	string& interface, string& vif)
 {
     typename map<string, uint32_t>::iterator i;
-    for(i = _iidmap.begin(); i != _iidmap.end(); i++) {
-	if ((*i).second == interface_id) {
+    for(i = _iidmap.begin(); i != _iidmap.end(); i++) 
+    {
+	if ((*i).second == interface_id) 
+	{
 	    string concat = (*i).first;
 	    interface = concat.substr(0, concat.find('/'));
 	    vif = concat.substr(concat.find('/') + 1, concat.size() - 1);
-// 	    fprintf(stderr, "interface <%s> vif <%s>\n", interface.c_str(),
-// 		    vif.c_str());
+	    // 	    fprintf(stderr, "interface <%s> vif <%s>\n", interface.c_str(),
+	    // 		    vif.c_str());
 	    return true;
 	}
     }
-    
+
     return false;
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::get_prefix_length(const string& interface, const string& vif,
-			   A address, uint16_t& prefix_length)
+	A address, uint16_t& prefix_length)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
+	    vif.c_str(), cstring(address));
 
-    if (string(VLINK) == interface) {
+    if (string(VLINK) == interface) 
+    {
 	prefix_length = 0;
 	return true;
     }
@@ -255,7 +265,7 @@ Ospf<A>::get_prefix_length(const string& interface, const string& vif,
 }
 
 template <typename A>
-uint32_t
+    uint32_t
 Ospf<A>::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
@@ -267,62 +277,67 @@ Ospf<A>::get_mtu(const string& interface)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::join_multicast_group(const string& interface, const string& vif,
-			      A mcast)
+	A mcast)
 {
     debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
-	      vif.c_str(), cstring(mcast));
+	    vif.c_str(), cstring(mcast));
 
     return _io->join_multicast_group(interface, vif, mcast);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::leave_multicast_group(const string& interface, const string& vif,
-			      A mcast)
+	A mcast)
 {
     debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
-	      vif.c_str(), cstring(mcast));
+	    vif.c_str(), cstring(mcast));
 
     return _io->leave_multicast_group(interface, vif, mcast);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::transmit(const string& interface, const string& vif,
-		  A dst, A src,
-		  int ttl, uint8_t* data, uint32_t len)
+	A dst, A src,
+	int ttl, uint8_t* data, uint32_t len)
 {
     XLOG_TRACE(trace()._packets,
-              "Interface %s Vif %s ttl %d data %p len %u\n",
-	      interface.c_str(), vif.c_str(), ttl, data, len);
+	    "Interface %s Vif %s ttl %d data %p len %u\n",
+	    interface.c_str(), vif.c_str(), ttl, data, len);
     debug_msg("Interface %s Vif %s ttl %d data %p len %u\n",
-	      interface.c_str(), vif.c_str(), ttl, data, len);
+	    interface.c_str(), vif.c_str(), ttl, data, len);
 
     // If the transport is IPv6 then the checksum has to include the
     // pseudo header. In the IPv4 case this function is a noop.
     ipv6_checksum_apply<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
-			   _io->get_ip_protocol_number());
+	    _io->get_ip_protocol_number());
 
-    if (trace()._packets) {
-	try {
+    if (trace()._packets) 
+    {
+	try 
+	{
 	    // Decode the packet in order to pretty print it.
 	    Packet *packet = _packet_decoder.decode(data, len);
 	    XLOG_TRACE(trace()._packets, "Transmit: %s\n", cstring(*packet));
 	    delete packet;
-	} catch(InvalidPacket& e) {
+	} catch(InvalidPacket& e) 
+	{
 	    XLOG_TRACE(trace()._packets, "Unable to decode packet\n");
 	}
     }
 
 #ifdef	DEBUG_LOGGING
-    try {
+    try 
+    {
 	// Decode the packet in order to pretty print it.
 	Packet *packet = _packet_decoder.decode(data, len);
 	debug_msg("Transmit: %s\n", cstring(*packet));
 	delete packet;
-    } catch(InvalidPacket& e) {
+    } catch(InvalidPacket& e) 
+    {
 	debug_msg("Unable to decode packet\n");
     }
 #endif
@@ -331,47 +346,34 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_hello_interval(const string& interface, const string& vif,
-			    OspfTypes::AreaID area,
-			    uint16_t hello_interval)
+	OspfTypes::AreaID area,
+	uint16_t hello_interval)
 {
-    try {
+    try 
+    {
 	_peer_manager.set_hello_interval(_peer_manager.
-					 get_peerid(interface, vif),
-					 area, hello_interval);
-    } catch(BadPeer& e) {
+		get_peerid(interface, vif),
+		area, hello_interval);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
     return true;
 }
 
-#if	0
-template <typename A>
-bool 
-Ospf<A>::set_options(const string& interface, const string& vif,
-		     OspfTypes::AreaID area,
-		     uint32_t options)
-{
-    try {
-	_peer_manager.set_options(_peer_manager.get_peerid(interface, vif),
-				  area, options);
-    } catch(BadPeer& e) {
-	XLOG_ERROR("%s", cstring(e));
-	return false;
-    }
-    return true;
-}
-#endif
 
 template <typename A>
-bool
+    bool
 Ospf<A>::create_virtual_link(OspfTypes::RouterID rid)
 {
-    try {
+    try 
+    {
 	_peer_manager.create_virtual_link(rid);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -379,12 +381,14 @@ Ospf<A>::create_virtual_link(OspfTypes::RouterID rid)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::delete_virtual_link(OspfTypes::RouterID rid)
 {
-    try {
+    try 
+    {
 	_peer_manager.delete_virtual_link(rid);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -392,30 +396,34 @@ Ospf<A>::delete_virtual_link(OspfTypes::RouterID rid)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
-				   OspfTypes::AreaID transit_area)
+	OspfTypes::AreaID transit_area)
 {
-    try {
+    try 
+    {
 	_peer_manager.transit_area_virtual_link(rid, transit_area);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
     return true;
 }
-    
+
 template <typename A>
-bool
+    bool
 Ospf<A>::set_router_priority(const string& interface, const string& vif,
-			     OspfTypes::AreaID area,
-			     uint8_t priority)
+	OspfTypes::AreaID area,
+	uint8_t priority)
 {
-    try {
+    try 
+    {
 	_peer_manager.set_router_priority(_peer_manager.
-					  get_peerid(interface, vif),
-					  area, priority);
-    } catch(BadPeer& e) {
+		get_peerid(interface, vif),
+		area, priority);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -423,16 +431,18 @@ Ospf<A>::set_router_priority(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_router_dead_interval(const string& interface, const string& vif,
-			 OspfTypes::AreaID area,
-			 uint32_t router_dead_interval)
+	OspfTypes::AreaID area,
+	uint32_t router_dead_interval)
 {
-    try {
+    try 
+    {
 	_peer_manager.set_router_dead_interval(_peer_manager.
-					       get_peerid(interface,vif),
-					       area, router_dead_interval);
-    } catch(BadPeer& e) {
+		get_peerid(interface,vif),
+		area, router_dead_interval);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -440,16 +450,18 @@ Ospf<A>::set_router_dead_interval(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_interface_cost(const string& interface, const string& vif,
-			    OspfTypes::AreaID area,
-			    uint16_t interface_cost)
+	OspfTypes::AreaID area,
+	uint16_t interface_cost)
 {
-    try {
+    try 
+    {
 	_peer_manager.set_interface_cost(_peer_manager.
-					 get_peerid(interface,vif),
-					 area, interface_cost);
-    } catch(BadPeer& e) {
+		get_peerid(interface,vif),
+		area, interface_cost);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -457,21 +469,24 @@ Ospf<A>::set_interface_cost(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_retransmit_interval(const string& interface, const string& vif,
-				 OspfTypes::AreaID area,
-				 uint16_t retransmit_interval)
+	OspfTypes::AreaID area,
+	uint16_t retransmit_interval)
 {
-    if (0 == retransmit_interval) {
+    if (0 == retransmit_interval) 
+    {
 	XLOG_ERROR("Zero is not a legal value for RxmtInterval");
 	return false;
     }
 
-    try {
+    try 
+    {
 	_peer_manager.set_retransmit_interval(_peer_manager.
-					      get_peerid(interface,vif),
-					      area, retransmit_interval);
-    } catch(BadPeer& e) {
+		get_peerid(interface,vif),
+		area, retransmit_interval);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -479,21 +494,24 @@ Ospf<A>::set_retransmit_interval(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
-			   OspfTypes::AreaID area,
-			   uint16_t inftransdelay)
+	OspfTypes::AreaID area,
+	uint16_t inftransdelay)
 {
-    if (0 == inftransdelay) {
+    if (0 == inftransdelay) 
+    {
 	XLOG_ERROR("Zero is not a legal value for inftransdelay");
 	return false;
     }
 
-    try {
+    try 
+    {
 	_peer_manager.set_inftransdelay(_peer_manager.
-					get_peerid(interface,vif),
-					area, inftransdelay);
-    } catch(BadPeer& e) {
+		get_peerid(interface,vif),
+		area, inftransdelay);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -501,26 +519,29 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_simple_authentication_key(const string&		interface,
-				       const string&		vif,
-				       OspfTypes::AreaID	area,
-				       const string&		password,
-				       string&			error_msg)
+	const string&		vif,
+	OspfTypes::AreaID	area,
+	const string&		password,
+	string&			error_msg)
 {
     OspfTypes::PeerID peerid;
 
-    try {
+    try 
+    {
 	peerid = _peer_manager.get_peerid(interface, vif);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	error_msg = e.str();
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     } 
 
     if (_peer_manager.set_simple_authentication_key(peerid, area,
-						    password, error_msg)
-	!= true) {
+		password, error_msg)
+	    != true) 
+    {
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     }
@@ -529,24 +550,27 @@ Ospf<A>::set_simple_authentication_key(const string&		interface,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::delete_simple_authentication_key(const string&		interface,
-					  const string&		vif,
-					  OspfTypes::AreaID	area,
-					  string&		error_msg)
+	const string&		vif,
+	OspfTypes::AreaID	area,
+	string&		error_msg)
 {
     OspfTypes::PeerID peerid;
 
-    try {
+    try 
+    {
 	peerid = _peer_manager.get_peerid(interface, vif);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	error_msg = e.str();
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     } 
 
     if (_peer_manager.delete_simple_authentication_key(peerid, area, error_msg)
-	!= true) {
+	    != true) 
+    {
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     }
@@ -555,33 +579,36 @@ Ospf<A>::delete_simple_authentication_key(const string&		interface,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_md5_authentication_key(const string&	interface,
-				    const string&	vif,
-				    OspfTypes::AreaID	area,
-				    uint8_t		key_id,
-				    const string&	password,
-				    const TimeVal&	start_timeval,
-				    const TimeVal&	end_timeval,
-				    const TimeVal&	max_time_drift,
-				    string&		error_msg)
+	const string&	vif,
+	OspfTypes::AreaID	area,
+	uint8_t		key_id,
+	const string&	password,
+	const TimeVal&	start_timeval,
+	const TimeVal&	end_timeval,
+	const TimeVal&	max_time_drift,
+	string&		error_msg)
 
 {
     OspfTypes::PeerID peerid;
 
-    try {
+    try 
+    {
 	peerid = _peer_manager.get_peerid(interface, vif);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	error_msg = e.str();
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     } 
 
     if (_peer_manager.set_md5_authentication_key(peerid, area, key_id,
-						 password, start_timeval,
-						 end_timeval, max_time_drift,
-						 error_msg)
-	!= true) {
+		password, start_timeval,
+		end_timeval, max_time_drift,
+		error_msg)
+	    != true) 
+    {
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     }
@@ -590,26 +617,29 @@ Ospf<A>::set_md5_authentication_key(const string&	interface,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::delete_md5_authentication_key(const string&		interface,
-				       const string&		vif,
-				       OspfTypes::AreaID	area,
-				       uint8_t			key_id,
-				       string&			error_msg)
+	const string&		vif,
+	OspfTypes::AreaID	area,
+	uint8_t			key_id,
+	string&			error_msg)
 {
     OspfTypes::PeerID peerid;
 
-    try {
+    try 
+    {
 	peerid = _peer_manager.get_peerid(interface, vif);
-    } catch(BadPeer& e) {
+    } catch(BadPeer& e) 
+    {
 	error_msg = e.str();
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     } 
 
     if (_peer_manager.delete_md5_authentication_key(peerid, area, key_id,
-						    error_msg)
-	!= true) {
+		error_msg)
+	    != true) 
+    {
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     }
@@ -618,15 +648,17 @@ Ospf<A>::delete_md5_authentication_key(const string&		interface,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::set_passive(const string& interface, const string& vif,
-		     OspfTypes::AreaID area, bool passive, bool host)
+	OspfTypes::AreaID area, bool passive, bool host)
 {
-    try {
+    try 
+    {
 	_peer_manager.set_passive(_peer_manager.
-				  get_peerid(interface,vif),
-				  area, passive, host);
-    } catch(BadPeer& e) {
+		get_peerid(interface,vif),
+		area, passive, host);
+    } catch(BadPeer& e) 
+    {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
     }
@@ -634,7 +666,7 @@ Ospf<A>::set_passive(const string& interface, const string& vif,
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::originate_default_route(OspfTypes::AreaID area, bool enable)
 {
     debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
@@ -643,7 +675,7 @@ Ospf<A>::originate_default_route(OspfTypes::AreaID area, bool enable)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::stub_default_cost(OspfTypes::AreaID area, uint32_t cost)
 {
     debug_msg("Area %s cost %u\n", pr_id(area).c_str(), cost);
@@ -652,7 +684,7 @@ Ospf<A>::stub_default_cost(OspfTypes::AreaID area, uint32_t cost)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::summaries(OspfTypes::AreaID area, bool enable)
 {
     debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
@@ -661,24 +693,24 @@ Ospf<A>::summaries(OspfTypes::AreaID area, bool enable)
 }
 
 template <typename A>
-bool 
+    bool 
 Ospf<A>::set_ip_router_alert(bool alert)
 {
     return _io->set_ip_router_alert(alert);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), bool_c_str(advertise));
+	    cstring(net), bool_c_str(advertise));
 
     return _peer_manager.area_range_add(area, net, advertise);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::area_range_delete(OspfTypes::AreaID area, IPNet<A> net)
 {
     debug_msg("Area %s Net %s\n", pr_id(area).c_str(), cstring(net));
@@ -687,20 +719,20 @@ Ospf<A>::area_range_delete(OspfTypes::AreaID area, IPNet<A> net)
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
-				 bool advertise)
+	bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), bool_c_str(advertise));
+	    cstring(net), bool_c_str(advertise));
 
     return _peer_manager.area_range_change_state(area, net, advertise);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::get_lsa(const OspfTypes::AreaID area, const uint32_t index,
-		 bool& valid, bool& toohigh, bool& self, vector<uint8_t>& lsa)
+	bool& valid, bool& toohigh, bool& self, vector<uint8_t>& lsa)
 {
     debug_msg("Area %s index %u\n", pr_id(area).c_str(), index);
 
@@ -728,60 +760,60 @@ Ospf<A>::get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const
 template <typename A>
 bool
 Ospf<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
-			    NeighbourInfo& ninfo) const
+	NeighbourInfo& ninfo) const
 {
     return _peer_manager.get_neighbour_info(nid, ninfo);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::clear_database()
 {
     return _peer_manager.clear_database();
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
-		   uint32_t metric, bool equal, bool discard,
-		   const PolicyTags& policytags)
+	uint32_t metric, bool equal, bool discard,
+	const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, bool_c_str(equal),
-	      bool_c_str(discard), cstring(policytags));
+	    cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	    bool_c_str(discard), cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
-	       "Add route "
-	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	       cstring(net), cstring(nexthop), metric, bool_c_str(equal),
-	       bool_c_str(discard), cstring(policytags));
+	    "Add route "
+	    "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
+	    cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	    bool_c_str(discard), cstring(policytags));
 
     return _io->add_route(net, nexthop, nexthop_id, metric, equal, discard,
-			  policytags);
+	    policytags);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id, 
-		       uint32_t metric, bool equal, bool discard,
-		       const PolicyTags& policytags)
+	uint32_t metric, bool equal, bool discard,
+	const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, bool_c_str(equal),
-	      bool_c_str(discard), cstring(policytags));
+	    cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	    bool_c_str(discard), cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
-	       "Replace route "
-	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	       cstring(net), cstring(nexthop), metric, bool_c_str(equal),
-	       bool_c_str(discard), cstring(policytags));
+	    "Replace route "
+	    "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
+	    cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	    bool_c_str(discard), cstring(policytags));
 
     return _io->replace_route(net, nexthop, nexthop_id, metric, equal, discard,
-			      policytags);
+	    policytags);
 }
 
 template <typename A>
-bool
+    bool
 Ospf<A>::delete_route(IPNet<A> net)
 {
     debug_msg("Net %s\n", cstring(net));
@@ -792,21 +824,21 @@ Ospf<A>::delete_route(IPNet<A> net)
 }
 
 template <typename A>
-void
+    void
 Ospf<A>::configure_filter(const uint32_t& filter, const string& conf)
 {
     _policy_filters.configure(filter,conf);
 }
 
 template <typename A>
-void
+    void
 Ospf<A>::reset_filter(const uint32_t& filter)
 {
     _policy_filters.reset(filter);
 }
 
 template <typename A>
-void
+    void
 Ospf<A>::push_routes()
 {
     _peer_manager.external_push_routes();
@@ -814,24 +846,24 @@ Ospf<A>::push_routes()
 }
 
 template <typename A>
-bool 
+    bool 
 Ospf<A>::originate_route(const IPNet<A>& net,
-			 const A& nexthop,
-			 const uint32_t& metric,
-			 const PolicyTags& policytags)
+	const A& nexthop,
+	const uint32_t& metric,
+	const PolicyTags& policytags)
 {
     return _peer_manager.external_announce(net, nexthop, metric, policytags);
 }
 
 template <typename A>
-bool 
+    bool 
 Ospf<A>::withdraw_route(const IPNet<A>& net)
 {
     return _peer_manager.external_withdraw(net);
 }
 
 template <typename A>
-void
+    void
 Ospf<A>::set_router_id(OspfTypes::RouterID id)
 {
     _peer_manager.router_id_changing();

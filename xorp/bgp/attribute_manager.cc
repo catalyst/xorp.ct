@@ -24,57 +24,59 @@
 #include "attribute_manager.hh"
 
 
-template <class A>
+	template <class A>
 AttributeManager<A>::AttributeManager()
 {
-    _total_references = 0;
+	_total_references = 0;
 }
 
 template <class A>
-PAListRef<A> 
+	PAListRef<A> 
 AttributeManager<A>::add_attribute_list(PAListRef<A>& palist)
 {
-    debug_msg("AttributeManager<A>::add_attribute_list\n");
-    typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
-    Iter i = _attribute_lists.find(palist);
+	debug_msg("AttributeManager<A>::add_attribute_list\n");
+	typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
+	Iter i = _attribute_lists.find(palist);
 
-    if (i == _attribute_lists.end()) {
-	_attribute_lists.insert(palist);
-	palist->incr_managed_refcount(1);
-	debug_msg("** new att list\n");
+	if (i == _attribute_lists.end()) 
+	{
+		_attribute_lists.insert(palist);
+		palist->incr_managed_refcount(1);
+		debug_msg("** new att list\n");
+		debug_msg("** (+) ref count for %p now %u\n",
+				palist.attributes(), palist->managed_references());
+		return palist;
+	}
+
+	(*i)->incr_managed_refcount(1);
+	debug_msg("** old att list\n");
 	debug_msg("** (+) ref count for %p now %u\n",
-		  palist.attributes(), palist->managed_references());
-	return palist;
-    }
+			(*i).attributes(), (*i)->managed_references());
+	debug_msg("done\n");
 
-    (*i)->incr_managed_refcount(1);
-    debug_msg("** old att list\n");
-    debug_msg("** (+) ref count for %p now %u\n",
-	      (*i).attributes(), (*i)->managed_references());
-    debug_msg("done\n");
-
-    return *i;
+	return *i;
 }
 
 template <class A>
-void
+	void
 AttributeManager<A>::delete_attribute_list(PAListRef<A>& palist)
 {
-    debug_msg("AttributeManager<A>::delete_attribute_list %p\n",
-	      palist.attributes());
-    typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
-    Iter i = _attribute_lists.find(palist);
-    assert(i != _attribute_lists.end());
+	debug_msg("AttributeManager<A>::delete_attribute_list %p\n",
+			palist.attributes());
+	typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
+	Iter i = _attribute_lists.find(palist);
+	assert(i != _attribute_lists.end());
 
-    XLOG_ASSERT((*i)->managed_references()>=1);
-    (*i)->decr_managed_refcount(1);
+	XLOG_ASSERT((*i)->managed_references()>=1);
+	(*i)->decr_managed_refcount(1);
 
-    debug_msg("** (-) ref count for %p now %u\n",
-	      (*i).attributes(), (*i)->managed_references());
+	debug_msg("** (-) ref count for %p now %u\n",
+			(*i).attributes(), (*i)->managed_references());
 
-    if ((*i)->managed_references() < 1) {
-	_attribute_lists.erase(i);
-    }
+	if ((*i)->managed_references() < 1) 
+	{
+		_attribute_lists.erase(i);
+	}
 }
 
 template class AttributeManager<IPv4>;

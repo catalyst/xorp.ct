@@ -47,73 +47,76 @@ class VisitorSemantic :
     public NONCOPYABLE,
     public Visitor
 {
-public:
-    enum PolicyType {
-	IMPORT,
-	EXPORT
-    };
-
-    /**
-     * @short Exception thrown on a semantic error
-     */
-    class sem_error : public PolicyException {
     public:
-        sem_error(const char* file, size_t line, const string& init_why = "")
-            : PolicyException("sem_error", file, line, init_why) {}
+	enum PolicyType 
+	{
+	    IMPORT,
+	    EXPORT
+	};
+
+	/**
+	 * @short Exception thrown on a semantic error
+	 */
+	class sem_error : public PolicyException 
+    {
+	public:
+	    sem_error(const char* file, size_t line, const string& init_why = "")
+		: PolicyException("sem_error", file, line, init_why) {}
     };
 
-    /**
-     * @param varrw semantic VarRW used to simulate a protocol.
-     * @param varmap the varmap.
-     * @param setmap the SetMap to check if sets exist.
-     * @param pmap the policy map to check subroutines.
-     * @param protocol the protocol which instantiates the policy.
-     * @param ptype the type of policy [import/export].
-     */
-    VisitorSemantic(SemanticVarRW& varrw, VarMap& varmap, SetMap& setmap,
-		    PolicyMap& pmap, const string& protocol, PolicyType ptype);
+	/**
+	 * @param varrw semantic VarRW used to simulate a protocol.
+	 * @param varmap the varmap.
+	 * @param setmap the SetMap to check if sets exist.
+	 * @param pmap the policy map to check subroutines.
+	 * @param protocol the protocol which instantiates the policy.
+	 * @param ptype the type of policy [import/export].
+	 */
+	VisitorSemantic(SemanticVarRW& varrw, VarMap& varmap, SetMap& setmap,
+		PolicyMap& pmap, const string& protocol, PolicyType ptype);
 
-    const Element* visit(PolicyStatement& policy);
-    const Element* visit(Term& term);
-    const Element* visit(NodeUn& node);
-    const Element* visit(NodeBin& node);
-    const Element* visit(NodeAssign& node);
-    const Element* visit(NodeVar& node);
-    const Element* visit(NodeSet& node);
-    const Element* visit(NodeElem& node);
-    const Element* visit(NodeAccept& node);
-    const Element* visit(NodeReject& node);
-    const Element* visit(NodeProto& node);
-    const Element* visit(NodeNext& node);
-    const Element* visit(NodeSubr& node);
+	const Element* visit(PolicyStatement& policy);
+	const Element* visit(Term& term);
+	const Element* visit(NodeUn& node);
+	const Element* visit(NodeBin& node);
+	const Element* visit(NodeAssign& node);
+	const Element* visit(NodeVar& node);
+	const Element* visit(NodeSet& node);
+	const Element* visit(NodeElem& node);
+	const Element* visit(NodeAccept& node);
+	const Element* visit(NodeReject& node);
+	const Element* visit(NodeProto& node);
+	const Element* visit(NodeNext& node);
+	const Element* visit(NodeSubr& node);
 
-    /**
-     * @return sets used by the policy.
-     *
-     */
-    const set<string>& sets() const {
-	return _sets;
-    }
+	/**
+	 * @return sets used by the policy.
+	 *
+	 */
+	const set<string>& sets() const 
+	{
+	    return _sets;
+	}
 
-private:
-    void	    change_protocol(const string& proto);
-    const string&   semantic_protocol();
-    const Element*  do_bin(const Element& left, const Element& right,
-			   const BinOper& op, const Node& from);
-    void	    do_policy_statement(PolicyStatement& ps);
+    private:
+	void	    change_protocol(const string& proto);
+	const string&   semantic_protocol();
+	const Element*  do_bin(const Element& left, const Element& right,
+		const BinOper& op, const Node& from);
+	void	    do_policy_statement(PolicyStatement& ps);
 
-    SemanticVarRW&  _varrw;
-    VarMap&	    _varmap;
-    SetMap&	    _setmap;
-    PolicyMap&	    _pmap;
-    Dispatcher	    _disp;
-    set<string>	    _sets;
-    string	    _protocol;
-    string	    _current_protocol;
-    string	    _semantic_protocol;
-    PolicyType	    _ptype;
-    set<Element*>   _trash;
-    bool	    _reject;
+	SemanticVarRW&  _varrw;
+	VarMap&	    _varmap;
+	SetMap&	    _setmap;
+	PolicyMap&	    _pmap;
+	Dispatcher	    _disp;
+	set<string>	    _sets;
+	string	    _protocol;
+	string	    _current_protocol;
+	string	    _semantic_protocol;
+	PolicyType	    _ptype;
+	set<Element*>   _trash;
+	bool	    _reject;
 };
 
 #endif // __POLICY_VISITOR_SEMANTIC_HH__

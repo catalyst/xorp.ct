@@ -49,108 +49,115 @@
  */ 
 
 template<class A>
-class RibInTable : public BGPRouteTable<A>, CrashDumper {
-public:
-    RibInTable(string tablename, Safi safi, const PeerHandler *peer);
-    ~RibInTable();
-    /**
-     * Remove all the stored routes. Used to flush static routes only.
-     */
-    void flush();
+class RibInTable : public BGPRouteTable<A>, CrashDumper 
+{
+	public:
+		RibInTable(string tablename, Safi safi, const PeerHandler *peer);
+		~RibInTable();
+		/**
+		 * Remove all the stored routes. Used to flush static routes only.
+		 */
+		void flush();
 
-    /* this version is deprecated  - we only use messages between stages */
-    int add_route(InternalMessage<A>& /*rtmsg*/,
-		  BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
+		/* this version is deprecated  - we only use messages between stages */
+		int add_route(InternalMessage<A>& /*rtmsg*/,
+				BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
 
-    int add_route(const IPNet<A> &net,
-		  FPAListRef& pa_list,
-		  const PolicyTags& policy_tags);
+		int add_route(const IPNet<A> &net,
+				FPAListRef& pa_list,
+				const PolicyTags& policy_tags);
 
-    void ribin_peering_went_down();
-    void ribin_peering_came_up();
+		void ribin_peering_went_down();
+		void ribin_peering_came_up();
 
-    /*replace_route doesn't make sense for a RibIn because it's the
-      RibIn that decides whether this is an add or a replace*/
-    int replace_route(InternalMessage<A> & /*old_rtmsg*/,
-		      InternalMessage<A> & /*new_rtmsg*/,
-		      BGPRouteTable<A> * /*caller*/ ) { abort(); return 0; }
+		/*replace_route doesn't make sense for a RibIn because it's the
+		  RibIn that decides whether this is an add or a replace*/
+		int replace_route(InternalMessage<A> & /*old_rtmsg*/,
+				InternalMessage<A> & /*new_rtmsg*/,
+				BGPRouteTable<A> * /*caller*/ ) { abort(); return 0; }
 
-    /* this version is deprecated  - we only use messages between stages */
-    int delete_route(InternalMessage<A>& /*rtmsg*/,
-		     BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
+		/* this version is deprecated  - we only use messages between stages */
+		int delete_route(InternalMessage<A>& /*rtmsg*/,
+				BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
 
-    int delete_route(const IPNet<A> &net);
-    
+		int delete_route(const IPNet<A> &net);
 
-    int push(BGPRouteTable<A> *caller);
-    int delete_add_routes();
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net, 
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
-    void route_used(const SubnetRoute<A>* route, bool in_use);
 
-    BGPRouteTable<A> *parent() { return NULL; }
+		int push(BGPRouteTable<A> *caller);
+		int delete_add_routes();
+		const SubnetRoute<A> *lookup_route(const IPNet<A> &net, 
+				uint32_t& genid,
+				FPAListRef& pa_list) const;
+		void route_used(const SubnetRoute<A>* route, bool in_use);
 
-    RouteTableType type() const { return RIB_IN_TABLE; }
+		BGPRouteTable<A> *parent() { return NULL; }
 
-    string str() const;
+		RouteTableType type() const { return RIB_IN_TABLE; }
 
-    bool get_next_message(BGPRouteTable<A> */*next_table*/) {
-	abort();
-	return false;
-    }
-    void set_peer_is_up() { _peer_is_up = true; }
+		string str() const;
 
-    bool dump_next_route(DumpIterator<A>& dump_iter);
+		bool get_next_message(BGPRouteTable<A> */*next_table*/) 
+		{
+			abort();
+			return false;
+		}
+		void set_peer_is_up() { _peer_is_up = true; }
 
-    /*igp_nexthop_changed is called when the IGP routing changes in
-      such a way that IGP information that was being used by BGP for
-      its decision process is affected.  We need to scan through the
-      RIB, looking for routes that have this nexthop, and propagate
-      them downstream again to see if the change makes a difference */
-    void igp_nexthop_changed(const A& bgp_nexthop);
+		bool dump_next_route(DumpIterator<A>& dump_iter);
 
-    int route_count() const {
-	return _route_table->route_count();
-    }
+		/*igp_nexthop_changed is called when the IGP routing changes in
+		  such a way that IGP information that was being used by BGP for
+		  its decision process is affected.  We need to scan through the
+		  RIB, looking for routes that have this nexthop, and propagate
+		  them downstream again to see if the change makes a difference */
+		void igp_nexthop_changed(const A& bgp_nexthop);
 
-    BgpTrie<A>& trie() const {
-	return *_route_table;
-    }
+		int route_count() const 
+		{
+			return _route_table->route_count();
+		}
 
-    const PeerHandler* peer_handler() const {
-	return _peer;
-    }
+		BgpTrie<A>& trie() const 
+		{
+			return *_route_table;
+		}
 
-    uint32_t genid() const {
-	return _genid;
-    }
+		const PeerHandler* peer_handler() const 
+		{
+			return _peer;
+		}
 
-    void crash_dump() const {
-	CrashDumper::crash_dump();
-    }
-    string dump_state() const;
+		uint32_t genid() const 
+		{
+			return _genid;
+		}
 
-private:
+		void crash_dump() const 
+		{
+			CrashDumper::crash_dump();
+		}
+		string dump_state() const;
 
-    BgpTrie<A>* _route_table;
-    const PeerHandler *_peer;
-    bool _peer_is_up;
-    uint32_t _genid;
-    uint32_t _table_version;
+	private:
 
-    // state and methods related to re-sending all the routes related
-    // to a nexthop whose IGP information has changed.
-    set <A> _changed_nexthops;
-    bool _nexthop_push_active;
-    A _current_changed_nexthop;
-    typename BgpTrie<A>::PathmapType::const_iterator _current_chain;
-    XorpTask _push_task;
-    bool push_next_changed_nexthop();
-    void deletion_nexthop_check(const SubnetRoute<A>* route);
-    void next_chain();
-    void stop_nexthop_push();
-    // end of IGP nexthop handing stuff
+		BgpTrie<A>* _route_table;
+		const PeerHandler *_peer;
+		bool _peer_is_up;
+		uint32_t _genid;
+		uint32_t _table_version;
+
+		// state and methods related to re-sending all the routes related
+		// to a nexthop whose IGP information has changed.
+		set <A> _changed_nexthops;
+		bool _nexthop_push_active;
+		A _current_changed_nexthop;
+		typename BgpTrie<A>::PathmapType::const_iterator _current_chain;
+		XorpTask _push_task;
+		bool push_next_changed_nexthop();
+		void deletion_nexthop_check(const SubnetRoute<A>* route);
+		void next_chain();
+		void stop_nexthop_push();
+		// end of IGP nexthop handing stuff
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBIN_HH__

@@ -24,21 +24,22 @@
 #define __LIBXORP_TOKENIZE_HH__
 
 /*
-** Tokenizer.
-*/
+ ** Tokenizer.
+ */
 inline
 void 
 tokenize(const string& str,
-	      vector<string>& tokens,
-	      const string& delimiters = " ")
+	vector<string>& tokens,
+	const string& delimiters = " ")
 {
     string::size_type begin = str.find_first_not_of(delimiters, 0);
     string::size_type end = str.find_first_of(delimiters, begin);
 
-    while(string::npos != begin || string::npos != end) {
-        tokens.push_back(str.substr(begin, end - begin));
-        begin = str.find_first_not_of(delimiters, end);
-        end = str.find_first_of(delimiters, begin);
+    while(string::npos != begin || string::npos != end) 
+    {
+	tokens.push_back(str.substr(begin, end - begin));
+	begin = str.find_first_not_of(delimiters, end);
+	end = str.find_first_of(delimiters, begin);
     }
 }
 

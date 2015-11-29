@@ -62,24 +62,26 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif /* __cplusplus */
 
 #ifndef HAVE_STRUCT_ETHER_ADDR
 #ifndef ETHER_ADDR_LEN
 #define ETHER_ADDR_LEN 6
 #endif
-struct ether_addr {
+    struct ether_addr 
+    {
 	char	octet[ETHER_ADDR_LEN];
-};
+    };
 #endif /* HAVE_STRUCT_ETHER_ADDR */
 
 #ifndef HAVE_ETHER_ATON
-struct ether_addr* ether_aton(const char *a);
+    struct ether_addr* ether_aton(const char *a);
 #endif
 
 #ifndef HAVE_ETHER_NTOA
-char* ether_ntoa(const struct ether_addr* ea);
+    char* ether_ntoa(const struct ether_addr* ea);
 #endif
 
 #ifndef ETHERTYPE_IP

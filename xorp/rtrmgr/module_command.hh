@@ -31,63 +31,64 @@ class TemplateTreeNode;
 class Validation;
 class MasterConfigTreeNode;
 
-class ModuleCommand : public Command {
-public:
-    ModuleCommand(TemplateTree& template_tree,
-		  TemplateTreeNode& template_tree_node,
-		  const string& cmd_name);
-    ~ModuleCommand();
+class ModuleCommand : public Command 
+{
+	public:
+		ModuleCommand(TemplateTree& template_tree,
+				TemplateTreeNode& template_tree_node,
+				const string& cmd_name);
+		~ModuleCommand();
 
-    void add_action(const list<string>& action,
-		    const XRLdb* xrldb) throw (ParseError);
-    virtual bool expand_actions(string& error_msg);
-    virtual bool check_referred_variables(string& error_msg) const;
+		void add_action(const list<string>& action,
+				const XRLdb* xrldb) throw (ParseError);
+		virtual bool expand_actions(string& error_msg);
+		virtual bool check_referred_variables(string& error_msg) const;
 
-    Validation* startup_validation(TaskManager& taskmgr) const;
-    Validation* config_validation(TaskManager& taskmgr) const;
-    Validation* ready_validation(TaskManager& taskmgr) const;
-    Validation* shutdown_validation(TaskManager& taskmgr) const;
-    Startup*	startup_method(TaskManager& taskmgr) const;
-    Shutdown*	shutdown_method(TaskManager& taskmgr) const;
+		Validation* startup_validation(TaskManager& taskmgr) const;
+		Validation* config_validation(TaskManager& taskmgr) const;
+		Validation* ready_validation(TaskManager& taskmgr) const;
+		Validation* shutdown_validation(TaskManager& taskmgr) const;
+		Startup*	startup_method(TaskManager& taskmgr) const;
+		Shutdown*	shutdown_method(TaskManager& taskmgr) const;
 
-    const string& module_name() const { return _module_name; }
-    const string& module_exec_path() const { return _module_exec_path; }
-    const list<string>& depends() const { return _depends; }
-    int start_transaction(MasterConfigTreeNode& ctn,
-			  TaskManager& task_manager) const;
-    int end_transaction(MasterConfigTreeNode& ctn,
-			TaskManager& task_manager) const;
-    string str() const;
+		const string& module_name() const { return _module_name; }
+		const string& module_exec_path() const { return _module_exec_path; }
+		const list<string>& depends() const { return _depends; }
+		int start_transaction(MasterConfigTreeNode& ctn,
+				TaskManager& task_manager) const;
+		int end_transaction(MasterConfigTreeNode& ctn,
+				TaskManager& task_manager) const;
+		string str() const;
 
-    typedef XorpCallback3<void, bool, const string&, const string&>::RefPtr ProgramCallback;
+		typedef XorpCallback3<void, bool, const string&, const string&>::RefPtr ProgramCallback;
 
-protected:
-    void xrl_action_complete(const XrlError& err,
-			     XrlArgs* xrl_args,
-			     MasterConfigTreeNode *ctn,
-			     Action *action,
-			     string cmd) const;
+	protected:
+		void xrl_action_complete(const XrlError& err,
+				XrlArgs* xrl_args,
+				MasterConfigTreeNode *ctn,
+				Action *action,
+				string cmd) const;
 
-    void program_action_complete(bool success,
-				 const string& stdout_output,
-				 const string& stderr_output,
-				 bool do_exec,
-				 MasterConfigTreeNode *ctn,
-				 Action *action,
-				 string cmd) const;
+		void program_action_complete(bool success,
+				const string& stdout_output,
+				const string& stderr_output,
+				bool do_exec,
+				MasterConfigTreeNode *ctn,
+				Action *action,
+				string cmd) const;
 
-private:
-    TemplateTree&	_tt;
-    string		_module_name;
-    string		_module_exec_path;
-    string		_default_target_name;
-    list<string>	_depends;
-    Action*		_start_commit;
-    Action*		_end_commit;
-    Action*		_status_method;
-    Action*		_startup_method;
-    Action*		_shutdown_method;
-    bool		_verbose;	// Set to true if output is verbose
+	private:
+		TemplateTree&	_tt;
+		string		_module_name;
+		string		_module_exec_path;
+		string		_default_target_name;
+		list<string>	_depends;
+		Action*		_start_commit;
+		Action*		_end_commit;
+		Action*		_status_method;
+		Action*		_startup_method;
+		Action*		_shutdown_method;
+		bool		_verbose;	// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_MODULE_COMMAND_HH__

@@ -27,18 +27,20 @@
 #include "libxorp/xlog.h"
 #include "libxorp/ipvx.hh"
 
-class UnresolvableHost : public XorpReasonedException {
-public:
-    UnresolvableHost(const char* file, size_t line, const string init_why = "")
- 	: XorpReasonedException("UnresolvableHost", file, line, init_why) {}
+class UnresolvableHost : public XorpReasonedException 
+{
+	public:
+		UnresolvableHost(const char* file, size_t line, const string init_why = "")
+			: XorpReasonedException("UnresolvableHost", file, line, init_why) {}
 };
 
-class AddressFamilyMismatch : public XorpReasonedException {
-public:
-    AddressFamilyMismatch(const char* file, size_t line,
-			  const string init_why = "")
- 	: XorpReasonedException("AddressFamilyMismatch",
-				file, line, init_why) {}
+class AddressFamilyMismatch : public XorpReasonedException 
+{
+	public:
+		AddressFamilyMismatch(const char* file, size_t line,
+				const string init_why = "")
+			: XorpReasonedException("AddressFamilyMismatch",
+					file, line, init_why) {}
 };
 
 /**
@@ -56,76 +58,77 @@ public:
  * a DNS / Yellow pages interaction taking place. After this as we are
  * dealing with IP addresses there should be no danger.
  */
-class Iptuple {
-public:
-    Iptuple();
-    Iptuple(const char* local_dev, const char *local_addr, uint16_t local_port,
-	    const char *peer_addr, uint16_t peer_port)
-	throw(UnresolvableHost,AddressFamilyMismatch);
+class Iptuple 
+{
+	public:
+		Iptuple();
+		Iptuple(const char* local_dev, const char *local_addr, uint16_t local_port,
+				const char *peer_addr, uint16_t peer_port)
+			throw(UnresolvableHost,AddressFamilyMismatch);
 
-    Iptuple(const Iptuple&);
-    Iptuple& operator=(const Iptuple&);
-    void copy(const Iptuple&);
+		Iptuple(const Iptuple&);
+		Iptuple& operator=(const Iptuple&);
+		void copy(const Iptuple&);
 
-    bool operator==(const Iptuple&) const;
+		bool operator==(const Iptuple&) const;
 
-    const struct sockaddr *get_local_socket(size_t& len) const;
-    string get_local_addr() const;
-    bool get_local_addr(IPv4& addr) const;
-    bool get_local_addr(IPv6& addr) const;
-    uint16_t get_local_port() const;
+		const struct sockaddr *get_local_socket(size_t& len) const;
+		string get_local_addr() const;
+		bool get_local_addr(IPv4& addr) const;
+		bool get_local_addr(IPv6& addr) const;
+		uint16_t get_local_port() const;
 
-    const struct sockaddr *get_bind_socket(size_t& len) const;
+		const struct sockaddr *get_bind_socket(size_t& len) const;
 
-    const struct sockaddr *get_peer_socket(size_t& len) const;
-    string get_peer_addr() const;
-    const string& get_local_interface() const { return _local_dev; }
-    bool get_peer_addr(IPv4& addr) const;
-    bool get_peer_addr(IPv6& addr) const;
-    uint16_t get_peer_port() const;
+		const struct sockaddr *get_peer_socket(size_t& len) const;
+		string get_peer_addr() const;
+		const string& get_local_interface() const { return _local_dev; }
+		bool get_peer_addr(IPv4& addr) const;
+		bool get_peer_addr(IPv6& addr) const;
+		uint16_t get_peer_port() const;
 
-    string str() const;
-private:
-    void
-    fill_address(const char *addr, uint16_t local_port,
-		 struct sockaddr_storage& ss, size_t& len,
-		 string& addr_numeric)
-	throw(UnresolvableHost);
+		string str() const;
+	private:
+		void
+			fill_address(const char *addr, uint16_t local_port,
+					struct sockaddr_storage& ss, size_t& len,
+					string& addr_numeric)
+			throw(UnresolvableHost);
 
-    string _local_dev; // The interface (device) name.  NOT IP.
-    string _local_addr;	// String representation only for debugging.  IP Address.
-    string _peer_addr;	// String representation only for debugging.  IP Address
+		string _local_dev; // The interface (device) name.  NOT IP.
+		string _local_addr;	// String representation only for debugging.  IP Address.
+		string _peer_addr;	// String representation only for debugging.  IP Address
 
-    // For listen().
-    struct sockaddr_storage	_local_sock;	 // Local socket
-    size_t			_local_sock_len; // Length of local socket
+		// For listen().
+		struct sockaddr_storage	_local_sock;	 // Local socket
+		size_t			_local_sock_len; // Length of local socket
 
-    // For bind() before connect.
-    struct sockaddr_storage	_bind_sock;	// Bind socket
-    size_t			_bind_sock_len;	// Length of bind socket
+		// For bind() before connect.
+		struct sockaddr_storage	_bind_sock;	// Bind socket
+		size_t			_bind_sock_len;	// Length of bind socket
 
-    // For connect().
-    struct sockaddr_storage	_peer_sock;	// Peer socket
-    size_t			_peer_sock_len;	// Length of peer socket
+		// For connect().
+		struct sockaddr_storage	_peer_sock;	// Peer socket
+		size_t			_peer_sock_len;	// Length of peer socket
 
-    /*
-    ** The local address and the peer address are stored twice once in
-    ** string format and one in IPvX format. Originally the addresses
-    ** were stored only as strings as they are rarely used, however
-    ** the policy code may repeatedly request the peer address in IPv4
-    ** or IPv6 format so keep it in the internal format for
-    ** performance reasons.
-    */
-    string _local_address;	// Local address in numeric form
-    IPvX   _local_address_ipvx;	// Local address in IPvX form
-    string _peer_address;	// Peer address in numeric form
-    IPvX   _peer_address_ipvx;	// Peer address in IPvX form
+		/*
+		 ** The local address and the peer address are stored twice once in
+		 ** string format and one in IPvX format. Originally the addresses
+		 ** were stored only as strings as they are rarely used, however
+		 ** the policy code may repeatedly request the peer address in IPv4
+		 ** or IPv6 format so keep it in the internal format for
+		 ** performance reasons.
+		 */
+		string _local_address;	// Local address in numeric form
+		IPvX   _local_address_ipvx;	// Local address in IPvX form
+		string _peer_address;	// Peer address in numeric form
+		IPvX   _peer_address_ipvx;	// Peer address in IPvX form
 
-    /*
-    ** Held in host byte order
-    */
-    uint16_t _local_port;	// Local port
-    uint16_t _peer_port;	// Peer port
+		/*
+		 ** Held in host byte order
+		 */
+		uint16_t _local_port;	// Local port
+		uint16_t _peer_port;	// Peer port
 };
 
 #endif // __BGP_IPTUPLE_HH__

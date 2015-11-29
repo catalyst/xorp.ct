@@ -28,48 +28,49 @@
 
 
 class IfConfigObserverRoutingSocket : public IfConfigObserver,
-				      public RoutingSocket,
-				      public RoutingSocketObserver {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager);
+	public RoutingSocket,
+	public RoutingSocketObserver 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~IfConfigObserverRoutingSocket();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~IfConfigObserverRoutingSocket();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(vector<uint8_t>& buffer);
-    
-    void routing_socket_data(vector<uint8_t>& buffer);
-    
-private:
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
+
+		/**
+		 * Receive data from the underlying system.
+		 * 
+		 * @param buffer the buffer with the received data.
+		 */
+		virtual void receive_data(vector<uint8_t>& buffer);
+
+		void routing_socket_data(vector<uint8_t>& buffer);
+
+	private:
 };
 
 #endif

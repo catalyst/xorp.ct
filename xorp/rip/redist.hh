@@ -48,22 +48,22 @@ template <typename A>
 class RedistRouteOrigin :
     public RouteEntryOrigin<A>
 {
-public:
-    RedistRouteOrigin() : RouteEntryOrigin<A>(true) {}
+    public:
+	RedistRouteOrigin() : RouteEntryOrigin<A>(true) {}
 
-    /**
-     * Retrieve number of seconds before routes associated with this
-     * RedistRouteOrigin expire.
-     *
-     * Always returns 0 to signify routes do not automatically expire.
-     */
-    uint32_t expiry_secs() const;
+	/**
+	 * Retrieve number of seconds before routes associated with this
+	 * RedistRouteOrigin expire.
+	 *
+	 * Always returns 0 to signify routes do not automatically expire.
+	 */
+	uint32_t expiry_secs() const;
 
-    /**
-     * Retrieve number of seconds before route should be deleted after
-     * expiry.
-     */
-    uint32_t deletion_secs() const;
+	/**
+	 * Retrieve number of seconds before route should be deleted after
+	 * expiry.
+	 */
+	uint32_t deletion_secs() const;
 };
 
 
@@ -74,82 +74,82 @@ template <typename A>
 class RouteRedistributor :
     public NONCOPYABLE
 {
-public:
-    typedef A Addr;
-    typedef IPNet<A> Net;
+    public:
+	typedef A Addr;
+	typedef IPNet<A> Net;
 
-public:
-    /**
-     * Constructor for RouteRedistributor
-     *
-     * @param route_db the route database to add and expire routes in.
-     */
-    RouteRedistributor(RouteDB<A>&	route_db);
+    public:
+	/**
+	 * Constructor for RouteRedistributor
+	 *
+	 * @param route_db the route database to add and expire routes in.
+	 */
+	RouteRedistributor(RouteDB<A>&	route_db);
 
-    ~RouteRedistributor();
+	~RouteRedistributor();
 
-    /**
-     * Add a route to be redistributed with specific cost and tag values.
-     *
-     * @param net network described by route.
-     * @param nexthop router capable of forwarding route.
-     * @param ifname the corresponding interface name toward the destination.
-     * @param vifname the corresponding vif name toward the destination.
-     * @param policytags policy-tags associated with route.
-     *
-     * @return true on success, false if route could not be added to
-     *         the RouteDatabase.  Failure may occur if route already exists
-     *	       or a lower cost route exists.
-     */
-    bool add_route(const Net&		net,
-		   const Addr&		nexthop,
-		   const string&	ifname,
-		   const string&	vifname,
-		   uint16_t		cost,
-		   uint16_t		tag,
-		   const PolicyTags&	policytags);
+	/**
+	 * Add a route to be redistributed with specific cost and tag values.
+	 *
+	 * @param net network described by route.
+	 * @param nexthop router capable of forwarding route.
+	 * @param ifname the corresponding interface name toward the destination.
+	 * @param vifname the corresponding vif name toward the destination.
+	 * @param policytags policy-tags associated with route.
+	 *
+	 * @return true on success, false if route could not be added to
+	 *         the RouteDatabase.  Failure may occur if route already exists
+	 *	       or a lower cost route exists.
+	 */
+	bool add_route(const Net&		net,
+		const Addr&		nexthop,
+		const string&	ifname,
+		const string&	vifname,
+		uint16_t		cost,
+		uint16_t		tag,
+		const PolicyTags&	policytags);
 
-    /**
-     * Trigger route expiry.
-     *
-     * @param network described by route.
-     *
-     * @return true on success, false if route did not come from this
-     * RouteRedistributor instance.
-     */
-    bool expire_route(const Net& net);
+	/**
+	 * Trigger route expiry.
+	 *
+	 * @param network described by route.
+	 *
+	 * @return true on success, false if route did not come from this
+	 * RouteRedistributor instance.
+	 */
+	bool expire_route(const Net& net);
 
-    /**
-     * Accessor.
-     *
-     * @return number of routes
-     */
-    uint32_t route_count() const;
+	/**
+	 * Accessor.
+	 *
+	 * @return number of routes
+	 */
+	uint32_t route_count() const;
 
-    /**
-     * Withdraw routes.  Triggers a walking of associated routes and
-     * their expiration from the RIP route database.
-     */
-    void withdraw_routes();
+	/**
+	 * Withdraw routes.  Triggers a walking of associated routes and
+	 * their expiration from the RIP route database.
+	 */
+	void withdraw_routes();
 
-    /**
-     * @return true if actively withdrawing routes, false otherwise.
-     */
-    bool withdrawing_routes() const;
+	/**
+	 * @return true if actively withdrawing routes, false otherwise.
+	 */
+	bool withdrawing_routes() const;
 
-private:
-    /**
-     * Periodic timer callback for withdrawing a batch of routes.  The timer
-     * is triggered by @ref withdraw_routes().
-     */
-    bool withdraw_batch();
+    private:
+	/**
+	 * Periodic timer callback for withdrawing a batch of routes.  The timer
+	 * is triggered by @ref withdraw_routes().
+	 */
+	bool withdraw_batch();
 
-protected:
-    RouteDB<A>&			_route_db;
-    RedistRouteOrigin<A>*	_rt_origin;
+    protected:
+	RouteDB<A>&			_route_db;
+	RedistRouteOrigin<A>*	_rt_origin;
 
-    RouteWalker<A>* 		_wdrawer;	// Route Withdrawl Walker
-    XorpTimer			_wtimer;	// Clock for Withdrawls
+	RouteWalker<A>* 		_wdrawer;	// Route Withdrawl Walker
+	XorpTimer			_wtimer;	// Clock for Withdrawls
 };
 
 #endif // __RIP_REDIST_HH__

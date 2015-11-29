@@ -48,23 +48,24 @@ class NodeSubr;
  *
  * Inspired by Alexandrescu.
  */
-class Visitor {
-public:
-    virtual ~Visitor() {}
+class Visitor 
+{
+    public:
+	virtual ~Visitor() {}
 
-    virtual const Element* visit(NodeUn&) = 0;
-    virtual const Element* visit(NodeBin&) = 0;
-    virtual const Element* visit(NodeVar&) = 0;
-    virtual const Element* visit(NodeAssign&) = 0;
-    virtual const Element* visit(NodeSet&) = 0;
-    virtual const Element* visit(NodeAccept&) = 0;
-    virtual const Element* visit(NodeReject&) = 0;
-    virtual const Element* visit(Term&) = 0;
-    virtual const Element* visit(PolicyStatement&) = 0;
-    virtual const Element* visit(NodeElem&) = 0;
-    virtual const Element* visit(NodeProto&) = 0;
-    virtual const Element* visit(NodeNext&) = 0;
-    virtual const Element* visit(NodeSubr&) = 0;
+	virtual const Element* visit(NodeUn&) = 0;
+	virtual const Element* visit(NodeBin&) = 0;
+	virtual const Element* visit(NodeVar&) = 0;
+	virtual const Element* visit(NodeAssign&) = 0;
+	virtual const Element* visit(NodeSet&) = 0;
+	virtual const Element* visit(NodeAccept&) = 0;
+	virtual const Element* visit(NodeReject&) = 0;
+	virtual const Element* visit(Term&) = 0;
+	virtual const Element* visit(PolicyStatement&) = 0;
+	virtual const Element* visit(NodeElem&) = 0;
+	virtual const Element* visit(NodeProto&) = 0;
+	virtual const Element* visit(NodeNext&) = 0;
+	virtual const Element* visit(NodeSubr&) = 0;
 };
 
 #endif // __POLICY_VISITOR_HH__

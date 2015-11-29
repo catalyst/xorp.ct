@@ -34,59 +34,61 @@ static const char TARGET_WRAPPER[] = "wrapper4";   // XRL target name.
 
 static bool wakeup_hook(int n)
 {
-    UNUSED(n);
-    return true;
+	UNUSED(n);
+	return true;
 }
 
-int
+	int
 main(int /*argc*/, char **argv)
 {
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
-    // XXX: verbosity of the error messages temporarily increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
-    //xlog_add_default_output();
-    //xlog_add_output(stdout);
-    xlog_add_output(stderr);
-    xlog_start();
+	XorpUnexpectedHandler x(xorp_unexpected_handler);
+	//
+	// Initialize and start xlog
+	//
+	xlog_init(argv[0], NULL);
+	xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
+	// XXX: verbosity of the error messages temporarily increased
+	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+	xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
+	xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
+	xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
+	//xlog_add_default_output();
+	//xlog_add_output(stdout);
+	xlog_add_output(stderr);
+	xlog_start();
 
-    try {
+	try 
+	{
 
-        string feaname = "fea";
-        string ribname = "rib";
-        string protocol(TARGET_WRAPPER);
+		string feaname = "fea";
+		string ribname = "rib";
+		string protocol(TARGET_WRAPPER);
 
-        XrlStdRouter xrl_router( TARGET_WRAPPER);
+		XrlStdRouter xrl_router( TARGET_WRAPPER);
 
-        XrlIO io( xrl_router, feaname, ribname,protocol);
-        Wrapper wrapper( &io);
+		XrlIO io( xrl_router, feaname, ribname,protocol);
+		Wrapper wrapper( &io);
 
-        XrlWrapper4Target target(&xrl_router, wrapper, io);
-        wait_until_xrl_router_is_ready( xrl_router);
-        io.wstartup(&wrapper);
-        while (!io.doReg()) EventLoop::instance().run();
+		XrlWrapper4Target target(&xrl_router, wrapper, io);
+		wait_until_xrl_router_is_ready( xrl_router);
+		io.wstartup(&wrapper);
+		while (!io.doReg()) EventLoop::instance().run();
 
-        XorpTimer wakeywakey = EventLoop::instance().new_periodic_ms(50, callback(wakeup_hook, 1));
+		XorpTimer wakeywakey = EventLoop::instance().new_periodic_ms(50, callback(wakeup_hook, 1));
 
-        while (wrapper.running())
-            EventLoop::instance().run();
-    } catch(...) {
-        xorp_catch_standard_exceptions();
-    }
+		while (wrapper.running())
+			EventLoop::instance().run();
+	} catch(...) 
+	{
+		xorp_catch_standard_exceptions();
+	}
 
-    //
-    // Gracefully stop and exit xlog
-    //
-    fprintf(stderr,"Exiting wrapper4 ...\n");
-    xlog_stop();
-    xlog_exit();
-    return 0;
+	//
+	// Gracefully stop and exit xlog
+	//
+	fprintf(stderr,"Exiting wrapper4 ...\n");
+	xlog_stop();
+	xlog_exit();
+	return 0;
 }
 

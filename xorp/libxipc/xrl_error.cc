@@ -29,40 +29,43 @@
 #include "xrl_error.hh"
 
 
-class XrlErrlet {
-public:
-    XrlErrlet(XrlErrorCode n, const char *s) : _error_code(n), _error_msg(s)
+class XrlErrlet 
+{
+    public:
+	XrlErrlet(XrlErrorCode n, const char *s) : _error_code(n), _error_msg(s)
     {
 	if (find(n)) abort(); // programming error, definitely
 	_next = _errlet_head; // plumb in entry
 	_errlet_head = this;
     }
 
-    static const XrlErrlet* find(uint32_t error_code) {
-	for (const XrlErrlet* e = _errlet_head; e != 0; e = e->_next) {
-	    if (e->_error_code == XrlErrorCode(error_code)) return e;
+	static const XrlErrlet* find(uint32_t error_code) 
+	{
+	    for (const XrlErrlet* e = _errlet_head; e != 0; e = e->_next) 
+	    {
+		if (e->_error_code == XrlErrorCode(error_code)) return e;
+	    }
+	    return 0;
 	}
-	return 0;
-    }
 
-    XrlErrorCode error_code() const	{ return _error_code; }
-    const char*  error_msg() const	{ return _error_msg; }
+	XrlErrorCode error_code() const	{ return _error_code; }
+	const char*  error_msg() const	{ return _error_msg; }
 
-protected:
-    XrlErrorCode _error_code;
-    const char*  _error_msg;
+    protected:
+	XrlErrorCode _error_code;
+	const char*  _error_msg;
 
-    // Node for list of all known errlets
-    XrlErrlet*	   _next;
-    // Head pointer for all known errlets
-    static XrlErrlet* _errlet_head;
+	// Node for list of all known errlets
+	XrlErrlet*	   _next;
+	// Head pointer for all known errlets
+	static XrlErrlet* _errlet_head;
 };
 
 XrlErrlet* XrlErrlet::_errlet_head = 0;
 
 // Macro that glues together XrlErrlet and XrlError
 #define XRL_ERROR_GLUE(ename, oname, reason)				      \
-static const XrlErrlet ename(oname, reason); 				      \
+    static const XrlErrlet ename(oname, reason); 				      \
 static const XrlError E_##oname(&ename);				      \
 const XrlError& XrlError::oname() { return E_##oname; }
 
@@ -87,21 +90,23 @@ XrlError::XrlError() : _errlet(&okay) {}
 
 XrlError::XrlError(const XrlErrlet* errlet) : _errlet(errlet) {}
 
-XrlError::XrlError(XrlErrorCode errcode, const string& note)
-    : _note(note)
+    XrlError::XrlError(XrlErrorCode errcode, const string& note)
+: _note(note)
 {
     _errlet = XrlErrlet::find(errcode);
-    if (_errlet == 0) {
+    if (_errlet == 0) 
+    {
 	_errlet = &internal_error;
 	_note = c_format("Errorcode %d unknown", errcode);
-	if (note.empty() == false) {
+	if (note.empty() == false) 
+	{
 	    _note += " ";
 	    _note += note;
 	}
     }
 }
 
-bool
+    bool
 XrlError::known_code(uint32_t errcode)
 {
     return (XrlErrlet::find(errcode) != 0);

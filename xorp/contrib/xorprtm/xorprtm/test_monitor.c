@@ -40,7 +40,7 @@
 
 extern void print_rtmsg(struct rt_msghdr *, int); /* XXX client_rtmsg.c */
 
-void
+    void
 monitor(void)
 {
     int n;
@@ -51,15 +51,17 @@ monitor(void)
     char msg[2048];
     DWORD dwErr;
 
-    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) {
+    if (!WaitNamedPipeA(XORPRTM_PIPENAME, NMPWAIT_USE_DEFAULT_WAIT)) 
+    {
 	fprintf(stderr, "No named pipe instances available.\n");
 	return;
     }
 
     hPipe = CreateFileA(XORPRTM_PIPENAME,
-			GENERIC_READ | GENERIC_WRITE, 0, NULL,
-			OPEN_EXISTING, 0, NULL);
-    if (hPipe == INVALID_HANDLE_VALUE) {
+	    GENERIC_READ | GENERIC_WRITE, 0, NULL,
+	    OPEN_EXISTING, 0, NULL);
+    if (hPipe == INVALID_HANDLE_VALUE) 
+    {
 	result = GetLastError();
 	fprintf(stderr, "error opening pipe: %d\n", result);
 	return;
@@ -70,16 +72,18 @@ monitor(void)
      * Block the thread and read a message at a time, just
      * like the monitor option of BSD's route(8) command.
      */
-    for (;;) {
+    for (;;) 
+    {
 	dwErr = ReadFile(hPipe, msg, sizeof(msg), &n, NULL);
-	if (dwErr == 0) {
+	if (dwErr == 0) 
+	{
 	    fprintf(stderr, "error %d reading from pipe\n",
 		    GetLastError());
 	    break;
 	}
 	now = time(NULL);
 	(void) fprintf(stderr, "\ngot message of size %d on %s", n,
-		       ctime(&now));
+		ctime(&now));
 	print_rtmsg((struct rt_msghdr *) msg, n);
 	fflush(stdout);
     }
@@ -88,7 +92,7 @@ monitor(void)
     CloseHandle(hPipe);
 }
 
-int
+    int
 main(int argc, char *argv[])
 {
     monitor();

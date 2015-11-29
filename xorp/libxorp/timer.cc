@@ -63,8 +63,8 @@
 // ----------------------------------------------------------------------------
 // TimerNode methods
 
-TimerNode::TimerNode(TimerList* l, BasicTimerCallback cb)
-    : _ref_cnt(0), _cb(cb), _list(l)
+    TimerNode::TimerNode(TimerList* l, BasicTimerCallback cb)
+: _ref_cnt(0), _cb(cb), _list(l)
 {
 }
 
@@ -73,20 +73,20 @@ TimerNode::~TimerNode()
     unschedule();
 }
 
-void
+    void
 TimerNode::add_ref()
 {
     _ref_cnt++;
 }
 
-void
+    void
 TimerNode::release_ref()
 {
     if (--_ref_cnt <= 0)
 	delete this;
 }
 
-void
+    void
 TimerNode::expire(XorpTimer& xorp_timer, void*)
 {
     // XXX: Implemented by children. Might be called only for custom timers.
@@ -111,14 +111,14 @@ TimerNode::time_remaining(TimeVal& remain) const
     return (true);
 }
 
-void
+    void
 TimerNode::unschedule()
 {
     if (scheduled())
 	_list->unschedule_node(this);
 }
 
-void
+    void
 TimerNode::schedule_at(const TimeVal& t, int priority)
 {
     assert(_list);
@@ -128,7 +128,7 @@ TimerNode::schedule_at(const TimeVal& t, int priority)
     _list->schedule_node(this);
 }
 
-void
+    void
 TimerNode::schedule_after(const TimeVal& wait, int priority)
 {
     assert(_list);
@@ -142,7 +142,7 @@ TimerNode::schedule_after(const TimeVal& wait, int priority)
     _list->schedule_node(this);
 }
 
-void
+    void
 TimerNode::reschedule_after(const TimeVal& wait)
 {
     assert(_list);
@@ -157,34 +157,38 @@ TimerNode::reschedule_after(const TimeVal& wait)
 // the TimerList XorpTimer creation methods (e.g. TimerList::new_oneoff_at(), etc)
 // actually refer to/
 
-class OneoffTimerNode2 : public TimerNode {
-public:
-    OneoffTimerNode2(TimerList *l, const OneoffTimerCallback& cb)
-	: TimerNode (l, callback(this, &OneoffTimerNode2::expire, (void*)0)),
-	_cb(cb) {}
-private:
-    OneoffTimerCallback _cb;
+class OneoffTimerNode2 : public TimerNode 
+{
+    public:
+	OneoffTimerNode2(TimerList *l, const OneoffTimerCallback& cb)
+	    : TimerNode (l, callback(this, &OneoffTimerNode2::expire, (void*)0)),
+	    _cb(cb) {}
+    private:
+	OneoffTimerCallback _cb;
 
-    void expire(XorpTimer&, void*) {
-	_cb->dispatch();
-    }
+	void expire(XorpTimer&, void*) 
+	{
+	    _cb->dispatch();
+	}
 };
 
-class PeriodicTimerNode2 : public TimerNode {
-public:
-    PeriodicTimerNode2(TimerList *l, const PeriodicTimerCallback& cb,
-		       const TimeVal& period)
-	: TimerNode(l, callback(this, &PeriodicTimerNode2::expire, (void*)0)),
-		    _cb(cb), _period(period) { }
+class PeriodicTimerNode2 : public TimerNode 
+{
+    public:
+	PeriodicTimerNode2(TimerList *l, const PeriodicTimerCallback& cb,
+		const TimeVal& period)
+	    : TimerNode(l, callback(this, &PeriodicTimerNode2::expire, (void*)0)),
+	    _cb(cb), _period(period) { }
 
-private:
-    PeriodicTimerCallback _cb;
-    TimeVal _period;
+    private:
+	PeriodicTimerCallback _cb;
+	TimeVal _period;
 
-    void expire(XorpTimer& t, void*) {
-	if (_cb->dispatch())
-	    t.reschedule_after(_period);
-    }
+	void expire(XorpTimer& t, void*) 
+	{
+	    if (_cb->dispatch())
+		t.reschedule_after(_period);
+	}
 };
 
 
@@ -194,8 +198,8 @@ private:
 TimerList* the_timerlist = NULL;
 int timerlist_instance_count;
 
-TimerList::TimerList(ClockBase* clock)
-    : _clock(clock), _observer(NULL)
+    TimerList::TimerList(ClockBase* clock)
+: _clock(clock), _observer(NULL)
 {
     assert(the_timerlist == NULL);
     assert(timerlist_instance_count == 0);
@@ -210,7 +214,8 @@ TimerList::~TimerList()
     // Delete all of the heaps we've previously created
     map<int, Heap*>::const_iterator hi;
     Heap* tmp = NULL;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	tmp = hi->second;
 	//fprintf(stderr, "deleting heap: %p\n", tmp);
 	fflush(stderr);
@@ -222,7 +227,7 @@ TimerList::~TimerList()
     the_timerlist = NULL;
 }
 
-TimerList*
+    TimerList*
 TimerList::instance()
 {
     return the_timerlist;
@@ -234,21 +239,23 @@ TimerList::current_time(TimeVal& now) const
     _clock->current_time(now);
 }
 
-void
+    void
 TimerList::advance_time()
 {
     _clock->advance_time();
 }
 
-void
+    void
 TimerList::system_gettimeofday(TimeVal* tv)
 {
     TimerList* instance = TimerList::instance();
-    if (!instance) {
+    if (!instance) 
+    {
 	SystemClock s;
 	TimerList timer = TimerList(&s);
 	timer.system_gettimeofday(tv);
-    } else {
+    } else 
+    {
 	instance->advance_time();
 	instance->current_time(*tv);
     }
@@ -257,7 +264,7 @@ TimerList::system_gettimeofday(TimeVal* tv)
 /*
  * Call the underlying system's 'alertable wait' function.
  */
-void
+    void
 TimerList::system_sleep(const TimeVal& tv)
 {
     TimerList* instance = TimerList::instance();
@@ -269,33 +276,35 @@ TimerList::system_sleep(const TimeVal& tv)
     instance->advance_time();
 }
 
-Heap* 
+    Heap* 
 TimerList::find_heap(int priority)
 {
     map<int, Heap*>::iterator hi = _heaplist.find(priority);
-    if (hi == _heaplist.end()) {
+    if (hi == _heaplist.end()) 
+    {
 	Heap* h = new Heap(true);
 	//printf("created new heap in find_heap, ptr: %p\n", h);
 	_heaplist[priority] = h;
 	return h;
-    } else {
+    } else 
+    {
 	return hi->second;
     }
 }
 
-XorpTimer
+    XorpTimer
 TimerList::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& cb,
-			 int priority)
+	int priority)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
     n->schedule_at(tv, priority);
     return XorpTimer(n);
 }
 
-XorpTimer
+    XorpTimer
 TimerList::new_oneoff_after(const TimeVal& wait,
-			    const OneoffTimerCallback& cb,
-			    int priority)
+	const OneoffTimerCallback& cb,
+	int priority)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
 
@@ -303,47 +312,48 @@ TimerList::new_oneoff_after(const TimeVal& wait,
     return XorpTimer(n);
 }
 
-void TimerList::remove_timer(XorpTimer& t) {
+void TimerList::remove_timer(XorpTimer& t) 
+{
     if (t.node())
 	t.node()->unschedule();
 }
 
 
-XorpTimer
+    XorpTimer
 TimerList::new_periodic(const TimeVal& wait,
-			const PeriodicTimerCallback& cb,
-			int priority)
+	const PeriodicTimerCallback& cb,
+	int priority)
 {
     TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
     n->schedule_after(wait, priority);
     return XorpTimer(n);
 }
 
-static void
+    static void
 set_flag_hook(bool* flag_ptr, bool to_value)
 {
     assert(flag_ptr);
     *flag_ptr = to_value;
 }
 
-XorpTimer
+    XorpTimer
 TimerList::set_flag_at(const TimeVal& tv, bool *flag_ptr, bool to_value,
-		       int priority)
+	int priority)
 {
     assert(flag_ptr);
     *flag_ptr = false;
     return new_oneoff_at(tv, callback(set_flag_hook, flag_ptr, to_value), 
-			 priority);
+	    priority);
 }
 
-XorpTimer
+    XorpTimer
 TimerList::set_flag_after(const TimeVal& wait, bool *flag_ptr, bool to_value,
-			  int priority)
+	int priority)
 {
     assert(flag_ptr);
     *flag_ptr = false;
     return new_oneoff_after(wait, callback(set_flag_hook, flag_ptr, to_value), 
-			    priority);
+	    priority);
 }
 
 int
@@ -357,26 +367,30 @@ TimerList::get_expired_priority() const
     // Run through in increasing priority until we find a timer to expire
     //
     map<int, Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	int priority = hi->first;
 	struct Heap::heap_entry *n = hi->second->top();
-	if (n != 0 && now >= n->key) {
+	if (n != 0 && now >= n->key) 
+	{
 	    return priority;
 	}
     }
     return XorpTask::PRIORITY_INFINITY;
 }
 
-void
+    void
 TimerList::run()
 {
     //
     // Run through in increasing priority until we find a timer to expire
     //
     map<int, Heap*>::iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	int priority = hi->first;
-	if(expire_one(priority)) {
+	if(expire_one(priority)) 
+	{
 	    return;
 	}
     }
@@ -390,7 +404,7 @@ TimerList::run()
  * worst_priority.
  */
 
-bool
+    bool
 TimerList::expire_one(int worst_priority)
 {
     static const TimeVal WAY_BACK_GAP(15, 0);
@@ -402,10 +416,12 @@ TimerList::expire_one(int worst_priority)
     struct Heap::heap_entry *n;
     map<int, Heap*>::iterator hi;
     for (hi = _heaplist.begin(); 
-	 hi != _heaplist.end() && hi->first <= worst_priority;
-	 ++hi) {
+	    hi != _heaplist.end() && hi->first <= worst_priority;
+	    ++hi) 
+    {
 	Heap* heap = hi->second;
-	while ((n = heap->top()) != 0 && n->key <= now) {
+	while ((n = heap->top()) != 0 && n->key <= now) 
+	{
 
 	    //
 	    // Throw a wobbly if we're a long way behind.
@@ -416,10 +432,11 @@ TimerList::expire_one(int worst_priority)
 	    // correlated with the appearance of this message.
 	    //
 	    TimeVal tardiness = now - n->key;
-	    if (tardiness > WAY_BACK_GAP) {
+	    if (tardiness > WAY_BACK_GAP) 
+	    {
 		XLOG_WARNING("Timer Expiry *much* later than scheduled: "
-			     "behind by %s seconds",
-			     tardiness.str().c_str());
+			"behind by %s seconds",
+			tardiness.str().c_str());
 	    }
 
 	    TimerNode *t = static_cast<TimerNode *>(n->object);
@@ -442,7 +459,8 @@ TimerList::empty() const
 
     acquire_lock();
     map<int, Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	if (hi->second->top() != 0)
 	    result = false;
     }
@@ -458,7 +476,8 @@ TimerList::size() const
 
     acquire_lock();
     map<int, Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	result += hi->second->size();
     }
     release_lock();
@@ -475,7 +494,8 @@ TimerList::get_next_delay(TimeVal& tv) const
 
     // find the earliest key
     map<int, Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) 
+    {
 	struct Heap::heap_entry *tmp_t = hi->second->top();
 	if (tmp_t == 0) 
 	    continue;
@@ -485,16 +505,20 @@ TimerList::get_next_delay(TimeVal& tv) const
 
     release_lock();
 
-    if (t == 0) {
+    if (t == 0) 
+    {
 	tv = TimeVal::MAXIMUM();
 	return false;
-    } else {
+    } else 
+    {
 	TimeVal now;
 	_clock->current_time(now);
-	if (t->key > now) {
+	if (t->key > now) 
+	{
 	    // next event is in the future
 	    tv = t->key - now ;
-	} else {
+	} else 
+	{
 	    // next event is already in the past, return 0.0
 	    tv = TimeVal::ZERO();
 	}
@@ -502,7 +526,7 @@ TimerList::get_next_delay(TimeVal& tv) const
     }
 }
 
-void
+    void
 TimerList::schedule_node(TimerNode* n)
 {
     acquire_lock();
@@ -513,7 +537,7 @@ TimerList::schedule_node(TimerNode* n)
     assert(n->scheduled());
 }
 
-void
+    void
 TimerList::unschedule_node(TimerNode *n)
 {
     acquire_lock();
@@ -523,14 +547,14 @@ TimerList::unschedule_node(TimerNode *n)
     if (_observer) _observer->notify_unscheduled(n->expiry());
 }
 
-void
+    void
 TimerList::set_observer(TimerListObserverBase& obs)
 {
     _observer = &obs;
     _observer->_observed = this;
 }
 
-void
+    void
 TimerList::remove_observer()
 {
     if (_observer) _observer->_observed = NULL;

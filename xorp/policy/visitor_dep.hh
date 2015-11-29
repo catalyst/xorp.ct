@@ -37,48 +37,50 @@
  *
  * This is useful for set dependancy tracking.
  */
-class VisitorDep : public Visitor {
-public:
-    /**
-     * @short Semantic error thrown if set is not found.
-     */
-    class sem_error : public PolicyException {
+class VisitorDep : public Visitor 
+{
     public:
-        sem_error(const char* file, size_t line, const string& init_why = "")   
-            : PolicyException("sem_error", file, line, init_why) {} 
+	/**
+	 * @short Semantic error thrown if set is not found.
+	 */
+	class sem_error : public PolicyException 
+    {
+	public:
+	    sem_error(const char* file, size_t line, const string& init_why = "")   
+		: PolicyException("sem_error", file, line, init_why) {} 
     };
 
-    /**
-     * @param setmap The setmap used.
-     */
-    VisitorDep(SetMap& setmap, PolicyMap& pmap);
+	/**
+	 * @param setmap The setmap used.
+	 */
+	VisitorDep(SetMap& setmap, PolicyMap& pmap);
 
-    const Element* visit(PolicyStatement& policy);
-    const Element* visit(Term& term);
-    const Element* visit(NodeUn& node);
-    const Element* visit(NodeBin& node);
-    const Element* visit(NodeAssign& node);
-    const Element* visit(NodeVar& node);
-    const Element* visit(NodeSet& node);
-    const Element* visit(NodeElem& node);
-    const Element* visit(NodeAccept& node);
-    const Element* visit(NodeReject& node);
-    const Element* visit(NodeProto& node);
-    const Element* visit(NodeNext& node);
-    const Element* visit(NodeSubr& node);
+	const Element* visit(PolicyStatement& policy);
+	const Element* visit(Term& term);
+	const Element* visit(NodeUn& node);
+	const Element* visit(NodeBin& node);
+	const Element* visit(NodeAssign& node);
+	const Element* visit(NodeVar& node);
+	const Element* visit(NodeSet& node);
+	const Element* visit(NodeElem& node);
+	const Element* visit(NodeAccept& node);
+	const Element* visit(NodeReject& node);
+	const Element* visit(NodeProto& node);
+	const Element* visit(NodeNext& node);
+	const Element* visit(NodeSubr& node);
 
-    /**
-     * @return the sets used by the policy.
-     */
-    const DEPS& sets() const;
+	/**
+	 * @return the sets used by the policy.
+	 */
+	const DEPS& sets() const;
 
-private:
-    void commit_deps(PolicyStatement& policy);
+    private:
+	void commit_deps(PolicyStatement& policy);
 
-    SetMap&		_setmap;
-    PolicyMap&		_pmap;
-    DEPS		_sets;
-    DEPS		_policies;
+	SetMap&		_setmap;
+	PolicyMap&		_pmap;
+	DEPS		_sets;
+	DEPS		_policies;
 };
 
 #endif // __POLICY_VISITOR_DEP_HH__

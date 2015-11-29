@@ -72,245 +72,269 @@ typedef uint64_t u64;
 //
 // Get the link status
 //
-int
+	int
 ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
-			       uint64_t& baudrate, string& error_msg)
+		uint64_t& baudrate, string& error_msg)
 {
-    UNUSED(if_name);
+	UNUSED(if_name);
 
-    no_carrier = false;
-    baudrate = 0;
+	no_carrier = false;
+	baudrate = 0;
 
 #ifdef SIOCGIFMEDIA
-    do {
-	int s;
-	struct ifmediareq ifmr;
+	do 
+	{
+		int s;
+		struct ifmediareq ifmr;
 
-	memset(&ifmr, 0, sizeof(ifmr));
-	strncpy(ifmr.ifm_name, if_name.c_str(), sizeof(ifmr.ifm_name) - 1);
-	
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (s < 0) {
-	    break; // try another method
-	}
-	if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0) {
-	    //
-	    // XXX: Most likely the interface doesn't support SIOCGIFMEDIA,
-	    // hence this is not an error.
-	    //
-	    no_carrier = false;
-	    close(s);
-	    break; // Try another method
-	}
-	close(s);
+		memset(&ifmr, 0, sizeof(ifmr));
+		strncpy(ifmr.ifm_name, if_name.c_str(), sizeof(ifmr.ifm_name) - 1);
 
-	switch (IFM_TYPE(ifmr.ifm_active)) {
-	case IFM_ETHER:
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s < 0) 
+		{
+			break; // try another method
+		}
+		if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0) 
+		{
+			//
+			// XXX: Most likely the interface doesn't support SIOCGIFMEDIA,
+			// hence this is not an error.
+			//
+			no_carrier = false;
+			close(s);
+			break; // Try another method
+		}
+		close(s);
+
+		switch (IFM_TYPE(ifmr.ifm_active)) 
+		{
+			case IFM_ETHER:
 #ifdef IFM_FDDI
-	case IFM_FDDI:
+			case IFM_FDDI:
 #endif
 #ifdef IFM_TOKEN
-	case IFM_TOKEN:
+			case IFM_TOKEN:
 #endif
-	case IFM_IEEE80211:
-	    if ((ifmr.ifm_status & IFM_AVALID)
-		&& (ifmr.ifm_status & IFM_ACTIVE)) {
-		no_carrier = false;
-	    } else {
-		no_carrier = true;
-	    }
-	    break;
-	default:
-	    no_carrier = false;
-	    break;
-	}
+			case IFM_IEEE80211:
+				if ((ifmr.ifm_status & IFM_AVALID)
+						&& (ifmr.ifm_status & IFM_ACTIVE)) 
+				{
+					no_carrier = false;
+				} else 
+				{
+					no_carrier = true;
+				}
+				break;
+			default:
+				no_carrier = false;
+				break;
+		}
 
-	//
-	// Get the link baudrate
-	//
+		//
+		// Get the link baudrate
+		//
 #ifdef IFM_BAUDRATE_DESCRIPTIONS
-	static const struct ifmedia_baudrate ifm[] = IFM_BAUDRATE_DESCRIPTIONS;
-	for (size_t i = 0; ifm[i].ifmb_word != 0; i++) {
-	    if ((ifmr.ifm_active & (IFM_NMASK | IFM_TMASK))
-		!= ifm[i].ifmb_word) {
-		continue;
-	    }
-	    baudrate = ifm[i].ifmb_baudrate;
-	    break;
-	}
+		static const struct ifmedia_baudrate ifm[] = IFM_BAUDRATE_DESCRIPTIONS;
+		for (size_t i = 0; ifm[i].ifmb_word != 0; i++) 
+		{
+			if ((ifmr.ifm_active & (IFM_NMASK | IFM_TMASK))
+					!= ifm[i].ifmb_word) 
+			{
+				continue;
+			}
+			baudrate = ifm[i].ifmb_baudrate;
+			break;
+		}
 #endif // IFM_BAUDRATE_DESCRIPTIONS
 
-	error_msg = ""; // all is forgiven
-	return (XORP_OK);
-    } while (false);
+		error_msg = ""; // all is forgiven
+		return (XORP_OK);
+	} while (false);
 #endif // SIOCGIFMEDIA
 
 #if defined(SIOCETHTOOL) && defined(ETHTOOL_GLINK)
-    do {
-	int s;
-	struct ifreq ifreq;
+	do 
+	{
+		int s;
+		struct ifreq ifreq;
 
-	//
-	// XXX: Do this only if we have the necessary permission
-	//
-	if (geteuid() != 0) {
-	    error_msg += c_format("Must be root to query the interface status\n");
-	    break; // try another method
-	}
+		//
+		// XXX: Do this only if we have the necessary permission
+		//
+		if (geteuid() != 0) 
+		{
+			error_msg += c_format("Must be root to query the interface status\n");
+			break; // try another method
+		}
 
-	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
+		memset(&ifreq, 0, sizeof(ifreq));
+		strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (s < 0) {
-	    break; //try another method
-	}
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s < 0) 
+		{
+			break; //try another method
+		}
 
-	// Get the link status
-	struct ethtool_value edata;
-	memset(&edata, 0, sizeof(edata));
-	edata.cmd = ETHTOOL_GLINK;
-	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
-	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
-	    error_msg += c_format("ioctl(SIOCETHTOOL) for interface %s "
-				  "failed: %s\n",
-				  if_name.c_str(), strerror(errno));
-	    close(s);
-	    break; //try another method
-	}
-	if (edata.data != 0)
-	    no_carrier = false;
-	else
-	    no_carrier = true;
+		// Get the link status
+		struct ethtool_value edata;
+		memset(&edata, 0, sizeof(edata));
+		edata.cmd = ETHTOOL_GLINK;
+		ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
+		if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) 
+		{
+			error_msg += c_format("ioctl(SIOCETHTOOL) for interface %s "
+					"failed: %s\n",
+					if_name.c_str(), strerror(errno));
+			close(s);
+			break; //try another method
+		}
+		if (edata.data != 0)
+			no_carrier = false;
+		else
+			no_carrier = true;
 
-	//
-	// Get the link baudrate
-	//
+		//
+		// Get the link baudrate
+		//
 #ifdef ETHTOOL_GSET
-	struct ethtool_cmd ecmd;
-	memset(&ecmd, 0, sizeof(ecmd));
-	ecmd.cmd = ETHTOOL_GSET;
-	ifreq.ifr_data = reinterpret_cast<caddr_t>(&ecmd);
-	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
-	    //
-	    // XXX: ignore any errors, because the non-Ethernet
-	    // interfaces might not support this query.
-	    //
-	} else {
-	    // XXX: The ecmd.speed is returned in Mbps
-	    baudrate = ecmd.speed * 1000 * 1000;
-	}
+		struct ethtool_cmd ecmd;
+		memset(&ecmd, 0, sizeof(ecmd));
+		ecmd.cmd = ETHTOOL_GSET;
+		ifreq.ifr_data = reinterpret_cast<caddr_t>(&ecmd);
+		if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) 
+		{
+			//
+			// XXX: ignore any errors, because the non-Ethernet
+			// interfaces might not support this query.
+			//
+		} else 
+		{
+			// XXX: The ecmd.speed is returned in Mbps
+			baudrate = ecmd.speed * 1000 * 1000;
+		}
 #endif // ETHTOOL_GSET
 
-	close(s);
+		close(s);
 
-	error_msg = ""; // all is forgiven
-	return (XORP_OK);
-    } while (false);
+		error_msg = ""; // all is forgiven
+		return (XORP_OK);
+	} while (false);
 #endif // SIOCETHTOOL && ETHTOOL_GLINK
 
 #ifdef SIOCGMIIREG
-    do {
-	int s;
-	struct ifreq ifreq;
+	do 
+	{
+		int s;
+		struct ifreq ifreq;
 
-	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
+		memset(&ifreq, 0, sizeof(ifreq));
+		strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-	//
-	// Define data structure and definitions used for MII ioctl's.
-	//
-	// We need to do this here because some of them are missing
-	// from the system's <linux/mii.h> header file, and because
-	// this header file is broken for older Linux versions
-	// (e.g., RedHat-7.3 with Linux kernel 2.4.20-28.7smp).
-	//
+		//
+		// Define data structure and definitions used for MII ioctl's.
+		//
+		// We need to do this here because some of them are missing
+		// from the system's <linux/mii.h> header file, and because
+		// this header file is broken for older Linux versions
+		// (e.g., RedHat-7.3 with Linux kernel 2.4.20-28.7smp).
+		//
 #ifndef MII_BMSR
 #define MII_BMSR		0x01
 #endif
 #ifndef MII_BMSR_LINK_VALID
 #define MII_BMSR_LINK_VALID	0x0004
 #endif
-	struct mii_data {
-	    uint16_t	phy_id;
-	    uint16_t	reg_num;
-	    uint16_t	val_in;
-	    uint16_t	val_out;
-	} __attribute__((packed));
+		struct mii_data 
+		{
+			uint16_t	phy_id;
+			uint16_t	reg_num;
+			uint16_t	val_in;
+			uint16_t	val_out;
+		} __attribute__((packed));
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (s < 0) {
-	    break; //try another method
-	}
-	if (ioctl(s, SIOCGMIIPHY, &ifreq) < 0) {
-	    error_msg += c_format("ioctl(SIOCGMIIPHY) for interface %s "
-				  "failed: %s\n",
-				  if_name.c_str(), strerror(errno));
-	    close(s);
-	    break; //try another method
-	}
+		s = socket(AF_INET, SOCK_DGRAM, 0);
+		if (s < 0) 
+		{
+			break; //try another method
+		}
+		if (ioctl(s, SIOCGMIIPHY, &ifreq) < 0) 
+		{
+			error_msg += c_format("ioctl(SIOCGMIIPHY) for interface %s "
+					"failed: %s\n",
+					if_name.c_str(), strerror(errno));
+			close(s);
+			break; //try another method
+		}
 
-	// NOTE:  We cannot just cast &ifr_addr to an mii
-	// pointer, as it gives strict-aliasing errors on some
-	// compilers when optimization is enabled.  So, copy
-	// around the data instead.
-	struct mii_data mii;
-	memset(&mii, 0, sizeof(mii));
-	mii.reg_num = MII_BMSR;
-	memcpy(&ifreq.ifr_addr, &mii, sizeof(mii));
-	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
-	    error_msg += c_format("ioctl(SIOCGMIIREG) for interface %s "
-				  "failed: %s\n",
-				  if_name.c_str(), strerror(errno));
-	    close(s);
-	    break; //try another method
-	}
-	close(s);
+		// NOTE:  We cannot just cast &ifr_addr to an mii
+		// pointer, as it gives strict-aliasing errors on some
+		// compilers when optimization is enabled.  So, copy
+		// around the data instead.
+		struct mii_data mii;
+		memset(&mii, 0, sizeof(mii));
+		mii.reg_num = MII_BMSR;
+		memcpy(&ifreq.ifr_addr, &mii, sizeof(mii));
+		if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) 
+		{
+			error_msg += c_format("ioctl(SIOCGMIIREG) for interface %s "
+					"failed: %s\n",
+					if_name.c_str(), strerror(errno));
+			close(s);
+			break; //try another method
+		}
+		close(s);
 
-	memcpy(&mii, &ifreq.ifr_addr, sizeof(mii));
-	int bmsr = mii.val_out;
-	if (bmsr & MII_BMSR_LINK_VALID)
-	    no_carrier = false;
-	else
-	    no_carrier = true;
-	error_msg = ""; // all is forgiven
-	return (XORP_OK);
-    } while (false);
+		memcpy(&mii, &ifreq.ifr_addr, sizeof(mii));
+		int bmsr = mii.val_out;
+		if (bmsr & MII_BMSR_LINK_VALID)
+			no_carrier = false;
+		else
+			no_carrier = true;
+		error_msg = ""; // all is forgiven
+		return (XORP_OK);
+	} while (false);
 #endif // SIOCGMIIREG
 
-    string cfn("/sys/class/net/");
-    cfn.append(if_name);
-    cfn.append("/carrier");
-    errno = 0;
+	string cfn("/sys/class/net/");
+	cfn.append(if_name);
+	cfn.append("/carrier");
+	errno = 0;
 
-    // Seems that C++ throws an exception if you just do the >> and the
-    // underlying logic returns EINVAL.  Use read and then check for good
-    // instead.
-    ifstream cf(cfn.c_str());
-    char dummy[4];
-    dummy[0] = 0;
-    cf.read(dummy, 1);
-    if (cf.good()) {
-	if (dummy[0] == '0') {
-	    no_carrier = 1;
+	// Seems that C++ throws an exception if you just do the >> and the
+	// underlying logic returns EINVAL.  Use read and then check for good
+	// instead.
+	ifstream cf(cfn.c_str());
+	char dummy[4];
+	dummy[0] = 0;
+	cf.read(dummy, 1);
+	if (cf.good()) 
+	{
+		if (dummy[0] == '0') 
+		{
+			no_carrier = 1;
+		}
+		else if (dummy[0] == '1') 
+		{
+			no_carrier = 0;
+		}
+		else 
+		{
+			// can't read, or got funky value, cannot detect this way.
+			error_msg += c_format("Got un-known value: 0x%02hx for %s, cannot probe carrier for this device using sysfs.\n",
+					(unsigned short)(dummy[0]), cfn.c_str());
+			goto notfound;
+		}
+		error_msg = ""; // all is forgiven
+		return XORP_OK;
 	}
-        else if (dummy[0] == '1') {
-            no_carrier = 0;
-        }
-        else {
-	    // can't read, or got funky value, cannot detect this way.
-	    error_msg += c_format("Got un-known value: 0x%02hx for %s, cannot probe carrier for this device using sysfs.\n",
-				  (unsigned short)(dummy[0]), cfn.c_str());
-	    goto notfound;
+	else 
+	{
+		error_msg += c_format("error reading file: %s errno: %i\n", cfn.c_str(), errno);
 	}
-	error_msg = ""; // all is forgiven
-	return XORP_OK;
-    }
-    else {
-	error_msg += c_format("error reading file: %s errno: %i\n", cfn.c_str(), errno);
-    }
- 
+
 notfound:
-    error_msg += c_format("No functional mechanism found to test the link status\n");
-    return (XORP_ERROR);
+	error_msg += c_format("No functional mechanism found to test the link status\n");
+	return (XORP_ERROR);
 }

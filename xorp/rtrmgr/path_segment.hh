@@ -20,21 +20,22 @@
 #ifndef __RTRMGR_PATH_SEGMENT_HH__
 #define __RTRMGR_PATH_SEGMENT_HH__
 
-class PathSegment {
-public:
-    PathSegment(const string& segname, bool is_tag) 
-	: _is_tag(is_tag), _segname(segname) {}
+class PathSegment 
+{
+	public:
+		PathSegment(const string& segname, bool is_tag) 
+			: _is_tag(is_tag), _segname(segname) {}
 
 #ifdef XORP_USE_USTL
-    PathSegment() { }
+		PathSegment() { }
 #endif
 
-    bool is_tag() const { return _is_tag; }
-    const string& segname() const { return _segname; }
+		bool is_tag() const { return _is_tag; }
+		const string& segname() const { return _segname; }
 
-private:
-    bool	_is_tag;
-    string	_segname;
+	private:
+		bool	_is_tag;
+		string	_segname;
 };
 
 #endif // __RTRMGR_PATH_SEGMENT_HH__

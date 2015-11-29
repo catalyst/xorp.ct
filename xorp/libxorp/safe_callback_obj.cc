@@ -31,28 +31,29 @@
 
 SafeCallbackBase::SafeCallbackBase(CallbackSafeObject* o) : _cso(o)
 {
-    _cso->ref_cb(this);
+	_cso->ref_cb(this);
 }
 
 SafeCallbackBase::~SafeCallbackBase()
 {
-    if (valid())
-	invalidate();
+	if (valid())
+		invalidate();
 }
 
-void
+	void
 SafeCallbackBase::invalidate()
 {
-    if (valid()) {
-	_cso->unref_cb(this);
-	_cso = 0;
-    }
+	if (valid()) 
+	{
+		_cso->unref_cb(this);
+		_cso = 0;
+	}
 }
 
 bool
 SafeCallbackBase::valid() const
 {
-    return _cso != 0;
+	return _cso != 0;
 }
 
 
@@ -61,16 +62,19 @@ SafeCallbackBase::valid() const
 
 CallbackSafeObject::~CallbackSafeObject()
 {
-    vector<SafeCallbackBase*>::iterator i = _cbs.begin();
-    while (_cbs.empty() == false) {
-	SafeCallbackBase* scb = *i;
-	if (scb == 0) {
-	    _cbs.erase(_cbs.begin());
-	    continue;
+	vector<SafeCallbackBase*>::iterator i = _cbs.begin();
+	while (_cbs.empty() == false) 
+	{
+		SafeCallbackBase* scb = *i;
+		if (scb == 0) 
+		{
+			_cbs.erase(_cbs.begin());
+			continue;
+		}
+		if (scb->valid()) 
+		{
+			scb->invalidate();
+		}
 	}
-	if (scb->valid()) {
-	    scb->invalidate();
-	}
-    }
 }
 

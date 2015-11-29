@@ -26,12 +26,13 @@
 #include "element.hh"
 
 
-class ElemSet : public Element {
-public:
-    ElemSet(Hash hash) : Element(hash) {}
-    virtual ~ElemSet() {}
+class ElemSet : public Element 
+{
+    public:
+	ElemSet(Hash hash) : Element(hash) {}
+	virtual ~ElemSet() {}
 
-    virtual void erase(const ElemSet&) = 0;
+	virtual void erase(const ElemSet&) = 0;
 };
 
 /**
@@ -41,184 +42,185 @@ public:
  * will be lost, as elements will all be promoted to strings.
  */
 template <class T> 
-class ElemSetAny : public ElemSet {
-public:
-    typedef set<T> Set;
-    typedef typename Set::iterator iterator;
-    typedef typename Set::const_iterator const_iterator;
+class ElemSetAny : public ElemSet 
+{
+    public:
+	typedef set<T> Set;
+	typedef typename Set::iterator iterator;
+	typedef typename Set::const_iterator const_iterator;
 
-    static const char* id;
-    static Hash _hash;
+	static const char* id;
+	static Hash _hash;
 
-    ElemSetAny(const Set& val);
+	ElemSetAny(const Set& val);
 
-    /**
-     * @param c_str initialize from string in the form element1,element2,...
-     */
-    ElemSetAny(const char* c_str);
-    ElemSetAny();
+	/**
+	 * @param c_str initialize from string in the form element1,element2,...
+	 */
+	ElemSetAny(const char* c_str);
+	ElemSetAny();
 
-    /**
-     * @return string representation of set.
-     */
-    string str() const;
+	/**
+	 * @return string representation of set.
+	 */
+	string str() const;
 
-    /**
-     * @param s element to insert.
-     */
-    void insert(const T& s);
+	/**
+	 * @param s element to insert.
+	 */
+	void insert(const T& s);
 
-    /**
-     * Insert all elements of other set.
-     *
-     * @param s set to insert.
-     */
-    void insert(const ElemSetAny<T>& s);
+	/**
+	 * Insert all elements of other set.
+	 *
+	 * @param s set to insert.
+	 */
+	void insert(const ElemSetAny<T>& s);
 
-    /**
-     * Left and right sets are identical [same elements and size].
-     *
-     * @param rhs set to compare with
-     */
-    bool operator==(const ElemSetAny<T>& rhs) const;
-    
-    /**
-     * Left and right are not identical
-     *
-     * @param rhs set to compare with
-     */
-    bool operator!=(const ElemSetAny<T>& rhs) const;
+	/**
+	 * Left and right sets are identical [same elements and size].
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator==(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * All elements on left match, but right has more elments.
-     *
-     * @param rhs set to compare with
-     */
-    bool operator<(const ElemSetAny<T>& rhs) const;
+	/**
+	 * Left and right are not identical
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator!=(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * All elements on right match, but left has more elements.
-     *
-     * @param rhs set to compare with
-     */
-    bool operator>(const ElemSetAny<T>& rhs) const;
+	/**
+	 * All elements on left match, but right has more elments.
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator<(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * Left is a subset of right.
-     *
-     * @param rhs set to compare with
-     */
-    bool operator<=(const ElemSetAny<T>& rhs) const;
+	/**
+	 * All elements on right match, but left has more elements.
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator>(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * Right is a subset of left.
-     *
-     * @param rhs set to compare with
-     */
-    bool operator>=(const ElemSetAny<T>& rhs) const;
+	/**
+	 * Left is a subset of right.
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator<=(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * All elements on left match, but right has more.
-     *
-     * May only be true if left is an empty set.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator<(const T& rhs) const;
-    
-    /**
-     * All elements on on right match, but left has more.
-     *
-     * Will be true if the element is present in the set, and the set contains
-     * at least one more element.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator>(const T& rhs) const;
+	/**
+	 * Right is a subset of left.
+	 *
+	 * @param rhs set to compare with
+	 */
+	bool operator>=(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * Left and right are identical.
-     *
-     * Will be true in a single element set which contains the rhs element.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator==(const T& rhs) const;
+	/**
+	 * All elements on left match, but right has more.
+	 *
+	 * May only be true if left is an empty set.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator<(const T& rhs) const;
 
-    /**
-     * Disjoint sets.
-     *
-     * Will be true if element is not contained in set.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator!=(const T& rhs) const;
+	/**
+	 * All elements on on right match, but left has more.
+	 *
+	 * Will be true if the element is present in the set, and the set contains
+	 * at least one more element.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator>(const T& rhs) const;
 
-    /**
-     * Left is a subset of right.
-     *
-     * Will be true if set is empty or contains rhs.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator<=(const T& rhs) const;
+	/**
+	 * Left and right are identical.
+	 *
+	 * Will be true in a single element set which contains the rhs element.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator==(const T& rhs) const;
 
-    /**
-     * Right is a subset of left.
-     *
-     * Will be true if element is contained in set.
-     *
-     * @param rhs element to compare with.
-     */
-    bool operator>=(const T& rhs) const;
+	/**
+	 * Disjoint sets.
+	 *
+	 * Will be true if element is not contained in set.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator!=(const T& rhs) const;
 
-    /**
-     * @return true if intersection is not empty
-     */
-    bool nonempty_intersection(const ElemSetAny<T>& rhs) const;
+	/**
+	 * Left is a subset of right.
+	 *
+	 * Will be true if set is empty or contains rhs.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator<=(const T& rhs) const;
 
-    /**
-     * Removes elements in set.
-     *
-     * @param s elements to remove.
-     */
-    void erase(const ElemSetAny<T>& rhs);
-    void erase(const ElemSet& rhs);
+	/**
+	 * Right is a subset of left.
+	 *
+	 * Will be true if element is contained in set.
+	 *
+	 * @param rhs element to compare with.
+	 */
+	bool operator>=(const T& rhs) const;
 
-    /**
-     * Obtain iterator for set.
-     *
-     * @return iterator for the set.
-     */
-    iterator begin();
+	/**
+	 * @return true if intersection is not empty
+	 */
+	bool nonempty_intersection(const ElemSetAny<T>& rhs) const;
 
-    /**
-     * Obtain an iterator for the end.
-     *
-     * @return iterator for the end of the set.
-     */
-    iterator end(); 
-    
-    /**
-     * Obtain const iterator for set.
-     *
-     * @return const iterator for the set.
-     */
-    const_iterator begin() const;
+	/**
+	 * Removes elements in set.
+	 *
+	 * @param s elements to remove.
+	 */
+	void erase(const ElemSetAny<T>& rhs);
+	void erase(const ElemSet& rhs);
 
-    /**
-     * Obtain an const iterator for the end.
-     *
-     * @return const iterator for the end of the set.
-     */
-    const_iterator end() const;
+	/**
+	 * Obtain iterator for set.
+	 *
+	 * @return iterator for the set.
+	 */
+	iterator begin();
 
-    const char* type() const;
+	/**
+	 * Obtain an iterator for the end.
+	 *
+	 * @return iterator for the end of the set.
+	 */
+	iterator end(); 
 
-    string dbgstr() const;
+	/**
+	 * Obtain const iterator for set.
+	 *
+	 * @return const iterator for the set.
+	 */
+	const_iterator begin() const;
 
-private:
-    Set _val;
+	/**
+	 * Obtain an const iterator for the end.
+	 *
+	 * @return const iterator for the end of the set.
+	 */
+	const_iterator end() const;
+
+	const char* type() const;
+
+	string dbgstr() const;
+
+    private:
+	Set _val;
 };
 
 // define set types

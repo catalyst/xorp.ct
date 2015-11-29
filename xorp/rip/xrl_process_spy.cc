@@ -36,10 +36,10 @@
 #include "xrl_process_spy.hh"
 
 XrlProcessSpy::XrlProcessSpy(XrlRouter& rtr)
-    : ServiceBase("FEA/RIB Process Watcher"), _rtr(rtr)
+	: ServiceBase("FEA/RIB Process Watcher"), _rtr(rtr)
 {
-    _cname[FEA_IDX] = xrl_fea_name();
-    _cname[RIB_IDX] = xrl_rib_name();
+	_cname[FEA_IDX] = xrl_fea_name();
+	_cname[RIB_IDX] = xrl_rib_name();
 }
 
 XrlProcessSpy::~XrlProcessSpy()
@@ -49,161 +49,177 @@ XrlProcessSpy::~XrlProcessSpy()
 bool
 XrlProcessSpy::fea_present() const
 {
-    if (status() == SERVICE_RUNNING)
-	return _iname[FEA_IDX].empty() == false;
-    debug_msg("XrlProcessSpy::fea_present() called when not "
-	      "SERVICE_RUNNING.\n");
-    return false;
+	if (status() == SERVICE_RUNNING)
+		return _iname[FEA_IDX].empty() == false;
+	debug_msg("XrlProcessSpy::fea_present() called when not "
+			"SERVICE_RUNNING.\n");
+	return false;
 }
 
 bool
 XrlProcessSpy::rib_present() const
 {
-    if (status() == SERVICE_RUNNING)
-	return _iname[RIB_IDX].empty() == false;
-    debug_msg("XrlProcessSpy::rib_present() called when not "
-	      "SERVICE_RUNNING.\n");
-    return false;
+	if (status() == SERVICE_RUNNING)
+		return _iname[RIB_IDX].empty() == false;
+	debug_msg("XrlProcessSpy::rib_present() called when not "
+			"SERVICE_RUNNING.\n");
+	return false;
 }
 
 
-void
+	void
 XrlProcessSpy::birth_event(const string& class_name,
-			   const string& instance_name)
+		const string& instance_name)
 {
-    debug_msg("Birth event: class %s instance %s\n",
-	      class_name.c_str(), instance_name.c_str());
+	debug_msg("Birth event: class %s instance %s\n",
+			class_name.c_str(), instance_name.c_str());
 
-    for (uint32_t i = 0; i < END_IDX; i++) {
-	if (class_name != _cname[i]) {
-	    continue;
+	for (uint32_t i = 0; i < END_IDX; i++) 
+	{
+		if (class_name != _cname[i]) 
+		{
+			continue;
+		}
+		if (_iname[i].empty() == false) 
+		{
+			XLOG_WARNING("Got ");
+		}
+		_iname[i] = instance_name;
 	}
-	if (_iname[i].empty() == false) {
-	    XLOG_WARNING("Got ");
-	}
-	_iname[i] = instance_name;
-    }
 }
 
-void
+	void
 XrlProcessSpy::death_event(const string& class_name,
-			   const string& instance_name)
+		const string& instance_name)
 {
-    debug_msg("Death event: class %s instance %s\n",
-	      class_name.c_str(), instance_name.c_str());
+	debug_msg("Death event: class %s instance %s\n",
+			class_name.c_str(), instance_name.c_str());
 
-    for (uint32_t i = 0; i < END_IDX; i++) {
-	if (class_name != _cname[i]) {
-	    continue;
+	for (uint32_t i = 0; i < END_IDX; i++) 
+	{
+		if (class_name != _cname[i]) 
+		{
+			continue;
+		}
+		if (_iname[i] == instance_name) 
+		{
+			_iname[i].erase();
+			return;
+		}
 	}
-	if (_iname[i] == instance_name) {
-	    _iname[i].erase();
-	    return;
-	}
-    }
 }
 
 
-int
+	int
 XrlProcessSpy::startup()
 {
-    if (status() == SERVICE_READY || status() == SERVICE_SHUTDOWN) {
-	send_register(0);
-	set_status(SERVICE_STARTING);
-    }
+	if (status() == SERVICE_READY || status() == SERVICE_SHUTDOWN) 
+	{
+		send_register(0);
+		set_status(SERVICE_STARTING);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-void
+	void
 XrlProcessSpy::schedule_register_retry(uint32_t idx)
 {
-    _retry = EventLoop::instance().new_oneoff_after_ms(100,
-				   callback(this,
-					    &XrlProcessSpy::send_register,
-					    idx));
+	_retry = EventLoop::instance().new_oneoff_after_ms(100,
+			callback(this,
+				&XrlProcessSpy::send_register,
+				idx));
 }
 
-void
+	void
 XrlProcessSpy::send_register(uint32_t idx)
 {
-    XrlFinderEventNotifierV0p1Client x(&_rtr);
-    if (x.send_register_class_event_interest("finder", _rtr.instance_name(),
-		_cname[idx], callback(this, &XrlProcessSpy::register_cb, idx))
-	== false) {
-	XLOG_ERROR("Failed to send interest registration for \"%s\"\n",
-		   _cname[idx].c_str());
-	schedule_register_retry(idx);
-    }
+	XrlFinderEventNotifierV0p1Client x(&_rtr);
+	if (x.send_register_class_event_interest("finder", _rtr.instance_name(),
+				_cname[idx], callback(this, &XrlProcessSpy::register_cb, idx))
+			== false) 
+	{
+		XLOG_ERROR("Failed to send interest registration for \"%s\"\n",
+				_cname[idx].c_str());
+		schedule_register_retry(idx);
+	}
 }
 
-void
+	void
 XrlProcessSpy::register_cb(const XrlError& xe, uint32_t idx)
 {
-    if (XrlError::OKAY() != xe) {
-	XLOG_ERROR("Failed to register interest in \"%s\": %s\n",
-		   _cname[idx].c_str(), xe.str().c_str());
-	schedule_register_retry(idx);
-	return;
-    }
-    debug_msg("Registered interest in %s\n", _cname[idx].c_str());
-    idx++;
-    if (idx < END_IDX) {
-	send_register(idx);
-    } else {
-	set_status(SERVICE_RUNNING);
-    }
+	if (XrlError::OKAY() != xe) 
+	{
+		XLOG_ERROR("Failed to register interest in \"%s\": %s\n",
+				_cname[idx].c_str(), xe.str().c_str());
+		schedule_register_retry(idx);
+		return;
+	}
+	debug_msg("Registered interest in %s\n", _cname[idx].c_str());
+	idx++;
+	if (idx < END_IDX) 
+	{
+		send_register(idx);
+	} else 
+	{
+		set_status(SERVICE_RUNNING);
+	}
 }
 
 
-int
+	int
 XrlProcessSpy::shutdown()
 {
-    if (status() == SERVICE_RUNNING) {
-	send_deregister(0);
-	set_status(SERVICE_SHUTTING_DOWN);
-    }
+	if (status() == SERVICE_RUNNING) 
+	{
+		send_deregister(0);
+		set_status(SERVICE_SHUTTING_DOWN);
+	}
 
-    return (XORP_OK);
+	return (XORP_OK);
 }
 
-void
+	void
 XrlProcessSpy::schedule_deregister_retry(uint32_t idx)
 {
-    _retry = EventLoop::instance().new_oneoff_after_ms(100,
-				   callback(this,
-					    &XrlProcessSpy::send_deregister,
-					    idx));
+	_retry = EventLoop::instance().new_oneoff_after_ms(100,
+			callback(this,
+				&XrlProcessSpy::send_deregister,
+				idx));
 }
 
-void
+	void
 XrlProcessSpy::send_deregister(uint32_t idx)
 {
-    XrlFinderEventNotifierV0p1Client x(&_rtr);
-    if (x.send_deregister_class_event_interest(
-		"finder", _rtr.instance_name(), _cname[idx],
-		callback(this, &XrlProcessSpy::deregister_cb, idx))
-	== false) {
-	XLOG_ERROR("Failed to send interest registration for \"%s\"\n",
-		   _cname[idx].c_str());
-	schedule_deregister_retry(idx);
-    }
+	XrlFinderEventNotifierV0p1Client x(&_rtr);
+	if (x.send_deregister_class_event_interest(
+				"finder", _rtr.instance_name(), _cname[idx],
+				callback(this, &XrlProcessSpy::deregister_cb, idx))
+			== false) 
+	{
+		XLOG_ERROR("Failed to send interest registration for \"%s\"\n",
+				_cname[idx].c_str());
+		schedule_deregister_retry(idx);
+	}
 }
 
-void
+	void
 XrlProcessSpy::deregister_cb(const XrlError& xe, uint32_t idx)
 {
-    if (XrlError::OKAY() != xe) {
-	XLOG_ERROR("Failed to deregister interest in \"%s\": %s\n",
-		   _cname[idx].c_str(), xe.str().c_str());
-	schedule_deregister_retry(idx);
-	return;
-    }
-    debug_msg("Deregistered interest in %s\n", _cname[idx].c_str());
-    idx++;
-    if (idx < END_IDX) {
-	send_deregister(idx);
-    } else {
-	set_status(SERVICE_SHUTDOWN);
-    }
+	if (XrlError::OKAY() != xe) 
+	{
+		XLOG_ERROR("Failed to deregister interest in \"%s\": %s\n",
+				_cname[idx].c_str(), xe.str().c_str());
+		schedule_deregister_retry(idx);
+		return;
+	}
+	debug_msg("Deregistered interest in %s\n", _cname[idx].c_str());
+	idx++;
+	if (idx < END_IDX) 
+	{
+		send_deregister(idx);
+	} else 
+	{
+		set_status(SERVICE_SHUTDOWN);
+	}
 }

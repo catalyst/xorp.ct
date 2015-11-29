@@ -44,11 +44,12 @@
 // TODO: External route metrics.
 //  TODO: Use metric information for collation in ExternalRouteOrderPred.
 
-bool
+    bool
 ExternalRouteOrderPred::operator()(const OlsrTypes::ExternalID lhid,
-				   const OlsrTypes::ExternalID rhid)
+	const OlsrTypes::ExternalID rhid)
 {
-    try {
+    try 
+    {
 	// TODO Propagate exceptions if IDs cannot be retrieved,
 	// rather than just catching them.
 	const ExternalRoute* lhp = _ers.get_hna_route_in_by_id(lhid);
@@ -59,12 +60,13 @@ ExternalRouteOrderPred::operator()(const OlsrTypes::ExternalID lhid,
 	// learned routes; originated routes with originated routes.
 	XLOG_ASSERT(lhp->is_self_originated() == rhp->is_self_originated());
 
-	if (lhp->dest() == rhp->dest()) {
+	if (lhp->dest() == rhp->dest()) 
+	{
 	    // Invariant: Self originated routes should have a distance of 0.
 	    // Learned routes should have a non-zero distance.
 	    XLOG_ASSERT(lhp->is_self_originated() ?
-			lhp->distance() == 0 && rhp->distance() == 0 :
-			lhp->distance() != 0 && rhp->distance() != 0);
+		    lhp->distance() == 0 && rhp->distance() == 0 :
+		    lhp->distance() != 0 && rhp->distance() != 0);
 
 	    return lhp->distance() < rhp->distance();
 	}
@@ -80,24 +82,24 @@ ExternalRouteOrderPred::operator()(const OlsrTypes::ExternalID lhid,
  */
 
 ExternalRoutes::ExternalRoutes(Olsr& olsr, 
-    FaceManager& fm, Neighborhood& nh)
-     : _olsr(olsr),
-       _fm(fm),
-       _nh(nh),
-       _rm(0),
-       _routes_in_order_pred(*this),
-       _is_early_hna_enabled(false),
-       _next_erid(1),
-       _hna_interval(TimeVal(OlsrTypes::DEFAULT_HNA_INTERVAL, 0))
+	FaceManager& fm, Neighborhood& nh)
+: _olsr(olsr),
+    _fm(fm),
+    _nh(nh),
+    _rm(0),
+    _routes_in_order_pred(*this),
+    _is_early_hna_enabled(false),
+    _next_erid(1),
+    _hna_interval(TimeVal(OlsrTypes::DEFAULT_HNA_INTERVAL, 0))
 {
     _fm.add_message_cb(callback(this,
-				&ExternalRoutes::event_receive_hna));
+		&ExternalRoutes::event_receive_hna));
 }
 
 ExternalRoutes::~ExternalRoutes()
 {
     _fm.delete_message_cb(callback(this,
-				   &ExternalRoutes::event_receive_hna));
+		&ExternalRoutes::event_receive_hna));
 
     clear_hna_routes_in();
     clear_hna_routes_out();
@@ -107,19 +109,20 @@ ExternalRoutes::~ExternalRoutes()
  * Protocol variables.
  */
 
-void
+    void
 ExternalRoutes::set_hna_interval(const TimeVal& hna_interval)
 {
     if (hna_interval == _hna_interval)
 	return;
 
     debug_msg("%s setting HNA interval to %s.\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(hna_interval));
+	    cstring(_fm.get_main_addr()),
+	    cstring(hna_interval));
 
     _hna_interval = hna_interval;
 
-    if (_hna_send_timer.scheduled()) {
+    if (_hna_send_timer.scheduled()) 
+    {
 	// Change period.
 	reschedule_hna_send_timer();
 
@@ -132,19 +135,19 @@ ExternalRoutes::set_hna_interval(const TimeVal& hna_interval)
  * HNA Routes In.
  */
 
-OlsrTypes::ExternalID
+    OlsrTypes::ExternalID
 ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
-				    const IPv4& lasthop,
-				    const uint16_t distance,
-				    const TimeVal& expiry_time,
-				    bool& is_created)
-    throw(BadExternalRoute)
+	const IPv4& lasthop,
+	const uint16_t distance,
+	const TimeVal& expiry_time,
+	bool& is_created)
+throw(BadExternalRoute)
 {
     debug_msg("Dest %s Lasthop %s Distance %u ExpiryTime %s\n",
-	      cstring(dest),
-	      cstring(lasthop),
-	      XORP_UINT_CAST(distance),
-	      cstring(expiry_time));
+	    cstring(dest),
+	    cstring(lasthop),
+	    XORP_UINT_CAST(distance),
+	    cstring(expiry_time));
 
     // We perform the multimap search inline, to avoid doing it more than
     // once; we may need to re-insert into the multimap if the HNA
@@ -158,18 +161,22 @@ ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
 	_routes_in_by_dest.equal_range(dest);
     ExternalDestInMap::iterator ii;
 
-    for (ii = rd.first; ii != rd.second; ii++) {
+    for (ii = rd.first; ii != rd.second; ii++) 
+    {
 	er = _routes_in[(*ii).second];
-	if (er->lasthop() == lasthop) {
+	if (er->lasthop() == lasthop) 
+	{
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (is_found) {
+    if (is_found) 
+    {
 	erid = er->id();
 
-	if (er->distance() != distance) {
+	if (er->distance() != distance) 
+	{
 	    // If the distance changed, update it.
 	    //  ii already points to the entry, so need only
 	    //  erase and re-insert; the use of ExternalRouteOrderPred
@@ -182,7 +189,8 @@ ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
 
 	er->update_timer(expiry_time);
 
-    } else {
+    } else 
+    {
 	// Create a new HNA entry.
 	erid = add_hna_route_in(dest, lasthop, distance, expiry_time);
     }
@@ -192,30 +200,31 @@ ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
     return erid;
 }
 
-OlsrTypes::ExternalID
+    OlsrTypes::ExternalID
 ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
-			         const IPv4& lasthop,
-			         const uint16_t distance,
-			         const TimeVal& expiry_time)
-    throw(BadExternalRoute)
+	const IPv4& lasthop,
+	const uint16_t distance,
+	const TimeVal& expiry_time)
+throw(BadExternalRoute)
 {
     debug_msg("Dest %s Lasthop %s Distance %u ExpiryTime %s\n",
-	      cstring(dest),
-	      cstring(lasthop),
-	      XORP_UINT_CAST(distance),
-	      cstring(expiry_time));
+	    cstring(dest),
+	    cstring(lasthop),
+	    XORP_UINT_CAST(distance),
+	    cstring(expiry_time));
 
     OlsrTypes::ExternalID erid = _next_erid++;
 
-    if (_routes_in.find(erid) != _routes_in.end()) {
+    if (_routes_in.find(erid) != _routes_in.end()) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for ExternalID %u already exists",
-		   XORP_UINT_CAST(erid)));
+		c_format("Mapping for ExternalID %u already exists",
+		    XORP_UINT_CAST(erid)));
     }
 
     _routes_in[erid] = new ExternalRoute(*this,  erid,
-					 dest, lasthop, distance,
-					 expiry_time);
+	    dest, lasthop, distance,
+	    expiry_time);
 
     _routes_in_by_dest.insert(make_pair(dest, erid));
 
@@ -224,7 +233,7 @@ ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
     return erid;
 }
 
-bool
+    bool
 ExternalRoutes::delete_hna_route_in(OlsrTypes::ExternalID erid)
 {
     debug_msg("ExternalID %u\n", XORP_UINT_CAST(erid));
@@ -238,11 +247,13 @@ ExternalRoutes::delete_hna_route_in(OlsrTypes::ExternalID erid)
     // Prune from destination map.
     // Note: does not maintain invariant on ID in _routes_in_by_dest.
     pair<ExternalDestInMap::iterator,
-	 ExternalDestInMap::iterator> rd =
-	_routes_in_by_dest.equal_range(er->dest());
+	ExternalDestInMap::iterator> rd =
+	    _routes_in_by_dest.equal_range(er->dest());
     ExternalDestInMap::iterator jj;
-    for (jj = rd.first; jj != rd.second; jj++) {
-	if ((*jj).second == erid) {
+    for (jj = rd.first; jj != rd.second; jj++) 
+    {
+	if ((*jj).second == erid) 
+	{
 	    _routes_in_by_dest.erase(jj);   // jj now invalidated; break.
 	    break;
 	}
@@ -258,13 +269,14 @@ ExternalRoutes::delete_hna_route_in(OlsrTypes::ExternalID erid)
     return true;
 }
 
-void
+    void
 ExternalRoutes::clear_hna_routes_in()
 {
     _routes_in_by_dest.clear();
 
     ExternalRouteMap::iterator ii, jj;
-    for (ii = _routes_in.begin(); ii != _routes_in.end(); ) {
+    for (ii = _routes_in.begin(); ii != _routes_in.end(); ) 
+    {
 	jj = ii++;
 	delete (*jj).second;
 	_routes_in.erase(jj);
@@ -276,56 +288,60 @@ ExternalRoutes::clear_hna_routes_in()
 	_rm->schedule_external_route_update();
 }
 
-const ExternalRoute*
+    const ExternalRoute*
 ExternalRoutes::get_hna_route_in(const IPv4Net& dest,
-				 const IPv4& lasthop)
-    throw(BadExternalRoute)
+	const IPv4& lasthop)
+throw(BadExternalRoute)
 {
     pair<ExternalDestInMap::iterator,
-	 ExternalDestInMap::iterator> rd =
-	_routes_in_by_dest.equal_range(dest);
+	ExternalDestInMap::iterator> rd =
+	    _routes_in_by_dest.equal_range(dest);
 
     ExternalRoute* er = 0;
     bool is_found = false;
 
     ExternalDestInMap::const_iterator ii;
-    for (ii = rd.first; ii != rd.second; ii++) {
+    for (ii = rd.first; ii != rd.second; ii++) 
+    {
 	er = _routes_in[(*ii).second];
-	if (er->lasthop() == lasthop) {
+	if (er->lasthop() == lasthop) 
+	{
 	    is_found = true;
 	    break;
 	}
     }
 
-    if (! is_found) {
+    if (! is_found) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for %s:%s does not exist",
-			    cstring(dest),
-			    cstring(lasthop)));
+		c_format("Mapping for %s:%s does not exist",
+		    cstring(dest),
+		    cstring(lasthop)));
     }
 
     return er;
 }
 
-OlsrTypes::ExternalID
+    OlsrTypes::ExternalID
 ExternalRoutes::get_hna_route_in_id(const IPv4Net& dest,
-				    const IPv4& lasthop)
-    throw(BadExternalRoute)
+	const IPv4& lasthop)
+throw(BadExternalRoute)
 {
     const ExternalRoute* er = get_hna_route_in(dest, lasthop);
 
     return er->id();
 }
 
-const ExternalRoute*
-ExternalRoutes::get_hna_route_in_by_id(const OlsrTypes::ExternalID erid)
-    throw(BadExternalRoute)
+    const ExternalRoute*
+    ExternalRoutes::get_hna_route_in_by_id(const OlsrTypes::ExternalID erid)
+throw(BadExternalRoute)
 {
     ExternalRouteMap::iterator ii = _routes_in.find(erid);
-    if (ii ==  _routes_in.end()) {
+    if (ii ==  _routes_in.end()) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for %u does not exist",
-			    XORP_UINT_CAST(erid)));
+		c_format("Mapping for %u does not exist",
+		    XORP_UINT_CAST(erid)));
     }
 
     return (*ii).second;
@@ -338,7 +354,8 @@ ExternalRoutes::hna_origin_count() const
 
     // Count the number of unique origins in _routes_in.
     ExternalRouteMap::const_iterator ii;
-    for (ii = _routes_in.begin(); ii != _routes_in.end(); ii++) {
+    for (ii = _routes_in.begin(); ii != _routes_in.end(); ii++) 
+    {
 	ExternalRoute* er = (*ii).second;
 	XLOG_ASSERT(! er->is_self_originated());
 	// Requires that origins is a model of UniqueAssociativeContainer.
@@ -355,8 +372,8 @@ ExternalRoutes::hna_dest_count() const
 
     ExternalDestInMap::const_iterator ii;
     for (ii = _routes_in_by_dest.begin();
-	 ii != _routes_in_by_dest.end();
-	 ii = _routes_in_by_dest.upper_bound((*ii).first))
+	    ii != _routes_in_by_dest.end();
+	    ii = _routes_in_by_dest.upper_bound((*ii).first))
     {
 	unique_key_count++;
     }
@@ -364,7 +381,7 @@ ExternalRoutes::hna_dest_count() const
     return unique_key_count;
 }
 
-void
+    void
 ExternalRoutes::get_hna_route_in_list(list<OlsrTypes::ExternalID>& hnalist)
 {
     ExternalRouteMap::const_iterator ii;
@@ -377,27 +394,29 @@ ExternalRoutes::get_hna_route_in_list(list<OlsrTypes::ExternalID>& hnalist)
  * HNA Routes Out [Redistribution].
  */
 
-bool
-ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
-    throw(BadExternalRoute)
+    bool
+    ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
+throw(BadExternalRoute)
 {
     debug_msg("MyMainAddr %s Dest %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(dest));
+	    cstring(_fm.get_main_addr()),
+	    cstring(dest));
 
     bool is_first_route = _routes_out.empty();
 
-    if (_routes_out_by_dest.find(dest) != _routes_out_by_dest.end()) {
+    if (_routes_out_by_dest.find(dest) != _routes_out_by_dest.end()) 
+    {
 	debug_msg("Already originating %s\n", cstring(dest));
 	return false;
     }
 
     OlsrTypes::ExternalID erid = _next_erid++;
 
-    if (_routes_out.find(erid) != _routes_out.end()) {
+    if (_routes_out.find(erid) != _routes_out.end()) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for ExternalID %u already exists",
-		   XORP_UINT_CAST(erid)));
+		c_format("Mapping for ExternalID %u already exists",
+		    XORP_UINT_CAST(erid)));
     }
 
     _routes_out[erid] = new ExternalRoute(*this,  erid, dest);
@@ -415,37 +434,40 @@ ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
     return true;
 }
 
-void
-ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
-    throw(BadExternalRoute)
+    void
+    ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
+throw(BadExternalRoute)
 {
     debug_msg("MyMainAddr %s Dest %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(dest));
+	    cstring(_fm.get_main_addr()),
+	    cstring(dest));
 
     ExternalDestOutMap::iterator ii = _routes_out_by_dest.find(dest);
-    if (ii == _routes_out_by_dest.end()) {
+    if (ii == _routes_out_by_dest.end()) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("%s is not originated by this node",
-			cstring(dest)));
+		c_format("%s is not originated by this node",
+		    cstring(dest)));
     }
 
     ExternalRouteMap::iterator jj = _routes_out.find((*ii).second);
-    if (jj == _routes_out.end()) {
+    if (jj == _routes_out.end()) 
+    {
 	XLOG_UNREACHABLE();
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for %s does not exist",
-			cstring(dest)));
+		c_format("Mapping for %s does not exist",
+		    cstring(dest)));
     }
 
     ExternalRoute* er = (*jj).second;
     XLOG_ASSERT(er != 0);
 
-    if (! er->is_self_originated()) {
+    if (! er->is_self_originated()) 
+    {
 	XLOG_UNREACHABLE();
 	xorp_throw(BadExternalRoute,
-		   c_format("%s is not a self-originated prefix",
-			cstring(dest)));
+		c_format("%s is not a self-originated prefix",
+		    cstring(dest)));
     }
 
     _routes_out.erase(jj);
@@ -457,34 +479,37 @@ ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
     // stop the HNA transmission timer.
     // [No point in scheduling an early HNA broadcast, as
     //  HNA routes are expired only when their life timer expires.]
-    if (_routes_out.empty()) {
+    if (_routes_out.empty()) 
+    {
 	debug_msg("%s: stopping HNA timer as last external route is now"
-		  "withdrawn.\n",
-		  cstring(_fm.get_main_addr()));
+		"withdrawn.\n",
+		cstring(_fm.get_main_addr()));
 	stop_hna_send_timer();
     }
 }
 
-void
+    void
 ExternalRoutes::clear_hna_routes_out()
 {
     ExternalRouteMap::iterator ii, jj;
-    for (ii = _routes_out.begin(); ii != _routes_out.end(); ) {
+    for (ii = _routes_out.begin(); ii != _routes_out.end(); ) 
+    {
 	jj = ii++;
 	delete (*jj).second;
 	_routes_out.erase(jj);
     }
 }
 
-OlsrTypes::ExternalID
-ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest)
-    throw(BadExternalRoute)
+    OlsrTypes::ExternalID
+    ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest)
+throw(BadExternalRoute)
 {
     ExternalDestOutMap::const_iterator ii = _routes_out_by_dest.find(dest);
-    if (ii == _routes_out_by_dest.end()) {
+    if (ii == _routes_out_by_dest.end()) 
+    {
 	xorp_throw(BadExternalRoute,
-		   c_format("Mapping for %s does not exist",
-			    cstring(dest)));
+		c_format("Mapping for %s does not exist",
+		    cstring(dest)));
     }
 
     return (*ii).second;
@@ -494,7 +519,7 @@ ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest)
  * RouteManager interaction.
  */
 
-void
+    void
 ExternalRoutes::push_external_routes()
 {
     XLOG_ASSERT(_rm != 0);
@@ -507,38 +532,38 @@ ExternalRoutes::push_external_routes()
     //  the first route for each destination has the shortest distance.]
     // Recursive resolution of the next hop is the RIB's problem.
     for (ExternalDestInMap::iterator ii = _routes_in_by_dest.begin();
-	 ii != _routes_in_by_dest.end();
-	 ii = _routes_in_by_dest.upper_bound((*ii).first))
+	    ii != _routes_in_by_dest.end();
+	    ii = _routes_in_by_dest.upper_bound((*ii).first))
     {
 	ExternalRoute* er = _routes_in[(*ii).second];
 
 	bool is_route_added = _rm->add_hna_route(er->dest(),
-						 er->lasthop(),
-						 er->distance());
+		er->lasthop(),
+		er->distance());
 	if (is_route_added)
 	    ++pushed_route_count;
     }
 
     debug_msg("%s: pushed %u HNA routes to RouteManager.\n",
-	      cstring(_fm.get_main_addr()),
-	      XORP_UINT_CAST(pushed_route_count));
+	    cstring(_fm.get_main_addr()),
+	    XORP_UINT_CAST(pushed_route_count));
 }
 
 /*
  * Timer manipulation.
  */
 
-void
+    void
 ExternalRoutes::start_hna_send_timer()
 {
     debug_msg("%s -> HNA_RUNNING\n", cstring(_fm.get_main_addr()));
 
     _hna_send_timer = EventLoop::instance().
 	new_periodic(get_hna_interval(),
-		     callback(this, &ExternalRoutes::event_send_hna));
+		callback(this, &ExternalRoutes::event_send_hna));
 }
 
-void
+    void
 ExternalRoutes::stop_hna_send_timer()
 {
     debug_msg("%s -> HNA_STOPPED\n", cstring(_fm.get_main_addr()));
@@ -546,20 +571,20 @@ ExternalRoutes::stop_hna_send_timer()
     _hna_send_timer.clear();
 }
 
-void
+    void
 ExternalRoutes::restart_hna_send_timer()
 {
     reschedule_hna_send_timer();
 }
 
-void
+    void
 ExternalRoutes::reschedule_hna_send_timer()
 {
     _hna_send_timer.reschedule_after(get_hna_interval());
 
 }
 
-void
+    void
 ExternalRoutes::reschedule_immediate_hna_send_timer()
 {
     _hna_send_timer.schedule_now();
@@ -569,11 +594,11 @@ ExternalRoutes::reschedule_immediate_hna_send_timer()
  * Event handlers.
  */
 
-bool
+    bool
 ExternalRoutes::event_send_hna()
 {
     debug_msg("MyMainAddr %s event_send_hna \n",
-	      cstring(_fm.get_main_addr()));
+	    cstring(_fm.get_main_addr()));
 
     XLOG_ASSERT(! _routes_out.empty());
 
@@ -588,7 +613,8 @@ ExternalRoutes::event_send_hna()
 
     // Populate the message with the routes which this node advertises.
     ExternalRouteMap::const_iterator ii;
-    for (ii = _routes_out.begin(); ii != _routes_out.end(); ii++) {
+    for (ii = _routes_out.begin(); ii != _routes_out.end(); ii++) 
+    {
 	ExternalRoute* er = (*ii).second;
 	hna->add_network(er->dest());
     }
@@ -604,11 +630,11 @@ ExternalRoutes::event_send_hna()
     return true;
 }
 
-bool
+    bool
 ExternalRoutes::event_receive_hna(
-    Message* msg,
-    const IPv4& remote_addr,
-    const IPv4& local_addr)
+	Message* msg,
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
 {
     HnaMessage* hna = dynamic_cast<HnaMessage *>(msg);
     if (0 == hna)
@@ -616,19 +642,20 @@ ExternalRoutes::event_receive_hna(
 
     // Put this after the cast to skip false positives.
     debug_msg("[HNA] MyMainAddr %s Src %s RecvIf %s\n",
-	      cstring(_fm.get_main_addr()),
-	      cstring(remote_addr),
-	      cstring(local_addr));
+	    cstring(_fm.get_main_addr()),
+	    cstring(remote_addr),
+	    cstring(local_addr));
 
     // 12.5, 1: Sender must be in symmetric 1-hop neighborhood.
-    if (! _nh.is_sym_neighbor_addr(remote_addr)) {
+    if (! _nh.is_sym_neighbor_addr(remote_addr)) 
+    {
 	debug_msg("Rejecting HNA message from %s via non-neighbor %s\n",
-		  cstring(msg->origin()),
-		  cstring(remote_addr));
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting HNA message from %s via non-neighbor %s",
-		   cstring(msg->origin()),
-		   cstring(remote_addr));
+		"Rejecting HNA message from %s via non-neighbor %s",
+		cstring(msg->origin()),
+		cstring(remote_addr));
 	return true; // consumed but invalid.
     }
 
@@ -641,7 +668,8 @@ ExternalRoutes::event_receive_hna(
     // 12.5, 2: For each address/mask pair in the message,
     // create or update an existing entry.
     size_t updated_hna_count = 0;
-    try {
+    try 
+    {
 	bool is_hna_created = false;
 
 	// Account for hop count not being incremented before forwarding.
@@ -649,14 +677,16 @@ ExternalRoutes::event_receive_hna(
 	const uint16_t distance = hna->hops() + 1;
 
 	vector<IPv4Net>::const_iterator ii;
-	for (ii = nets.begin(); ii != nets.end(); ii++) {
+	for (ii = nets.begin(); ii != nets.end(); ii++) 
+	{
 	    update_hna_route_in((*ii), hna->origin(), distance,
-				hna->expiry_time() + now,
-				is_hna_created);
+		    hna->expiry_time() + now,
+		    is_hna_created);
 	    updated_hna_count++;
 	    UNUSED(is_hna_created);
 	}
-    } catch (...) {
+    } catch (...) 
+    {
 	// If an exception is thrown whilst processing the HNA
 	// message, disregard the rest of the message.
     }
@@ -670,13 +700,13 @@ ExternalRoutes::event_receive_hna(
     UNUSED(local_addr);
 }
 
-void
+    void
 ExternalRoutes::event_hna_route_in_expired(const OlsrTypes::ExternalID erid)
 {
     delete_hna_route_in(erid);
 }
 
-void
+    void
 ExternalRoute::update_timer(const TimeVal& expiry_time)
 {
     XLOG_ASSERT(! _is_self_originated);
@@ -686,10 +716,10 @@ ExternalRoute::update_timer(const TimeVal& expiry_time)
 
     _expiry_timer = EventLoop::instance().
 	new_oneoff_at(expiry_time,
-		      callback(this, &ExternalRoute::event_expired));
+		callback(this, &ExternalRoute::event_expired));
 }
 
-void
+    void
 ExternalRoute::event_expired()
 {
     XLOG_ASSERT(! _is_self_originated);

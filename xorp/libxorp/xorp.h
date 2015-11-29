@@ -83,7 +83,7 @@
 #ifdef __cplusplus
 #  ifdef XORP_USE_USTL
 #    include <ustl.h>
-     using namespace ustl;
+using namespace ustl;
 #  else
 #    include <new>
 #    include <iostream>
@@ -102,7 +102,7 @@
 #    include <functional>
 #    include <memory>
 #    if !defined(__STL_NO_NAMESPACES)
-       using namespace std;
+using namespace std;
 #    endif /* namespace std */
 #  endif /* else, not ustl */
 #endif /* c++ */
@@ -138,7 +138,8 @@
  */
 #ifndef __BEGIN_DECLS
 #  if defined(__cplusplus)
-#    define __BEGIN_DECLS	extern "C" {
+#    define __BEGIN_DECLS	extern "C" 
+{
 #    define __END_DECLS		};    
 #  else /* __BEGIN_DECLS */
 #    define __BEGIN_DECLS
@@ -222,7 +223,7 @@ using namespace std::rel_ops;
 #ifdef NULL
 #   undef NULL
 #   if defined __GNUG__ && \
-	(__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8))
+    (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8))
 #	define NULL (__null)
 #   else
 #	if !defined(__cplusplus)
@@ -248,7 +249,8 @@ using namespace std::rel_ops;
 #endif /* TRUE, FALSE */
 #ifndef HAVE_STDBOOL_H
 #ifndef __cplusplus
-typedef enum {
+typedef enum 
+{
     true = TRUE,
     false = FALSE
 } bool;

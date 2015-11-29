@@ -46,10 +46,11 @@
 template<class A> AttributeManager<A>* PAListRef<A>::_att_mgr = 0;
 
 #ifdef DEBUG_LOGGING
-inline static void
+    inline static void
 dump_bytes(const uint8_t* d, uint8_t l)
 {
-    for (uint16_t i = 0; i < l; i++) {
+    for (uint16_t i = 0; i < l; i++) 
+    {
 	debug_msg("%3u 0x%02x\n", i, d[i]);
     }
 }
@@ -76,8 +77,8 @@ inline static void dump_bytes(const uint8_t*, uint8_t) {}
  * OriginAttribute
  */
 
-OriginAttribute::OriginAttribute(OriginType t)
-	: PathAttribute(Transitive, ORIGIN), _origin(t)
+    OriginAttribute::OriginAttribute(OriginType t)
+: PathAttribute(Transitive, ORIGIN), _origin(t)
 {
 }
 
@@ -87,41 +88,44 @@ OriginAttribute::clone() const
     return new OriginAttribute(origin());
 }
 
-OriginAttribute::OriginAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    OriginAttribute::OriginAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
-    if (length(d) != 1) {
+    if (length(d) != 1) 
+    {
 	xorp_throw(CorruptMessage,
-		   c_format("OriginAttribute bad length %u",
-			    XORP_UINT_CAST(length(d))),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("OriginAttribute bad length %u",
+		    XORP_UINT_CAST(length(d))),
+		UPDATEMSGERR, ATTRLEN);
     }
-    if (!well_known() || !transitive()) {
+    if (!well_known() || !transitive()) 
+    {
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in Origin attribute %#x",flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in Origin attribute %#x",flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     }
 
     const uint8_t* data = payload(d);	// skip header.
 
-    switch (data[0]) {
-    case IGP:
-    case EGP:
-    case INCOMPLETE:
-	_origin = (OriginType)data[0];
-	break;
+    switch (data[0]) 
+    {
+	case IGP:
+	case EGP:
+	case INCOMPLETE:
+	    _origin = (OriginType)data[0];
+	    break;
 
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("Unknown Origin Type %d", data[0]),
-		   UPDATEMSGERR, INVALORGATTR, d, total_tlv_length(d));
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("Unknown Origin Type %d", data[0]),
+		    UPDATEMSGERR, INVALORGATTR, d, total_tlv_length(d));
     }
 }
 
-bool
+    bool
 OriginAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
-const
+    const
 {
     UNUSED(peerdata);
     debug_msg("OriginAttribute::encode\n");
@@ -137,18 +141,19 @@ string
 OriginAttribute::str() const
 {
     string s = "Origin Path Attribute - ";
-    switch (origin()) {
-    case IGP:
-	s += "IGP";
-	break;
-    case EGP:
-	s += "EGP";
-	break;
-    case INCOMPLETE:
-	s += "INCOMPLETE";
-	break;
-    default:
-	s += "UNKNOWN";
+    switch (origin()) 
+    {
+	case IGP:
+	    s += "IGP";
+	    break;
+	case EGP:
+	    s += "EGP";
+	    break;
+	case INCOMPLETE:
+	    s += "INCOMPLETE";
+	    break;
+	default:
+	    s += "UNKNOWN";
     }
     return s;
 }
@@ -157,8 +162,8 @@ OriginAttribute::str() const
  * ASPathAttribute
  */
 
-ASPathAttribute::ASPathAttribute(const ASPath& p)
-	: PathAttribute(Transitive, AS_PATH)
+    ASPathAttribute::ASPathAttribute(const ASPath& p)
+: PathAttribute(Transitive, AS_PATH)
 {
     _as_path = new ASPath(p);
 }
@@ -169,14 +174,14 @@ ASPathAttribute::clone() const
     return new ASPathAttribute(as_path());
 }
 
-ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in AS Path attribute %#x", flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in AS Path attribute %#x", flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
     if (use_4byte_asnums)
 	_as_path = new AS4Path(payload(d), length(d));
@@ -188,38 +193,44 @@ ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
 /**
  * see note in aspath.hh on using 4-byte AS numbers
  */
-bool
+    bool
 ASPathAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
-const
+    const
 {
     debug_msg("ASPathAttribute encode(peerdata=%p)\n", peerdata);
     bool enc_4byte_asnums = false;
-    if (peerdata == NULL) {
+    if (peerdata == NULL) 
+    {
 	/* when we're hashing the attributes, we don't know the peer.
 	   Use the most general form, which is 4-byte ASnums */
 	enc_4byte_asnums = true;
-    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) 
+    {
 	// both us and the peer use 4-byte AS numbers, so encode using
 	// 4-byte ASnums.
 	enc_4byte_asnums = true;
     }
-    
 
-    if (enc_4byte_asnums) {
+
+    if (enc_4byte_asnums) 
+    {
 	size_t l = as4_path().wire_size();
-	if (l + 4 >= wire_size) {
+	if (l + 4 >= wire_size) 
+	{
 	    // There's not enough space to encode this.
 	    return false;
 	}
 
 	uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
 	as4_path().encode(l, d);	// encode the payload in the buffer
-    } else {
+    } else 
+    {
 	// either we're not using 4-byte AS numbers, or the peer isn't
 	// so encode as two-byte AS nums.  If we've got any 4-byte AS
 	// numbers in there, they'll be mapped to AS_TRAN.
 	size_t l = as_path().wire_size();
-	if (l + 4 >= wire_size) {
+	if (l + 4 >= wire_size) 
+	{
 	    // There's not enough space to encode this.
 	    return false;
 	}
@@ -236,20 +247,20 @@ const
  * AS4 Path Attribute - see note in aspath.hh for usage details
  */
 
-AS4PathAttribute::AS4PathAttribute(const AS4Path& p)
-	: PathAttribute((Flags)(Optional|Transitive), AS4_PATH)
+    AS4PathAttribute::AS4PathAttribute(const AS4Path& p)
+: PathAttribute((Flags)(Optional|Transitive), AS4_PATH)
 {
     _as_path = new AS4Path(p);
 }
 
-AS4PathAttribute::AS4PathAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    AS4PathAttribute::AS4PathAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in AS4 Path attribute %#x", flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in AS4 Path attribute %#x", flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
     _as_path = new AS4Path(payload(d), length(d));
 }
@@ -260,20 +271,21 @@ AS4PathAttribute::clone() const
     return new AS4PathAttribute(as4_path());
 }
 
-bool
+    bool
 AS4PathAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
-const
+    const
 {
     // If we're encoding this, it's because we're not configured to do
     // 4-byte AS numbers, but we received a 4-byte AS Path from a peer
     // and now we're sending it on to another peer unchanged.  So this
     // should alwasy be encoded as a 4-byte AS Path, no matter who
     // we're sending it to.
-    
+
     UNUSED(peerdata);
     debug_msg("AS4PathAttribute encode()\n");
     size_t l = as4_path().wire_size();
-    if (l + 4 >= wire_size) {
+    if (l + 4 >= wire_size) 
+    {
 	// There's not enough space to encode this.
 	return false;
     }
@@ -287,10 +299,10 @@ const
  * NextHopAttribute
  */
 
-template <class A>
-NextHopAttribute<A>::NextHopAttribute(const A& n)
+    template <class A>
+    NextHopAttribute<A>::NextHopAttribute(const A& n)
     throw(CorruptMessage)
-	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
+: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
 {
     verify();
 }
@@ -306,33 +318,35 @@ NextHopAttribute<A>::clone() const
  * otherwise.
  */
 template <class A>
-void
-NextHopAttribute<A>::verify()
-    throw(CorruptMessage)
+    void
+    NextHopAttribute<A>::verify()
+throw(CorruptMessage)
 {
-    if (!_next_hop.is_unicast()) {
+    if (!_next_hop.is_unicast()) 
+    {
 	//XLOG_ASSERT(0);
 	xorp_throw(CorruptMessage,
-		   c_format("NextHop %s is not a unicast address",
-			    _next_hop.str().c_str()),
-		   UPDATEMSGERR, INVALNHATTR);
+		c_format("NextHop %s is not a unicast address",
+		    _next_hop.str().c_str()),
+		UPDATEMSGERR, INVALNHATTR);
     }
 }
 
-template <class A>
-NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    template <class A>
+    NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in NextHop attribute %#x", flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
-    if (length(d) != A::addr_bytelen()) {
+		c_format("Bad Flags in NextHop attribute %#x", flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+    if (length(d) != A::addr_bytelen()) 
+    {
 	xorp_throw(CorruptMessage, 
-		   c_format("Bad size in NextHop address, was %u, should be %u",
-			    (uint32_t)length(d), (uint32_t)A::addr_bytelen()),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("Bad size in NextHop address, was %u, should be %u",
+		    (uint32_t)length(d), (uint32_t)A::addr_bytelen()),
+		UPDATEMSGERR, ATTRLEN);
     }
 
     _next_hop = A(payload(d));
@@ -343,11 +357,12 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 template<class A>
 bool
 NextHopAttribute<A>::encode(uint8_t *buf, size_t &wire_size, 
-			    const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     UNUSED(peerdata);
     debug_msg("NextHopAttribute<A>::encode\n");
-    if (wire_size <= 3 + A::addr_bytelen()) {
+    if (wire_size <= 3 + A::addr_bytelen()) 
+    {
 	return false;
     }
     uint8_t *d = set_header(buf, A::addr_bytelen(), wire_size);
@@ -363,8 +378,8 @@ template class NextHopAttribute<IPv6>;
  * MEDAttribute
  */
 
-MEDAttribute::MEDAttribute(const uint32_t med)
-	: PathAttribute(Optional, MED), _med(med)
+    MEDAttribute::MEDAttribute(const uint32_t med)
+: PathAttribute(Optional, MED), _med(med)
 {
 }
 
@@ -374,27 +389,28 @@ MEDAttribute::clone() const
     return new MEDAttribute(med());
 }
 
-MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
-    : PathAttribute(d)
+    MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in MEDAttribute %#x", flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in MEDAttribute %#x", flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in MEDAttribute",
-		   UPDATEMSGERR, ATTRLEN);
+		UPDATEMSGERR, ATTRLEN);
     memcpy(&_med, payload(d), 4);
     _med = ntohl(_med);
 }
 
-bool
+    bool
 MEDAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
-const
+    const
 {
     debug_msg("MEDAttribute::encode\n");
     UNUSED(peerdata);
-    if (wire_size <= 7) {
+    if (wire_size <= 7) 
+    {
 	return false;
     }
     uint8_t *d = set_header(buf, 4, wire_size);
@@ -407,15 +423,15 @@ string
 MEDAttribute::str() const
 {
     return c_format("Multiple Exit Descriminator Attribute: MED=%u",
-		    XORP_UINT_CAST(med()));
+	    XORP_UINT_CAST(med()));
 }
 
 /**
  * LocalPrefAttribute
  */
 
-LocalPrefAttribute::LocalPrefAttribute(const uint32_t localpref)
-	: PathAttribute(Transitive, LOCAL_PREF), _localpref(localpref)
+    LocalPrefAttribute::LocalPrefAttribute(const uint32_t localpref)
+: PathAttribute(Transitive, LOCAL_PREF), _localpref(localpref)
 {
 }
 
@@ -425,28 +441,29 @@ LocalPrefAttribute::clone() const
     return new LocalPrefAttribute(localpref());
 }
 
-LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in LocalPrefAttribute %#x", flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in LocalPrefAttribute %#x", flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in LocalPrefAttribute",
-		   UPDATEMSGERR, ATTRLEN);
+		UPDATEMSGERR, ATTRLEN);
     memcpy(&_localpref, payload(d), 4);
     _localpref = ntohl(_localpref);
 }
 
 bool
 LocalPrefAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			   const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("LocalPrefAttribute::encode\n");
     UNUSED(peerdata);
-    if (wire_size < 7) {
+    if (wire_size < 7) 
+    {
 	return false;
     }
     uint8_t *d = set_header(buf, 4, wire_size);
@@ -459,25 +476,26 @@ string
 LocalPrefAttribute::str() const
 {
     return c_format("Local Preference Attribute - %u",
-		    XORP_UINT_CAST(_localpref));
+	    XORP_UINT_CAST(_localpref));
 }
 
 /**
  * AtomicAggAttribute has length 0
  */
 
-AtomicAggAttribute::AtomicAggAttribute()
-	: PathAttribute(Transitive, ATOMIC_AGGREGATE)
+    AtomicAggAttribute::AtomicAggAttribute()
+: PathAttribute(Transitive, ATOMIC_AGGREGATE)
 {
 }
 
 bool
 AtomicAggAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			   const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("AAggAttribute::encode\n");
     UNUSED(peerdata);
-    if (wire_size < 3) {
+    if (wire_size < 3) 
+    {
 	return false;
     }
     set_header(buf, 0, wire_size);
@@ -490,20 +508,20 @@ AtomicAggAttribute::clone() const
     return new AtomicAggAttribute();
 }
 
-AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (length(d) != 0)
 	xorp_throw(CorruptMessage,
-		   c_format("AtomicAggregate bad length %u",
-			    XORP_UINT_CAST(length(d))),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("AtomicAggregate bad length %u",
+		    XORP_UINT_CAST(length(d))),
+		UPDATEMSGERR, ATTRLEN);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
-			    flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in AtomicAggregate attribute %#x",
+		    flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 }
 
 /**
@@ -511,9 +529,9 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
  */
 
 AggregatorAttribute::AggregatorAttribute(const IPv4& speaker,
-			const AsNum& as)
-	: PathAttribute((Flags)(Optional|Transitive), AGGREGATOR),
-		_speaker(speaker), _as(as)            
+	const AsNum& as)
+: PathAttribute((Flags)(Optional|Transitive), AGGREGATOR),
+    _speaker(speaker), _as(as)            
 {
 }
 
@@ -523,57 +541,62 @@ AggregatorAttribute::clone() const
     return new AggregatorAttribute(route_aggregator(), aggregator_as());
 }
 
-AggregatorAttribute::AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums)
-	throw(CorruptMessage)
-	: PathAttribute(d), _as(AsNum::AS_INVALID)
+    AggregatorAttribute::AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums)
+    throw(CorruptMessage)
+: PathAttribute(d), _as(AsNum::AS_INVALID)
 {
     if (!use_4byte_asnums && length(d) != 6)
 	xorp_throw(CorruptMessage,
-		   c_format("Aggregator bad length %u",
-			    XORP_UINT_CAST(length(d))),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("Aggregator bad length %u",
+		    XORP_UINT_CAST(length(d))),
+		UPDATEMSGERR, ATTRLEN);
     if (use_4byte_asnums && length(d) != 8)
 	xorp_throw(CorruptMessage,
-		   c_format("Aggregator bad length %u",
-			    XORP_UINT_CAST(length(d))),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("Aggregator bad length %u",
+		    XORP_UINT_CAST(length(d))),
+		UPDATEMSGERR, ATTRLEN);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
-			    flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in AtomicAggregate attribute %#x",
+		    flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     d = payload(d);
     _as = AsNum(d, use_4byte_asnums);
     if (use_4byte_asnums)
 	_speaker = IPv4(d+4);
-    else {
+    else 
+    {
 	_speaker = IPv4(d+2);
     }
 }
 
 bool
 AggregatorAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			    const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("AggAttribute::encode\n");
     bool enc_4byte_asnums = false;
-    if (peerdata == NULL) {
+    if (peerdata == NULL) 
+    {
 	/* when we're hashing the attributes, we don't know the peer.
 	   Use the most general form, which is 4-byte ASnums */
 	enc_4byte_asnums = true;
-    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) 
+    {
 	// both us and the peer use 4-byte AS numbers, so encode using
 	// 4-byte ASnums.
 	enc_4byte_asnums = true;
     }
 
-    if (enc_4byte_asnums) {
+    if (enc_4byte_asnums) 
+    {
 	if (wire_size < 11) 
 	    return false;
 	uint8_t *d = set_header(buf, 8, wire_size);
 	_as.copy_out4(d);
 	_speaker.copy_out(d + 4); // defined to be an IPv4 address in RFC 2858
-    } else {
+    } else 
+    {
 	if (wire_size < 9) 
 	    return false;
 	uint8_t *d = set_header(buf, 6, wire_size);
@@ -594,9 +617,9 @@ string AggregatorAttribute::str() const
  */
 
 AS4AggregatorAttribute::AS4AggregatorAttribute(const IPv4& speaker,
-			const AsNum& as)
-	: PathAttribute((Flags)(Optional|Transitive), AS4_AGGREGATOR),
-		_speaker(speaker), _as(as)            
+	const AsNum& as)
+: PathAttribute((Flags)(Optional|Transitive), AS4_AGGREGATOR),
+    _speaker(speaker), _as(as)            
 {
 }
 
@@ -606,20 +629,20 @@ AS4AggregatorAttribute::clone() const
     return new AS4AggregatorAttribute(route_aggregator(), aggregator_as());
 }
 
-AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d), _as(AsNum::AS_INVALID)
+    AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d), _as(AsNum::AS_INVALID)
 {
     if (length(d) != 8)
 	xorp_throw(CorruptMessage,
-		   c_format("AS4Aggregator bad length %u",
-			    XORP_UINT_CAST(length(d))),
-		   UPDATEMSGERR, ATTRLEN);
+		c_format("AS4Aggregator bad length %u",
+		    XORP_UINT_CAST(length(d))),
+		UPDATEMSGERR, ATTRLEN);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
-			    flags()),
-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+		c_format("Bad Flags in AtomicAggregate attribute %#x",
+		    flags()),
+		UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     d = payload(d);
     _as = AsNum(d, true); //force interpretation as a 4-byte quantity
     _speaker = IPv4(d+4);
@@ -627,14 +650,15 @@ AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d)
 
 bool
 AS4AggregatorAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			    const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("AS4AggAttribute::encode\n");
     if (wire_size < 11) 
 	return false;
 
     if (peerdata && 
-	peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+	    peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) 
+    {
 	// we're configured to do 4-byte AS numbers and our peer is
 	// also configured to do them.  We should not be encoding 4
 	// byte AS numbers in an AS4AggregatorAttribute, but rather
@@ -658,8 +682,8 @@ string AS4AggregatorAttribute::str() const
  * CommunityAttribute
  */
 
-CommunityAttribute::CommunityAttribute()
-	: PathAttribute((Flags)(Optional | Transitive), COMMUNITY)
+    CommunityAttribute::CommunityAttribute()
+: PathAttribute((Flags)(Optional | Transitive), COMMUNITY)
 {
 }
 
@@ -668,23 +692,24 @@ CommunityAttribute::clone() const
 {
     CommunityAttribute *ca = new CommunityAttribute();
     for(const_iterator i = community_set().begin(); 
-	i != community_set().end(); i++)
+	    i != community_set().end(); i++)
 	ca->add_community(*i);
 
     return ca;
 }
 
-CommunityAttribute::CommunityAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    CommunityAttribute::CommunityAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Community attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in Community attribute",
+		UPDATEMSGERR, ATTRFLAGS);
     size_t len = length(d);
     d = payload(d);
-    for (size_t l = len; l >= 4;  d += 4, l -= 4) {
+    for (size_t l = len; l >= 4;  d += 4, l -= 4) 
+    {
 	uint32_t value;
 	memcpy(&value, d, 4);
 	_communities.insert(ntohl(value));
@@ -693,18 +718,20 @@ CommunityAttribute::CommunityAttribute(const uint8_t* d)
 
 bool
 CommunityAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			   const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("CommAttribute::encode\n");
     UNUSED(peerdata);
     size_t size = 4 * _communities.size();
-    if (wire_size < size + 4) {
+    if (wire_size < size + 4) 
+    {
 	return false;
     }
 
     uint8_t *d = set_header(buf, size, wire_size);
     const_iterator i = _communities.begin();
-    for (; i != _communities.end(); d += 4, i++) {
+    for (; i != _communities.end(); d += 4, i++) 
+    {
 	uint32_t value = htonl(*i);
 	memcpy(d, &value, 4);
     }
@@ -716,26 +743,28 @@ CommunityAttribute::str() const
 {
     string s = "Community Attribute ";
     const_iterator i = _communities.begin();
-    for ( ; i != _communities.end();  ++i) {
-	switch (*i) {
-	case NO_EXPORT:
-	    s += "NO_EXPORT ";
-	    break;
-	case NO_ADVERTISE:
-	    s += "NO_ADVERTISE ";
-	    break;
-	case NO_EXPORT_SUBCONFED:
-	    s += "NO_EXPORT_SUBCONFED ";
-	    break;
+    for ( ; i != _communities.end();  ++i) 
+    {
+	switch (*i) 
+	{
+	    case NO_EXPORT:
+		s += "NO_EXPORT ";
+		break;
+	    case NO_ADVERTISE:
+		s += "NO_ADVERTISE ";
+		break;
+	    case NO_EXPORT_SUBCONFED:
+		s += "NO_EXPORT_SUBCONFED ";
+		break;
 	}
 	s += c_format("%d:%d %#x ", XORP_UINT_CAST(((*i >> 16) & 0xffff)),
-		      XORP_UINT_CAST((*i & 0xffff)),
-		      XORP_UINT_CAST(*i));
+		XORP_UINT_CAST((*i & 0xffff)),
+		XORP_UINT_CAST(*i));
     }
     return s;
 }
 
-void
+    void
 CommunityAttribute::add_community(uint32_t community)
 {
     _communities.insert(community);
@@ -755,8 +784,8 @@ CommunityAttribute::contains(uint32_t community) const
  * OriginatorIDAttribute
  */
 
-OriginatorIDAttribute::OriginatorIDAttribute(const IPv4 originator_id)
-	: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
+    OriginatorIDAttribute::OriginatorIDAttribute(const IPv4 originator_id)
+: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
 {
 }
 
@@ -766,27 +795,28 @@ OriginatorIDAttribute::clone() const
     return new OriginatorIDAttribute(originator_id());
 }
 
-OriginatorIDAttribute::OriginatorIDAttribute(const uint8_t* d)
+    OriginatorIDAttribute::OriginatorIDAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage, "Bad Flags in OriginatorIDAttribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		UPDATEMSGERR, ATTRFLAGS);
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in OriginatorIDAttribute",
-		   UPDATEMSGERR, INVALNHATTR);
+		UPDATEMSGERR, INVALNHATTR);
 
     _originator_id.copy_in(payload(d));
 }
 
 bool
 OriginatorIDAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			      const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("OriginatorIDAttribute::encode\n");
     UNUSED(peerdata);
-    if (wire_size < 7) {
+    if (wire_size < 7) 
+    {
 	return false;
     }
     uint8_t *d = set_header(buf, 4, wire_size);
@@ -804,22 +834,23 @@ OriginatorIDAttribute::str() const
  * ClusterListAttribute
  */
 
-ClusterListAttribute::ClusterListAttribute()
-	: PathAttribute(Optional, CLUSTER_LIST)
+    ClusterListAttribute::ClusterListAttribute()
+: PathAttribute(Optional, CLUSTER_LIST)
 {
 }
 
-ClusterListAttribute::ClusterListAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    ClusterListAttribute::ClusterListAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in CLUSTER_LIST attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in CLUSTER_LIST attribute",
+		UPDATEMSGERR, ATTRFLAGS);
     size_t size = length(d);
     d = payload(d);
-    for (size_t l = size; l >= 4;  d += 4, l -= 4) {
+    for (size_t l = size; l >= 4;  d += 4, l -= 4) 
+    {
 	IPv4 i;
 	i.copy_in(d);
 	_cluster_list.push_back(i);
@@ -838,19 +869,21 @@ ClusterListAttribute::clone() const
 
 bool
 ClusterListAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			     const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("CLAttribute::encode\n");
     UNUSED(peerdata);
     size_t size = 4 * _cluster_list.size();
     XLOG_ASSERT(size < 256);
-    if (wire_size < size + 4) {
+    if (wire_size < size + 4) 
+    {
 	return false;
     }
 
     uint8_t *d = set_header(buf, size, wire_size);
     const_iterator i = _cluster_list.begin();
-    for (; i != _cluster_list.end(); d += 4, i++) {
+    for (; i != _cluster_list.end(); d += 4, i++) 
+    {
 	i->copy_out(d);
     }
     return true;
@@ -866,7 +899,7 @@ ClusterListAttribute::str() const
     return s;
 }
 
-void
+    void
 ClusterListAttribute::prepend_cluster_id(IPv4 cluster_id)
 {
     _cluster_list.push_front(cluster_id);
@@ -876,7 +909,7 @@ bool
 ClusterListAttribute::contains(IPv4 cluster_id) const
 {
     const_iterator i = find(_cluster_list.begin(), _cluster_list.end(),
-			    cluster_id);
+	    cluster_id);
     if (i == _cluster_list.end())
 	return false;
     return true;
@@ -903,7 +936,7 @@ ClusterListAttribute::contains(IPv4 cluster_id) const
 template <>
 bool
 MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size, 
-				   const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("MPReachAttribute::encode\n");
     UNUSED(peerdata);
@@ -913,8 +946,8 @@ MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
     XLOG_ASSERT(16 == IPv6::addr_bytelen());
 
     /*
-    ** Figure out how many bytes we need to allocate.
-    */
+     ** Figure out how many bytes we need to allocate.
+     */
     size_t len;
     len = 2;	// AFI
     len += 1;	// SAFI
@@ -925,42 +958,47 @@ MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
     len += 1;	// Number of SNPAs
 
     const_iterator i;
-    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+    for (i = _nlri.begin(); i != _nlri.end(); i++) 
+    {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
 
 	// check it will fit
-	if (wire_size < len + 4) {
+	if (wire_size < len + 4) 
+	{
 	    // not enough space to encode!
 	    return false;
 	}
     }
 
     uint8_t *d = set_header(buf, len, wire_size);
-    
+
     /*
-    ** Fill in the buffer.
-    */
+     ** Fill in the buffer.
+     */
     *d++ = (_afi << 8) & 0xff;	// AFI
     *d++ = _afi & 0xff;		// AFI
-    
+
     *d++ = _safi;		// SAFIs
 
-    if (_link_local_next_hop.is_zero()) {
+    if (_link_local_next_hop.is_zero()) 
+    {
 	*d++ = IPv6::addr_bytelen();
 	nexthop().copy_out(d);
 	d += IPv6::addr_bytelen();
-    } else {
+    } else 
+    {
 	*d++ = IPv6::addr_bytelen() * 2;
 	nexthop().copy_out(d);
 	d += IPv6::addr_bytelen();
 	_link_local_next_hop.copy_out(d);
 	d += IPv6::addr_bytelen();
     }
-    
+
     *d++ = 0;	// Number of SNPAs
 
-    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+    for (i = _nlri.begin(); i != _nlri.end(); i++) 
+    {
 	int bytes = (i->prefix_len() + 7)/ 8;
 
 	// if there's no space, truncate
@@ -971,7 +1009,7 @@ MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
-	
+
 	*d++ = i->prefix_len();
 	memcpy(d, buf, bytes);
 	d += bytes;
@@ -982,7 +1020,7 @@ MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
 template <>
 bool
 MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size, 
-				   const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("MPReachAttribute::encode\n");
     UNUSED(peerdata);
@@ -991,8 +1029,8 @@ MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
     XLOG_ASSERT(4 == IPv4::addr_bytelen());
 
     /*
-    ** Figure out how many bytes we need to allocate.
-    */
+     ** Figure out how many bytes we need to allocate.
+     */
     size_t len;
     len = 2;	// AFI
     len += 1;	// SAFI
@@ -1001,34 +1039,37 @@ MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
     len += 1;	// Number of SNPAs
 
     const_iterator i;
-    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+    for (i = _nlri.begin(); i != _nlri.end(); i++) 
+    {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
 
 	// check it will fit
-	if (wire_size < len + 4) {
+	if (wire_size < len + 4) 
+	{
 	    // not enough space to encode!
 	    return false;
 	}
     }
 
     uint8_t *d = set_header(buf, len, wire_size);
-    
+
     /*
-    ** Fill in the buffer.
-    */
+     ** Fill in the buffer.
+     */
     *d++ = (_afi << 8) & 0xff;	// AFI
     *d++ = _afi & 0xff;		// AFI
-    
+
     *d++ = _safi;		// SAFIs
 
     *d++ = IPv4::addr_bytelen();
     nexthop().copy_out(d);
     d += IPv4::addr_bytelen();
-    
+
     *d++ = 0;	// Number of SNPAs
 
-    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+    for (i = _nlri.begin(); i != _nlri.end(); i++) 
+    {
 	int bytes = (i->prefix_len() + 7) / 8;
 
 	// if there's no space, truncate
@@ -1047,19 +1088,19 @@ MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
     return true;
 }
 
-template <>
-MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional), MP_REACH_NLRI),
-      _afi(AFI_IPV6),
-      _safi(safi)
+    template <>
+    MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
+: PathAttribute((Flags)(Optional), MP_REACH_NLRI),
+    _afi(AFI_IPV6),
+    _safi(safi)
 {
 }
 
-template <>
-MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional), MP_REACH_NLRI),
-      _afi(AFI_IPV4),
-      _safi(safi)
+    template <>
+    MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(Safi safi)
+: PathAttribute((Flags)(Optional), MP_REACH_NLRI),
+    _afi(AFI_IPV4),
+    _safi(safi)
 {
 }
 
@@ -1077,15 +1118,15 @@ MPReachNLRIAttribute<A>::clone() const
     return mp;
 }
 
-template <>
-MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+    template <>
+    MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRFLAGS);
 
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
@@ -1096,90 +1137,95 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     afi |= *data++;
 
     /*
-    ** This is method is specialized for dealing with IPv6.
-    */
+     ** This is method is specialized for dealing with IPv6.
+     */
     if (AFI_IPV6_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI to be %d not %d",
-			    AFI_IPV6, afi),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Expected AFI to be %d not %d",
+		    AFI_IPV6, afi),
+		UPDATEMSGERR, OPTATTR);
     _afi = AFI_IPV6;
 
     uint8_t safi = *data++;
-    switch(safi) {
-    case SAFI_UNICAST_VAL:
-	_safi = SAFI_UNICAST;
-	break;
-    case SAFI_MULTICAST_VAL:
-	_safi = SAFI_MULTICAST;
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("Expected SAFI to %d or %d not %d",
-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
-		   UPDATEMSGERR, OPTATTR);
+    switch(safi) 
+    {
+	case SAFI_UNICAST_VAL:
+	    _safi = SAFI_UNICAST;
+	    break;
+	case SAFI_MULTICAST_VAL:
+	    _safi = SAFI_MULTICAST;
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("Expected SAFI to %d or %d not %d",
+			SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		    UPDATEMSGERR, OPTATTR);
     }
 
     /*
-    ** Next Hop
-    */
+     ** Next Hop
+     */
     uint8_t len = *data++;
 
     XLOG_ASSERT(16 == IPv6::addr_bytelen());
     IPv6 temp;
 
-    switch(len) {
-    case 16:
-	temp.copy_in(data);
-	set_nexthop(temp);
-	data += IPv6::addr_bytelen();
-	break;
-    case 32:
-	temp.copy_in(data);
-	set_nexthop(temp);
-	data += IPv6::addr_bytelen();
-	_link_local_next_hop.copy_in(data);
-	data += IPv6::addr_bytelen();
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("BAD Next Hop size in "
-			    "IPv6 Multiprotocol Reachable NLRI attribute "
-			    "16 and 32 allowed not %u", len),
-		   UPDATEMSGERR, OPTATTR);
+    switch(len) 
+    {
+	case 16:
+	    temp.copy_in(data);
+	    set_nexthop(temp);
+	    data += IPv6::addr_bytelen();
+	    break;
+	case 32:
+	    temp.copy_in(data);
+	    set_nexthop(temp);
+	    data += IPv6::addr_bytelen();
+	    _link_local_next_hop.copy_in(data);
+	    data += IPv6::addr_bytelen();
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("BAD Next Hop size in "
+			"IPv6 Multiprotocol Reachable NLRI attribute "
+			"16 and 32 allowed not %u", len),
+		    UPDATEMSGERR, OPTATTR);
     }
-    
+
     if (data > end)
 	xorp_throw(CorruptMessage,
-		   "Premature end of Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRLEN);
+		"Premature end of Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRLEN);
 
     /*
-    ** SNPA - I have no idea how these are supposed to be used for IPv6
-    ** so lets just step over them.
-    */
+     ** SNPA - I have no idea how these are supposed to be used for IPv6
+     ** so lets just step over them.
+     */
     uint8_t snpa_cnt = *data++;
-    for (;snpa_cnt > 0; snpa_cnt--) {
+    for (;snpa_cnt > 0; snpa_cnt--) 
+    {
 	uint8_t snpa_length = *data++;
 	data += snpa_length;
     }
 
-    if (data > end) {
+    if (data > end) 
+    {
 	xorp_throw(CorruptMessage,
-		   "Premature end of Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRLEN);
+		"Premature end of Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRLEN);
     }
 
     /*
-    ** NLRI
-    */
-    while(data < end) {
+     ** NLRI
+     */
+    while(data < end) 
+    {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 7)/ 8;
 	if (bytes > IPv6::addr_bytelen())
 	    xorp_throw(CorruptMessage,
-		       c_format("prefix length too long %d", prefix_length),
-		       UPDATEMSGERR, OPTATTR);
+		    c_format("prefix length too long %d", prefix_length),
+		    UPDATEMSGERR, OPTATTR);
 	uint8_t buf[IPv6::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
@@ -1188,20 +1234,20 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
 	_nlri.push_back(IPNet<IPv6>(nlri, prefix_length));
 	data += bytes;
 	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
-		  prefix_length, XORP_UINT_CAST(bytes));
+		prefix_length, XORP_UINT_CAST(bytes));
     }
 
 }
 
-template <>
-MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+    template <>
+    MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRFLAGS);
 
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
@@ -1212,89 +1258,94 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     afi |= *data++;
 
     /*
-    ** This is method is specialized for dealing with IPv4.
-    */
+     ** This is method is specialized for dealing with IPv4.
+     */
     if (AFI_IPV4_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI to be %d not %d",
-			    AFI_IPV4, afi),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Expected AFI to be %d not %d",
+		    AFI_IPV4, afi),
+		UPDATEMSGERR, OPTATTR);
     _afi = AFI_IPV4;
 
     uint8_t safi = *data++;
-    switch(safi) {
-    case SAFI_UNICAST_VAL:
-	_safi = SAFI_UNICAST;
-	break;
-    case SAFI_MULTICAST_VAL:
-	_safi = SAFI_MULTICAST;
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("Expected SAFI to %d or %d not %d",
-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
-		   UPDATEMSGERR, OPTATTR);
+    switch(safi) 
+    {
+	case SAFI_UNICAST_VAL:
+	    _safi = SAFI_UNICAST;
+	    break;
+	case SAFI_MULTICAST_VAL:
+	    _safi = SAFI_MULTICAST;
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("Expected SAFI to %d or %d not %d",
+			SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		    UPDATEMSGERR, OPTATTR);
     }
 
     // XXX - Temporary hack as SAFI_UNICAST causes problems.
     if (SAFI_UNICAST == _safi)
 	xorp_throw(CorruptMessage,
-		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+		UPDATEMSGERR, OPTATTR);
 
     /*
-    ** Next Hop
-    */
+     ** Next Hop
+     */
     uint8_t len = *data++;
 
     XLOG_ASSERT(4 == IPv4::addr_bytelen());
     IPv4 temp;
 
-    switch(len) {
-    case 4:
-	temp.copy_in(data);
-	set_nexthop(temp);
-	data += IPv4::addr_bytelen();
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("BAD Next Hop size in "
-			    "IPv4 Multiprotocol Reachable NLRI attribute "
-			    "4 allowed not %u", len),
-		   UPDATEMSGERR, OPTATTR);
+    switch(len) 
+    {
+	case 4:
+	    temp.copy_in(data);
+	    set_nexthop(temp);
+	    data += IPv4::addr_bytelen();
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("BAD Next Hop size in "
+			"IPv4 Multiprotocol Reachable NLRI attribute "
+			"4 allowed not %u", len),
+		    UPDATEMSGERR, OPTATTR);
     }
-    
+
     if (data > end)
 	xorp_throw(CorruptMessage,
-		   "Premature end of Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRLEN);
+		"Premature end of Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRLEN);
 
     /*
-    ** SNPA - I have no idea how these are supposed to be used for IPv4
-    ** so lets just step over them.
-    */
+     ** SNPA - I have no idea how these are supposed to be used for IPv4
+     ** so lets just step over them.
+     */
     uint8_t snpa_cnt = *data++;
-    for (;snpa_cnt > 0; snpa_cnt--) {
+    for (;snpa_cnt > 0; snpa_cnt--) 
+    {
 	uint8_t snpa_length = *data++;
 	data += snpa_length;
     }
 
-    if (data > end) {
+    if (data > end) 
+    {
 	xorp_throw(CorruptMessage,
-		   "Premature end of Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRLEN);
+		"Premature end of Multiprotocol Reachable NLRI attribute",
+		UPDATEMSGERR, ATTRLEN);
     }
 
     /*
-    ** NLRI
-    */
-    while(data < end) {
+     ** NLRI
+     */
+    while(data < end) 
+    {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 7) / 8;
 	if (bytes > IPv4::addr_bytelen())
 	    xorp_throw(CorruptMessage,
-		       c_format("prefix length too long %d", prefix_length),
-		       UPDATEMSGERR, OPTATTR);
+		    c_format("prefix length too long %d", prefix_length),
+		    UPDATEMSGERR, OPTATTR);
 	uint8_t buf[IPv4::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
@@ -1303,7 +1354,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
 	_nlri.push_back(IPNet<IPv4>(nlri, prefix_length));
 	data += bytes;
 	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
-		  prefix_length, XORP_UINT_CAST(bytes));
+		prefix_length, XORP_UINT_CAST(bytes));
     }
 
 }
@@ -1313,10 +1364,10 @@ string
 MPReachNLRIAttribute<A>::str() const
 {
     string s = c_format("Multiprotocol Reachable NLRI AFI = %d SAFI = %d\n",
-			_afi, _safi);
+	    _afi, _safi);
     s += c_format("   - Next Hop Attribute %s\n", nexthop().str().c_str());
     s += c_format("   - Link Local Next Hop Attribute %s",
-		  link_local_nexthop().str().c_str());
+	    link_local_nexthop().str().c_str());
     typename list<IPNet<A> >::const_iterator i = nlri_list().begin();
     for(; i != nlri_list().end(); i++)
 	s += c_format("\n   - Nlri %s", i->str().c_str());
@@ -1326,7 +1377,7 @@ MPReachNLRIAttribute<A>::str() const
 template <>
 bool
 MPUNReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size, 
-				     const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("MPUnreachAttribute::encode\n");
     UNUSED(peerdata);
@@ -1336,35 +1387,38 @@ MPUNReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
     XLOG_ASSERT(16 == IPv6::addr_bytelen());
 
     /*
-    ** Figure out how many bytes we need to allocate.
-    */
+     ** Figure out how many bytes we need to allocate.
+     */
     size_t len;
     len = 2;	// AFI
     len += 1;	// SAFI
 
     const_iterator i;
-    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) 
+    {
 	len += 1;
 	len += (i->prefix_len() + 7)/ 8;
 
 	// check it will fit
-	if (wire_size < len + 4) {
+	if (wire_size < len + 4) 
+	{
 	    // not enough space to encode!
 	    return false;
 	}
     }
 
     uint8_t *d = set_header(buf, len, wire_size);
-    
+
     /*
-    ** Fill in the buffer.
-    */
+     ** Fill in the buffer.
+     */
     *d++ = (_afi << 8) & 0xff;	// AFI
     *d++ = _afi & 0xff;		// AFI
 
     *d++ = _safi;		// SAFIs
-    
-    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) 
+    {
 	int bytes = (i->prefix_len() + 7)/ 8;
 
 	// if there's no space, truncate
@@ -1386,7 +1440,7 @@ MPUNReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size,
 template <>
 bool
 MPUNReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size, 
-				     const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("MPUnreachNLRIAttribute::encode\n");
     UNUSED(peerdata);
@@ -1395,34 +1449,37 @@ MPUNReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
     XLOG_ASSERT(4 == IPv4::addr_bytelen());
 
     /*
-    ** Figure out how many bytes we need to allocate.
-    */
+     ** Figure out how many bytes we need to allocate.
+     */
     size_t len;
     len = 2;	// AFI
     len += 1;	// SAFI
 
     const_iterator i;
-    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) 
+    {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
 	// check it will fit
-	if (wire_size < len + 4) {
+	if (wire_size < len + 4) 
+	{
 	    // not enough space to encode!
 	    return false;
 	}
     }
 
     uint8_t *d = set_header(buf, len, wire_size);
-    
+
     /*
-    ** Fill in the buffer.
-    */
+     ** Fill in the buffer.
+     */
     *d++ = (_afi << 8) & 0xff;	// AFI
     *d++ = _afi & 0xff;		// AFI
 
     *d++ = _safi;		// SAFIs
-    
-    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) 
+    {
 	int bytes = (i->prefix_len() + 7) / 8;
 
 	// if there's no space, truncate
@@ -1441,19 +1498,19 @@ MPUNReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
     return true;
 }
 
-template <>
-MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
-      _afi(AFI_IPV6),
-      _safi(safi)
+    template <>
+    MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
+: PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
+    _afi(AFI_IPV6),
+    _safi(safi)
 {
 }
 
-template <>
-MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(Safi safi)
-    : PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
-      _afi(AFI_IPV4),
-      _safi(safi)
+    template <>
+    MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(Safi safi)
+: PathAttribute((Flags)(Optional), MP_UNREACH_NLRI),
+    _afi(AFI_IPV4),
+    _safi(safi)
 {
 }
 
@@ -1470,15 +1527,15 @@ MPUNReachNLRIAttribute<A>::clone() const
     return mp;
 }
 
-template <>
-MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+    template <>
+    MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in Multiprotocol UNReachable NLRI attribute",
+		UPDATEMSGERR, ATTRFLAGS);
 
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
@@ -1489,41 +1546,43 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     afi |= *data++;
 
     /*
-    ** This is method is specialized for dealing with IPv6.
-    */
+     ** This is method is specialized for dealing with IPv6.
+     */
     if (AFI_IPV6_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI to be %d not %d",
-			    AFI_IPV6, afi),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Expected AFI to be %d not %d",
+		    AFI_IPV6, afi),
+		UPDATEMSGERR, OPTATTR);
     _afi = AFI_IPV6;
 
     uint8_t safi = *data++;
-    switch(safi) {
-    case SAFI_UNICAST_VAL:
-	_safi = SAFI_UNICAST;
-	break;
-    case SAFI_MULTICAST_VAL:
-	_safi = SAFI_MULTICAST;
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("Expected SAFI to %d or %d not %d",
-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
-		   UPDATEMSGERR, OPTATTR);
+    switch(safi) 
+    {
+	case SAFI_UNICAST_VAL:
+	    _safi = SAFI_UNICAST;
+	    break;
+	case SAFI_MULTICAST_VAL:
+	    _safi = SAFI_MULTICAST;
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("Expected SAFI to %d or %d not %d",
+			SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		    UPDATEMSGERR, OPTATTR);
     }
 
     /*
-    ** NLRI
-    */
-    while(data < end) {
+     ** NLRI
+     */
+    while(data < end) 
+    {
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
 	if (bytes > IPv6::addr_bytelen())
 	    xorp_throw(CorruptMessage,
-		       c_format("prefix length too long %d", prefix_length),
-		       UPDATEMSGERR, OPTATTR);
+		    c_format("prefix length too long %d", prefix_length),
+		    UPDATEMSGERR, OPTATTR);
 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
 	uint8_t buf[IPv6::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
@@ -1535,15 +1594,15 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
     }
 }
 
-template <>
-MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+    template <>
+    MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+: PathAttribute(d)
 {
     if (!optional() || transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		"Bad Flags in Multiprotocol UNReachable NLRI attribute",
+		UPDATEMSGERR, ATTRFLAGS);
 
     const uint8_t *data = payload(d);
     const uint8_t *end = payload(d) + length(d);
@@ -1554,47 +1613,49 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
     afi |= *data++;
 
     /*
-    ** This is method is specialized for dealing with IPv4.
-    */
+     ** This is method is specialized for dealing with IPv4.
+     */
     if (AFI_IPV4_VAL != afi)
 	xorp_throw(CorruptMessage,
-		   c_format("Expected AFI to be %d not %d",
-			    AFI_IPV4, afi),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Expected AFI to be %d not %d",
+		    AFI_IPV4, afi),
+		UPDATEMSGERR, OPTATTR);
     _afi = AFI_IPV4;
 
     uint8_t safi = *data++;
-    switch(safi) {
-    case SAFI_UNICAST_VAL:
-	_safi = SAFI_UNICAST;
-	break;
-    case SAFI_MULTICAST_VAL:
-	_safi = SAFI_MULTICAST;
-	break;
-    default:
-	xorp_throw(CorruptMessage,
-		   c_format("Expected SAFI to %d or %d not %d",
-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
-		   UPDATEMSGERR, OPTATTR);
+    switch(safi) 
+    {
+	case SAFI_UNICAST_VAL:
+	    _safi = SAFI_UNICAST;
+	    break;
+	case SAFI_MULTICAST_VAL:
+	    _safi = SAFI_MULTICAST;
+	    break;
+	default:
+	    xorp_throw(CorruptMessage,
+		    c_format("Expected SAFI to %d or %d not %d",
+			SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		    UPDATEMSGERR, OPTATTR);
     }
 
     // XXX - Temporary hack as SAFI_UNICAST causes problems.
     if (SAFI_UNICAST == _safi)
 	xorp_throw(CorruptMessage,
-		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
-		   UPDATEMSGERR, OPTATTR);
+		c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+		UPDATEMSGERR, OPTATTR);
 
     /*
-    ** NLRI
-    */
-    while(data < end) {
+     ** NLRI
+     */
+    while(data < end) 
+    {
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
 	if (bytes > IPv4::addr_bytelen())
 	    xorp_throw(CorruptMessage,
-		       c_format("prefix length too long %d", prefix_length),
-		       UPDATEMSGERR, OPTATTR);
+		    c_format("prefix length too long %d", prefix_length),
+		    UPDATEMSGERR, OPTATTR);
 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
 	uint8_t buf[IPv4::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
@@ -1611,7 +1672,7 @@ string
 MPUNReachNLRIAttribute<A>::str() const
 {
     string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI = %d",
-			_afi, _safi);
+	    _afi, _safi);
     typename list<IPNet<A> >::const_iterator i = wr_list().begin();
     for(; i != wr_list().end(); i++)
 	s += c_format("\n   - Withdrawn %s", i->str().c_str());
@@ -1624,24 +1685,24 @@ MPUNReachNLRIAttribute<A>::str() const
  **** 
  **************************************************************************/ 
 
-UnknownAttribute::UnknownAttribute(const uint8_t* d)
-	throw(CorruptMessage)
-	: PathAttribute(d)
+    UnknownAttribute::UnknownAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+: PathAttribute(d)
 {
     // It shouldn't be possible to receive an unknown attribute that
     // is well known.
     if (well_known())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Unknown attribute",
-		   UPDATEMSGERR, UNRECOGWATTR, d, total_tlv_length(d));
-	
+		"Bad Flags in Unknown attribute",
+		UPDATEMSGERR, UNRECOGWATTR, d, total_tlv_length(d));
+
     _size = total_tlv_length(d);
     _data = new uint8_t[_size];
     memcpy(_data, d, _size);
 }
 
-UnknownAttribute::UnknownAttribute(uint8_t *data, size_t size, uint8_t flags) 
-    : PathAttribute(data)
+    UnknownAttribute::UnknownAttribute(uint8_t *data, size_t size, uint8_t flags) 
+: PathAttribute(data)
 {
     /* override the flags from the data because they may have been modified */
     _flags = flags;
@@ -1653,7 +1714,7 @@ UnknownAttribute::UnknownAttribute(uint8_t *data, size_t size, uint8_t flags)
 PathAttribute *
 UnknownAttribute::clone() const
 {
-     return new UnknownAttribute(_data, _size, _flags);
+    return new UnknownAttribute(_data, _size, _flags);
 }
 
 string
@@ -1668,7 +1729,7 @@ UnknownAttribute::str() const
 
 bool
 UnknownAttribute::encode(uint8_t *buf, size_t &wire_size, 
-			 const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     debug_msg("UnknownAttribute::encode\n");
     UNUSED(peerdata);
@@ -1691,119 +1752,127 @@ UnknownAttribute::encode(uint8_t *buf, size_t &wire_size,
  **** 
  **************************************************************************/ 
 
-PathAttribute *
+    PathAttribute *
 PathAttribute::create(const uint8_t* d, uint16_t max_len,
-		      size_t& l /* actual length */, const BGPPeerData* peerdata,
-		      uint32_t ip_version)
-	throw(CorruptMessage)
+	size_t& l /* actual length */, const BGPPeerData* peerdata,
+	uint32_t ip_version)
+throw(CorruptMessage)
 {
     PathAttribute *pa;
-    if (max_len < 3) {
+    if (max_len < 3) 
+    {
 	// must be at least 3 bytes! 
 	xorp_throw(CorruptMessage,
-		   c_format("PathAttribute too short %d bytes", max_len),
-		   UPDATEMSGERR, ATTRLEN, d, max_len);
+		c_format("PathAttribute too short %d bytes", max_len),
+		UPDATEMSGERR, ATTRLEN, d, max_len);
     }
 
     // compute length, which is 1 or 2 bytes depending on flags d[0]
-    if ( (d[0] & Extended) && max_len < 4) {
+    if ( (d[0] & Extended) && max_len < 4) 
+    {
 	xorp_throw(CorruptMessage,
-		   c_format("PathAttribute (extended) too short %d bytes",
-			    max_len),
-		   UPDATEMSGERR, ATTRLEN, d, max_len);
+		c_format("PathAttribute (extended) too short %d bytes",
+		    max_len),
+		UPDATEMSGERR, ATTRLEN, d, max_len);
     }
     l = length(d) + (d[0] & Extended ? 4 : 3);
-    if (max_len < l) {
+    if (max_len < l) 
+    {
 	xorp_throw(CorruptMessage,
-		   c_format("PathAttribute too short %d bytes need %u",
-			    max_len, XORP_UINT_CAST(l)),
-		   UPDATEMSGERR, ATTRLEN, d, max_len);
+		c_format("PathAttribute too short %d bytes need %u",
+		    max_len, XORP_UINT_CAST(l)),
+		UPDATEMSGERR, ATTRLEN, d, max_len);
     }
 
     // now we are sure that the data block is large enough.
     debug_msg("++ create type %d max_len %d actual_len %u\n",
-	      d[1], max_len, XORP_UINT_CAST(l));
+	    d[1], max_len, XORP_UINT_CAST(l));
 
     bool use_4byte_asnums = true;
     if (peerdata) 
 	use_4byte_asnums = peerdata->use_4byte_asnums();
 
     switch (d[1]) {	// depending on type, do the right thing.
-    case ORIGIN:
-	pa = new OriginAttribute(d);
-	break; 
+	case ORIGIN:
+	    pa = new OriginAttribute(d);
+	    break; 
 
-    case AS_PATH:
-	pa = new ASPathAttribute(d, use_4byte_asnums);
-	break;  
-     
-    case AS4_PATH:
-	pa = new AS4PathAttribute(d);
-	break;  
-     
-    case NEXT_HOP:
-	switch (ip_version) {
-	    case 4:
-		pa = new IPv4NextHopAttribute(d);
-		break;
-	    case 6:
-		pa = new IPv6NextHopAttribute(d);
-		break;
-	    default:
-		XLOG_UNREACHABLE();
-        }
-	break;
-    case MED:
-	pa = new MEDAttribute(d);
-	break;
-    
-    case LOCAL_PREF:
-	pa = new LocalPrefAttribute(d);
-	break;
+	case AS_PATH:
+	    pa = new ASPathAttribute(d, use_4byte_asnums);
+	    break;  
 
-    case ATOMIC_AGGREGATE:
-	pa = new AtomicAggAttribute(d);
-	break;
+	case AS4_PATH:
+	    pa = new AS4PathAttribute(d);
+	    break;  
 
-    case AGGREGATOR:
-	pa = new AggregatorAttribute(d, use_4byte_asnums);
-	break;
+	case NEXT_HOP:
+	    switch (ip_version) 
+	    {
+		case 4:
+		    pa = new IPv4NextHopAttribute(d);
+		    break;
+		case 6:
+		    pa = new IPv6NextHopAttribute(d);
+		    break;
+		default:
+		    XLOG_UNREACHABLE();
+	    }
+	    break;
+	case MED:
+	    pa = new MEDAttribute(d);
+	    break;
 
-    case AS4_AGGREGATOR:
-	pa = new AS4AggregatorAttribute(d);
-	break;
+	case LOCAL_PREF:
+	    pa = new LocalPrefAttribute(d);
+	    break;
 
-    case COMMUNITY:
-	pa = new CommunityAttribute(d);
-	break;
+	case ATOMIC_AGGREGATE:
+	    pa = new AtomicAggAttribute(d);
+	    break;
 
-    case ORIGINATOR_ID:
-	pa = new OriginatorIDAttribute(d);
-	break;
+	case AGGREGATOR:
+	    pa = new AggregatorAttribute(d, use_4byte_asnums);
+	    break;
 
-    case CLUSTER_LIST:
-	pa = new ClusterListAttribute(d);
-	break;
+	case AS4_AGGREGATOR:
+	    pa = new AS4AggregatorAttribute(d);
+	    break;
 
-    case MP_REACH_NLRI:
-	try {
-	    pa = new MPReachNLRIAttribute<IPv6>(d);
-	} catch(...) {
-	    pa = new MPReachNLRIAttribute<IPv4>(d);
-	}
-	break;
+	case COMMUNITY:
+	    pa = new CommunityAttribute(d);
+	    break;
 
-    case MP_UNREACH_NLRI:
-	try {
-	    pa = new MPUNReachNLRIAttribute<IPv6>(d);
-	} catch(...) {
-	    pa = new MPUNReachNLRIAttribute<IPv4>(d);
-	}
-	break;
-	
-    default:
-	pa = new UnknownAttribute(d);
-	break;
+	case ORIGINATOR_ID:
+	    pa = new OriginatorIDAttribute(d);
+	    break;
+
+	case CLUSTER_LIST:
+	    pa = new ClusterListAttribute(d);
+	    break;
+
+	case MP_REACH_NLRI:
+	    try 
+	    {
+		pa = new MPReachNLRIAttribute<IPv6>(d);
+	    } catch(...) 
+	    {
+		pa = new MPReachNLRIAttribute<IPv4>(d);
+	    }
+	    break;
+
+	case MP_UNREACH_NLRI:
+	    try 
+	    {
+		pa = new MPUNReachNLRIAttribute<IPv6>(d);
+	    } catch(...) 
+	    {
+		pa = new MPUNReachNLRIAttribute<IPv4>(d);
+	    }
+	    break;
+
+	default:
+	    pa = new UnknownAttribute(d);
+	    break;
     }
     return pa;
 }
@@ -1820,65 +1889,66 @@ string
 PathAttribute::str() const
 {
     string s = "Path attribute of type ";
-    switch (type()) {
-    case ORIGIN:
-	s += "ORIGIN";
-	break;
+    switch (type()) 
+    {
+	case ORIGIN:
+	    s += "ORIGIN";
+	    break;
 
-    case AS_PATH:
-	s += "AS_PATH";
-	break;
+	case AS_PATH:
+	    s += "AS_PATH";
+	    break;
 
-    case AS4_PATH:
-	s += "AS4_PATH";
-	break;
+	case AS4_PATH:
+	    s += "AS4_PATH";
+	    break;
 
-    case NEXT_HOP:
-	s += "NEXT_HOP";
-	break;
+	case NEXT_HOP:
+	    s += "NEXT_HOP";
+	    break;
 
-    case MED:
-	s += "MED";
-	break;
+	case MED:
+	    s += "MED";
+	    break;
 
-    case LOCAL_PREF:
-	s += "LOCAL_PREF";
-	break;
+	case LOCAL_PREF:
+	    s += "LOCAL_PREF";
+	    break;
 
-    case ATOMIC_AGGREGATE:
-	s += "ATOMIC_AGGREGATOR";
-	break;
+	case ATOMIC_AGGREGATE:
+	    s += "ATOMIC_AGGREGATOR";
+	    break;
 
-    case AGGREGATOR:
-	s += "AGGREGATOR";
-	break;
+	case AGGREGATOR:
+	    s += "AGGREGATOR";
+	    break;
 
-    case AS4_AGGREGATOR:
-	s += "AS4_AGGREGATOR";
-	break;
+	case AS4_AGGREGATOR:
+	    s += "AS4_AGGREGATOR";
+	    break;
 
-    case COMMUNITY:
-	s += "COMMUNITY";
-	break;
+	case COMMUNITY:
+	    s += "COMMUNITY";
+	    break;
 
-    case ORIGINATOR_ID:
-	s += "ORIGINATOR_ID";
-	break;
+	case ORIGINATOR_ID:
+	    s += "ORIGINATOR_ID";
+	    break;
 
-    case CLUSTER_LIST:
-	s += "CLUSTER_LIST";
-	break;
+	case CLUSTER_LIST:
+	    s += "CLUSTER_LIST";
+	    break;
 
-    case MP_REACH_NLRI:
-	s += "MP_REACH_NLRI";
-	break;
+	case MP_REACH_NLRI:
+	    s += "MP_REACH_NLRI";
+	    break;
 
-    case MP_UNREACH_NLRI:
-	s += "MP_UNREACH_NLRI";
-	break;
+	case MP_UNREACH_NLRI:
+	    s += "MP_UNREACH_NLRI";
+	    break;
 
-    default:
-	s += c_format("UNKNOWN(type: %d flags: %x): ", type(), _flags);
+	default:
+	    s += c_format("UNKNOWN(type: %d flags: %x): ", type(), _flags);
     }
     return s;
 }
@@ -1896,72 +1966,79 @@ PathAttribute::str() const
 
 bool
 PathAttribute::encode(uint8_t* buf, size_t &wire_size, 
-		      const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     string s = "Path attribute of type ";
-    switch (type()) {
-    case ORIGIN:
-	return ((const OriginAttribute*)this)->encode(buf, wire_size, peerdata);
+    switch (type()) 
+    {
+	case ORIGIN:
+	    return ((const OriginAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case AS_PATH:
-	return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
+	case AS_PATH:
+	    return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case AS4_PATH:
-	return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
+	case AS4_PATH:
+	    return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case NEXT_HOP:
-	if (dynamic_cast<const NextHopAttribute<IPv4>*>(this)) {
-	    return ((const NextHopAttribute<IPv4>*)this)->encode(buf, wire_size, peerdata);
-	} else {
-	    return ((const NextHopAttribute<IPv6>*)this)->encode(buf, wire_size, peerdata);
-	}
+	case NEXT_HOP:
+	    if (dynamic_cast<const NextHopAttribute<IPv4>*>(this)) 
+	    {
+		return ((const NextHopAttribute<IPv4>*)this)->encode(buf, wire_size, peerdata);
+	    } else 
+	    {
+		return ((const NextHopAttribute<IPv6>*)this)->encode(buf, wire_size, peerdata);
+	    }
 
-    case MED:
-	return ((const MEDAttribute*)this)->encode(buf, wire_size, peerdata);
+	case MED:
+	    return ((const MEDAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case LOCAL_PREF:
-	return ((const LocalPrefAttribute*)this)->encode(buf, wire_size, peerdata);
+	case LOCAL_PREF:
+	    return ((const LocalPrefAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case ATOMIC_AGGREGATE:
-	return ((const AtomicAggAttribute*)this)->encode(buf, wire_size, peerdata);
+	case ATOMIC_AGGREGATE:
+	    return ((const AtomicAggAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case AGGREGATOR:
-	return ((const AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
+	case AGGREGATOR:
+	    return ((const AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case AS4_AGGREGATOR:
-	return ((const AS4AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
+	case AS4_AGGREGATOR:
+	    return ((const AS4AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case COMMUNITY:
-	return ((const CommunityAttribute*)this)->encode(buf, wire_size, peerdata);
+	case COMMUNITY:
+	    return ((const CommunityAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case ORIGINATOR_ID:
-	return ((const OriginatorIDAttribute*)this)->encode(buf, wire_size, peerdata);
+	case ORIGINATOR_ID:
+	    return ((const OriginatorIDAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case CLUSTER_LIST:
-	return ((const ClusterListAttribute*)this)->encode(buf, wire_size, peerdata);
+	case CLUSTER_LIST:
+	    return ((const ClusterListAttribute*)this)->encode(buf, wire_size, peerdata);
 
-    case MP_REACH_NLRI:
-	if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) {
-	    return ((const MPReachNLRIAttribute<IPv4>*)this)
-		->encode(buf, wire_size, peerdata);
-	} else {
-	    return ((const MPReachNLRIAttribute<IPv6>*)this)
-		->encode(buf, wire_size, peerdata);
-	}
+	case MP_REACH_NLRI:
+	    if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) 
+	    {
+		return ((const MPReachNLRIAttribute<IPv4>*)this)
+		    ->encode(buf, wire_size, peerdata);
+	    } else 
+	    {
+		return ((const MPReachNLRIAttribute<IPv6>*)this)
+		    ->encode(buf, wire_size, peerdata);
+	    }
 
-    case MP_UNREACH_NLRI:
-	if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) {
-	    return ((const MPUNReachNLRIAttribute<IPv4>*)this)
-		->encode(buf, wire_size, peerdata);
-	} else {
-	    return ((const MPUNReachNLRIAttribute<IPv6>*)this)
-		->encode(buf, wire_size, peerdata);
-	}
+	case MP_UNREACH_NLRI:
+	    if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) 
+	    {
+		return ((const MPUNReachNLRIAttribute<IPv4>*)this)
+		    ->encode(buf, wire_size, peerdata);
+	    } else 
+	    {
+		return ((const MPUNReachNLRIAttribute<IPv6>*)this)
+		    ->encode(buf, wire_size, peerdata);
+	    }
 
-    case UNKNOWN_TESTING1:
-    case UNKNOWN_TESTING2:
-	// This is only for the test harness
-	return true;
+	case UNKNOWN_TESTING1:
+	case UNKNOWN_TESTING2:
+	    // This is only for the test harness
+	    return true;
     }
     return true;
 }
@@ -1976,96 +2053,101 @@ PathAttribute::operator<(const PathAttribute& him) const
     if (sorttype() > him.sorttype())
 	return false;
     // equal sorttypes imply equal types
-    switch (type()) {
-    case ORIGIN:
-	return ( ((const OriginAttribute &)*this).origin() <
-		((const OriginAttribute &)him).origin() );
+    switch (type()) 
+    {
+	case ORIGIN:
+	    return ( ((const OriginAttribute &)*this).origin() <
+		    ((const OriginAttribute &)him).origin() );
 
-    case AS_PATH:
-	return ( ((const ASPathAttribute &)*this).as_path() <
-		((const ASPathAttribute &)him).as_path() );
+	case AS_PATH:
+	    return ( ((const ASPathAttribute &)*this).as_path() <
+		    ((const ASPathAttribute &)him).as_path() );
 
-    case AS4_PATH:
-	return ( ((const AS4PathAttribute &)*this).as_path() <
-		((const AS4PathAttribute &)him).as_path() );
+	case AS4_PATH:
+	    return ( ((const AS4PathAttribute &)*this).as_path() <
+		    ((const AS4PathAttribute &)him).as_path() );
 
-    case NEXT_HOP:
-	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() <
-		((const NextHopAttribute<IPv4> &)him).nexthop() );
+	case NEXT_HOP:
+	    return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() <
+		    ((const NextHopAttribute<IPv4> &)him).nexthop() );
 
-    case MED:
-	return ( ((const MEDAttribute &)*this).med() <
-		((const MEDAttribute &)him).med() );
+	case MED:
+	    return ( ((const MEDAttribute &)*this).med() <
+		    ((const MEDAttribute &)him).med() );
 
-    case LOCAL_PREF:
-	return ( ((const LocalPrefAttribute &)*this).localpref() <
-		((const LocalPrefAttribute &)him).localpref() );
+	case LOCAL_PREF:
+	    return ( ((const LocalPrefAttribute &)*this).localpref() <
+		    ((const LocalPrefAttribute &)him).localpref() );
 
-    case ATOMIC_AGGREGATE:
-	return false;
-
-    case AGGREGATOR:
-	if ( ((const AggregatorAttribute &)*this).aggregator_as() 
-	     == ((const AggregatorAttribute &)him).aggregator_as() ) {
-	    return ( ((const AggregatorAttribute &)*this).route_aggregator() 
-		     < ((const AggregatorAttribute &)him).route_aggregator() );
-	} else {
-	    return ( ((const AggregatorAttribute &)*this).aggregator_as() 
-		     < ((const AggregatorAttribute &)him).aggregator_as() );
-	}
-
-    case AS4_AGGREGATOR:
-	if ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
-	     == ((const AS4AggregatorAttribute &)him).aggregator_as() ) {
-	    return ( ((const AS4AggregatorAttribute &)*this).route_aggregator() 
-		     < ((const AS4AggregatorAttribute &)him).route_aggregator() );
-	} else {
-	    return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
-		     < ((const AS4AggregatorAttribute &)him).aggregator_as() );
-	}
-
-    case COMMUNITY:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
-	((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen < hisbuflen)
-	    return true;
-	if (mybuflen > hisbuflen)
+	case ATOMIC_AGGREGATE:
 	    return false;
-	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
 
-    case ORIGINATOR_ID:
-	return ( ((const OriginatorIDAttribute &)*this).originator_id()
-		 < ((const OriginatorIDAttribute &)him).originator_id() );
+	case AGGREGATOR:
+	    if ( ((const AggregatorAttribute &)*this).aggregator_as() 
+		    == ((const AggregatorAttribute &)him).aggregator_as() ) 
+	    {
+		return ( ((const AggregatorAttribute &)*this).route_aggregator() 
+			< ((const AggregatorAttribute &)him).route_aggregator() );
+	    } else 
+	    {
+		return ( ((const AggregatorAttribute &)*this).aggregator_as() 
+			< ((const AggregatorAttribute &)him).aggregator_as() );
+	    }
 
-    case CLUSTER_LIST:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
-	((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen < hisbuflen)
-	    return true;
-	if (mybuflen > hisbuflen)
-	    return false;
-	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
+	case AS4_AGGREGATOR:
+	    if ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+		    == ((const AS4AggregatorAttribute &)him).aggregator_as() ) 
+	    {
+		return ( ((const AS4AggregatorAttribute &)*this).route_aggregator() 
+			< ((const AS4AggregatorAttribute &)him).route_aggregator() );
+	    } else 
+	    {
+		return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+			< ((const AS4AggregatorAttribute &)him).aggregator_as() );
+	    }
 
-    case MP_REACH_NLRI:
-    case MP_UNREACH_NLRI:
-	// at places in the code where we'll use this operator, these
-	// shouldn't be present in the PathAttributes.
-	XLOG_UNREACHABLE();
-    default:
-	/* this must be an unknown attribute */
-	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
-	this->encode(mybuf, mybuflen, NULL);
-	him.encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen < hisbuflen)
-	    return true;
-	if (mybuflen > hisbuflen)
-	    return false;
-	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
-	
+	case COMMUNITY:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	    ((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	    ((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen < hisbuflen)
+		return true;
+	    if (mybuflen > hisbuflen)
+		return false;
+	    return (memcmp(mybuf, hisbuf, mybuflen) < 0);
+
+	case ORIGINATOR_ID:
+	    return ( ((const OriginatorIDAttribute &)*this).originator_id()
+		    < ((const OriginatorIDAttribute &)him).originator_id() );
+
+	case CLUSTER_LIST:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	    ((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	    ((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen < hisbuflen)
+		return true;
+	    if (mybuflen > hisbuflen)
+		return false;
+	    return (memcmp(mybuf, hisbuf, mybuflen) < 0);
+
+	case MP_REACH_NLRI:
+	case MP_UNREACH_NLRI:
+	    // at places in the code where we'll use this operator, these
+	    // shouldn't be present in the PathAttributes.
+	    XLOG_UNREACHABLE();
+	default:
+	    /* this must be an unknown attribute */
+	    mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	    this->encode(mybuf, mybuflen, NULL);
+	    him.encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen < hisbuflen)
+		return true;
+	    if (mybuflen > hisbuflen)
+		return false;
+	    return (memcmp(mybuf, hisbuf, mybuflen) < 0);
+
     }
     XLOG_UNREACHABLE();
 }
@@ -2077,119 +2159,125 @@ PathAttribute::operator==(const PathAttribute& him) const
     size_t mybuflen, hisbuflen;
     if (sorttype() != him.sorttype())
 	return false;
-    switch (type()) {
-    case ORIGIN:
-	return ( ((const OriginAttribute &)*this).origin() ==
-		((const OriginAttribute &)him).origin() );
+    switch (type()) 
+    {
+	case ORIGIN:
+	    return ( ((const OriginAttribute &)*this).origin() ==
+		    ((const OriginAttribute &)him).origin() );
 
-    case AS_PATH:
-	return ( ((const ASPathAttribute &)*this).as_path() ==
-		((const ASPathAttribute &)him).as_path() );
+	case AS_PATH:
+	    return ( ((const ASPathAttribute &)*this).as_path() ==
+		    ((const ASPathAttribute &)him).as_path() );
 
-    case AS4_PATH:
-	return ( ((const AS4PathAttribute &)*this).as_path() ==
-		((const AS4PathAttribute &)him).as_path() );
+	case AS4_PATH:
+	    return ( ((const AS4PathAttribute &)*this).as_path() ==
+		    ((const AS4PathAttribute &)him).as_path() );
 
-    case NEXT_HOP:
-	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() ==
-		((const NextHopAttribute<IPv4> &)him).nexthop() );
+	case NEXT_HOP:
+	    return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() ==
+		    ((const NextHopAttribute<IPv4> &)him).nexthop() );
 
-    case MED:
-	return ( ((const MEDAttribute &)*this).med() ==
-		((const MEDAttribute &)him).med() );
+	case MED:
+	    return ( ((const MEDAttribute &)*this).med() ==
+		    ((const MEDAttribute &)him).med() );
 
-    case LOCAL_PREF:
-	return ( ((const LocalPrefAttribute &)*this).localpref() ==
-		((const LocalPrefAttribute &)him).localpref() );
+	case LOCAL_PREF:
+	    return ( ((const LocalPrefAttribute &)*this).localpref() ==
+		    ((const LocalPrefAttribute &)him).localpref() );
 
-    case ATOMIC_AGGREGATE:
-	return true;
+	case ATOMIC_AGGREGATE:
+	    return true;
 
-    case AGGREGATOR:
-	return ( ((const AggregatorAttribute &)*this).aggregator_as() 
-		 == ((const AggregatorAttribute &)him).aggregator_as()
-		 &&  ((const AggregatorAttribute &)*this).route_aggregator() 
-		 == ((const AggregatorAttribute &)him).route_aggregator() );
+	case AGGREGATOR:
+	    return ( ((const AggregatorAttribute &)*this).aggregator_as() 
+		    == ((const AggregatorAttribute &)him).aggregator_as()
+		    &&  ((const AggregatorAttribute &)*this).route_aggregator() 
+		    == ((const AggregatorAttribute &)him).route_aggregator() );
 
-    case AS4_AGGREGATOR:
-	return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
-		 == ((const AS4AggregatorAttribute &)him).aggregator_as()
-		 &&  ((const AS4AggregatorAttribute &)*this).route_aggregator() 
-		 == ((const AS4AggregatorAttribute &)him).route_aggregator() );
+	case AS4_AGGREGATOR:
+	    return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+		    == ((const AS4AggregatorAttribute &)him).aggregator_as()
+		    &&  ((const AS4AggregatorAttribute &)*this).route_aggregator() 
+		    == ((const AS4AggregatorAttribute &)him).route_aggregator() );
 
-    case COMMUNITY:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = 4096;
-	((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen != hisbuflen)
-	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+	case COMMUNITY:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = 4096;
+	    ((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	    ((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen != hisbuflen)
+		return false;
+	    return memcmp(mybuf, hisbuf, mybuflen) == 0;
 
-    case ORIGINATOR_ID:
-	return ( ((const OriginatorIDAttribute &)*this).originator_id()
-		 == ((const OriginatorIDAttribute &)him).originator_id() );
+	case ORIGINATOR_ID:
+	    return ( ((const OriginatorIDAttribute &)*this).originator_id()
+		    == ((const OriginatorIDAttribute &)him).originator_id() );
 
-    case CLUSTER_LIST:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = 4096;
-	((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen != hisbuflen) 
-	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+	case CLUSTER_LIST:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = 4096;
+	    ((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	    ((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen != hisbuflen) 
+		return false;
+	    return memcmp(mybuf, hisbuf, mybuflen) == 0;
 
-    case MP_REACH_NLRI:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = 4096;
-	if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) {
-	    ((const MPReachNLRIAttribute<IPv4>*)this)
-		->encode(mybuf, mybuflen, NULL);
-	    ((const MPReachNLRIAttribute<IPv4>&)him)
-		.encode(hisbuf, hisbuflen, NULL);
-	} else {
-	    ((const MPReachNLRIAttribute<IPv6>*)this)
-		->encode(mybuf, mybuflen, NULL);
-	    ((const MPReachNLRIAttribute<IPv6>&)him)
-		.encode(hisbuf, hisbuflen, NULL);
-	}
-	if (mybuflen != hisbuflen)
-	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+	case MP_REACH_NLRI:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = 4096;
+	    if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) 
+	    {
+		((const MPReachNLRIAttribute<IPv4>*)this)
+		    ->encode(mybuf, mybuflen, NULL);
+		((const MPReachNLRIAttribute<IPv4>&)him)
+		    .encode(hisbuf, hisbuflen, NULL);
+	    } else 
+	    {
+		((const MPReachNLRIAttribute<IPv6>*)this)
+		    ->encode(mybuf, mybuflen, NULL);
+		((const MPReachNLRIAttribute<IPv6>&)him)
+		    .encode(hisbuf, hisbuflen, NULL);
+	    }
+	    if (mybuflen != hisbuflen)
+		return false;
+	    return memcmp(mybuf, hisbuf, mybuflen) == 0;
 
-    case MP_UNREACH_NLRI:
-	// XXX using encode for this is a little inefficient
-	mybuflen = hisbuflen = 4096;
-	if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) {
-	    ((const MPUNReachNLRIAttribute<IPv4>*)this)
-		->encode(mybuf, mybuflen, NULL);
-	    ((const MPUNReachNLRIAttribute<IPv4>&)him)
-		.encode(hisbuf, hisbuflen, NULL);
-	} else {
-	    ((const MPUNReachNLRIAttribute<IPv6>*)this)
-		->encode(mybuf, mybuflen, NULL);
-	    ((const MPUNReachNLRIAttribute<IPv6>&)him)
-		.encode(hisbuf, hisbuflen, NULL);
-	}
-	if (mybuflen != hisbuflen)
-	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+	case MP_UNREACH_NLRI:
+	    // XXX using encode for this is a little inefficient
+	    mybuflen = hisbuflen = 4096;
+	    if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) 
+	    {
+		((const MPUNReachNLRIAttribute<IPv4>*)this)
+		    ->encode(mybuf, mybuflen, NULL);
+		((const MPUNReachNLRIAttribute<IPv4>&)him)
+		    .encode(hisbuf, hisbuflen, NULL);
+	    } else 
+	    {
+		((const MPUNReachNLRIAttribute<IPv6>*)this)
+		    ->encode(mybuf, mybuflen, NULL);
+		((const MPUNReachNLRIAttribute<IPv6>&)him)
+		    .encode(hisbuf, hisbuflen, NULL);
+	    }
+	    if (mybuflen != hisbuflen)
+		return false;
+	    return memcmp(mybuf, hisbuf, mybuflen) == 0;
 
-    default:
-	/* this must be an unknown attribute */
-	XLOG_ASSERT(dynamic_cast<const UnknownAttribute*>(this) != 0);
-	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
-	((const UnknownAttribute*)this)->encode(mybuf, mybuflen, NULL);
-	((const UnknownAttribute&)him).encode(hisbuf, hisbuflen, NULL);
-	if (mybuflen != hisbuflen) {
-	    return false;
-	}
-	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+	default:
+	    /* this must be an unknown attribute */
+	    XLOG_ASSERT(dynamic_cast<const UnknownAttribute*>(this) != 0);
+	    mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	    ((const UnknownAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	    ((const UnknownAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	    if (mybuflen != hisbuflen) 
+	    {
+		return false;
+	    }
+	    return memcmp(mybuf, hisbuf, mybuflen) == 0;
     }
     XLOG_UNREACHABLE();
 }
 
-uint8_t *
+    uint8_t *
 PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
     const
 {
@@ -2201,12 +2289,14 @@ PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
 
     data[0] = final_flags & ValidFlags;
     data[1] = type();
-    if (final_flags & Extended) {
+    if (final_flags & Extended) 
+    {
 	data[2] = (payload_size>>8) & 0xff;
 	data[3] = payload_size & 0xff;
 	wire_size = payload_size + 4;
 	return data + 4;
-    } else {
+    } else 
+    {
 	data[2] = payload_size & 0xff;
 	wire_size = payload_size + 3;
 	return data + 3;
@@ -2229,18 +2319,18 @@ PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
 
 #define PARANOID
 
-template<class A>
-PathAttributeList<A>::PathAttributeList() 
-    : _refcount(0), _managed_refcount(0)
+    template<class A>
+    PathAttributeList<A>::PathAttributeList() 
+: _refcount(0), _managed_refcount(0)
 {
     debug_msg("%p\n", this);
     _canonical_data = 0;
     _canonical_length = 0;
 }
 
-template<class A>
-PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
-    : _refcount(0), _managed_refcount(0)
+    template<class A>
+    PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
+: _refcount(0), _managed_refcount(0)
 {
     debug_msg("%p\n", this);
 
@@ -2249,17 +2339,17 @@ PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
     memcpy(_canonical_data, palist._canonical_data, _canonical_length);
 }
 
-template<class A>
-PathAttributeList<A>::PathAttributeList(FPAListRef& fpa_list)
-    : _refcount(0), _managed_refcount(0)
+    template<class A>
+    PathAttributeList<A>::PathAttributeList(FPAListRef& fpa_list)
+: _refcount(0), _managed_refcount(0)
 {
     fpa_list->canonicalize();
     _canonical_length = fpa_list->canonical_length();
     _canonical_data = new uint8_t[_canonical_length];
     memcpy(_canonical_data, fpa_list->canonical_data(), _canonical_length);
 }
-    
-template<class A>
+
+    template<class A>
 PathAttributeList<A>::~PathAttributeList()
 {
     //debug_msg("%p %s\n", this, str().c_str());
@@ -2342,49 +2432,56 @@ operator== (const PathAttributeList<A> &him) const
  **** 
  **************************************************************************/ 
 
-template<class A>
+    template<class A>
 PAListRef<A>::PAListRef(const PathAttributeList<A>* palist)
 {
     _palist = palist;
-    if (palist) {
+    if (palist) 
+    {
 	palist->incr_refcount(1);
     }
 }
 
-template<class A>
+    template<class A>
 PAListRef<A>::PAListRef(const PAListRef& palistref)
 {
     _palist = palistref.attributes();
-    if (_palist) {
+    if (_palist) 
+    {
 	_palist->incr_refcount(1);
     }
 }
 
-template<class A>
+    template<class A>
 PAListRef<A>::~PAListRef() 
 {
-    if (_palist) {
+    if (_palist) 
+    {
 	_palist->decr_refcount(1);
 	_palist = 0;
     }
 }
 
 template<class A>
-PAListRef<A>& 
+    PAListRef<A>& 
 PAListRef<A>::operator=(const PAListRef& palistref) 
 {
-    if (_palist) {
+    if (_palist) 
+    {
 	// we're not empty
-	if (_palist != palistref.attributes()) {
+	if (_palist != palistref.attributes()) 
+	{
 	    // it's not a no-op
 	    _palist->decr_refcount(1);
 	    _palist = palistref.attributes();
 	    _palist->incr_refcount(1);
 	}
-    } else {
+    } else 
+    {
 	// we were previously empty
 	_palist = palistref.attributes();
-	if (_palist) {
+	if (_palist) 
+	{
 	    _palist->incr_refcount(1);
 	}
     }
@@ -2395,11 +2492,13 @@ template<class A>
 bool 
 PAListRef<A>::operator==(const PAListRef& palistref) const
 {
-    if (_palist == palistref.attributes()) {
+    if (_palist == palistref.attributes()) 
+    {
 	// identical pointers
 	return true;
     }
-    if (_palist && palistref.attributes()) {
+    if (_palist && palistref.attributes()) 
+    {
 	// compare the content.
 	return *_palist == *(palistref.attributes());
     }
@@ -2413,13 +2512,15 @@ bool
 PAListRef<A>::operator<(const PAListRef& palistref) const 
 {
     debug_msg("PAListRef::operator< %p vs %p\n",
-	      _palist, palistref.attributes());
-    if (_palist == palistref.attributes()) {
+	    _palist, palistref.attributes());
+    if (_palist == palistref.attributes()) 
+    {
 	// identical pointers
 	debug_msg("identical ptrs -> false\n");
 	return false;
     }
-    if (_palist && palistref.attributes()) {
+    if (_palist && palistref.attributes()) 
+    {
 	// compare the content.
 	debug_msg("comparing content\n");
 	bool result = (*_palist) < (*(palistref.attributes()));
@@ -2429,24 +2530,28 @@ PAListRef<A>::operator<(const PAListRef& palistref) const
     // if we got here, one or the other pointer is null, but not both.
     // This is an odd case - the order is arbitrary
     debug_msg("one is null\n");
-    if (_palist) {
+    if (_palist) 
+    {
 	return true;
-    } else {
+    } else 
+    {
 	return false;
     }
 }
 
 template<class A>
-void 
+    void 
 PAListRef<A>::register_with_attmgr()
 {
     XLOG_ASSERT(_palist);
 
     PAListRef<A> found_palist = _att_mgr->add_attribute_list(*this);
-    if (_palist == found_palist.attributes()) {
+    if (_palist == found_palist.attributes()) 
+    {
 	// we already held a copy of the stored version
 	return;
-    } else {
+    } else 
+    {
 	// there's already a copy stored and it's not our one
 	_palist->decr_refcount(1);
 	_palist = found_palist.attributes();
@@ -2455,7 +2560,7 @@ PAListRef<A>::register_with_attmgr()
 }
 
 template<class A>
-void 
+    void 
 PAListRef<A>::deregister_with_attmgr()
 {
     XLOG_ASSERT(_palist);
@@ -2463,10 +2568,11 @@ PAListRef<A>::deregister_with_attmgr()
 }
 
 template<class A>
-void 
+    void 
 PAListRef<A>::release()
 {
-    if (_palist) {
+    if (_palist) 
+    {
 	_palist->decr_refcount(1);
 	_palist = 0;
     }
@@ -2478,34 +2584,36 @@ PAListRef<A>::release()
  **** 
  **************************************************************************/ 
 
-template<class A>
-FastPathAttributeList<A>::FastPathAttributeList()
-    :  	 _slave_pa_list(0),
-	 _attribute_count(0),
-	 _locked(false),
-	 _canonical_data(0),
-	 _canonical_length(0),
-	 _canonicalized(false)
+    template<class A>
+    FastPathAttributeList<A>::FastPathAttributeList()
+:  	 _slave_pa_list(0),
+    _attribute_count(0),
+    _locked(false),
+    _canonical_data(0),
+    _canonical_length(0),
+    _canonicalized(false)
 {
     _att.resize(MAX_ATTRIBUTE+1);
-    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) 
+    {
 	_att_bytes[i] = 0;
 	_att_lengths[i] = 0;
 	_att[i] = 0;
     }
 }
 
-template<class A>
-FastPathAttributeList<A>::FastPathAttributeList(PAListRef<A>& palistref)
-    :   _slave_pa_list(palistref), 
-	_attribute_count(0),
-	_locked(false),
-	_canonical_data(0),
-	_canonical_length(0),
-	_canonicalized(false)
+    template<class A>
+    FastPathAttributeList<A>::FastPathAttributeList(PAListRef<A>& palistref)
+:   _slave_pa_list(palistref), 
+    _attribute_count(0),
+    _locked(false),
+    _canonical_data(0),
+    _canonical_length(0),
+    _canonicalized(false)
 {
     _att.resize(MAX_ATTRIBUTE+1);
-    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) 
+    {
 	_att_bytes[i] = 0;
 	_att_lengths[i] = 0;
 	_att[i] = 0;
@@ -2514,19 +2622,21 @@ FastPathAttributeList<A>::FastPathAttributeList(PAListRef<A>& palistref)
     count_attributes();
 }
 
-template<class A>
-FastPathAttributeList<A>::FastPathAttributeList(FastPathAttributeList<A>& him)
-    :   _slave_pa_list(him._slave_pa_list), 
-	_locked(false),
-	_canonical_data(0),
-	_canonical_length(0),
-	_canonicalized(false)
+    template<class A>
+    FastPathAttributeList<A>::FastPathAttributeList(FastPathAttributeList<A>& him)
+:   _slave_pa_list(him._slave_pa_list), 
+    _locked(false),
+    _canonical_data(0),
+    _canonical_length(0),
+    _canonicalized(false)
 {
     _att.resize(MAX_ATTRIBUTE+1);
-    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) 
+    {
 	_att_bytes[i] = him._att_bytes[i];
 	_att_lengths[i] = him._att_lengths[i];
-	if (him._att[i]) {
+	if (him._att[i]) 
+	{
 	    _att[i] = him._att[i]->clone();
 	}
     }
@@ -2535,19 +2645,20 @@ FastPathAttributeList<A>::FastPathAttributeList(FastPathAttributeList<A>& him)
 
 template<class A>
 FastPathAttributeList<A>::
-  FastPathAttributeList(const NextHopAttribute<A> &nexthop_att,
-			const ASPathAttribute &aspath_att,
-			const OriginAttribute &origin_att)
-      : _slave_pa_list(),
-	_attribute_count(0),
-	_locked(false),
-	_canonical_data(0),
-	_canonical_length(0),
-	_canonicalized(false)
+FastPathAttributeList(const NextHopAttribute<A> &nexthop_att,
+	const ASPathAttribute &aspath_att,
+	const OriginAttribute &origin_att)
+: _slave_pa_list(),
+    _attribute_count(0),
+    _locked(false),
+    _canonical_data(0),
+    _canonical_length(0),
+    _canonicalized(false)
 {
     debug_msg("%p\n", this);
     _att.resize(MAX_ATTRIBUTE+1);
-    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) 
+    {
 	_att_bytes[i] = 0;
 	_att_lengths[i] = 0;
 	_att[i] = 0;
@@ -2558,13 +2669,14 @@ FastPathAttributeList<A>::
     add_path_attribute(aspath_att);
 }
 
-template<class A>
+    template<class A>
 FastPathAttributeList<A>::~FastPathAttributeList()
 {
     XLOG_ASSERT(!_locked);
     if (_canonical_data)
 	delete[] _canonical_data;
-    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) 
+    {
 	if (_att[i])
 	    delete _att[i];
     }
@@ -2584,7 +2696,7 @@ FastPathAttributeList<A>::operator==(const FastPathAttributeList<A>& him) const
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::quick_decode(const uint8_t* data, uint16_t length)
 {
     XLOG_ASSERT(!_locked);
@@ -2592,85 +2704,98 @@ FastPathAttributeList<A>::quick_decode(const uint8_t* data, uint16_t length)
     size_t remaining_length = length;
     size_t att_length;
     size_t tlv_att_length;
-    while (remaining_length > 0) {
+    while (remaining_length > 0) 
+    {
 	size_t hdr_len;
 	// compute length, which is 1 or 2 bytes depending on flags d[0]
-	if ( (data[0] & PathAttribute::Extended) && remaining_length < 4) {
-        xorp_throw(CorruptMessage,
-                   c_format("PathAttribute (extended) too short %u bytes",
-                            XORP_UINT_CAST(remaining_length)),
-                   UPDATEMSGERR, ATTRLEN, data, remaining_length);
+	if ( (data[0] & PathAttribute::Extended) && remaining_length < 4) 
+	{
+	    xorp_throw(CorruptMessage,
+		    c_format("PathAttribute (extended) too short %u bytes",
+			XORP_UINT_CAST(remaining_length)),
+		    UPDATEMSGERR, ATTRLEN, data, remaining_length);
 	}
 
-	if (data[0] & PathAttribute::Extended) {
+	if (data[0] & PathAttribute::Extended) 
+	{
 	    att_length = (data[2]<<8) + data[3];
 	    hdr_len = 4;
-	} else {
+	} else 
+	{
 	    att_length = data[2];
 	    hdr_len = 3;
-        }
+	}
 	tlv_att_length = att_length + hdr_len;
 
-	if (remaining_length < tlv_att_length) {
+	if (remaining_length < tlv_att_length) 
+	{
 	    xorp_throw(CorruptMessage,
-		       c_format("PathAttribute too short %u bytes need %u",
-				XORP_UINT_CAST(remaining_length), 
-				XORP_UINT_CAST(tlv_att_length)),
-		       UPDATEMSGERR, ATTRLEN, data, remaining_length);
+		    c_format("PathAttribute too short %u bytes need %u",
+			XORP_UINT_CAST(remaining_length), 
+			XORP_UINT_CAST(tlv_att_length)),
+		    UPDATEMSGERR, ATTRLEN, data, remaining_length);
 	}
 
 	uint8_t att_type = data[1];
-	if (att_type <= MAX_ATTRIBUTE) {
+	if (att_type <= MAX_ATTRIBUTE) 
+	{
 	    _att_bytes[att_type] = data;
 	    _att_lengths[att_type] = tlv_att_length;
 	}
 
-        data += tlv_att_length;
-        remaining_length -= tlv_att_length;
+	data += tlv_att_length;
+	remaining_length -= tlv_att_length;
     }
 }
 
 template<class A>
-NextHopAttribute<A>*
-FastPathAttributeList<A>::nexthop_att() {
+    NextHopAttribute<A>*
+FastPathAttributeList<A>::nexthop_att() 
+{
     return (NextHopAttribute<A>*)find_attribute_by_type(NEXT_HOP);
 }
 
 template<class A>
-A&
-FastPathAttributeList<A>::nexthop() {
+    A&
+FastPathAttributeList<A>::nexthop() 
+{
     NextHopAttribute<A>* nha = nexthop_att();
     return nha->nexthop();
 }
 
 template<class A>
-OriginAttribute*
-FastPathAttributeList<A>::origin_att() {
+    OriginAttribute*
+FastPathAttributeList<A>::origin_att() 
+{
     return (OriginAttribute*)find_attribute_by_type(ORIGIN);
 }
 
 template<class A>
-OriginType
-FastPathAttributeList<A>::origin() {
+    OriginType
+FastPathAttributeList<A>::origin() 
+{
     const OriginAttribute* oa = origin_att();
     return oa->origin();
 }
 
 template<class A>
-ASPathAttribute*
-FastPathAttributeList<A>::aspath_att() {
+    ASPathAttribute*
+FastPathAttributeList<A>::aspath_att() 
+{
     return (ASPathAttribute*)find_attribute_by_type(AS_PATH);
 }
 
 template<class A>
-AS4PathAttribute*
-FastPathAttributeList<A>::as4path_att() {
+    AS4PathAttribute*
+FastPathAttributeList<A>::as4path_att() 
+{
     return (AS4PathAttribute*)find_attribute_by_type(AS4_PATH);
 }
 
 template<class A>
-ASPath&
-FastPathAttributeList<A>::aspath() {
+    ASPath&
+FastPathAttributeList<A>::aspath() 
+{
     ASPathAttribute* aspa = aspath_att();
     return aspa->as_path();
 }
@@ -2678,13 +2803,13 @@ FastPathAttributeList<A>::aspath() {
 
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::load_raw_data(const uint8_t *data, 
-					size_t size, 
-					const BGPPeerData* peerdata,
-					bool have_nlri,
-					BGPMain *mainprocess,
-					bool do_checks)
+	size_t size, 
+	const BGPPeerData* peerdata,
+	bool have_nlri,
+	BGPMain *mainprocess,
+	bool do_checks)
 {
     debug_msg("FastPathAttributeList::load_raw_data\n");
     XLOG_ASSERT(!_locked);
@@ -2696,27 +2821,31 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 
     int pa_count = 0;
     size_t pa_len = size;
-    while (pa_len > 0) {
-        size_t used = 0;
-        PathAttribute *pa = PathAttribute::create(data, pa_len, used, peerdata, 
-						  A::ip_version());
-        debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
-        if (used == 0) {
+    while (pa_len > 0) 
+    {
+	size_t used = 0;
+	PathAttribute *pa = PathAttribute::create(data, pa_len, used, peerdata, 
+		A::ip_version());
+	debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
+	if (used == 0) 
+	{
 	    xorp_throw(CorruptMessage,"Attribute Size", UPDATEMSGERR, ATTRLEN);
-        }
+	}
 	debug_msg("Decoded Attribute: %s\n", pa->str().c_str());
-	
+
 	pa_count++;
 	uint32_t type = pa->type();
 	XLOG_ASSERT(type <= 255);
-	if (type > _att.size()) {
+	if (type > _att.size()) 
+	{
 	    // hopefully this shouldn't happen often, and only when
 	    // new Path Attributes are standardized
 	    _att.resize(type+1, 0);
 	}
-	
+
 	// check it's not a duplicate
-	if (_att[type] != 0) {
+	if (_att[type] != 0) 
+	{
 	    // we've got a duplicate!
 	    debug_msg("duplicate PA list entry, type: %d\n", (int)type);
 	    xorp_throw(CorruptMessage,"Duplicate PA list entry", UPDATEMSGERR, MALATTRLIST);
@@ -2727,71 +2856,79 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 
 	// Check it's not an unknown well-known attribute
 	if ((dynamic_cast<UnknownAttribute*>(_att[type]) != 0) &&
-	    _att[type]->well_known()) {
+		_att[type]->well_known()) 
+	{
 	    uint8_t buf[8192];
 	    size_t wire_size = 8192;
 	    pa->encode(buf, wire_size, peerdata);
 	    xorp_throw(CorruptMessage,"Unknown well-known attribute", 
-		       UPDATEMSGERR, UNRECOGWATTR,
-		       buf, wire_size);
+		    UPDATEMSGERR, UNRECOGWATTR,
+		    buf, wire_size);
 	}
 
-	if (type <= MAX_ATTRIBUTE) {
+	if (type <= MAX_ATTRIBUTE) 
+	{
 	    // we don't yet have a canonical form stored, so these
 	    // accessor shortcuts are not yet usable
 	    _att_bytes[type] = 0;
 	    _att_lengths[type] = 0;
 	}
 
-        data += used;
-        pa_len -= used;
+	data += used;
+	pa_len -= used;
     }
 
     /*
-    ** Check for multiprotocol parameters that haven't been "negotiated".
-    **
-    ** There are two questions that seem to ambiguous in the BGP specs.
-    **
-    ** 1) How do we deal with a multiprotocol attribute that hasn't
-    **    been "negotiated".
-    **    a) Strip out the offending attribute.
-    **    b) Send a notify and drop the peering.
-    ** 2) In order to accept a multiprotol attribute. I.E to consider
-    **    it to have been "negotiated", what is the criteria.
-    **    a) Is it sufficient for this speaker to have announced the
-    **    capability.
-    **    b) Do both speakers in a session need to announce a capability.
-    **
-    ** For the time being we are going with 1) (a) and 2 (a).
-    */
+     ** Check for multiprotocol parameters that haven't been "negotiated".
+     **
+     ** There are two questions that seem to ambiguous in the BGP specs.
+     **
+     ** 1) How do we deal with a multiprotocol attribute that hasn't
+     **    been "negotiated".
+     **    a) Strip out the offending attribute.
+     **    b) Send a notify and drop the peering.
+     ** 2) In order to accept a multiprotol attribute. I.E to consider
+     **    it to have been "negotiated", what is the criteria.
+     **    a) Is it sufficient for this speaker to have announced the
+     **    capability.
+     **    b) Do both speakers in a session need to announce a capability.
+     **
+     ** For the time being we are going with 1) (a) and 2 (a).
+     */
 
     //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
     BGPPeerData::Direction dir = BGPPeerData::SENT;  
     // Check the multiprotocol NLRI info.
-    if (_att[MP_REACH_NLRI]) {
+    if (_att[MP_REACH_NLRI]) 
+    {
 	// XXXX this duplicates the behaviour of older code, but I'm
 	// not convinced it's correct.  It assumes there's only one
 	// AFI/SAFI in the attribute.
 	MPReachNLRIAttribute<IPv4>* mp4_reach_att =
 	    dynamic_cast<MPReachNLRIAttribute<IPv4>*>(_att[MP_REACH_NLRI]);
-	if (mp4_reach_att) {
+	if (mp4_reach_att) 
+	{
 	    Safi safi = mp4_reach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) 
+	    {
 		delete _att[MP_REACH_NLRI];
 		_att[MP_REACH_NLRI] = 0;
-	    } else {
+	    } else 
+	    {
 		have_nlri = true;
 		// if there's an NLRI, there must be a non-zero nexthop
-		if (do_checks && mp4_reach_att->nexthop() == IPv4::ZERO()) {
+		if (do_checks && mp4_reach_att->nexthop() == IPv4::ZERO()) 
+		{
 		    uint8_t data = NEXT_HOP;
 		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
-			       MISSWATTR, &data, 1);
+			    MISSWATTR, &data, 1);
 		}
 		if (mainprocess && 
-		    mainprocess->interface_address4(mp4_reach_att->nexthop())) {
+			mainprocess->interface_address4(mp4_reach_att->nexthop())) 
+		{
 		    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
-			       cstring(*this));
+			    cstring(*this));
 		    xorp_throw(UnusableMessage, "Nexthop belongs to this router");
 		}
 	    }
@@ -2800,24 +2937,29 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 #ifdef HAVE_IPV6
 	MPReachNLRIAttribute<IPv6>* mp6_reach_att =
 	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(_att[MP_REACH_NLRI]);
-	if (mp6_reach_att) {
+	if (mp6_reach_att) 
+	{
 	    Safi safi = mp6_reach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) 
+	    {
 		delete _att[MP_REACH_NLRI];
 		_att[MP_REACH_NLRI] = 0;
-	    } else {
+	    } else 
+	    {
 		have_nlri = true;
-		if (do_checks && mp6_reach_att->nexthop() == IPv6::ZERO()) {
+		if (do_checks && mp6_reach_att->nexthop() == IPv6::ZERO()) 
+		{
 		    uint8_t data = NEXT_HOP;
 		    // if there's an NLRI, there must be a non-zero nexthop
 		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
-			       MISSWATTR, &data, 1);
+			    MISSWATTR, &data, 1);
 		}
 		if (do_checks && mainprocess &&
-		    mainprocess->interface_address6(mp6_reach_att->nexthop())) {
+			mainprocess->interface_address6(mp6_reach_att->nexthop())) 
+		{
 		    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
-			       cstring(*this));
+			    cstring(*this));
 		    xorp_throw(UnusableMessage, "Nexthop6 belongs to this router");
 		}
 	    }
@@ -2825,20 +2967,24 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 #endif
 	MPUNReachNLRIAttribute<IPv4>* mp4_unreach_att =
 	    dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(_att[MP_UNREACH_NLRI]);
-	if (mp4_unreach_att) {
+	if (mp4_unreach_att) 
+	{
 	    Safi safi = mp4_unreach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) 
+	    {
 		delete _att[MP_UNREACH_NLRI];
 		_att[MP_UNREACH_NLRI] = 0;
 	    }
 	}
 	MPUNReachNLRIAttribute<IPv6>* mp6_unreach_att =
 	    dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(_att[MP_UNREACH_NLRI]);
-	if (mp6_unreach_att) {
+	if (mp6_unreach_att) 
+	{
 	    Safi safi = mp6_unreach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) 
+	    {
 		delete _att[MP_UNREACH_NLRI];
 		_att[MP_UNREACH_NLRI] = 0;
 	    }
@@ -2850,34 +2996,38 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
     // which case we won't keep this instance) unless we have
     // Multiprotocol Attribute entries which serve the role of NLRI
     // entries.
-    if (pa_count == 0 && have_nlri) {
+    if (pa_count == 0 && have_nlri) 
+    {
 	debug_msg("Empty path attribute list and "
-		  "non-empty NLRI list\n");
+		"non-empty NLRI list\n");
 	xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, MALATTRLIST);
     }
 
 
     /*
-    ** If a NLRI attribute is present check for the following
-    ** mandatory fields:
-    ** ORIGIN
-    ** AS_PATH
-    ** NEXT_HOP
-    */ 
-    if (do_checks && have_nlri) {
-	if (_att[ORIGIN] == NULL) {
+     ** If a NLRI attribute is present check for the following
+     ** mandatory fields:
+     ** ORIGIN
+     ** AS_PATH
+     ** NEXT_HOP
+     */ 
+    if (do_checks && have_nlri) 
+    {
+	if (_att[ORIGIN] == NULL) 
+	{
 	    debug_msg("Missing ORIGIN\n");
 	    uint8_t data = ORIGIN;
 	    xorp_throw(CorruptMessage,"Missing Origin",
-		       UPDATEMSGERR, MISSWATTR, &data, 1);
+		    UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
 
 	// The AS Path attribute is mandatory
-	if (_att[AS_PATH] == NULL) {
+	if (_att[AS_PATH] == NULL) 
+	{
 	    debug_msg("Missing AS_PATH\n");
 	    uint8_t data = AS_PATH;
 	    xorp_throw(CorruptMessage,"Missing AS Path",
-		       UPDATEMSGERR, MISSWATTR, &data, 1);
+		    UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
 
 	// The NEXT_HOP attribute is mandatory for IPv4 unicast.  For
@@ -2887,49 +3037,53 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	    debug_msg("Missing NEXT_HOP\n");
 	    uint8_t data = NEXT_HOP;
 	    xorp_throw(CorruptMessage,"Missing Next Hop",
-		       UPDATEMSGERR, MISSWATTR, &data, 1);
+		    UPDATEMSGERR, MISSWATTR, &data, 1);
 	}
     }
 
     // If we got this far and as_path_attr is not set this is a
     // multiprotocol withdraw.
-    if (_att[AS_PATH] != NULL) {
-	if (!peerdata->ibgp()) {
+    if (_att[AS_PATH] != NULL) 
+    {
+	if (!peerdata->ibgp()) 
+	{
 	    // If this is an EBGP peering, the AS Path MUST NOT be empty
 	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().path_length() == 0)
 		xorp_throw(CorruptMessage,"Empty AS Path",
-			   UPDATEMSGERR, MALASPATH);
+			UPDATEMSGERR, MALASPATH);
 
 	    // If this is an EBGP peering, the AS Path MUST start
 	    // with the AS number of the peer.
 	    AsNum my_asnum(peerdata->as());
 	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().first_asnum() != my_asnum)
 		xorp_throw(CorruptMessage,"AS path must list peer",
-			   UPDATEMSGERR, MALASPATH);
+			UPDATEMSGERR, MALASPATH);
 
 	    // If this is an EBGP peering and a route reflector
 	    // attribute has been received then generate an error.
 	    if (_att[CLUSTER_LIST] || _att[ORIGINATOR_ID])
 		xorp_throw(CorruptMessage,"RR on EBGP peering",
-			   UPDATEMSGERR, MALATTRLIST);
+			UPDATEMSGERR, MALATTRLIST);
 	}
 	// Receiving confederation path segments when the router
 	// is not configured for confederations is an error. 
 	if (!peerdata->confederation() &&
-	    ((ASPathAttribute*)_att[AS_PATH])->as_path().contains_confed_segments())
+		((ASPathAttribute*)_att[AS_PATH])->as_path().contains_confed_segments())
 	    xorp_throw(CorruptMessage,"Unexpected confederation",
-		       UPDATEMSGERR, MALASPATH);
+		    UPDATEMSGERR, MALASPATH);
     }
 
     // If an update message is received that contains a nexthop
     // that belongs to this router then discard the update, don't
     // send a notification.
 
-    if (_att[NEXT_HOP] != NULL) {
+    if (_att[NEXT_HOP] != NULL) 
+    {
 	if (mainprocess && 
-	    mainprocess->interface_address4(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop())) {
+		mainprocess->interface_address4(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop())) 
+	{
 	    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
-		       cstring(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop()));
+		    cstring(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop()));
 	    xorp_throw(UnusableMessage, "Nexthop belongs to this router");
 	}
     }
@@ -2948,14 +3102,16 @@ FastPathAttributeList<A>::canonicalize() const {
     size_t size_so_far = 0;
     uint8_t buf[remaining_space];
     uint8_t *p = buf;
-    for (uint32_t i = 0; i < _att.size(); i++) {
+    for (uint32_t i = 0; i < _att.size(); i++) 
+    {
 
 	// reorder so nexthop is first, so we can find nexthops when
 	// IGP distance changes
 	uint32_t type = att_order(i);
 
 	// make sure we really have decoded this before canonicalizing it
-	if (_att_bytes[type] && !_att[type]) {
+	if (_att_bytes[type] && !_att[type]) 
+	{
 	    // we're got data for an attribute, but not decoded it yet
 	    // this must have come from a canonicalize PA list in the
 	    // first place, because if we received it from a peer,
@@ -2966,13 +3122,16 @@ FastPathAttributeList<A>::canonicalize() const {
 	    XLOG_ASSERT(remaining_space >= length);
 	    remaining_space -= length;
 	    size_so_far += length;
-	} else {
+	} else 
+	{
 
 	    // encode each attribute
-	    if (_att[type]) {
+	    if (_att[type]) 
+	    {
 		size_t length = remaining_space;
 		// encode the most general peer-independent version
-		if (!(_att[type]->encode(p, length, NULL))) {
+		if (!(_att[type]->encode(p, length, NULL))) 
+		{
 		    // we ran out of space to encode; this can't happen 
 		    XLOG_UNREACHABLE();
 		}
@@ -2983,13 +3142,16 @@ FastPathAttributeList<A>::canonicalize() const {
 	    }
 	}
     }
-    
+
     bool alloc_space = true;
-    if (_canonical_data) {
-	if (_canonical_length >= size_so_far) {
-	// we've got enough space already
+    if (_canonical_data) 
+    {
+	if (_canonical_length >= size_so_far) 
+	{
+	    // we've got enough space already
 	    alloc_space = false;
-	} else {
+	} else 
+	{
 	    delete[] _canonical_data;
 	}
     } 
@@ -3006,7 +3168,7 @@ FastPathAttributeList<A>::canonicalize() const {
 
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
     debug_msg("%p %s\n", this, att.str().c_str());
@@ -3016,7 +3178,7 @@ FastPathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::add_path_attribute(PathAttribute *a)
 {
     uint8_t type = a->type();
@@ -3025,24 +3187,27 @@ FastPathAttributeList<A>::add_path_attribute(PathAttribute *a)
     XLOG_ASSERT(!_locked);
 
 
-    if (_att[type]) {
+    if (_att[type]) 
+    {
 	XLOG_ERROR("ERROR:  Attribute type: %d already exists.  Currently, only a single"
-		   " attribute for each type is supported.  Deleting old one and adding"
-		   " this new one.", (int)(type));
+		" attribute for each type is supported.  Deleting old one and adding"
+		" this new one.", (int)(type));
 	delete _att[type];
 	_att[type] = a;
     }
-    else {
+    else 
+    {
 	_att[type] = a;
 	_attribute_count++;
     }
 }
 
 template<class A>
-PathAttribute*
+    PathAttribute*
 FastPathAttributeList<A>::find_attribute_by_type(PathAttType type)
 {
-    if (_att[type]) {
+    if (_att[type]) 
+    {
 	return _att[type];
     }
     if (_att_bytes[type] == 0)
@@ -3051,14 +3216,14 @@ FastPathAttributeList<A>::find_attribute_by_type(PathAttType type)
     // we're got data for an attribute, but not decoded it yet
     size_t used = _att_lengths[type];
     PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
-					      _att_lengths[type], used, NULL,
-					      A::ip_version());
+	    _att_lengths[type], used, NULL,
+	    A::ip_version());
     _att[type] = pa;
     return pa;
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 {
     debug_msg("%p\n", this);
@@ -3067,10 +3232,12 @@ FastPathAttributeList<A>::replace_attribute(PathAttribute* new_att)
     _canonicalized = false;
 
     XLOG_ASSERT(_att[new_att->type()] != 0 || _att_bytes[new_att->type()] != 0);
-    if (_att[new_att->type()]) {
+    if (_att[new_att->type()]) 
+    {
 	// remove the old decoded version
 	delete _att[new_att->type()];
-    } else {
+    } else 
+    {
 	// we hadn't yet decoded it; now we never will
 	_att_bytes[new_att->type()] = 0;
 	_att_lengths[new_att->type()] = 0;
@@ -3080,7 +3247,7 @@ FastPathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
 {
     debug_msg("%p\n", this);
@@ -3089,7 +3256,7 @@ FastPathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 {
     debug_msg("%p\n", this);
@@ -3098,7 +3265,7 @@ FastPathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::replace_origin(const OriginType& new_origin)
 {
     debug_msg("%p\n", this);
@@ -3107,19 +3274,21 @@ FastPathAttributeList<A>::replace_origin(const OriginType& new_origin)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 {
     debug_msg("%p\n", this);
     XLOG_ASSERT(!_locked);
     _canonicalized = false;
     bool old_existed = false;
-    if (_att[type]) {
+    if (_att[type]) 
+    {
 	delete _att[type];
 	_att[type] = 0;
 	old_existed = true;
     }
-    if (_att_bytes[type]) {
+    if (_att_bytes[type]) 
+    {
 	_att_bytes[type] = 0;
 	_att_lengths[type] = 0;
 	old_existed = true;
@@ -3129,7 +3298,7 @@ FastPathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 }
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
 {
     debug_msg("%p\n", this);
@@ -3139,7 +3308,7 @@ FastPathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
 }
 
 template<class A>
-MEDAttribute* 
+    MEDAttribute* 
 FastPathAttributeList<A>::med_att()
 {
     debug_msg("%p\n", this);
@@ -3148,7 +3317,7 @@ FastPathAttributeList<A>::med_att()
 }
 
 template<class A>
-LocalPrefAttribute*
+    LocalPrefAttribute*
 FastPathAttributeList<A>::local_pref_att()
 {
     debug_msg("%p\n", this);
@@ -3157,7 +3326,7 @@ FastPathAttributeList<A>::local_pref_att()
 }
 
 template<class A>
-AtomicAggAttribute*
+    AtomicAggAttribute*
 FastPathAttributeList<A>::atomic_aggregate_att()
 {
     debug_msg("%p\n", this);
@@ -3166,7 +3335,7 @@ FastPathAttributeList<A>::atomic_aggregate_att()
 }
 
 template<class A>
-AggregatorAttribute*
+    AggregatorAttribute*
 FastPathAttributeList<A>::aggregator_att()
 {
     debug_msg("%p\n", this);
@@ -3175,7 +3344,7 @@ FastPathAttributeList<A>::aggregator_att()
 }
 
 template<class A>
-CommunityAttribute*
+    CommunityAttribute*
 FastPathAttributeList<A>::community_att()
 {
     debug_msg("%p\n", this);
@@ -3184,7 +3353,7 @@ FastPathAttributeList<A>::community_att()
 }
 
 template<class A>
-OriginatorIDAttribute*
+    OriginatorIDAttribute*
 FastPathAttributeList<A>::originator_id()
 {
     debug_msg("%p\n", this);
@@ -3193,7 +3362,7 @@ FastPathAttributeList<A>::originator_id()
 }
 
 template<class A>
-ClusterListAttribute*
+    ClusterListAttribute*
 FastPathAttributeList<A>::cluster_list()
 {
     debug_msg("%p\n", this);
@@ -3203,16 +3372,20 @@ FastPathAttributeList<A>::cluster_list()
 
 
 template<class A>
-void
+    void
 FastPathAttributeList<A>::process_unknown_attributes()
 {
     debug_msg("%p\n", this);
     debug_msg("process_unknown_attributes\n");
-    for (uint32_t i = 0; i < _att.size(); i++) {
-	if (_att[i] && dynamic_cast<UnknownAttribute *>(_att[i])) {
-	    if (_att[i]->transitive()) {
+    for (uint32_t i = 0; i < _att.size(); i++) 
+    {
+	if (_att[i] && dynamic_cast<UnknownAttribute *>(_att[i])) 
+	{
+	    if (_att[i]->transitive()) 
+	    {
 		_att[i]->set_partial();
-	    } else {
+	    } else 
+	    {
 		delete _att[i];
 		_att[i] = 0;
 	    }
@@ -3226,54 +3399,65 @@ FastPathAttributeList<A>::process_unknown_attributes()
 template<class A>
 bool
 FastPathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
-				 const BGPPeerData* peerdata) const
+	const BGPPeerData* peerdata) const
 {
     size_t len_so_far = 0;
     size_t attr_len;
 
     // fill path attribute list
-    for (uint32_t i = 0; i < _att.size(); i++) {
+    for (uint32_t i = 0; i < _att.size(); i++) 
+    {
 	uint32_t type = i;
 	attr_len = wire_size - len_so_far;
-	if (_att[type]) {
-	    if (_att[type]->encode(buf + len_so_far, attr_len, peerdata) ) {
+	if (_att[type]) 
+	{
+	    if (_att[type]->encode(buf + len_so_far, attr_len, peerdata) ) 
+	    {
 		len_so_far += attr_len;
 		XLOG_ASSERT(len_so_far <= wire_size);
-	    } else {
+	    } else 
+	    {
 		// not enough space to encode the PA list.
 		return false;
 	    }
-	} else if (_att_bytes[type]) {
+	} else if (_att_bytes[type]) 
+	{
 	    // We've got an attribute that hasn't yet been decoded,
 	    // which means it can't have changed.  Often we can
 	    // shortcut the encoding process and just use the
 	    // previously encoded version.
 
 	    if (encode_and_decode_attribute(_att_bytes[type], _att_lengths[type],
-					    buf + len_so_far, attr_len, 
-					    peerdata)) {
+			buf + len_so_far, attr_len, 
+			peerdata)) 
+	    {
 		len_so_far += attr_len;
 		XLOG_ASSERT(len_so_far <= wire_size);
-	    } else {
+	    } else 
+	    {
 		// not enough space to encode the PA list.
 		return false;
 	    }
 	}
     }
-    if (peerdata->we_use_4byte_asnums() && !peerdata->use_4byte_asnums()) {
+    if (peerdata->we_use_4byte_asnums() && !peerdata->use_4byte_asnums()) 
+    {
 
 	// we're using 4byte AS nums, but our peer isn't so we need to
 	// add an AS4Path attribute
 	XLOG_ASSERT(_att[AS_PATH]);  // surely we've decoded this by now?
-	if (!((ASPathAttribute*)_att[AS_PATH])->as_path().two_byte_compatible()) {
+	if (!((ASPathAttribute*)_att[AS_PATH])->as_path().two_byte_compatible()) 
+	{
 	    // only add the AS4Path if we can't code the ASPath without losing information
 
 	    attr_len = wire_size - len_so_far;
 	    AS4PathAttribute as4path_att(((ASPathAttribute*)_att[AS_PATH])->as4_path());
-	    if (as4path_att.encode(buf + len_so_far, attr_len, peerdata) ) {
+	    if (as4path_att.encode(buf + len_so_far, attr_len, peerdata) ) 
+	    {
 		len_so_far += attr_len;
 		XLOG_ASSERT(len_so_far <= wire_size);
-	    } else {
+	    } else 
+	    {
 		// not enough space to encode the PA list.
 		return false;
 	    }
@@ -3283,58 +3467,62 @@ FastPathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
 	// we're aggregating
     }
     wire_size = len_so_far;
-    
+
     return true;
 }
 
 template<class A>
 bool
 FastPathAttributeList<A>::encode_and_decode_attribute(const uint8_t* att_data,
-						      const size_t& att_len, 
-						      uint8_t *buf,
-						      size_t& wire_size ,
-						      const BGPPeerData* peerdata) const
+	const size_t& att_len, 
+	uint8_t *buf,
+	size_t& wire_size ,
+	const BGPPeerData* peerdata) const
 {
     PathAttribute *pa;
     bool use_4byte_asnums = peerdata->use_4byte_asnums();
     switch (att_data[1]) {	// depending on type, do the right thing.
 
-    case AS_PATH: 
-    case AGGREGATOR:
-	// AS Path and Aggregator can be encoded differently for each
-	// peer, so we need to decode and re-encode if we are not
-	// using 4-byte AS nums.
-	if (use_4byte_asnums) {
+	case AS_PATH: 
+	case AGGREGATOR:
+	    // AS Path and Aggregator can be encoded differently for each
+	    // peer, so we need to decode and re-encode if we are not
+	    // using 4-byte AS nums.
+	    if (use_4byte_asnums) 
+	    {
+		if (wire_size < att_len) 
+		    return false;
+		memcpy(buf, att_data, att_len);
+		wire_size = att_len;
+		return true;
+	    } else 
+	    {
+		if (att_data[1] == AS_PATH) 
+		{
+		    ASPathAttribute as_path_att(att_data, use_4byte_asnums);
+		    return as_path_att.encode(buf, wire_size, peerdata);
+		} else 
+		{
+		    AggregatorAttribute agg_att(att_data, use_4byte_asnums);
+		    return agg_att.encode(buf, wire_size, peerdata);
+		}
+	    }
+
+	case AS4_PATH:
+	case AS4_AGGREGATOR:
+	case MP_REACH_NLRI:
+	case MP_UNREACH_NLRI:
+	    // these can't exist in the canonical version, because we use
+	    // 4-byte AS nums internally and speak MP
+	    XLOG_UNREACHABLE();
+
+	default:
+	    // all the remainder encode identically for all peers
 	    if (wire_size < att_len) 
 		return false;
 	    memcpy(buf, att_data, att_len);
 	    wire_size = att_len;
 	    return true;
-	} else {
-	    if (att_data[1] == AS_PATH) {
-		ASPathAttribute as_path_att(att_data, use_4byte_asnums);
-		return as_path_att.encode(buf, wire_size, peerdata);
-	    } else {
-		AggregatorAttribute agg_att(att_data, use_4byte_asnums);
-		return agg_att.encode(buf, wire_size, peerdata);
-	    }
-	}
-     
-    case AS4_PATH:
-    case AS4_AGGREGATOR:
-    case MP_REACH_NLRI:
-    case MP_UNREACH_NLRI:
-	// these can't exist in the canonical version, because we use
-	// 4-byte AS nums internally and speak MP
-	XLOG_UNREACHABLE();
-     
-    default:
-	// all the remainder encode identically for all peers
-	if (wire_size < att_len) 
-	    return false;
-	memcpy(buf, att_data, att_len);
-	wire_size = att_len;
-	return true;
     }
     return pa;
 }
@@ -3345,21 +3533,26 @@ FastPathAttributeList<A>::str() const
 {
     // Don't change this formatting or the isolation tests will fail.
     string s;
-    for (uint32_t i = 0; i < _att.size(); i++) {
+    for (uint32_t i = 0; i < _att.size(); i++) 
+    {
 	uint32_t type = att_order(i);
-	if (_att[type]) {
+	if (_att[type]) 
+	{
 	    s += "\n\t" + _att[type]->str();
-	} else if(_att_lengths[type]>0) {
-	    try {
+	} else if(_att_lengths[type]>0) 
+	{
+	    try 
+	    {
 		// we've got data for an attribute, but not decoded it yet
 		size_t used = _att_lengths[type];
 		PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
-							  _att_lengths[type], 
-							  used, NULL, A::ip_version());
+			_att_lengths[type], 
+			used, NULL, A::ip_version());
 		_att[type] = pa;
 		s += "\n\t" + _att[type]->str();
 	    }
-	    catch (const XorpException& e) {
+	    catch (const XorpException& e) 
+	    {
 		s += "\n\tException: " + e.str();
 	    }
 	}

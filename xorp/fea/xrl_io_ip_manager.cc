@@ -35,107 +35,110 @@
 #include "xrl_io_ip_manager.hh"
 
 XrlIoIpManager::XrlIoIpManager(IoIpManager&	io_ip_manager,
-			       XrlRouter&	xrl_router)
-    : IoIpManagerReceiver(),
-      _io_ip_manager(io_ip_manager),
-      _xrl_router(xrl_router)
+		XrlRouter&	xrl_router)
+: IoIpManagerReceiver(),
+	_io_ip_manager(io_ip_manager),
+	_xrl_router(xrl_router)
 {
-    _io_ip_manager.set_io_ip_manager_receiver(this);
+	_io_ip_manager.set_io_ip_manager_receiver(this);
 }
 
 XrlIoIpManager::~XrlIoIpManager()
 {
-    _io_ip_manager.set_io_ip_manager_receiver(NULL);
+	_io_ip_manager.set_io_ip_manager_receiver(NULL);
 }
 
-void
+	void
 XrlIoIpManager::recv_event(const string& receiver_name,
-			   const struct IPvXHeaderInfo& header,
-			   const vector<uint8_t>& payload)
+		const struct IPvXHeaderInfo& header,
+		const vector<uint8_t>& payload)
 {
-    size_t i;
-
-    //
-    // Create the extention headers info
-    //
-    XLOG_ASSERT(header.ext_headers_type.size()
-		== header.ext_headers_payload.size());
-    XrlAtomList ext_headers_type_list, ext_headers_payload_list;
-    for (i = 0; i < header.ext_headers_type.size(); i++) {
-	ext_headers_type_list.append(XrlAtom(static_cast<uint32_t>(header.ext_headers_type[i])));
-	ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
-    }
-
-    if (header.src_address.is_ipv4()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlRawPacket4ClientV0p1Client cl(&xrl_router());
+	size_t i;
 
 	//
-	// Send notification
+	// Create the extention headers info
 	//
-	cl.send_recv(receiver_name.c_str(),
-		     header.if_name,
-		     header.vif_name,
-		     header.src_address.get_ipv4(),
-		     header.dst_address.get_ipv4(),
-		     header.ip_protocol,
-		     header.ip_ttl,
-		     header.ip_tos,
-		     header.ip_router_alert,
-		     header.ip_internet_control,
-		     payload,
-		     callback(this,
-			      &XrlIoIpManager::xrl_send_recv_cb,
-			      header.src_address.af(), receiver_name));
-    }
+	XLOG_ASSERT(header.ext_headers_type.size()
+			== header.ext_headers_payload.size());
+	XrlAtomList ext_headers_type_list, ext_headers_payload_list;
+	for (i = 0; i < header.ext_headers_type.size(); i++) 
+	{
+		ext_headers_type_list.append(XrlAtom(static_cast<uint32_t>(header.ext_headers_type[i])));
+		ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
+	}
+
+	if (header.src_address.is_ipv4()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlRawPacket4ClientV0p1Client cl(&xrl_router());
+
+		//
+		// Send notification
+		//
+		cl.send_recv(receiver_name.c_str(),
+				header.if_name,
+				header.vif_name,
+				header.src_address.get_ipv4(),
+				header.dst_address.get_ipv4(),
+				header.ip_protocol,
+				header.ip_ttl,
+				header.ip_tos,
+				header.ip_router_alert,
+				header.ip_internet_control,
+				payload,
+				callback(this,
+					&XrlIoIpManager::xrl_send_recv_cb,
+					header.src_address.af(), receiver_name));
+	}
 
 #ifdef HAVE_IPV6
-    if (header.src_address.is_ipv6()) {
-	//
-	// Instantiate client sending interface
-	//
-	XrlRawPacket6ClientV0p1Client cl(&xrl_router());
+	if (header.src_address.is_ipv6()) 
+	{
+		//
+		// Instantiate client sending interface
+		//
+		XrlRawPacket6ClientV0p1Client cl(&xrl_router());
 
-	//
-	// Send notification
-	//
-	cl.send_recv(receiver_name.c_str(),
-		     header.if_name,
-		     header.vif_name,
-		     header.src_address.get_ipv6(),
-		     header.dst_address.get_ipv6(),
-		     header.ip_protocol,
-		     header.ip_ttl,
-		     header.ip_tos,
-		     header.ip_router_alert,
-		     header.ip_internet_control,
-		     ext_headers_type_list,
-		     ext_headers_payload_list,
-		     payload,
-		     callback(this,
-			      &XrlIoIpManager::xrl_send_recv_cb,
-			      header.src_address.af(), receiver_name));
-    }
+		//
+		// Send notification
+		//
+		cl.send_recv(receiver_name.c_str(),
+				header.if_name,
+				header.vif_name,
+				header.src_address.get_ipv6(),
+				header.dst_address.get_ipv6(),
+				header.ip_protocol,
+				header.ip_ttl,
+				header.ip_tos,
+				header.ip_router_alert,
+				header.ip_internet_control,
+				ext_headers_type_list,
+				ext_headers_payload_list,
+				payload,
+				callback(this,
+					&XrlIoIpManager::xrl_send_recv_cb,
+					header.src_address.af(), receiver_name));
+	}
 #endif
 }
 
-void
+	void
 XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error, int family,
-				 string receiver_name)
+		string receiver_name)
 {
-    UNUSED(family);
+	UNUSED(family);
 
-    if (xrl_error == XrlError::OKAY())
-	return;
+	if (xrl_error == XrlError::OKAY())
+		return;
 
-    debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
+	debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
 
-    //
-    // Sending Xrl generated an error.
-    //
-    // Remove all filters associated with this receiver.
-    //
-    _io_ip_manager.instance_death(receiver_name);
+	//
+	// Sending Xrl generated an error.
+	//
+	// Remove all filters associated with this receiver.
+	//
+	_io_ip_manager.instance_death(receiver_name);
 }

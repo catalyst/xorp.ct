@@ -43,17 +43,19 @@ IfMgrIfTree::find_interface(const string& ifname) const
 
 /*  Print this thing out for debugging purposes. */
 string
-IfMgrIfTree::toString() const {
+IfMgrIfTree::toString() const 
+{
     ostringstream oss;
     IfMgrIfTree::IfMap::const_iterator ii = interfaces().begin();
-    while (ii != interfaces().end()) {
+    while (ii != interfaces().end()) 
+    {
 	oss << ii->second.toString() << endl;
 	ii++;
     }
     return oss.str();
 }
 
-IfMgrIfAtom*
+    IfMgrIfAtom*
 IfMgrIfTree::find_interface(const string& ifname)
 {
     IfMgrIfTree::IfMap::iterator ii = interfaces().find(ifname);
@@ -73,7 +75,7 @@ IfMgrIfTree::find_vif(const string& ifname, const string& vifname) const
     return (ifa->find_vif(vifname));
 }
 
-IfMgrVifAtom*
+    IfMgrVifAtom*
 IfMgrIfTree::find_vif(const string& ifname, const string& vifname)
 {
     IfMgrIfAtom* ifa = find_interface(ifname);
@@ -85,8 +87,8 @@ IfMgrIfTree::find_vif(const string& ifname, const string& vifname)
 
 const IfMgrIPv4Atom*
 IfMgrIfTree::find_addr(const string& ifname,
-		       const string& vifname,
-		       const IPv4&   addr) const
+	const string& vifname,
+	const IPv4&   addr) const
 {
     const IfMgrVifAtom* vifa = find_vif(ifname, vifname);
     if (vifa == NULL)
@@ -95,10 +97,10 @@ IfMgrIfTree::find_addr(const string& ifname,
     return (vifa->find_addr(addr));
 }
 
-IfMgrIPv4Atom*
+    IfMgrIPv4Atom*
 IfMgrIfTree::find_addr(const string& ifname,
-		       const string& vifname,
-		       const IPv4&   addr)
+	const string& vifname,
+	const IPv4&   addr)
 {
     IfMgrVifAtom* vifa = find_vif(ifname, vifname);
     if (vifa == NULL)
@@ -109,8 +111,8 @@ IfMgrIfTree::find_addr(const string& ifname,
 
 const IfMgrIPv6Atom*
 IfMgrIfTree::find_addr(const string& ifname,
-		       const string& vifname,
-		       const IPv6&   addr) const
+	const string& vifname,
+	const IPv6&   addr) const
 {
     const IfMgrVifAtom* vifa = find_vif(ifname, vifname);
     if (vifa == NULL)
@@ -119,10 +121,10 @@ IfMgrIfTree::find_addr(const string& ifname,
     return (vifa->find_addr(addr));
 }
 
-IfMgrIPv6Atom*
+    IfMgrIPv6Atom*
 IfMgrIfTree::find_addr(const string& ifname,
-		       const string& vifname,
-		       const IPv6&   addr)
+	const string& vifname,
+	const IPv6&   addr)
 {
     IfMgrVifAtom* vifa = find_vif(ifname, vifname);
     if (vifa == NULL)
@@ -139,11 +141,12 @@ IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 
 bool
 IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
-			string& vifname) const
+	string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) 
+    {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -152,8 +155,9 @@ IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
 	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
+		vif_iter != iface.vifs().end();
+		++vif_iter) 
+	{
 	    const IfMgrVifAtom& vif = vif_iter->second;
 
 	    // Test if vif is enabled
@@ -164,15 +168,17 @@ IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
 	    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 	    for (a4_iter = vif.ipv4addrs().begin();
-		 a4_iter != vif.ipv4addrs().end();
-		 ++a4_iter) {
+		    a4_iter != vif.ipv4addrs().end();
+		    ++a4_iter) 
+	    {
 		const IfMgrIPv4Atom& a4 = a4_iter->second;
 
 		if (! a4.enabled())
 		    continue;
 
 		// Test if my own address
-		if (a4.addr() == addr) {
+		if (a4.addr() == addr) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
@@ -189,11 +195,12 @@ IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
 
 bool
 IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
-			string& vifname) const
+	string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) 
+    {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -202,8 +209,9 @@ IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
 	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
+		vif_iter != iface.vifs().end();
+		++vif_iter) 
+	{
 	    const IfMgrVifAtom& vif = vif_iter->second;
 
 	    // Test if vif is enabled
@@ -214,15 +222,17 @@ IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
 	    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 	    for (a6_iter = vif.ipv6addrs().begin();
-		 a6_iter != vif.ipv6addrs().end();
-		 ++a6_iter) {
+		    a6_iter != vif.ipv6addrs().end();
+		    ++a6_iter) 
+	    {
 		const IfMgrIPv6Atom& a6 = a6_iter->second;
 
 		if (! a6.enabled())
 		    continue;
 
 		// Test if my own address
-		if (a6.addr() == addr) {
+		if (a6.addr() == addr) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
@@ -239,14 +249,16 @@ IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
 
 bool
 IfMgrIfTree::is_my_addr(const IPvX& addr, string& ifname,
-			string& vifname) const
+	string& vifname) const
 {
-    if (addr.is_ipv4()) {
+    if (addr.is_ipv4()) 
+    {
 	IPv4 addr4 = addr.get_ipv4();
 	return (is_my_addr(addr4, ifname, vifname));
     }
 
-    if (addr.is_ipv6()) {
+    if (addr.is_ipv6()) 
+    {
 	IPv6 addr6 = addr.get_ipv6();
 	return (is_my_addr(addr6, ifname, vifname));
     }
@@ -256,11 +268,12 @@ IfMgrIfTree::is_my_addr(const IPvX& addr, string& ifname,
 
 bool
 IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
-				   string& vifname) const
+	string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) 
+    {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -269,8 +282,9 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
 	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
+		vif_iter != iface.vifs().end();
+		++vif_iter) 
+	{
 	    const IfMgrVifAtom& vif = vif_iter->second;
 
 	    // Test if vif is enabled
@@ -281,23 +295,27 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 	    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 	    for (a4_iter = vif.ipv4addrs().begin();
-		 a4_iter != vif.ipv4addrs().end();
-		 ++a4_iter) {
+		    a4_iter != vif.ipv4addrs().end();
+		    ++a4_iter) 
+	    {
 		const IfMgrIPv4Atom& a4 = a4_iter->second;
 
 		if (! a4.enabled())
 		    continue;
 
 		// Test if my own address
-		if (a4.addr() == addr) {
+		if (a4.addr() == addr) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
 		}
 
 		// Test if p2p address
-		if (a4.has_endpoint()) {
-		    if (a4.endpoint_addr() == addr) {
+		if (a4.has_endpoint()) 
+		{
+		    if (a4.endpoint_addr() == addr) 
+		    {
 			ifname = iface.name();
 			vifname = vif.name();
 			return (true);
@@ -306,7 +324,8 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 
 		// Test if same subnet
 		if (IPv4Net(addr, a4.prefix_len())
-		    == IPv4Net(a4.addr(), a4.prefix_len())) {
+			== IPv4Net(a4.addr(), a4.prefix_len())) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
@@ -323,11 +342,12 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 
 bool
 IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
-				   string& vifname) const
+	string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) 
+    {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -336,8 +356,9 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
 	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
+		vif_iter != iface.vifs().end();
+		++vif_iter) 
+	{
 	    const IfMgrVifAtom& vif = vif_iter->second;
 
 	    // Test if vif is enabled
@@ -348,23 +369,27 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 	    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 	    for (a6_iter = vif.ipv6addrs().begin();
-		 a6_iter != vif.ipv6addrs().end();
-		 ++a6_iter) {
+		    a6_iter != vif.ipv6addrs().end();
+		    ++a6_iter) 
+	    {
 		const IfMgrIPv6Atom& a6 = a6_iter->second;
 
 		if (! a6.enabled())
 		    continue;
 
 		// Test if my own address
-		if (a6.addr() == addr) {
+		if (a6.addr() == addr) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
 		}
 
 		// Test if p2p address
-		if (a6.has_endpoint()) {
-		    if (a6.endpoint_addr() == addr) {
+		if (a6.has_endpoint()) 
+		{
+		    if (a6.endpoint_addr() == addr) 
+		    {
 			ifname = iface.name();
 			vifname = vif.name();
 			return (true);
@@ -373,7 +398,8 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 
 		// Test if same subnet
 		if (IPv6Net(addr, a6.prefix_len())
-		    == IPv6Net(a6.addr(), a6.prefix_len())) {
+			== IPv6Net(a6.addr(), a6.prefix_len())) 
+		{
 		    ifname = iface.name();
 		    vifname = vif.name();
 		    return (true);
@@ -390,14 +416,16 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 
 bool
 IfMgrIfTree::is_directly_connected(const IPvX& addr, string& ifname,
-				   string& vifname) const
+	string& vifname) const
 {
-    if (addr.is_ipv4()) {
+    if (addr.is_ipv4()) 
+    {
 	IPv4 addr4 = addr.get_ipv4();
 	return (is_directly_connected(addr4, ifname, vifname));
     }
 
-    if (addr.is_ipv6()) {
+    if (addr.is_ipv6()) 
+    {
 	IPv6 addr6 = addr.get_ipv6();
 	return (is_directly_connected(addr6, ifname, vifname));
     }
@@ -427,18 +455,20 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
 	    iface_type()		== o.iface_type()		&&
 	    vid()			== o.vid()			&&
 	    vifs()			== o.vifs()
-	    );
+	   );
 }
 
 string
-IfMgrIfAtom::toString() const {
+IfMgrIfAtom::toString() const 
+{
     ostringstream oss;
     oss << " Name: " << _name << " enabled: " << _enabled << " discard: " << _discard
 	<< " unreachable: " << _unreachable << " management: " << _management
 	<< " mtu: " << _mtu << " mac: " << _mac.str() << " pif_index: " << _pif_index
 	<< " no_carrier: " << _no_carrier << " baudrate: " << _baudrate << endl;
     IfMgrIfAtom::VifMap::const_iterator vi = vifs().begin();
-    while (vi != vifs().end()) {
+    while (vi != vifs().end()) 
+    {
 	oss << "  Vif: " << vi->second.toString() << endl;
 	vi++;
     }
@@ -455,7 +485,7 @@ IfMgrIfAtom::find_vif(const string& vifname) const
     return (&vi->second);
 }
 
-IfMgrVifAtom*
+    IfMgrVifAtom*
 IfMgrIfAtom::find_vif(const string& vifname)
 {
     IfMgrIfAtom::VifMap::iterator vi = vifs().find(vifname);
@@ -484,11 +514,12 @@ IfMgrVifAtom::operator==(const IfMgrVifAtom& o) const
 	    vif_index()			== o.vif_index()		&&
 	    ipv4addrs()			== o.ipv4addrs()		&&
 	    ipv6addrs()			== o.ipv6addrs()
-	    );
+	   );
 }
 
 string
-IfMgrVifAtom::toString() const {
+IfMgrVifAtom::toString() const 
+{
     ostringstream oss;
     oss << " Name: " << _name << " enabled: " << _enabled << " mcast_capable: " << _multicast_capable
 	<< " bcast_capable: " << _broadcast_capable << " p2p-capable: " << _p2p_capable
@@ -497,12 +528,14 @@ IfMgrVifAtom::toString() const {
 	<< endl;
 
     IfMgrVifAtom::IPv4Map::const_iterator ai = ipv4addrs().begin();
-    while (ai != ipv4addrs().end()) {
+    while (ai != ipv4addrs().end()) 
+    {
 	oss << "     Addr4: " << ai->second.toString() << endl;
 	ai++;
     }
     IfMgrVifAtom::IPv6Map::const_iterator ai6 = ipv6addrs().begin();
-    while (ai6 != ipv6addrs().end()) {
+    while (ai6 != ipv6addrs().end()) 
+    {
 	oss << "     Addr6: " << ai6->second.toString() << endl;
 	ai6++;
     }
@@ -520,7 +553,7 @@ IfMgrVifAtom::find_addr(const IPv4& addr) const
     return (&ai->second);
 }
 
-IfMgrIPv4Atom*
+    IfMgrIPv4Atom*
 IfMgrVifAtom::find_addr(const IPv4& addr)
 {
     IfMgrVifAtom::IPv4Map::iterator ai = ipv4addrs().find(addr);
@@ -540,7 +573,7 @@ IfMgrVifAtom::find_addr(const IPv6& addr) const
     return (&ai->second);
 }
 
-IfMgrIPv6Atom*
+    IfMgrIPv6Atom*
 IfMgrVifAtom::find_addr(const IPv6& addr)
 {
     IfMgrVifAtom::IPv6Map::iterator ai = ipv6addrs().find(addr);
@@ -567,12 +600,13 @@ IfMgrIPv4Atom::operator==(const IfMgrIPv4Atom& o) const
 	    broadcast_addr()		== o.broadcast_addr()		&&
 	    has_endpoint()		== o.has_endpoint()		&&
 	    endpoint_addr()		== o.endpoint_addr()
-	    );
+	   );
 }
 
 // Debugging info
 string
-IfMgrIPv4Atom::toString() const {
+IfMgrIPv4Atom::toString() const 
+{
     ostringstream oss;
     oss << " Addr: " << _addr.str() << "/" << _prefix_len << " enabled: " << _enabled
 	<< " mcast-capable: " << _multicast_capable << " loopback: " << _loopback
@@ -597,13 +631,14 @@ IfMgrIPv6Atom::operator==(const IfMgrIPv6Atom& o) const
 	    loopback()			== o.loopback()			&&
 	    has_endpoint()		== o.has_endpoint()		&&
 	    endpoint_addr()		== o.endpoint_addr()
-	    );
+	   );
 }
 
 
 // Debugging info
 string
-IfMgrIPv6Atom::toString() const {
+IfMgrIPv6Atom::toString() const 
+{
     ostringstream oss;
     oss << " Addr: " << _addr.str() << "/" << _prefix_len << " enabled: " << _enabled
 	<< " mcast-capable: " << _multicast_capable << " loopback: " << _loopback

@@ -28,44 +28,44 @@
 #include "internal_message.hh"
 
 
-template<class A>
+	template<class A>
 InternalMessage<A>::InternalMessage(const SubnetRoute<A> *rte,
-				    const PeerHandler *origin,
-				    uint32_t genid)
+		const PeerHandler *origin,
+		uint32_t genid)
 {
-    XLOG_ASSERT(rte);
+	XLOG_ASSERT(rte);
 
-    _subnet_route = rte;
-    _origin_peer = origin;
-    _changed = false;
-    _copied = false;
-    _push = false;
-    _from_previous_peering = false;
-    _genid = genid;
-    PAListRef<A> pal = rte->attributes();
-    _attributes = new FastPathAttributeList<A>(pal);
+	_subnet_route = rte;
+	_origin_peer = origin;
+	_changed = false;
+	_copied = false;
+	_push = false;
+	_from_previous_peering = false;
+	_genid = genid;
+	PAListRef<A> pal = rte->attributes();
+	_attributes = new FastPathAttributeList<A>(pal);
 }
 
-template<class A>
+	template<class A>
 InternalMessage<A>::InternalMessage(const SubnetRoute<A> *rte,
-				    FPAListRef pa_list,
-				    const PeerHandler *origin,
-				    uint32_t genid)
+		FPAListRef pa_list,
+		const PeerHandler *origin,
+		uint32_t genid)
 {
-    XLOG_ASSERT(rte);
+	XLOG_ASSERT(rte);
 
-    _subnet_route = rte;
-    _origin_peer = origin;
-    _changed = false;
-    _copied = false;
-    _push = false;
-    _from_previous_peering = false;
-    _genid = genid;
-    _attributes = pa_list;
+	_subnet_route = rte;
+	_origin_peer = origin;
+	_changed = false;
+	_copied = false;
+	_push = false;
+	_from_previous_peering = false;
+	_genid = genid;
+	_attributes = pa_list;
 }
 
 
-template<class A>
+	template<class A>
 InternalMessage<A>::~InternalMessage()
 {
 }
@@ -74,23 +74,23 @@ template<class A>
 const IPNet<A>&
 InternalMessage<A>::net() const
 {
-    return _subnet_route->net();
+	return _subnet_route->net();
 }
 
 template<class A>
 string
 InternalMessage<A>::str() const
 {
-    string s;
-    s += c_format("GenID is %d\n", XORP_INT_CAST(_genid));
-    if (_changed)
-	s += "CHANGED flag is set\n";
-    if (_push)
-	s += "PUSH flag is set\n";
-    if (_from_previous_peering)
-	s += "FROM_PREVIOUS_PEERING flag is set\n";
-    s += _subnet_route->str();
-    return s;
+	string s;
+	s += c_format("GenID is %d\n", XORP_INT_CAST(_genid));
+	if (_changed)
+		s += "CHANGED flag is set\n";
+	if (_push)
+		s += "PUSH flag is set\n";
+	if (_from_previous_peering)
+		s += "FROM_PREVIOUS_PEERING flag is set\n";
+	s += _subnet_route->str();
+	return s;
 }
 
 template class InternalMessage<IPv4>;

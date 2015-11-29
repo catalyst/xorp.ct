@@ -49,18 +49,22 @@
  * @return true when they are equal
  */
 inline
-bool
+    bool
 compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
 {
-    if (pkt1.size() != pkt2.size()) {
+    if (pkt1.size() != pkt2.size()) 
+    {
 	DOUT(info) << "Packet lengths don't match " <<
 	    pkt1.size() << " " << pkt2.size() << endl;
 	return false;
     }
-    
-    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) {
-	for(size_t i = 0; i < pkt1.size(); i++) {
-	    if (pkt1[i] != pkt2[i]) {
+
+    if (0 != memcmp(&pkt1[0], &pkt2[0], pkt1.size())) 
+    {
+	for(size_t i = 0; i < pkt1.size(); i++) 
+	{
+	    if (pkt1[i] != pkt2[i]) 
+	    {
 		DOUT(info) << "mismatch at byte position " << i << endl;
 		DOUT(info) << "bytes " <<
 		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
@@ -79,26 +83,31 @@ compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
  * @return true when they are equal
  */
 inline
-bool
+    bool
 compare_packet_strings(TestInfo& info, string str1, string str2)
 {
-    if (str1 != str2) {
-	if (info.verbose()) {
+    if (str1 != str2) 
+    {
+	if (info.verbose()) 
+	{
 	    vector<string> token1;
 	    vector<string> token2;
 	    tokenize(str1, token1, "\n");
 	    tokenize(str2, token2, "\n");
 	    vector<string>::iterator i1 = token1.begin();
 	    vector<string>::iterator i2 = token2.begin();
-	    for(;;) {
-		if (token1.end() == i1 || token2.end() == i2) {
+	    for(;;) 
+	    {
+		if (token1.end() == i1 || token2.end() == i2) 
+		{
 		    DOUT(info) << "Ran out of tokens\n";
 		    break;
 		}
-		if (*i1 != *i2) {
+		if (*i1 != *i2) 
+		{
 		    DOUT(info) << *i1
-			       << " *** DOES NOT MATCH ***" 
-			       << *i2 << endl;
+			<< " *** DOES NOT MATCH ***" 
+			<< *i2 << endl;
 		    break;
 		}
 		i1++;
@@ -112,7 +121,7 @@ compare_packet_strings(TestInfo& info, string str1, string str2)
 }
 
 inline
-void
+    void
 populate_mid(MidMessage* mid)
 {
     mid->set_hop_count(0);
@@ -133,7 +142,7 @@ populate_mid(MidMessage* mid)
 /**
  * Create a packet containing a MID message, and print it.
  */
-bool
+    bool
 mid_packet_print(TestInfo& info)
 {
     MessageDecoder md;
@@ -155,7 +164,7 @@ mid_packet_print(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_hna(HnaMessage* hna)
 {
     hna->set_hop_count(0);
@@ -176,7 +185,7 @@ populate_hna(HnaMessage* hna)
 /**
  * Create a packet containing an HNA message, and print it.
  */
-bool
+    bool
 hna_packet_print(TestInfo& info)
 {
     MessageDecoder md;
@@ -196,7 +205,7 @@ hna_packet_print(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_tc(TcMessage* tc)
 {
     tc->set_hop_count(0);
@@ -218,7 +227,7 @@ populate_tc(TcMessage* tc)
 /**
  * Create a packet containing a TC message, and print it.
  */
-bool
+    bool
 tc_packet_print(TestInfo& info)
 {
     MessageDecoder md;
@@ -238,7 +247,7 @@ tc_packet_print(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_hello(HelloMessage* hello)
 {
     hello->set_hop_count(0);
@@ -264,7 +273,7 @@ populate_hello(HelloMessage* hello)
 /**
  * Create a packet containing a HELLO message, and print it.
  */
-bool
+    bool
 hello_packet_print(TestInfo& info)
 {
     MessageDecoder md;
@@ -283,23 +292,26 @@ hello_packet_print(TestInfo& info)
     return true;
 }
 
-uint8_t multi_v4_packet_data[] = {
+uint8_t multi_v4_packet_data[] = 
+{
 #include "regression/multi_msg_ok_ipv4.data"
 };
 
 /**
  * Decode a packet containing many messages, and print it.
  */
-bool
+    bool
 multi_packet_decode(TestInfo& info)
 {
     MessageDecoder md;
     initialize_message_decoder(md);
 
     Packet* pkt = new Packet(md);
-    try {
+    try 
+    {
 	pkt->decode(&multi_v4_packet_data[0], sizeof(multi_v4_packet_data));
-    } catch (InvalidPacket& e) {
+    } catch (InvalidPacket& e) 
+    {
 	DOUT(info) << cstring(e) << endl;
 	return false;
     }
@@ -307,50 +319,55 @@ multi_packet_decode(TestInfo& info)
     DOUT(info) << pkt->str() << endl;
 
     {
-    // Check that the 'first' and 'last' packet flags are set as
-    // S-OLSR needs to see them.
-    const vector<Message*>& msgs = pkt->messages();
+	// Check that the 'first' and 'last' packet flags are set as
+	// S-OLSR needs to see them.
+	const vector<Message*>& msgs = pkt->messages();
 
-    size_t index;
-    vector<Message*>::const_iterator ii;
-    for (index = 0, ii = msgs.begin(); ii != msgs.end(); ii++, index++) {
-	if (0 == index)
-	    XLOG_ASSERT((*ii)->is_first() == true);
-	if ((msgs.size() - 1) == index)
-	    XLOG_ASSERT((*ii)->is_last() == true);
-    }
+	size_t index;
+	vector<Message*>::const_iterator ii;
+	for (index = 0, ii = msgs.begin(); ii != msgs.end(); ii++, index++) 
+	{
+	    if (0 == index)
+		XLOG_ASSERT((*ii)->is_first() == true);
+	    if ((msgs.size() - 1) == index)
+		XLOG_ASSERT((*ii)->is_last() == true);
+	}
     }
 
     {
-    const vector<Message*>& msgs = pkt->messages();
+	const vector<Message*>& msgs = pkt->messages();
 
-    vector<Message*>::const_iterator ii;
-    for (ii = msgs.begin(); ii != msgs.end(); ii++) {
-	delete (*ii);
-    }
+	vector<Message*>::const_iterator ii;
+	for (ii = msgs.begin(); ii != msgs.end(); ii++) 
+	{
+	    delete (*ii);
+	}
     }
 
     delete pkt;
     return true;
 }
 
-uint8_t hna_v4_packet_data[] = {
+uint8_t hna_v4_packet_data[] = 
+{
 #include "regression/hna_ok_ipv4.data"
 };
 
 /**
  * Decode a packet containing an HNA message, and print it.
  */
-bool
+    bool
 hna_packet_decode(TestInfo& info)
 {
     MessageDecoder md;
     initialize_message_decoder(md);
 
     Packet* pkt = new Packet(md);
-    try {
+    try 
+    {
 	pkt->decode(&hna_v4_packet_data[0], sizeof(hna_v4_packet_data));
-    } catch (InvalidPacket& e) {
+    } catch (InvalidPacket& e) 
+    {
 	DOUT(info) << cstring(e) << endl;
 	return false;
     }
@@ -358,35 +375,39 @@ hna_packet_decode(TestInfo& info)
     DOUT(info) << pkt->str() << endl;
 
     {
-    const vector<Message*>& msgs = pkt->messages();
+	const vector<Message*>& msgs = pkt->messages();
 
-    vector<Message*>::const_iterator ii;
-    for (ii = msgs.begin(); ii != msgs.end(); ii++) {
-	delete (*ii);
-    }
+	vector<Message*>::const_iterator ii;
+	for (ii = msgs.begin(); ii != msgs.end(); ii++) 
+	{
+	    delete (*ii);
+	}
     }
 
     delete pkt;
     return true;
 }
 
-uint8_t mid_v4_packet_data[] = {
+uint8_t mid_v4_packet_data[] = 
+{
 #include "regression/mid_ok_ipv4.data"
 };
 
 /**
  * Decode a packet containing a MID message, and print it.
  */
-bool
+    bool
 mid_packet_decode(TestInfo& info)
 {
     MessageDecoder md;
     initialize_message_decoder(md);
 
     Packet* pkt = new Packet(md);
-    try {
+    try 
+    {
 	pkt->decode(&mid_v4_packet_data[0], sizeof(mid_v4_packet_data));
-    } catch (InvalidPacket& e) {
+    } catch (InvalidPacket& e) 
+    {
 	DOUT(info) << cstring(e) << endl;
 	return false;
     }
@@ -394,35 +415,39 @@ mid_packet_decode(TestInfo& info)
     DOUT(info) << pkt->str() << endl;
 
     {
-    const vector<Message*>& msgs = pkt->messages();
+	const vector<Message*>& msgs = pkt->messages();
 
-    vector<Message*>::const_iterator ii;
-    for (ii = msgs.begin(); ii != msgs.end(); ii++) {
-	delete (*ii);
-    }
+	vector<Message*>::const_iterator ii;
+	for (ii = msgs.begin(); ii != msgs.end(); ii++) 
+	{
+	    delete (*ii);
+	}
     }
 
     delete pkt;
     return true;
 }
 
-uint8_t tc_v4_packet_data[] = {
+uint8_t tc_v4_packet_data[] = 
+{
 #include "regression/tc_ok_ipv4.data"
 };
 
 /**
  * Decode a packet containing a TC message, and print it.
  */
-bool
+    bool
 tc_packet_decode(TestInfo& info)
 {
     MessageDecoder md;
     initialize_message_decoder(md);
 
     Packet* pkt = new Packet(md);
-    try {
+    try 
+    {
 	pkt->decode(&tc_v4_packet_data[0], sizeof(tc_v4_packet_data));
-    } catch (InvalidPacket& e) {
+    } catch (InvalidPacket& e) 
+    {
 	DOUT(info) << cstring(e) << endl;
 	return false;
     }
@@ -430,36 +455,40 @@ tc_packet_decode(TestInfo& info)
     DOUT(info) << pkt->str() << endl;
 
     {
-    const vector<Message*>& msgs = pkt->messages();
+	const vector<Message*>& msgs = pkt->messages();
 
-    vector<Message*>::const_iterator ii;
-    for (ii = msgs.begin(); ii != msgs.end(); ii++) {
-	delete (*ii);
-    }
+	vector<Message*>::const_iterator ii;
+	for (ii = msgs.begin(); ii != msgs.end(); ii++) 
+	{
+	    delete (*ii);
+	}
     }
 
     delete pkt;
     return true;
 }
 
-uint8_t hello_multi_v4_packet_data[] = {
+uint8_t hello_multi_v4_packet_data[] = 
+{
 #include "regression/hello_multi_ok_ipv4.data"
 };
 
 /**
  * Decode a packet containing a HELLO message, and print it.
  */
-bool
+    bool
 hello_multi_link_packet_decode(TestInfo& info)
 {
     MessageDecoder md;
     initialize_message_decoder(md);
 
     Packet* pkt = new Packet(md);
-    try {
+    try 
+    {
 	pkt->decode(&hello_multi_v4_packet_data[0],
-	    sizeof(hello_multi_v4_packet_data));
-    } catch (InvalidPacket& e) {
+		sizeof(hello_multi_v4_packet_data));
+    } catch (InvalidPacket& e) 
+    {
 	DOUT(info) << cstring(e) << endl;
 	return false;
     }
@@ -467,12 +496,13 @@ hello_multi_link_packet_decode(TestInfo& info)
     DOUT(info) << pkt->str() << endl;
 
     {
-    const vector<Message*>& msgs = pkt->messages();
+	const vector<Message*>& msgs = pkt->messages();
 
-    vector<Message*>::const_iterator ii;
-    for (ii = msgs.begin(); ii != msgs.end(); ii++) {
-	delete (*ii);
-    }
+	vector<Message*>::const_iterator ii;
+	for (ii = msgs.begin(); ii != msgs.end(); ii++) 
+	{
+	    delete (*ii);
+	}
     }
 
     delete pkt;
@@ -480,7 +510,7 @@ hello_multi_link_packet_decode(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_hna_for_encode(HnaMessage *hna)
 {
     TimeVal expiry(256,0);
@@ -500,7 +530,7 @@ populate_hna_for_encode(HnaMessage *hna)
  * Create a packet containing an HNA message, intended to be
  * identical to a hard-coded test packet.
  */
-bool
+    bool
 hna_packet_encode(TestInfo& info)
 {
     MessageDecoder md;
@@ -517,8 +547,8 @@ hna_packet_encode(TestInfo& info)
     pkt->encode(buf1);
 
     std::copy(&hna_v4_packet_data[0],
-	&hna_v4_packet_data[0] + sizeof(hna_v4_packet_data),
-	std::back_inserter(buf2));
+	    &hna_v4_packet_data[0] + sizeof(hna_v4_packet_data),
+	    std::back_inserter(buf2));
 
     bool result = compare_packets(info, buf1, buf2);
 
@@ -529,7 +559,7 @@ hna_packet_encode(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_mid_for_encode(MidMessage *mid)
 {
     TimeVal expiry(256,0);
@@ -551,7 +581,7 @@ populate_mid_for_encode(MidMessage *mid)
  * Create a packet containing a MID message, intended to be
  * identical to a hard-coded test packet.
  */
-bool
+    bool
 mid_packet_encode(TestInfo& info)
 {
     MessageDecoder md;
@@ -568,8 +598,8 @@ mid_packet_encode(TestInfo& info)
     pkt->encode(buf1);
 
     std::copy(&mid_v4_packet_data[0],
-	&mid_v4_packet_data[0] + sizeof(mid_v4_packet_data),
-	std::back_inserter(buf2));
+	    &mid_v4_packet_data[0] + sizeof(mid_v4_packet_data),
+	    std::back_inserter(buf2));
 
     bool result = compare_packets(info, buf1, buf2);
 
@@ -580,7 +610,7 @@ mid_packet_encode(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_tc_for_encode(TcMessage *tc)
 {
     TimeVal expiry(256,0);
@@ -601,7 +631,7 @@ populate_tc_for_encode(TcMessage *tc)
  * Create a packet containing a TC message, intended to be
  * identical to a hard-coded test packet.
  */
-bool
+    bool
 tc_packet_encode(TestInfo& info)
 {
     MessageDecoder md;
@@ -618,8 +648,8 @@ tc_packet_encode(TestInfo& info)
     pkt->encode(buf1);
 
     std::copy(&tc_v4_packet_data[0],
-	&tc_v4_packet_data[0] + sizeof(tc_v4_packet_data),
-	std::back_inserter(buf2));
+	    &tc_v4_packet_data[0] + sizeof(tc_v4_packet_data),
+	    std::back_inserter(buf2));
 
     bool result = compare_packets(info, buf1, buf2);
 
@@ -630,7 +660,7 @@ tc_packet_encode(TestInfo& info)
 }
 
 inline
-void
+    void
 populate_hello_for_encode(HelloMessage *hello)
 {
     TimeVal expiry(256,0);
@@ -659,7 +689,7 @@ populate_hello_for_encode(HelloMessage *hello)
  * Create a packet containing a HELLO message, intended to be
  * identical to a hard-coded test packet.
  */
-bool
+    bool
 hello_packet_encode(TestInfo& info)
 {
     MessageDecoder md;
@@ -677,8 +707,8 @@ hello_packet_encode(TestInfo& info)
 
 
     std::copy(&hello_multi_v4_packet_data[0],
-	&hello_multi_v4_packet_data[0] + sizeof(hello_multi_v4_packet_data),
-	std::back_inserter(buf2));
+	    &hello_multi_v4_packet_data[0] + sizeof(hello_multi_v4_packet_data),
+	    std::back_inserter(buf2));
 
     bool result = compare_packets(info, buf1, buf2);
 
@@ -688,7 +718,7 @@ hello_packet_encode(TestInfo& info)
     return result;
 }
 
-int
+    int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -704,10 +734,12 @@ main(int argc, char **argv)
 	t.get_optional_args("-t", "--test", "run only the specified test");
     t.complete_args_parsing();
 
-    struct test {
+    struct test 
+    {
 	string test_name;
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
-    } tests[] = {
+    } tests[] = 
+    {
 	{"hello_print", callback(hello_packet_print)},
 	{"tc_print", callback(tc_packet_print)},
 	{"mid_print", callback(mid_packet_print)},
@@ -725,19 +757,24 @@ main(int argc, char **argv)
 	{"hna_encode", callback(hna_packet_encode)},
     };
 
-    try {
-	if (test.empty()) {
+    try 
+    {
+	if (test.empty()) 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
 		t.run(tests[i].test_name, tests[i].cb);
-	} else {
+	} else 
+	{
 	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
-		if (test == tests[i].test_name) {
+		if (test == tests[i].test_name) 
+		{
 		    t.run(tests[i].test_name, tests[i].cb);
 		    return t.exit();
 		}
 	    t.failed("No test with name " + test + " found\n");
 	}
-    } catch(...) {
+    } catch(...) 
+    {
 	xorp_catch_standard_exceptions();
     }
 

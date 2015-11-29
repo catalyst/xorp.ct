@@ -56,450 +56,452 @@ class Mld6igmpVif;
 /**
  * @short A class to store information about multicast group membership.
  */
-class Mld6igmpGroupRecord {
-public:
-    /**
-     * Constructor for a given vif and group address.
-     * 
-     * @param mld6igmp_vif the interface this entry belongs to.
-     * @param group the multicast group address.
-     */
-    Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
-    
-    /**
-     * Destructor.
-     */
-    ~Mld6igmpGroupRecord();
+class Mld6igmpGroupRecord 
+{
+	public:
+		/**
+		 * Constructor for a given vif and group address.
+		 * 
+		 * @param mld6igmp_vif the interface this entry belongs to.
+		 * @param group the multicast group address.
+		 */
+		Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
 
-    /**
-     * Get the vif this entry belongs to.
-     * 
-     * @return a reference to the vif this entry belongs to.
-     */
-    Mld6igmpVif& mld6igmp_vif()	const	{ return (_mld6igmp_vif);	}
-    
-    /**
-     * Get the multicast group address.
-     * 
-     * @return the multicast group address.
-     */
-    const IPvX&	group() const		{ return (_group); }
+		/**
+		 * Destructor.
+		 */
+		~Mld6igmpGroupRecord();
 
-    
-    /**
-     * Test whether the filter mode is INCLUDE.
-     *
-     * @return true if the filter mode is INCLUDE.
-     */
-    bool is_include_mode() const	{ return (this->timeout_sec() == 0); }
+		/**
+		 * Get the vif this entry belongs to.
+		 * 
+		 * @return a reference to the vif this entry belongs to.
+		 */
+		Mld6igmpVif& mld6igmp_vif()	const	{ return (_mld6igmp_vif);	}
 
-    /**
-     * Test whether the filter mode is EXCLUDE.
-     *
-     * @return true if the filter mode is EXCLUDE.
-     */
-    bool is_asm_mode() const	{ return (! (this->timeout_sec() == 0)); }
+		/**
+		 * Get the multicast group address.
+		 * 
+		 * @return the multicast group address.
+		 */
+		const IPvX&	group() const		{ return (_group); }
 
-    /**
-     * Set the filter mode to INCLUDE.
-     */
-    void set_include_mode()		{ }
 
-    /**
-     * Set the filter mode to asm.
-     */
-    void set_exclude_mode()		{ }
+		/**
+		 * Test whether the filter mode is INCLUDE.
+		 *
+		 * @return true if the filter mode is INCLUDE.
+		 */
+		bool is_include_mode() const	{ return (this->timeout_sec() == 0); }
 
-    /**
-     * Test whether the entry is unused.
-     *
-     * @return true if the entry is unused, otherwise false.
-     */
-    bool is_unused() const;
+		/**
+		 * Test whether the filter mode is EXCLUDE.
+		 *
+		 * @return true if the filter mode is EXCLUDE.
+		 */
+		bool is_asm_mode() const	{ return (! (this->timeout_sec() == 0)); }
 
-    /**
-     * Find a source that should be forwarded.
-     *
-     * @param source the source address.
-     * @return the corresponding source record (@ref Mld6igmpSourceRecord)
-     * if found, otherwise NULL.
-     */
-    Mld6igmpSourceRecord* find_do_forward_source(const IPvX& source);
+		/**
+		 * Set the filter mode to INCLUDE.
+		 */
+		void set_include_mode()		{ }
 
-    /**
-     * Find a source that should not be forwarded.
-     *
-     * @param source the source address.
-     * @return the corresponding source record (@ref Mld6igmpSourceRecord)
-     * if found, otherwise NULL.
-     */
-    Mld6igmpSourceRecord* find_dont_forward_source(const IPvX& source);
+		/**
+		 * Set the filter mode to asm.
+		 */
+		void set_exclude_mode()		{ }
 
-    /**
-     * Get a reference to the set of sources to forward.
-     *
-     * @return a reference to the set of sources to forward.
-     */
-    const Mld6igmpSourceSet& do_forward_sources() const { return (_do_forward_sources); }
+		/**
+		 * Test whether the entry is unused.
+		 *
+		 * @return true if the entry is unused, otherwise false.
+		 */
+		bool is_unused() const;
 
-    /**
-     * Get a reference to the set of sources not to forward.
-     *
-     * @return a reference to the set of sources not to forward.
-     */
+		/**
+		 * Find a source that should be forwarded.
+		 *
+		 * @param source the source address.
+		 * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+		 * if found, otherwise NULL.
+		 */
+		Mld6igmpSourceRecord* find_do_forward_source(const IPvX& source);
 
-    /**
-     * Process MODE_IS_INCLUDE report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_mode_is_include(const set<IPvX>& sources,
-				 const IPvX& last_reported_host);
+		/**
+		 * Find a source that should not be forwarded.
+		 *
+		 * @param source the source address.
+		 * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+		 * if found, otherwise NULL.
+		 */
+		Mld6igmpSourceRecord* find_dont_forward_source(const IPvX& source);
 
-    /**
-     * Process MODE_IS_EXCLUDE report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_mode_is_exclude(const set<IPvX>& sources,
-				 const IPvX& last_reported_host);
+		/**
+		 * Get a reference to the set of sources to forward.
+		 *
+		 * @return a reference to the set of sources to forward.
+		 */
+		const Mld6igmpSourceSet& do_forward_sources() const { return (_do_forward_sources); }
 
-    /**
-     * Process CHANGE_TO_INCLUDE_MODE report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_change_to_include_mode(const set<IPvX>& sources,
-					const IPvX& last_reported_host);
+		/**
+		 * Get a reference to the set of sources not to forward.
+		 *
+		 * @return a reference to the set of sources not to forward.
+		 */
 
-    /**
-     * Process CHANGE_TO_EXCLUDE_MODE report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_change_to_exclude_mode(const set<IPvX>& sources,
-					const IPvX& last_reported_host);
+		/**
+		 * Process MODE_IS_INCLUDE report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_mode_is_include(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process ALLOW_NEW_SOURCES report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_allow_new_sources(const set<IPvX>& sources,
-				   const IPvX& last_reported_host);
+		/**
+		 * Process MODE_IS_EXCLUDE report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_mode_is_exclude(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process BLOCK_OLD_SOURCES report.
-     *
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_block_old_sources(const set<IPvX>& sources,
-				   const IPvX& last_reported_host);
+		/**
+		 * Process CHANGE_TO_INCLUDE_MODE report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_change_to_include_mode(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Lower the group timer.
-     *
-     * @param timeval the timeout interval the timer should be lowered to.
-     */
-    void lower_group_timer(const TimeVal& timeval);
+		/**
+		 * Process CHANGE_TO_EXCLUDE_MODE report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_change_to_exclude_mode(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Lower the source timer for a set of sources.
-     *
-     * @param sources the source addresses.
-     * @param timeval the timeout interval the timer should be lowered to.
-     */
-    void lower_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
+		/**
+		 * Process ALLOW_NEW_SOURCES report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_allow_new_sources(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Take the appropriate actions for a source that has expired.
-     *
-     * @param source_record the source record that has expired.
-     */
-    void source_expired(Mld6igmpSourceRecord* source_record);
+		/**
+		 * Process BLOCK_OLD_SOURCES report.
+		 *
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_block_old_sources(const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Get the number of seconds until the group timer expires.
-     * 
-     * @return the number of seconds until the group timer expires.
-     */
-    uint32_t	timeout_sec()	const;
+		/**
+		 * Lower the group timer.
+		 *
+		 * @param timeval the timeout interval the timer should be lowered to.
+		 */
+		void lower_group_timer(const TimeVal& timeval);
 
-    /**
-     * Get the number of seconds until the IGMPv1 host present timer expires.
-     *
-     * @return the number of seconds until the IGMPv1 host present timer
-     * expires.
-     */
-    uint32_t	igmpv1_host_present_timer_timeout_sec()	const;
+		/**
+		 * Lower the source timer for a set of sources.
+		 *
+		 * @param sources the source addresses.
+		 * @param timeval the timeout interval the timer should be lowered to.
+		 */
+		void lower_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
 
-    /**
-     * Get the number of seconds until the IGMPv2/MLDv1 host present timer
-     * expires.
-     *
-     * @return the number of seconds until the IGMPv2/MLDv1 host present timer
-     * expires.
-     */
-    uint32_t	igmpv2_mldv1_host_present_timer_timeout_sec()	const;
+		/**
+		 * Take the appropriate actions for a source that has expired.
+		 *
+		 * @param source_record the source record that has expired.
+		 */
+		void source_expired(Mld6igmpSourceRecord* source_record);
 
-    /**
-     * Get the address of the host that last reported as member.
-     * 
-     * @return the address of the host that last reported as member.
-     */
-    const IPvX& last_reported_host() const { return (_last_reported_host); }
+		/**
+		 * Get the number of seconds until the group timer expires.
+		 * 
+		 * @return the number of seconds until the group timer expires.
+		 */
+		uint32_t	timeout_sec()	const;
 
-    /**
-     * Get a refererence to the group timer.
-     *
-     * @return a reference to the group timer.
-     */
-    XorpTimer& group_timer() { return _group_timer; }
+		/**
+		 * Get the number of seconds until the IGMPv1 host present timer expires.
+		 *
+		 * @return the number of seconds until the IGMPv1 host present timer
+		 * expires.
+		 */
+		uint32_t	igmpv1_host_present_timer_timeout_sec()	const;
 
-    /**
-     * Schedule periodic Group-Specific and Group-and-Source-Specific Query
-     * retransmission.
-     *
-     * If the sources list is empty, we schedule Group-Specific Query,
-     * otherwise we schedule Group-and-Source-Specific Query.
-     *
-     * @param sources the source addresses.
-     */
-    void schedule_periodic_group_query(const set<IPvX>& sources);
+		/**
+		 * Get the number of seconds until the IGMPv2/MLDv1 host present timer
+		 * expires.
+		 *
+		 * @return the number of seconds until the IGMPv2/MLDv1 host present timer
+		 * expires.
+		 */
+		uint32_t	igmpv2_mldv1_host_present_timer_timeout_sec()	const;
 
-    /**
-     * Record that an older Membership report message has been received.
-     *
-     * @param message_version the corresponding protocol version of the
-     * received message.
-     */
-    void received_older_membership_report(int message_version);
+		/**
+		 * Get the address of the host that last reported as member.
+		 * 
+		 * @return the address of the host that last reported as member.
+		 */
+		const IPvX& last_reported_host() const { return (_last_reported_host); }
 
-    /**
-     * Test if the group is running in IGMPv1 mode.
-     *
-     * @return true if the group is running in IGMPv1 mode, otherwise false.
-     */
-    bool	is_igmpv1_mode() const;
+		/**
+		 * Get a refererence to the group timer.
+		 *
+		 * @return a reference to the group timer.
+		 */
+		XorpTimer& group_timer() { return _group_timer; }
 
-    /**
-     * Test if the group is running in IGMPv2 mode.
-     *
-     * @return true if the group is running in IGMPv2 mode, otherwise false.
-     */
-    bool	is_igmpv2_mode() const;
+		/**
+		 * Schedule periodic Group-Specific and Group-and-Source-Specific Query
+		 * retransmission.
+		 *
+		 * If the sources list is empty, we schedule Group-Specific Query,
+		 * otherwise we schedule Group-and-Source-Specific Query.
+		 *
+		 * @param sources the source addresses.
+		 */
+		void schedule_periodic_group_query(const set<IPvX>& sources);
 
-    /**
-     * Test if the group is running in IGMPv3 mode.
-     *
-     * @return true if the group is running in IGMPv3 mode, otherwise false.
-     */
-    bool	is_igmpv3_mode() const;
+		/**
+		 * Record that an older Membership report message has been received.
+		 *
+		 * @param message_version the corresponding protocol version of the
+		 * received message.
+		 */
+		void received_older_membership_report(int message_version);
 
-    /**
-     * Test if the group is running in MLDv1 mode.
-     *
-     * @return true if the group is running in MLDv1 mode, otherwise false.
-     */
-    bool	is_mldv1_mode() const;
+		/**
+		 * Test if the group is running in IGMPv1 mode.
+		 *
+		 * @return true if the group is running in IGMPv1 mode, otherwise false.
+		 */
+		bool	is_igmpv1_mode() const;
 
-    /**
-     * Test if the group is running in MLDv2 mode.
-     *
-     * @return true if the group is running in MLDv2 mode, otherwise false.
-     */
-    bool	is_mldv2_mode() const;
+		/**
+		 * Test if the group is running in IGMPv2 mode.
+		 *
+		 * @return true if the group is running in IGMPv2 mode, otherwise false.
+		 */
+		bool	is_igmpv2_mode() const;
 
-    /**
-     * Get the address family.
-     *
-     * @return the address family.
-     */
-    int		family() const { return _group.af(); }
+		/**
+		 * Test if the group is running in IGMPv3 mode.
+		 *
+		 * @return true if the group is running in IGMPv3 mode, otherwise false.
+		 */
+		bool	is_igmpv3_mode() const;
 
-private:
-    /**
-     * Calculate the forwarding changes and notify the interested parties.
-     *
-     * @param old_is_include mode if true, the old filter mode was INCLUDE,
-     * otherwise was EXCLUDE.
-     * @param old_do_forward_sources the old set of sources to forward.
-     * @param old_dont_forward_sources the old set of sources not to forward.
-     */
-    void calculate_forwarding_changes(bool old_is_include_mode,
-				      const set<IPvX>& old_do_forward_sources) const; 
-    /**
-     * Timeout: one of the older version host present timers has expired.
-     */
-    void	older_version_host_present_timer_timeout();
+		/**
+		 * Test if the group is running in MLDv1 mode.
+		 *
+		 * @return true if the group is running in MLDv1 mode, otherwise false.
+		 */
+		bool	is_mldv1_mode() const;
 
-    /**
-     * Timeout: the group timer has expired.
-     */
-    void	group_timer_timeout();
+		/**
+		 * Test if the group is running in MLDv2 mode.
+		 *
+		 * @return true if the group is running in MLDv2 mode, otherwise false.
+		 */
+		bool	is_mldv2_mode() const;
 
-    /**
-     * Periodic timeout: time to send the next Group-Specific and
-     * Group-and-Source-Specific Queries.
-     *
-     * @return true if the timer should be scheduled again, otherwise false.
-     */
-    bool	group_query_periodic_timeout();
+		/**
+		 * Get the address family.
+		 *
+		 * @return the address family.
+		 */
+		int		family() const { return _group.af(); }
 
-    /**
-     * Set the address of the host that last reported as member.
-     *
-     * @param v the address of the host that last reported as member.
-     */
-    void set_last_reported_host(const IPvX& v) { _last_reported_host = v; }
+	private:
+		/**
+		 * Calculate the forwarding changes and notify the interested parties.
+		 *
+		 * @param old_is_include mode if true, the old filter mode was INCLUDE,
+		 * otherwise was EXCLUDE.
+		 * @param old_do_forward_sources the old set of sources to forward.
+		 * @param old_dont_forward_sources the old set of sources not to forward.
+		 */
+		void calculate_forwarding_changes(bool old_is_include_mode,
+				const set<IPvX>& old_do_forward_sources) const; 
+		/**
+		 * Timeout: one of the older version host present timers has expired.
+		 */
+		void	older_version_host_present_timer_timeout();
 
-    Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
-    IPvX	_group;			// The multicast group address
-    Mld6igmpSourceSet _do_forward_sources;	// Sources to forward
-    IPvX	_last_reported_host;	// The host that last reported as member
+		/**
+		 * Timeout: the group timer has expired.
+		 */
+		void	group_timer_timeout();
 
-    // Timers indicating that hosts running older protocol version are present
-    XorpTimer	_igmpv1_host_present_timer;
-    XorpTimer	_igmpv2_mldv1_host_present_timer;
+		/**
+		 * Periodic timeout: time to send the next Group-Specific and
+		 * Group-and-Source-Specific Queries.
+		 *
+		 * @return true if the timer should be scheduled again, otherwise false.
+		 */
+		bool	group_query_periodic_timeout();
 
-    XorpTimer	_group_timer;		// Group timer for filter mode switch
-    XorpTimer	_group_query_timer;	// Timer for periodic Queries
-    size_t	_query_retransmission_count; // Count for periodic Queries
+		/**
+		 * Set the address of the host that last reported as member.
+		 *
+		 * @param v the address of the host that last reported as member.
+		 */
+		void set_last_reported_host(const IPvX& v) { _last_reported_host = v; }
+
+		Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
+		IPvX	_group;			// The multicast group address
+		Mld6igmpSourceSet _do_forward_sources;	// Sources to forward
+		IPvX	_last_reported_host;	// The host that last reported as member
+
+		// Timers indicating that hosts running older protocol version are present
+		XorpTimer	_igmpv1_host_present_timer;
+		XorpTimer	_igmpv2_mldv1_host_present_timer;
+
+		XorpTimer	_group_timer;		// Group timer for filter mode switch
+		XorpTimer	_group_query_timer;	// Timer for periodic Queries
+		size_t	_query_retransmission_count; // Count for periodic Queries
 };
 
 /**
  * @short A class to store information about a set of multicast groups.
  */
-class Mld6igmpGroupSet : public map<IPvX, Mld6igmpGroupRecord *> {
-public:
-    /**
-     * Constructor for a given vif.
-     * 
-     * @param mld6igmp_vif the interface this set belongs to.
-     */
-    Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif);
-    
-    /**
-     * Destructor.
-     */
-    ~Mld6igmpGroupSet();
+class Mld6igmpGroupSet : public map<IPvX, Mld6igmpGroupRecord *> 
+{
+	public:
+		/**
+		 * Constructor for a given vif.
+		 * 
+		 * @param mld6igmp_vif the interface this set belongs to.
+		 */
+		Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif);
 
-    /**
-     * Find a group record.
-     *
-     * @param group the group address.
-     * @return the corresponding group record (@ref Mld6igmpGroupRecord)
-     * if found, otherwise NULL.
-     */
-    Mld6igmpGroupRecord* find_group_record(const IPvX& group);
+		/**
+		 * Destructor.
+		 */
+		~Mld6igmpGroupSet();
 
-    /**
-     * Delete the payload of the set, and clear the set itself.
-     */
-    void delete_payload_and_clear();
+		/**
+		 * Find a group record.
+		 *
+		 * @param group the group address.
+		 * @return the corresponding group record (@ref Mld6igmpGroupRecord)
+		 * if found, otherwise NULL.
+		 */
+		Mld6igmpGroupRecord* find_group_record(const IPvX& group);
 
-    /**
-     * Process MODE_IS_INCLUDE report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_mode_is_include(const IPvX& group, const set<IPvX>& sources,
-				 const IPvX& last_reported_host);
+		/**
+		 * Delete the payload of the set, and clear the set itself.
+		 */
+		void delete_payload_and_clear();
 
-    /**
-     * Process MODE_IS_EXCLUDE report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_mode_is_exclude(const IPvX& group, const set<IPvX>& sources,
-				 const IPvX& last_reported_host);
+		/**
+		 * Process MODE_IS_INCLUDE report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_mode_is_include(const IPvX& group, const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process CHANGE_TO_INCLUDE_MODE report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_change_to_include_mode(const IPvX& group,
-					const set<IPvX>& sources,
-					const IPvX& last_reported_host);
+		/**
+		 * Process MODE_IS_EXCLUDE report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_mode_is_exclude(const IPvX& group, const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process CHANGE_TO_EXCLUDE_MODE report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_change_to_exclude_mode(const IPvX& group,
-					const set<IPvX>& sources,
-					const IPvX& last_reported_host);
+		/**
+		 * Process CHANGE_TO_INCLUDE_MODE report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_change_to_include_mode(const IPvX& group,
+				const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process ALLOW_NEW_SOURCES report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_allow_new_sources(const IPvX& group,
-				   const set<IPvX>& sources,
-				   const IPvX& last_reported_host);
+		/**
+		 * Process CHANGE_TO_EXCLUDE_MODE report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_change_to_exclude_mode(const IPvX& group,
+				const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Process BLOCK_OLD_SOURCES report.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param last_reported_host the address of the host that last reported
-     * as member.
-     */
-    void process_block_old_sources(const IPvX& group,
-				   const set<IPvX>& sources,
-				   const IPvX& last_reported_host);
+		/**
+		 * Process ALLOW_NEW_SOURCES report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_allow_new_sources(const IPvX& group,
+				const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Lower the group timer.
-     *
-     * @param group the group address.
-     * @param timeval the timeout interval the timer should be lowered to.
-     */
-    void lower_group_timer(const IPvX& group, const TimeVal& timeval);
+		/**
+		 * Process BLOCK_OLD_SOURCES report.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param last_reported_host the address of the host that last reported
+		 * as member.
+		 */
+		void process_block_old_sources(const IPvX& group,
+				const set<IPvX>& sources,
+				const IPvX& last_reported_host);
 
-    /**
-     * Lower the source timer for a set of sources.
-     *
-     * @param group the group address.
-     * @param sources the source addresses.
-     * @param timeval the timeout interval the timer should be lowered to.
-     */
-    void lower_source_timer(const IPvX& group, const set<IPvX>& sources,
-			    const TimeVal& timeval);
+		/**
+		 * Lower the group timer.
+		 *
+		 * @param group the group address.
+		 * @param timeval the timeout interval the timer should be lowered to.
+		 */
+		void lower_group_timer(const IPvX& group, const TimeVal& timeval);
 
-private:
-    Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to
+		/**
+		 * Lower the source timer for a set of sources.
+		 *
+		 * @param group the group address.
+		 * @param sources the source addresses.
+		 * @param timeval the timeout interval the timer should be lowered to.
+		 */
+		void lower_source_timer(const IPvX& group, const set<IPvX>& sources,
+				const TimeVal& timeval);
+
+	private:
+		Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to
 };
 
 //

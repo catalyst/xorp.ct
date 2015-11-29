@@ -41,178 +41,179 @@ class Vrrp;
  *
  * This class links the VRRP state machine to the actual network.
  */
-class VrrpVif {
-public:
-    typedef set<uint8_t>    VRIDS;
+class VrrpVif 
+{
+    public:
+	typedef set<uint8_t>    VRIDS;
 
-    /**
-     * @param vt the VRRP target.
-     * @param ifname the name of the physical interface.
-     * @param vifname the name of the logical interface.
-     */
-    VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname);
-    ~VrrpVif();
+	/**
+	 * @param vt the VRRP target.
+	 * @param ifname the name of the physical interface.
+	 * @param vifname the name of the logical interface.
+	 */
+	VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname);
+	~VrrpVif();
 
-    VrrpTarget& get_vrrp_target() { return _vt; }
+	VrrpTarget& get_vrrp_target() { return _vt; }
 
-    /**
-     * Check whether an IP address is configured on this interface.
-     *
-     * @return whether the given IP address is configured on the interface.
-     * @param addr the IP address tocheck for.
-     */
-    bool	    own(const IPv4& addr);
+	/**
+	 * Check whether an IP address is configured on this interface.
+	 *
+	 * @return whether the given IP address is configured on the interface.
+	 * @param addr the IP address tocheck for.
+	 */
+	bool	    own(const IPv4& addr);
 
-    /**
-     * Look for a VRRP instance on this interface.
-     *
-     * @return a VRRP instance configured on this interface.
-     * @param vrid the VRRP ID to look for.
-     */
-    Vrrp*	    find_vrid(uint32_t vrid);
+	/**
+	 * Look for a VRRP instance on this interface.
+	 *
+	 * @return a VRRP instance configured on this interface.
+	 * @param vrid the VRRP ID to look for.
+	 */
+	Vrrp*	    find_vrid(uint32_t vrid);
 
-    /**
-     * Add a VRRP instance on this interface.
-     *
-     * @param vrid the router ID of this VRRP instance.
-     */
-    void	    add_vrid(uint32_t vrid);
+	/**
+	 * Add a VRRP instance on this interface.
+	 *
+	 * @param vrid the router ID of this VRRP instance.
+	 */
+	void	    add_vrid(uint32_t vrid);
 
-    /**
-     * Delete a VRRP instance from this interface.
-     *
-     * @param vrid the router ID of the instance.
-     */
-    void	    delete_vrid(uint32_t vrid);
+	/**
+	 * Delete a VRRP instance from this interface.
+	 *
+	 * @param vrid the router ID of the instance.
+	 */
+	void	    delete_vrid(uint32_t vrid);
 
-    /**
-     * Check whether the interface is up.
-     *
-     * @return whether the interface is enabled.
-     */
-    bool	    ready() const;
+	/**
+	 * Check whether the interface is up.
+	 *
+	 * @return whether the interface is enabled.
+	 */
+	bool	    ready() const;
 
-    /**
-     * Change the interface's configuration.
-     *
-     * @param conf the new configuration of the interface.
-     */
-    void	    configure(const IfMgrIfTree& conf);
+	/**
+	 * Change the interface's configuration.
+	 *
+	 * @param conf the new configuration of the interface.
+	 */
+	void	    configure(const IfMgrIfTree& conf);
 
-    /**
-     * Obtain the interface's primary IP address.
-     *
-     * @return the primary IP address.
-     */
-    const IPv4&	    addr() const;
+	/**
+	 * Obtain the interface's primary IP address.
+	 *
+	 * @return the primary IP address.
+	 */
+	const IPv4&	    addr() const;
 
-    /**
-     * Send a L2 packet.
-     *
-     * @param src the source MAC address.
-     * @param dst the destination MAC address.
-     * @param ether the Ethernet type.
-     * @param payload the data following the MAC header.
-     */
-    void	    send(const Mac& src, const Mac& dst, uint32_t ether,
-			 const vector<uint8_t>& payload);
+	/**
+	 * Send a L2 packet.
+	 *
+	 * @param src the source MAC address.
+	 * @param dst the destination MAC address.
+	 * @param ether the Ethernet type.
+	 * @param payload the data following the MAC header.
+	 */
+	void	    send(const Mac& src, const Mac& dst, uint32_t ether,
+		const vector<uint8_t>& payload);
 
-    /**
-     * Join the VRRP multicast group.
-     */
-    void	    join_mcast();
+	/**
+	 * Join the VRRP multicast group.
+	 */
+	void	    join_mcast();
 
-    /**
-     * Leave the VRRP multicast group.
-     */
-    void	    leave_mcast();
+	/**
+	 * Leave the VRRP multicast group.
+	 */
+	void	    leave_mcast();
 
-    /**
-     * Receive an IP packet.
-     *
-     * @param from the source IP address.
-     * @param payload the IP payload.
-     */
-    void recv(const IPv4& from, const vector<uint8_t>& payload);
+	/**
+	 * Receive an IP packet.
+	 *
+	 * @param from the source IP address.
+	 * @param payload the IP payload.
+	 */
+	void recv(const IPv4& from, const vector<uint8_t>& payload);
 
-    /**
-     * Add a MAC address to this interface.
-     *
-     * @param mac MAC address to add.
-     */
-    void add_mac(const Mac& mac);
-    void add_ip(const IPv4& ip, uint32_t prefix);
+	/**
+	 * Add a MAC address to this interface.
+	 *
+	 * @param mac MAC address to add.
+	 */
+	void add_mac(const Mac& mac);
+	void add_ip(const IPv4& ip, uint32_t prefix);
 
-    /**
-     * Delete a MAC address from this interface.
-     *
-     * @param mac MAC address to remove.
-     */
-    void delete_mac(const Mac& mac);
+	/**
+	 * Delete a MAC address from this interface.
+	 *
+	 * @param mac MAC address to remove.
+	 */
+	void delete_mac(const Mac& mac);
 
-    void delete_ip(const IPv4& ip);
+	void delete_ip(const IPv4& ip);
 
-    /**
-     * Start the reception of ARP packets.
-     */
-    void	    start_arps();
+	/**
+	 * Start the reception of ARP packets.
+	 */
+	void	    start_arps();
 
-    /**
-     * Stop the reception of ARP packets.
-     */
-    void	    stop_arps();
+	/**
+	 * Stop the reception of ARP packets.
+	 */
+	void	    stop_arps();
 
-    /**
-     * Notify the reception of an ARP packet.
-     *
-     * @param src the source MAC address.
-     * @param payload the ARP header and data.
-     */
-    void recv_arp(const Mac& src, const vector<uint8_t>& payload);
+	/**
+	 * Notify the reception of an ARP packet.
+	 *
+	 * @param src the source MAC address.
+	 * @param payload the ARP header and data.
+	 */
+	void recv_arp(const Mac& src, const vector<uint8_t>& payload);
 
-    /**
-     * Obtain a list of VRRP instance configured on this interface.
-     *
-     * @param vrids the VRRP instances on this interface (output parameter).
-     */
-    void	    get_vrids(VRIDS& vrids);
+	/**
+	 * Obtain a list of VRRP instance configured on this interface.
+	 *
+	 * @param vrids the VRRP instances on this interface (output parameter).
+	 */
+	void	    get_vrids(VRIDS& vrids);
 
-    /**
-     * Callback on XRL error caused by this interface.
-     *
-     * @param xrl_error the error (if any).
-     */
-    void	    xrl_cb(const XrlError& xrl_error);
+	/**
+	 * Callback on XRL error caused by this interface.
+	 *
+	 * @param xrl_error the error (if any).
+	 */
+	void	    xrl_cb(const XrlError& xrl_error);
 
-private:
-    typedef set<IPv4>		    IPS;
-    typedef map<uint32_t, Vrrp*>    VRRPS;
+    private:
+	typedef set<IPv4>		    IPS;
+	typedef map<uint32_t, Vrrp*>    VRRPS;
 
-    /**
-     * Enable or disable the interface.  This will start / stop all VRRP
-     * instances running on this interface.
-     *
-     * @param ready if true, enable the interface, otherwise disable it.
-     */
-    void		    set_ready(bool ready);
+	/**
+	 * Enable or disable the interface.  This will start / stop all VRRP
+	 * instances running on this interface.
+	 *
+	 * @param ready if true, enable the interface, otherwise disable it.
+	 */
+	void		    set_ready(bool ready);
 
-    /**
-     * Check whether a rtrmgr configuration element (e.g., an interface) is
-     * enabled.
-     *
-     * @return true if the element is enabled, false otherwise.
-     * @param obj element to check.
-     */
-    template <class T> bool is_enabled(const T* obj);
+	/**
+	 * Check whether a rtrmgr configuration element (e.g., an interface) is
+	 * enabled.
+	 *
+	 * @return true if the element is enabled, false otherwise.
+	 * @param obj element to check.
+	 */
+	template <class T> bool is_enabled(const T* obj);
 
-    VrrpTarget&	_vt;
-    string	_ifname;
-    string	_vifname;
-    bool	_ready;	// is it configured?
-    IPS		_ips;	// IPs assigned to this vif
-    VRRPS	_vrrps;	// VRRPs enabled on this vif
-    uint32_t	_join;
-    uint32_t	_arps;
+	VrrpTarget&	_vt;
+	string	_ifname;
+	string	_vifname;
+	bool	_ready;	// is it configured?
+	IPS		_ips;	// IPs assigned to this vif
+	VRRPS	_vrrps;	// VRRPs enabled on this vif
+	uint32_t	_join;
+	uint32_t	_arps;
 };
 
 #endif // __VRRP_VRRP_VIF_HH__

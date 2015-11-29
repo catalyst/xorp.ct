@@ -25,78 +25,79 @@
 #include "fea/fibconfig_table_set.hh"
 
 
-class FibConfigTableSetDummy : public FibConfigTableSet {
-public:
-    /**
-     * Constructor.
-     *
-     * @param fea_data_plane_manager the corresponding data plane manager
-     * (@ref FeaDataPlaneManager).
-     */
-    FibConfigTableSetDummy(FeaDataPlaneManager& fea_data_plane_manager);
+class FibConfigTableSetDummy : public FibConfigTableSet 
+{
+	public:
+		/**
+		 * Constructor.
+		 *
+		 * @param fea_data_plane_manager the corresponding data plane manager
+		 * (@ref FeaDataPlaneManager).
+		 */
+		FibConfigTableSetDummy(FeaDataPlaneManager& fea_data_plane_manager);
 
-    /**
-     * Virtual destructor.
-     */
-    virtual ~FibConfigTableSetDummy();
+		/**
+		 * Virtual destructor.
+		 */
+		virtual ~FibConfigTableSetDummy();
 
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Set the IPv4 unicast forwarding table.
-     *
-     * @param fte_list the list with all entries to install into
-     * the IPv4 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int set_table4(const list<Fte4>& fte_list);
+		/**
+		 * Start operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int start(string& error_msg);
 
-    /**
-     * Delete all entries in the IPv4 unicast forwarding table.
-     *
-     * Must be within a configuration interval.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_all_entries4();
+		/**
+		 * Stop operation.
+		 * 
+		 * @param error_msg the error message (if error).
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int stop(string& error_msg);
 
-    /**
-     * Set the IPv6 unicast forwarding table.
-     *
-     * @param fte_list the list with all entries to install into
-     * the IPv6 unicast forwarding table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int set_table6(const list<Fte6>& fte_list);
+		/**
+		 * Set the IPv4 unicast forwarding table.
+		 *
+		 * @param fte_list the list with all entries to install into
+		 * the IPv4 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int set_table4(const list<Fte4>& fte_list);
 
-    /**
-     * Delete all entries in the IPv6 unicast forwarding table.
-     *
-     * Must be within a configuration interval.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_all_entries6();
+		/**
+		 * Delete all entries in the IPv4 unicast forwarding table.
+		 *
+		 * Must be within a configuration interval.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_all_entries4();
 
-    /** Routing table ID that we are interested in might have changed.
-     */
-    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
-    
-private:
+		/**
+		 * Set the IPv6 unicast forwarding table.
+		 *
+		 * @param fte_list the list with all entries to install into
+		 * the IPv6 unicast forwarding table.
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int set_table6(const list<Fte6>& fte_list);
+
+		/**
+		 * Delete all entries in the IPv6 unicast forwarding table.
+		 *
+		 * Must be within a configuration interval.
+		 *
+		 * @return XORP_OK on success, otherwise XORP_ERROR.
+		 */
+		virtual int delete_all_entries6();
+
+		/** Routing table ID that we are interested in might have changed.
+		*/
+		virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
+
+	private:
 };
 
 #endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_DUMMY_HH__

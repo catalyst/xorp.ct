@@ -28,19 +28,20 @@
 class UnexpandedXrl;
 class XrlRouter;
 
-class XorpClient  {
-public:
-    XorpClient( XrlRouter& xrl_router);
-    ~XorpClient();
+class XorpClient  
+{
+	public:
+		XorpClient( XrlRouter& xrl_router);
+		~XorpClient();
 
-    void send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
-		 const string& expected_response, bool do_exec);
-    void fake_send_done(string xrl_return_spec, XrlRouter::XrlCallback cb);
-    XrlArgs fake_return_args(const string& xrl_return_spec);
+		void send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
+				const string& expected_response, bool do_exec);
+		void fake_send_done(string xrl_return_spec, XrlRouter::XrlCallback cb);
+		XrlArgs fake_return_args(const string& xrl_return_spec);
 
-private:
-    XrlRouter&	_xrl_router;
-    XorpTimer	_delay_timer;
+	private:
+		XrlRouter&	_xrl_router;
+		XorpTimer	_delay_timer;
 };
 
 #endif // __RTRMGR_XORP_CLIENT_HH__

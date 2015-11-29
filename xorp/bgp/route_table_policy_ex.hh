@@ -33,27 +33,28 @@
  * the originating peer.
  */
 template <class A>
-class PolicyTableExport : public PolicyTable<A> {
-public:
-    /**
-     * @param tablename name of the table.
-     * @param safi the safe.
-     * @param parent parent table.
-     * @param pfs a reference to the global policy filters.
-     * @param neighbor the id of the peer on this output branch.
-     */
-    PolicyTableExport(const string& tablename, 
-		      const Safi& safi,
-		      BGPRouteTable<A>* parent,
-		      PolicyFilters& pfs,
-		      const string& neighbor,
-		      const A& self);
+class PolicyTableExport : public PolicyTable<A> 
+{
+    public:
+	/**
+	 * @param tablename name of the table.
+	 * @param safi the safe.
+	 * @param parent parent table.
+	 * @param pfs a reference to the global policy filters.
+	 * @param neighbor the id of the peer on this output branch.
+	 */
+	PolicyTableExport(const string& tablename, 
+		const Safi& safi,
+		BGPRouteTable<A>* parent,
+		PolicyFilters& pfs,
+		const string& neighbor,
+		const A& self);
 
-protected:
-    void init_varrw();
+    protected:
+	void init_varrw();
 
-private:
-    const string _neighbor;
+    private:
+	const string _neighbor;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_EX_HH__

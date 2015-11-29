@@ -26,35 +26,38 @@
 
 #include "firewall_entry.hh"
 
-static struct {
-    FirewallEntry::Action	action;
-    string			name;
-} firewall_action_table[FirewallEntry::ACTION_MAX] = {
-    { FirewallEntry::ACTION_ANY,	"any" },	// XXX: not used
-    { FirewallEntry::ACTION_NONE,	"none" },
-    { FirewallEntry::ACTION_PASS,	"pass" },
-    { FirewallEntry::ACTION_DROP,	"drop" },
-    { FirewallEntry::ACTION_REJECT,	"reject" }
+static struct 
+{
+	FirewallEntry::Action	action;
+	string			name;
+} firewall_action_table[FirewallEntry::ACTION_MAX] = 
+{
+	{ FirewallEntry::ACTION_ANY,	"any" },	// XXX: not used
+	{ FirewallEntry::ACTION_NONE,	"none" },
+	{ FirewallEntry::ACTION_PASS,	"pass" },
+	{ FirewallEntry::ACTION_DROP,	"drop" },
+	{ FirewallEntry::ACTION_REJECT,	"reject" }
 };
 
-string
+	string
 FirewallEntry::action2str(FirewallEntry::Action action)
 {
-    if ((action < ACTION_MIN) || (action >= ACTION_MAX))
-	return (string("InvalidAction"));
+	if ((action < ACTION_MIN) || (action >= ACTION_MAX))
+		return (string("InvalidAction"));
 
-    return (firewall_action_table[action].name);
+	return (firewall_action_table[action].name);
 }
 
-FirewallEntry::Action
+	FirewallEntry::Action
 FirewallEntry::str2action(const string& name)
 {
-    size_t i;
+	size_t i;
 
-    for (i = ACTION_MIN; i < ACTION_MAX; i++) {
-	if (firewall_action_table[i].name == name)
-	    return (firewall_action_table[i].action);
-    }
+	for (i = ACTION_MIN; i < ACTION_MAX; i++) 
+	{
+		if (firewall_action_table[i].name == name)
+			return (firewall_action_table[i].action);
+	}
 
-    return (ACTION_INVALID);
+	return (ACTION_INVALID);
 }

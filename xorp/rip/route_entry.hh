@@ -41,213 +41,213 @@ template<typename A>
 class RouteEntry :
     public NONCOPYABLE
 {
-public:
-    typedef A Addr;
-    typedef IPNet<A> Net;
-    typedef RouteEntryOrigin<A> Origin;
+    public:
+	typedef A Addr;
+	typedef IPNet<A> Net;
+	typedef RouteEntryOrigin<A> Origin;
 
-public:
-    /**
-     * Constructor.
-     *
-     * The constructor set the internal state according to the parameters and
-     * if the Origin is non-null makes the appropriate call to tell the
-     * Origin of it's existence.
-     */
-    RouteEntry(const Net&  n,
-	       const Addr& nh,
-	       const string& ifname,
-	       const string& vifname,
-	       uint16_t	   cost,
-	       Origin*&	   o,
-	       uint16_t    tag);
+    public:
+	/**
+	 * Constructor.
+	 *
+	 * The constructor set the internal state according to the parameters and
+	 * if the Origin is non-null makes the appropriate call to tell the
+	 * Origin of it's existence.
+	 */
+	RouteEntry(const Net&  n,
+		const Addr& nh,
+		const string& ifname,
+		const string& vifname,
+		uint16_t	   cost,
+		Origin*&	   o,
+		uint16_t    tag);
 
-    RouteEntry(const Net&  n,
-	       const Addr& nh,
-	       const string& ifname,
-	       const string& vifname,
-	       uint16_t	   cost,
-	       Origin*&	   o,
-	       uint16_t    tag,
-	       const PolicyTags& policytags);
-    /**
-     * Destructor.
-     *
-     * Cleans up state associated with RouteEntry.  If the Origin associated
-     * with the RouteEntry is not-null, the Origin is informed of the
-     * destruction.
-     */
-    ~RouteEntry();
+	RouteEntry(const Net&  n,
+		const Addr& nh,
+		const string& ifname,
+		const string& vifname,
+		uint16_t	   cost,
+		Origin*&	   o,
+		uint16_t    tag,
+		const PolicyTags& policytags);
+	/**
+	 * Destructor.
+	 *
+	 * Cleans up state associated with RouteEntry.  If the Origin associated
+	 * with the RouteEntry is not-null, the Origin is informed of the
+	 * destruction.
+	 */
+	~RouteEntry();
 
-    /**
-     * Get network.
-     */
-    const IPNet<A>& net() const		{ return _net; }
+	/**
+	 * Get network.
+	 */
+	const IPNet<A>& net() const		{ return _net; }
 
-    /**
-     * Set next hop.
-     *
-     * @param nh the new nexthop to be associated with Route Entry.
-     *
-     * @return true if the stored nexthop changed, false otherwise.
-     */
-    bool set_nexthop(const A& nh);
+	/**
+	 * Set next hop.
+	 *
+	 * @param nh the new nexthop to be associated with Route Entry.
+	 *
+	 * @return true if the stored nexthop changed, false otherwise.
+	 */
+	bool set_nexthop(const A& nh);
 
-    /**
-     * Get next hop.
-     *
-     * @return nexthop address associated with the route entry.
-     */
-    const A& nexthop() const		{ return _nh; }
+	/**
+	 * Get next hop.
+	 *
+	 * @return nexthop address associated with the route entry.
+	 */
+	const A& nexthop() const		{ return _nh; }
 
-    /**
-     * Get the outgoing interface name.
-     *
-     * @return the outgoing interface name.
-     */
-    const string& ifname() const	{ return _ifname; }
+	/**
+	 * Get the outgoing interface name.
+	 *
+	 * @return the outgoing interface name.
+	 */
+	const string& ifname() const	{ return _ifname; }
 
-    /**
-     * Set the outgoing interface name.
-     *
-     * @param ifname the outgoing interface name.
-     * @return true if the stored interface name changed, false otherwise.
-     */
-    bool set_ifname(const string& ifname);
+	/**
+	 * Set the outgoing interface name.
+	 *
+	 * @param ifname the outgoing interface name.
+	 * @return true if the stored interface name changed, false otherwise.
+	 */
+	bool set_ifname(const string& ifname);
 
-    /**
-     * Get the outgoing vif name.
-     *
-     * @return the outgoing vif name.
-     */
-    const string& vifname() const	{ return _vifname; }
+	/**
+	 * Get the outgoing vif name.
+	 *
+	 * @return the outgoing vif name.
+	 */
+	const string& vifname() const	{ return _vifname; }
 
-    /**
-     * Set the outgoing vif name.
-     *
-     * @param vifname the outgoing vif name.
-     * @return true if the stored vif name changed, false otherwise.
-     */
-    bool set_vifname(const string& vifname);
-    
-    /**
-     * Set the cost metric.
-     *
-     * @param cost the new cost to be associated with the Route Entry.
-     *
-     * @return true if stored cost changed, false otherwise.
-     */
-    bool set_cost(uint16_t cost);
+	/**
+	 * Set the outgoing vif name.
+	 *
+	 * @param vifname the outgoing vif name.
+	 * @return true if the stored vif name changed, false otherwise.
+	 */
+	bool set_vifname(const string& vifname);
 
-    /**
-     * Get the cost metric.
-     *
-     * @return the cost associated with the route entry.
-     */
-    uint16_t cost() const			{ return _cost; }
+	/**
+	 * Set the cost metric.
+	 *
+	 * @param cost the new cost to be associated with the Route Entry.
+	 *
+	 * @return true if stored cost changed, false otherwise.
+	 */
+	bool set_cost(uint16_t cost);
 
-    /**
-     * Set the origin.  If the origin is different from the stored origin,
-     * the RouteEntry dissociates itself from the current origin and
-     * informs the new origin of it's existence.
-     *
-     * @param origin the new origin to be associated with the route entry.
-     *
-     * @return true if the stored origin changed, false otherwise.
-     */
-    bool set_origin(Origin* origin);
+	/**
+	 * Get the cost metric.
+	 *
+	 * @return the cost associated with the route entry.
+	 */
+	uint16_t cost() const			{ return _cost; }
 
-    /**
-     * Get the origin.
-     *
-     * @return a pointer to the origin associated with the route entry.
-     */
-    const Origin* origin() const 	{ return _origin; }
+	/**
+	 * Set the origin.  If the origin is different from the stored origin,
+	 * the RouteEntry dissociates itself from the current origin and
+	 * informs the new origin of it's existence.
+	 *
+	 * @param origin the new origin to be associated with the route entry.
+	 *
+	 * @return true if the stored origin changed, false otherwise.
+	 */
+	bool set_origin(Origin* origin);
 
-    /**
-     * Get the origin.
-     *
-     * @return a pointer to the origin associated with the route entry.
-     */
-    Origin* origin()			{ return _origin; }
+	/**
+	 * Get the origin.
+	 *
+	 * @return a pointer to the origin associated with the route entry.
+	 */
+	const Origin* origin() const 	{ return _origin; }
 
-    /**
-     * Set the tag value.
-     *
-     * @param tag the tag value to be associated with the route entry.
-     *
-     * @return true if the stored tag changed, false otherwise.
-     */
-    bool set_tag(uint16_t tag);
+	/**
+	 * Get the origin.
+	 *
+	 * @return a pointer to the origin associated with the route entry.
+	 */
+	Origin* origin()			{ return _origin; }
 
-    /**
-     * Get the tag.
-     *
-     * @return tag value associated with the route entry.
-     */
-    uint16_t tag() const 		{ return _tag; }
+	/**
+	 * Set the tag value.
+	 *
+	 * @param tag the tag value to be associated with the route entry.
+	 *
+	 * @return true if the stored tag changed, false otherwise.
+	 */
+	bool set_tag(uint16_t tag);
 
-    /**
-     * Set a Timer Event associated with this route.
-     */
-    void set_timer(const XorpTimer& t) 	{ _timer = t; }
+	/**
+	 * Get the tag.
+	 *
+	 * @return tag value associated with the route entry.
+	 */
+	uint16_t tag() const 		{ return _tag; }
 
-    /**
-     * Get Timer associated with route.
-     */
-    const XorpTimer& timer() const 	{ return _timer; }
+	/**
+	 * Set a Timer Event associated with this route.
+	 */
+	void set_timer(const XorpTimer& t) 	{ _timer = t; }
 
-    /**
-     * @return policy-tags associated with route.
-     */
-    const PolicyTags& policytags() const	{ return _policytags; }
+	/**
+	 * Get Timer associated with route.
+	 */
+	const XorpTimer& timer() const 	{ return _timer; }
 
-    PolicyTags& policytags()			{ return _policytags; }
+	/**
+	 * @return policy-tags associated with route.
+	 */
+	const PolicyTags& policytags() const	{ return _policytags; }
 
-    /**
-     * Replace policy-tags of route
-     * @return true if tags were modified.
-     * @param tags new policy-tags.
-     */
-    bool set_policytags(const PolicyTags& tags);
+	PolicyTags& policytags()			{ return _policytags; }
 
-    /**
-     * @return true if route was rejected by policy filter.
-     */
-    bool filtered() const			{ return _filtered; }
-    /**
-     * Set if route is accepted or rejected.
-     *
-     * @param v true if route is filtered
-     */
-    void set_filtered(bool v)			{ _filtered = v;    }
+	/**
+	 * Replace policy-tags of route
+	 * @return true if tags were modified.
+	 * @param tags new policy-tags.
+	 */
+	bool set_policytags(const PolicyTags& tags);
 
-    string str() const;
+	/**
+	 * @return true if route was rejected by policy filter.
+	 */
+	bool filtered() const			{ return _filtered; }
+	/**
+	 * Set if route is accepted or rejected.
+	 *
+	 * @param v true if route is filtered
+	 */
+	void set_filtered(bool v)			{ _filtered = v;    }
 
-private:
-    friend class RouteEntryRef<A>;
-    void ref()				{ _ref_cnt++; }
-    uint16_t unref()			{ return --_ref_cnt; }
-    uint16_t ref_cnt() const		{ return _ref_cnt; }
+	string str() const;
 
-protected:
-    void dissociate();
-    void associate(Origin* o);
+    private:
+	friend class RouteEntryRef<A>;
+	void ref()				{ _ref_cnt++; }
+	uint16_t unref()			{ return --_ref_cnt; }
+	uint16_t ref_cnt() const		{ return _ref_cnt; }
 
-protected:
-    Net		_net;
-    Addr	_nh;
-    string	_ifname;
-    string	_vifname;
-    uint16_t	_cost;
-    Origin*	_origin;
-    uint16_t	_tag;
-    uint16_t	_ref_cnt;
+    protected:
+	void dissociate();
+	void associate(Origin* o);
 
-    XorpTimer	_timer;
-    
-    PolicyTags	_policytags;
-    bool	_filtered;
+    protected:
+	Net		_net;
+	Addr	_nh;
+	string	_ifname;
+	string	_vifname;
+	uint16_t	_cost;
+	Origin*	_origin;
+	uint16_t	_tag;
+	uint16_t	_ref_cnt;
+
+	XorpTimer	_timer;
+
+	PolicyTags	_policytags;
+	bool	_filtered;
 };
 
 /**
@@ -259,39 +259,42 @@ protected:
  * than using ref_ptr.
  */
 template <typename A>
-class RouteEntryRef {
-private:
-    RouteEntry<A>* _rt;
+class RouteEntryRef 
+{
+    private:
+	RouteEntry<A>* _rt;
 
-protected:
-    void release() {
-	if (_rt && _rt->unref() == 0) delete _rt;
-    }
+    protected:
+	void release() 
+	{
+	    if (_rt && _rt->unref() == 0) delete _rt;
+	}
 
-public:
-    RouteEntryRef(RouteEntry<A>* r) : _rt(r)		{ _rt->ref(); }
+    public:
+	RouteEntryRef(RouteEntry<A>* r) : _rt(r)		{ _rt->ref(); }
 
-    RouteEntryRef() : _rt(0) 				{}
+	RouteEntryRef() : _rt(0) 				{}
 
-    ~RouteEntryRef()					{ release(); }
+	~RouteEntryRef()					{ release(); }
 
-    RouteEntryRef(const RouteEntryRef& o) : _rt(o._rt)
+	RouteEntryRef(const RouteEntryRef& o) : _rt(o._rt)
     {
 	if (_rt) _rt->ref();
     }
 
-    RouteEntryRef& operator=(const RouteEntryRef& o) {
-	release();
-	_rt = o._rt;
-	if (_rt) _rt->ref();
-	return *this;
-    }
+	RouteEntryRef& operator=(const RouteEntryRef& o) 
+	{
+	    release();
+	    _rt = o._rt;
+	    if (_rt) _rt->ref();
+	    return *this;
+	}
 
-    RouteEntry<A>* get() const { return _rt; }
+	RouteEntry<A>* get() const { return _rt; }
 
-    RouteEntry<A>* operator->() const { return _rt; }
+	RouteEntry<A>* operator->() const { return _rt; }
 
-    bool operator==(const RouteEntryRef& o) const { return _rt == o._rt; }
+	bool operator==(const RouteEntryRef& o) const { return _rt == o._rt; }
 };
 
 
@@ -306,76 +309,76 @@ template <typename A>
 class RouteEntryOrigin :
     public NONCOPYABLE
 {
-public:
-    typedef RouteEntry<A> Route;
-    typedef IPNet<A>	  Net;
-    struct RouteEntryStore;
+    public:
+	typedef RouteEntry<A> Route;
+	typedef IPNet<A>	  Net;
+	struct RouteEntryStore;
 
-public:
-    RouteEntryOrigin(bool is_rib_origin);
-    virtual ~RouteEntryOrigin();
+    public:
+	RouteEntryOrigin(bool is_rib_origin);
+	virtual ~RouteEntryOrigin();
 
-    /**
-     * Test if RIB is the originator.
-     *
-     * @return true if RIB is the originator, otherwise false.
-     */
-    bool is_rib_origin() const { return _is_rib_origin; }
+	/**
+	 * Test if RIB is the originator.
+	 *
+	 * @return true if RIB is the originator, otherwise false.
+	 */
+	bool is_rib_origin() const { return _is_rib_origin; }
 
-    /**
-     * Associate route with this RouteEntryOrigin.
-     * @param r route to be stored.
-     * @return true on success, false if route is already associated.
-     */
-    bool associate(Route* r);
+	/**
+	 * Associate route with this RouteEntryOrigin.
+	 * @param r route to be stored.
+	 * @return true on success, false if route is already associated.
+	 */
+	bool associate(Route* r);
 
-    /**
-     * Dissociate route from this RouteEntryOrigin.
-     * @param r route to be dissociated.
-     * @return true on success, false if route is not associated.
-     */
-    bool dissociate(Route* r);
+	/**
+	 * Dissociate route from this RouteEntryOrigin.
+	 * @param r route to be dissociated.
+	 * @return true on success, false if route is not associated.
+	 */
+	bool dissociate(Route* r);
 
-    /**
-     * Find route if RouteOrigin has a route for given network.
-     * @param n network.
-     * @return true if entry exists in store, false otherwise.
-     */
-    Route* find_route(const Net& n) const;
+	/**
+	 * Find route if RouteOrigin has a route for given network.
+	 * @param n network.
+	 * @return true if entry exists in store, false otherwise.
+	 */
+	Route* find_route(const Net& n) const;
 
-    /**
-     * @return number of routes associated with this RouteEntryOrigin.
-     */
-    uint32_t route_count() const;
+	/**
+	 * @return number of routes associated with this RouteEntryOrigin.
+	 */
+	uint32_t route_count() const;
 
-    /**
-     * Clear/remove all routes associated with this RouteEntryOrigin.
-     */
-    void clear();
+	/**
+	 * Clear/remove all routes associated with this RouteEntryOrigin.
+	 */
+	void clear();
 
-    /**
-     * Dump associated routes into a vector (debugging use only).
-     */
-    void dump_routes(vector<const Route*>& routes) const;
+	/**
+	 * Dump associated routes into a vector (debugging use only).
+	 */
+	void dump_routes(vector<const Route*>& routes) const;
 
-    /**
-     * Retrieve number of seconds before routes associated with this
-     * RouteEntryOrigin should be marked as expired.  A return value of 0
-     * indicates routes are of infinite duration, eg static routes.
-     */
-    virtual uint32_t expiry_secs() const = 0;
+	/**
+	 * Retrieve number of seconds before routes associated with this
+	 * RouteEntryOrigin should be marked as expired.  A return value of 0
+	 * indicates routes are of infinite duration, eg static routes.
+	 */
+	virtual uint32_t expiry_secs() const = 0;
 
-    /**
-     * Retrieve number of seconds before route should be deleted after
-     * expiry.
-     */
-    virtual uint32_t deletion_secs() const = 0;
+	/**
+	 * Retrieve number of seconds before route should be deleted after
+	 * expiry.
+	 */
+	virtual uint32_t deletion_secs() const = 0;
 
-protected:
-    struct RouteEntryStore* _rtstore;
+    protected:
+	struct RouteEntryStore* _rtstore;
 
-private:
-    bool	_is_rib_origin;		// True if the origin is RIB
+    private:
+	bool	_is_rib_origin;		// True if the origin is RIB
 };
 
 #endif // __RIP_ROUTE_ENTRY_HH__

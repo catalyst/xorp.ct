@@ -31,28 +31,29 @@ ostream& operator<<(ostream& os, const NextHop& rhs)
 	return os;
 }
 
-string
+	string
 NextHop::type_str(int type)
 {
-    static map<int, string> nexthop_names;
-    if (nexthop_names.empty()) {
-	nexthop_names[GENERIC_NEXTHOP] = " ";
-	nexthop_names[PEER_NEXTHOP] = "NH: ";
-	nexthop_names[ENCAPS_NEXTHOP] = "NH-> ";
-	nexthop_names[EXTERNAL_NEXTHOP] = "Ext> ";
-	nexthop_names[DISCARD_NEXTHOP] = "DISCARD ";
-	nexthop_names[UNREACHABLE_NEXTHOP] = "UNREACHABLE ";
-    }
-    map<int, string>::iterator i = nexthop_names.find(type);
-    if (i == nexthop_names.end())
-	return " ";
-    else
-	return i->second;
+	static map<int, string> nexthop_names;
+	if (nexthop_names.empty()) 
+	{
+		nexthop_names[GENERIC_NEXTHOP] = " ";
+		nexthop_names[PEER_NEXTHOP] = "NH: ";
+		nexthop_names[ENCAPS_NEXTHOP] = "NH-> ";
+		nexthop_names[EXTERNAL_NEXTHOP] = "Ext> ";
+		nexthop_names[DISCARD_NEXTHOP] = "DISCARD ";
+		nexthop_names[UNREACHABLE_NEXTHOP] = "UNREACHABLE ";
+	}
+	map<int, string>::iterator i = nexthop_names.find(type);
+	if (i == nexthop_names.end())
+		return " ";
+	else
+		return i->second;
 }
 
-template<class A>
-IPNextHop<A>::IPNextHop(const A& from_ipaddr)
-    : _addr(from_ipaddr)
+	template<class A>
+	IPNextHop<A>::IPNextHop(const A& from_ipaddr)
+: _addr(from_ipaddr)
 {
 }
 
@@ -60,82 +61,82 @@ template<class A>
 string
 IPNextHop<A>::str() const
 {
-    return (NextHop::type_str(type()) + this->_addr.str());
+	return (NextHop::type_str(type()) + this->_addr.str());
 }
 
-template<class A>
-IPPeerNextHop<A>::IPPeerNextHop(const A& from_ipaddr)
-    : IPNextHop<A>(from_ipaddr)
+	template<class A>
+	IPPeerNextHop<A>::IPPeerNextHop(const A& from_ipaddr)
+: IPNextHop<A>(from_ipaddr)
 {
 }
 
 template<class A>
-void*
+	void*
 IPPeerNextHop<A>::operator new(size_t/* size*/)
 {
-    return memory_pool().alloc();
+	return memory_pool().alloc();
 }
 
 template<class A>
-void
+	void
 IPPeerNextHop<A>::operator delete(void* ptr)
 {
-    memory_pool().free(ptr);
+	memory_pool().free(ptr);
 }
 
 template<class A>
 inline
-MemoryPool<IPPeerNextHop<A> >&
+	MemoryPool<IPPeerNextHop<A> >&
 IPPeerNextHop<A>::memory_pool()
 {
-    static MemoryPool<IPPeerNextHop<A> > mp;
-    return mp;
+	static MemoryPool<IPPeerNextHop<A> > mp;
+	return mp;
 }
 
-template<class A>
-IPEncapsNextHop<A>::IPEncapsNextHop(const A& from_ipaddr)
-    : IPNextHop<A>(from_ipaddr)
+	template<class A>
+	IPEncapsNextHop<A>::IPEncapsNextHop(const A& from_ipaddr)
+: IPNextHop<A>(from_ipaddr)
+{
+}
+
+	template<class A>
+	IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr)
+: IPNextHop<A>(from_ipaddr)
 {
 }
 
 template<class A>
-IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr)
-    : IPNextHop<A>(from_ipaddr)
-{
-}
-
-template<class A>
-void*
+	void*
 IPExternalNextHop<A>::operator new(size_t/* size*/)
 {
-    return memory_pool().alloc();
+	return memory_pool().alloc();
 }
 
 template<class A>
-void
+	void
 IPExternalNextHop<A>::operator delete(void* ptr)
 {
-    memory_pool().free(ptr);
+	memory_pool().free(ptr);
 }
 
 template<class A>
 inline
-MemoryPool<IPExternalNextHop<A> >&
+	MemoryPool<IPExternalNextHop<A> >&
 IPExternalNextHop<A>::memory_pool()
 {
-    static MemoryPool<IPExternalNextHop<A> > mp;
-    return mp;
+	static MemoryPool<IPExternalNextHop<A> > mp;
+	return mp;
 }
 
-template <class A>
-DiscardNextHop<A>::DiscardNextHop()
-    : IPNextHop<A>(A::ZERO())
+	template <class A>
+	DiscardNextHop<A>::DiscardNextHop()
+: IPNextHop<A>(A::ZERO())
 {
 }
 
-template <class A>
-UnreachableNextHop<A>::UnreachableNextHop()
-    : IPNextHop<A>(A::ZERO())
+	template <class A>
+	UnreachableNextHop<A>::UnreachableNextHop()
+: IPNextHop<A>(A::ZERO())
 {
 }
 

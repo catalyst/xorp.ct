@@ -76,6 +76,6 @@ const char *_hd_last_home_dir_error(HomeDir *home);
 #define HOME_DIR_FN(fn) int (fn)(void *data, const char *usrnam, const char *homedir, char *errmsg, int maxerr)
 
 int _hd_scan_user_home_dirs(HomeDir *home, void *data,
-			    HOME_DIR_FN(*callback_fn));
+		HOME_DIR_FN(*callback_fn));
 
 #endif

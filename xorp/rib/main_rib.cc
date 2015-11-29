@@ -31,71 +31,74 @@
 #include <sysexits.h>
 #endif
 
-int
+	int
 main (int /* argc */, char* argv[])
 {
-    //
-    // Initialize and start xlog
-    //
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    // XXX: verbosity of the error messages temporary increased
-    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    xlog_add_default_output();
-    xlog_start();
-
-    setup_dflt_sighandlers();
-
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
-    try {
-	XrlStdRouter xrl_std_router_rib( "rib");
-
 	//
-	// The RIB manager
+	// Initialize and start xlog
 	//
-	RibManager rib_manager( xrl_std_router_rib, "fea");
-	rib_manager.enable();
+	xlog_init(argv[0], NULL);
+	xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+	// XXX: verbosity of the error messages temporary increased
+	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+	xlog_add_default_output();
+	xlog_start();
 
-	wait_until_xrl_router_is_ready( xrl_std_router_rib);
+	setup_dflt_sighandlers();
 
-	// Add the FEA as a RIB client
-	rib_manager.add_redist_xrl_output4("fea",	/* target_name */
-					   "all",	/* from_protocol */
-					   true,	/* unicast */
-					   false,	/* multicast */
-					   IPv4Net(IPv4::ZERO(), 0), /* network_prefix */
-					   "all",	/* cookie */
-					   true /* is_xrl_transaction_output */
-	    );
+	XorpUnexpectedHandler x(xorp_unexpected_handler);
+	try 
+	{
+		XrlStdRouter xrl_std_router_rib( "rib");
+
+		//
+		// The RIB manager
+		//
+		RibManager rib_manager( xrl_std_router_rib, "fea");
+		rib_manager.enable();
+
+		wait_until_xrl_router_is_ready( xrl_std_router_rib);
+
+		// Add the FEA as a RIB client
+		rib_manager.add_redist_xrl_output4("fea",	/* target_name */
+				"all",	/* from_protocol */
+				true,	/* unicast */
+				false,	/* multicast */
+				IPv4Net(IPv4::ZERO(), 0), /* network_prefix */
+				"all",	/* cookie */
+				true /* is_xrl_transaction_output */
+				);
 #ifdef HAVE_IPV6
-	rib_manager.add_redist_xrl_output6("fea",	/* target_name */
-					   "all",	/* from_protocol */
-					   true,	/* unicast */
-					   false,	/* multicast */
-					   IPv6Net(IPv6::ZERO(), 0), /* network_prefix */
-					   "all",	/* cookie */
-					   true /* is_xrl_transaction_output */
-	    );
+		rib_manager.add_redist_xrl_output6("fea",	/* target_name */
+				"all",	/* from_protocol */
+				true,	/* unicast */
+				false,	/* multicast */
+				IPv6Net(IPv6::ZERO(), 0), /* network_prefix */
+				"all",	/* cookie */
+				true /* is_xrl_transaction_output */
+				);
 #endif
 
-	rib_manager.start();
+		rib_manager.start();
 
-	//
-	// Main loop
-	//
-	string reason;
-	while (xorp_do_run && (rib_manager.status(reason) != PROC_DONE)) {
-	    EventLoop::instance().run();
+		//
+		// Main loop
+		//
+		string reason;
+		while (xorp_do_run && (rib_manager.status(reason) != PROC_DONE)) 
+		{
+			EventLoop::instance().run();
+		}
+	} catch (...) 
+	{
+		xorp_catch_standard_exceptions();
 	}
-    } catch (...) {
-	xorp_catch_standard_exceptions();
-    }
 
-    //
-    // Gracefully stop and exit xlog
-    //
-    xlog_stop();
-    xlog_exit();
+	//
+	// Gracefully stop and exit xlog
+	//
+	xlog_stop();
+	xlog_exit();
 
-    return 0;
+	return 0;
 }

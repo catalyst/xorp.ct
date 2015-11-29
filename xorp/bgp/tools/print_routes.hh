@@ -37,48 +37,49 @@
 
 
 template <typename A>
-class PrintRoutes : public XrlBgpV0p3Client {
-public:
-    static const uint32_t MAX_REQUESTS = 100;
-    static const int32_t INVALID = -1;
-    enum detail_t {SUMMARY, NORMAL, DETAIL};
-    PrintRoutes(detail_t verbose, int interval, IPNet<A> net, bool unicast,
-		bool multicast,	int lines = -1);
-    void get_route_list_start(IPNet<A> net, bool unicast, bool multicast);
-    void get_route_list_start_done(const XrlError& e,
-				   const uint32_t* token);
-    void get_route_list_next();
-    void get_route_list_next_done(const XrlError& 	 e,
-				  const IPv4* 		 peer_id,
-				  const IPNet<A>* 	 net,
-				  const uint32_t 	 *best_and_origin,
-				  const vector<uint8_t>* aspath,
-				  const A* 		 nexthop,
-				  const int32_t* 	 med,
-				  const int32_t* 	 localpref,
-				  const int32_t* 	 atomic_agg,
-				  const vector<uint8_t>* aggregator,
-				  const int32_t* 	 calc_localpref,
-				  const vector<uint8_t>* attr_unknown,
-				  const bool* 		 valid,
-				  const bool* 		 unicast,
-				  const bool* 		 multicast);
-private:
-    void timer_expired();
+class PrintRoutes : public XrlBgpV0p3Client 
+{
+	public:
+		static const uint32_t MAX_REQUESTS = 100;
+		static const int32_t INVALID = -1;
+		enum detail_t {SUMMARY, NORMAL, DETAIL};
+		PrintRoutes(detail_t verbose, int interval, IPNet<A> net, bool unicast,
+				bool multicast,	int lines = -1);
+		void get_route_list_start(IPNet<A> net, bool unicast, bool multicast);
+		void get_route_list_start_done(const XrlError& e,
+				const uint32_t* token);
+		void get_route_list_next();
+		void get_route_list_next_done(const XrlError& 	 e,
+				const IPv4* 		 peer_id,
+				const IPNet<A>* 	 net,
+				const uint32_t 	 *best_and_origin,
+				const vector<uint8_t>* aspath,
+				const A* 		 nexthop,
+				const int32_t* 	 med,
+				const int32_t* 	 localpref,
+				const int32_t* 	 atomic_agg,
+				const vector<uint8_t>* aggregator,
+				const int32_t* 	 calc_localpref,
+				const vector<uint8_t>* attr_unknown,
+				const bool* 		 valid,
+				const bool* 		 unicast,
+				const bool* 		 multicast);
+	private:
+		void timer_expired();
 
-    XrlStdRouter 	_xrl_rtr;
-    detail_t 		_verbose;
-    uint32_t 		_token;
-    bool 		_done;
-    uint32_t 		_count;
-    bool 		_prev_no_bgp;
-    bool 		_prev_no_routes;
+		XrlStdRouter 	_xrl_rtr;
+		detail_t 		_verbose;
+		uint32_t 		_token;
+		bool 		_done;
+		uint32_t 		_count;
+		bool 		_prev_no_bgp;
+		bool 		_prev_no_routes;
 
-    XorpTimer 		_timer;
-    int 		_active_requests;
-    bool 		_unicast;
-    bool 		_multicast;
-    int			_lines;
+		XorpTimer 		_timer;
+		int 		_active_requests;
+		bool 		_unicast;
+		bool 		_multicast;
+		int			_lines;
 };
 
 #endif // __BGP_TOOLS_PRINT_PEER_HH__

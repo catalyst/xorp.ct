@@ -34,9 +34,9 @@ using policy_backend_parser::policy_backend_parse;
 
 PolicyFilter::PolicyFilter() : _policies(NULL),
 #ifndef XORP_DISABLE_PROFILE
-			       _profiler_exec(NULL),
+    _profiler_exec(NULL),
 #endif
-			       _subr(NULL)
+    _subr(NULL)
 {
     _exec.set_set_manager(&_sman);
 }
@@ -49,7 +49,8 @@ void PolicyFilter::configure(const string& str)
     string err;
 
     // do the actual parsing
-    if (policy_backend_parse(*policies, *sets, *subr, str, err)) {
+    if (policy_backend_parse(*policies, *sets, *subr, str, err)) 
+    {
 	// get rid of temporary parse junk.
 	delete_vector(policies);
 	clear_map(*sets);
@@ -77,13 +78,15 @@ PolicyFilter::~PolicyFilter()
 
 void PolicyFilter::reset()
 {
-    if (_policies) {
+    if (_policies) 
+    {
 	delete_vector(_policies);
 	_policies = NULL;
 	_exec.set_policies(NULL);
     }
 
-    if (_subr) {
+    if (_subr) 
+    {
 	clear_map(*_subr);
 	delete _subr;
 	_subr = NULL;
@@ -97,7 +100,8 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     bool default_action = true;
 
     // no configuration done yet.
-    if (!_policies) {
+    if (!_policies) 
+    {
 	// need to sync.  Consider case where the parent [such as version policy
 	// filter] performed a write for some reason.  If we return without
 	// syncing, it might be a problem [i.e. when using singlevarrw which
@@ -116,18 +120,21 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 
     // print any trace data...
     uint32_t level = varrw.trace();
-    if (level) {
+    if (level) 
+    {
 	string trace = "";
 
 	// basic, one line [hopefully!] info...
-	if (level > 0) {
+	if (level > 0) 
+	{
 	    trace += varrw.more_tracelog();
 
-	    switch (fa) {
+	    switch (fa) 
+	    {
 		case IvExec::REJ:
 		    trace += ": rejected";
 		    break;
-	    
+
 		case IvExec::DEFAULT:
 		    trace += ": default action";
 		    break;
@@ -138,12 +145,14 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 	    }
 	}
 
-	if (level > 1) {
+	if (level > 1) 
+	{
 	    trace += "\nBasic VarRW trace:\n";
 	    trace += varrw.tracelog();
 	}
 
-	if (level > 2) {
+	if (level > 2) 
+	{
 	    trace += "Execution trace:\n";
 	    trace += _exec.tracelog();
 	    trace += "End of trace\n";
@@ -153,14 +162,15 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     }
 
     // decide what to do
-    switch (fa) {
-        case IvExec::REJ:
+    switch (fa) 
+    {
+	case IvExec::REJ:
 	    return false;
 
-        case IvExec::DEFAULT:
+	case IvExec::DEFAULT:
 	    return default_action;
 
-        case IvExec::ACCEPT:
+	case IvExec::ACCEPT:
 	    return true;
     }
 
@@ -169,7 +179,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 }
 
 #ifndef XORP_DISABLE_PROFILE
-void
+    void
 PolicyFilter::set_profiler_exec(PolicyProfiler* profiler)
 {
     _profiler_exec = profiler;

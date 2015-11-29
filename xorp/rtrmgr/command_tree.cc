@@ -31,121 +31,128 @@
 
 
 CommandTreeNode::CommandTreeNode(const string& name,
-				 const ConfigTreeNode* ctn,
-				 const TemplateTreeNode* ttn)
-    : _name(name),
-      _config_tree_node(ctn),
-      _template_tree_node(ttn)
+		const ConfigTreeNode* ctn,
+		const TemplateTreeNode* ttn)
+: _name(name),
+	_config_tree_node(ctn),
+	_template_tree_node(ttn)
 {
-    _parent = NULL;
-    _has_command = false;
+	_parent = NULL;
+	_has_command = false;
 }
 
 CommandTreeNode::~CommandTreeNode()
 {
-    list<CommandTreeNode*>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	delete *iter;
-    }
+	list<CommandTreeNode*>::iterator iter;
+	for (iter = _children.begin(); iter != _children.end(); ++iter) 
+	{
+		delete *iter;
+	}
 }
 
-void
+	void
 CommandTreeNode::add_child(CommandTreeNode* child)
 {
-    _children.push_back(child);
-    child->set_parent(this);
+	_children.push_back(child);
+	child->set_parent(this);
 }
 
 string
 CommandTreeNode::str() const
 {
-    if (_parent == NULL) {
-	return "";
-    } else {
-	string s = _parent->str();
-	if (s != "") 
-	    s += " ";
-	s += _name;
-	if (_has_command)
-	    s += "[*]";
-	return s;
-    }
+	if (_parent == NULL) 
+	{
+		return "";
+	} else 
+	{
+		string s = _parent->str();
+		if (s != "") 
+			s += " ";
+		s += _name;
+		if (_has_command)
+			s += "[*]";
+		return s;
+	}
 }
 
 
 string
 CommandTreeNode::subtree_str() const
 {
-    string s;
+	string s;
 
-    s = c_format("Node: %s\n", str().c_str());
-    list<CommandTreeNode*>::const_iterator iter;
-    for (iter = _children.begin(); iter !=  _children.end(); ++iter) {
-	s += (*iter)->subtree_str();
-    }
+	s = c_format("Node: %s\n", str().c_str());
+	list<CommandTreeNode*>::const_iterator iter;
+	for (iter = _children.begin(); iter !=  _children.end(); ++iter) 
+	{
+		s += (*iter)->subtree_str();
+	}
 
-    return s;
+	return s;
 }
 
 const string& 
 CommandTreeNode::help() const 
 {
-    return _template_tree_node->help();
+	return _template_tree_node->help();
 }
 
 
 CommandTree::CommandTree() 
-    : _root_node("ROOT", NULL, NULL)
+	: _root_node("ROOT", NULL, NULL)
 {
-    _current_node = &_root_node;
+	_current_node = &_root_node;
 }
 
 CommandTree::~CommandTree()
 {
-    
+
 }
 
-void 
+	void 
 CommandTree::push(const string& str)
 {
-    _temp_path.push_back(str);
+	_temp_path.push_back(str);
 }
 
-void 
+	void 
 CommandTree::pop()
 {
-    if (_temp_path.empty()) {
-	_current_node = _current_node->parent();
-    } else {
-	_temp_path.pop_back();
-    }
+	if (_temp_path.empty()) 
+	{
+		_current_node = _current_node->parent();
+	} else 
+	{
+		_temp_path.pop_back();
+	}
 }
 
-void 
+	void 
 CommandTree::instantiate(const ConfigTreeNode* ctn, 
-			 const TemplateTreeNode* ttn,
-			 bool has_command)
+		const TemplateTreeNode* ttn,
+		bool has_command)
 {
-    XLOG_ASSERT(! _temp_path.empty());
+	XLOG_ASSERT(! _temp_path.empty());
 
-    list<string>::const_iterator iter;
+	list<string>::const_iterator iter;
 
-    for (iter = _temp_path.begin(); iter != _temp_path.end(); ++iter) {
-	debug_msg("Instantiating node >%s<\n", iter->c_str());
-	CommandTreeNode* new_ctn = new CommandTreeNode(*iter, ctn, ttn);
-	_current_node->add_child(new_ctn);
-	_current_node = new_ctn;
-    }
-    if (has_command)
-	_current_node->set_has_command();
+	for (iter = _temp_path.begin(); iter != _temp_path.end(); ++iter) 
+	{
+		debug_msg("Instantiating node >%s<\n", iter->c_str());
+		CommandTreeNode* new_ctn = new CommandTreeNode(*iter, ctn, ttn);
+		_current_node->add_child(new_ctn);
+		_current_node = new_ctn;
+	}
+	if (has_command)
+		_current_node->set_has_command();
 
-    _temp_path.clear();
+	_temp_path.clear();
 }
 
-void 
+	void 
 CommandTree::activate_current()
 {
-    _current_node->set_has_command();
+	_current_node->set_has_command();
 }
 
 
@@ -153,5 +160,5 @@ CommandTree::activate_current()
 string
 CommandTree::tree_str() const
 {
-    return _root_node.subtree_str();
+	return _root_node.subtree_str();
 }

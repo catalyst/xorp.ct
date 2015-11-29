@@ -36,84 +36,87 @@ class XrlAtom;
  * type in Xrl calls.  The XrlAtom type that the list supports is
  * determined by the first XrlAtom added to the list via the
  * prepend() and append() methods.
-*/
-class XrlAtomList {
-public:
-    struct BadAtomType : public XorpReasonedException {
+ */
+class XrlAtomList 
+{
+    public:
+	struct BadAtomType : public XorpReasonedException 
+    {
 	BadAtomType(const char* file, size_t line, const string& init_why)
 	    : XorpReasonedException("BadAtomType", file, line, init_why)
 	{}
     };
-    struct InvalidIndex : public XorpReasonedException {
+	struct InvalidIndex : public XorpReasonedException 
+    {
 	InvalidIndex(const char* file, size_t line, const string& init_why)
 	    : XorpReasonedException("InvalidIndex", file, line, init_why)
 	{}
     };
 
-public:
-    XrlAtomList();
+    public:
+	XrlAtomList();
 
-    /**
-     * Insert an XrlAtom at the front of the list.
-     *
-     * @param xa the XrlAtom to be inserted.
-     */
-    void prepend(const XrlAtom& xa) throw (BadAtomType);
+	/**
+	 * Insert an XrlAtom at the front of the list.
+	 *
+	 * @param xa the XrlAtom to be inserted.
+	 */
+	void prepend(const XrlAtom& xa) throw (BadAtomType);
 
-    /**
-     * Insert an XrlAtom at the tail of the list.
-     *
-     * @param xa the XrlAtom to be inserted.
-     */
-    void append(const XrlAtom& xa) throw (BadAtomType);
+	/**
+	 * Insert an XrlAtom at the tail of the list.
+	 *
+	 * @param xa the XrlAtom to be inserted.
+	 */
+	void append(const XrlAtom& xa) throw (BadAtomType);
 
-    /**
-     * Retrieve an XrlAtom from list.
-     *
-     * @param itemno the index of the atom in the list.
-     * @return the itemno - 1 XrlAtom in the list.
-     */
-    const XrlAtom& get(size_t itemno) const throw (InvalidIndex);
+	/**
+	 * Retrieve an XrlAtom from list.
+	 *
+	 * @param itemno the index of the atom in the list.
+	 * @return the itemno - 1 XrlAtom in the list.
+	 */
+	const XrlAtom& get(size_t itemno) const throw (InvalidIndex);
 
-    /**
-     * Removes an XrlAtom from list.
-     *
-     * @param itemno the index of the atom in the list to be removed.
-     */
-    void remove(size_t itemno) throw (InvalidIndex);
+	/**
+	 * Removes an XrlAtom from list.
+	 *
+	 * @param itemno the index of the atom in the list to be removed.
+	 */
+	void remove(size_t itemno) throw (InvalidIndex);
 
-    /**
-     * @return number of XrlAtoms in the list.
-     */
-    size_t size() const;
+	/**
+	 * @return number of XrlAtoms in the list.
+	 */
+	size_t size() const;
 
-    /**
-     * Test equality of with another XrlAtomList.
-     *
-     * @return true if XrlAtomList's are the same.
-     */
-    bool operator==(const XrlAtomList& x) const;
+	/**
+	 * Test equality of with another XrlAtomList.
+	 *
+	 * @return true if XrlAtomList's are the same.
+	 */
+	bool operator==(const XrlAtomList& x) const;
 
-    /**
-     * @return a C++ string with the human-readable representation of
-     * the list.
-     */
-    string str() const;
+	/**
+	 * @return a C++ string with the human-readable representation of
+	 * the list.
+	 */
+	string str() const;
 
-    /**
-     * Construct from human-readable representation.
-     */
-    XrlAtomList(const string& s);
+	/**
+	 * Construct from human-readable representation.
+	 */
+	XrlAtomList(const string& s);
 
-    size_t  modify(size_t item, const uint8_t* buf, size_t len);
-    void    set_size(size_t size);
+	size_t  modify(size_t item, const uint8_t* buf, size_t len);
+	void    set_size(size_t size);
 
-private:
-    void    check_type(const XrlAtom& xa) throw (BadAtomType);
-    void    do_append(const XrlAtom& xa);
+    private:
+	void    check_type(const XrlAtom& xa) throw (BadAtomType);
+	void    do_append(const XrlAtom& xa);
 
-    list<XrlAtom> _list;
-    size_t	  _size;
+	list<XrlAtom> _list;
+	size_t	  _size;
 };
 
 #endif // __LIBXIPC_XRL_ATOM_LIST_HH__

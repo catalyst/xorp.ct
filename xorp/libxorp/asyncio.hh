@@ -55,187 +55,191 @@ struct iovec;
  * to or from user supplied buffers.  A callback is invoked on each
  * transfer.  Transfer stops when the available buffers are exhausted.
  */
-class AsyncFileOperator {
-public:
-    enum Event {
-	DATA = 1,		// I/O occured
-	FLUSHING = 2,		// Buffer is being flushed
-	OS_ERROR = 4,		// I/O Error has occurred, check error()
-	END_OF_FILE = 8,	// End of file reached (applies to read only)
-	WOULDBLOCK = 16		// I/O would block the current thread
-    };
+class AsyncFileOperator 
+{
+    public:
+	enum Event 
+	{
+	    DATA = 1,		// I/O occured
+	    FLUSHING = 2,		// Buffer is being flushed
+	    OS_ERROR = 4,		// I/O Error has occurred, check error()
+	    END_OF_FILE = 8,	// End of file reached (applies to read only)
+	    WOULDBLOCK = 16		// I/O would block the current thread
+	};
 
-    /**
-     * Callback type user provides when adding buffers to sub-classes
-     * AsyncFileOperator.  Callback's are on a per buffer basis and
-     * invoked any time some I/O is performed.  The offset field
-     * refers to the offset of the last byte read, or written, from
-     * the start of the buffer.
-     *
-     * Callback has arguments:
-     * 		ErrorCode	e,
-     *		uint8_t*	buffer,
-     * 		size_t 		buffer_bytes,
-     *          size_t 		offset
-     */
+	/**
+	 * Callback type user provides when adding buffers to sub-classes
+	 * AsyncFileOperator.  Callback's are on a per buffer basis and
+	 * invoked any time some I/O is performed.  The offset field
+	 * refers to the offset of the last byte read, or written, from
+	 * the start of the buffer.
+	 *
+	 * Callback has arguments:
+	 * 		ErrorCode	e,
+	 *		uint8_t*	buffer,
+	 * 		size_t 		buffer_bytes,
+	 *          size_t 		offset
+	 */
 
-    typedef XorpCallback4<void, Event, const uint8_t*, size_t, size_t>::RefPtr Callback;
-public:
-    /**
-     * @return the number of buffers available.
-     */
-    virtual size_t 	buffers_remaining() const = 0;
+	typedef XorpCallback4<void, Event, const uint8_t*, size_t, size_t>::RefPtr Callback;
+    public:
+	/**
+	 * @return the number of buffers available.
+	 */
+	virtual size_t 	buffers_remaining() const = 0;
 
-    /**
-     * Stop asynchronous operation and clear list of buffers.
-     */
-    virtual void	flush_buffers() = 0;
+	/**
+	 * Stop asynchronous operation and clear list of buffers.
+	 */
+	virtual void	flush_buffers() = 0;
 
-    /**
-     * Start asynchronous operation.
-     *
-     * @return true on success, false if no buffers are available.
-     */
-    virtual bool	start() = 0;
+	/**
+	 * Start asynchronous operation.
+	 *
+	 * @return true on success, false if no buffers are available.
+	 */
+	virtual bool	start() = 0;
 
-    /**
-     * Stop asynchronous operation.
-     */
-    virtual void	stop()  = 0;
+	/**
+	 * Stop asynchronous operation.
+	 */
+	virtual void	stop()  = 0;
 
-    /**
-     * Resume stopped asynchronous operation.
-     *
-     * @return true on success, false if no buffers are available.
-     */
-    bool		resume()		{ return start(); }
+	/**
+	 * Resume stopped asynchronous operation.
+	 *
+	 * @return true on success, false if no buffers are available.
+	 */
+	bool		resume()		{ return start(); }
 
-    /**
-     * @return true if asynchronous I/O is started.
-     */
-    bool		running() const 	{ return _running; }
+	/**
+	 * @return true if asynchronous I/O is started.
+	 */
+	bool		running() const 	{ return _running; }
 
-    /**
-     * @return file descriptor undergoing asynchronous operation.
-     */
-    XorpFd		fd() const		{ return _fd; }
+	/**
+	 * @return file descriptor undergoing asynchronous operation.
+	 */
+	XorpFd		fd() const		{ return _fd; }
 
-    /**
-     * @return the last error code returned by the underlying OS.
-     */
-    int			error() const		{ return _last_error; }
+	/**
+	 * @return the last error code returned by the underlying OS.
+	 */
+	int			error() const		{ return _last_error; }
 
-    virtual string toString() const;
+	virtual string toString() const;
 
-protected:
-    AsyncFileOperator( XorpFd fd, 
-		      int priority = XorpTask::PRIORITY_DEFAULT)
-	:  _fd(fd), _running(false),
-	  _last_error(0), _priority(priority)
+    protected:
+	AsyncFileOperator( XorpFd fd, 
+		int priority = XorpTask::PRIORITY_DEFAULT)
+	    :  _fd(fd), _running(false),
+	    _last_error(0), _priority(priority)
     {
 	int fl = fcntl(fd, F_GETFL);
 	assert(fl & O_NONBLOCK);
     }
-    virtual ~AsyncFileOperator();
+	virtual ~AsyncFileOperator();
 
-    XorpFd		_fd;
-    bool		_running;
-    int			_last_error;
-    int			_priority;
+	XorpFd		_fd;
+	bool		_running;
+	int			_last_error;
+	int			_priority;
 };
 
 /**
  * @short Read asynchronously from a file.
  */
-class AsyncFileReader : public AsyncFileOperator {
-public:
-    /**
-     * @param fd a file descriptor to read from.
-     */
-    AsyncFileReader( XorpFd fd,
-		    int priority = XorpTask::PRIORITY_DEFAULT);
-    virtual ~AsyncFileReader();
-
-    /**
-     * Add an additional buffer for reading to.
-     *
-     * Note that the buffer with the data is managed by the user.
-     *
-     * @param buffer pointer to buffer.
-     * @param buffer_bytes size of buffer in bytes.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_buffer(uint8_t* buffer, size_t buffer_bytes, const Callback& cb);
-
-    /**
-     * Add an additional buffer for reading to.
-     *
-     * Note that the buffer with the data is managed by the user.
-     *
-     * @param buffer pointer to buffer.
-     * @param buffer_bytes size of buffer in bytes.
-     * @param offset starting point for read operation.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_buffer_with_offset(uint8_t* buffer, size_t buffer_bytes,
-				size_t offset, const Callback& cb);
-
-    /**
-     * Start asynchronous operation.
-     *
-     * @return true on success, false if no buffers are available.
-     */
-    bool start();
-
-    /**
-     * Stop asynchronous operation.
-     */
-    void stop();
-
-    /**
-     * @return the number of buffers available.
-     */
-    size_t buffers_remaining() const { return _buffers.size(); }
-
-    /**
-     * Stop asynchronous operation and clear list of buffers.
-     */
-    void flush_buffers();
-
-    virtual string toString() const;
-
-protected:
-    class BufferInfo :
-        public NONCOPYABLE
-    {
+class AsyncFileReader : public AsyncFileOperator 
+{
     public:
-	BufferInfo(uint8_t* b, size_t bb, Callback cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
-	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {}
+	/**
+	 * @param fd a file descriptor to read from.
+	 */
+	AsyncFileReader( XorpFd fd,
+		int priority = XorpTask::PRIORITY_DEFAULT);
+	virtual ~AsyncFileReader();
 
-	void dispatch_callback(AsyncFileOperator::Event e) {
-	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
-	}
+	/**
+	 * Add an additional buffer for reading to.
+	 *
+	 * Note that the buffer with the data is managed by the user.
+	 *
+	 * @param buffer pointer to buffer.
+	 * @param buffer_bytes size of buffer in bytes.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_buffer(uint8_t* buffer, size_t buffer_bytes, const Callback& cb);
 
-	uint8_t* buffer() { return (_buffer); }
-	size_t buffer_bytes() const { return (_buffer_bytes); }
-	size_t offset() const { return (_offset); }
-	void incr_offset(size_t done) { _offset += done; }
+	/**
+	 * Add an additional buffer for reading to.
+	 *
+	 * Note that the buffer with the data is managed by the user.
+	 *
+	 * @param buffer pointer to buffer.
+	 * @param buffer_bytes size of buffer in bytes.
+	 * @param offset starting point for read operation.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_buffer_with_offset(uint8_t* buffer, size_t buffer_bytes,
+		size_t offset, const Callback& cb);
 
-    private:
-	BufferInfo();				// Not directly constructible
+	/**
+	 * Start asynchronous operation.
+	 *
+	 * @return true on success, false if no buffers are available.
+	 */
+	bool start();
 
-	uint8_t*	_buffer;
-	size_t		_buffer_bytes;
-	size_t		_offset;
-	Callback	_cb;
+	/**
+	 * Stop asynchronous operation.
+	 */
+	void stop();
+
+	/**
+	 * @return the number of buffers available.
+	 */
+	size_t buffers_remaining() const { return _buffers.size(); }
+
+	/**
+	 * Stop asynchronous operation and clear list of buffers.
+	 */
+	void flush_buffers();
+
+	virtual string toString() const;
+
+    protected:
+	class BufferInfo :
+	    public NONCOPYABLE
+    {
+	public:
+	    BufferInfo(uint8_t* b, size_t bb, Callback cb)
+		: _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
+	    BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
+		: _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {}
+
+	    void dispatch_callback(AsyncFileOperator::Event e) 
+	    {
+		_cb->dispatch(e, _buffer, _buffer_bytes, _offset);
+	    }
+
+	    uint8_t* buffer() { return (_buffer); }
+	    size_t buffer_bytes() const { return (_buffer_bytes); }
+	    size_t offset() const { return (_offset); }
+	    void incr_offset(size_t done) { _offset += done; }
+
+	private:
+	    BufferInfo();				// Not directly constructible
+
+	    uint8_t*	_buffer;
+	    size_t		_buffer_bytes;
+	    size_t		_offset;
+	    Callback	_cb;
     };
 
-    void read(XorpFd fd, IoEventType type);
-    void complete_transfer(int err, ssize_t done);
+	void read(XorpFd fd, IoEventType type);
+	void complete_transfer(int err, ssize_t done);
 
-    list<BufferInfo *> _buffers;
+	list<BufferInfo *> _buffers;
 
 };
 
@@ -247,175 +251,176 @@ class AsyncFileWriter :
     public NONCOPYABLE,
     public AsyncFileOperator
 {
-public:
-    /**
-     * @param fd a file descriptor marked as non-blocking to write to.
-     * @param coalesce the number of buffers to coalesce for each write()
-     *        system call.
-     */
-    AsyncFileWriter( XorpFd fd, uint32_t coalesce = 1,
-		    int priority = XorpTask::PRIORITY_DEFAULT);
-
-    virtual ~AsyncFileWriter();
-
-    /**
-     * Add an additional buffer for writing from.
-     *
-     * Note that the buffer with the data is managed by the user.
-     *
-     * @param buffer pointer to buffer.
-     * @param buffer_bytes size of buffer in bytes.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_buffer(const uint8_t*	buffer,
-		    size_t		buffer_bytes,
-		    const Callback&	cb);
-
-    /**
-     * Add an additional buffer for writing from by using sendto(2).
-     *
-     * Note that sendto()-buffers are never coalesced with other buffers.
-     *
-     * @param buffer pointer to buffer.
-     * @param buffer_bytes size of buffer in bytes.
-     * @param dst_addr the destination address to send the data to.
-     * @param dst_port the destination port (in host order) to send the
-     * data to.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_buffer_sendto(const uint8_t*	buffer,
-			   size_t		buffer_bytes,
-			   const IPvX&		dst_addr,
-			   uint16_t		dst_port,
-			   const Callback&	cb);
-
-    /**
-     * Add an additional buffer for writing from.
-     *
-     * @param buffer pointer to buffer.
-     * @param buffer_bytes size of buffer in bytes.
-     * @param offset the starting point to write from in the buffer.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_buffer_with_offset(const uint8_t*	buffer,
-				size_t		buffer_bytes,
-				size_t		offset,
-				const Callback&	cb);
-
-    /**
-     * Add additional data for writing from.
-     *
-     * Note that the data is stored to write is stored internally by
-     * AsyncFileWriter.
-     *
-     * @param data the data to write.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_data(const vector<uint8_t>&	data,
-		  const Callback&		cb);
-
-    /**
-     * Add additional data for writing from by using sendto(2).
-     *
-     * Note that the data is stored to write is stored internally by
-     * AsyncFileWriter.
-     * Note that sendto()-buffers are never coalesced with other buffers.
-     *
-     * @param data the data to send.
-     * @param dst_addr the destination address to send the data to.
-     * @param dst_port the destination port (in host order) to send the
-     * data to.
-     * @param cb Callback object to invoke when I/O is performed.
-     */
-    void add_data_sendto(const vector<uint8_t>&	data,
-			 const IPvX&		dst_addr,
-			 uint16_t		dst_port,
-			 const Callback&	cb);
-
-    /**
-     * Start asynchronous operation.
-     *
-     * @return true on success, false if no buffers are available.
-     */
-    bool start();
-
-    /**
-     * Stop asynchronous operation.
-     */
-    void stop();
-
-    /**
-     * @return the number of buffers available.
-     */
-    size_t buffers_remaining() const { return _buffers.size(); }
-
-    /**
-     * Stop asynchronous operation and clear list of buffers.
-     */
-    void flush_buffers();
-
-    virtual string toString() const;
-
-private:
-    AsyncFileWriter();			// Not directly constructible
-
-protected:
-    class BufferInfo :
-	public NONCOPYABLE
-    {
     public:
-	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
-	      _cb(cb), _is_sendto(false) {}
-	BufferInfo(const uint8_t* b, size_t bb, const IPvX& dst_addr,
-		   uint16_t dst_port, const Callback& cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_addr(dst_addr),
-	      _dst_port(dst_port), _cb(cb), _is_sendto(true) {}
-	BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
-	      _cb(cb), _is_sendto(false) {}
+	/**
+	 * @param fd a file descriptor marked as non-blocking to write to.
+	 * @param coalesce the number of buffers to coalesce for each write()
+	 *        system call.
+	 */
+	AsyncFileWriter( XorpFd fd, uint32_t coalesce = 1,
+		int priority = XorpTask::PRIORITY_DEFAULT);
 
-	BufferInfo(const vector<uint8_t>& data, const Callback& cb)
-	    : _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
-	      _offset(0), _dst_port(0), _cb(cb), _is_sendto(false) {}
-	BufferInfo(const vector<uint8_t>& data, const IPvX& dst_addr,
-		   uint16_t dst_port, const Callback& cb)
-	    : _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
-	      _offset(0), _dst_addr(dst_addr), _dst_port(dst_port),
-	      _cb(cb), _is_sendto(true) {}
+	virtual ~AsyncFileWriter();
 
-	void dispatch_callback(AsyncFileOperator::Event e) {
-	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
-	}
+	/**
+	 * Add an additional buffer for writing from.
+	 *
+	 * Note that the buffer with the data is managed by the user.
+	 *
+	 * @param buffer pointer to buffer.
+	 * @param buffer_bytes size of buffer in bytes.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_buffer(const uint8_t*	buffer,
+		size_t		buffer_bytes,
+		const Callback&	cb);
 
-	const uint8_t* buffer() const { return (_buffer); }
-	size_t buffer_bytes() const { return (_buffer_bytes); }
-	size_t offset() const { return (_offset); }
-	void incr_offset(size_t done) { _offset += done; }
-	const IPvX& dst_addr() const { return (_dst_addr); }
-	uint16_t dst_port() const { return (_dst_port); }
-	bool is_sendto() const { return (_is_sendto); }
+	/**
+	 * Add an additional buffer for writing from by using sendto(2).
+	 *
+	 * Note that sendto()-buffers are never coalesced with other buffers.
+	 *
+	 * @param buffer pointer to buffer.
+	 * @param buffer_bytes size of buffer in bytes.
+	 * @param dst_addr the destination address to send the data to.
+	 * @param dst_port the destination port (in host order) to send the
+	 * data to.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_buffer_sendto(const uint8_t*	buffer,
+		size_t		buffer_bytes,
+		const IPvX&		dst_addr,
+		uint16_t		dst_port,
+		const Callback&	cb);
+
+	/**
+	 * Add an additional buffer for writing from.
+	 *
+	 * @param buffer pointer to buffer.
+	 * @param buffer_bytes size of buffer in bytes.
+	 * @param offset the starting point to write from in the buffer.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_buffer_with_offset(const uint8_t*	buffer,
+		size_t		buffer_bytes,
+		size_t		offset,
+		const Callback&	cb);
+
+	/**
+	 * Add additional data for writing from.
+	 *
+	 * Note that the data is stored to write is stored internally by
+	 * AsyncFileWriter.
+	 *
+	 * @param data the data to write.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_data(const vector<uint8_t>&	data,
+		const Callback&		cb);
+
+	/**
+	 * Add additional data for writing from by using sendto(2).
+	 *
+	 * Note that the data is stored to write is stored internally by
+	 * AsyncFileWriter.
+	 * Note that sendto()-buffers are never coalesced with other buffers.
+	 *
+	 * @param data the data to send.
+	 * @param dst_addr the destination address to send the data to.
+	 * @param dst_port the destination port (in host order) to send the
+	 * data to.
+	 * @param cb Callback object to invoke when I/O is performed.
+	 */
+	void add_data_sendto(const vector<uint8_t>&	data,
+		const IPvX&		dst_addr,
+		uint16_t		dst_port,
+		const Callback&	cb);
+
+	/**
+	 * Start asynchronous operation.
+	 *
+	 * @return true on success, false if no buffers are available.
+	 */
+	bool start();
+
+	/**
+	 * Stop asynchronous operation.
+	 */
+	void stop();
+
+	/**
+	 * @return the number of buffers available.
+	 */
+	size_t buffers_remaining() const { return _buffers.size(); }
+
+	/**
+	 * Stop asynchronous operation and clear list of buffers.
+	 */
+	void flush_buffers();
+
+	virtual string toString() const;
 
     private:
-	BufferInfo();			// Not directly constructible
+	AsyncFileWriter();			// Not directly constructible
 
-	const vector<uint8_t>	_data;		// Local copy of the data
-	const uint8_t*		_buffer;
-	size_t			_buffer_bytes;
-	size_t			_offset;
-	const IPvX		_dst_addr;
-	const uint16_t		_dst_port;
-	Callback		_cb;
-	bool			_is_sendto;
+    protected:
+	class BufferInfo :
+	    public NONCOPYABLE
+    {
+	public:
+	    BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
+		: _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
+		_cb(cb), _is_sendto(false) {}
+	    BufferInfo(const uint8_t* b, size_t bb, const IPvX& dst_addr,
+		    uint16_t dst_port, const Callback& cb)
+		: _buffer(b), _buffer_bytes(bb), _offset(0), _dst_addr(dst_addr),
+		_dst_port(dst_port), _cb(cb), _is_sendto(true) {}
+	    BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb)
+		: _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
+		_cb(cb), _is_sendto(false) {}
+
+	    BufferInfo(const vector<uint8_t>& data, const Callback& cb)
+		: _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
+		_offset(0), _dst_port(0), _cb(cb), _is_sendto(false) {}
+	    BufferInfo(const vector<uint8_t>& data, const IPvX& dst_addr,
+		    uint16_t dst_port, const Callback& cb)
+		: _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
+		_offset(0), _dst_addr(dst_addr), _dst_port(dst_port),
+		_cb(cb), _is_sendto(true) {}
+
+	    void dispatch_callback(AsyncFileOperator::Event e) 
+	    {
+		_cb->dispatch(e, _buffer, _buffer_bytes, _offset);
+	    }
+
+	    const uint8_t* buffer() const { return (_buffer); }
+	    size_t buffer_bytes() const { return (_buffer_bytes); }
+	    size_t offset() const { return (_offset); }
+	    void incr_offset(size_t done) { _offset += done; }
+	    const IPvX& dst_addr() const { return (_dst_addr); }
+	    uint16_t dst_port() const { return (_dst_port); }
+	    bool is_sendto() const { return (_is_sendto); }
+
+	private:
+	    BufferInfo();			// Not directly constructible
+
+	    const vector<uint8_t>	_data;		// Local copy of the data
+	    const uint8_t*		_buffer;
+	    size_t			_buffer_bytes;
+	    size_t			_offset;
+	    const IPvX		_dst_addr;
+	    const uint16_t		_dst_port;
+	    Callback		_cb;
+	    bool			_is_sendto;
     };
 
-    void write(XorpFd, IoEventType);
-    void complete_transfer(ssize_t done);
+	void write(XorpFd, IoEventType);
+	void complete_transfer(ssize_t done);
 
-    uint32_t		_coalesce;
-    struct iovec* 	_iov;
-    ref_ptr<int>	_dtoken;
-    list<BufferInfo *> 	_buffers;
+	uint32_t		_coalesce;
+	struct iovec* 	_iov;
+	ref_ptr<int>	_dtoken;
+	list<BufferInfo *> 	_buffers;
 
 };
 

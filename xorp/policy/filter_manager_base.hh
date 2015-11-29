@@ -34,25 +34,26 @@
  * It is used by the configuration class to trigger updates
  *
  */
-class FilterManagerBase {
-public:
-    virtual ~FilterManagerBase() {}
+class FilterManagerBase 
+{
+    public:
+	virtual ~FilterManagerBase() {}
 
-    /**
-     * Update a specific policy filter.
-     *
-     * @param t The target to update [protocol/filter pair].
-     *
-     */
-    virtual void update_filter(const Code::Target& t) = 0;
+	/**
+	 * Update a specific policy filter.
+	 *
+	 * @param t The target to update [protocol/filter pair].
+	 *
+	 */
+	virtual void update_filter(const Code::Target& t) = 0;
 
-    /**
-     * Commit all updates after msec milliseconds.
-     *
-     * @param msec Milliseconds after which all updates should be commited.
-     *
-     */
-    virtual void flush_updates(uint32_t msec) = 0;
+	/**
+	 * Commit all updates after msec milliseconds.
+	 *
+	 * @param msec Milliseconds after which all updates should be commited.
+	 *
+	 */
+	virtual void flush_updates(uint32_t msec) = 0;
 };
 
 #endif // __POLICY_FILTER_MANAGER_BASE_HH__

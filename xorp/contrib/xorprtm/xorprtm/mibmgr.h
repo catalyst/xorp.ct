@@ -39,8 +39,8 @@ MM_MibSet (PXORPRTM_MIB_SET_INPUT_DATA    pimsid);
 DWORD
 WINAPI
 MM_MibGet (PXORPRTM_MIB_GET_INPUT_DATA    pimgid,
-	   PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
-	   PULONG                         pulOutputSize,
-	   MODE                            mMode);
+	PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
+	PULONG                         pulOutputSize,
+	MODE                            mMode);
 
 #endif

@@ -44,24 +44,25 @@
  * BoF: Design Patterns , Erich Gamma, Richard Helm, Ralph Johnson,
  * John Vlissides, Addison Wesley, 1995, ISBN 0-201-63361-2.
  */
-class TransactionOperation {
-public:
-    /**
-     * Destructor
-     */
-    virtual ~TransactionOperation() {}
+class TransactionOperation 
+{
+    public:
+	/**
+	 * Destructor
+	 */
+	virtual ~TransactionOperation() {}
 
-    /**
-     * Dispatch operation
-     * 
-     * @return true on success, false on error.
-     */
-    virtual bool dispatch() = 0;
+	/**
+	 * Dispatch operation
+	 * 
+	 * @return true on success, false on error.
+	 */
+	virtual bool dispatch() = 0;
 
-    /**
-     * @return string representation of operation.
-     */
-    virtual string str() const = 0;
+	/**
+	 * @return string representation of operation.
+	 */
+	virtual string str() const = 0;
 };
 
 /**
@@ -72,219 +73,222 @@ public:
  * TransactionOperation s.  Each transaction is uniquely identified by
  * a transaction id.
  */
-class TransactionManager {
-public:
-    typedef ref_ptr<TransactionOperation> Operation;
+class TransactionManager 
+{
+    public:
+	typedef ref_ptr<TransactionOperation> Operation;
 
-    /**
-     * Constuctor with a given event loop, timeout, and max pending commits.
-     *
-     * 
-     * @param timeout_ms the inter-operation addition timeout.  If zero,
-     *        timeouts are not used, otherwise a timeout will occur
-     *	      and the transaction aborted if the transaction is not
-     *	      updated for timeout_ms.
-     *
-     * @param max_pending the maximum number of uncommitted transactions
-     *        pending commit.
-     */
-    TransactionManager( uint32_t timeout_ms = 0,
-		       uint32_t max_pending = 10) : 
-	     _timeout_ms(timeout_ms), _max_pending(max_pending), _next_tid(0)
+	/**
+	 * Constuctor with a given event loop, timeout, and max pending commits.
+	 *
+	 * 
+	 * @param timeout_ms the inter-operation addition timeout.  If zero,
+	 *        timeouts are not used, otherwise a timeout will occur
+	 *	      and the transaction aborted if the transaction is not
+	 *	      updated for timeout_ms.
+	 *
+	 * @param max_pending the maximum number of uncommitted transactions
+	 *        pending commit.
+	 */
+	TransactionManager( uint32_t timeout_ms = 0,
+		uint32_t max_pending = 10) : 
+	    _timeout_ms(timeout_ms), _max_pending(max_pending), _next_tid(0)
     {
     }
 
-    /**
-     * Destructor
-     */
-    virtual ~TransactionManager() {}
+	/**
+	 * Destructor
+	 */
+	virtual ~TransactionManager() {}
 
-    /**
-     * Start transaction
-     *
-     * @param new_tid variable to assigned new transaction id.
-     * 
-     * @return true on success, false if maximum number of pending 
-     * 		    transactions is reached.
-     */
-    bool start(uint32_t& new_tid);
+	/**
+	 * Start transaction
+	 *
+	 * @param new_tid variable to assigned new transaction id.
+	 * 
+	 * @return true on success, false if maximum number of pending 
+	 * 		    transactions is reached.
+	 */
+	bool start(uint32_t& new_tid);
 
-    /**
-     * Commit transaction
-     * 
-     * @param tid the transaction ID.
-     * @return true on success, false on error.
-     */
-    bool commit(uint32_t tid);
+	/**
+	 * Commit transaction
+	 * 
+	 * @param tid the transaction ID.
+	 * @return true on success, false on error.
+	 */
+	bool commit(uint32_t tid);
 
-    /**
-     * Abort transaction
-     * 
-     * @param tid the transaction ID.
-     * @return true on success, false on error.
-     */
-    bool abort(uint32_t tid);
+	/**
+	 * Abort transaction
+	 * 
+	 * @param tid the transaction ID.
+	 * @return true on success, false on error.
+	 */
+	bool abort(uint32_t tid);
 
-    /**
-     * Add operation to transaction.
-     *
-     * @param tid the transaction ID.
-     * @param operation to be added.
-     * @return true on success, false if tid is invalid.
-     */
-    virtual bool add(uint32_t tid, const Operation& op);
+	/**
+	 * Add operation to transaction.
+	 *
+	 * @param tid the transaction ID.
+	 * @param operation to be added.
+	 * @return true on success, false if tid is invalid.
+	 */
+	virtual bool add(uint32_t tid, const Operation& op);
 
-    /**
-     * Retrieve number of operations in pending transaction.
-     *
-     * @param tid the transaction ID.
-     *
-     * @param count variable to be assigned number of operations in 
-     * transaction.
-     *
-     * @return true if tid is valid, false otherwise.
-     */
-    bool retrieve_size(uint32_t tid, uint32_t& count) const;
+	/**
+	 * Retrieve number of operations in pending transaction.
+	 *
+	 * @param tid the transaction ID.
+	 *
+	 * @param count variable to be assigned number of operations in 
+	 * transaction.
+	 *
+	 * @return true if tid is valid, false otherwise.
+	 */
+	bool retrieve_size(uint32_t tid, uint32_t& count) const;
 
-    /**
-     * Get the inter-operation additional timeout.
-     * 
-     * If the inter-operation addition timeout is zero,
-     * timeouts are not used, otherwise a timeout will occur
-     * and the transaction aborted if the transaction is not
-     * updated for timeout_ms.
-     * 
-     * @return the inter-operation additional timeout.
-     */
-    uint32_t timeout_ms() const 	{ return _timeout_ms; }
+	/**
+	 * Get the inter-operation additional timeout.
+	 * 
+	 * If the inter-operation addition timeout is zero,
+	 * timeouts are not used, otherwise a timeout will occur
+	 * and the transaction aborted if the transaction is not
+	 * updated for timeout_ms.
+	 * 
+	 * @return the inter-operation additional timeout.
+	 */
+	uint32_t timeout_ms() const 	{ return _timeout_ms; }
 
-    /**
-     * Get the maximum number of uncommited pending transactions.
-     * 
-     * @return the maximum number of uncommitted transactions pending commit.
-     */
-    uint32_t max_pending() const { return _max_pending; }
+	/**
+	 * Get the maximum number of uncommited pending transactions.
+	 * 
+	 * @return the maximum number of uncommitted transactions pending commit.
+	 */
+	uint32_t max_pending() const { return _max_pending; }
 
-    /**
-     * Get the current number of uncommited pending transactions.
-     * 
-     * @return the current number of uncommitted transactions pending commit.
-     */
-    uint32_t pending() const 	{ return _transactions.size(); }
+	/**
+	 * Get the current number of uncommited pending transactions.
+	 * 
+	 * @return the current number of uncommitted transactions pending commit.
+	 */
+	uint32_t pending() const 	{ return _transactions.size(); }
 
-protected:
+    protected:
 
-    /**
-     * Overrideable function that can be called before the first
-     * operation in a commit is dispatched.
-     *
-     * Default implementation is a no-op.
-     */
-    virtual void pre_commit(uint32_t tid);
+	/**
+	 * Overrideable function that can be called before the first
+	 * operation in a commit is dispatched.
+	 *
+	 * Default implementation is a no-op.
+	 */
+	virtual void pre_commit(uint32_t tid);
 
-    /**
-     * Overrideable function that can be called after commit occurs 
-     *
-     * Default implementation is a no-op.
-     */
-    virtual void post_commit(uint32_t tid);
+	/**
+	 * Overrideable function that can be called after commit occurs 
+	 *
+	 * Default implementation is a no-op.
+	 */
+	virtual void post_commit(uint32_t tid);
 
-    /**
-     * Overrideable function that is called immediately after an individual
-     * operation is dispatched.
-     *
-     * Default implementation is a no-op.
-     *
-     * @param success whether the operation succeed.
-     *
-     * @param op the operation.
-     */
-    virtual void operation_result(bool success, 
-				  const TransactionOperation& op);
+	/**
+	 * Overrideable function that is called immediately after an individual
+	 * operation is dispatched.
+	 *
+	 * Default implementation is a no-op.
+	 *
+	 * @param success whether the operation succeed.
+	 *
+	 * @param op the operation.
+	 */
+	virtual void operation_result(bool success, 
+		const TransactionOperation& op);
 
-    /**
-     * Flush operations in transaction list.  May be use by @ref
-     * operation_result methods to safely prevent further operations
-     * being dispatched when errors are detected.  flush() always
-     * succeeds if transaction exists.
-     *
-     * @param tid transaction id of transaction to be flushed.
-     *
-     * @return true if transaction exists, false otherwise.
-     */
-    bool flush(uint32_t tid);
-    
-protected:
-    /**
-     * Transaction class, just a list of operations to be dispatched.
-     * 
-     * It is defined here so classes derived from TransactionManager
-     * can operate, eg sort operations in list, before committing transaction.
-     */
-    class Transaction {
-    public:
-	typedef list<Operation> OperationList;
-	
-	Transaction(TransactionManager& mgr, const XorpTimer& timeout_timer)
-	    : _mgr(&mgr), _timeout_timer(timeout_timer), _op_count(0)
-	{}
+	/**
+	 * Flush operations in transaction list.  May be use by @ref
+	 * operation_result methods to safely prevent further operations
+	 * being dispatched when errors are detected.  flush() always
+	 * succeeds if transaction exists.
+	 *
+	 * @param tid transaction id of transaction to be flushed.
+	 *
+	 * @return true if transaction exists, false otherwise.
+	 */
+	bool flush(uint32_t tid);
 
-	Transaction(TransactionManager& mgr) : _mgr(&mgr), _op_count(0)
-	{}
-	Transaction() { _mgr = NULL; }
+    protected:
+	/**
+	 * Transaction class, just a list of operations to be dispatched.
+	 * 
+	 * It is defined here so classes derived from TransactionManager
+	 * can operate, eg sort operations in list, before committing transaction.
+	 */
+	class Transaction 
+	{
+	    public:
+		typedef list<Operation> OperationList;
 
-	Transaction& operator=(const Transaction& rhs) {
-	    _mgr = rhs._mgr;
-	    _ops = rhs._ops;
-	    _timeout_timer = rhs._timeout_timer;
-	    _op_count = rhs._op_count;
-	    return *this;
-	}
+		Transaction(TransactionManager& mgr, const XorpTimer& timeout_timer)
+		    : _mgr(&mgr), _timeout_timer(timeout_timer), _op_count(0)
+		{}
 
-	/** Add an operation to list */
-	void add(const Operation& op);
+		Transaction(TransactionManager& mgr) : _mgr(&mgr), _op_count(0)
+	    {}
+		Transaction() { _mgr = NULL; }
 
-	/** Dispatch all operations on list */
-	void commit();
+		Transaction& operator=(const Transaction& rhs) 
+		{
+		    _mgr = rhs._mgr;
+		    _ops = rhs._ops;
+		    _timeout_timer = rhs._timeout_timer;
+		    _op_count = rhs._op_count;
+		    return *this;
+		}
 
-	/** Flush all operations on list */
-	void flush();
-	
-	/** Defer timeout by TransactionManagers timeout interval */
-	void defer_timeout();
+		/** Add an operation to list */
+		void add(const Operation& op);
 
-	/** Cancel timeout timer */
-	void cancel_timeout();
-	
-	/** Get the list of operations */
-	OperationList& operations() { return _ops; }
+		/** Dispatch all operations on list */
+		void commit();
 
-	/** Get the length of the operations list. */
-	uint32_t size() const { return _op_count; }
-	
+		/** Flush all operations on list */
+		void flush();
+
+		/** Defer timeout by TransactionManagers timeout interval */
+		void defer_timeout();
+
+		/** Cancel timeout timer */
+		void cancel_timeout();
+
+		/** Get the list of operations */
+		OperationList& operations() { return _ops; }
+
+		/** Get the length of the operations list. */
+		uint32_t size() const { return _op_count; }
+
+	    private:
+		TransactionManager* _mgr;
+		OperationList	    _ops;
+		XorpTimer	    _timeout_timer;
+		uint32_t	    _op_count;
+	};
+
     private:
-	TransactionManager* _mgr;
-	OperationList	    _ops;
-	XorpTimer	    _timeout_timer;
-	uint32_t	    _op_count;
-    };
+	/** Called when timeout timer expires */
+	void timeout(uint32_t tid);
 
-private:
-    /** Called when timeout timer expires */
-    void timeout(uint32_t tid);
+	/** Increment next transaction id by a randomized amount. */
+	void crank_tid();
 
-    /** Increment next transaction id by a randomized amount. */
-    void crank_tid();
+    private:
+	typedef map<uint32_t, Transaction> TransactionDB;
 
-private:
-    typedef map<uint32_t, Transaction> TransactionDB;
+	TransactionDB _transactions;
+	uint32_t _timeout_ms;
+	uint32_t _max_pending;
+	uint32_t _next_tid;
 
-    TransactionDB _transactions;
-    uint32_t _timeout_ms;
-    uint32_t _max_pending;
-    uint32_t _next_tid;
-    
-    friend class Transaction; // for Transaction to call operation_result()
+	friend class Transaction; // for Transaction to call operation_result()
 };
 
 #endif // __LIBXORP_TRANSACTION_HH__

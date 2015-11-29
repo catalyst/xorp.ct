@@ -57,64 +57,67 @@
  * RibInTable.
  */
 template<class A>
-class DeletionTable : public BGPRouteTable<A>, CrashDumper  {
-public:
-    DeletionTable(string tablename,
-		  Safi safi,
-		  BgpTrie<A>* route_table,
-		  const PeerHandler *peer,
-		  uint32_t genid,
-		  BGPRouteTable<A> *parent);
-    ~DeletionTable();
-    int add_route(InternalMessage<A> &rtmsg,
-		  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-		      InternalMessage<A> &new_rtmsg,
-		      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg,
-		     BGPRouteTable<A> *caller);
-    int route_dump(InternalMessage<A> &rtmsg,
-		   BGPRouteTable<A> *caller,
-		   const PeerHandler *dump_peer);
-    int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
-    void route_used(const SubnetRoute<A>* route, bool in_use);
+class DeletionTable : public BGPRouteTable<A>, CrashDumper  
+{
+	public:
+		DeletionTable(string tablename,
+				Safi safi,
+				BgpTrie<A>* route_table,
+				const PeerHandler *peer,
+				uint32_t genid,
+				BGPRouteTable<A> *parent);
+		~DeletionTable();
+		int add_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
+				BGPRouteTable<A> *caller);
+		int delete_route(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller);
+		int route_dump(InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller,
+				const PeerHandler *dump_peer);
+		int push(BGPRouteTable<A> *caller);
+		const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+				uint32_t& genid,
+				FPAListRef& pa_list) const;
+		void route_used(const SubnetRoute<A>* route, bool in_use);
 
 
-    RouteTableType type() const { return DELETION_TABLE; }
-    string str() const;
+		RouteTableType type() const { return DELETION_TABLE; }
+		string str() const;
 
-    /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool /*busy*/, BGPRouteTable<A>* /*next_table*/) {
-	abort();
-    }
-    bool get_next_message(BGPRouteTable<A>* /*next_table*/) {
-	abort();
-	return false;
-    }
+		/* mechanisms to implement flow control in the output plumbing */
+		void output_state(bool /*busy*/, BGPRouteTable<A>* /*next_table*/) 
+		{
+			abort();
+		}
+		bool get_next_message(BGPRouteTable<A>* /*next_table*/) 
+		{
+			abort();
+			return false;
+		}
 
-    void initiate_background_deletion();
+		void initiate_background_deletion();
 
-    /**
-     * @return the generation id.
-     */
-    uint32_t genid() const {return _genid;}
+		/**
+		 * @return the generation id.
+		 */
+		uint32_t genid() const {return _genid;}
 
-    string dump_state() const;
+		string dump_state() const;
 
-private:
-    void unplumb_self();
-    bool delete_next_chain();
+	private:
+		void unplumb_self();
+		bool delete_next_chain();
 
-    const PeerHandler *_peer;
-    uint32_t _genid;
-    BgpTrie<A>* _route_table;
-    typename BgpTrie<A>::PathmapType::const_iterator _del_sweep;
+		const PeerHandler *_peer;
+		uint32_t _genid;
+		BgpTrie<A>* _route_table;
+		typename BgpTrie<A>::PathmapType::const_iterator _del_sweep;
 
-    int _deleted, _chains;
-    XorpTask _deletion_task;
+		int _deleted, _chains;
+		XorpTask _deletion_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_DELETION_HH__

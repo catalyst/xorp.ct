@@ -30,42 +30,43 @@ class XrlRouter;
  * @short A class that is the bridge between the raw IP I/O communications
  * and the XORP XRL interface.
  */
-class XrlIoIpManager : public IoIpManagerReceiver {
-public:
-    /**
-     * Constructor.
-     */
-    XrlIoIpManager(IoIpManager& io_ip_manager, XrlRouter& xrl_router);
+class XrlIoIpManager : public IoIpManagerReceiver 
+{
+	public:
+		/**
+		 * Constructor.
+		 */
+		XrlIoIpManager(IoIpManager& io_ip_manager, XrlRouter& xrl_router);
 
-    /**
-     * Destructor.
-     */
-    virtual ~XrlIoIpManager();
+		/**
+		 * Destructor.
+		 */
+		virtual ~XrlIoIpManager();
 
-    /**
-     * Data received event.
-     *
-     * @param receiver_name the name of the receiver to send the
-     * IP packet to.
-     * @param header the IP header information.
-     * @param payload the payload, everything after the IP header
-     * and options.
-     */
-    void recv_event(const string&			receiver_name,
-		    const struct IPvXHeaderInfo&	header,
-		    const vector<uint8_t>&		payload);
+		/**
+		 * Data received event.
+		 *
+		 * @param receiver_name the name of the receiver to send the
+		 * IP packet to.
+		 * @param header the IP header information.
+		 * @param payload the payload, everything after the IP header
+		 * and options.
+		 */
+		void recv_event(const string&			receiver_name,
+				const struct IPvXHeaderInfo&	header,
+				const vector<uint8_t>&		payload);
 
-private:
-    XrlRouter&		xrl_router() { return _xrl_router; }
+	private:
+		XrlRouter&		xrl_router() { return _xrl_router; }
 
-    /**
-     * Method to be called by XRL sending filter invoker
-     */
-    void xrl_send_recv_cb(const XrlError& xrl_error, int family,
-			  string receiver_name);
+		/**
+		 * Method to be called by XRL sending filter invoker
+		 */
+		void xrl_send_recv_cb(const XrlError& xrl_error, int family,
+				string receiver_name);
 
-    IoIpManager&	_io_ip_manager;
-    XrlRouter&		_xrl_router;
+		IoIpManager&	_io_ip_manager;
+		XrlRouter&		_xrl_router;
 };
 
 #endif // __FEA_XRL_IO_IP_MANAGER_HH__

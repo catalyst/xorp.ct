@@ -30,13 +30,13 @@
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
-VrrpVif::VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname)
-    : _vt(vt),
-      _ifname(ifname),
-      _vifname(vifname),
-      _ready(false),
-      _join(0),
-      _arps(0)
+    VrrpVif::VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname)
+: _vt(vt),
+    _ifname(ifname),
+    _vifname(vifname),
+    _ready(false),
+    _join(0),
+    _arps(0)
 {
 }
 
@@ -46,13 +46,13 @@ VrrpVif::~VrrpVif()
 	delete i->second;
 }
 
-bool
+    bool
 VrrpVif::own(const IPv4& addr)
 {
     return _ips.find(addr) != _ips.end();
 }
 
-Vrrp*
+    Vrrp*
 VrrpVif::find_vrid(uint32_t vrid)
 {
     VRRPS::iterator i = _vrrps.find(vrid);
@@ -63,7 +63,7 @@ VrrpVif::find_vrid(uint32_t vrid)
     return i->second;
 }
 
-void
+    void
 VrrpVif::add_vrid(uint32_t vrid)
 {
     XLOG_ASSERT(find_vrid(vrid) == NULL);
@@ -71,7 +71,7 @@ VrrpVif::add_vrid(uint32_t vrid)
     _vrrps[vrid] = new Vrrp(*this,  vrid);
 }
 
-void
+    void
 VrrpVif::delete_vrid(uint32_t vrid)
 {
     Vrrp* v = find_vrid(vrid);
@@ -88,7 +88,7 @@ VrrpVif::ready() const
     return _ready;
 }
 
-void
+    void
 VrrpVif::configure(const IfMgrIfTree& conf)
 {
     // check interface
@@ -106,19 +106,22 @@ VrrpVif::configure(const IfMgrIfTree& conf)
 
     const IfMgrVifAtom::IPv4Map& addrs = vifa->ipv4addrs();
     for (IfMgrVifAtom::IPv4Map::const_iterator i = addrs.begin();
-	 i != addrs.end(); ++i) {
+	    i != addrs.end(); ++i) 
+    {
 
 	const IfMgrIPv4Atom& addr = i->second;
 
-	if (addr.enabled()) {
+	if (addr.enabled()) 
+	{
 	    XLOG_WARNING("vif: %s/%s configured with IP: %s\n",
-			 _ifname.c_str(), _vifname.c_str(),
-			 addr.toString().c_str());
+		    _ifname.c_str(), _vifname.c_str(),
+		    addr.toString().c_str());
 	    _ips.insert(addr.addr());
 	}
     }
 
-    if (_ips.empty()) {
+    if (_ips.empty()) 
+    {
 	set_ready(false);
 	return;
     }
@@ -127,7 +130,7 @@ VrrpVif::configure(const IfMgrIfTree& conf)
 }
 
 template <class T>
-bool
+    bool
 VrrpVif::is_enabled(const T* obj)
 {
     if (obj && obj->enabled())
@@ -138,16 +141,18 @@ VrrpVif::is_enabled(const T* obj)
     return false;
 }
 
-void
+    void
 VrrpVif::set_ready(bool ready)
 {
     if (ready)
 	_ready = ready;
 
-    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
+    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) 
+    {
 	Vrrp* v = i->second;
 
-	if (ready) {
+	if (ready) 
+	{
 	    //v->check_ownership();
 	    v->start();
 	} else
@@ -166,16 +171,16 @@ VrrpVif::addr() const
     return *(_ips.begin());
 }
 
-void
+    void
 VrrpVif::send(const Mac& src, const Mac& dst, uint32_t ether,
-	      const PAYLOAD& payload)
+	const PAYLOAD& payload)
 {
     XLOG_ASSERT(ready());
 
     _vt.send(_ifname, _vifname, src, dst, ether, payload);
 }
 
-void
+    void
 VrrpVif::join_mcast()
 {
     _join++;
@@ -185,7 +190,7 @@ VrrpVif::join_mcast()
 	_vt.join_mcast(_ifname, _vifname);
 }
 
-void
+    void
 VrrpVif::leave_mcast()
 {
     XLOG_ASSERT(_join);
@@ -198,7 +203,8 @@ VrrpVif::leave_mcast()
 
     // paranoia
     int cnt = 0;
-    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
+    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) 
+    {
 	Vrrp* v = i->second;
 
 	if (v->running())
@@ -206,7 +212,7 @@ VrrpVif::leave_mcast()
     }
 }
 
-void
+    void
 VrrpVif::start_arps()
 {
     _arps++;
@@ -216,7 +222,7 @@ VrrpVif::start_arps()
 	_vt.start_arps(_ifname, _vifname);
 }
 
-void
+    void
 VrrpVif::stop_arps()
 {
     XLOG_ASSERT(_arps);
@@ -228,14 +234,16 @@ VrrpVif::stop_arps()
     _vt.stop_arps(_ifname, _vifname);
 }
 
-void
+    void
 VrrpVif::recv(const IPv4& from, const PAYLOAD& payload)
 {
-    try {
+    try 
+    {
 	const VrrpHeader& vh = VrrpHeader::assign(payload);
 
 	Vrrp* v = find_vrid(vh.vh_vrid);
-	if (!v) {
+	if (!v) 
+	{
 	    // This is a normal and common occurance if there are
 	    // lots of different VRRP protocol groups running on
 	    // the LAN.  Don't be noisy about it.
@@ -245,19 +253,20 @@ VrrpVif::recv(const IPv4& from, const PAYLOAD& payload)
 
 	v->recv(from, vh);
 
-    } catch (const VrrpException& e) {
+    } catch (const VrrpException& e) 
+    {
 	XLOG_WARNING("VRRP packet error: %s", e.str().c_str());
     }
 }
 
-void
+    void
 VrrpVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 {
     UNUSED(from);
     UNUSED(payload);
 }
 
-void
+    void
 VrrpVif::add_mac(const Mac& mac)
 {
     // XXX mac operations are per physical interface.  We musn't have multiple
@@ -273,14 +282,14 @@ VrrpVif::add_mac(const Mac& mac)
     _vt.add_mac(_ifname, mac);
 }
 
-void
+    void
 VrrpVif::add_ip(const IPv4& ip, uint32_t prefix)
 {
     XLOG_ASSERT(_ifname == _vifname);
     _vt.add_ip(_ifname, ip, prefix);
 }
 
-void
+    void
 VrrpVif::delete_mac(const Mac& mac)
 {
     // XXX see add mac
@@ -289,7 +298,7 @@ VrrpVif::delete_mac(const Mac& mac)
     _vt.delete_mac(_ifname, mac);
 }
 
-void
+    void
 VrrpVif::delete_ip(const IPv4& ip)
 {
     // XXX see add mac
@@ -298,21 +307,21 @@ VrrpVif::delete_ip(const IPv4& ip)
     _vt.delete_ip(_ifname, ip);
 }
 
-void
+    void
 VrrpVif::get_vrids(VRIDS& vrids)
 {
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
 	vrids.insert(i->first);
 }
 
-void
+    void
 VrrpVif::xrl_cb(const XrlError& xrl_error)
 {
     if (xrl_error == XrlError::OKAY())
 	return;
 
     XLOG_WARNING("Error on interface %s:%s - %s\n",
-		 _ifname.c_str(), _vifname.c_str(), xrl_error.str().c_str());
+	    _ifname.c_str(), _vifname.c_str(), xrl_error.str().c_str());
 
     set_ready(false);
 }

@@ -37,7 +37,6 @@ sources = [
 	'proto_node_cli.cc',
 	'proto_state.cc',
 	'proto_unit.cc',
-	'spt.cc',
 	]
 
 if is_shared:

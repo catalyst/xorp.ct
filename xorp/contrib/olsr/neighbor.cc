@@ -37,46 +37,50 @@
 #include "neighbor.hh"
 #include "neighborhood.hh"
 
-bool
+    bool
 IsLinkSymmetricPred::operator()(OlsrTypes::LogicalLinkID linkid)
 {
-    try {
+    try 
+    {
 	bool result = _nh->get_logical_link(linkid)->is_sym();
 	debug_msg("link %u is %s\n",
-		  XORP_UINT_CAST(linkid),
-		  bool_c_str(result));
+		XORP_UINT_CAST(linkid),
+		bool_c_str(result));
 	return result;
-    } catch (...) {
+    } catch (...) 
+    {
 	return false;
     }
 }
 
-bool
+    bool
 IsTwoHopLinkStrictPred::operator()(OlsrTypes::TwoHopLinkID tlid)
 {
-    try {
+    try 
+    {
 	return _nh->get_twohop_link(tlid)->destination()->is_strict();
-    } catch (...) {
+    } catch (...) 
+    {
 	return false;
     }
 }
 
 Neighbor::Neighbor( Neighborhood* parent,
-		   const OlsrTypes::NeighborID nid,
-		   const IPv4& main_addr,
-		   const OlsrTypes::LogicalLinkID linkid)
- : _parent(parent),
-   _id(nid),
-   _main_addr(main_addr),
-   _is_mpr(false),
-   _is_sym(false),
-   _willingness(OlsrTypes::WILL_NEVER),
-   _degree(0),
-   _is_advertised(false)
+	const OlsrTypes::NeighborID nid,
+	const IPv4& main_addr,
+	const OlsrTypes::LogicalLinkID linkid)
+: _parent(parent),
+    _id(nid),
+    _main_addr(main_addr),
+    _is_mpr(false),
+    _is_sym(false),
+    _willingness(OlsrTypes::WILL_NEVER),
+    _degree(0),
+    _is_advertised(false)
 {
     // Invariant: A neighbor must be created with a newly created link.
     XLOG_ASSERT(OlsrTypes::UNUSED_NEIGHBOR_ID ==
-		_parent->get_logical_link(linkid)->neighbor_id());
+	    _parent->get_logical_link(linkid)->neighbor_id());
 
     update_link(linkid);
 
@@ -84,7 +88,8 @@ Neighbor::Neighbor( Neighborhood* parent,
     update_cand_mpr(false);
 }
 
-string Neighbor::toStringBrief() {
+string Neighbor::toStringBrief() 
+{
     ostringstream oss;
     oss << id() << "-(" << main_addr().str() << ")";
     return oss.str();
@@ -102,14 +107,14 @@ Neighbor::neighbor_type() const
     return OlsrTypes::NOT_NEIGH;
 }
 
-void
+    void
 Neighbor::recount_degree()
 {
     _degree = count_if(_twohop_links.begin(), _twohop_links.end(),
-		       IsTwoHopLinkStrictPred(_parent));
+	    IsTwoHopLinkStrictPred(_parent));
 }
 
-bool
+    bool
 Neighbor::is_cand_mpr()
 {
 
@@ -121,7 +126,7 @@ Neighbor::is_cand_mpr()
     return degree() > 0;
 }
 
-bool
+    bool
 Neighbor::update_cand_mpr(bool was_cand_mpr)
 {
     // If willingness is neither WILL_ALWAYS nor WILL_NEVER,
@@ -129,7 +134,7 @@ Neighbor::update_cand_mpr(bool was_cand_mpr)
     // Degree is never used for MPR decisions when these conditions hold,
     // so update it lazily.
     if (_willingness != OlsrTypes::WILL_ALWAYS ||
-	_willingness != OlsrTypes::WILL_NEVER)
+	    _willingness != OlsrTypes::WILL_NEVER)
 	recount_degree();
 
     // Reconsider node's MPR candidacy.
@@ -151,12 +156,14 @@ Neighbor::update_cand_mpr(bool was_cand_mpr)
     // of this as it may have been left out during 
     //
     if (is_persistent_cand_mpr() ||
-	(was_cand_mpr == false && is_cand_mpr() == true)) {
+	    (was_cand_mpr == false && is_cand_mpr() == true)) 
+    {
 	// If a node is now a candidate MPR due to a change
 	// in its state, it should be considered as an MPR
 	// candidate for all interfaces from which it is reachable.
 	_parent->add_cand_mpr(id());
-    } else {
+    } else 
+    {
 	// If a node is no longer a candidate MPR due to a change
 	// in its state, it should be withdrawn as an MPR
 	// candidate for all interfaces from which it is reachable.
@@ -166,7 +173,7 @@ Neighbor::update_cand_mpr(bool was_cand_mpr)
     return is_now_cand_mpr;
 }
 
-void
+    void
 Neighbor::set_willingness(const OlsrTypes::WillType value)
 {
     if (_willingness == value)
@@ -181,7 +188,7 @@ Neighbor::set_willingness(const OlsrTypes::WillType value)
     update_cand_mpr(was_cand_mpr);
 }
 
-void
+    void
 Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
 {
     debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
@@ -189,7 +196,8 @@ Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
 
     bool was_cand_mpr = is_cand_mpr();
 
-    if (_links.find(linkid) == _links.end()) {
+    if (_links.find(linkid) == _links.end()) 
+    {
 	_links.insert(linkid);
     }
 
@@ -211,7 +219,7 @@ Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
     update_cand_mpr(was_cand_mpr);
 }
 
-bool
+    bool
 Neighbor::delete_link(const OlsrTypes::LogicalLinkID linkid)
 {
     debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
@@ -230,8 +238,8 @@ Neighbor::delete_link(const OlsrTypes::LogicalLinkID linkid)
     // XXX TODO Only 'good' links should be considered when ETX
     // is implemented, see Neighborhood::is_better_link().
     set_is_sym(is_empty ? false :
-	       find_if(_links.begin(), _links.end(),
-			IsLinkSymmetricPred(_parent)) != _links.end());
+	    find_if(_links.begin(), _links.end(),
+		IsLinkSymmetricPred(_parent)) != _links.end());
 
     // Neighbor loses MPR status if we no longer have a symmetric link, or
     // indeed any links, to this neighbor.
@@ -246,23 +254,24 @@ Neighbor::is_mpr_selector() const
     return _mpr_selector_timer.scheduled();
 }
 
-void
+    void
 Neighbor::set_is_mpr_selector(bool value, const TimeVal& expiry_time)
 {
     if (_mpr_selector_timer.scheduled())
 	_mpr_selector_timer.clear();
 
-    if (value == true) {
+    if (value == true) 
+    {
 	debug_msg("scheduling %u's MPR selector expiry for %s\n",
-	    XORP_UINT_CAST(id()), cstring(expiry_time));
+		XORP_UINT_CAST(id()), cstring(expiry_time));
 
 	_mpr_selector_timer = EventLoop::instance().new_oneoff_after(
-	    expiry_time,
-	    callback(this, &Neighbor::event_mpr_selector_expired));
+		expiry_time,
+		callback(this, &Neighbor::event_mpr_selector_expired));
     }
 }
 
-void
+    void
 Neighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
@@ -280,7 +289,7 @@ Neighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     update_cand_mpr(was_cand_mpr);
 }
 
-bool
+    bool
 Neighbor::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
@@ -300,7 +309,7 @@ Neighbor::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     return is_empty;
 }
 
-size_t
+    size_t
 Neighbor::delete_all_twohop_links()
 {
     size_t deleted_count = 0;
@@ -310,7 +319,8 @@ Neighbor::delete_all_twohop_links()
 
     set<OlsrTypes::TwoHopLinkID>::iterator ii, jj;
     ii = _twohop_links.begin();
-    while (ii != _twohop_links.end()) {
+    while (ii != _twohop_links.end()) 
+    {
 	jj = ii++;
 	_parent->delete_twohop_link((*jj));
 	// Don't erase the element; delete_twohop_link() will
@@ -324,7 +334,7 @@ Neighbor::delete_all_twohop_links()
     return deleted_count;
 }
 
-void
+    void
 Neighbor::event_mpr_selector_expired()
 {
     _parent->event_mpr_selector_expired(id());

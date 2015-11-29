@@ -31,36 +31,37 @@
 #include "io_link_manager.hh"
 
 // A filter that matches no packets - useful for TX only.
-class TxOnlyFilter : public IoLinkComm::InputFilter {
-public:
-    // A MAC address that will "never" match
-    static const Mac filter_mac;
+class TxOnlyFilter : public IoLinkComm::InputFilter 
+{
+    public:
+	// A MAC address that will "never" match
+	static const Mac filter_mac;
 
-    TxOnlyFilter(IoLinkManager&	io_link_manager,
-		 const string&	receiver_name,
-		 const string&	if_name,
-		 const string&	vif_name,
-		 uint16_t	ether_type)
-	: IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
-				  vif_name, ether_type,
-				  "ether src " + filter_mac.str())
+	TxOnlyFilter(IoLinkManager&	io_link_manager,
+		const string&	receiver_name,
+		const string&	if_name,
+		const string&	vif_name,
+		uint16_t	ether_type)
+	    : IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
+		    vif_name, ether_type,
+		    "ether src " + filter_mac.str())
     {}
 
-    void recv(const struct MacHeaderInfo& header,
-	      const vector<uint8_t>& payload)
-    {
-	UNUSED(payload);
+	void recv(const struct MacHeaderInfo& header,
+		const vector<uint8_t>& payload)
+	{
+	    UNUSED(payload);
 
-	if (header.src_address == filter_mac)
-	    return;
+	    if (header.src_address == filter_mac)
+		return;
 
-	XLOG_FATAL("Receiving data on a TX only filter");
-    }
+	    XLOG_FATAL("Receiving data on a TX only filter");
+	}
 
-    void bye()
-    {
-	delete this;
-    }
+	void bye()
+	{
+	    delete this;
+	}
 };
 
 const Mac TxOnlyFilter::filter_mac("66:66:66:66:66:66");
@@ -69,123 +70,136 @@ const Mac TxOnlyFilter::filter_mac("66:66:66:66:66:66");
 // Filter class for checking incoming raw link-level packets and checking
 // whether to forward them.
 //
-class LinkVifInputFilter : public IoLinkComm::InputFilter {
-public:
-    LinkVifInputFilter(IoLinkManager&	io_link_manager,
-		       IoLinkComm&	io_link_comm,
-		       const string&	receiver_name,
-		       const string&	if_name,
-		       const string&	vif_name,
-		       uint16_t		ether_type,
-		       const string&	filter_program)
-	: IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
-				  vif_name, ether_type, filter_program),
-	  _io_link_comm(io_link_comm),
-	  _enable_multicast_loopback(false)
+class LinkVifInputFilter : public IoLinkComm::InputFilter 
+{
+    public:
+	LinkVifInputFilter(IoLinkManager&	io_link_manager,
+		IoLinkComm&	io_link_comm,
+		const string&	receiver_name,
+		const string&	if_name,
+		const string&	vif_name,
+		uint16_t		ether_type,
+		const string&	filter_program)
+	    : IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
+		    vif_name, ether_type, filter_program),
+	    _io_link_comm(io_link_comm),
+	    _enable_multicast_loopback(false)
     {}
 
-    virtual ~LinkVifInputFilter() {
-	leave_all_multicast_groups();
-    }
-
-    void set_enable_multicast_loopback(bool v) {
-	_enable_multicast_loopback = v;
-    }
-
-    void recv(const struct MacHeaderInfo& header,
-	      const vector<uint8_t>& payload)
-    {
-	// Check the EtherType protocol
-	if ((ether_type() != 0) && (ether_type() != header.ether_type)) {
-	    debug_msg("Ignore packet with EtherType protocol %u (watching for %u)\n",
-		      XORP_UINT_CAST(header.ether_type),
-		      XORP_UINT_CAST(ether_type()));
-	    return;
+	virtual ~LinkVifInputFilter() 
+	{
+	    leave_all_multicast_groups();
 	}
 
-	// Check if multicast loopback is enabled
-	if (header.dst_address.is_multicast()
-	    && is_my_address(header.src_address)
-	    && (! _enable_multicast_loopback)) {
-	    debug_msg("Ignore raw link-level packet with src %s dst %s: "
-		      "multicast loopback is disabled\n",
-		      header.src_address.str().c_str(),
-		      header.dst_address.str().c_str());
-	    return;
+	void set_enable_multicast_loopback(bool v) 
+	{
+	    _enable_multicast_loopback = v;
 	}
 
-	// Forward the packet
-	io_link_manager().recv_event(receiver_name(), header, payload);
-    }
+	void recv(const struct MacHeaderInfo& header,
+		const vector<uint8_t>& payload)
+	{
+	    // Check the EtherType protocol
+	    if ((ether_type() != 0) && (ether_type() != header.ether_type)) 
+	    {
+		debug_msg("Ignore packet with EtherType protocol %u (watching for %u)\n",
+			XORP_UINT_CAST(header.ether_type),
+			XORP_UINT_CAST(ether_type()));
+		return;
+	    }
 
-    void bye() {}
+	    // Check if multicast loopback is enabled
+	    if (header.dst_address.is_multicast()
+		    && is_my_address(header.src_address)
+		    && (! _enable_multicast_loopback)) 
+	    {
+		debug_msg("Ignore raw link-level packet with src %s dst %s: "
+			"multicast loopback is disabled\n",
+			header.src_address.str().c_str(),
+			header.dst_address.str().c_str());
+		return;
+	    }
 
-    int join_multicast_group(const Mac& group_address, string& error_msg) {
-	if (! group_address.is_multicast()) {
-	    error_msg = c_format("Cannot join group %s: not a multicast "
-				 "address",
-				 group_address.str().c_str());
-	    return (XORP_ERROR);
+	    // Forward the packet
+	    io_link_manager().recv_event(receiver_name(), header, payload);
 	}
-	if (_io_link_comm.join_multicast_group(group_address, receiver_name(),
-					       error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+
+	void bye() {}
+
+	int join_multicast_group(const Mac& group_address, string& error_msg) 
+	{
+	    if (! group_address.is_multicast()) 
+	    {
+		error_msg = c_format("Cannot join group %s: not a multicast "
+			"address",
+			group_address.str().c_str());
+		return (XORP_ERROR);
+	    }
+	    if (_io_link_comm.join_multicast_group(group_address, receiver_name(),
+			error_msg)
+		    != XORP_OK) 
+	    {
+		return (XORP_ERROR);
+	    }
+	    _joined_multicast_groups.insert(group_address);
+	    return (XORP_OK);
 	}
-	_joined_multicast_groups.insert(group_address);
-	return (XORP_OK);
-    }
 
-    int leave_multicast_group(const Mac& group_address, string& error_msg) {
-	_joined_multicast_groups.erase(group_address);
-	if (_io_link_comm.leave_multicast_group(group_address, receiver_name(),
-						error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+	int leave_multicast_group(const Mac& group_address, string& error_msg) 
+	{
+	    _joined_multicast_groups.erase(group_address);
+	    if (_io_link_comm.leave_multicast_group(group_address, receiver_name(),
+			error_msg)
+		    != XORP_OK) 
+	    {
+		return (XORP_ERROR);
+	    }
+	    return (XORP_OK);
 	}
-	return (XORP_OK);
-    }
 
-    void leave_all_multicast_groups() {
-	string error_msg;
-	while (! _joined_multicast_groups.empty()) {
-	    Mac group_address = *(_joined_multicast_groups.begin());
-	    leave_multicast_group(group_address, error_msg);
+	void leave_all_multicast_groups() 
+	{
+	    string error_msg;
+	    while (! _joined_multicast_groups.empty()) 
+	    {
+		Mac group_address = *(_joined_multicast_groups.begin());
+		leave_multicast_group(group_address, error_msg);
+	    }
 	}
-    }
 
-protected:
-    bool is_my_address(const Mac& addr) const {
-	const IfTreeInterface* ifp;
+    protected:
+	bool is_my_address(const Mac& addr) const 
+	{
+	    const IfTreeInterface* ifp;
 
-	ifp = io_link_manager().iftree().find_interface(if_name());
-	if (ifp == NULL)
-	    return (false);
+	    ifp = io_link_manager().iftree().find_interface(if_name());
+	    if (ifp == NULL)
+		return (false);
 
-	if (! ifp->enabled())
-	    return (false);
+	    if (! ifp->enabled())
+		return (false);
 
-	return (ifp->mac() == addr);
-    }
+	    return (ifp->mac() == addr);
+	}
 
-    IoLinkComm&		_io_link_comm;
-    set<Mac>		_joined_multicast_groups;
-    bool		_enable_multicast_loopback;
+	IoLinkComm&		_io_link_comm;
+	set<Mac>		_joined_multicast_groups;
+	bool		_enable_multicast_loopback;
 };
 
 /* ------------------------------------------------------------------------- */
 /* IoLinkComm methods */
 
 IoLinkComm::IoLinkComm(IoLinkManager& io_link_manager, const IfTree& iftree,
-		       const string& if_name, const string& vif_name,
-		       uint16_t ether_type, const string& filter_program)
-    : IoLinkReceiver(),
-      _io_link_manager(io_link_manager),
-      _iftree(iftree),
-      _if_name(if_name),
-      _vif_name(vif_name),
-      _ether_type(ether_type),
-      _filter_program(filter_program)
+	const string& if_name, const string& vif_name,
+	uint16_t ether_type, const string& filter_program)
+: IoLinkReceiver(),
+    _io_link_manager(io_link_manager),
+    _iftree(iftree),
+    _if_name(if_name),
+    _vif_name(vif_name),
+    _ether_type(ether_type),
+    _filter_program(filter_program)
 {
 }
 
@@ -193,23 +207,26 @@ IoLinkComm::~IoLinkComm()
 {
     deallocate_io_link_plugins();
 
-    while (_input_filters.empty() == false) {
+    while (_input_filters.empty() == false) 
+    {
 	InputFilter* i = _input_filters.front();
 	_input_filters.erase(_input_filters.begin());
 	i->bye();
     }
 }
 
-int
+    int
 IoLinkComm::add_filter(InputFilter* filter)
 {
-    if (filter == NULL) {
+    if (filter == NULL) 
+    {
 	XLOG_FATAL("Adding a null filter");
 	return (XORP_ERROR);
     }
 
     if (find(_input_filters.begin(), _input_filters.end(), filter)
-	!= _input_filters.end()) {
+	    != _input_filters.end()) 
+    {
 	debug_msg("filter already exists\n");
 	return (XORP_ERROR);
     }
@@ -219,7 +236,8 @@ IoLinkComm::add_filter(InputFilter* filter)
     //
     // Allocate and start the IoLink plugins: one per data plane manager.
     //
-    if (_input_filters.front() == filter) {
+    if (_input_filters.front() == filter) 
+    {
 	XLOG_ASSERT(_io_link_plugins.empty());
 	allocate_io_link_plugins();
 	start_io_link_plugins();
@@ -227,13 +245,14 @@ IoLinkComm::add_filter(InputFilter* filter)
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkComm::remove_filter(InputFilter* filter)
 {
     list<InputFilter*>::iterator i;
 
     i = find(_input_filters.begin(), _input_filters.end(), filter);
-    if (i == _input_filters.end()) {
+    if (i == _input_filters.end()) 
+    {
 	debug_msg("filter does not exist\n");
 	return (XORP_ERROR);
     }
@@ -241,43 +260,47 @@ IoLinkComm::remove_filter(InputFilter* filter)
     XLOG_ASSERT(! _io_link_plugins.empty());
 
     _input_filters.erase(i);
-    if (_input_filters.empty()) {
+    if (_input_filters.empty()) 
+    {
 	deallocate_io_link_plugins();
     }
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkComm::send_packet(const Mac&	src_address,
-			const Mac&	dst_address,
-			uint16_t	ether_type,
-			const vector<uint8_t>& payload,
-			string&		error_msg)
+	const Mac&	dst_address,
+	uint16_t	ether_type,
+	const vector<uint8_t>& payload,
+	string&		error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
 
-    if (_io_link_plugins.empty()) {
+    if (_io_link_plugins.empty()) 
+    {
 	error_msg = c_format("No I/O Link plugin to send a link raw packet on "
-			     "interface %s vif %s from %s to %s EtherType %u",
-			     if_name().c_str(), vif_name().c_str(),
-			     src_address.str().c_str(),
-			     dst_address.str().c_str(),
-			     ether_type);
+		"interface %s vif %s from %s to %s EtherType %u",
+		if_name().c_str(), vif_name().c_str(),
+		src_address.str().c_str(),
+		dst_address.str().c_str(),
+		ether_type);
 	return (XORP_ERROR);
     }
 
     IoLinkPlugins::iterator iter;
     for (iter = _io_link_plugins.begin();
-	 iter != _io_link_plugins.end();
-	 ++iter) {
+	    iter != _io_link_plugins.end();
+	    ++iter) 
+    {
 	IoLink* io_link = iter->second;
 	if (io_link->send_packet(src_address,
-				 dst_address,
-				 ether_type,
-				 payload,
-				 error_msg2)
-	    != XORP_OK) {
+		    dst_address,
+		    ether_type,
+		    payload,
+		    error_msg2)
+		!= XORP_OK) 
+	{
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -288,11 +311,11 @@ IoLinkComm::send_packet(const Mac&	src_address,
     return (ret_value);
 }
 
-void
+    void
 IoLinkComm::recv_packet(const Mac&		src_address,
-			const Mac&		dst_address,
-			uint16_t		ether_type,
-			const vector<uint8_t>&	payload)
+	const Mac&		dst_address,
+	uint16_t		ether_type,
+	const vector<uint8_t>&	payload)
 {
     struct MacHeaderInfo header;
 
@@ -303,26 +326,28 @@ IoLinkComm::recv_packet(const Mac&		src_address,
     header.ether_type = ether_type;
 
     for (list<InputFilter*>::iterator i = _input_filters.begin();
-	 i != _input_filters.end(); ++i) {
+	    i != _input_filters.end(); ++i) 
+    {
 	(*i)->recv(header, payload);
     }
 }
 
-int
+    int
 IoLinkComm::join_multicast_group(const Mac&	group_address,
-				 const string&	receiver_name,
-				 string&	error_msg)
+	const string&	receiver_name,
+	string&	error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
 
-    if (_io_link_plugins.empty()) {
+    if (_io_link_plugins.empty()) 
+    {
 	error_msg = c_format("No I/O Link plugin to join group %s "
-			     "on interface %s vif %s EtherType %u "
-			     "receiver name %s",
-			     group_address.str().c_str(),
-			     if_name().c_str(), vif_name().c_str(),
-			     ether_type(), receiver_name.c_str());
+		"on interface %s vif %s EtherType %u "
+		"receiver name %s",
+		group_address.str().c_str(),
+		if_name().c_str(), vif_name().c_str(),
+		ether_type(), receiver_name.c_str());
 	return (XORP_ERROR);
     }
 
@@ -330,30 +355,34 @@ IoLinkComm::join_multicast_group(const Mac&	group_address,
     // Check the arguments
     //
     // LinkVifInputFilter checks that the group address is multicast.
-    if (receiver_name.empty()) {
+    if (receiver_name.empty()) 
+    {
 	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
-			     "empty receiver name",
-			     group_address.str().c_str(),
-			     if_name().c_str(),
-			     vif_name().c_str());
+		"empty receiver name",
+		group_address.str().c_str(),
+		if_name().c_str(),
+		vif_name().c_str());
 	return (XORP_ERROR);
     }
 
     JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(group_address);
     joined_iter = _joined_groups_table.find(init_jmg);
-    if (joined_iter == _joined_groups_table.end()) {
+    if (joined_iter == _joined_groups_table.end()) 
+    {
 	//
 	// First receiver, hence join the multicast group first to check
 	// for errors.
 	//
 	IoLinkPlugins::iterator plugin_iter;
 	for (plugin_iter = _io_link_plugins.begin();
-	     plugin_iter != _io_link_plugins.end();
-	     ++plugin_iter) {
+		plugin_iter != _io_link_plugins.end();
+		++plugin_iter) 
+	{
 	    IoLink* io_link = plugin_iter->second;
 	    if (io_link->join_multicast_group(group_address, error_msg2)
-		!= XORP_OK) {
+		    != XORP_OK) 
+	    {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
 		    error_msg += " ";
@@ -371,33 +400,35 @@ IoLinkComm::join_multicast_group(const Mac&	group_address,
     return (ret_value);
 }
 
-int
+    int
 IoLinkComm::leave_multicast_group(const Mac&	group_address,
-				  const string&	receiver_name,
-				  string&	error_msg)
+	const string&	receiver_name,
+	string&	error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
 
-    if (_io_link_plugins.empty()) {
+    if (_io_link_plugins.empty()) 
+    {
 	error_msg = c_format("No I/O Link plugin to leave group %s "
-			     "on interface %s vif %s EtherType %u "
-			     "receiver name %s",
-			     group_address.str().c_str(),
-			     if_name().c_str(), vif_name().c_str(),
-			     ether_type(), receiver_name.c_str());
+		"on interface %s vif %s EtherType %u "
+		"receiver name %s",
+		group_address.str().c_str(),
+		if_name().c_str(), vif_name().c_str(),
+		ether_type(), receiver_name.c_str());
 	return (XORP_ERROR);
     }
 
     JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(group_address);
     joined_iter = _joined_groups_table.find(init_jmg);
-    if (joined_iter == _joined_groups_table.end()) {
+    if (joined_iter == _joined_groups_table.end()) 
+    {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
-			     "the group was not joined",
-			     group_address.str().c_str(),
-			     if_name().c_str(),
-			     vif_name().c_str());
+		"the group was not joined",
+		group_address.str().c_str(),
+		if_name().c_str(),
+		vif_name().c_str());
 	XLOG_WARNING("%s", error_msg.c_str());
 	// Don't fail this..would fail the whole commit, and the group isn't joined
 	// anyway, so no loss of validity in the configuration.
@@ -406,7 +437,8 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
     JoinedMulticastGroup& jmg = joined_iter->second;
 
     jmg.delete_receiver(receiver_name);
-    if (jmg.empty()) {
+    if (jmg.empty()) 
+    {
 	//
 	// The last receiver, hence leave the group
 	//
@@ -414,11 +446,13 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
 
 	IoLinkPlugins::iterator plugin_iter;
 	for (plugin_iter = _io_link_plugins.begin();
-	     plugin_iter != _io_link_plugins.end();
-	     ++plugin_iter) {
+		plugin_iter != _io_link_plugins.end();
+		++plugin_iter) 
+	{
 	    IoLink* io_link = plugin_iter->second;
 	    if (io_link->leave_multicast_group(group_address, error_msg2)
-		!= XORP_OK) {
+		    != XORP_OK) 
+	    {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
 		    error_msg += " ";
@@ -430,30 +464,32 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
     return (ret_value);
 }
 
-void
+    void
 IoLinkComm::allocate_io_link_plugins()
 {
     list<FeaDataPlaneManager *>::iterator iter;
 
     for (iter = _io_link_manager.fea_data_plane_managers().begin();
-	 iter != _io_link_manager.fea_data_plane_managers().end();
-	 ++iter) {
+	    iter != _io_link_manager.fea_data_plane_managers().end();
+	    ++iter) 
+    {
 	FeaDataPlaneManager* fea_data_plane_manager = *iter;
 	allocate_io_link_plugin(fea_data_plane_manager);
     }
 }
 
-void
+    void
 IoLinkComm::deallocate_io_link_plugins()
 {
-    while (! _io_link_plugins.empty()) {
+    while (! _io_link_plugins.empty()) 
+    {
 	IoLinkPlugins::iterator iter = _io_link_plugins.begin();
 	FeaDataPlaneManager* fea_data_plane_manager = iter->first;
 	deallocate_io_link_plugin(fea_data_plane_manager);
     }
 }
 
-void
+    void
 IoLinkComm::allocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager)
 {
     IoLinkPlugins::iterator iter;
@@ -461,31 +497,34 @@ IoLinkComm::allocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager)
     XLOG_ASSERT(fea_data_plane_manager != NULL);
 
     for (iter = _io_link_plugins.begin();
-	 iter != _io_link_plugins.end();
-	 ++iter) {
+	    iter != _io_link_plugins.end();
+	    ++iter) 
+    {
 	if (iter->first == fea_data_plane_manager)
 	    break;
     }
-    if (iter != _io_link_plugins.end()) {
+    if (iter != _io_link_plugins.end()) 
+    {
 	return;	// XXX: the plugin was already allocated
     }
 
     IoLink* io_link = fea_data_plane_manager->allocate_io_link(_iftree,
-							       _if_name,
-							       _vif_name,
-							       _ether_type,
-							       _filter_program);
-    if (io_link == NULL) {
+	    _if_name,
+	    _vif_name,
+	    _ether_type,
+	    _filter_program);
+    if (io_link == NULL) 
+    {
 	XLOG_ERROR("Couldn't allocate plugin for I/O Link raw "
-		   "communications for data plane manager %s",
-		   fea_data_plane_manager->manager_name().c_str());
+		"communications for data plane manager %s",
+		fea_data_plane_manager->manager_name().c_str());
 	return;
     }
 
     _io_link_plugins.push_back(make_pair(fea_data_plane_manager, io_link));
 }
 
-void
+    void
 IoLinkComm::deallocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager)
 {
     IoLinkPlugins::iterator iter;
@@ -493,15 +532,17 @@ IoLinkComm::deallocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manage
     XLOG_ASSERT(fea_data_plane_manager != NULL);
 
     for (iter = _io_link_plugins.begin();
-	 iter != _io_link_plugins.end();
-	 ++iter) {
+	    iter != _io_link_plugins.end();
+	    ++iter) 
+    {
 	if (iter->first == fea_data_plane_manager)
 	    break;
     }
-    if (iter == _io_link_plugins.end()) {
+    if (iter == _io_link_plugins.end()) 
+    {
 	XLOG_ERROR("Couldn't deallocate plugin for I/O Link raw "
-		   "communications for data plane manager %s: plugin not found",
-		   fea_data_plane_manager->manager_name().c_str());
+		"communications for data plane manager %s: plugin not found",
+		fea_data_plane_manager->manager_name().c_str());
 	return;
     }
 
@@ -511,20 +552,22 @@ IoLinkComm::deallocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manage
 }
 
 
-void
+    void
 IoLinkComm::start_io_link_plugins()
 {
     IoLinkPlugins::iterator iter;
     string error_msg;
 
     for (iter = _io_link_plugins.begin();
-	 iter != _io_link_plugins.end();
-	 ++iter) {
+	    iter != _io_link_plugins.end();
+	    ++iter) 
+    {
 	IoLink* io_link = iter->second;
 	if (io_link->is_running())
 	    continue;
 	io_link->register_io_link_receiver(this);
-	if (io_link->start(error_msg) != XORP_OK) {
+	if (io_link->start(error_msg) != XORP_OK) 
+	{
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    continue;
 	}
@@ -534,30 +577,34 @@ IoLinkComm::start_io_link_plugins()
 	//
 	JoinedGroupsTable::iterator join_iter;
 	for (join_iter = _joined_groups_table.begin();
-	     join_iter != _joined_groups_table.end();
-	     ++join_iter) {
+		join_iter != _joined_groups_table.end();
+		++join_iter) 
+	{
 	    JoinedMulticastGroup& joined_multicast_group = join_iter->second;
 	    if (io_link->join_multicast_group(joined_multicast_group.group_address(),
-					      error_msg)
-		!= XORP_OK) {
+			error_msg)
+		    != XORP_OK) 
+	    {
 		XLOG_ERROR("%s", error_msg.c_str());
 	    }
 	}
     }
 }
 
-void
+    void
 IoLinkComm::stop_io_link_plugins()
 {
     string error_msg;
     IoLinkPlugins::iterator iter;
 
     for (iter = _io_link_plugins.begin();
-	 iter != _io_link_plugins.end();
-	 ++iter) {
+	    iter != _io_link_plugins.end();
+	    ++iter) 
+    {
 	IoLink* io_link = iter->second;
 	io_link->unregister_io_link_receiver();
-	if (io_link->stop(error_msg) != XORP_OK) {
+	if (io_link->stop(error_msg) != XORP_OK) 
+	{
 	    XLOG_ERROR("%s", error_msg.c_str());
 	}
     }
@@ -567,11 +614,11 @@ IoLinkComm::stop_io_link_plugins()
 // IoLinkManager code
 
 IoLinkManager::IoLinkManager(FeaNode&		fea_node,
-			     const IfTree&	iftree)
-    : IoLinkManagerReceiver(),
-      _fea_node(fea_node),
-      _iftree(iftree),
-      _io_link_manager_receiver(NULL)
+	const IfTree&	iftree)
+: IoLinkManagerReceiver(),
+    _fea_node(fea_node),
+    _iftree(iftree),
+    _io_link_manager_receiver(NULL)
 {
 }
 
@@ -581,25 +628,25 @@ IoLinkManager::~IoLinkManager()
 
     // Erase any TX only entries
     for (CommTable::iterator i = _comm_table.begin(); i != _comm_table.end();
-	 ++i)
+	    ++i)
 	delete i->second;
 }
 
-void
+    void
 IoLinkManager::recv_event(const string&			receiver_name,
-			  const struct MacHeaderInfo&	header,
-			  const vector<uint8_t>&	payload)
+	const struct MacHeaderInfo&	header,
+	const vector<uint8_t>&	payload)
 {
     if (_io_link_manager_receiver != NULL)
 	_io_link_manager_receiver->recv_event(receiver_name, header, payload);
 }
 
-void
+    void
 IoLinkManager::erase_filters_by_receiver_name(const string& receiver_name)
 {
     erase_filters(_comm_table, _filters,
-		  _filters.lower_bound(receiver_name),
-		  _filters.upper_bound(receiver_name));
+	    _filters.lower_bound(receiver_name),
+	    _filters.upper_bound(receiver_name));
 }
 
 bool
@@ -612,17 +659,18 @@ IoLinkManager::has_filter_by_receiver_name(const string& receiver_name) const
     return (false);
 }
 
-void
+    void
 IoLinkManager::erase_filters(CommTable& comm_table, FilterBag& filters,
-			     const FilterBag::iterator& begin,
-			     const FilterBag::iterator& end)
+	const FilterBag::iterator& begin,
+	const FilterBag::iterator& end)
 {
     FilterBag::iterator fi(begin);
-    while (fi != end) {
+    while (fi != end) 
+    {
 	IoLinkComm::InputFilter* filter = fi->second;
 
 	CommTableKey key(filter->if_name(), filter->vif_name(),
-			 filter->ether_type(), filter->filter_program());
+		filter->ether_type(), filter->filter_program());
 
 	CommTable::iterator cti = comm_table.find(key);
 	XLOG_ASSERT(cti != comm_table.end());
@@ -639,16 +687,17 @@ IoLinkManager::erase_filters(CommTable& comm_table, FilterBag& filters,
 	// this protocol socket (and hence no filters), remove it
 	// from the table and delete it.
 	//
-	if (io_link_comm->no_input_filters()) {
+	if (io_link_comm->no_input_filters()) 
+	{
 	    comm_table.erase(key);
 	    delete io_link_comm;
 	}
     }
 }
 
-IoLinkComm&
+    IoLinkComm&
 IoLinkManager::find_iolink_comm(const string& if_name, const string& vif_name,
-				uint16_t ether_type)
+	uint16_t ether_type)
 {
     CommTableKey key(if_name, vif_name, ether_type, "");
 
@@ -659,12 +708,15 @@ IoLinkManager::find_iolink_comm(const string& if_name, const string& vif_name,
     // XXX: Search the whole table in case the protocol was registered
     // only with some non-empty filter program.
     //
-    if (cti == _comm_table.end()) {
-	for (cti = _comm_table.begin(); cti != _comm_table.end(); ++cti) {
+    if (cti == _comm_table.end()) 
+    {
+	for (cti = _comm_table.begin(); cti != _comm_table.end(); ++cti) 
+	{
 	    IoLinkComm* c = cti->second;
 	    if ((c->if_name() == if_name)
-		&& (c->vif_name() == vif_name)
-		&& (c->ether_type() == ether_type)) {
+		    && (c->vif_name() == vif_name)
+		    && (c->ether_type() == ether_type)) 
+	    {
 		break;
 	    }
 	}
@@ -682,28 +734,28 @@ IoLinkManager::find_iolink_comm(const string& if_name, const string& vif_name,
     return *io_link_comm;
 }
 
-int
+    int
 IoLinkManager::send(const string&	if_name,
-		    const string&	vif_name,
-		    const Mac&		src_address,
-		    const Mac&		dst_address,
-		    uint16_t		ether_type,
-		    const vector<uint8_t>& payload,
-		    string&		error_msg)
+	const string&	vif_name,
+	const Mac&		src_address,
+	const Mac&		dst_address,
+	uint16_t		ether_type,
+	const vector<uint8_t>& payload,
+	string&		error_msg)
 {
     IoLinkComm& io_link_comm = find_iolink_comm(if_name, vif_name, ether_type);
 
     return (io_link_comm.send_packet(src_address,
-				     dst_address,
-				     ether_type,
-				     payload,
-				     error_msg));
+		dst_address,
+		ether_type,
+		payload,
+		error_msg));
 }
 
-IoLinkComm&
+    IoLinkComm&
 IoLinkManager::add_iolink_comm_txonly(const string&  if_name,
-				      const string&  vif_name,
-				      uint16_t       ether_type)
+	const string&  vif_name,
+	uint16_t       ether_type)
 {
     //
     // TODO: XXX: Ideally we'd configure the io plugins to do TX only, but
@@ -714,7 +766,7 @@ IoLinkManager::add_iolink_comm_txonly(const string&  if_name,
     string filter_program = "";
 
     TxOnlyFilter* filter = new TxOnlyFilter(*this, receiver_name, if_name,
-					    vif_name, ether_type);
+	    vif_name, ether_type);
     filter_program = filter->filter_program();
 
     IoLinkComm* io_link_comm = NULL;
@@ -723,9 +775,10 @@ IoLinkManager::add_iolink_comm_txonly(const string&  if_name,
 
     if (_comm_table.find(key) != _comm_table.end())
 	io_link_comm = i->second;
-    else {
+    else 
+    {
 	io_link_comm = new IoLinkComm(*this, iftree(), if_name, vif_name,
-				      ether_type, filter_program);
+		ether_type, filter_program);
 	_comm_table[key] = io_link_comm;
     }
     XLOG_ASSERT(io_link_comm != NULL);
@@ -736,23 +789,23 @@ IoLinkManager::add_iolink_comm_txonly(const string&  if_name,
     return *io_link_comm;
 }
 
-int
+    int
 IoLinkManager::add_multicast_mac(const string& if_name, const Mac& mac,
-				 string& error_msg)
+	string& error_msg)
 {
     return (add_remove_multicast_mac(true, if_name, mac, error_msg));
 }
 
-int
+    int
 IoLinkManager::remove_multicast_mac(const string& if_name, const Mac& mac,
-				    string& error_msg)
+	string& error_msg)
 {
     return (add_remove_multicast_mac(false, if_name, mac, error_msg));
 }
 
-int
+    int
 IoLinkManager::add_remove_multicast_mac(bool add, const string& if_name,
-				        const Mac& mac, string& error_msg)
+	const Mac& mac, string& error_msg)
 {
     string vif_name	 = if_name;
     uint16_t ether_type  = ETHERTYPE_IP;
@@ -769,14 +822,14 @@ IoLinkManager::add_remove_multicast_mac(bool add, const string& if_name,
     return (rc);
 }
 
-int
+    int
 IoLinkManager::register_receiver(const string&	receiver_name,
-				 const string&	if_name,
-				 const string&	vif_name,
-				 uint16_t	ether_type,
-				 const string&	filter_program,
-				 bool		enable_multicast_loopback,
-				 string&	error_msg)
+	const string&	if_name,
+	const string&	vif_name,
+	uint16_t	ether_type,
+	const string&	filter_program,
+	bool		enable_multicast_loopback,
+	string&	error_msg)
 {
     CommTableKey key(if_name, vif_name, ether_type, filter_program);
     LinkVifInputFilter* filter;
@@ -789,11 +842,13 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     //
     CommTable::iterator cti = _comm_table.find(key);
     IoLinkComm* io_link_comm = NULL;
-    if (cti == _comm_table.end()) {
+    if (cti == _comm_table.end()) 
+    {
 	io_link_comm = new IoLinkComm(*this, iftree(), if_name, vif_name,
-				      ether_type, filter_program);
+		ether_type, filter_program);
 	_comm_table[key] = io_link_comm;
-    } else {
+    } else 
+    {
 	io_link_comm = cti->second;
     }
     XLOG_ASSERT(io_link_comm != NULL);
@@ -803,7 +858,8 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     //
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) 
+    {
 	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
@@ -812,9 +868,10 @@ IoLinkManager::register_receiver(const string&	receiver_name,
 	// Search if we have already the filter
 	//
 	if ((filter->ether_type() == ether_type) &&
-	    (filter->if_name() == if_name) &&
-	    (filter->vif_name() == vif_name) &&
-	    (filter->filter_program() == filter_program)) {
+		(filter->if_name() == if_name) &&
+		(filter->vif_name() == vif_name) &&
+		(filter->filter_program() == filter_program)) 
+	{
 	    // Already have this filter
 	    filter->set_enable_multicast_loopback(enable_multicast_loopback);
 	    return (XORP_OK);
@@ -825,8 +882,8 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     // Create the filter
     //
     filter = new LinkVifInputFilter(*this, *io_link_comm, receiver_name,
-				    if_name, vif_name, ether_type,
-				    filter_program);
+	    if_name, vif_name, ether_type,
+	    filter_program);
     filter->set_enable_multicast_loopback(enable_multicast_loopback);
 
     // Add the filter to the appropriate IoLinkComm entry
@@ -837,23 +894,24 @@ IoLinkManager::register_receiver(const string&	receiver_name,
 
     // Register interest in watching the receiver
     if (_fea_node.fea_io().add_instance_watch(receiver_name, this, error_msg)
-	!= XORP_OK) {
+	    != XORP_OK) 
+    {
 	string dummy_error_msg;
 	unregister_receiver(receiver_name, if_name, vif_name, ether_type,
-			    filter_program, dummy_error_msg);
+		filter_program, dummy_error_msg);
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkManager::unregister_receiver(const string&	receiver_name,
-				   const string&	if_name,
-				   const string&	vif_name,
-				   uint16_t		ether_type,
-				   const string&	filter_program,
-				   string&		error_msg)
+	const string&	if_name,
+	const string&	vif_name,
+	uint16_t		ether_type,
+	const string&	filter_program,
+	string&		error_msg)
 {
     CommTableKey key(if_name, vif_name, ether_type, filter_program);
 
@@ -861,12 +919,13 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
     // Find the IoLinkComm entry associated with this protocol
     //
     CommTable::iterator cti = _comm_table.find(key);
-    if (cti == _comm_table.end()) {
+    if (cti == _comm_table.end()) 
+    {
 	error_msg = c_format("EtherType protocol %u filter program %s "
-			     "is not registered on interface %s vif %s",
-			     XORP_UINT_CAST(ether_type),
-			     filter_program.c_str(), if_name.c_str(),
-			     vif_name.c_str());
+		"is not registered on interface %s vif %s",
+		XORP_UINT_CAST(ether_type),
+		filter_program.c_str(), if_name.c_str(),
+		vif_name.c_str());
 	return (XORP_ERROR);
     }
     IoLinkComm* io_link_comm = cti->second;
@@ -877,7 +936,8 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
     //
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) 
+    {
 	LinkVifInputFilter* filter;
 	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
@@ -885,9 +945,10 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
 
 	// If filter found, remove it and delete it
 	if ((filter->ether_type() == ether_type) &&
-	    (filter->if_name() == if_name) &&
-	    (filter->vif_name() == vif_name) &&
-	    (filter->filter_program() == filter_program)) {
+		(filter->if_name() == if_name) &&
+		(filter->vif_name() == vif_name) &&
+		(filter->filter_program() == filter_program)) 
+	{
 
 	    // Remove the filter
 	    io_link_comm->remove_filter(filter);
@@ -903,16 +964,18 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
 	    // this protocol socket (and hence no filters), remove it
 	    // from the table and delete it.
 	    //
-	    if (io_link_comm->no_input_filters()) {
+	    if (io_link_comm->no_input_filters()) 
+	    {
 		_comm_table.erase(key);
 		delete io_link_comm;
 	    }
 
 	    // Deregister interest in watching the receiver
-	    if (! has_filter_by_receiver_name(receiver_name)) {
+	    if (! has_filter_by_receiver_name(receiver_name)) 
+	    {
 		string dummy_error_msg;
 		_fea_node.fea_io().delete_instance_watch(receiver_name, this,
-							 dummy_error_msg);
+			dummy_error_msg);
 	    }
 
 	    return (XORP_OK);
@@ -920,43 +983,46 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
     }
 
     error_msg = c_format("Cannot find registration for receiver %s "
-			 "EtherType protocol %u filter program %s "
-			 "interface %s and vif %s",
-			 receiver_name.c_str(),
-			 XORP_UINT_CAST(ether_type),
-			 filter_program.c_str(),
-			 if_name.c_str(),
-			 vif_name.c_str());
+	    "EtherType protocol %u filter program %s "
+	    "interface %s and vif %s",
+	    receiver_name.c_str(),
+	    XORP_UINT_CAST(ether_type),
+	    filter_program.c_str(),
+	    if_name.c_str(),
+	    vif_name.c_str());
     return (XORP_ERROR);
 }
 
-int
+    int
 IoLinkManager::join_multicast_group(const string&	receiver_name,
-				    const string&	if_name,
-				    const string&	vif_name,
-				    uint16_t		ether_type,
-				    const string&	filter_program,
-				    const Mac&		group_address,
-				    string&		error_msg)
+	const string&	if_name,
+	const string&	vif_name,
+	uint16_t		ether_type,
+	const string&	filter_program,
+	const Mac&		group_address,
+	string&		error_msg)
 {
     //
     // Search if we have already the filter
     //
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) 
+    {
 	LinkVifInputFilter* filter;
 	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
 	if ((filter->ether_type() == ether_type) &&
-	    (filter->if_name() == if_name) &&
-	    (filter->vif_name() == vif_name) &&
-	    (filter->filter_program() == filter_program)) {
+		(filter->if_name() == if_name) &&
+		(filter->vif_name() == vif_name) &&
+		(filter->filter_program() == filter_program)) 
+	{
 	    // Filter found
 	    if (filter->join_multicast_group(group_address, error_msg)
-		!= XORP_OK) {
+		    != XORP_OK) 
+	    {
 		return (XORP_ERROR);
 	    }
 	    return (XORP_OK);
@@ -964,44 +1030,47 @@ IoLinkManager::join_multicast_group(const string&	receiver_name,
     }
 
     error_msg = c_format("Cannot join group %s on interface %s vif %s "
-			 "protocol %u filter program %s receiver %s: "
-			 "not registered",
-			 group_address.str().c_str(),
-			 if_name.c_str(),
-			 vif_name.c_str(),
-			 XORP_UINT_CAST(ether_type),
-			 filter_program.c_str(),
-			 receiver_name.c_str());
+	    "protocol %u filter program %s receiver %s: "
+	    "not registered",
+	    group_address.str().c_str(),
+	    if_name.c_str(),
+	    vif_name.c_str(),
+	    XORP_UINT_CAST(ether_type),
+	    filter_program.c_str(),
+	    receiver_name.c_str());
     return (XORP_ERROR);
 }
 
-int
+    int
 IoLinkManager::leave_multicast_group(const string&	receiver_name,
-				     const string&	if_name,
-				     const string&	vif_name,
-				     uint16_t		ether_type,
-				     const string&	filter_program,
-				     const Mac&		group_address,
-				     string&		error_msg)
+	const string&	if_name,
+	const string&	vif_name,
+	uint16_t		ether_type,
+	const string&	filter_program,
+	const Mac&		group_address,
+	string&		error_msg)
 {
     //
     // Search if we have already the filter
     //
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) 
+    {
 	LinkVifInputFilter* filter;
 	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
 	if ((filter->ether_type() == ether_type) &&
-	    (filter->if_name() == if_name) &&
-	    (filter->vif_name() == vif_name) &&
-	    (filter->filter_program() == filter_program)) {
+		(filter->if_name() == if_name) &&
+		(filter->vif_name() == vif_name) &&
+		(filter->filter_program() == filter_program)) 
+	{
 	    // Filter found
 	    if (filter->leave_multicast_group(group_address, error_msg)
-		!= XORP_OK) {
+		    != XORP_OK) 
+	    {
 		return (XORP_ERROR);
 	    }
 	    return (XORP_OK);
@@ -1009,37 +1078,41 @@ IoLinkManager::leave_multicast_group(const string&	receiver_name,
     }
 
     error_msg = c_format("Cannot leave group %s on interface %s vif %s "
-			 "protocol %u filter program %s receiver %s: "
-			 "not registered",
-			 group_address.str().c_str(),
-			 if_name.c_str(),
-			 vif_name.c_str(),
-			 XORP_UINT_CAST(ether_type),
-			 filter_program.c_str(),
-			 receiver_name.c_str());
+	    "protocol %u filter program %s receiver %s: "
+	    "not registered",
+	    group_address.str().c_str(),
+	    if_name.c_str(),
+	    vif_name.c_str(),
+	    XORP_UINT_CAST(ether_type),
+	    filter_program.c_str(),
+	    receiver_name.c_str());
     return (XORP_ERROR);
 }
 
-int
+    int
 IoLinkManager::register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
-					   bool is_exclusive)
+	bool is_exclusive)
 {
-    if (is_exclusive) {
+    if (is_exclusive) 
+    {
 	// Unregister all registered data plane managers
-	while (! _fea_data_plane_managers.empty()) {
+	while (! _fea_data_plane_managers.empty()) 
+	{
 	    unregister_data_plane_manager(_fea_data_plane_managers.front());
 	}
     }
 
-    if (fea_data_plane_manager == NULL) {
+    if (fea_data_plane_manager == NULL) 
+    {
 	// XXX: exclusive NULL is used to unregister all data plane managers
 	return (XORP_OK);
     }
 
     if (find(_fea_data_plane_managers.begin(),
-	     _fea_data_plane_managers.end(),
-	     fea_data_plane_manager)
-	!= _fea_data_plane_managers.end()) {
+		_fea_data_plane_managers.end(),
+		fea_data_plane_manager)
+	    != _fea_data_plane_managers.end()) 
+    {
 	// XXX: already registered
 	return (XORP_OK);
     }
@@ -1050,7 +1123,8 @@ IoLinkManager::register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_m
     // Allocate all I/O Link plugins for the new data plane manager
     //
     CommTable::iterator iter;
-    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) {
+    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) 
+    {
 	IoLinkComm* io_link_comm = iter->second;
 	io_link_comm->allocate_io_link_plugin(fea_data_plane_manager);
 	io_link_comm->start_io_link_plugins();
@@ -1059,7 +1133,7 @@ IoLinkManager::register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_m
     return (XORP_OK);
 }
 
-int
+    int
 IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager)
 {
     if (fea_data_plane_manager == NULL)
@@ -1067,8 +1141,8 @@ IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane
 
     list<FeaDataPlaneManager*>::iterator data_plane_manager_iter;
     data_plane_manager_iter = find(_fea_data_plane_managers.begin(),
-				   _fea_data_plane_managers.end(),
-				   fea_data_plane_manager);
+	    _fea_data_plane_managers.end(),
+	    fea_data_plane_manager);
     if (data_plane_manager_iter == _fea_data_plane_managers.end())
 	return (XORP_ERROR);
 
@@ -1076,7 +1150,8 @@ IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane
     // Dealocate all I/O Link plugins for the unregistered data plane manager
     //
     CommTable::iterator iter;
-    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) {
+    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) 
+    {
 	IoLinkComm* io_link_comm = iter->second;
 	io_link_comm->deallocate_io_link_plugin(fea_data_plane_manager);
     }
@@ -1086,20 +1161,20 @@ IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane
     return (XORP_OK);
 }
 
-void
+    void
 IoLinkManager::instance_birth(const string& instance_name)
 {
     // XXX: Nothing to do
     UNUSED(instance_name);
 }
 
-void
+    void
 IoLinkManager::instance_death(const string& instance_name)
 {
     string dummy_error_msg;
 
     _fea_node.fea_io().delete_instance_watch(instance_name, this,
-					     dummy_error_msg);
+	    dummy_error_msg);
 
     erase_filters_by_receiver_name(instance_name);
 }

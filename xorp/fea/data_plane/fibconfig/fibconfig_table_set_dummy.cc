@@ -37,95 +37,98 @@
 //
 
 
-FibConfigTableSetDummy::FibConfigTableSetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : FibConfigTableSet(fea_data_plane_manager)
+	FibConfigTableSetDummy::FibConfigTableSetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+: FibConfigTableSet(fea_data_plane_manager)
 {
 }
 
 FibConfigTableSetDummy::~FibConfigTableSetDummy()
 {
-    string error_msg;
+	string error_msg;
 
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Dummy mechanism to set "
-		   "whole forwarding table from the underlying "
-		   "system: %s",
-		   error_msg.c_str());
-    }
+	if (stop(error_msg) != XORP_OK) 
+	{
+		XLOG_ERROR("Cannot stop the Dummy mechanism to set "
+				"whole forwarding table from the underlying "
+				"system: %s",
+				error_msg.c_str());
+	}
 }
 
-int
+	int
 FibConfigTableSetDummy::start(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (_is_running)
+	if (_is_running)
+		return (XORP_OK);
+
+	_is_running = true;
+
 	return (XORP_OK);
-
-    _is_running = true;
-
-    return (XORP_OK);
 }
-    
-int
+
+	int
 FibConfigTableSetDummy::stop(string& error_msg)
 {
-    UNUSED(error_msg);
+	UNUSED(error_msg);
 
-    if (! _is_running)
+	if (! _is_running)
+		return (XORP_OK);
+
+	_is_running = false;
+
 	return (XORP_OK);
-
-    _is_running = false;
-
-    return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 {
-    list<Fte4>::const_iterator iter;
+	list<Fte4>::const_iterator iter;
 
-    // Add the entries one-by-one
-    for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
-	const Fte4& fte = *iter;
-	fibconfig().add_entry4(fte);
-    }
-    
-    return (XORP_OK);
+	// Add the entries one-by-one
+	for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) 
+	{
+		const Fte4& fte = *iter;
+		fibconfig().add_entry4(fte);
+	}
+
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableSetDummy::delete_all_entries4()
 {
-    if (in_configuration() == false)
-	return (XORP_ERROR);
-    
-    fibconfig().trie4().delete_all_nodes();
-    
-    return (XORP_OK);
+	if (in_configuration() == false)
+		return (XORP_ERROR);
+
+	fibconfig().trie4().delete_all_nodes();
+
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 {
-    list<Fte6>::const_iterator iter;
-    
-    // Add the entries one-by-one
-    for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
-	const Fte6& fte = *iter;
-	fibconfig().add_entry6(fte);
-    }
-    
-    return (XORP_OK);
+	list<Fte6>::const_iterator iter;
+
+	// Add the entries one-by-one
+	for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) 
+	{
+		const Fte6& fte = *iter;
+		fibconfig().add_entry6(fte);
+	}
+
+	return (XORP_OK);
 }
 
-int
+	int
 FibConfigTableSetDummy::delete_all_entries6()
 {
-    if (in_configuration() == false)
-	return (XORP_ERROR);
-    
-    fibconfig().trie6().delete_all_nodes();
-    
-    return (XORP_OK);
+	if (in_configuration() == false)
+		return (XORP_ERROR);
+
+	fibconfig().trie6().delete_all_nodes();
+
+	return (XORP_OK);
 }

@@ -34,13 +34,13 @@
 // ----------------------------------------------------------------------------
 // RedistOutput<A>
 
-template <typename A>
-RedistOutput<A>::RedistOutput(Redistributor<A>* r)
-    : _r(r)
+	template <typename A>
+	RedistOutput<A>::RedistOutput(Redistributor<A>* r)
+: _r(r)
 {
 }
 
-template <typename A>
+	template <typename A>
 RedistOutput<A>::~RedistOutput()
 {
 }
@@ -51,159 +51,166 @@ RedistOutput<A>::~RedistOutput()
 
 template <class A>
 const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(),
-					       A::ADDR_BITLEN);
+		A::ADDR_BITLEN);
 
 template <typename A>
 const RedistNetCmp<A> Redistributor<A>::redist_net_cmp = RedistNetCmp<A>();
 
-template <typename A>
-Redistributor<A>::Redistributor( const string& 	n)
-    :  _name(n), _table(0), _output(0), _policy(0),
-      _rei(this), _oei(this), _dumping(false), _blocked(false)
+	template <typename A>
+	Redistributor<A>::Redistributor( const string& 	n)
+:  _name(n), _table(0), _output(0), _policy(0),
+	_rei(this), _oei(this), _dumping(false), _blocked(false)
 {
 }
 
-template <typename A>
+	template <typename A>
 Redistributor<A>::~Redistributor()
 {
-    delete _output;
-    delete _policy;
+	delete _output;
+	delete _policy;
 }
 
 template <typename A>
 const string&
 Redistributor<A>::name() const
 {
-    return _name;
+	return _name;
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::set_redist_table(RedistTable<A>* rt)
 {
-    if (_table) {
-	_table->remove_redistributor(this);
-    }
+	if (_table) 
+	{
+		_table->remove_redistributor(this);
+	}
 
-    _table = rt;
+	_table = rt;
 
-    if (_table) {
-	_table->add_redistributor(this);
-	start_dump();
-    }
+	if (_table) 
+	{
+		_table->add_redistributor(this);
+		start_dump();
+	}
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::set_output(RedistOutput<A>* o)
 {
-    if (_output)
-	delete _output;
+	if (_output)
+		delete _output;
 
-    _output = o;
-    _blocked = false;
-    if (_output) {
-	start_dump();
-    }
+	_output = o;
+	_blocked = false;
+	if (_output) 
+	{
+		start_dump();
+	}
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::set_policy(RedistPolicy<A>* rpo)
 {
-    if (_policy)
-	delete _policy;
-    _policy = rpo;
+	if (_policy)
+		delete _policy;
+	_policy = rpo;
 }
 
 template <typename A>
 bool
 Redistributor<A>::policy_accepts(const IPRouteEntry<A>& ipr) const
 {
-    return (_policy == 0) || _policy->accept(ipr);
+	return (_policy == 0) || _policy->accept(ipr);
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::start_dump()
 {
-    if (_output != 0 && _table != 0) {
-	_dumping = true;
-	_last_net = NO_LAST_NET;
-	schedule_dump_timer();
-	debug_msg("starting dump\n");
-	_output->starting_route_dump();
-    }
+	if (_output != 0 && _table != 0) 
+	{
+		_dumping = true;
+		_last_net = NO_LAST_NET;
+		schedule_dump_timer();
+		debug_msg("starting dump\n");
+		_output->starting_route_dump();
+	}
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::finish_dump()
 {
-    _dumping = false;
-    _last_net = NO_LAST_NET;
-    debug_msg("finishing dump\n");
-    if (_output)
-	_output->finishing_route_dump();
+	_dumping = false;
+	_last_net = NO_LAST_NET;
+	debug_msg("finishing dump\n");
+	if (_output)
+		_output->finishing_route_dump();
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::schedule_dump_timer()
 {
-    XLOG_ASSERT(_blocked == false);
-    debug_msg("schedule dump timer\n");
-    _dtimer = EventLoop::instance().new_oneoff_after_ms(0,
-				     callback(this,
-					      &Redistributor<A>::dump_a_route)
-				     );
+	XLOG_ASSERT(_blocked == false);
+	debug_msg("schedule dump timer\n");
+	_dtimer = EventLoop::instance().new_oneoff_after_ms(0,
+			callback(this,
+				&Redistributor<A>::dump_a_route)
+			);
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::unschedule_dump_timer()
 {
-    debug_msg("unschedule dump timer\n");
-    _dtimer.unschedule();
+	debug_msg("unschedule dump timer\n");
+	_dtimer.unschedule();
 }
 
 template <typename A>
-void
+	void
 Redistributor<A>::dump_a_route()
 {
-    XLOG_ASSERT(_dumping == true);
+	XLOG_ASSERT(_dumping == true);
 
-    typename RedistTable<A>::RouteIndex::const_iterator end;
-    end = _table->route_index().end();
+	typename RedistTable<A>::RouteIndex::const_iterator end;
+	end = _table->route_index().end();
 
-    typename RedistTable<A>::RouteIndex::const_iterator ci;
+	typename RedistTable<A>::RouteIndex::const_iterator ci;
 
-    // Find net associated with route to dump
-    if (_last_net == NO_LAST_NET) {
-	ci = _table->route_index().begin();
-    } else {
-	ci = _table->route_index().find(_last_net);
-	XLOG_ASSERT(ci != end);
-	ci++;
-    }
+	// Find net associated with route to dump
+	if (_last_net == NO_LAST_NET) 
+	{
+		ci = _table->route_index().begin();
+	} else 
+	{
+		ci = _table->route_index().find(_last_net);
+		XLOG_ASSERT(ci != end);
+		ci++;
+	}
 
-    if (ci == end) {
-	finish_dump();
-	return;
-    }
+	if (ci == end) 
+	{
+		finish_dump();
+		return;
+	}
 
-    // Lookup route and announce it via output
-    const IPRouteEntry<A>* ipr = _table->lookup_ip_route(*ci);
-    XLOG_ASSERT(ipr != 0);
-    if (policy_accepts(*ipr))
-	_output->add_route(*ipr);
+	// Lookup route and announce it via output
+	const IPRouteEntry<A>* ipr = _table->lookup_ip_route(*ci);
+	XLOG_ASSERT(ipr != 0);
+	if (policy_accepts(*ipr))
+		_output->add_route(*ipr);
 
-    // Record last net dumped and reschedule
-    _last_net = *ci;
+	// Record last net dumped and reschedule
+	_last_net = *ci;
 
-    // Check blocked as it may have been set by output's add_route()
-    if (_blocked == false)
-	schedule_dump_timer();
+	// Check blocked as it may have been set by output's add_route()
+	if (_blocked == false)
+		schedule_dump_timer();
 }
 
 
@@ -211,331 +218,359 @@ Redistributor<A>::dump_a_route()
 // Event Notification handling
 
 template <typename A>
-void
+	void
 Redistributor<A>::RedistEventInterface::did_add(const IPRouteEntry<A>& ipr)
 {
-    if (_r->policy_accepts(ipr) == false) {
-	return;
-    }
-
-    if (_r->dumping() == true) {
-	// We're in a dump, if the route is greater than current
-	// position we ignore it as it'll be picked up later,
-	// otherwise we need to announce route now.
-	if (_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) {
-	    return;		// dump not started
+	if (_r->policy_accepts(ipr) == false) 
+	{
+		return;
 	}
 
-	const IPNet<A>& last = _r->last_dumped_net();
-	const IPNet<A>& net  = ipr.net();
+	if (_r->dumping() == true) 
+	{
+		// We're in a dump, if the route is greater than current
+		// position we ignore it as it'll be picked up later,
+		// otherwise we need to announce route now.
+		if (_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) 
+		{
+			return;		// dump not started
+		}
+
+		const IPNet<A>& last = _r->last_dumped_net();
+		const IPNet<A>& net  = ipr.net();
 #ifdef XORP_USE_USTL
-	if (!(net < last)) {
+		if (!(net < last)) 
+		{
 #else
-	if (!redist_net_cmp(net, last)) {
+			if (!redist_net_cmp(net, last)) 
+			{
 #endif
-	    return;	// route will be hit later on in dump anyway
-	}
-    }
-    _r->output()->add_route(ipr);
-}
-
-template <typename A>
-void
-Redistributor<A>::RedistEventInterface::will_delete(const IPRouteEntry<A>& ipr)
-{
-    if (_r->policy_accepts(ipr) == false) {
-	return;
-    }
-
-    // We only care that a route is about to be deleted when we are
-    // doing the initial route dump.  The pending delete may affect the
-    // last route dumped and as a result nobble our iteration of the valid
-    // routes set.
-    if (_r->dumping() == false ||
-	_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) {
-	return;
-    }
-
-    if (ipr.net() == _r->last_dumped_net()) {
-	// The pending delete affects last announced net.
-	//
-	// 1. Need to step back to previous net so next announcement will work
-	//    correctly.
-	//
-	typename RedistTable<A>::RouteIndex::const_iterator ci;
-	ci = _r->redist_table()->route_index().find(_r->last_dumped_net());
-	XLOG_ASSERT(ci != _r->redist_table()->route_index().end());
-	if (ci == _r->redist_table()->route_index().begin()) {
-	    _r->_last_net = Redistributor<A>::NO_LAST_NET;
-	} else {
-	    --ci;
-	    _r->_last_net = *ci;
+				return;	// route will be hit later on in dump anyway
+			}
+		}
+		_r->output()->add_route(ipr);
 	}
 
-	//
-	// 2. Announce delete.
-	//
-	_r->output()->delete_route(ipr);
-    }
-}
+	template <typename A>
+		void
+		Redistributor<A>::RedistEventInterface::will_delete(const IPRouteEntry<A>& ipr)
+		{
+			if (_r->policy_accepts(ipr) == false) 
+			{
+				return;
+			}
 
-template <typename A>
-void
-Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
-{
-    if (_r->policy_accepts(ipr) == false) {
-	return;
-    }
+			// We only care that a route is about to be deleted when we are
+			// doing the initial route dump.  The pending delete may affect the
+			// last route dumped and as a result nobble our iteration of the valid
+			// routes set.
+			if (_r->dumping() == false ||
+					_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) 
+			{
+				return;
+			}
 
-    if (_r->dumping()) {
-	if (_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) {
-	    debug_msg("did_delete with no last net\n");
-	    return;	// Dump not started
-	}
+			if (ipr.net() == _r->last_dumped_net()) 
+			{
+				// The pending delete affects last announced net.
+				//
+				// 1. Need to step back to previous net so next announcement will work
+				//    correctly.
+				//
+				typename RedistTable<A>::RouteIndex::const_iterator ci;
+				ci = _r->redist_table()->route_index().find(_r->last_dumped_net());
+				XLOG_ASSERT(ci != _r->redist_table()->route_index().end());
+				if (ci == _r->redist_table()->route_index().begin()) 
+				{
+					_r->_last_net = Redistributor<A>::NO_LAST_NET;
+				} else 
+				{
+					--ci;
+					_r->_last_net = *ci;
+				}
 
-	const IPNet<A>& last = _r->last_dumped_net();
-	const IPNet<A>& net  = ipr.net();
+				//
+				// 2. Announce delete.
+				//
+				_r->output()->delete_route(ipr);
+			}
+		}
+
+	template <typename A>
+		void
+		Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
+		{
+			if (_r->policy_accepts(ipr) == false) 
+			{
+				return;
+			}
+
+			if (_r->dumping()) 
+			{
+				if (_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) 
+				{
+					debug_msg("did_delete with no last net\n");
+					return;	// Dump not started
+				}
+
+				const IPNet<A>& last = _r->last_dumped_net();
+				const IPNet<A>& net  = ipr.net();
 #ifdef XORP_USE_USTL
-	if (!(net < last)) {
+				if (!(net < last)) 
+				{
 #else
-	if (!redist_net_cmp(net, last)) {
+					if (!redist_net_cmp(net, last)) 
+					{
 #endif
-	    return;	// route has not yet been announced so ignore
-	}
-    }
-    _r->output()->delete_route(ipr);
-}
+						return;	// route has not yet been announced so ignore
+					}
+				}
+				_r->output()->delete_route(ipr);
+			}
 
-template <typename A>
-void
-Redistributor<A>::OutputEventInterface::low_water()
-{
-    debug_msg("low water\n");
-    // Fallen below low water, take hint and resume dumping
-    if (_r->dumping()) {
-	_r->_blocked = false;
-	_r->schedule_dump_timer();
-    }
-}
+			template <typename A>
+				void
+				Redistributor<A>::OutputEventInterface::low_water()
+				{
+					debug_msg("low water\n");
+					// Fallen below low water, take hint and resume dumping
+					if (_r->dumping()) 
+					{
+						_r->_blocked = false;
+						_r->schedule_dump_timer();
+					}
+				}
 
-template <typename A>
-void
-Redistributor<A>::OutputEventInterface::high_water()
-{
-    // Risen above high water, take hint and stop dumping
-    debug_msg("high water\n");
-    if (_r->dumping()) {
-	_r->unschedule_dump_timer();
-	_r->_blocked = true;
-    }
-}
+			template <typename A>
+				void
+				Redistributor<A>::OutputEventInterface::high_water()
+				{
+					// Risen above high water, take hint and stop dumping
+					debug_msg("high water\n");
+					if (_r->dumping()) 
+					{
+						_r->unschedule_dump_timer();
+						_r->_blocked = true;
+					}
+				}
 
-template <typename A>
-void
-Redistributor<A>::OutputEventInterface::fatal_error()
-{
-    _r->redist_table()->remove_redistributor(_r);
-    delete _r;
-}
+			template <typename A>
+				void
+				Redistributor<A>::OutputEventInterface::fatal_error()
+				{
+					_r->redist_table()->remove_redistributor(_r);
+					delete _r;
+				}
 
-// ----------------------------------------------------------------------------
-// RedistTable
+			// ----------------------------------------------------------------------------
+			// RedistTable
 
-template <typename A>
-RedistTable<A>::RedistTable(const string& tablename,
-			    RouteTable<A>* parent)
-    : RouteTable<A>(tablename)
-{
-    if (parent->next_table()) {
-	this->set_next_table(parent->next_table());
-    }
-    parent->set_next_table(this);
-}
+			template <typename A>
+				RedistTable<A>::RedistTable(const string& tablename,
+						RouteTable<A>* parent)
+				: RouteTable<A>(tablename)
+				{
+					if (parent->next_table()) 
+					{
+						this->set_next_table(parent->next_table());
+					}
+					parent->set_next_table(this);
+				}
 
-template <typename A>
-RedistTable<A>::~RedistTable()
-{
-    while (_outputs.empty() == false) {
-	delete _outputs.front();
-	_outputs.pop_front();
-    }
-}
+			template <typename A>
+				RedistTable<A>::~RedistTable()
+				{
+					while (_outputs.empty() == false) 
+					{
+						delete _outputs.front();
+						_outputs.pop_front();
+					}
+				}
 
-template <typename A>
-void
-RedistTable<A>::add_redistributor(Redistributor<A>* r)
-{
-    if (find(_outputs.begin(), _outputs.end(), r) == _outputs.end())
-	_outputs.push_back(r);
-}
+			template <typename A>
+				void
+				RedistTable<A>::add_redistributor(Redistributor<A>* r)
+				{
+					if (find(_outputs.begin(), _outputs.end(), r) == _outputs.end())
+						_outputs.push_back(r);
+				}
 
-template <typename A>
-void
-RedistTable<A>::remove_redistributor(Redistributor<A>* r)
-{
-    typename list<Redistributor<A>*>::iterator i =
-	find(_outputs.begin(), _outputs.end(), r);
+			template <typename A>
+				void
+				RedistTable<A>::remove_redistributor(Redistributor<A>* r)
+				{
+					typename list<Redistributor<A>*>::iterator i =
+						find(_outputs.begin(), _outputs.end(), r);
 
-    if (i != _outputs.end()) {
-	_outputs.erase(i);
-    }
-}
+					if (i != _outputs.end()) 
+					{
+						_outputs.erase(i);
+					}
+				}
 
-template <typename A>
-const IPRouteEntry<A>*
-RedistTable<A>::lookup_ip_route(const IPNet<A>& net) const
-{
-    typename IPRouteTrie::iterator iter = _ip_route_table.lookup_node(net);
-    return (iter == _ip_route_table.end()) ? NULL : *iter;
-}
+			template <typename A>
+				const IPRouteEntry<A>*
+				RedistTable<A>::lookup_ip_route(const IPNet<A>& net) const
+				{
+					typename IPRouteTrie::iterator iter = _ip_route_table.lookup_node(net);
+					return (iter == _ip_route_table.end()) ? NULL : *iter;
+				}
 
-template <typename A>
-Redistributor<A>*
-RedistTable<A>::redistributor(const string& name)
-{
-    typename list<Redistributor<A>*>::iterator i = _outputs.begin();
-    while (i != _outputs.end()) {
-	Redistributor<A>* r = *i;
-	if (r->name() == name)
-	    return r;
-	++i;
-    }
-    return 0;
-}
+			template <typename A>
+				Redistributor<A>*
+				RedistTable<A>::redistributor(const string& name)
+				{
+					typename list<Redistributor<A>*>::iterator i = _outputs.begin();
+					while (i != _outputs.end()) 
+					{
+						Redistributor<A>* r = *i;
+						if (r->name() == name)
+							return r;
+						++i;
+					}
+					return 0;
+				}
 
-template <typename A>
-void
-RedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
-{
-    XLOG_ASSERT(_rt_index.find(route.net()) == _rt_index.end());
+			template <typename A>
+				void
+				RedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
+				{
+					XLOG_ASSERT(_rt_index.find(route.net()) == _rt_index.end());
 
-    _rt_index.insert(route.net());
-    _ip_route_table.insert(route.net(), &route);
+					_rt_index.insert(route.net());
+					_ip_route_table.insert(route.net(), &route);
 
-    typename list<Redistributor<A>*>::iterator i = _outputs.begin();
-    while (i != _outputs.end()) {
-	Redistributor<A>* r = *i;
-	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_add(route);
-    }
-}
+					typename list<Redistributor<A>*>::iterator i = _outputs.begin();
+					while (i != _outputs.end()) 
+					{
+						Redistributor<A>* r = *i;
+						i++;	// XXX for safety increment iterator before prodding output
+						r->redist_event().did_add(route);
+					}
+				}
 
-template <typename A>
-int
-RedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
-{
-    this->generic_add_route(route);
+			template <typename A>
+				int
+				RedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
+				{
+					this->generic_add_route(route);
 
-    if (this->next_table())
-	return this->next_table()->add_igp_route(route);
-    return XORP_OK;
-}
+					if (this->next_table())
+						return this->next_table()->add_igp_route(route);
+					return XORP_OK;
+				}
 
-template <typename A>
-int
-RedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
-{
-    this->generic_add_route(route);
+			template <typename A>
+				int
+				RedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
+				{
+					this->generic_add_route(route);
 
-    if (this->next_table())
-	return this->next_table()->add_egp_route(route);
-    return XORP_OK;
-}
+					if (this->next_table())
+						return this->next_table()->add_egp_route(route);
+					return XORP_OK;
+				}
 
-template <typename A>
-void
-RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
-{
-    debug_msg("delete_route for %s\n", route->net().str().c_str());
+			template <typename A>
+				void
+				RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
+				{
+					debug_msg("delete_route for %s\n", route->net().str().c_str());
 
-    typename RouteIndex::iterator rci = _rt_index.find(route->net());
-    XLOG_ASSERT(rci != _rt_index.end());
+					typename RouteIndex::iterator rci = _rt_index.find(route->net());
+					XLOG_ASSERT(rci != _rt_index.end());
 
-    typename list<Redistributor<A>*>::iterator i;
+					typename list<Redistributor<A>*>::iterator i;
 
-    // Announce intent to delete route
-    i = _outputs.begin();
-    while (i != _outputs.end()) {
-	Redistributor<A>* r = *i;
-	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().will_delete(*route);
-    }
+					// Announce intent to delete route
+					i = _outputs.begin();
+					while (i != _outputs.end()) 
+					{
+						Redistributor<A>* r = *i;
+						i++;	// XXX for safety increment iterator before prodding output
+						r->redist_event().will_delete(*route);
+					}
 
-    _rt_index.erase(rci);
-    _ip_route_table.erase(route->net());
+					_rt_index.erase(rci);
+					_ip_route_table.erase(route->net());
 
-    // Announce delete as fait accompli
-    i = _outputs.begin();
-    while (i != _outputs.end()) {
-	Redistributor<A>* r = *i;
-	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_delete(*route);
-    }
-}
+					// Announce delete as fait accompli
+					i = _outputs.begin();
+					while (i != _outputs.end()) 
+					{
+						Redistributor<A>* r = *i;
+						i++;	// XXX for safety increment iterator before prodding output
+						r->redist_event().did_delete(*route);
+					}
+				}
 
-template <typename A>
-int
-RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r, bool b)
-{
-    this->generic_delete_route(r);
+			template <typename A>
+				int
+				RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r, bool b)
+				{
+					this->generic_delete_route(r);
 
-    if (this->next_table())
-	return this->next_table()->delete_igp_route(r, b);
+					if (this->next_table())
+						return this->next_table()->delete_igp_route(r, b);
 
-    return XORP_OK;
-}
+					return XORP_OK;
+				}
 
-template <typename A>
-int
-RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r, bool b)
-{
-    this->generic_delete_route(r);
+			template <typename A>
+				int
+				RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r, bool b)
+				{
+					this->generic_delete_route(r);
 
-    if (this->next_table())
-	return this->next_table()->delete_egp_route(r, b);
+					if (this->next_table())
+						return this->next_table()->delete_egp_route(r, b);
 
-    return XORP_OK;
-}
+					return XORP_OK;
+				}
 
 
-// ----------------------------------------------------------------------------
-// Standard RouteTable methods, RedistTable punts everything to parent.
+			// ----------------------------------------------------------------------------
+			// Standard RouteTable methods, RedistTable punts everything to parent.
 
-template <typename A>
-string
-RedistTable<A>::str() const
-{
-    string s;
-    s = "-------\nRedistTable: " + this->tablename() + "\n";
+			template <typename A>
+				string
+				RedistTable<A>::str() const
+				{
+					string s;
+					s = "-------\nRedistTable: " + this->tablename() + "\n";
 
-    if (_outputs.empty() == false) {
-	s += "outputs:\n";
-	typename list<Redistributor<A>*>::const_iterator i = _outputs.begin();
-	while (i != _outputs.end()) {
-	    const Redistributor<A>* r = *i;
-	    s += "\t" + r->name() + "\n";
-	    ++i;
-	}
-    }
+					if (_outputs.empty() == false) 
+					{
+						s += "outputs:\n";
+						typename list<Redistributor<A>*>::const_iterator i = _outputs.begin();
+						while (i != _outputs.end()) 
+						{
+							const Redistributor<A>* r = *i;
+							s += "\t" + r->name() + "\n";
+							++i;
+						}
+					}
 
-    if (this->next_table() == NULL) {
-	s += "no next table\n";
-    } else {
-	s += "next table = " + this->next_table()->tablename() + "\n";
-    }
+					if (this->next_table() == NULL) 
+					{
+						s += "no next table\n";
+					} else 
+					{
+						s += "next table = " + this->next_table()->tablename() + "\n";
+					}
 
-    return s;
-}
+					return s;
+				}
 
-// ----------------------------------------------------------------------------
-// Instantiations
+			// ----------------------------------------------------------------------------
+			// Instantiations
 
-template class RedistOutput<IPv4>;
-template class RedistOutput<IPv6>;
+			template class RedistOutput<IPv4>;
+			template class RedistOutput<IPv6>;
 
-template class Redistributor<IPv4>;
-template class Redistributor<IPv6>;
+			template class Redistributor<IPv4>;
+			template class Redistributor<IPv6>;
 
-template class RedistTable<IPv4>;
-template class RedistTable<IPv6>;
+			template class RedistTable<IPv4>;
+			template class RedistTable<IPv6>;
 

@@ -20,8 +20,8 @@
 
 
 /*
-** BGP Pretty Print
-*/
+ ** BGP Pretty Print
+ */
 
 #include "bgp/bgp_module.h"
 
@@ -33,49 +33,56 @@
 #include "bgp/peer.hh"
 #include "bgppp.hh"
 
-string
+	string
 bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
 {
-    string result;
-    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+	string result;
+	uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
 
-    try {
-	switch(type) {
-	case MESSAGETYPEOPEN: {
-	    OpenPacket pac(buf, len);
-	    result = pac.str().c_str();
-	}
-	    break;
-	case MESSAGETYPEKEEPALIVE: {
-	    KeepAlivePacket pac(buf, len);
-	    result = pac.str().c_str();
-	}
-	    break;
-	case MESSAGETYPEUPDATE: {
-	    UpdatePacket pac(buf, len, peerdata, 0, false);
-	    result = pac.str().c_str();
-	}
-	    break;
-	case MESSAGETYPENOTIFICATION: {
-	    NotificationPacket pac(buf, len);
-	    result = pac.str().c_str();
-	}
-	    break;
-	default:
-	    /*
-	    ** Send a notification to the peer. This is a bad message type.
-	    */
-	    result = c_format("Unknown packet type %d\n", type);
-	    XLOG_WARNING("%s", result.c_str());
-	}
-    } catch(CorruptMessage& c) {
-	/*
-	** This peer had sent us a bad message.
-	*/
-	
-	result = c_format("BAD Message: %s", c.why().c_str());
-	XLOG_WARNING("%s", result.c_str());
-    }
+	try 
+	{
+		switch(type) 
+		{
+			case MESSAGETYPEOPEN: 
+				{
+					OpenPacket pac(buf, len);
+					result = pac.str().c_str();
+				}
+				break;
+			case MESSAGETYPEKEEPALIVE: 
+				{
+					KeepAlivePacket pac(buf, len);
+					result = pac.str().c_str();
+				}
+				break;
+			case MESSAGETYPEUPDATE: 
+				{
+					UpdatePacket pac(buf, len, peerdata, 0, false);
+					result = pac.str().c_str();
+				}
+				break;
+			case MESSAGETYPENOTIFICATION: 
+				{
+					NotificationPacket pac(buf, len);
+					result = pac.str().c_str();
+				}
+				break;
+			default:
+				/*
+				 ** Send a notification to the peer. This is a bad message type.
+				 */
+				result = c_format("Unknown packet type %d\n", type);
+				XLOG_WARNING("%s", result.c_str());
+		}
+	} catch(CorruptMessage& c) 
+	{
+		/*
+		 ** This peer had sent us a bad message.
+		 */
 
-    return result;
+		result = c_format("BAD Message: %s", c.why().c_str());
+		XLOG_WARNING("%s", result.c_str());
+	}
+
+	return result;
 }

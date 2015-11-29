@@ -31,43 +31,45 @@
  * @short Enables reading and writing variables of RIP routes.
  */
 template <class A>
-class RIPVarRW : public SingleVarRW {
-public:
-    enum {
-	VAR_NETWORK4 = VAR_PROTOCOL,
-	VAR_NEXTHOP4,
-	VAR_NETWORK6,
-	VAR_NEXTHOP6,
-	VAR_METRIC
-    };
-    
-    /**
-     * @param route route to read/write values from.
-     */
-    RIPVarRW(RouteEntry<A>& route);
+class RIPVarRW : public SingleVarRW 
+{
+    public:
+	enum 
+	{
+	    VAR_NETWORK4 = VAR_PROTOCOL,
+	    VAR_NEXTHOP4,
+	    VAR_NETWORK6,
+	    VAR_NEXTHOP6,
+	    VAR_METRIC
+	};
 
-    // SingleVarRW interface
-    void start_read();
-    Element* single_read(const Id& id);
-    void single_write(const Id& id, const Element& e);
+	/**
+	 * @param route route to read/write values from.
+	 */
+	RIPVarRW(RouteEntry<A>& route);
 
-private:
-    /**
-     * @param route route to read nexthop and network from.
-     */
-    void read_route_nexthop(RouteEntry<A>& route);
+	// SingleVarRW interface
+	void start_read();
+	Element* single_read(const Id& id);
+	void single_write(const Id& id, const Element& e);
 
-    /**
-     * Specialized template method to write correct nexthop value based on
-     * address family of route.
-     *
-     * @param id variable to write.
-     * @param e value of variable.
-     * @return true if write was performed, false otherwise.
-     */
-    bool write_nexthop(const Id& id, const Element& e);
+    private:
+	/**
+	 * @param route route to read nexthop and network from.
+	 */
+	void read_route_nexthop(RouteEntry<A>& route);
 
-    RouteEntry<A>&	_route;
+	/**
+	 * Specialized template method to write correct nexthop value based on
+	 * address family of route.
+	 *
+	 * @param id variable to write.
+	 * @param e value of variable.
+	 * @return true if write was performed, false otherwise.
+	 */
+	bool write_nexthop(const Id& id, const Element& e);
+
+	RouteEntry<A>&	_route;
 };
 
 #endif // __RIP_RIP_VARRW_HH__

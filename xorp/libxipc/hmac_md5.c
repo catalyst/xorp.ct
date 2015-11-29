@@ -45,86 +45,89 @@
 
 
 void hmac_md5(const unsigned char   *data,
-	      int              data_len,
-	      const unsigned char   *key,
-	      int              key_len,
-	      unsigned char    digest[16])
+	int              data_len,
+	const unsigned char   *key,
+	int              key_len,
+	unsigned char    digest[16])
 {
-        MD5_CTX       context;
-        unsigned char k_ipad[65];    /* inner padding - key XORd with ipad */
-        unsigned char k_opad[65];    /* outer padding - key XORd with opad */
-        unsigned char tk[16];
-        int           i;
+    MD5_CTX       context;
+    unsigned char k_ipad[65];    /* inner padding - key XORd with ipad */
+    unsigned char k_opad[65];    /* outer padding - key XORd with opad */
+    unsigned char tk[16];
+    int           i;
 
-        /* If key is longer than 64 bytes reset it to key = MD5(key) */
-        if (key_len > 64) {
-                MD5_CTX      tctx;
+    /* If key is longer than 64 bytes reset it to key = MD5(key) */
+    if (key_len > 64) 
+    {
+	MD5_CTX      tctx;
 
-                MD5_Init(&tctx);
-                MD5_Update(&tctx, key, key_len);
-                MD5_Final(tk, &tctx);
+	MD5_Init(&tctx);
+	MD5_Update(&tctx, key, key_len);
+	MD5_Final(tk, &tctx);
 
-                key = tk;
-                key_len = 16;
-        }
+	key = tk;
+	key_len = 16;
+    }
 
-        /*
-         * The HMAC_MD5 transform looks like:
-         *
-         * MD5(K XOR opad, MD5(K XOR ipad, data))
-         *
-         * where K is an n byte key
-         * ipad is the byte 0x36 repeated 64 times
-         * opad is the byte 0x5c repeated 64 times
-         * and text is the data being protected
-         */
+    /*
+     * The HMAC_MD5 transform looks like:
+     *
+     * MD5(K XOR opad, MD5(K XOR ipad, data))
+     *
+     * where K is an n byte key
+     * ipad is the byte 0x36 repeated 64 times
+     * opad is the byte 0x5c repeated 64 times
+     * and text is the data being protected
+     */
 
-        /* Start out by storing key in pads */
-        memset(k_ipad, 0, sizeof(k_ipad));
-        memset(k_opad, 0, sizeof(k_opad));
-        memcpy(k_ipad, key, key_len);
-        memcpy(k_opad, key, key_len);
+    /* Start out by storing key in pads */
+    memset(k_ipad, 0, sizeof(k_ipad));
+    memset(k_opad, 0, sizeof(k_opad));
+    memcpy(k_ipad, key, key_len);
+    memcpy(k_opad, key, key_len);
 
-        /* XOR key with ipad and opad values */
-        for (i = 0; i<64; i++) {
-                k_ipad[i] ^= 0x36;
-                k_opad[i] ^= 0x5c;
-        }
-        /*
-         * perform inner MD5
-         */
-        MD5_Init(&context);                   /* init context for 1st pass */
-        MD5_Update(&context, k_ipad, 64);     /* start with inner pad      */
-        MD5_Update(&context, data, data_len); /* then text of datagram     */
-        MD5_Final(digest, &context);          /* finish up 1st pass        */
-        /*
-         * perform outer MD5
-         */
-        MD5_Init(&context);                   /* init context for 2nd pass */
-        MD5_Update(&context, k_opad, 64);     /* start with outer pad      */
-        MD5_Update(&context, digest, 16);     /* then results of 1st hash  */
-        MD5_Final(digest, &context);          /* finish up 2nd pass        */
+    /* XOR key with ipad and opad values */
+    for (i = 0; i<64; i++) 
+    {
+	k_ipad[i] ^= 0x36;
+	k_opad[i] ^= 0x5c;
+    }
+    /*
+     * perform inner MD5
+     */
+    MD5_Init(&context);                   /* init context for 1st pass */
+    MD5_Update(&context, k_ipad, 64);     /* start with inner pad      */
+    MD5_Update(&context, data, data_len); /* then text of datagram     */
+    MD5_Final(digest, &context);          /* finish up 1st pass        */
+    /*
+     * perform outer MD5
+     */
+    MD5_Init(&context);                   /* init context for 2nd pass */
+    MD5_Update(&context, k_opad, 64);     /* start with outer pad      */
+    MD5_Update(&context, digest, 16);     /* then results of 1st hash  */
+    MD5_Final(digest, &context);          /* finish up 2nd pass        */
 }
 
-const char*
+    const char*
 hmac_md5_digest_to_ascii(unsigned char	digest[16],
-			 char*		b,
-			 unsigned int	b_bytes)
+	char*		b,
+	unsigned int	b_bytes)
 {
-	const char* hex = "0123456789abcdef";
-	char* o = b;
-	int i;
+    const char* hex = "0123456789abcdef";
+    char* o = b;
+    int i;
 
-	if (b_bytes < 33)
-		return NULL;
+    if (b_bytes < 33)
+	return NULL;
 
-	for (i = 0; i < 16; i++) {
-		*o++ = hex[digest[i] >> 4];
-		*o++ = hex[digest[i] & 0x0f];
-	}
-	*o = '\0';
+    for (i = 0; i < 16; i++) 
+    {
+	*o++ = hex[digest[i] >> 4];
+	*o++ = hex[digest[i] & 0x0f];
+    }
+    *o = '\0';
 
-	return b;
+    return b;
 }
 
 /*
@@ -155,18 +158,19 @@ hmac_md5_digest_to_ascii(unsigned char	digest[16],
 #ifdef TEST_HMAC
 int main()
 {
-	unsigned char	*key  = "Jefe";
-	unsigned char	*data = "what do ya want for nothing?";
-	unsigned char	 digest[16];
-	int		 i;
+    unsigned char	*key  = "Jefe";
+    unsigned char	*data = "what do ya want for nothing?";
+    unsigned char	 digest[16];
+    int		 i;
 
-	hmac_md5(data, 28, key, 4, digest);
-	for (i = 0; i < 16; i++) {
-		printf("%02x", digest[i]);
-	}
-	printf("\n");
+    hmac_md5(data, 28, key, 4, digest);
+    for (i = 0; i < 16; i++) 
+    {
+	printf("%02x", digest[i]);
+    }
+    printf("\n");
 
-	return 0;
+    return 0;
 }
 #endif
 

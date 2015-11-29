@@ -39,20 +39,21 @@
  */
 
 template<class A>
-class BGPRouteFilter {
-public:
-    BGPRouteFilter() {};
-    virtual ~BGPRouteFilter() {}
+class BGPRouteFilter 
+{
+    public:
+	BGPRouteFilter() {};
+	virtual ~BGPRouteFilter() {}
 
-    /* "modified" is needed because we need to know whether we should
-       free the rtmsg or not if we modify the route. If this
-       filterbank has modified it, and then modifies it again, then we
-       should free the rtmsg.  Otherwise it's the responsibility of
-       whoever created the rtmsg*/
-    virtual bool
-       filter(InternalMessage<A>& rtmsg) const = 0;
-protected:
-private:
+	/* "modified" is needed because we need to know whether we should
+	   free the rtmsg or not if we modify the route. If this
+	   filterbank has modified it, and then modifies it again, then we
+	   should free the rtmsg.  Otherwise it's the responsibility of
+	   whoever created the rtmsg*/
+	virtual bool
+	    filter(InternalMessage<A>& rtmsg) const = 0;
+    protected:
+    private:
 };
 
 
@@ -62,12 +63,13 @@ private:
  */
 
 template<class A>
-class AggregationFilter : public BGPRouteFilter<A> {
-public:
-    AggregationFilter(bool is_ibgp);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    bool _is_ibgp;
+class AggregationFilter : public BGPRouteFilter<A> 
+{
+    public:
+	AggregationFilter(bool is_ibgp);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	bool _is_ibgp;
 };
 
 
@@ -84,12 +86,13 @@ private:
  */
 
 template<class A>
-class SimpleASFilter : public BGPRouteFilter<A> {
-public:
-    SimpleASFilter(const AsNum &as_num);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    AsNum _as_num;
+class SimpleASFilter : public BGPRouteFilter<A> 
+{
+    public:
+	SimpleASFilter(const AsNum &as_num);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	AsNum _as_num;
 };
 
 
@@ -104,13 +107,14 @@ private:
  */
 
 template<class A>
-class RRInputFilter : public BGPRouteFilter<A> {
-public:
-    RRInputFilter(IPv4 bgp_id, IPv4 cluster_id);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    IPv4 _bgp_id;
-    IPv4 _cluster_id;
+class RRInputFilter : public BGPRouteFilter<A> 
+{
+    public:
+	RRInputFilter(IPv4 bgp_id, IPv4 cluster_id);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	IPv4 _bgp_id;
+	IPv4 _cluster_id;
 };
 
 
@@ -125,13 +129,14 @@ private:
  */
 
 template<class A>
-class ASPrependFilter : public BGPRouteFilter<A> {
-public:
-    ASPrependFilter(const AsNum &as_num, bool is_confederation_peer);
-    bool filter(InternalMessage<A>& rtmsg) const;
-private:
-    AsNum _as_num;
-    bool _is_confederation_peer; 
+class ASPrependFilter : public BGPRouteFilter<A> 
+{
+    public:
+	ASPrependFilter(const AsNum &as_num, bool is_confederation_peer);
+	bool filter(InternalMessage<A>& rtmsg) const;
+    private:
+	AsNum _as_num;
+	bool _is_confederation_peer; 
 };
 
 
@@ -148,15 +153,16 @@ private:
  */
 
 template<class A>
-class NexthopRewriteFilter : public BGPRouteFilter<A> {
-public:
-    NexthopRewriteFilter(const A &local_nexthop, bool directly_connected,
-			 const IPNet<A> &subnet);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    A _local_nexthop;
-    bool _directly_connected;
-    IPNet<A> _subnet;
+class NexthopRewriteFilter : public BGPRouteFilter<A> 
+{
+    public:
+	NexthopRewriteFilter(const A &local_nexthop, bool directly_connected,
+		const IPNet<A> &subnet);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	A _local_nexthop;
+	bool _directly_connected;
+	IPNet<A> _subnet;
 };
 
 
@@ -171,13 +177,14 @@ private:
  */
 
 template<class A>
-class NexthopPeerCheckFilter : public BGPRouteFilter<A> {
-public:
-    NexthopPeerCheckFilter(const A &local_nexthop, const A &peer_address);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    A _local_nexthop;
-    A _peer_address;
+class NexthopPeerCheckFilter : public BGPRouteFilter<A> 
+{
+    public:
+	NexthopPeerCheckFilter(const A &local_nexthop, const A &peer_address);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	A _local_nexthop;
+	A _peer_address;
 };
 
 
@@ -191,11 +198,12 @@ private:
  */
 
 template<class A>
-class IBGPLoopFilter : public BGPRouteFilter<A> {
-public:
-    IBGPLoopFilter();
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
+class IBGPLoopFilter : public BGPRouteFilter<A> 
+{
+    public:
+	IBGPLoopFilter();
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
 };
 
 
@@ -212,14 +220,15 @@ private:
  */
 
 template<class A>
-class RRIBGPLoopFilter : public BGPRouteFilter<A> {
-public:
-    RRIBGPLoopFilter(bool rr_client, IPv4 bgp_id, IPv4 cluster_id);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    bool _rr_client;
-    IPv4 _bgp_id;
-    IPv4 _cluster_id;
+class RRIBGPLoopFilter : public BGPRouteFilter<A> 
+{
+    public:
+	RRIBGPLoopFilter(bool rr_client, IPv4 bgp_id, IPv4 cluster_id);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	bool _rr_client;
+	IPv4 _bgp_id;
+	IPv4 _cluster_id;
 };
 
 /**
@@ -231,11 +240,12 @@ private:
  */
 
 template<class A>
-class RRPurgeFilter : public BGPRouteFilter<A> {
-public:
-    RRPurgeFilter();
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
+class RRPurgeFilter : public BGPRouteFilter<A> 
+{
+    public:
+	RRPurgeFilter();
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
 };
 
 /**
@@ -247,12 +257,13 @@ private:
  */
 
 template<class A>
-class LocalPrefInsertionFilter : public BGPRouteFilter<A> {
-public:
-    LocalPrefInsertionFilter(uint32_t default_local_pref);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    uint32_t _default_local_pref;
+class LocalPrefInsertionFilter : public BGPRouteFilter<A> 
+{
+    public:
+	LocalPrefInsertionFilter(uint32_t default_local_pref);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	uint32_t _default_local_pref;
 };
 
 
@@ -266,11 +277,12 @@ private:
  */
 
 template<class A>
-class LocalPrefRemovalFilter : public BGPRouteFilter<A> {
-public:
-    LocalPrefRemovalFilter();
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
+class LocalPrefRemovalFilter : public BGPRouteFilter<A> 
+{
+    public:
+	LocalPrefRemovalFilter();
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
 };
 
 
@@ -283,12 +295,13 @@ private:
  */
 
 template<class A>
-class MEDInsertionFilter : public BGPRouteFilter<A> {
-public:
-    MEDInsertionFilter(NextHopResolver<A>& next_hop_resolver);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    NextHopResolver<A>& _next_hop_resolver;
+class MEDInsertionFilter : public BGPRouteFilter<A> 
+{
+    public:
+	MEDInsertionFilter(NextHopResolver<A>& next_hop_resolver);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	NextHopResolver<A>& _next_hop_resolver;
 };
 
 /**
@@ -300,11 +313,12 @@ private:
  */
 
 template<class A>
-class MEDRemovalFilter : public BGPRouteFilter<A> {
-public:
-    MEDRemovalFilter();
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
+class MEDRemovalFilter : public BGPRouteFilter<A> 
+{
+    public:
+	MEDRemovalFilter();
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
 };
 
 /**
@@ -315,12 +329,13 @@ private:
  */
 
 template<class A>
-class KnownCommunityFilter : public BGPRouteFilter<A> {
-public:
-    KnownCommunityFilter(PeerType peer_type);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    PeerType _peer_type;
+class KnownCommunityFilter : public BGPRouteFilter<A> 
+{
+    public:
+	KnownCommunityFilter(PeerType peer_type);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	PeerType _peer_type;
 };
 
 /**
@@ -334,11 +349,12 @@ private:
  */
 
 template<class A>
-class UnknownFilter : public BGPRouteFilter<A> {
-public:
-    UnknownFilter();
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
+class UnknownFilter : public BGPRouteFilter<A> 
+{
+    public:
+	UnknownFilter();
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
 };
 
 
@@ -353,13 +369,14 @@ private:
  */
 
 template<class A>
-class OriginateRouteFilter : public BGPRouteFilter<A> {
-public:
-    OriginateRouteFilter(const AsNum &as_num, PeerType peer_type);
-    bool filter(InternalMessage<A>& rtmsg) const ;
-private:
-    AsNum _as_num;
-    PeerType _peer_type;
+class OriginateRouteFilter : public BGPRouteFilter<A> 
+{
+    public:
+	OriginateRouteFilter(const AsNum &as_num, PeerType peer_type);
+	bool filter(InternalMessage<A>& rtmsg) const ;
+    private:
+	AsNum _as_num;
+	PeerType _peer_type;
 };
 
 /**
@@ -373,42 +390,43 @@ private:
  */
 
 template<class A>
-class FilterVersion {
-public:
-    FilterVersion(NextHopResolver<A>& next_hop_resolver);
-    ~FilterVersion();
-    void set_genid(uint32_t genid) {_genid = genid;}
-    int add_aggregation_filter(bool is_ibgp);
-    int add_simple_AS_filter(const AsNum &asn);
-    int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
-    int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
-    int add_nexthop_rewrite_filter(const A& nexthop,
-				   bool directly_connected,
-				   const IPNet<A> &subnet);
-    int add_nexthop_peer_check_filter(const A& nexthop,
-				      const A& peer_address);
-    int add_ibgp_loop_filter();
-    int add_route_reflector_ibgp_loop_filter(bool client,
-					     IPv4 bgp_id,
-					     IPv4 cluster_id);
-    int add_route_reflector_purge_filter();
-    int add_localpref_insertion_filter(uint32_t default_local_pref);
-    int add_localpref_removal_filter();
-    int add_med_insertion_filter();
-    int add_med_removal_filter();
-    int add_known_community_filter(PeerType peer_type);
-    int add_unknown_filter();
-    int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
-    bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
-    int ref_count() const {return _ref_count;}
-    uint32_t genid() const {return _genid;}
-    bool used() const {return _used;}
-private:
-    uint32_t _genid;
-    bool _used;
-    list <BGPRouteFilter<A> *> _filters;
-    int _ref_count;
-    NextHopResolver<A>& _next_hop_resolver;
+class FilterVersion 
+{
+    public:
+	FilterVersion(NextHopResolver<A>& next_hop_resolver);
+	~FilterVersion();
+	void set_genid(uint32_t genid) {_genid = genid;}
+	int add_aggregation_filter(bool is_ibgp);
+	int add_simple_AS_filter(const AsNum &asn);
+	int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
+	int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
+	int add_nexthop_rewrite_filter(const A& nexthop,
+		bool directly_connected,
+		const IPNet<A> &subnet);
+	int add_nexthop_peer_check_filter(const A& nexthop,
+		const A& peer_address);
+	int add_ibgp_loop_filter();
+	int add_route_reflector_ibgp_loop_filter(bool client,
+		IPv4 bgp_id,
+		IPv4 cluster_id);
+	int add_route_reflector_purge_filter();
+	int add_localpref_insertion_filter(uint32_t default_local_pref);
+	int add_localpref_removal_filter();
+	int add_med_insertion_filter();
+	int add_med_removal_filter();
+	int add_known_community_filter(PeerType peer_type);
+	int add_unknown_filter();
+	int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
+	bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
+	int ref_count() const {return _ref_count;}
+	uint32_t genid() const {return _genid;}
+	bool used() const {return _used;}
+    private:
+	uint32_t _genid;
+	bool _used;
+	list <BGPRouteFilter<A> *> _filters;
+	int _ref_count;
+	NextHopResolver<A>& _next_hop_resolver;
 };
 
 /**
@@ -439,69 +457,70 @@ private:
  */
 
 template<class A>
-class FilterTable : public BGPRouteTable<A>  {
-public:
-    FilterTable(string tablename,
+class FilterTable : public BGPRouteTable<A>  
+{
+    public:
+	FilterTable(string tablename,
 		Safi safi,
 		BGPRouteTable<A> *parent, 
 		NextHopResolver<A>& next_hop_resolver);
-    ~FilterTable();
-    void reconfigure_filter();
+	~FilterTable();
+	void reconfigure_filter();
 
-    int add_route(InternalMessage<A> &rtmsg,
-		  BGPRouteTable<A> *caller);
-    int replace_route(InternalMessage<A> &old_rtmsg,
-		      InternalMessage<A> &new_rtmsg,
-		      BGPRouteTable<A> *caller);
-    int delete_route(InternalMessage<A> &rtmsg, 
-		     BGPRouteTable<A> *caller);
-    int route_dump(InternalMessage<A> &rtmsg,
-		   BGPRouteTable<A> *caller,
-		   const PeerHandler *dump_peer);
-    int push(BGPRouteTable<A> *caller);
-    const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid,
-				       FPAListRef& pa_list) const;
-    void route_used(const SubnetRoute<A>* route, bool in_use);
+	int add_route(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller);
+	int replace_route(InternalMessage<A> &old_rtmsg,
+		InternalMessage<A> &new_rtmsg,
+		BGPRouteTable<A> *caller);
+	int delete_route(InternalMessage<A> &rtmsg, 
+		BGPRouteTable<A> *caller);
+	int route_dump(InternalMessage<A> &rtmsg,
+		BGPRouteTable<A> *caller,
+		const PeerHandler *dump_peer);
+	int push(BGPRouteTable<A> *caller);
+	const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
+		uint32_t& genid,
+		FPAListRef& pa_list) const;
+	void route_used(const SubnetRoute<A>* route, bool in_use);
 
-    RouteTableType type() const {return FILTER_TABLE;}
-    string str() const;
+	RouteTableType type() const {return FILTER_TABLE;}
+	string str() const;
 
-    /* mechanisms to implement flow control in the output plumbing */
-    bool get_next_message(BGPRouteTable<A> *next_table);
+	/* mechanisms to implement flow control in the output plumbing */
+	bool get_next_message(BGPRouteTable<A> *next_table);
 
-    int add_aggregation_filter(bool is_ibgp);
-    int add_simple_AS_filter(const AsNum &asn);
-    int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
-    int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
-    int add_nexthop_rewrite_filter(const A& nexthop,
-				   bool directly_connected,
-				   const IPNet<A> &subnet);
-    int add_nexthop_peer_check_filter(const A& nexthop,
-				      const A& peer_address);
-    int add_ibgp_loop_filter();
-    int add_route_reflector_ibgp_loop_filter(bool client,
-					     IPv4 bgp_id,
-					     IPv4 cluster_id);
-    int add_route_reflector_purge_filter();
-    int add_localpref_insertion_filter(uint32_t default_local_pref);
-    int add_localpref_removal_filter();
-    int add_med_insertion_filter();
-    int add_med_removal_filter();
-    int add_known_community_filter(PeerType peer_type);
-    int add_unknown_filter();
-    int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
-    void do_versioning() {_do_versioning = true;}
+	int add_aggregation_filter(bool is_ibgp);
+	int add_simple_AS_filter(const AsNum &asn);
+	int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
+	int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
+	int add_nexthop_rewrite_filter(const A& nexthop,
+		bool directly_connected,
+		const IPNet<A> &subnet);
+	int add_nexthop_peer_check_filter(const A& nexthop,
+		const A& peer_address);
+	int add_ibgp_loop_filter();
+	int add_route_reflector_ibgp_loop_filter(bool client,
+		IPv4 bgp_id,
+		IPv4 cluster_id);
+	int add_route_reflector_purge_filter();
+	int add_localpref_insertion_filter(uint32_t default_local_pref);
+	int add_localpref_removal_filter();
+	int add_med_insertion_filter();
+	int add_med_removal_filter();
+	int add_known_community_filter(PeerType peer_type);
+	int add_unknown_filter();
+	int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
+	void do_versioning() {_do_versioning = true;}
 
-private:
-    bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
-    bool apply_filters(InternalMessage<A>& rtmsg) const;
-    void drop_message(const InternalMessage<A> *rtmsg) const ;
-    map <uint32_t, FilterVersion<A>* > _filter_versions;
-    set <uint32_t> _deleted_filters;  /* kept as a sanity check */
-    FilterVersion<A>* _current_filter;
-    NextHopResolver<A>& _next_hop_resolver;
-    bool _do_versioning;
+    private:
+	bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
+	bool apply_filters(InternalMessage<A>& rtmsg) const;
+	void drop_message(const InternalMessage<A> *rtmsg) const ;
+	map <uint32_t, FilterVersion<A>* > _filter_versions;
+	set <uint32_t> _deleted_filters;  /* kept as a sanity check */
+	FilterVersion<A>* _current_filter;
+	NextHopResolver<A>& _next_hop_resolver;
+	bool _do_versioning;
 };
 
 #endif // __BGP_ROUTE_TABLE_FILTER_HH__

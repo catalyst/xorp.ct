@@ -25,8 +25,9 @@
 #include "test_varrw.hh"
 #include "common/policy_exception.hh"
 
-const Element& 
-TestVarRW::read(const Id& id) {
+    const Element& 
+TestVarRW::read(const Id& id) 
+{
     ELEM::iterator i = _elem.find(id);
 
     if (i == _elem.end())
@@ -37,7 +38,8 @@ TestVarRW::read(const Id& id) {
     return *e;
 }
 
-void 
-TestVarRW::write(const Id& id, const Element& elem) {
+    void 
+TestVarRW::write(const Id& id, const Element& elem) 
+{
     _elem[id] = &elem;
 }

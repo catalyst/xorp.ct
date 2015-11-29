@@ -27,15 +27,15 @@
 #include "route_table_policy_ex.hh"
 #include "bgp_varrw_export.hh"
 
-template <class A>
+    template <class A>
 PolicyTableExport<A>::PolicyTableExport(const string& tablename, 
-					const Safi& safi,
-					BGPRouteTable<A>* parent,
-					PolicyFilters& pfs,
-					const string& neighbor,
-					const A& self)
-    : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT),
-      _neighbor(neighbor)
+	const Safi& safi,
+	BGPRouteTable<A>* parent,
+	PolicyFilters& pfs,
+	const string& neighbor,
+	const A& self)
+: PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT),
+    _neighbor(neighbor)
 {
     this->_parent = parent;
 
@@ -50,14 +50,14 @@ PolicyTableExport<A>::PolicyTableExport(const string& tablename,
 }
 
 template <class A>
-void
+    void
 PolicyTableExport<A>::init_varrw()
 {
     if (this->_varrw)
 	delete this->_varrw;
     this->_varrw = new BGPVarRWExport<A>(
-                        filter::filter2str(PolicyTable<A>::_filter_type),
-                        _neighbor);
+	    filter::filter2str(PolicyTable<A>::_filter_type),
+	    _neighbor);
 }
 
 template class PolicyTableExport<IPv4>;

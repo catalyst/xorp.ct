@@ -47,69 +47,72 @@ class PimNode;
 class PimScopeZone;
 
 // The PIM Scope Zone ID
-class PimScopeZoneId {
-public:
-    PimScopeZoneId(const IPvXNet& scope_zone_prefix, bool is_scope_zone);
-    
-    const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
-    bool is_scope_zone() const { return (_is_scope_zone); }
-    bool operator==(const PimScopeZoneId& other) const;
-    bool is_overlap(const PimScopeZoneId& other) const;
-    bool contains(const IPvXNet& ipvxnet) const;
-    bool contains(const IPvX& ipvx) const;
-    string str() const;
-    
-private:
-    IPvXNet	_scope_zone_prefix;	// The scope zone address prefix
-    bool	_is_scope_zone;		// If true, this is admin. scoped zone
+class PimScopeZoneId 
+{
+	public:
+		PimScopeZoneId(const IPvXNet& scope_zone_prefix, bool is_scope_zone);
+
+		const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
+		bool is_scope_zone() const { return (_is_scope_zone); }
+		bool operator==(const PimScopeZoneId& other) const;
+		bool is_overlap(const PimScopeZoneId& other) const;
+		bool contains(const IPvXNet& ipvxnet) const;
+		bool contains(const IPvX& ipvx) const;
+		string str() const;
+
+	private:
+		IPvXNet	_scope_zone_prefix;	// The scope zone address prefix
+		bool	_is_scope_zone;		// If true, this is admin. scoped zone
 };
 
 
 // PIM-specific scope zone table
-class PimScopeZoneTable {
-public:
-    PimScopeZoneTable(PimNode& pim_node);
-    virtual ~PimScopeZoneTable();
-    
-    list<PimScopeZone>& pim_scope_zone_list() { return (_pim_scope_zone_list); }
-    void add_scope_zone(const IPvXNet& scope_zone_prefix, uint32_t vif_index);
-    void delete_scope_zone(const IPvXNet& scope_zone_prefix,
-			   uint32_t vif_index);
-    
-    bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
-    bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
-    bool is_zone_border_router(const IPvXNet& group_prefix) const;
-    
-    PimNode&	pim_node() const	{ return (_pim_node);		}
-    
-private:
-    // Private functions
-    
-    // Private state
-    PimNode&	_pim_node;			// The PIM node I belong to
-    list<PimScopeZone> _pim_scope_zone_list;	// The list with scoped zones
+class PimScopeZoneTable 
+{
+	public:
+		PimScopeZoneTable(PimNode& pim_node);
+		virtual ~PimScopeZoneTable();
+
+		list<PimScopeZone>& pim_scope_zone_list() { return (_pim_scope_zone_list); }
+		void add_scope_zone(const IPvXNet& scope_zone_prefix, uint32_t vif_index);
+		void delete_scope_zone(const IPvXNet& scope_zone_prefix,
+				uint32_t vif_index);
+
+		bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
+		bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
+		bool is_zone_border_router(const IPvXNet& group_prefix) const;
+
+		PimNode&	pim_node() const	{ return (_pim_node);		}
+
+	private:
+		// Private functions
+
+		// Private state
+		PimNode&	_pim_node;			// The PIM node I belong to
+		list<PimScopeZone> _pim_scope_zone_list;	// The list with scoped zones
 };
 
-class PimScopeZone {
-public:
-    PimScopeZone(const IPvXNet& scope_zone_prefix, const Mifset& scoped_vifs);
+class PimScopeZone 
+{
+	public:
+		PimScopeZone(const IPvXNet& scope_zone_prefix, const Mifset& scoped_vifs);
 #ifdef XORP_USE_USTL
-    PimScopeZone() { }
+		PimScopeZone() { }
 #endif
-    virtual ~PimScopeZone();
-    
-    const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
-    void set_scoped_vif(uint32_t vif_index, bool v);
-    
-    bool is_empty() const { return (! _scoped_vifs.any()); }
-    bool is_set(uint32_t vif_index) const;
-    bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
-    bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
-    bool is_same_scope_zone(const IPvXNet& scope_zone_prefix) const;
-    
-private:
-    IPvXNet	_scope_zone_prefix;		// The scoped zone prefix
-    Mifset	_scoped_vifs;			// The set of scoped vifs
+		virtual ~PimScopeZone();
+
+		const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
+		void set_scoped_vif(uint32_t vif_index, bool v);
+
+		bool is_empty() const { return (! _scoped_vifs.any()); }
+		bool is_set(uint32_t vif_index) const;
+		bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
+		bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
+		bool is_same_scope_zone(const IPvXNet& scope_zone_prefix) const;
+
+	private:
+		IPvXNet	_scope_zone_prefix;		// The scoped zone prefix
+		Mifset	_scoped_vifs;			// The set of scoped vifs
 };
 
 //

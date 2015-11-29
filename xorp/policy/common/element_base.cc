@@ -34,8 +34,8 @@ Element::~Element()
 Element::Element(Hash hash) : _refcount(1), _hash(hash)
 {
     if (_hash >= HASH_ELEM_MAX)
-        xorp_throw(PolicyException,
-                   "Too many elems for dispatcher---find a better hashing mechanism\n");
+	xorp_throw(PolicyException,
+		"Too many elems for dispatcher---find a better hashing mechanism\n");
 }
 
 // TODO do a proper refcount implementation, factory, object reuse, etc.
@@ -46,7 +46,7 @@ Element::ref() const
     XLOG_ASSERT(_refcount);
 }
 
-void
+    void
 Element::unref()
 {
     XLOG_ASSERT(_refcount > 0);
@@ -54,7 +54,7 @@ Element::unref()
     _refcount--;
 
     if (_refcount == 0)
-        delete this;
+	delete this;
 }
 
 uint32_t
