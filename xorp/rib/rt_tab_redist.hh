@@ -35,7 +35,6 @@ class RedistOutput;
 template <typename A>
 class RedistPolicy;
 
-#ifndef XORP_USE_USTL
 /**
  * Comparitor to allow nets to be stored in a sorted container.
  */
@@ -44,7 +43,6 @@ struct RedistNetCmp
 {
 	bool operator() (const IPNet<A>& l, const IPNet<A>& r) const;
 };
-#endif
 
 
 /**
@@ -67,11 +65,7 @@ template<class A>
 class RedistTable : public RouteTable<A> 
 {
 	public:
-#ifdef XORP_USE_USTL
-		typedef set<IPNet<A> > RouteIndex;
-#else
 		typedef set<IPNet<A>,RedistNetCmp<A> > RouteIndex;
-#endif
 
 	public:
 		/**
@@ -286,9 +280,7 @@ class Redistributor :
 		XorpTimer			_dtimer;
 
 		static const IPNet<A> NO_LAST_NET;		// Indicator for last net inval
-#ifndef XORP_USE_USTL
 		static const RedistNetCmp<A> redist_net_cmp;
-#endif
 };
 
 
@@ -334,7 +326,6 @@ class RedistOutput :
 // ----------------------------------------------------------------------------
 // Inline RedistTable methods
 
-#ifndef XORP_USE_USTL
 template <typename A>
 inline bool
 RedistNetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
@@ -343,6 +334,5 @@ RedistNetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
 		return l.prefix_len() < r.prefix_len();
 	return l.masked_addr() < r.masked_addr();
 }
-#endif
 
 #endif // __RIB_RT_TAB_REDIST_HH__

@@ -123,9 +123,6 @@ class XrlCmdEntry
     XrlCmdEntry(const string& s, XrlRecvSyncCallback cb) :
 	_name(s), _cb(make_async_cb(cb)) {}
 
-#ifdef XORP_USE_USTL
-    XrlCmdEntry() { }
-#endif
 
     const string& name() const { return _name; }
 

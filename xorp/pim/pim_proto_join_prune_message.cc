@@ -49,17 +49,6 @@
 {
 }
 
-#ifdef XORP_USE_USTL
-	PimJpHeader::PimJpHeader()
-: _pim_node(NULL),
-	_family(AF_INET),
-	_jp_groups_n(0),
-	_jp_sources_n(0),
-	_holdtime(PIM_JOIN_PRUNE_HOLDTIME_DEFAULT) // XXX
-{
-}
-#endif
-
 
 PimJpHeader::~PimJpHeader()
 {

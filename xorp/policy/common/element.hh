@@ -552,25 +552,8 @@ class ElemNet : public Element
 	    return oss.str();
 	}
 
-#ifdef XORP_USE_USTL
-	ElemNet& operator=(const ElemNet<A>& rhs) 
-	{
-	    if (this != &rhs) 
-	    {
-		if (_net) 
-		{
-		    delete _net;
-		}
-		_net = new A(*rhs._net);
-		_mod = rhs._mod;
-		_op = rhs._op;
-	    }
-	    return *this;
-	}
-#else
     private:
 	ElemNet& operator=(const ElemNet<A>&);	// not assignable
-#endif
 
 	const A*		_net;
 	Mod			_mod;

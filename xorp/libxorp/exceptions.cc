@@ -24,9 +24,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifndef XORP_USE_USTL
 #include <typeinfo>
-#endif
 
 
 XorpException::XorpException(const char* init_what,

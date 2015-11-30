@@ -25,9 +25,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#ifndef XORP_USE_USTL
 #include <typeinfo>
-#endif
 
 #include "policy/common/elem_filter.hh"
 

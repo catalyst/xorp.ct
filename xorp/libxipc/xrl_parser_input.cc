@@ -62,24 +62,7 @@ throw (XrlParserInputException)
     }
 
     stack_top().incr_line();
-#ifdef XORP_USE_USTL
-    {
-	// Lame as can be, but uSTL doesn't have working getline(), so
-	// fake one out here..
-	line.clear();
-	char c[2];
-	while (stack_top().input()->remaining() > 0) 
-	{
-	    stack_top().input()->read(&c[0], 1);
-	    c[1] = 0;
-	    if (c[0] == '\n')
-		break;
-	    line.append(c);
-	}
-    }
-#else
     std::getline(*stack_top().input(), line);
-#endif
     // Okay, got line see if it's a pre-processor directive
     for (string::const_iterator c = line.begin();
 	    c != line.end(); c++) 

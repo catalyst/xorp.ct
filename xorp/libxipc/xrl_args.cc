@@ -27,9 +27,7 @@
 #include "libxorp/debug.h"
 #include "libproto/packet.hh"
 
-#ifndef XORP_USE_USTL
 #include <stdexcept>
-#endif
 
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"

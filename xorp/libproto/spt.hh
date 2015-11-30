@@ -434,7 +434,6 @@ class PriorityQueue
 
 	bool empty() { return _tentative.empty(); }
     private:
-#ifndef XORP_USE_USTL
 	template <typename B>
 	    struct lweight 
 	    {
@@ -453,15 +452,8 @@ class PriorityQueue
 			return aw < bw;
 		    }
 	    };
-#endif
 
-#ifdef XORP_USE_USTL
-	// TODO:  I tried making ref-ptr compare work..but don't know if
-	// it is actually functional.  Need to fix up uSTL probably.
-	typedef set<typename Node<A>::NodeRef> Tent;
-#else
 	typedef set<typename Node<A>::NodeRef, lweight<A> > Tent;
-#endif
 	Tent _tentative;
 };
 

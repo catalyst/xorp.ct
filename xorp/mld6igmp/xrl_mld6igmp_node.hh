@@ -948,9 +948,6 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 					_source(source),
 					_group(group),
 					_is_add(is_add) {}
-#ifdef XORP_USE_USTL
-				SendAddDeleteMembership() { }
-#endif
 
 				const char*	operation_name() const 
 				{

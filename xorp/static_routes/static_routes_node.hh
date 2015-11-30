@@ -142,9 +142,6 @@ class StaticRoute : public StaticRouteBase
 	    _metric(metric), _is_backup_route(is_backup_route),
 	    _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
-#ifdef XORP_USE_USTL
-	StaticRoute() { }
-#endif
 
 	/**
 	 * Constructor for a given IPv6 static route.

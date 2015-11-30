@@ -166,9 +166,6 @@ class IoLinkComm :
 		JoinedMulticastGroup(const Mac& group_address)
 		    : _group_address(group_address)
 		{}
-#ifdef XORP_USE_USTL
-		JoinedMulticastGroup() { }
-#endif
 		virtual ~JoinedMulticastGroup() {}
 
 		const Mac& group_address() const { return _group_address; }

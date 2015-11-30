@@ -45,13 +45,6 @@
 #include "olsr/olsr.hh"
 #include "olsr/test_common.hh"
 
-// Sorting will break the 1:1 mapping between id and Info
-// structures after retrieval via XRL. Bear this in mind if we need to
-// further extend this tool.
-#ifndef SORT_OUTPUT
-#define SORT_OUTPUT
-#endif
-
 /**
  * Humanize a bool.
  *
@@ -612,13 +605,7 @@ GetLinks::output()
 
     // TODO: Turn LinkType into a symbolic string.
 
-#ifdef SORT_OUTPUT
-#ifdef XORP_USE_USTL
-    sort(_infos, LinkSortOrderPred());
-#else
     _infos.sort(LinkSortOrderPred());
-#endif
-#endif
 
     list<LinkInfo>::iterator ii;
     for (ii = _infos.begin(); ii != _infos.end(); ii++) 
@@ -955,13 +942,7 @@ GetNeighbors::output()
 	    "MainAddr", "Will", "Degree", "Links", "2links",
 	    "ADV", "SYM", "MPR", "MPRS");
 
-#ifdef SORT_OUTPUT
-#ifdef XORP_USE_USTL
-    sort(_infos, NeighborSortOrderPred());
-#else
     _infos.sort(NeighborSortOrderPred());
-#endif
-#endif
 
     list<NeighborInfo>::iterator ii;
     for (ii = _infos.begin(); ii != _infos.end(); ii++) 

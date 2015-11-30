@@ -100,9 +100,6 @@ class Fib2mribRoute
 			_route_type(IDLE_ROUTE), _is_ignored(false),
 			_is_filtered(false), _is_accepted_by_nexthop(false) {}
 
-#ifdef XORP_USE_USTL
-		Fib2mribRoute() { }
-#endif
 
 		/**
 		 * Equality Operator

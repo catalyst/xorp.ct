@@ -71,9 +71,6 @@ class ConfigNodeId
 	    copy_in(s);
 	}
 
-#ifdef XORP_USE_USTL
-	ConfigNodeId() { }
-#endif
 
 	/**
 	 * Constructor for a given unique node ID and position.

@@ -559,9 +559,6 @@ class XrlAtomSpell
 		const XrlAtomType& type,
 		const string&	    m)
 	    : _xa(XrlAtom(name, type)), _spell(m) {}
-#ifdef XORP_USE_USTL
-	XrlAtomSpell() { }
-#endif
 	const string& atom_name() const { return _xa.name(); }
 	const XrlAtomType& atom_type() const { return _xa.type(); }
 	const XrlAtom& atom() const { return _xa; }

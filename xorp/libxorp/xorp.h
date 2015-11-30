@@ -81,10 +81,6 @@
 
 
 #ifdef __cplusplus
-#  ifdef XORP_USE_USTL
-#    include <ustl.h>
-using namespace ustl;
-#  else
 #    include <new>
 #    include <iostream>
 #    include <fstream>
@@ -104,7 +100,6 @@ using namespace ustl;
 #    if !defined(__STL_NO_NAMESPACES)
 using namespace std;
 #    endif /* namespace std */
-#  endif /* else, not ustl */
 #endif /* c++ */
 
 #ifdef HAVE_STDINT_H
@@ -203,9 +198,7 @@ using namespace std;
 
 
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
-#ifndef XORP_USE_USTL
 using namespace std::rel_ops;
-#endif
 #endif
 
 /*

@@ -271,12 +271,7 @@ class AsNum
     private:
 	uint32_t _as;		// The value of the AS number
 
-#ifdef XORP_USE_USTL
-    public:
-	AsNum() { };
-#else
 	AsNum(); // forbidden
-#endif
 
 };
 #endif // __LIBXORP_ASNUM_HH__

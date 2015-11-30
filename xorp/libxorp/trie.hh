@@ -34,9 +34,7 @@
 #include "debug.h"
 #include "minitraits.hh"
 
-#ifndef XORP_USE_USTL
 #include <stack>
-#endif
 
 #define trie_debug_msg(x...) /* debug_msg(x) */
 #define trie_debug_msg_indent(x)

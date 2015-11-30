@@ -26,9 +26,6 @@ class PathSegment
 		PathSegment(const string& segname, bool is_tag) 
 			: _is_tag(is_tag), _segname(segname) {}
 
-#ifdef XORP_USE_USTL
-		PathSegment() { }
-#endif
 
 		bool is_tag() const { return _is_tag; }
 		const string& segname() const { return _segname; }

@@ -36,15 +36,6 @@
 {
 }
 
-#ifdef XORP_USE_USTL
-	VifAddr::VifAddr()
-: _addr(AF_INET),
-	_subnet_addr(AF_INET),
-	_broadcast_addr(AF_INET),
-	_peer_addr(AF_INET)
-{
-}
-#endif
 
 VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
 		const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)

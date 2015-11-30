@@ -120,9 +120,6 @@ class IPNextHop : public NextHop
 
 	virtual ~IPNextHop() { }
 
-#ifdef XORP_USE_USTL
-	IPNextHop() { }
-#endif
 
 	/**
 	 * Get the address of the nexthop.
@@ -172,9 +169,6 @@ class IPPeerNextHop : public IPNextHop<A>
 	 */
 	IPPeerNextHop(const A &from_addr);
 
-#ifdef XORP_USE_USTL
-	IPPeerNextHop() { }
-#endif
 
 	/**
 	 * Get the type of the nexthop.
@@ -257,9 +251,6 @@ class IPExternalNextHop : public IPNextHop<A>
 	 */
 	IPExternalNextHop(const A &from_addr);
 
-#ifdef XORP_USE_USTL
-	IPExternalNextHop() { }
-#endif
 
 	/**
 	 * Get the type of the nexthop.

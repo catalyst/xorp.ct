@@ -60,9 +60,6 @@ class VifAddr
 	VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvx_subnet_addr,
 		const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr);
 
-#ifdef XORP_USE_USTL
-	VifAddr(); // AF_INET
-#endif
 
 	/**
 	 * Get the interface address.
@@ -228,9 +225,6 @@ class Vif : public BugCatcher
 	 */
 	explicit Vif(const string& vifname, const string& ifname = string(""));
 
-#ifdef XORP_USE_USTL
-	Vif() { }
-#endif
 
 	/**
 	 * Constructor to clone a Vif.

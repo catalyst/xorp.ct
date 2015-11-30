@@ -28,9 +28,7 @@
 #include "policy/backend/version_filters.hh"
 #include "policy/common/elem_filter.hh"
 #include "policy/common/elem_bgp.hh"
-#ifndef XORP_USE_USTL
 #include <typeinfo>
-#endif
 
 using namespace policy_utils;
 

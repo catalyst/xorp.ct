@@ -139,9 +139,6 @@ class FinderMessengerBase : public XrlSender
 			    callback(fmb,  &FinderMessengerBase::response_timeout,
 				seqno));
 		}
-#ifdef XORP_USE_USTL
-		ResponseState() { }
-#endif
 
 		SendCallback scb;
 		XorpTimer    expiry;

@@ -90,9 +90,6 @@ class PimJpHeader
 {
 	public:
 		PimJpHeader(PimNode* pim_node);
-#ifdef XORP_USE_USTL
-		PimJpHeader();
-#endif
 		~PimJpHeader();
 		void	reset();
 

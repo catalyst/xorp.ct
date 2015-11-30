@@ -85,9 +85,6 @@ class IPvXNet : public BaseIPvXNet
 	 */
 	explicit IPvXNet(int family) throw (InvalidFamily)
 	    : BaseIPvXNet(IPvX::ZERO(family), 0) {}
-#ifdef XORP_USE_USTL
-	IPvXNet() : BaseIPvXNet(IPvX::ZERO(AF_INET), 0) {}
-#endif
 	/**
 	 * Copy constructor for BaseIPvXNet subnet address
 	 *

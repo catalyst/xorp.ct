@@ -54,9 +54,6 @@ class IoTcpUdpComm :
 					: _interface_address(interface_address),
 					_group_address(group_address)
 			{}
-#ifdef XORP_USE_USTL
-				JoinedMulticastGroup() { }
-#endif
 				virtual ~JoinedMulticastGroup() {}
 
 				const IPvX& interface_address() const { return _interface_address; }

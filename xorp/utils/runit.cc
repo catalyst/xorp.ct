@@ -178,9 +178,6 @@ struct Command
 	_wait_command(wait_command),
 	_pid(-1)
     {}
-#ifdef XORP_USE_USTL
-    Command() { _pid = -1;}
-#endif
 
     string _command;	// The actual command that we wish to run.
     string _wait_command;// The command to run that exits when the

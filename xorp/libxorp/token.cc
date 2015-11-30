@@ -109,11 +109,7 @@ pop_token(string& token_line)
 	// Check if we reached the end of the token line
 	if (i == token_line.length()) 
 	{
-#ifdef XORP_USE_USTL
-		token_line.erase((uoff_t)(0), i);
-#else
 		token_line.erase(0, i);
-#endif
 		return (token);
 	}
 
@@ -154,11 +150,7 @@ pop_token(string& token_line)
 		token += token_line[i];
 	}
 
-#ifdef XORP_USE_USTL    
-	token_line.erase((uoff_t)(0), i);
-#else
 	token_line.erase(0, i);
-#endif
 
 	if (is_escape_begin && !is_escape_end) 
 	{

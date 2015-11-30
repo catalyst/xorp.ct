@@ -326,12 +326,8 @@ class IfMgrIfAtom
 	// Print this thing out for debugging purposes.
 	string toString() const;
 
-#ifndef XORP_USE_USTL
     private:
 	IfMgrIfAtom();					// not implemented
-#else
-	IfMgrIfAtom() { }
-#endif
 
     protected:
 	string	_name;		// The interface name
@@ -407,12 +403,8 @@ class IfMgrVifAtom
 	// Print this thing out for debugging purposes.
 	string toString() const;
 
-#ifndef XORP_USE_USTL
     private:
 	IfMgrVifAtom();			// Not implemented
-#else
-	IfMgrVifAtom() { }
-#endif
 
     protected:
 	string	_name;			// The vif name
@@ -471,12 +463,8 @@ class IfMgrIPv4Atom
 	// Debugging info
 	string toString() const;
 
-#ifndef XORP_USE_USTL
     private:
 	IfMgrIPv4Atom();			// Not implemented
-#else
-	IfMgrIPv4Atom() { }
-#endif
 
     protected:
 	IPv4	_addr;			// The address
@@ -528,12 +516,8 @@ class IfMgrIPv6Atom
 	// Debugging info
 	string toString() const;
 
-#ifndef XORP_USE_USTL
     private:
 	IfMgrIPv6Atom();			// Not implemented
-#else
-	IfMgrIPv6Atom() { }
-#endif
 
     protected:
 	IPv6	_addr;			// The address

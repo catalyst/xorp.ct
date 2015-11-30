@@ -69,9 +69,6 @@ class FirewallEntry
 			_dst_port_begin(PORT_MIN), _dst_port_end(PORT_MAX),
 			_action(ACTION_INVALID) {}
 
-#ifdef XORP_USE_USTL
-		FirewallEntry() { FirewallEntry(AF_INET); }
-#endif
 
 		FirewallEntry(uint32_t		rule_number,
 				const string&		ifname,

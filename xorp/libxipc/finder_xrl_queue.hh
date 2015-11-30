@@ -53,9 +53,7 @@ class FinderXrlCommandQueue
 
 	void enqueue(const Command& cmd);
 
-#ifndef XORP_USE_USTL
     private:
-#endif
 	FinderXrlCommandQueue& operator=(const FinderXrlCommandQueue&);
 
     protected:

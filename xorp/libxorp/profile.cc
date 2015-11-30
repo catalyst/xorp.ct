@@ -51,10 +51,8 @@ Profile::~Profile()
 throw(PVariableExists)
 {
     // Catch initialization problems.
-#ifndef XORP_USE_USTL
     if (_profiles.count(pname))
 	xorp_throw(PVariableExists, pname.c_str());
-#endif
 
     ProfileState *p = new ProfileState(comment, false, false, new logentries);
     _profiles[pname] = ref_ptr<ProfileState>(p);

@@ -1190,240 +1190,235 @@ FaceManager::delete_message_cb(MessageReceiveCB cb)
     vector<MessageReceiveCB>::iterator ii;
     for (ii = _handlers.begin(); ii != _handlers.end(); ii++) 
     {
-#ifdef XORP_USE_USTL
-	if (ii->get() == cb.get()) 
+	if (*ii == cb) 
 	{
-#else
-	    if (*ii == cb) 
-	    {
-#endif
-		_handlers.erase(ii);
-		is_deleted = true;
-		break;
-	    }
+	    _handlers.erase(ii);
+	    is_deleted = true;
+	    break;
 	}
-
-	return is_deleted;
     }
 
-    bool
-	FaceManager::event_receive_unknown(
-		Message* msg,
-		const IPv4& remote_addr,
-		const IPv4& local_addr)
-	{
-	    UnknownMessage* um = dynamic_cast<UnknownMessage *>(msg);
-	    if (um == 0) 
-	    {
-		debug_msg("Warning: couldn't cast to UnknownMessage; did you\n"
-			"forget to register a receive callback in addition to\n"
-			"registering a decoder?\n");
-		XLOG_UNREACHABLE();
-	    }
-
-	    debug_msg("*** RECEIVED UNKNOWN MESSAGE %p ***\n", um);
-
-	    // Update statistics.
-	    _faces[msg->faceid()]->counters().incr_unknown_messages();
-
-	    // Forward the message.
-	    forward_message(remote_addr,  msg);
-
-	    return true;
-	    UNUSED(local_addr);
-	}
+    return is_deleted;
+}
 
     bool
-	FaceManager::is_duplicate_message(const Message* msg) const
-	{
-	    //debug_msg("Msg %p\n", msg);
+FaceManager::event_receive_unknown(
+	Message* msg,
+	const IPv4& remote_addr,
+	const IPv4& local_addr)
+{
+    UnknownMessage* um = dynamic_cast<UnknownMessage *>(msg);
+    if (um == 0) 
+    {
+	debug_msg("Warning: couldn't cast to UnknownMessage; did you\n"
+		"forget to register a receive callback in addition to\n"
+		"registering a decoder?\n");
+	XLOG_UNREACHABLE();
+    }
 
-	    // 7.1.1: HELLO messages are excluded from duplicate detection.
-	    if (0 != dynamic_cast<const HelloMessage *>(msg))
-		return false;
+    debug_msg("*** RECEIVED UNKNOWN MESSAGE %p ***\n", um);
 
-	    return (0 != get_dupetuple(msg->origin(), msg->seqno()));
-	}
+    // Update statistics.
+    _faces[msg->faceid()]->counters().incr_unknown_messages();
 
-    bool
-	FaceManager::forward_message(const IPv4& remote_addr, Message* msg)
-	{
-	    debug_msg("MyMainAddr %s Msg %p\n",
-		    cstring(get_main_addr()),
-		    msg);
+    // Forward the message.
+    forward_message(remote_addr,  msg);
 
-	    // Invariant: HELLO messages should never be forwarded.
-	    XLOG_ASSERT(0 == dynamic_cast<HelloMessage *>(msg));
+    return true;
+    UNUSED(local_addr);
+}
 
-	    if (is_forwarded_message(msg)) 
-	    {
-		debug_msg("%p already forwarded.\n", msg);
-		return false;
-	    }
+bool
+FaceManager::is_duplicate_message(const Message* msg) const
+{
+    //debug_msg("Msg %p\n", msg);
 
-	    // 3.4, 4: Check if *sender interface address* of the packet
-	    // which originally contained this message belongs to a neighbor
-	    // which is an MPR selector of this node.
-	    // If so, the message MUST be forwarded.
-	    bool will_forward = _nh->is_mpr_selector_addr(remote_addr) &&
-		msg->ttl() > 1;
+    // 7.1.1: HELLO messages are excluded from duplicate detection.
+    if (0 != dynamic_cast<const HelloMessage *>(msg))
+	return false;
 
-	    debug_msg("%sforwarding %p.\n", will_forward ? "" : "not ", msg);
-
-	    // 3.4, 5: Update the duplicate set tuple.
-	    update_dupetuple(msg, will_forward);
-
-	    if (will_forward) 
-	    {
-		// 3.4, 6: Increment hopcount.
-		// 3.4, 7: Decrement ttl.
-		// 3.4, 8: Forward message on all interfaces.
-		msg->incr_hops();
-		msg->decr_ttl();
-
-		flood_message(msg);
-
-		_faces[msg->faceid()]->counters().incr_forwarded();
-	    }
-
-	    return will_forward;
-	}
+    return (0 != get_dupetuple(msg->origin(), msg->seqno()));
+}
 
     bool
-	FaceManager::is_forwarded_message(const Message* msg) const
+FaceManager::forward_message(const IPv4& remote_addr, Message* msg)
+{
+    debug_msg("MyMainAddr %s Msg %p\n",
+	    cstring(get_main_addr()),
+	    msg);
+
+    // Invariant: HELLO messages should never be forwarded.
+    XLOG_ASSERT(0 == dynamic_cast<HelloMessage *>(msg));
+
+    if (is_forwarded_message(msg)) 
+    {
+	debug_msg("%p already forwarded.\n", msg);
+	return false;
+    }
+
+    // 3.4, 4: Check if *sender interface address* of the packet
+    // which originally contained this message belongs to a neighbor
+    // which is an MPR selector of this node.
+    // If so, the message MUST be forwarded.
+    bool will_forward = _nh->is_mpr_selector_addr(remote_addr) &&
+	msg->ttl() > 1;
+
+    debug_msg("%sforwarding %p.\n", will_forward ? "" : "not ", msg);
+
+    // 3.4, 5: Update the duplicate set tuple.
+    update_dupetuple(msg, will_forward);
+
+    if (will_forward) 
+    {
+	// 3.4, 6: Increment hopcount.
+	// 3.4, 7: Decrement ttl.
+	// 3.4, 8: Forward message on all interfaces.
+	msg->incr_hops();
+	msg->decr_ttl();
+
+	flood_message(msg);
+
+	_faces[msg->faceid()]->counters().incr_forwarded();
+    }
+
+    return will_forward;
+}
+
+bool
+FaceManager::is_forwarded_message(const Message* msg) const
+{
+    //debug_msg("Msg %p\n", msg);
+
+    // 3.4, 2: If a duplicate tuple does not exist, it is OK to
+    // forward the message.
+    DupeTuple* dt = get_dupetuple(msg->origin(), msg->seqno());
+    if (0 == dt)
+	return false;
+
+    // 3.4, 2: If a duplicate tuple exists, it is not OK to forward the
+    // message if it has already been forwarded, OR it has already been
+    // received on the interface where we originally received it.
+    if (!dt->is_forwarded() && !dt->is_seen_by_face(msg->faceid()))
+	return false;
+
+    return true;
+}
+
+DupeTuple*
+FaceManager::get_dupetuple(const IPv4& origin_addr,
+	const uint16_t seqno) const
+{
+    //debug_msg("OriginAddr %s Seqno %u\n", cstring(origin_addr),
+    //		XORP_UINT_CAST(seqno));
+
+    if (_duplicate_set.empty())
+	return 0;
+
+    // 3.4, 3.1: If address and sequence number are matched in
+    // the duplicate set, the message is a duplicate.
+    DupeTuple* found_dt = 0;
+
+    pair<DupeTupleMap::const_iterator, DupeTupleMap::const_iterator> rd =
+	_duplicate_set.equal_range(origin_addr);
+    for (DupeTupleMap::const_iterator ii = rd.first; ii != rd.second; ii++) 
+    {
+	DupeTuple* dt = (*ii).second;
+	if (dt->seqno() == seqno) 
 	{
-	    //debug_msg("Msg %p\n", msg);
-
-	    // 3.4, 2: If a duplicate tuple does not exist, it is OK to
-	    // forward the message.
-	    DupeTuple* dt = get_dupetuple(msg->origin(), msg->seqno());
-	    if (0 == dt)
-		return false;
-
-	    // 3.4, 2: If a duplicate tuple exists, it is not OK to forward the
-	    // message if it has already been forwarded, OR it has already been
-	    // received on the interface where we originally received it.
-	    if (!dt->is_forwarded() && !dt->is_seen_by_face(msg->faceid()))
-		return false;
-
-	    return true;
+	    found_dt = dt;
+	    break;
 	}
+    }
 
-    DupeTuple*
-	FaceManager::get_dupetuple(const IPv4& origin_addr,
-		const uint16_t seqno) const
-	{
-	    //debug_msg("OriginAddr %s Seqno %u\n", cstring(origin_addr),
-	    //		XORP_UINT_CAST(seqno));
-
-	    if (_duplicate_set.empty())
-		return 0;
-
-	    // 3.4, 3.1: If address and sequence number are matched in
-	    // the duplicate set, the message is a duplicate.
-	    DupeTuple* found_dt = 0;
-
-	    pair<DupeTupleMap::const_iterator, DupeTupleMap::const_iterator> rd =
-		_duplicate_set.equal_range(origin_addr);
-	    for (DupeTupleMap::const_iterator ii = rd.first; ii != rd.second; ii++) 
-	    {
-		DupeTuple* dt = (*ii).second;
-		if (dt->seqno() == seqno) 
-		{
-		    found_dt = dt;
-		    break;
-		}
-	    }
-
-	    return found_dt;
-	}
+    return found_dt;
+}
 
     void
-	FaceManager::set_dup_hold_time(const TimeVal& dup_hold_time)
-	{
-	    _dup_hold_time = dup_hold_time;
-	}
+FaceManager::set_dup_hold_time(const TimeVal& dup_hold_time)
+{
+    _dup_hold_time = dup_hold_time;
+}
 
     void
-	FaceManager::update_dupetuple(const Message* msg, const bool is_forwarded)
+FaceManager::update_dupetuple(const Message* msg, const bool is_forwarded)
+{
+    debug_msg("MyMainAddr %s OriginAddr %s Seqno %u\n",
+	    cstring(get_main_addr()),
+	    cstring(msg->origin()),
+	    XORP_UINT_CAST(msg->seqno()));
+
+    DupeTuple* dt = 0;
+
+    // Check if we already have a duplicate set entry for the
+    // sequence number and origin inside the message.
+    pair<DupeTupleMap::iterator, DupeTupleMap::iterator> rd =
+	_duplicate_set.equal_range(msg->origin());
+
+    for (DupeTupleMap::iterator ii = rd.first; ii != rd.second; ii++) 
+    {
+	DupeTuple* ndt = (*ii).second;
+	if (ndt->seqno() == msg->seqno()) 
 	{
-	    debug_msg("MyMainAddr %s OriginAddr %s Seqno %u\n",
-		    cstring(get_main_addr()),
-		    cstring(msg->origin()),
-		    XORP_UINT_CAST(msg->seqno()));
-
-	    DupeTuple* dt = 0;
-
-	    // Check if we already have a duplicate set entry for the
-	    // sequence number and origin inside the message.
-	    pair<DupeTupleMap::iterator, DupeTupleMap::iterator> rd =
-		_duplicate_set.equal_range(msg->origin());
-
-	    for (DupeTupleMap::iterator ii = rd.first; ii != rd.second; ii++) 
-	    {
-		DupeTuple* ndt = (*ii).second;
-		if (ndt->seqno() == msg->seqno()) 
-		{
-		    dt = ndt;
-		    break;
-		}
-	    }
-
-	    // If a duplicate set tuple was not found, record a new tuple with the
-	    // sequence number and origin inside the message.
-	    if (0 == dt) 
-	    {
-		dt = new DupeTuple( this, msg->origin(),
-			msg->seqno(), get_dup_hold_time());
-		_duplicate_set.insert(make_pair(msg->origin(), dt));
-	    }
-
-	    XLOG_ASSERT(dt != 0);
-
-	    // Update the message expiry time and the set of interfaces where it
-	    // was received.
-	    dt->update_timer(get_dup_hold_time());
-	    dt->set_seen_by_face(msg->faceid());
-	    dt->set_is_forwarded(is_forwarded);
+	    dt = ndt;
+	    break;
 	}
+    }
+
+    // If a duplicate set tuple was not found, record a new tuple with the
+    // sequence number and origin inside the message.
+    if (0 == dt) 
+    {
+	dt = new DupeTuple( this, msg->origin(),
+		msg->seqno(), get_dup_hold_time());
+	_duplicate_set.insert(make_pair(msg->origin(), dt));
+    }
+
+    XLOG_ASSERT(dt != 0);
+
+    // Update the message expiry time and the set of interfaces where it
+    // was received.
+    dt->update_timer(get_dup_hold_time());
+    dt->set_seen_by_face(msg->faceid());
+    dt->set_is_forwarded(is_forwarded);
+}
 
     void
-	FaceManager::event_dupetuple_expired(const IPv4& origin, const uint16_t seqno)
+FaceManager::event_dupetuple_expired(const IPv4& origin, const uint16_t seqno)
+{
+    bool is_found = false;
+
+    pair<DupeTupleMap::iterator, DupeTupleMap::iterator> rd =
+	_duplicate_set.equal_range(origin);
+
+    DupeTupleMap::iterator ii;
+    for (ii = rd.first; ii != rd.second; ii++) 
+    {
+	DupeTuple* dt = (*ii).second;
+	if (dt->seqno() == seqno) 
 	{
-	    bool is_found = false;
-
-	    pair<DupeTupleMap::iterator, DupeTupleMap::iterator> rd =
-		_duplicate_set.equal_range(origin);
-
-	    DupeTupleMap::iterator ii;
-	    for (ii = rd.first; ii != rd.second; ii++) 
-	    {
-		DupeTuple* dt = (*ii).second;
-		if (dt->seqno() == seqno) 
-		{
-		    is_found = true;
-		    break;
-		}
-	    }
-
-	    XLOG_ASSERT(is_found);
-
-	    delete (*ii).second;
-	    _duplicate_set.erase(ii);
+	    is_found = true;
+	    break;
 	}
+    }
+
+    XLOG_ASSERT(is_found);
+
+    delete (*ii).second;
+    _duplicate_set.erase(ii);
+}
 
     void
-	DupeTuple::update_timer(const TimeVal& vtime)
-	{
-	    if (_expiry_timer.scheduled())
-		_expiry_timer.clear();
+DupeTuple::update_timer(const TimeVal& vtime)
+{
+    if (_expiry_timer.scheduled())
+	_expiry_timer.clear();
 
-	    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
-		    callback(this, &DupeTuple::event_dead));
-	}
+    _expiry_timer = EventLoop::instance().new_oneoff_after(vtime,
+	    callback(this, &DupeTuple::event_dead));
+}
 
     void
-	DupeTuple::event_dead()
-	{
-	    _parent->event_dupetuple_expired(origin(), seqno());
-	}
+DupeTuple::event_dead()
+{
+    _parent->event_dupetuple_expired(origin(), seqno());
+}

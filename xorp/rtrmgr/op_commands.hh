@@ -82,9 +82,6 @@ class OpCommand
 {
 	public:
 		OpCommand(OpCommandList& ocl, const list<string>& command_parts);
-#ifdef XORP_USE_USTL
-		OpCommand() { _ocl = NULL; }
-#endif
 
 		const list<string>& command_parts() const { return _command_parts; }
 		const string& command_name() const { return _command_name; }

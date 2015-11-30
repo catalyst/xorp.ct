@@ -25,9 +25,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 
-#ifndef XORP_USE_USTL
 #include <iomanip>
-#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -176,7 +174,6 @@ display_route_terse(const IPNet<A>&	net,
 	//       - = Last Active,
 	//       * = Both
 
-#ifndef XORP_USE_USTL
 	if (net.str().size() > 18) 
 	{
 		cout << net.str() << endl << setw(19) << " ";
@@ -187,11 +184,6 @@ display_route_terse(const IPNet<A>&	net,
 	cout << resetiosflags(ios::left) << protocol_short << " ";
 	cout << setw(3) << admin_distance;
 	cout << setw(10) << metric << "  ";
-#else
-	// uSTL doesn't have fancy formatting operations.
-	cout << net.str() << endl << "                   " << protocol_short << " "
-		<< admin_distance << " " << metric << "  ";
-#endif
 
 	// XXX: We don't have second metric yet
 	if (admin_distance != 0)

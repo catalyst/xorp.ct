@@ -39,9 +39,7 @@
 
 
 
-#ifndef XORP_USE_USTL
 #include <typeinfo>
-#endif
 
 // XXX
 // The system header files are here to get the sizeof an ipv4 and ipv6

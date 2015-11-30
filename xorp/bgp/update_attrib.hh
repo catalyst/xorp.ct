@@ -48,9 +48,6 @@ class BGPUpdateAttrib : public IPv4Net
 
 		BGPUpdateAttrib(const IPv4Net& p) : IPv4Net(p)		{}
 
-#ifdef XORP_USE_USTL
-		BGPUpdateAttrib() { }
-#endif
 
 		/**
 		 * Construct from wire format

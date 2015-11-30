@@ -609,9 +609,6 @@ class FinderClient::InstanceInfo
 	    _dispatcher(dispatcher),
 	    _id(_s_id++)
     {}
-#ifdef XORP_USE_USTL
-	InstanceInfo() { };
-#endif
 	const string& instance_name() const		{ return _ins_name; }
 	const string& class_name() const		{ return _cls_name; }
 	const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
