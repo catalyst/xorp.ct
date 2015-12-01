@@ -1466,7 +1466,6 @@ NHRequest<A>::request_nets(NhLookupTable<A>* requester) const
 template class NextHopResolver<IPv4>;
 
 
-#ifdef HAVE_IPV6
 /* IPv6 stuff */
 
 template<>
@@ -1516,4 +1515,3 @@ NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr,
 template class NextHopResolver<IPv6>;
 
 
-#endif //ipv6

@@ -92,7 +92,6 @@ usage(const char *argv0, int exit_value)
 	static void
 mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 {
-#ifdef HAVE_IPV6
 
 	//
 	// MLD6IGMP node
@@ -134,7 +133,6 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 		EventLoop::instance().run();
 	}
 #endif // HAVE_IPV6_MULTICAST
-#endif // HAVE_IPV6
 
 	UNUSED(finder_hostname);
 	UNUSED(finder_port);

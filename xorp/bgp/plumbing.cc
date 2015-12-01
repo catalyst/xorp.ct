@@ -43,9 +43,7 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
 	RibIpcHandler* ribhandler,
 	AggregationHandler* aggrhandler,
 	NextHopResolver<IPv4>& next_hop_resolver_ipv4,
-#ifdef HAVE_IPV6
 	NextHopResolver<IPv6>& next_hop_resolver_ipv6,
-#endif
 	PolicyFilters& pfs,
 	BGPMain& bgp)
     : _bgp(bgp),
@@ -56,11 +54,9 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
     _policy_filters(pfs),
     _plumbing_ipv4("[IPv4:" + string(pretty_string_safi(safi)) + "]", *this,
 	    _next_hop_resolver_ipv4)
-#ifdef HAVE_IPV6
 	     , _next_hop_resolver_ipv6(next_hop_resolver_ipv6)
     , _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
 	    _next_hop_resolver_ipv6)
-#endif
 {
 }
 
@@ -69,9 +65,7 @@ BGPPlumbing::add_peering(PeerHandler* peer_handler)
 {
     int result = 0;
     result |= plumbing_ipv4().add_peering(peer_handler);
-#ifdef HAVE_IPV6
     result |= plumbing_ipv6().add_peering(peer_handler);
-#endif
     return result;
 }
 
@@ -81,9 +75,7 @@ BGPPlumbing::stop_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::stop_peering\n");
     int result = 0;
     result |= plumbing_ipv4().stop_peering(peer_handler);
-#ifdef HAVE_IPV6
     result |= plumbing_ipv6().stop_peering(peer_handler);
-#endif
     return result;
 }
 
@@ -95,10 +87,8 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler)
     TIMESPENT();
     result |= plumbing_ipv4().peering_went_down(peer_handler);
     TIMESPENT_CHECK();
-#ifdef HAVE_IPV6
     result |= plumbing_ipv6().peering_went_down(peer_handler);
     TIMESPENT_CHECK();
-#endif
     return result;
 }
 
@@ -108,9 +98,7 @@ BGPPlumbing::peering_came_up(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::peering_came_up\n");
     int result = 0;
     result |= plumbing_ipv4().peering_came_up(peer_handler);
-#ifdef HAVE_IPV6
     result |= plumbing_ipv6().peering_came_up(peer_handler);
-#endif
     return result;
 }
 
@@ -120,9 +108,7 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::delete_peering\n");
     int result = 0;
     result |= plumbing_ipv4().delete_peering(peer_handler);
-#ifdef HAVE_IPV6
     result |= plumbing_ipv6().delete_peering(peer_handler);
-#endif
     return result;
 }
 
@@ -131,9 +117,7 @@ BGPPlumbing::flush(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::flush\n");
     plumbing_ipv4().flush(peer_handler);
-#ifdef HAVE_IPV6
     plumbing_ipv6().flush(peer_handler);
-#endif
 }
 
     int 
@@ -192,9 +176,7 @@ BGPPlumbing::push<IPv4>(PeerHandler* peer_handler)
 BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler) 
 {
     plumbing_ipv4().output_no_longer_busy(peer_handler);
-#ifdef HAVE_IPV6
     plumbing_ipv6().output_no_longer_busy(peer_handler);
-#endif
 }
 
     uint32_t
@@ -203,11 +185,8 @@ BGPPlumbing::get_prefix_count(const PeerHandler *peer_handler)
     return
 	plumbing_ipv4().
 	get_prefix_count(const_cast<PeerHandler *>(peer_handler))
-#ifdef HAVE_IPV6
 	+ plumbing_ipv6().
-	get_prefix_count(const_cast<PeerHandler *>(peer_handler))
-#endif
-	;
+	get_prefix_count(const_cast<PeerHandler *>(peer_handler)) ;
 }
 
 template<>
@@ -233,13 +212,11 @@ BGPPlumbing::status(string& reason) const
     {
 	return false;
     }
-#ifdef HAVE_IPV6
     if (const_cast<BGPPlumbing *>(this)->
 	    plumbing_ipv6().status(reason) == false) 
     {
 	return false;
     }
-#endif
     return true;
 }
 
@@ -247,9 +224,7 @@ BGPPlumbing::status(string& reason) const
 BGPPlumbing::push_routes() 
 {
     plumbing_ipv4().push_routes();
-#ifdef HAVE_IPV6
     plumbing_ipv6().push_routes();
-#endif
 }
 
 /***********************************************************************/
@@ -1355,7 +1330,6 @@ BGPPlumbingAF<A>::push_routes()
 template class BGPPlumbingAF<IPv4>;
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 
     int 
@@ -1470,4 +1444,3 @@ BGPPlumbingAF<IPv6>::directly_connected(const PeerHandler *peer_handler,
 template class BGPPlumbingAF<IPv6>;
 
 
-#endif // ipv6

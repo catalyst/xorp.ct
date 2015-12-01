@@ -72,14 +72,12 @@
     _aggregation_handler = new AggregationHandler();
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
 	    *this);
-#ifdef HAVE_IPV6
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
 	    *this);
     PAListRef<IPv6>* palist6 =  new PAListRef<IPv6>(0);
     palist6->create_attribute_manager();
     delete palist6;
 
-#endif
 
     // start up the attribute managers
     PAListRef<IPv4>* palist4 =  new PAListRef<IPv4>(0);
@@ -90,18 +88,14 @@
 	    _rib_ipc_handler,
 	    _aggregation_handler,
 	    *_next_hop_resolver_ipv4,
-#ifdef HAVE_IPV6
 	    *_next_hop_resolver_ipv6,
-#endif
 	    _policy_filters,
 	    *this);
     _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 	    _rib_ipc_handler,
 	    _aggregation_handler,
 	    *_next_hop_resolver_ipv4,
-#ifdef HAVE_IPV6
 	    *_next_hop_resolver_ipv6,
-#endif
 	    _policy_filters,
 	    *this);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
@@ -155,9 +149,7 @@ BGPMain::~BGPMain()
     int now;
     while (_peerlist->not_all_idle() || _rib_ipc_handler->busy() ||
 	    DeleteAllNodes<IPv4>::running()
-#ifdef HAVE_IPV6
 	    || DeleteAllNodes<IPv6>::running()
-#endif
 	  ) 
     {
 	EventLoop::instance().run();
@@ -176,12 +168,10 @@ BGPMain::~BGPMain()
 		    " continuing...",
 		    now - start, (int)(_peerlist->not_all_idle()), (int)(_rib_ipc_handler->busy()),
 		    (int)(DeleteAllNodes<IPv4>::running()));
-#ifdef HAVE_IPV6
 	    if (DeleteAllNodes<IPv6>::running()) 
 	    {
 		XLOG_WARNING("delete-all-ipv6-nodes is running.");
 	    }
-#endif
 	    break;
 	}
     }
@@ -267,11 +257,9 @@ BGPMain::~BGPMain()
     debug_msg("Deleting next hop resolver IPv4\n");
     delete _next_hop_resolver_ipv4;
 
-#ifdef HAVE_IPV6
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting next hop resolver IPv6\n");
     delete _next_hop_resolver_ipv6;
-#endif
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting process watcher\n");
@@ -327,9 +315,7 @@ BGPMain::startup()
     component_up("startup");
 
     register_address_status(callback(this, &BGPMain::address_status_change4));
-#ifdef HAVE_IPV6
     register_address_status(callback(this, &BGPMain::address_status_change6));
-#endif
 
     return (XORP_OK);
 }
@@ -496,11 +482,9 @@ BGPMain::updates_made()
     const IfMgrVifAtom* other_vif_atom;
     const IfMgrIPv4Atom* addr_atom4;
     const IfMgrIPv4Atom* other_addr_atom4;
-#ifdef HAVE_IPV6
     IfMgrVifAtom::IPv6Map::const_iterator ai6;
     const IfMgrIPv6Atom* addr_atom6;
     const IfMgrIPv6Atom* other_addr_atom6;
-#endif
 
     //
     // Check whether the old interfaces, vifs and addresses are still there
@@ -600,7 +584,6 @@ BGPMain::updates_made()
 		}
 	    }
 
-#ifdef HAVE_IPV6
 	    for (ai6 = vif_atom->ipv6addrs().begin();
 		    ai6 != vif_atom->ipv6addrs().end();
 		    ++ai6) 
@@ -634,7 +617,6 @@ BGPMain::updates_made()
 			    is_new_address_enabled);
 		}
 	    }
-#endif
 	}
     }
 
@@ -708,7 +690,6 @@ BGPMain::updates_made()
 		}
 	    }
 
-#ifdef HAVE_IPV6
 	    for (ai6 = vif_atom->ipv6addrs().begin();
 		    ai6 != vif_atom->ipv6addrs().end();
 		    ++ai6) 
@@ -736,7 +717,6 @@ BGPMain::updates_made()
 		    }
 		}
 	    }
-#endif
 	}
     }
 
@@ -1749,11 +1729,9 @@ BGPMain::register_ribname(const string& name)
 	    plumbing_ipv4().next_hop_resolver().register_ribname(name))
 	return false;
 
-#ifdef HAVE_IPV6
     if (!plumbing_unicast()->
 	    plumbing_ipv6().next_hop_resolver().register_ribname(name))
 	return false;
-#endif
 
     return true;
 }
@@ -1961,7 +1939,6 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
     {
 	debug_msg("IPv4 Multicast\n");
 	node = new BGPMultiProtocolCapability(AFI_IPV4, SAFI_MULTICAST);
-#ifdef HAVE_IPV6
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Unicast") == 0) 
     {
 	debug_msg("IPv6 Unicast\n");
@@ -1970,8 +1947,8 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
     {
 	debug_msg("IPv6 Multicast\n");
 	node = new BGPMultiProtocolCapability(AFI_IPV6, SAFI_MULTICAST);
-#endif
-    } else 
+    } 
+    else 
     {
 	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		parameter.c_str());
@@ -2017,7 +1994,6 @@ BGPMain::push_routes()
 }
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 
 bool
@@ -2188,4 +2164,3 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
-#endif //ipv6

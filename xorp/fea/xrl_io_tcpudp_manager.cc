@@ -28,9 +28,7 @@
 #include "libxipc/xrl_router.hh"
 
 #include "xrl/interfaces/socket4_user_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/socket6_user_xif.hh"
-#endif
 
 #include "xrl_io_tcpudp_manager.hh"
 
@@ -79,7 +77,6 @@ XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 					src_host.af(), receiver_name));
 	}
 
-#ifdef HAVE_IPV6
 	if (src_host.is_ipv6()) 
 	{
 		//
@@ -101,7 +98,6 @@ XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 					&XrlIoTcpUdpManager::xrl_send_recv_event_cb,
 					src_host.af(), receiver_name));
 	}
-#endif
 }
 
 	void
@@ -132,7 +128,6 @@ XrlIoTcpUdpManager::inbound_connect_event(const string&		receiver_name,
 					receiver_name));
 	}
 
-#ifdef HAVE_IPV6
 	if (src_host.is_ipv6()) 
 	{
 		//
@@ -153,7 +148,6 @@ XrlIoTcpUdpManager::inbound_connect_event(const string&		receiver_name,
 					src_host.af(), new_sockid,
 					receiver_name));
 	}
-#endif
 }
 
 	void
@@ -178,7 +172,6 @@ XrlIoTcpUdpManager::outgoing_connect_event(int			family,
 					family, receiver_name));
 	}
 
-#ifdef HAVE_IPV6
 	if (family == IPv6::af()) 
 	{
 		//
@@ -195,7 +188,6 @@ XrlIoTcpUdpManager::outgoing_connect_event(int			family,
 					&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
 					family, receiver_name));
 	}
-#endif
 }
 
 	void
@@ -224,7 +216,6 @@ XrlIoTcpUdpManager::error_event(int			family,
 					family, receiver_name));
 	}
 
-#ifdef HAVE_IPV6
 	if (family == IPv6::af()) 
 	{
 		//
@@ -243,7 +234,6 @@ XrlIoTcpUdpManager::error_event(int			family,
 					&XrlIoTcpUdpManager::xrl_send_error_event_cb,
 					family, receiver_name));
 	}
-#endif
 }
 
 	void
@@ -268,7 +258,6 @@ XrlIoTcpUdpManager::disconnect_event(int			family,
 					family, receiver_name));
 	}
 
-#ifdef HAVE_IPV6
 	if (family == IPv6::af()) 
 	{
 		//
@@ -285,7 +274,6 @@ XrlIoTcpUdpManager::disconnect_event(int			family,
 					&XrlIoTcpUdpManager::xrl_send_disconnect_event_cb,
 					family, receiver_name));
 	}
-#endif
 }
 
 	void

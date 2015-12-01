@@ -116,7 +116,6 @@ class XrlFibClientManager : public FibTableObserverBase
 				const Fte4& fte);
 
 
-#ifdef HAVE_IPV6
 
 		/**
 		 * Process a list of IPv6 FIB route changes.
@@ -181,7 +180,6 @@ class XrlFibClientManager : public FibTableObserverBase
 		int send_fib_client_resolve_route(const string& target_name,
 				const Fte6& fte);
 
-#endif
 
 	protected:
 		FibConfig&		_fibconfig;
@@ -194,14 +192,12 @@ class XrlFibClientManager : public FibTableObserverBase
 				string target_name);
 		void send_fib_client_resolve_route4_cb(const XrlError& xrl_error,
 				string target_name);
-#ifdef HAVE_IPV6
 		void send_fib_client_delete_route6_cb(const XrlError& xrl_error,
 				string target_name);
 		void send_fib_client_add_route6_cb(const XrlError& xrl_error,
 				string target_name);
 		void send_fib_client_resolve_route6_cb(const XrlError& xrl_error,
 				string target_name);
-#endif
 
 		/**
 		 * A template class for storing FIB client information.
@@ -252,10 +248,8 @@ class XrlFibClientManager : public FibTableObserverBase
 		typedef FibClient<Fte4>	FibClient4;
 		map<string, FibClient4>	_fib_clients4;
 
-#ifdef HAVE_IPV6
 		typedef FibClient<Fte6>	FibClient6;
 		map<string, FibClient6>	_fib_clients6;
-#endif
 
 		XrlFeaFibClientV0p1Client	_xrl_fea_fib_client;
 };

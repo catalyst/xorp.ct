@@ -58,7 +58,6 @@
  * @param error_msg the error message (if error).
  * @return the physical interface index on success, otherwise 0.
  */
-#ifdef HAVE_IPV6
 // XXX: For now the function is used only by the IPv6 code
     static uint32_t
 find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
@@ -132,7 +131,6 @@ int find_best_pif_idx(const IfTree& iftree, const string& ifname,
     }
     return XORP_OK;
 }
-#endif // HAVE_IPV6
 
 /**
  * Extract the port number from struct sockaddr_storage.
@@ -153,7 +151,6 @@ get_sockadr_storage_port_number(const struct sockaddr_storage& ss)
 		port = ntohs(sin->sin_port);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		const struct sockaddr* sa = sockaddr_storage2sockaddr(&ss);
@@ -161,7 +158,6 @@ get_sockadr_storage_port_number(const struct sockaddr_storage& ss)
 		port = ntohs(sin6->sin6_port);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    return (port);
@@ -260,7 +256,6 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 		break;
 	    }
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		// XXX: the setsockopt() argument must be 'int'
@@ -291,7 +286,6 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -365,7 +359,6 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 			COMM_SOCK_NONBLOCKING);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr local_in6_addr;
@@ -386,7 +379,6 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 			COMM_SOCK_NONBLOCKING);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -431,7 +423,6 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 			COMM_SOCK_NONBLOCKING, reuse_addr);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr local_in6_addr;
@@ -446,7 +437,6 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 			COMM_SOCK_NONBLOCKING);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -526,7 +516,6 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr mcast_in6_addr;
@@ -562,7 +551,6 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -621,7 +609,6 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 			&in_progress);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr local_in6_addr, remote_in6_addr;
@@ -646,7 +633,6 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 			&in_progress);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -703,7 +689,6 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 			&in_progress);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr local_in6_addr, remote_in6_addr;
@@ -728,7 +713,6 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 			&in_progress);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -1028,7 +1012,6 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 			htons(local_port));
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr local_in6_addr;
@@ -1048,7 +1031,6 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 			htons(local_port));
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -1093,7 +1075,6 @@ IoTcpUdpSocket::udp_join_group(const IPvX& mcast_addr,
 			&local_in_addr);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr  mcast_in6_addr;
@@ -1108,7 +1089,6 @@ IoTcpUdpSocket::udp_join_group(const IPvX& mcast_addr,
 		ret_value = comm_sock_join6(_socket_fd, &mcast_in6_addr, pif_index);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -1153,7 +1133,6 @@ IoTcpUdpSocket::udp_leave_group(const IPvX& mcast_addr,
 			&local_in_addr);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		struct in6_addr  mcast_in6_addr;
@@ -1168,7 +1147,6 @@ IoTcpUdpSocket::udp_leave_group(const IPvX& mcast_addr,
 		ret_value = comm_sock_leave6(_socket_fd, &mcast_in6_addr, pif_index);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -1406,7 +1384,6 @@ IoTcpUdpSocket::send_from_multicast_if(const IPvX& group_addr,
 		ret_value = comm_set_iface4(_socket_fd, &ifaddr_in_addr);
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		uint32_t pif_index = 0;
@@ -1419,7 +1396,6 @@ IoTcpUdpSocket::send_from_multicast_if(const IPvX& group_addr,
 		ret_value = comm_set_iface6(_socket_fd, pif_index);
 		break;
 	    }
-#endif // HAVE_IPV6
 	default:
 	    error_msg = c_format("Address family %d is not supported", family());
 	    return (XORP_ERROR);
@@ -1946,7 +1922,6 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 		}
 		break;
 
-#ifdef HAVE_IPV6
 	    case AF_INET6:
 		{
 		    struct sockaddr_in6 from6;
@@ -2022,7 +1997,6 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 		    }
 		}
 		break;
-#endif // HAVE_IPV6
 
 	    default:
 		XLOG_UNREACHABLE();

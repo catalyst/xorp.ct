@@ -201,11 +201,9 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
 		case AF_INET:
 			rtm->rtm_msglen = sizeof(*rtm) + sizeof(struct sockaddr_in);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			rtm->rtm_msglen = sizeof(*rtm) + sizeof(struct sockaddr_in6);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;
@@ -239,12 +237,10 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
 				sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in),
 						struct sockaddr_dl*);
 				break;
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
 						struct sockaddr_dl*);
 				break;
-#endif // HAVE_IPV6
 			default:
 				XLOG_UNREACHABLE();
 				break;
@@ -331,11 +327,9 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 		case AF_INET:
 			rtm->rtm_msglen = sizeof(*rtm) + 2 * sizeof(struct sockaddr_in);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			rtm->rtm_msglen = sizeof(*rtm) + 2 * sizeof(struct sockaddr_in6);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;
@@ -358,12 +352,10 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 			sin = ADD_POINTER(sin, sizeof(struct sockaddr_in),
 					struct sockaddr_in*);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			sin = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
 					struct sockaddr_in*);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;
@@ -389,12 +381,10 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 				sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in),
 						struct sockaddr_dl*);
 				break;
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				sdl = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
 						struct sockaddr_dl*);
 				break;
-#endif // HAVE_IPV6
 			default:
 				XLOG_UNREACHABLE();
 				break;

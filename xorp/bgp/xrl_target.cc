@@ -1510,7 +1510,6 @@ XrlBgpTarget::done()
 }
 
 
-#ifdef HAVE_IPV6
 /** IPv6 stuff */
 XrlCmdError 
 XrlBgpTarget::bgp_0_3_set_nexthop6(
@@ -1741,4 +1740,3 @@ XrlBgpTarget::policy_redist6_0_1_delete_route6(
     return XrlCmdError::OKAY();
 }	
 
-#endif //ipv6

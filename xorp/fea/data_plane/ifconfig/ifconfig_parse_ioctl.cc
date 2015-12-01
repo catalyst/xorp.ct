@@ -100,11 +100,9 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 #else
 		switch (ifreq.ifr_addr.sa_family) 
 		{
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				len = sizeof(struct sockaddr_in6);
 				break;
-#endif // HAVE_IPV6
 			case AF_INET:
 			default:
 				len = sizeof(struct sockaddr);
@@ -408,7 +406,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 #endif // SIOCGIFADDR
 					break;
 
-#ifdef HAVE_IPV6
 				case AF_INET6:
 #ifdef SIOCGIFADDR_IN6
 					{
@@ -430,7 +427,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 					}
 #endif // SIOCGIFADDR_IN6
 					break;
-#endif // HAVE_IPV6
 
 				default:
 					XLOG_UNREACHABLE();
@@ -463,7 +459,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 #endif // SIOCGIFNETMASK
 				break;
 
-#ifdef HAVE_IPV6
 			case AF_INET6:
 #ifdef SIOCGIFNETMASK_IN6
 				{
@@ -487,7 +482,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 				}
 #endif // SIOCGIFNETMASK_IN6
 				break;
-#endif // HAVE_IPV6
 
 			default:
 				XLOG_UNREACHABLE();
@@ -517,10 +511,8 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 #endif // SIOCGIFBRDADDR
 					break;
 
-#ifdef HAVE_IPV6
 				case AF_INET6:
 					break;	// IPv6 doesn't have the idea of broadcast
-#endif // HAVE_IPV6
 
 				default:
 					XLOG_UNREACHABLE();
@@ -551,7 +543,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 #endif // SIOCGIFDSTADDR
 					break;
 
-#ifdef HAVE_IPV6
 				case AF_INET6:
 #ifdef SIOCGIFDSTADDR_IN6
 					{
@@ -572,7 +563,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 					}
 #endif // SIOCGIFDSTADDR_IN6
 					break;
-#endif // HAVE_IPV6
 
 				default:
 					XLOG_UNREACHABLE();
@@ -612,7 +602,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 						ap->set_endpoint(peer_addr.get_ipv4());
 					break;
 				}
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				{
 					vifp->add_addr(lcl_addr.get_ipv6());
@@ -628,7 +617,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 						ap->set_endpoint(peer_addr.get_ipv6());
 					break;
 				}
-#endif // HAVE_IPV6
 			default:
 				XLOG_UNREACHABLE();
 				break;

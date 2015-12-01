@@ -98,12 +98,10 @@ CliNode::sock_serv_open()
 		case AF_INET:
 			_cli_socket = comm_bind_tcp4(NULL, _cli_port, COMM_SOCK_NONBLOCKING);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			_cli_socket = comm_bind_tcp6(NULL, 0, _cli_port,
 					COMM_SOCK_NONBLOCKING);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			_cli_socket.clear();
@@ -207,14 +205,12 @@ CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
 					peer_addr.copy_in(*s_in);
 				}
 				break;
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				{
 					struct sockaddr_in6 *s_in6 = (struct sockaddr_in6 *)&ss;
 					peer_addr.copy_in(*s_in6);
 				}
 				break;
-#endif // HAVE_IPV6
 			default:
 				// Invalid address family
 				error_msg = c_format("Cannot set peer address: "

@@ -135,9 +135,7 @@ FibConfigEntrySetRoutingSocket::delete_entry6(const Fte6& fte)
 	 (sizeof(type) + sizeof(long) - (sizeof(type) % sizeof(long)))	\
 	 : (sizeof(type)))
 static const size_t SOCKADDR_IN_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockaddr_in);
-#ifdef HAVE_IPV6
 static const size_t SOCKADDR_IN6_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockaddr_in6);
-#endif
 #ifdef AF_LINK
 static const size_t SOCKADDR_DL_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockaddr_dl);
 #endif
@@ -277,7 +275,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 				rtm->rtm_msglen += sin_nexthop_len + sin_netmask_len;
 			}
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			sin_dst = (struct sockaddr_in *)(rtm + 1);
 			sin_dst_len = SOCKADDR_IN6_ROUNDUP_LEN;
@@ -302,7 +299,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 				rtm->rtm_msglen += sin_nexthop_len + sin_netmask_len;
 			}
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;
@@ -332,7 +328,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 			fte_nexthop.copy_out(*sin_nexthop);
 		fte.net().netmask().copy_out(*sin_netmask);
 	}
-#ifdef HAVE_IPV6
 	else 
 	{
 		// Keep the stupid ipvx.cc code from throwing an exception.
@@ -341,7 +336,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 			fte_nexthop.copy_out(*((struct sockaddr_in6*)(sin_nexthop)));
 		fte.net().netmask().copy_out(*((struct sockaddr_in6*)(sin_netmask)));
 	}
-#endif
 
 	if (is_interface_route) 
 	{
@@ -373,7 +367,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 			{
 				case AF_INET:
 					break;
-#ifdef HAVE_IPV6
 				case AF_INET6:
 					{
 						struct sockaddr_in6* sin6_nexthop;
@@ -381,7 +374,6 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 						system_adjust_sockaddr_in6_route(*sin6_nexthop, pif_index);
 					}
 					break;
-#endif // HAVE_IPV6
 				default:
 					XLOG_UNREACHABLE();
 					break;
@@ -501,7 +493,6 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 				rtm->rtm_msglen += sin_netmask_len;
 			}
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			sin_dst = (struct sockaddr_in *)(rtm + 1);
 			sin_dst_len = SOCKADDR_IN6_ROUNDUP_LEN;
@@ -514,7 +505,6 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 				rtm->rtm_msglen += sin_netmask_len;
 			}
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;
@@ -536,14 +526,12 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 		if (! is_host_route)
 			fte.net().netmask().copy_out(*sin_netmask);
 	}
-#ifdef HAVE_IPV6
 	else 
 	{
 		fte.net().masked_addr().copy_out(*((struct sockaddr_in6*)(sin_dst)));
 		if (! is_host_route)
 			fte.net().netmask().copy_out(*((struct sockaddr_in6*)(sin_netmask)));
 	}
-#endif
 
 	errno = 0;
 	if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) 

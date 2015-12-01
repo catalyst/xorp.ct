@@ -61,10 +61,8 @@ static int proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,
 static int if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 		const string& proc_linux_net_device_file);
 
-#ifdef HAVE_IPV6
 static int if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		const string& proc_linux_net_device_file);
-#endif
 
 	IfConfigGetProcLinux::IfConfigGetProcLinux(FeaDataPlaneManager& fea_data_plane_manager)
 : IfConfigGet(fea_data_plane_manager),
@@ -156,7 +154,6 @@ IfConfigGetProcLinux::read_config(const IfTree* local_config, IfTree& iftree)
 			return (XORP_ERROR);
 	}
 
-#ifdef HAVE_IPV6
 	//
 	// The IPv6 information
 	//
@@ -167,7 +164,6 @@ IfConfigGetProcLinux::read_config(const IfTree* local_config, IfTree& iftree)
 				!= XORP_OK)
 			return (XORP_ERROR);
 	}
-#endif // HAVE_IPV6
 
 	//
 	// Get the VLAN vif info
@@ -201,14 +197,12 @@ proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree, int family,
 			if_fetch_linux_v4(ifconfig, iftree, proc_linux_net_device_file);
 			break;
 
-#ifdef HAVE_IPV6
 			//
 			// The IPv6 information
 			//
 		case AF_INET6:
 			if_fetch_linux_v6(ifconfig, iftree, proc_linux_net_device_file);
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -360,7 +354,6 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 // that structure is completely different from the BSD structure with
 // the same name. No comment.
 //
-#ifdef HAVE_IPV6
 	static int
 if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		const string& proc_linux_net_device_file)
@@ -610,6 +603,5 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 
 	return (XORP_OK);
 }
-#endif // HAVE_IPV6
 
 #endif // HAVE_PROC_LINUX

@@ -194,7 +194,6 @@ class MfeaNode : public ProtoNode<MfeaVif>,
 			return (_mfea_mrouter.have_multicast_routing4());
 		}
 
-#ifdef HAVE_IPV6
 		/**
 		 * Test if the underlying system supports IPv6 multicast routing.
 		 * 
@@ -205,7 +204,6 @@ class MfeaNode : public ProtoNode<MfeaVif>,
 		{
 			return (_mfea_mrouter.have_multicast_routing6());
 		}
-#endif
 
 		/**
 		 * Install a new MFEA vif.
@@ -863,12 +861,10 @@ class MfeaNode : public ProtoNode<MfeaVif>,
 				const IPv4&   addr,
 				const Update& update);
 
-#ifdef HAVE_IPV6
 		void vifaddr6_update(const string& ifname,
 				const string& vifname,
 				const IPv6&   addr,
 				const Update& update);
-#endif
 
 		void updates_completed();
 

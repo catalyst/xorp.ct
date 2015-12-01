@@ -241,7 +241,6 @@ FirewallManager::register_firewall_set(FirewallSet* firewall_set,
 				}
 			}
 
-#ifdef HAVE_IPV6
 			firewall_entry_list.clear();
 
 			if (get_table6(firewall_entry_list, error_msg) == XORP_OK) 
@@ -254,7 +253,6 @@ FirewallManager::register_firewall_set(FirewallSet* firewall_set,
 							"firewall table: %s", error_msg.c_str());
 				}
 			}
-#endif // HAVE_IPV6
 		}
 	}
 

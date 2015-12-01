@@ -350,7 +350,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const string&	client_target_name);
 
 
-#ifdef HAVE_IPV6
 	XrlCmdError fea_fib_0_1_add_fib_client6(
 		// Input values,
 		const string&	client_target_name,
@@ -360,7 +359,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 	XrlCmdError fea_fib_0_1_delete_fib_client6(
 		// Input values,
 		const string&	client_target_name);
-#endif
 
 #ifndef XORP_DISABLE_FIREWALL
 	//
@@ -594,7 +592,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		string&		action,
 		bool&		more);
 
-#ifdef HAVE_IPV6
 
 	/**
 	 *  Add an IPv6 firewall entry.
@@ -791,7 +788,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		uint32_t&	dst_port_end,
 		string&		action,
 		bool&		more);
-#endif //ipv6
 #endif //firewall
 
 
@@ -1145,7 +1141,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		// Output values,
 		IPv4&	endpoint);
 
-#ifdef HAVE_IPV6
 	XrlCmdError ifmgr_0_1_get_configured_address_flags6(
 		// Input values,
 		const string& ifname,
@@ -1224,7 +1219,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const IPv6&	address,
 		// Output values,
 		IPv6&		endpoint);
-#endif
 
 	XrlCmdError ifmgr_replicator_0_1_register_ifmgr_mirror(
 		// Input values,
@@ -1308,7 +1302,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const bool&	is_configured,
 		const uint32_t&	table_id);
 
-#ifdef HAVE_IPV6
 	XrlCmdError fti_0_2_lookup_route_by_dest6(
 		// Input values,
 		const IPv6&	host,
@@ -1379,7 +1372,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		// Input values,
 		const bool&	is_configured,
 		const uint32_t&	table_id);
-#endif
 
 	//
 	// RIB routes redistribution transaction-based XRL interface
@@ -1474,7 +1466,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const string&	cookie);
 
 
-#ifdef HAVE_IPV6
 	/**
 	 *  Start transaction.
 	 *
@@ -1563,7 +1554,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const uint32_t&	tid,
 		const string&	cookie);
 
-#endif //ipv6
 
 
 	//
@@ -1864,7 +1854,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const uint32_t&	ip_protocol,
 		const IPv4&	group_address);
 
-#ifdef HAVE_IPV6
 	//
 	// IPv6 Raw Socket Server Interface
 	//
@@ -2018,7 +2007,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const string&	vif_name,
 		const uint32_t&	ip_protocol,
 		const IPv6&	group_address);
-#endif
 
 	//
 	// TCP/UDP I/O Socket Server Interface
@@ -2403,7 +2391,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const string&	optname,
 		const string&	optval);
 
-#ifdef HAVE_IPV6
 	/**
 	 *  Open a TCP socket.
 	 *
@@ -2700,7 +2687,6 @@ class XrlFeaTarget : public XrlFeaTargetBase
 		const string&	sockid,
 		const string&	optname,
 		const uint32_t&	optval);
-#endif
 
 #ifndef XORP_DISABLE_PROFILE
 	//

@@ -116,11 +116,6 @@ FibConfigTableGetNetlinkSocket::get_table4(list<Fte4>& fte_list)
 	int
 FibConfigTableGetNetlinkSocket::get_table6(list<Fte6>& fte_list)
 {
-#ifndef HAVE_IPV6
-	UNUSED(fte_list);
-
-	return (XORP_ERROR);
-#else
 	list<FteX> ftex_list;
 
 	// Get the table
@@ -136,7 +131,6 @@ FibConfigTableGetNetlinkSocket::get_table6(list<Fte6>& fte_list)
 	}
 
 	return (XORP_OK);
-#endif // HAVE_IPV6
 }
 
 	int
@@ -161,12 +155,10 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
 			if (! fea_data_plane_manager().have_ipv4())
 				return (XORP_ERROR);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			if (! fea_data_plane_manager().have_ipv6())
 				return (XORP_ERROR);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;

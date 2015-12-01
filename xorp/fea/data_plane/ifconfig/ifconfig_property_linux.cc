@@ -65,16 +65,12 @@ IfConfigPropertyLinux::test_have_ipv4() const
 bool
 IfConfigPropertyLinux::test_have_ipv6() const
 {
-#ifndef HAVE_IPV6
-	return (false);
-#else
 	XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
 	if (! s.is_valid())
 		return (false);
 
 	comm_close(s);
 	return (true);
-#endif // HAVE_IPV6
 }
 
 

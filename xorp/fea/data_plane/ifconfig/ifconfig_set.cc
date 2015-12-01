@@ -200,7 +200,6 @@ IfConfigSet::push_config(const IfTree& iftree)
 			}
 
 			// Propagate the "DELETE" status to the IPv6 addresses
-#ifdef HAVE_IPV6
 			IfTreeVif::IPv6Map::iterator a6i;
 			for (a6i = config_vif.ipv6addrs().begin();
 					a6i != config_vif.ipv6addrs().end();
@@ -210,7 +209,6 @@ IfConfigSet::push_config(const IfTree& iftree)
 				if (config_vif.state() == IfTreeItem::DELETED)
 					config_addr.mark(IfTreeItem::DELETED);
 			}
-#endif // HAVE_IPV6
 		}
 	}
 
@@ -321,7 +319,6 @@ IfConfigSet::push_config(const IfTree& iftree)
 						config_iface, config_vif, config_addr);
 			}
 
-#ifdef HAVE_IPV6
 			//
 			// Push the IPv6 addresses
 			//
@@ -339,7 +336,6 @@ IfConfigSet::push_config(const IfTree& iftree)
 				push_vif_address(system_ifp, system_vifp, system_addrp,
 						config_iface, config_vif, config_addr);
 			}
-#endif // HAVE_IPV6
 
 			push_vif_end(system_ifp, system_vifp, config_iface, config_vif);
 		}
@@ -735,7 +731,6 @@ done:
 	}
 }
 
-#ifdef HAVE_IPV6
 	void
 IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
 		const IfTreeVif*		system_vifp,
@@ -831,4 +826,3 @@ done:
 		return;
 	}
 }
-#endif // HAVE_IPV6

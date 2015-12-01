@@ -2934,7 +2934,6 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	    }
 	}
 
-#ifdef HAVE_IPV6
 	MPReachNLRIAttribute<IPv6>* mp6_reach_att =
 	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(_att[MP_REACH_NLRI]);
 	if (mp6_reach_att) 
@@ -2964,7 +2963,6 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 		}
 	    }
 	}
-#endif
 	MPUNReachNLRIAttribute<IPv4>* mp4_unreach_att =
 	    dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(_att[MP_UNREACH_NLRI]);
 	if (mp4_unreach_att) 

@@ -1962,9 +1962,7 @@ IoTcpUdpManager::instance_death(const string& instance_name)
 			dummy_error_msg);
 
 	erase_comm_handlers_by_creator(AF_INET, instance_name);
-#ifdef HAVE_IPV6
 	erase_comm_handlers_by_creator(AF_INET6, instance_name);
-#endif
 }
 
 	IoTcpUdpComm*

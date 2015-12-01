@@ -351,7 +351,6 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change_cb(
 template class XrlFibClientManager::FibClient<Fte4>;
 
 
-#ifdef HAVE_IPV6
 
 /**
  * Process a list of IPv6 FIB route changes.
@@ -550,4 +549,3 @@ XrlFibClientManager::send_fib_client_resolve_route6_cb(
 
 template class XrlFibClientManager::FibClient<Fte6>;
 
-#endif

@@ -220,12 +220,10 @@ bool supports_mcast_tables = false;
 			ret_value = multicast_forwarding_enabled4(_multicast_forwarding_enabled,
 					error_msg);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			ret_value = multicast_forwarding_enabled6(_multicast_forwarding_enabled,
 					error_msg);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 	}
@@ -348,12 +346,10 @@ MfeaMrouter::stop()
 			ret_value = set_multicast_forwarding_enabled4(_multicast_forwarding_enabled,
 					error_msg);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			ret_value = set_multicast_forwarding_enabled6(_multicast_forwarding_enabled,
 					error_msg);
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 	}
@@ -807,10 +803,8 @@ MfeaMrouter::kernel_mrouter_ip_protocol() const
 	{
 		case AF_INET:
 			return (IPPROTO_IGMP);
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			return (IPPROTO_ICMPV6);
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			return (-1);
@@ -907,7 +901,6 @@ MfeaMrouter::start_mrt()
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -949,7 +942,6 @@ MfeaMrouter::start_mrt()
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -1030,7 +1022,6 @@ MfeaMrouter::start_mrt()
 #endif // MRT_API_CONFIG && ENABLE_ADVANCED_MULTICAST_API
 
 #if defined(MRT6_API_CONFIG) && defined(ENABLE_ADVANCED_MULTICAST_API)
-#ifdef HAVE_IPV6
 	if (family == AF_INET6) 
 	{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1098,7 +1089,6 @@ MfeaMrouter::start_mrt()
 
 #endif // HAVE_IPV6_MULTICAST_ROUTING	
 	}
-#endif // HAVE_IPV6
 #endif // MRT6_API_CONFIG && ENABLE_ADVANCED_MULTICAST_API
 
 	return (XORP_OK);
@@ -1169,7 +1159,6 @@ MfeaMrouter::stop_mrt()
 			}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1192,7 +1181,6 @@ MfeaMrouter::stop_mrt()
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			return (XORP_ERROR);
@@ -1244,7 +1232,6 @@ MfeaMrouter::start_pim(string& error_msg)
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1262,7 +1249,6 @@ MfeaMrouter::start_pim(string& error_msg)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			UNUSED(v);
@@ -1319,7 +1305,6 @@ MfeaMrouter::stop_pim(string& error_msg)
 #endif
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1338,7 +1323,6 @@ MfeaMrouter::stop_pim(string& error_msg)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			UNUSED(v);
@@ -1449,7 +1433,6 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1480,7 +1463,6 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -1561,7 +1543,6 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1584,7 +1565,6 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -1715,7 +1695,6 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1758,7 +1737,6 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -1833,7 +1811,6 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1857,7 +1834,6 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -2012,7 +1988,6 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2067,7 +2042,6 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 							}
 							break;
-#endif // HAVE_IPV6
 
 							default:
 							XLOG_UNREACHABLE();
@@ -2222,7 +2196,6 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2277,7 +2250,6 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -2360,7 +2332,6 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2394,7 +2365,6 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -2484,7 +2454,6 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2512,7 +2481,6 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -2596,7 +2564,6 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2625,7 +2592,6 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -2763,7 +2729,6 @@ MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
 			}
 			break;
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2858,7 +2823,6 @@ MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 			}
 			break;
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();

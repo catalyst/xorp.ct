@@ -781,14 +781,12 @@ int NlmUtils::nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfoms
 				family = IPv4::af();
 				break;
 			}
-#ifdef HAVE_IPV6
 		case ARPHRD_TUNNEL6:
 			{
 				// IPv6 address
 				family = IPv6::af();
 				break;
 			}
-#endif // HAVE_IPV6
 		default:
 			// Unknown address type: ignore
 			return (XORP_OK);
@@ -1145,10 +1143,8 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	{
 		case AF_INET:
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			break;
-#endif // HAVE_IPV6
 		default:
 			debug_msg("Ignoring address of family %d\n", family);
 			return;
@@ -1279,10 +1275,8 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 					}
 				}
 				break;
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				break;	// IPv6 doesn't have the idea of broadcast
-#endif // HAVE_IPV6
 
 			default:
 				XLOG_UNREACHABLE();
@@ -1341,7 +1335,6 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 
 				break;
 			}
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				vifp->add_addr(lcl_addr.get_ipv6());
@@ -1362,7 +1355,6 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 
 				break;
 			}
-#endif // HAVE_IPV6
 		default:
 			XLOG_UNREACHABLE();
 			break;

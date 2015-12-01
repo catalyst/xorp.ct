@@ -733,7 +733,6 @@ class BGPMain : public ServiceBase,
 	void push_routes();
 
 	/** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 	/**
 	 * Test whether an IPv6 interface/vif/address is enabled.
@@ -848,7 +847,6 @@ class BGPMain : public ServiceBase,
 		const IPv6&	addr,
 		const uint32_t&	prefix_len);
 
-#endif //ipv6
 
 #ifndef XORP_DISABLE_PROFILE
 	/**
@@ -1071,7 +1069,6 @@ class BGPMain : public ServiceBase,
 	bool _first_policy_push;	     	// Don't form peerings until the
 	// first policy push is seen.
 
-#ifdef HAVE_IPV6
 
 	/**
 	 * Callback method that is invoked when the status of an address changes.
@@ -1084,7 +1081,6 @@ class BGPMain : public ServiceBase,
 	AddressStatus6Cb	_address_status6_cb;
 	map<IPv6, uint32_t> _interfaces_ipv6;	// IPv6 interface addresses
 
-#endif //ipv6
 };
 
 template <typename A>

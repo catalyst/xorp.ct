@@ -167,11 +167,9 @@ next_sa(const struct sockaddr* sa)
 		case AF_INET:
 			sa_size = sizeof(struct sockaddr_in);
 			break;
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			sa_size = sizeof(struct sockaddr_in6);
 			break;
-#endif // HAVE_IPV6
 		default:
 			sa_size = sizeof(struct sockaddr_in);
 			break;
@@ -227,7 +225,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 				IPv4 netmask(sin->sin_addr);
 				return (netmask.mask_len());
 			}
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				// XXX: sock->sa_family is undefined
@@ -235,7 +232,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 				IPv6 netmask(sin6->sin6_addr);
 				return (netmask.mask_len());
 			}
-#endif // HAVE_IPV6
 		default:
 			XLOG_FATAL("Invalid address family %d", family);
 	}
@@ -280,7 +276,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 				}
 			}
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				if (sock->sa_len == 0) 
@@ -297,7 +292,6 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 				IPv6 netmask(sin6.sin6_addr);
 				return (netmask.mask_len());
 			}
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_FATAL("Invalid address family %d", family);

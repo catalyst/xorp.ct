@@ -937,9 +937,7 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 	return (false);
 }
 
-#ifdef HAVE_IPV6
-	bool
-IfConfig::report_update(const IfTreeInterface&	fi,
+bool IfConfig::report_update(const IfTreeInterface&	fi,
 		const IfTreeVif&	fv,
 		const IfTreeAddr6&	fa)
 {
@@ -953,7 +951,6 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 
 	return (false);
 }
-#endif
 
 	void
 IfConfig::report_updates_completed()
@@ -991,14 +988,12 @@ IfConfig::report_updates(IfTree& iftree)
 				updated |= report_update(interface, vif, addr);
 			}
 
-#ifdef HAVE_IPV6
 			for (IfTreeVif::IPv6Map::const_iterator ai = vif.ipv6addrs().begin();
 					ai != vif.ipv6addrs().end(); ai++) 
 			{
 				const IfTreeAddr6& addr = *(ai->second);
 				updated |= report_update(interface, vif, addr);
 			}
-#endif
 		}
 	}
 	if (updated) 

@@ -169,9 +169,7 @@ class BGPPlumbing
 		RibIpcHandler* rib_handler,
 		AggregationHandler* aggr_handler,
 		NextHopResolver<IPv4>&,
-#ifdef HAVE_IPV6
 		NextHopResolver<IPv6>&,
-#endif
 		PolicyFilters&,
 		BGPMain& bgp);
 
@@ -242,7 +240,6 @@ class BGPPlumbing
 	PolicyFilters& policy_filters() { return _policy_filters; }
 
 	/** IPv6 stuff */
-#ifdef HAVE_IPV6
 	int add_route(const IPv6Net& net, 
 		FPAList6Ref& pa_list,
 		const PolicyTags& policytags,
@@ -261,7 +258,6 @@ class BGPPlumbing
 	bool read_next_route(uint32_t token, 
 		const SubnetRoute<IPv6>*& route, 
 		IPv4& peer_id);
-#endif // ipv6
 
     private:
 	BGPMain &_bgp;
@@ -276,10 +272,8 @@ class BGPPlumbing
 
 	BGPPlumbingAF<IPv4> _plumbing_ipv4;
 
-#ifdef HAVE_IPV6
 	NextHopResolver<IPv6>& _next_hop_resolver_ipv6;
 	BGPPlumbingAF<IPv6> _plumbing_ipv6;
-#endif
 
 };
 

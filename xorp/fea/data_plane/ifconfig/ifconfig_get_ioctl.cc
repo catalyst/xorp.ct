@@ -92,7 +92,6 @@ IfConfigGetIoctl::start(string& error_msg)
 		}
 	}
 
-#ifdef HAVE_IPV6
 	if (fea_data_plane_manager().have_ipv6()) 
 	{
 		if (_s6 < 0) 
@@ -106,7 +105,6 @@ IfConfigGetIoctl::start(string& error_msg)
 			}
 		}
 	}
-#endif // HAVE_IPV6
 
 	_is_running = true;
 
@@ -178,7 +176,6 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
 		parse_buffer_ioctl(ifconfig(), iftree, AF_INET, buffer);
 	}
 
-#ifdef HAVE_IPV6
 	//
 	// The IPv6 information
 	//
@@ -193,7 +190,6 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
 
 		parse_buffer_ioctl(ifconfig(), iftree, AF_INET6, buffer);
 	}
-#endif // HAVE_IPV6
 
 	//
 	// Get the VLAN vif info

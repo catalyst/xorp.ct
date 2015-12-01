@@ -811,7 +811,6 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	}
 }
 
-#ifdef HAVE_IPV6
 	void
 MfeaNode::vifaddr6_update(const string&	ifname,
 		const string&	vifname,
@@ -983,7 +982,6 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 		mfea_vif->notifyUpdated();
 	}
 }
-#endif
 
 	void
 MfeaNode::updates_completed()
@@ -1173,7 +1171,6 @@ MfeaNode::add_pim_register_vif()
 						CREATED);
 			}
 
-#ifdef HAVE_IPV6
 			if (ipvx.is_ipv6()) 
 			{
 				IPv6 ipv6 = ipvx.get_ipv6();
@@ -1187,7 +1184,6 @@ MfeaNode::add_pim_register_vif()
 						ap->addr(),
 						CREATED);
 			}
-#endif
 		}
 
 		_mfea_iftree_update_replicator.updates_completed();
@@ -1848,7 +1844,6 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 				}
 				break;
 
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -1896,7 +1891,6 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 				}
 				break;
-#endif // HAVE_IPV6
 
 			default:
 				XLOG_UNREACHABLE();
@@ -2257,7 +2251,6 @@ MfeaNode::add_mfc(const string& module_instance_name,
 #endif
 					break;
 
-#ifdef HAVE_IPV6
 				case AF_INET6:
 					{
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
@@ -2272,7 +2265,6 @@ MfeaNode::add_mfc(const string& module_instance_name,
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 					}
 					break;
-#endif // HAVE_IPV6
 
 				default:
 					XLOG_UNREACHABLE();

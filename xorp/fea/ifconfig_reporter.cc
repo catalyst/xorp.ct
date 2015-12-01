@@ -109,7 +109,6 @@ IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
 						update);
 			}
 
-#ifdef HAVE_IPV6
 			IfTreeVif::IPv6Map::const_iterator a6_iter;
 			for (a6_iter = vif.ipv6addrs().begin();
 					a6_iter != vif.ipv6addrs().end();
@@ -119,7 +118,6 @@ IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
 				rp->vifaddr6_update(iface.ifname(), vif.vifname(), a6.addr(),
 						update);
 			}
-#endif
 		}
 	}
 	rp->updates_completed();
@@ -181,7 +179,6 @@ IfConfigUpdateReplicator::vifaddr4_update(const string& ifname,
 	}
 }
 
-#ifdef HAVE_IPV6
 	void
 IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
 		const string& vifname,
@@ -196,7 +193,6 @@ IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
 		++i;
 	}
 }
-#endif
 
 	void
 IfConfigUpdateReplicator::updates_completed()
@@ -257,7 +253,6 @@ IfConfigErrorReporter::vifaddr_error(const string& ifname,
 	log_error(preamble + error_msg);
 }
 
-#ifdef HAVE_IPV6
 	void
 IfConfigErrorReporter::vifaddr_error(const string& ifname,
 		const string& vifname,
@@ -270,4 +265,3 @@ IfConfigErrorReporter::vifaddr_error(const string& ifname,
 				addr.str().c_str()));
 	log_error(preamble + error_msg);
 }
-#endif

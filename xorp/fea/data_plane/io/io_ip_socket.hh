@@ -349,10 +349,8 @@ class IoIpSocket : public IoIp, public IfTreeListener
 
 		struct sockaddr_in	_from4;	// The source addr of recvmsg() msg (IPv4)
 		struct sockaddr_in  _to4;	// The dest.  addr of sendmsg() msg (IPv4)
-#ifdef HAVE_IPV6
 		struct sockaddr_in6	_from6;	// The source addr of recvmsg() msg (IPv6)
 		struct sockaddr_in6	_to6;	// The dest.  addr of sendmsg() msg (IPv6)
-#endif
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__

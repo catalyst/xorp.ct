@@ -258,7 +258,6 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 			break;
 		}
 
-#ifdef HAVE_IPV6
 		if (dst.is_ipv6()) 
 		{
 			_xrl_mfea_client_client.send_recv_kernel_signal_message6(
@@ -273,7 +272,6 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 					callback(this, &XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb));
 			break;
 		}
-#endif
 
 		XLOG_UNREACHABLE();
 		break;
@@ -390,7 +388,6 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 			break;
 		}
 
-#ifdef HAVE_IPV6
 		if (source_addr.is_ipv6()) 
 		{
 			_xrl_mfea_client_client.send_recv_dataflow_signal6(
@@ -414,7 +411,6 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 			break;
 		}
 		XLOG_UNREACHABLE();
-#endif
 
 		break;
 	} while (false);
@@ -820,7 +816,6 @@ XrlMfeaNode::mfea_0_1_have_multicast_routing4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlMfeaNode::mfea_0_1_have_multicast_routing6(
 		// Output values, 
@@ -1134,7 +1129,6 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
 	return XrlCmdError::OKAY();
 }
 
-#endif //ipv6
 
 XrlCmdError
 XrlMfeaNode::mfea_0_1_register_protocol4(

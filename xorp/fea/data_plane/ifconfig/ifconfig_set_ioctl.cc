@@ -66,7 +66,6 @@
 #include "ifconfig_set_ioctl.hh"
 
 
-#ifdef HAVE_IPV6
 //
 // XXX: In case of Linux, we have "struct in6_ifreq" defined
 // in <linux/ipv6.h>. However, we cannot include that file along
@@ -83,7 +82,6 @@ struct in6_ifreq
 	uint32_t ifr6_prefixlen;
 	unsigned int ifr6_ifindex;
 };
-#endif // HAVE_IPV6
 
 
 //
@@ -133,7 +131,6 @@ IfConfigSetIoctl::start(string& error_msg)
 		}
 	}
 
-#ifdef HAVE_IPV6
 	if (fea_data_plane_manager().have_ipv6()) 
 	{
 		if (_s6 < 0) 
@@ -147,7 +144,6 @@ IfConfigSetIoctl::start(string& error_msg)
 			}
 		}
 	}
-#endif // HAVE_IPV6
 
 	_is_running = true;
 
@@ -876,20 +872,6 @@ IfConfigSetIoctl::add_addr(const string& ifname, const string& vifname,
 		const IPv6& endpoint_addr, string& error_msg)
 
 {
-#ifndef HAVE_IPV6
-	UNUSED(ifname);
-	UNUSED(vifname);
-	UNUSED(if_index);
-	UNUSED(addr);
-	UNUSED(prefix_len);
-	UNUSED(is_point_to_point);
-	UNUSED(endpoint_addr);
-
-	error_msg = "IPv6 is not supported";
-
-	return (XORP_ERROR);
-
-#else // HAVE_IPV6
 
 #if defined(SIOCAIFADDR_IN6)
 	//
@@ -981,7 +963,6 @@ IfConfigSetIoctl::add_addr(const string& ifname, const string& vifname,
 			"on an interface");
 	return (XORP_ERROR);
 #endif
-#endif // HAVE_IPV6
 }
 
 	int
@@ -989,18 +970,7 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
 		uint32_t if_index, const IPv6& addr,
 		uint32_t prefix_len, string& error_msg)
 {
-#ifndef HAVE_IPV6
-	UNUSED(ifname);
-	UNUSED(vifname);
-	UNUSED(if_index);
-	UNUSED(addr);
-	UNUSED(prefix_len);
 
-	error_msg = "IPv6 is not supported";
-
-	return (XORP_ERROR);
-
-#else // HAVE_IPV6
 
 	//
 	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
@@ -1024,7 +994,6 @@ IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
 
 	return (XORP_OK);
 
-#endif // HAVE_IPV6
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF

@@ -141,7 +141,6 @@
 static uint32_t		ra_opt4;
 
 // IPv6 Router Alert stuff
-#ifdef HAVE_IPV6
 #ifndef IP6OPT_RTALERT
 #define IP6OPT_RTALERT		0x05
 #endif
@@ -154,14 +153,11 @@ static uint32_t		ra_opt4;
 #ifndef IP6OPT_ROUTER_ALERT	// XXX: for compatibility with older systems
 #define IP6OPT_ROUTER_ALERT IP6OPT_RTALERT
 #endif
-#endif // HAVE_IPV6
 //
-#ifdef HAVE_IPV6
 static uint16_t		rtalert_code6;
 #ifndef HAVE_RFC3542
 static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif
-#endif // HAVE_IPV6
 
 IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 	const IfTree& ift, int family, uint8_t ip_protocol)
@@ -171,14 +167,12 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 {
     // Init Router Alert related option stuff
     ra_opt4 = htonl((IPOPT_RA << 24) | (0x04 << 16));
-#ifdef HAVE_IPV6
     rtalert_code6 = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
 #ifndef HAVE_RFC3542
     ra_opt6[0] = IP6OPT_ROUTER_ALERT;
     ra_opt6[1] = IP6OPT_RTALERT_LEN - 2;
     memcpy(&ra_opt6[2], (caddr_t)&rtalert_code6, sizeof(rtalert_code6));
 #endif // ! HAVE_RFC3542
-#endif // HAVE_IPV6
 
     // Allocate the buffers
     _rcvbuf = new uint8_t[IO_BUF_SIZE];
@@ -207,14 +201,12 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 	    _rcvmh.msg_namelen	= sizeof(_from4);
 	    _sndmh.msg_namelen	= sizeof(_to4);
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    _rcvmh.msg_name		= (caddr_t)&_from6;
 	    _sndmh.msg_name		= (caddr_t)&_to6;
 	    _rcvmh.msg_namelen	= sizeof(_from6);
 	    _sndmh.msg_namelen	= sizeof(_to6);
 	    break;
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    break;
@@ -303,7 +295,6 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST
@@ -323,7 +314,6 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 #endif // HAVE_IPV6_MULTICAST
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -353,7 +343,6 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST
@@ -373,7 +362,6 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 #endif // HAVE_IPV6_MULTICAST
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -448,7 +436,6 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST
@@ -468,7 +455,6 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 #endif // HAVE_IPV6_MULTICAST
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -604,7 +590,6 @@ retry_v4:
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST
@@ -633,7 +618,6 @@ retry_v4:
 #endif // HAVE_IPV6_MULTICAST
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -798,7 +782,6 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST
@@ -823,7 +806,6 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 #endif // HAVE_IPV6_MULTICAST
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -927,7 +909,6 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg)
     {
 	case AF_INET:
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		// Not supported on mingw, at least...
@@ -948,7 +929,6 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg)
 		}
 	    }
 	    break;
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    error_msg += c_format("Invalid address family %d", family());
@@ -1118,10 +1098,8 @@ IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    break;		// XXX
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -1171,7 +1149,6 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 		break;
 	    }
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		// XXX: the setsockopt() argument must be 'int'
@@ -1299,7 +1276,6 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 #endif // ! IPV6_RECVDSTOPTS
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -1412,12 +1388,10 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    memset(&_from4, 0, sizeof(_from4));
 	    _rcvmh.msg_namelen = sizeof(_from4);
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    memset(&_from6, 0, sizeof(_from6));
 	    _rcvmh.msg_namelen = sizeof(_from6);
 	    break;
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    return;			// Error
@@ -1470,7 +1444,6 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		if (ip_protocol() != IPPROTO_ICMPV6)
@@ -1508,7 +1481,6 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -1688,7 +1660,6 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		src_address.copy_in(_from6);
@@ -1851,7 +1822,6 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		ip_data_len = nbytes;
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -1887,14 +1857,12 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    case AF_INET:
 		// TODO: take care of Linux??
 		break;	// XXX: in IPv4 (except Linux?) there is no pif_index
-#ifdef HAVE_IPV6
 	    case AF_INET6:
 		XLOG_ERROR("proto_socket_read() failed: "
 			"invalid interface pif_index from %s to %s: %u",
 			cstring(src_address), cstring(dst_address),
 			XORP_UINT_CAST(pif_index));
 		return;		// Error
-#endif // HAVE_IPV6
 	    default:
 		XLOG_UNREACHABLE();
 		return;		// Error
@@ -2084,7 +2052,6 @@ IoIpSocket::send_packet(const string& if_name,
 		    ip_tos = 0;
 	    }
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		// Assign the TTL
@@ -2110,7 +2077,6 @@ IoIpSocket::send_packet(const string& if_name,
 		}
 	    }
 	    break;
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    error_msg = c_format("Invalid address family %d", family());
@@ -2431,7 +2397,6 @@ IoIpSocket::send_packet(const string& if_name,
 	    }
 	    break;
 
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		int hbhlen = 0;
@@ -2661,7 +2626,6 @@ IoIpSocket::send_packet(const string& if_name,
 			error_msg);
 	    }
 	    break;
-#endif // HAVE_IPV6
 
 	default:
 	    XLOG_UNREACHABLE();
@@ -2767,12 +2731,10 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	    //_sndmh.msg_control	= NULL;
 	    //_sndmh.msg_controllen	= 0;
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    dst_address.copy_out(_to6);
 	    system_adjust_sockaddr_in6_send(_to6, vifp->pif_index());
 	    break;
-#endif // HAVE_IPV6
 	default:
 	    XLOG_UNREACHABLE();
 	    error_msg = c_format("Invalid address family %d", family());

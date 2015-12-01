@@ -288,7 +288,6 @@ PrintRoutes<A>::timer_expired()
 
 template class PrintRoutes<IPv4>;
 
-#ifdef HAVE_IPV6
 
 template <>
 	void
@@ -310,4 +309,3 @@ PrintRoutes<IPv6>::get_route_list_next()
 
 template class PrintRoutes<IPv6>;
 
-#endif // ipv6

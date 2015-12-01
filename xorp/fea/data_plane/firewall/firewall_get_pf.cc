@@ -130,13 +130,7 @@ FirewallGetPf::get_table4(list<FirewallEntry>& firewall_entry_list,
 FirewallGetPf::get_table6(list<FirewallEntry>& firewall_entry_list,
 		string& error_msg)
 {
-#ifdef HAVE_IPV6
 	return (get_table(AF_INET6, firewall_entry_list, error_msg));
-#else
-	error_msg = c_format("Cannot get the IPv6 firewall table: "
-			"IPv6 is not supported");
-	return (XORP_ERROR);
-#endif
 }
 
 	int

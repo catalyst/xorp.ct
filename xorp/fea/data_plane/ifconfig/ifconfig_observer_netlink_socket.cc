@@ -85,14 +85,12 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
 	if (fea_data_plane_manager().have_ipv4()) 
 		nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
-#ifdef HAVE_IPV6
 	//
 	// Listen to the netlink multicast group for network interfaces status
 	// and IPv6 addresses.
 	//
 	if (fea_data_plane_manager().have_ipv6())
 		nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
-#endif // HAVE_IPV6
 
 	//
 	// Set the netlink multicast groups to listen for on the netlink socket

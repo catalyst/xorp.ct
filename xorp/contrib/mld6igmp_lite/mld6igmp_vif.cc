@@ -540,7 +540,6 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 	// Compute the checksum
 	//
 	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6
 	// Add the checksum for the IPv6 pseudo-header
 	if (proto_is_mld6()) 
 	{
@@ -550,7 +549,6 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 				IPPROTO_ICMPV6);
 		cksum = inet_checksum_add(cksum, cksum2);
 	}
-#endif // HAVE_IPV6
 	BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
 
 	XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
@@ -1007,7 +1005,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	// Checksum verification.
 	//
 	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6
 	// Add the checksum for the IPv6 pseudo-header
 	if (proto_is_mld6()) 
 	{
@@ -1017,7 +1014,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 				IPPROTO_ICMPV6);
 		cksum = inet_checksum_add(cksum, cksum2);
 	}
-#endif // HAVE_IPV6
 	if (cksum) 
 	{
 		error_msg = c_format("RX packet from %s to %s on vif %s: "

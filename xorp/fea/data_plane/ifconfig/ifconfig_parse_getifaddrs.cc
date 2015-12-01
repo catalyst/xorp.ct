@@ -484,7 +484,6 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 
 					break;
 				}
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				{
 					// The default values
@@ -545,7 +544,6 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 					// XXX: what about TENTATIVE, DUPLICATED, DETACHED, DEPRECATED?
 					break;
 				}
-#endif // HAVE_IPV6
 			default:
 				break;
 		}

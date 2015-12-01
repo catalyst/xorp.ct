@@ -198,7 +198,6 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	return true;
 }
 
-#ifdef HAVE_IPV6
 
 template <>
 	bool
@@ -295,7 +294,6 @@ PeerHandler::withdraw<IPv6>(const UpdatePacket *p,
 }
 
 
-#endif
 
 
 template <>
@@ -365,12 +363,10 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 
 	FPAList4Ref pa_ipv4_unicast = new FastPathAttributeList<IPv4>();
 	FPAList4Ref pa_ipv4_multicast = new FastPathAttributeList<IPv4>();
-#ifdef HAVE_IPV6
 	FPAList6Ref pa_ipv6_unicast	= new FastPathAttributeList<IPv6>();
 	FPAList6Ref pa_ipv6_multicast = new FastPathAttributeList<IPv6>();
 	bool ipv6_unicast = false;
 	bool ipv6_multicast = false;
-#endif
 	XLOG_ASSERT(!pa_ipv4_unicast->is_locked());
 	bool ipv4_unicast = false;
 	bool ipv4_multicast = false;
@@ -427,7 +423,6 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 						break;
 
 					case MP_REACH_NLRI:
-#ifdef HAVE_IPV6
 						// we've got a multiprotocol NLRI to split out
 						if (dynamic_cast<const MPReachNLRIAttribute<IPv6>*>(pa)) 
 						{
@@ -452,7 +447,6 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 									}
 							}
 						}
-#endif
 
 						if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(pa)) 
 						{
@@ -479,13 +473,11 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 						continue;
 
 					case MP_UNREACH_NLRI:
-#ifdef HAVE_IPV6
 						if (dynamic_cast<const MPUNReachNLRIAttribute<IPv6>*>(pa)) 
 						{
 							/* don't store this in the PA list */
 							continue;
 						}
-#endif
 
 						if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(pa)) 
 						{
@@ -505,10 +497,8 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 				if (NEXT_HOP != pa->type()) 
 				{
 					pa_ipv4_multicast->add_path_attribute(*pa);
-#ifdef HAVE_IPV6
 					pa_ipv6_unicast->add_path_attribute(*pa);
 					pa_ipv6_multicast->add_path_attribute(*pa);
-#endif
 				}
 			} /* end of if */
 		} /* end of for loop */
@@ -520,10 +510,8 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 		ASPathAttribute as_path_attr(*as_path);
 		pa_ipv4_unicast->add_path_attribute(as_path_attr);
 		pa_ipv4_multicast->add_path_attribute(as_path_attr);
-#ifdef HAVE_IPV6
 		pa_ipv6_unicast->add_path_attribute(as_path_attr);
 		pa_ipv6_multicast->add_path_attribute(as_path_attr);
-#endif
 	}
 
 
@@ -533,13 +521,11 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 	// IPv4 Multicast Withdraws
 	set_if_true(ipv4_multicast, withdraw<IPv4>(p, pa_list, SAFI_MULTICAST));
 
-#ifdef HAVE_IPV6
 	// IPv6 Unicast Withdraws
 	set_if_true(ipv6_unicast, withdraw<IPv6>(p, pa_list, SAFI_UNICAST));
 
 	// IPv6 Multicast Withdraws
 	set_if_true(ipv6_multicast, withdraw<IPv6>(p, pa_list, SAFI_MULTICAST));
-#endif
 
 	// IPv4 Unicast Route add.
 	XLOG_ASSERT(!pa_ipv4_unicast->is_locked());
@@ -550,7 +536,6 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 	set_if_true(ipv4_multicast, add<IPv4>(p, pa_list, 
 				pa_ipv4_multicast,SAFI_MULTICAST));
 
-#ifdef HAVE_IPV6
 	// IPv6 Unicast Route add.
 	set_if_true(ipv6_unicast, add<IPv6>(p, pa_list,
 				pa_ipv6_unicast, SAFI_UNICAST));
@@ -558,18 +543,15 @@ PeerHandler::process_update_packet(UpdatePacket *p)
 	// IPv6 Multicast Route add.
 	set_if_true(ipv6_multicast, add<IPv6>(p, pa_list,
 				pa_ipv6_multicast,SAFI_MULTICAST));
-#endif
 
 	if (ipv4_unicast)
 		_plumbing_unicast->push<IPv4>(this);
 	if (ipv4_multicast)
 		_plumbing_multicast->push<IPv4>(this);
-#ifdef HAVE_IPV6
 	if (ipv6_unicast)
 		_plumbing_unicast->push<IPv6>(this);
 	if (ipv6_multicast)
 		_plumbing_multicast->push<IPv6>(this);
-#endif
 	return 0;
 }
 
@@ -728,7 +710,6 @@ PeerHandler::push_packet()
 	if(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST))
 		wdr += _packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST)->wr_list().size();
 
-#ifdef HAVE_IPV6
 	// Account for IPv6
 	if(_packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST))
 		nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST)->nlri_list().size();
@@ -738,7 +719,6 @@ PeerHandler::push_packet()
 		nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST)->nlri_list().size();
 	if(_packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST))
 		wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST)->wr_list().size();
-#endif
 
 	//     XLOG_ASSERT( (wdr+nlri) > 0);
 	// If we get here and wdr+nlri equals zero then we were trying to
@@ -784,7 +764,6 @@ PeerHandler::get_prefix_count() const
 
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 template <>
 bool
@@ -894,4 +873,3 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt,
 	return 0;
 }
 
-#endif // ipv6

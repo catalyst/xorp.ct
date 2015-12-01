@@ -145,14 +145,7 @@ FirewallGetIpfw2::get_table4(list<FirewallEntry>& firewall_entry_list,
 FirewallGetIpfw2::get_table6(list<FirewallEntry>& firewall_entry_list,
 		string& error_msg)
 {
-#ifdef HAVE_IPV6
 	return (get_table(AF_INET6, firewall_entry_list, error_msg));
-#else
-	error_msg = c_format("Cannot get the IPv6 firewall table: "
-			"IPv6 is not supported");
-	return (XORP_ERROR);
-	UNUSED(firewall_entry_list);
-#endif
 }
 
 	int
@@ -396,12 +389,10 @@ FirewallGetIpfw2::get_table(int family,
 				if (have_ipv4)
 					accept_entry = true;
 				break;
-#ifdef HAVE_IPV6
 			case AF_INET6:
 				if (have_ipv6)
 					accept_entry = true;
 				break;
-#endif
 			default:
 				XLOG_FATAL("Unknown family %d", family);
 				break;

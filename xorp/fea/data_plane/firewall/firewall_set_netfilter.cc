@@ -193,7 +193,6 @@ FirewallSetNetfilter::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
-#ifdef HAVE_IPV6
     //
     // Open a raw IPv6 socket that NETFILTER uses for communication
     //
@@ -207,7 +206,6 @@ FirewallSetNetfilter::start(string& error_msg)
 	_s4 = -1;
 	return (XORP_ERROR);
     }
-#endif // HAVE_IPV6
 
     _is_running = true;
 

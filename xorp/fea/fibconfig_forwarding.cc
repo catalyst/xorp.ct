@@ -79,7 +79,6 @@ FibConfigForwarding::start(string& error_msg)
 		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
-#ifdef HAVE_IPV6
 	if (fea_data_plane_manager().have_ipv6()) 
 	{
 	    if (unicast_forwarding_enabled6(_orig_unicast_forwarding_enabled6,
@@ -94,7 +93,6 @@ FibConfigForwarding::start(string& error_msg)
 		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
-#endif // HAVE_IPV6
 
 	_first_start = false;
     }
@@ -136,7 +134,6 @@ FibConfigForwarding::stop(string& error_msg)
 	    }
 	}
     }
-#ifdef HAVE_IPV6
     if (fea_data_plane_manager().have_ipv6()) 
     {
 	if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown6()) 
@@ -161,7 +158,6 @@ FibConfigForwarding::stop(string& error_msg)
 	    }
 	}
     }
-#endif // HAVE_IPV6
 
     _is_running = false;
 

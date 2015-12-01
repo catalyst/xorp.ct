@@ -152,9 +152,7 @@ class RibIpcHandler : public PeerHandler
 	bool busy() 
 	{
 	    return (_v4_queue.busy()
-#ifdef HAVE_IPV6
 		    || _v6_queue.busy()
-#endif
 		   );
 	}
 
@@ -211,7 +209,6 @@ class RibIpcHandler : public PeerHandler
 
 
 	/** IPv6 stuff */
-#ifdef HAVE_IPV6
 	int add_route(const SubnetRoute<IPv6> &rt, 
 		FPAList6Ref& pa_list,   
 		bool ibgp, Safi safi);
@@ -252,7 +249,6 @@ class RibIpcHandler : public PeerHandler
 	bool withdraw_route(const IPv6Net&	nlri,
 		const bool& unicast,
 		const bool& multicast);
-#endif // ipv6
 
     private:
 	bool unregister_rib(string ribname);
@@ -261,9 +257,7 @@ class RibIpcHandler : public PeerHandler
 	XrlStdRouter& _xrl_router;
 
 	XrlQueue<IPv4> _v4_queue;
-#ifdef HAVE_IPV6
 	XrlQueue<IPv6> _v6_queue;
-#endif
 	const uint32_t _fake_unique_id;
 	IPv4 _fake_id;
 };

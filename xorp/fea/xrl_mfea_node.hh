@@ -213,7 +213,6 @@ class XrlMfeaNode : public MfeaNode,
 				// Output values, 
 				bool&	result);
 
-#ifdef HAVE_IPV6
 		/**
 		 *  Test if the underlying system supports IPv6 multicast routing.
 		 *  
@@ -223,7 +222,6 @@ class XrlMfeaNode : public MfeaNode,
 		XrlCmdError mfea_0_1_have_multicast_routing6(
 				// Output values, 
 				bool&	result);
-#endif
 
 		/**
 		 *  Register a protocol on an interface in the Multicast FEA. There could
@@ -247,7 +245,6 @@ class XrlMfeaNode : public MfeaNode,
 				const string&	vif_name,
 				const uint32_t&	ip_protocol);
 
-#ifdef HAVE_IPV6
 		XrlCmdError mfea_0_1_register_protocol6(
 				// Input values,
 				const string&	xrl_sender_name,
@@ -313,7 +310,6 @@ class XrlMfeaNode : public MfeaNode,
 				const IPv6&	source_address, 
 				const IPv6&	group_address);
 
-#endif //ipv6
 
 		/**
 		 *  Unregister a protocol on an interface in the Multicast FEA. There could

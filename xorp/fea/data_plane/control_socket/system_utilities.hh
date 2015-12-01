@@ -61,7 +61,6 @@
 // E.g., see the sa6_recoverscope() implementation inside file
 // "sys/netinet6/scope6.c" on KAME-derived IPv6 stack.
 //
-#ifdef HAVE_IPV6
 	inline IPv6
 system_adjust_ipv6_recv(const IPv6& ipv6)
 {
@@ -80,18 +79,13 @@ system_adjust_ipv6_recv(const IPv6& ipv6)
 
 	return ipv6;
 }
-#endif // HAVE_IPV6
 
 	inline IPvX
 system_adjust_ipvx_recv(const IPvX& ipvx)
 {
-#ifndef HAVE_IPV6
-	return ipvx;
-#else
 	if (! ipvx.is_ipv6())
 		return ipvx;
 	return (system_adjust_ipv6_recv(ipvx.get_ipv6()));
-#endif // HAVE_IPV6
 }
 
 //
@@ -99,7 +93,6 @@ system_adjust_ipvx_recv(const IPvX& ipvx)
 // the link-local scope_id ((for link-local unicast/multicast addresses or
 // interface-local multicast addresses only).
 //
-#ifdef HAVE_IPV6
 	inline void
 system_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 {
@@ -117,7 +110,6 @@ system_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 	UNUSED(sin6);
 	UNUSED(zone_id);
 }
-#endif // HAVE_IPV6
 
 //
 // XXX: In case of KAME sometimes the local interface index is encoded
@@ -126,7 +118,6 @@ system_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 // E.g., see /usr/src/sbin/route/route.c on FreeBSD-6.2 and search for
 // the __KAME__ marker.
 //
-#ifdef HAVE_IPV6
 	inline void
 system_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
 {
@@ -144,6 +135,5 @@ system_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
 	UNUSED(sin6);
 	UNUSED(iface_id);
 }
-#endif // HAVE_IPV6
 
 #endif // _FEA_DATA_PLANE_CONTROL_SOCKET_SYSTEM_UTILITIES_HH__

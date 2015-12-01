@@ -442,7 +442,6 @@ class XrlBgpTarget :  XrlBgpTargetBase
 				const bool&     unicast,
 				const bool&     multicast);
 
-#ifdef HAVE_IPV6
 
 		XrlCmdError bgp_0_3_set_nexthop6(
 				// Input values,
@@ -532,7 +531,6 @@ class XrlBgpTarget :  XrlBgpTargetBase
 				const bool&     unicast,
 				const bool&     multicast);
 
-#endif //ipv6
 
 #ifndef XORP_DISABLE_PROFILE
 		XrlCmdError profile_0_1_enable(

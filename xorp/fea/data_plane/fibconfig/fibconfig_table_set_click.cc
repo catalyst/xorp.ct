@@ -93,7 +93,6 @@ FibConfigTableSetClick::start(string& error_msg)
 		}
 	}
 
-#ifdef HAVE_IPV6
 	list<Fte6> fte_list6;
 	if (fibconfig().get_table6(fte_list6) == XORP_OK) 
 	{
@@ -104,7 +103,6 @@ FibConfigTableSetClick::start(string& error_msg)
 					"the forwarding table");
 		}
 	}
-#endif // HAVE_IPV6
 
 	return (XORP_OK);
 }

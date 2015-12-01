@@ -572,7 +572,6 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 			}
 		}
 
-#ifdef HAVE_IPV6
 		//
 		// Set the request for IPv6 addresses
 		//
@@ -629,7 +628,6 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 				return (XORP_ERROR);
 			}
 		}
-#endif // HAVE_IPV6
 	}
 
 	//
@@ -787,7 +785,6 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 			}
 		}
 
-#ifdef HAVE_IPV6
 		//
 		// Set the request for IPv6 addresses
 		//
@@ -844,7 +841,6 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 				return (XORP_ERROR);
 			}
 		}
-#endif // HAVE_IPV6
 	}
 
 	//

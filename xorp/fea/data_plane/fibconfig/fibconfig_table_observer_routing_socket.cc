@@ -114,7 +114,6 @@ FibConfigTableObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 		}
 	}
 
-#ifdef HAVE_IPV6
 	//
 	// Get the IPv6 routes
 	//
@@ -131,7 +130,6 @@ FibConfigTableObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 			fte_list.clear();
 		}
 	}
-#endif // HAVE_IPV6
 }
 
 	void

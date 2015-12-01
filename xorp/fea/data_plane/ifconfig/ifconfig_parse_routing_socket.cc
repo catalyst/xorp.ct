@@ -727,7 +727,6 @@ rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 		return;
 	}
 
-#ifdef HAVE_IPV6
 	if (rti_info[RTAX_IFA]->sa_family == AF_INET6) 
 	{
 		IPv6 lcl_addr(*rti_info[RTAX_IFA]);
@@ -775,7 +774,6 @@ rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 
 		return;
 	}
-#endif // HAVE_IPV6
 }
 
 #ifdef RTM_IFANNOUNCE

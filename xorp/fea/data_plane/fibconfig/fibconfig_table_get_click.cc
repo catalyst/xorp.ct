@@ -132,11 +132,6 @@ FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 	int
 FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 {
-#ifndef HAVE_IPV6
-	UNUSED(fte_list);
-
-	return (XORP_ERROR);
-#else
 
 	//
 	// XXX: Get the table from the FibConfigEntrySetClick instance.
@@ -168,7 +163,6 @@ FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 	}
 
 	return (XORP_OK);
-#endif // HAVE_IPV6
 }
 
 #endif // click

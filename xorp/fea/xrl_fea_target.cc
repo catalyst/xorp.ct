@@ -824,7 +824,6 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
 }
 
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_add_fib_client6(
 	// Input values,
@@ -844,7 +843,6 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
 {
     return _xrl_fib_client_manager.delete_fib_client6(client_target_name);
 }
-#endif
 
 
 #ifndef XORP_DISABLE_FIREWALL
@@ -1100,7 +1098,6 @@ XrlFeaTarget::fea_firewall_0_1_get_entry_list_next4(
     return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::fea_firewall_0_1_add_entry6(
 	// Input values,
@@ -1300,7 +1297,6 @@ XrlFeaTarget::fea_firewall_0_1_get_entry_list_next6(
 
     return XrlCmdError::OKAY();
 }
-#endif //ipv6
 #endif // firewall
 
 XrlCmdError
@@ -1733,7 +1729,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 	// Input values,
@@ -2313,7 +2308,6 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
     return XrlCmdError::OKAY();
 }
 
-#endif
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
@@ -3978,7 +3972,6 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 // ----------------------------------------------------------------------------
 // IPv6 Raw Socket related
 
@@ -4132,7 +4125,6 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
 
     return XrlCmdError::OKAY();
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // TCP/UDP I/O Socket Server Interface
@@ -4610,7 +4602,6 @@ XrlFeaTarget::socket4_0_1_set_socket_option_txt(
     return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::socket6_0_1_tcp_open(
 	// Input values,
@@ -5003,7 +4994,6 @@ XrlFeaTarget::socket6_0_1_set_socket_option(
 
     return XrlCmdError::OKAY();
 }
-#endif
 
 #ifndef XORP_DISABLE_PROFILE
 // ----------------------------------------------------------------------------

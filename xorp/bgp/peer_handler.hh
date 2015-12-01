@@ -207,7 +207,6 @@ class PeerHandler
 
 
 
-#ifdef HAVE_IPV6
 
 		virtual int add_route(const SubnetRoute<IPv6> &rt, 
 				FPAList6Ref& pa_list,
@@ -235,7 +234,6 @@ class PeerHandler
 		}
 
 
-#endif //ipv6
 
 	protected:
 		BGPPlumbing *_plumbing_unicast;

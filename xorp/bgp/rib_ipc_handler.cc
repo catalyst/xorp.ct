@@ -38,9 +38,7 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
     _ribname(""),
     _xrl_router(xrl_router),
     _v4_queue(*this, xrl_router, bgp),
-#ifdef HAVE_IPV6
     _v6_queue(*this, xrl_router, bgp),
-#endif
     _fake_unique_id(RIB_IPC_HANDLER_UNIQUE_ID),
     _fake_id(IPv4::ZERO())
 {
@@ -49,9 +47,7 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
 RibIpcHandler::~RibIpcHandler() 
 {
     if(_v4_queue.busy()
-#ifdef HAVE_IPV6
 	    || _v6_queue.busy()
-#endif
       )
 	XLOG_WARNING("Deleting RibIpcHandler with callbacks pending");
 
@@ -107,7 +103,6 @@ RibIpcHandler::register_ribname(const string& r)
 	    callback(this, 
 		&RibIpcHandler::rib_command_done,"add_table"));
 
-#ifdef HAVE_IPV6
     //create our tables
     //ebgp - v6
     //name - "ebgp"
@@ -127,7 +122,6 @@ RibIpcHandler::register_ribname(const string& r)
 	    _xrl_router.instance_name(), true, true,
 	    callback(this,
 		&RibIpcHandler::rib_command_done,"add_table"));
-#endif
 
     return true;
 }
@@ -161,7 +155,6 @@ RibIpcHandler::unregister_rib(string ribname)
 		&RibIpcHandler::rib_command_done,
 		"delete_table"));
 
-#ifdef HAVE_IPV6
     //delete our tables
     //ebgp - v6
     //name - "ebgp"
@@ -186,7 +179,6 @@ RibIpcHandler::unregister_rib(string ribname)
 	    callback(this,
 		&RibIpcHandler::rib_command_done,
 		"delete_table"));
-#endif
 
     return true;
 }
@@ -575,7 +567,6 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 template class XrlQueue<IPv4>;
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 
     int 
@@ -762,4 +753,3 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 
 template class XrlQueue<IPv6>;
 
-#endif //ipv6

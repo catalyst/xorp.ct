@@ -1510,7 +1510,5 @@ IoIpManager::instance_death(const string& instance_name)
 			dummy_error_msg);
 
 	erase_filters_by_receiver_name(AF_INET, instance_name);
-#ifdef HAVE_IPV6
 	erase_filters_by_receiver_name(AF_INET6, instance_name);
-#endif
 }
