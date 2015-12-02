@@ -43,19 +43,7 @@ class Att_Ptr_Cmp
 		{
 			/*	printf("Att_Ptr_Cmp [%s] < [%s] ?\n", a->attribute()->str().c_str(),
 				b->attribute()->str().c_str());*/
-#ifdef OLDWAY
-			if (*(a->attribute()) < *(b->attribute())) 
-			{
-				//	    printf("true\n");
-				return true;
-			} else 
-			{
-				//	    printf("false\n");
-				return false;
-			}
-#else
 			return a < b;
-#endif
 		}
 };
 
