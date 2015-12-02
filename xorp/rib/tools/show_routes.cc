@@ -440,12 +440,10 @@ ShowRoutesProcessor::step_200_request_redist()
 
 	} else 
 	{
-#ifdef HAVE_IPV6
 		sent = rib.send_redist_enable6(_opts.xrl_target.c_str(),
 				_rtr->instance_name(),
 				protocol, _opts.unicast, !_opts.unicast,
 				_network_prefix6, _cookie, cb);
-#endif
 	}
 
 	if (sent == false) 
@@ -488,12 +486,10 @@ ShowRoutesProcessor::step_1000_request_cease()
 
 	} else 
 	{
-#ifdef HAVE_IPV6
 		sent = rib.send_redist_disable6(_opts.xrl_target.c_str(),
 				_rtr->instance_name(),
 				proto, _opts.unicast, !_opts.unicast,
 				_cookie, cb);
-#endif
 	}
 
 	if (sent == false) 

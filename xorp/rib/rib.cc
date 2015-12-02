@@ -1458,8 +1458,6 @@ RIB<A>::find_vif(const string& vifname)
 
 template class RIB<IPv4>;
 
-#ifdef HAVE_IPV6
 
 template class RIB<IPv6>;
 
-#endif //ipv6

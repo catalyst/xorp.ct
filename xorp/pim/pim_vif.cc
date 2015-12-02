@@ -889,7 +889,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 						break;
 					}
 
-#ifdef HAVE_IPV6
 				case AF_INET6:
 					{
 						struct ip6_hdr ip6_header;
@@ -900,7 +899,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 						ip_tos = (ntohl(ip6_header.ip6_flow) >> 20) & 0xff;
 						break;
 					}
-#endif // HAVE_IPV6
 
 				default:
 					XLOG_UNREACHABLE();
@@ -1206,12 +1204,10 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 						if (BUFFER_DATA_SIZE(buffer) == PIM_REG_MINLEN)
 							is_truncated = true;
 						break;
-#ifdef HAVE_IPV6	
 					case AF_INET6:
 						if (BUFFER_DATA_SIZE(buffer) == PIM6_REG_MINLEN)
 							is_truncated = true;
 						break;
-#endif // HAVE_IPV6
 					default:
 						XLOG_UNREACHABLE();
 						return (XORP_ERROR);
@@ -1344,14 +1340,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 				ret_value = XORP_ERROR;
 				goto ret_label;
 			}
-#ifdef HAVE_IPV6
 			if (is_ipv6()) 
 			{
 				//
 				// TODO: Multicast address scope check for IPv6
 				//
 			}
-#endif  // HAVE_IPV6
 			if (dst != IPvX::PIM_ROUTERS(family())) 
 			{
 				XLOG_WARNING("RX %s from %s to %s on vif %s: "
@@ -1392,7 +1386,6 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 				ret_value = XORP_ERROR;
 				goto ret_label;
 			}
-#ifdef HAVE_IPV6
 			if (dst.is_unicast()) 
 			{
 				// TODO: address check (if any)
@@ -1417,7 +1410,6 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 					//
 				}
 			}
-#endif  // HAVE_IPV6
 			break;
 		default:
 			break;

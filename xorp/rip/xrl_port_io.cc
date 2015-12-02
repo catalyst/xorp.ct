@@ -190,82 +190,60 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
 #ifdef INSTANTIATE_IPV6
 
 // TODO:  Fix this up so none of this is compiled if IPv6 is disabled.
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/socket6_xif.hh"
-#endif
 
 template <>
 	bool
 XrlPortIO<IPv6>::request_open_bind_socket()
 {
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	return cl.send_udp_open_and_bind(
 			_ss.c_str(), _xr.instance_name(), address(),
 			RIP_AF_CONSTANTS<IPv6>::IP_PORT, vifname(), 1,
 			callback(this, &XrlPortIO<IPv6>::open_bind_socket_cb)
 			);
-#else
-	return false;
-#endif
 }
 
 template <>
 	bool
 XrlPortIO<IPv6>::request_ttl()
 {
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	return cl.send_set_socket_option(
 			_ss.c_str(), socket_id(), "multicast_ttl", RIP_NG_HOP_COUNT,
 			callback(this, &XrlPortIO<IPv6>::ttl_cb));
-#else
-	return false;
-#endif
 }
 
 template <>
 	bool
 XrlPortIO<IPv6>::request_no_loop()
 {
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	return cl.send_set_socket_option(
 			_ss.c_str(), socket_id(), "multicast_loopback", 0,
 			callback(this, &XrlPortIO<IPv6>::no_loop_cb));
-#else
-	return false;
-#endif
 }
 
 template <>
 	bool
 XrlPortIO<IPv6>::request_socket_join()
 {
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	return cl.send_udp_join_group(
 			_ss.c_str(), socket_id(),
 			RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), this->address(),
 			callback(this, &XrlPortIO<IPv6>::socket_join_cb));
-#else
-	return false;
-#endif
 }
 
 template <>
 	bool
 XrlPortIO<IPv6>::request_socket_leave()
 {
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	return cl.send_udp_leave_group(
 			_ss.c_str(), socket_id(),
 			RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), this->address(),
 			callback(this, &XrlPortIO<IPv6>::socket_leave_cb));
-#else
-	return false;
-#endif
 }
 
 template <>
@@ -280,7 +258,6 @@ XrlPortIO<IPv6>::send(const IPv6& 		dst_addr,
 		return false;
 	}
 
-#ifdef HAVE_IPV6
 	XrlSocket6V0p1Client cl(&_xr);
 	if (dst_addr.is_multicast()) 
 	{
@@ -310,11 +287,6 @@ XrlPortIO<IPv6>::send(const IPv6& 		dst_addr,
 			return true;
 		}
 	}
-#else
-	UNUSED(dst_addr);
-	UNUSED(dst_port);
-	UNUSED(rip_packet);
-#endif
 	return false;
 }
 

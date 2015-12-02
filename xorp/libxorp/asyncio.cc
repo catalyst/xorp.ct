@@ -546,7 +546,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 			    sizeof(sin));
 		    break;
 		}
-#ifdef HAVE_IPV6
 	    case AF_INET6:
 		{
 		    struct sockaddr_in6 sin6;
@@ -561,7 +560,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 			    sizeof(sin6));
 		    break;
 		}
-#endif // HAVE_IPV6
 	    default:
 		XLOG_ERROR("Address family %d is not supported", dst_addr.af());
 		done = _iov[0].iov_len;	// XXX: Pretend that the data was sent

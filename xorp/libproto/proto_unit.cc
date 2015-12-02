@@ -98,10 +98,8 @@ xorp_module_name(int family, xorp_module_id module_id)
     if (family == AF_INET)
 	return (_xorp_module_name[module_id][0]);
 
-#ifdef HAVE_IPV6
     if (family == AF_INET6)
 	return (_xorp_module_name[module_id][1]);
-#endif // HAVE_IPV6
 
     XLOG_ERROR("Invalid address family = %d", family);
     return (NULL);

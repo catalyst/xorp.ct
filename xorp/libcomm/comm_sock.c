@@ -183,7 +183,6 @@ int comm_sock_bind4(int sock, const struct in_addr *my_addr,
 int comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 	unsigned int my_ifindex, unsigned short my_port)
 {
-#ifdef HAVE_IPV6
     int family;
     struct sockaddr_in6 sin6_addr;
 
@@ -231,10 +230,6 @@ int comm_sock_bind6(int sock, const struct in6_addr *my_addr,
     }
 
     return XORP_OK;
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_ifindex, my_port);
-    return XORP_ERROR;
-#endif /* ! HAVE_IPV6 */
 }
 
 int comm_sock_bind(int sock, const struct sockaddr *sin)
@@ -247,7 +242,6 @@ int comm_sock_bind(int sock, const struct sockaddr *sin)
 		return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port);
 	    }
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
@@ -255,7 +249,6 @@ int comm_sock_bind(int sock, const struct sockaddr *sin)
 			sin6->sin6_port);
 	    }
 	    break;
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error comm_sock_bind invalid family = %d", sin->sa_family);
 	    return (XORP_ERROR);
@@ -313,7 +306,6 @@ int comm_sock_join4(int sock, const struct in_addr *mcast_addr,
 int comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 	unsigned int my_ifindex)
 {
-#ifdef HAVE_IPV6
     int family;
     struct ipv6_mreq imr6;	/* the multicast join address */
 
@@ -342,10 +334,6 @@ int comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 
     return (XORP_OK);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_sock_join6", sock, mcast_addr, my_ifindex);
-    return (XORP_ERROR);
-#endif /* ! HAVE_IPV6 */
 }
 
 int comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
@@ -395,7 +383,6 @@ int comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
 int comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 	unsigned int my_ifindex)
 {
-#ifdef HAVE_IPV6
     int family;
     struct ipv6_mreq imr6;	/* the multicast leave address */
 
@@ -424,10 +411,6 @@ int comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 
     return (XORP_OK);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_sock_leave6", sock, mcast_addr, my_ifindex);
-    return (XORP_ERROR);
-#endif /* ! HAVE_IPV6 */
 }
 
 int comm_sock_connect4(int sock, const struct in_addr *remote_addr,
@@ -488,7 +471,6 @@ int comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 	unsigned short remote_port, int is_blocking,
 	int *in_progress)
 {
-#ifdef HAVE_IPV6
     int family;
     struct sockaddr_in6 sin6_addr;
 
@@ -544,14 +526,6 @@ int comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 
     return (XORP_OK);
 
-#else /* ! HAVE_IPV6 */
-    if (in_progress != NULL)
-	*in_progress = 0;
-
-    comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port,
-	    is_blocking);
-    return (XORP_ERROR);
-#endif /* ! HAVE_IPV6 */
 }
 
 int comm_sock_connect(int sock, const struct sockaddr *sin, int is_blocking,
@@ -566,7 +540,6 @@ int comm_sock_connect(int sock, const struct sockaddr *sin, int is_blocking,
 			is_blocking, in_progress);
 	    }
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
@@ -574,7 +547,6 @@ int comm_sock_connect(int sock, const struct sockaddr *sin, int is_blocking,
 			is_blocking, in_progress);
 	    }
 	    break;
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error comm_sock_connect invalid family = %d",
 		    sin->sa_family);
@@ -828,7 +800,6 @@ int comm_set_loopback(int sock, int val)
 		}
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		unsigned int loop6 = val;
@@ -843,7 +814,6 @@ int comm_set_loopback(int sock, int val)
 		}
 		break;
 	    }
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error %s setsockopt IP_MULTICAST_LOOP/IPV6_MULTICAST_LOOP "
 		    "on socket %d: invalid family = %d",
@@ -969,7 +939,6 @@ int comm_set_unicast_ttl(int sock, int val)
 		}
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		int ip_ttl = val;
@@ -984,7 +953,6 @@ int comm_set_unicast_ttl(int sock, int val)
 		}
 		break;
 	    }
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error %s setsockopt IP_TTL/IPV6_UNICAST_HOPS "
 		    "on socket %d: invalid family = %d",
@@ -1020,7 +988,6 @@ int comm_set_multicast_ttl(int sock, int val)
 		}
 		break;
 	    }
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		int ip_multicast_ttl = val;
@@ -1037,7 +1004,6 @@ int comm_set_multicast_ttl(int sock, int val)
 		}
 		break;
 	    }
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error %s setsockopt IP_MULTICAST_TTL/IPV6_MULTICAST_HOPS "
 		    "on socket %d: invalid family = %d",
@@ -1079,7 +1045,6 @@ int comm_set_iface4(int sock, const struct in_addr *in_addr)
 
 int comm_set_iface6(int sock, unsigned int my_ifindex)
 {
-#ifdef HAVE_IPV6
     int family = comm_sock_get_family(sock);
 
     if (family != AF_INET6) 
@@ -1100,10 +1065,6 @@ int comm_set_iface6(int sock, unsigned int my_ifindex)
 
     return (XORP_OK);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_set_iface6", sock, my_ifindex);
-    return (XORP_ERROR);
-#endif /* ! HAVE_IPV6 */
 }
 
 int comm_set_onesbcast(int sock, int enabled)

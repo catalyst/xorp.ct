@@ -310,7 +310,6 @@ class RegisterServer
 				const IPv4Net& net,
 				bool multicast);
 
-#ifdef HAVE_IPV6
 		/** 
 		 * send_route_changed is called to communicate to another XRL
 		 * module that routing information in which it had registered an
@@ -352,7 +351,6 @@ class RegisterServer
 		virtual void send_invalidate(const string& module_name,
 				const IPv6Net& net,
 				bool multicast);
-#endif
 
 		/**
 		 * @see NotifyQueue::flush

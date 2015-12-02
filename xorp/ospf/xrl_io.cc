@@ -40,9 +40,7 @@
 
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
-#endif
 #include "xrl/interfaces/rib_xif.hh"
 
 #include "ospf.hh"
@@ -584,7 +582,6 @@ XrlIO<A>::register_rib()
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
 
-#ifdef HAVE_IPV6
     if(!rib.send_add_igp_table6(_ribname.c_str(),
 		"ospf", _xrl_router.class_name(),
 		_xrl_router.instance_name(), true, true,
@@ -595,7 +592,6 @@ XrlIO<A>::register_rib()
     {
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
-#endif
 
 }
 
@@ -616,7 +612,6 @@ XrlIO<A>::unregister_rib()
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
 
-#ifdef HAVE_IPV6
     if(!rib.send_delete_igp_table6(_ribname.c_str(),
 		"ospf", _xrl_router.class_name(),
 		_xrl_router.instance_name(), true, true,
@@ -627,7 +622,6 @@ XrlIO<A>::unregister_rib()
     {
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
-#endif
 
 }
 
@@ -1130,7 +1124,6 @@ template class XrlIO<IPv4>;
 
 /** IPv6 Stuff */
 
-#ifdef HAVE_IPV6
 
 template <>
     bool
@@ -1602,4 +1595,3 @@ XrlIO<IPv6>::updates_made()
 template class XrlQueue<IPv6>;
 template class XrlIO<IPv6>;
 
-#endif // ipv6

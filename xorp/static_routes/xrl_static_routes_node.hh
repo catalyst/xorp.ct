@@ -507,7 +507,6 @@ class XrlStaticRoutesNode : public StaticRoutesNode,
 	}
 
 
-#ifdef HAVE_IPV6
 	XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
 		// Input values,
 		const string&,
@@ -541,7 +540,6 @@ class XrlStaticRoutesNode : public StaticRoutesNode,
 	{
 	    return XrlCmdError::OKAY();
 	}
-#endif
 
 	/**
 	 * Configure a policy filter.
@@ -606,14 +604,10 @@ class XrlStaticRoutesNode : public StaticRoutesNode,
 	void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
 	void send_rib_add_tables();
 	void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
-#ifdef HAVE_IPV6
 	void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
-#endif
 	void send_rib_delete_tables();
 	void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
-#ifdef HAVE_IPV6
 	void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
-#endif
 
 	/**
 	 * Inform the RIB about a route change.
@@ -677,9 +671,7 @@ class XrlStaticRoutesNode : public StaticRoutesNode,
 	XorpTimer		_mfea_register_startup_timer;
 	XorpTimer		_mfea_register_shutdown_timer;
 
-#ifdef HAVE_IPV6
 	bool		_is_rib_igp_table6_registered;
-#endif
 	XorpTimer		_rib_register_startup_timer;
 	XorpTimer		_rib_register_shutdown_timer;
 	XorpTimer		_rib_igp_table_registration_timer;

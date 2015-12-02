@@ -80,7 +80,6 @@
  * and ip6_mroute.h headers results in undefined behavior.
  * Therefore we implement a preprocessor workaround here.
  */
-#ifdef HAVE_IPV6
 
 /* Save GET_TIME. */
 #  ifdef GET_TIME
@@ -98,6 +97,5 @@
 #    undef _SAVE_GET_TIME
 #  endif
 
-#endif /* HAVE_IPV6 */
 
 #endif /* __MRT_INCLUDE_IP_MROUTE_H__ */

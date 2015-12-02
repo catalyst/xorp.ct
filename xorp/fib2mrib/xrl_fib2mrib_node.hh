@@ -281,7 +281,6 @@ class XrlFib2mribNode : public Fib2mribNode,
 		XrlCmdError policy_backend_0_1_push_routes();
 
 
-#ifdef HAVE_IPV6
 		XrlCmdError fea_fib_client_0_1_add_route6(
 				// Input values,
 				const IPv6Net&	network,
@@ -315,7 +314,6 @@ class XrlFib2mribNode : public Fib2mribNode,
 				// Input values,
 				const IPv6Net&	network);
 
-#endif
 
 	private:
 		const ServiceBase* ifmgr_mirror_service_base() const 
@@ -346,14 +344,12 @@ class XrlFib2mribNode : public Fib2mribNode,
 		void send_fea_add_fib_client();
 		void fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
 				const bool* result);
-#ifdef HAVE_IPV6
 		void fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
 				const bool* result);
 		void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
 		void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
 		void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
 		void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
-#endif
 
 		void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
 		void send_fea_delete_fib_client();
@@ -408,12 +404,10 @@ class XrlFib2mribNode : public Fib2mribNode,
 		XorpTimer		_fea_register_startup_timer;
 		XorpTimer		_fea_register_shutdown_timer;
 
-#ifdef HAVE_IPV6
 		bool		_is_fea_have_ipv6_tested;
 		bool		_fea_have_ipv6;
 		bool		_is_fea_fib_client6_registered;
 		bool		_is_rib_igp_table6_registered;
-#endif
 
 		bool		_is_fea_have_ipv4_tested;
 		bool		_fea_have_ipv4;

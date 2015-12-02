@@ -196,13 +196,7 @@
 										 * a specific address family
 										 */
 
-#ifndef HAVE_IPV6
-#define ADDRF2IP_ADDRF(addr_family)					\
-	(((addr_family) == ADDRF_IPv4) ? (AF_INET) : (-1))
-#define IP_ADDRF2ADDRF(ip_family)					\
-	(((ip_family) == AF_INET) ? (ADDRF_IPv4) : (-1))
 
-#else
 #define ADDRF2IP_ADDRF(addr_family)					\
 	(((addr_family) == ADDRF_IPv4) ? (AF_INET) 		\
 	 : ((addr_family) == ADDRF_IPv6) ?		\
@@ -214,7 +208,6 @@
 	 (ADDRF_IPv6)				\
 	 : (-1))
 
-#endif /* HAVE_IPV6 */
 
 #define ESADDR_RPT_BIT		0x1
 #define ESADDR_WC_BIT		0x2
@@ -223,13 +216,6 @@
 #define EGADDR_Z_BIT		0x1
 
 /* PIM message max. payload (IP header and Router Alert IP option excluded) */
-#ifndef HAVE_IPV6
-#define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
-		(IP_MAXPACKET			\
-		 - sizeof(struct ip)	\
-		 - 4*sizeof(uint8_t))	\
-		: (0))
-#else
 #ifndef IPV6_MAXPACKET
 #define IPV6_MAXPACKET 65535	/* ip6 max packet size without Jumbo payload */
 #endif
@@ -242,7 +228,6 @@
 		(IPV6_MAXPACKET		\
 		 - 4*sizeof(uint8_t))	\
 		: (0))
-#endif /* HAVE_IPV6 */
 
 /*
  * Macros to get PIM-specific encoded addresses from a datastream.

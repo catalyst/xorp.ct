@@ -34,9 +34,7 @@
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
-#endif
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
@@ -252,7 +250,6 @@ class XrlPimNode : public PimNode,
 				const bool&	ip_router_alert,
 				const bool&	ip_internet_control,
 				const vector<uint8_t>&	payload);
-#ifdef HAVE_IPV6
 		/**
 		 *  Receive an IPv6 packet from a raw socket.
 		 *
@@ -298,7 +295,6 @@ class XrlPimNode : public PimNode,
 				const XrlAtomList&	ext_headers_type,
 				const XrlAtomList&	ext_headers_payload,
 				const vector<uint8_t>&	payload);
-#endif
 		/**
 		 *  
 		 *  Receive a kernel signal message from the MFEA.
@@ -327,7 +323,6 @@ class XrlPimNode : public PimNode,
 				const IPv4&	source_address, 
 				const IPv4&	dest_address, 
 				const vector<uint8_t>&	protocol_message);
-#ifdef HAVE_IPV6
 		XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
 				// Input values, 
 				const string&	xrl_sender_name, 
@@ -337,7 +332,6 @@ class XrlPimNode : public PimNode,
 				const IPv6&	source_address, 
 				const IPv6&	dest_address, 
 				const vector<uint8_t>&	protocol_message);
-#endif
 		/**
 		 *  A signal that a dataflow-related pre-condition is true.
 		 *  
@@ -396,7 +390,6 @@ class XrlPimNode : public PimNode,
 				const bool&	is_threshold_in_bytes, 
 				const bool&	is_geq_upcall, 
 				const bool&	is_leq_upcall);
-#ifdef HAVE_IPV6
 		XrlCmdError mfea_client_0_1_recv_dataflow_signal6(
 				// Input values, 
 				const string&	xrl_sender_name, 
@@ -414,7 +407,6 @@ class XrlPimNode : public PimNode,
 				const bool&	is_threshold_in_bytes, 
 				const bool&	is_geq_upcall, 
 				const bool&	is_leq_upcall);
-#endif
 		/**
 		 *  Start transaction.
 		 *
@@ -502,7 +494,6 @@ class XrlPimNode : public PimNode,
 				// Input values,
 				const uint32_t&	tid,
 				const string&	cookie);
-#ifdef HAVE_IPV6
 		/**
 		 *  Start transaction.
 		 *
@@ -511,7 +502,6 @@ class XrlPimNode : public PimNode,
 		XrlCmdError redist_transaction6_0_1_start_transaction(
 				// Output values,
 				uint32_t&	tid);
-#endif 
 		/**
 		 *  Commit transaction.
 		 *
@@ -2569,9 +2559,7 @@ class XrlPimNode : public PimNode,
 
 		TransactionManager		_mrib_transaction_manager;
 		XrlRawPacket4V0p1Client	_xrl_fea_client4;
-#ifdef HAVE_IPV6
 		XrlRawPacket6V0p1Client	_xrl_fea_client6;
-#endif
 		XrlMfeaV0p1Client		_xrl_mfea_client;
 		XrlRibV0p1Client		_xrl_rib_client;
 		XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;

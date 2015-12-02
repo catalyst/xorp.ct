@@ -142,7 +142,6 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 				break;
 			}
 
-#ifdef HAVE_IPV6	
 		case AF_INET6: 
 			{
 				uint8_t ip_header6_buffer[IpHeader6::SIZE];
@@ -187,7 +186,6 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 				}
 				break;
 			}
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -528,7 +526,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 				break;
 			}
 
-#ifdef HAVE_IPV6
 		case AF_INET6:
 			{
 				mtu = 0xffff	      // IPv6 max payload size (jumbo payload excluded)
@@ -536,7 +533,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 					- sizeof(uint32_t);
 				break;
 			}
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();
@@ -597,7 +593,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 		}
 	}
 
-#ifdef HAVE_IPV6
 	if (family() == AF_INET6) 
 	{
 		// In IPv6 routers do not fragment packets that they forward.
@@ -605,7 +600,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 
 		// TODO: XXX: PAVPAVPAV: send back ICMP "Packet Too Big"
 	}
-#endif // HAVE_IPV6
 
 	return (XORP_OK);
 
@@ -658,7 +652,6 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 				break;
 			}
 
-#ifdef HAVE_IPV6    
 		case AF_INET6: 
 			{
 				//
@@ -698,7 +691,6 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 				BUFFER_PUT_DATA(cp, buffer, sizeof(pim_header));
 				break;
 			}
-#endif // HAVE_IPV6
 
 		default:
 			XLOG_UNREACHABLE();

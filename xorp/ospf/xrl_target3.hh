@@ -23,7 +23,6 @@
 #ifndef __OSPF_XRL_TARGET3_HH__
 #define __OSPF_XRL_TARGET3_HH__
 
-#ifdef HAVE_IPV6
 #include "xrl/targets/ospfv3_base.hh"
 
 #include "ospf.hh"
@@ -637,5 +636,4 @@ class XrlOspfV3Target : XrlOspfv3TargetBase
 };
 
 
-#endif // ipv6
 #endif // target3

@@ -96,11 +96,7 @@ comm_ipv4_present(void)
     int
 comm_ipv6_present(void)
 {
-#ifdef HAVE_IPV6
     return XORP_OK;
-#else
-    return XORP_ERROR;
-#endif /* HAVE_IPV6 */
 }
 
     int
@@ -255,7 +251,6 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
 comm_bind_tcp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 	unsigned short my_port, int is_blocking)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -275,11 +270,6 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_bind_tcp6", my_addr, my_ifindex, my_port,
-	    is_blocking);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -294,7 +284,6 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 		return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
 	    }
 	    break;
-#ifdef HAVE_IPV6
 	case AF_INET6:
 	    {
 		const struct sockaddr_in6 *sin =
@@ -303,7 +292,6 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 			sin->sin6_port, is_blocking);
 	    }
 	    break;
-#endif /* HAVE_IPV6 */
 	default:
 	    XLOG_FATAL("Error comm_bind_tcp invalid family = %d", sock->sa_family);
 	    break;
@@ -355,7 +343,6 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
 comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 	unsigned short my_port, int is_blocking)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -370,11 +357,6 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_ifindex, my_port,
-	    is_blocking);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -425,7 +407,6 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 	unsigned short my_port,
 	int reuse_flag, int is_blocking)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -462,11 +443,6 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_bind_join_udp6", mcast_addr, my_ifindex,
-	    my_port, reuse_flag, is_blocking);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -506,7 +482,6 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 	unsigned short remote_port, int is_blocking,
 	int *in_progress)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     if (in_progress != NULL)
@@ -533,14 +508,6 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    if (in_progress != NULL)
-	*in_progress = 0;
-
-    comm_sock_no_ipv6("comm_connect_tcp6", remote_addr, remote_port,
-	    is_blocking, in_progress);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -580,7 +547,6 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 	unsigned short remote_port, int is_blocking,
 	int *in_progress)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     if (in_progress != NULL)
@@ -607,14 +573,6 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    if (in_progress != NULL)
-	*in_progress = 0;
-
-    comm_sock_no_ipv6("comm_connect_udp6", remote_addr, remote_port,
-	    is_blocking, in_progress);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -671,7 +629,6 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
 	int is_blocking,
 	int *in_progress)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     if (in_progress != NULL)
@@ -708,15 +665,6 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    if (in_progress != NULL)
-	*in_progress = 0;
-
-    comm_sock_no_ipv6("comm_bind_connect_tcp6", local_addr, my_ifindex,
-	    local_port, remote_addr, remote_port, is_blocking,
-	    in_progress);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
     int
@@ -768,7 +716,6 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 	int is_blocking,
 	int *in_progress)
 {
-#ifdef HAVE_IPV6
     int sock;
 
     if (in_progress != NULL)
@@ -800,15 +747,6 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 
     return (sock);
 
-#else /* ! HAVE_IPV6 */
-    if (in_progress != NULL)
-	*in_progress = 0;
-
-    comm_sock_no_ipv6("comm_bind_connect_udp6", local_addr, my_ifindex,
-	    local_port, remote_addr, remote_port, is_blocking,
-	    in_progress);
-    return (-1);
-#endif /* ! HAVE_IPV6 */
 }
 
 

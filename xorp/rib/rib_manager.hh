@@ -377,7 +377,6 @@ class RibManager : public ProtoState
 	 */
 	XrlRibTarget& xrl_rib_target() { return _xrl_rib_target; }
 
-#ifdef HAVE_IPV6
 
 	/**
 	 * add_vif_address is called to inform all the RIBs that a new IPv6
@@ -483,7 +482,6 @@ class RibManager : public ProtoState
 	const RIB<IPv6>& mrib6() const { return _mrib6; }
 
 
-#endif //ipv6
 
     private:
 
@@ -526,10 +524,8 @@ class RibManager : public ProtoState
 
 	RIB<IPv4>		_urib4;			// The IPv4 unicast RIB
 	RIB<IPv4>		_mrib4;			// The IPv4 multicast RIB
-#ifdef HAVE_IPV6
 	RIB<IPv6>		_urib6;			// The IPv6 unicast RIB
 	RIB<IPv6>		_mrib6;			// The IPv6 multicast RIB
-#endif
 	VifManager		_vif_manager;		// The VIF manager
 	XrlRibTarget	_xrl_rib_target;
 	set<string>		_targets_of_interest;	// Monitored XRL targets

@@ -338,11 +338,9 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 #else
 	switch (ifreq.ifr_addr.sa_family) 
 	{
-#ifdef HAVE_IPV6
 	    case AF_INET6:
 		len = sizeof(struct sockaddr_in6);
 		break;
-#endif // HAVE_IPV6
 	    case AF_INET:
 	    default:
 		len = sizeof(struct sockaddr);

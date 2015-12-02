@@ -63,9 +63,7 @@ XrlPimNode::XrlPimNode(int		family,
 	_ifmgr( mfea_target.c_str(), xrl_router().finder_address(),
 			xrl_router().finder_port()),
 	_xrl_fea_client4(&xrl_router()),
-#ifdef HAVE_IPV6
 	_xrl_fea_client6(&xrl_router()),
-#endif
 	_xrl_mfea_client(&xrl_router()),
 	_xrl_rib_client(&xrl_router()),
 	_xrl_mld6igmp_client(&xrl_router()),
@@ -820,7 +818,6 @@ XrlPimNode::send_rib_redist_transaction_enable()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_rib_client.send_redist_transaction_enable6(
@@ -835,7 +832,6 @@ XrlPimNode::send_rib_redist_transaction_enable()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -944,7 +940,6 @@ XrlPimNode::send_rib_redist_transaction_disable()
 				success = false;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			bool success6;
@@ -959,7 +954,6 @@ XrlPimNode::send_rib_redist_transaction_disable()
 			if (success6 != true)
 				success = false;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1106,7 +1100,6 @@ XrlPimNode::send_register_unregister_receiver()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_fea_client6.send_register_receiver(
@@ -1120,7 +1113,6 @@ XrlPimNode::send_register_unregister_receiver()
 			if (success)
 				return;
 		}
-#endif
 	} else 
 	{
 		// Unregister a receiver with the FEA
@@ -1137,7 +1129,6 @@ XrlPimNode::send_register_unregister_receiver()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_fea_client6.send_unregister_receiver(
@@ -1150,7 +1141,6 @@ XrlPimNode::send_register_unregister_receiver()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1313,7 +1303,6 @@ XrlPimNode::send_register_unregister_protocol()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_mfea_client.send_register_protocol6(
@@ -1326,8 +1315,8 @@ XrlPimNode::send_register_unregister_protocol()
 			if (success)
 				return;
 		}
-#endif
-	} else 
+	}
+	else 
 	{
 		// Unregister a protocol with the MFEA
 		if (PimNode::is_ipv4()) 
@@ -1342,7 +1331,6 @@ XrlPimNode::send_register_unregister_protocol()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_mfea_client.send_unregister_protocol6(
@@ -1354,7 +1342,6 @@ XrlPimNode::send_register_unregister_protocol()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1518,7 +1505,6 @@ XrlPimNode::send_join_leave_multicast_group()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_fea_client6.send_join_multicast_group(
@@ -1532,8 +1518,8 @@ XrlPimNode::send_join_leave_multicast_group()
 			if (success)
 				return;
 		}
-#endif
-	} else 
+	}
+	else 
 	{
 		// Leave a multicast group with the FEA
 		if (PimNode::is_ipv4()) 
@@ -1550,7 +1536,6 @@ XrlPimNode::send_join_leave_multicast_group()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_fea_client6.send_leave_multicast_group(
@@ -1564,7 +1549,6 @@ XrlPimNode::send_join_leave_multicast_group()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1759,7 +1743,6 @@ XrlPimNode::send_add_delete_mfc()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_mfea_client.send_add_mfc6(
@@ -1777,7 +1760,6 @@ XrlPimNode::send_add_delete_mfc()
 			if (success)
 				return;
 		}
-#endif
 	} else 
 	{
 		// Delete a MFC with the MFEA
@@ -1793,7 +1775,6 @@ XrlPimNode::send_add_delete_mfc()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_mfea_client.send_delete_mfc6(
@@ -1805,7 +1786,6 @@ XrlPimNode::send_add_delete_mfc()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1994,7 +1974,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			success = _xrl_mfea_client.send_delete_all_dataflow_monitor6(
@@ -2006,7 +1985,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 			if (success)
 				return;
 		}
-#endif
 	} else 
 	{
 		if (entry->is_add()) 
@@ -2032,7 +2010,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 					return;
 			}
 
-#ifdef HAVE_IPV6
 			if (PimNode::is_ipv6()) 
 			{
 				success = _xrl_mfea_client.send_add_dataflow_monitor6(
@@ -2052,7 +2029,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 				if (success)
 					return;
 			}
-#endif
 		} else 
 		{
 			// Delete a dataflow monitor with the MFEA
@@ -2076,7 +2052,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 					return;
 			}
 
-#ifdef HAVE_IPV6
 			if (PimNode::is_ipv6()) 
 			{
 				success = _xrl_mfea_client.send_delete_dataflow_monitor6(
@@ -2096,7 +2071,6 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 				if (success)
 					return;
 			}
-#endif
 		}
 	}
 
@@ -2560,7 +2534,6 @@ XrlPimNode::send_protocol_message()
 			break;
 		}
 
-#ifdef HAVE_IPV6
 		if (PimNode::is_ipv6()) 
 		{
 			// XXX: no Extention headers
@@ -2586,7 +2559,6 @@ XrlPimNode::send_protocol_message()
 			break;
 		}
 		XLOG_UNREACHABLE();
-#endif
 		break;
 	} while (false);
 
@@ -3096,7 +3068,6 @@ XrlPimNode::raw_packet4_client_0_1_recv(
 	//
 	return XrlCmdError::OKAY();
 }
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::raw_packet6_client_0_1_recv(
 		// Input values,
@@ -3150,7 +3121,6 @@ XrlPimNode::raw_packet6_client_0_1_recv(
 	//
 	return XrlCmdError::OKAY();
 }
-#endif
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
 		// Input values, 
@@ -3192,7 +3162,6 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
 	//
 	return XrlCmdError::OKAY();
 }
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
 		// Input values, 
@@ -3234,7 +3203,6 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
 	//
 	return XrlCmdError::OKAY();
 }
-#endif
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_dataflow_signal4(
 		// Input values, 
@@ -3288,7 +3256,6 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal4(
 	// XXX: we don't care if the signal delivery failed
 	return XrlCmdError::OKAY();
 }
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
 		// Input values, 
@@ -3342,7 +3309,6 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
 	// XXX: we don't care if the signal delivery failed
 	return XrlCmdError::OKAY();
 }
-#endif
 XrlCmdError
 XrlPimNode::redist_transaction4_0_1_start_transaction(
 		// Output values, 
@@ -3561,7 +3527,6 @@ XrlPimNode::redist_transaction4_0_1_delete_all_routes(
 	//
 	return XrlCmdError::OKAY();
 }
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::redist_transaction6_0_1_start_transaction(
 		// Output values, 
@@ -3779,7 +3744,6 @@ XrlPimNode::redist_transaction6_0_1_delete_all_routes(
 	//
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::mld6igmp_client_0_1_add_membership4(
@@ -4226,7 +4190,6 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name6(
 		// Input values, 
@@ -4310,7 +4273,6 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr4(
@@ -4397,7 +4359,6 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr6(
 		// Input values, 
@@ -4505,7 +4466,6 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_bsr4(
@@ -4637,7 +4597,6 @@ XrlPimNode::pim_0_1_add_config_cand_rp4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_rp6(
 		// Input values, 
@@ -4721,7 +4680,6 @@ XrlPimNode::pim_0_1_delete_config_cand_rp6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_rp4(
@@ -4803,7 +4761,6 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_static_rp6(
 		// Input values, 
@@ -4905,7 +4862,6 @@ XrlPimNode::pim_0_1_delete_config_all_static_group_prefixes_rp6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_static_rp4(
@@ -5629,7 +5585,6 @@ XrlPimNode::pim_0_1_add_alternative_subnet4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_alternative_subnet6(
 		// Input values,
@@ -5684,7 +5639,6 @@ XrlPimNode::pim_0_1_delete_alternative_subnet6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_delete_alternative_subnet4(
@@ -5856,7 +5810,6 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_test_jp_entry6(
 		// Input values, 
@@ -6038,7 +5991,6 @@ XrlPimNode::pim_0_1_send_test_assert6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_send_test_jp_entry4(
@@ -6176,7 +6128,6 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_test_bsr_zone6(
 		// Input values, 
@@ -6285,7 +6236,6 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
@@ -6390,7 +6340,6 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_add_test_bsr_rp6(
 		// Input values, 
@@ -6520,7 +6469,6 @@ XrlPimNode::pim_0_1_pimstat_interface6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 XrlCmdError
 XrlPimNode::pim_0_1_send_test_bootstrap(
@@ -6860,7 +6808,6 @@ XrlPimNode::pim_0_1_pimstat_rps4(
 	return XrlCmdError::OKAY();
 }
 
-#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::pim_0_1_pimstat_rps6(
 		// Output values, 
@@ -6943,7 +6890,6 @@ XrlPimNode::pim_0_1_pimstat_rps6(
 
 	return XrlCmdError::OKAY();
 }
-#endif
 
 	XrlCmdError
 XrlPimNode::pim_0_1_clear_pim_statistics()

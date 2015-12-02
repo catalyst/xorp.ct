@@ -55,12 +55,10 @@ XrlFib2mribNode::XrlFib2mribNode( const string&	class_name,
 	_is_fea_registered(false),
 	_is_fea_registering(false),
 	_is_fea_deregistering(false),
-#ifdef HAVE_IPV6
 	_is_fea_have_ipv6_tested(false),
 	_fea_have_ipv6(false),
 	_is_fea_fib_client6_registered(false),
 	_is_rib_igp_table6_registered(false),
-#endif
 	_is_fea_have_ipv4_tested(false),
 	_fea_have_ipv4(false),
 	_is_fea_fib_client4_registered(false),
@@ -146,10 +144,8 @@ XrlFib2mribNode::fea_register_startup()
 
 		if (! _is_fea_fib_client4_registered)
 			Fib2mribNode::incr_startup_requests_n();
-#ifdef HAVE_IPV6
 		if (! _is_fea_fib_client6_registered)
 			Fib2mribNode::incr_startup_requests_n();
-#endif
 
 		_is_fea_registering = true;
 	}
@@ -263,10 +259,8 @@ XrlFib2mribNode::fea_register_shutdown()
 
 		if (_is_fea_fib_client4_registered)
 			Fib2mribNode::incr_shutdown_requests_n();
-#ifdef HAVE_IPV6
 		if (_is_fea_fib_client6_registered)
 			Fib2mribNode::incr_shutdown_requests_n();
-#endif
 		_is_fea_deregistering = true;
 	}
 
@@ -383,10 +377,8 @@ XrlFib2mribNode::rib_register_startup()
 	{
 		if (! _is_rib_igp_table4_registered)
 			Fib2mribNode::incr_startup_requests_n();
-#ifdef HAVE_IPV6
 		if (! _is_rib_igp_table6_registered)
 			Fib2mribNode::incr_startup_requests_n();
-#endif
 		_is_rib_registering = true;
 	}
 
@@ -498,10 +490,8 @@ XrlFib2mribNode::rib_register_shutdown()
 	{
 		if (_is_rib_igp_table4_registered)
 			Fib2mribNode::incr_shutdown_requests_n();
-#ifdef HAVE_IPV6
 		if (_is_rib_igp_table6_registered)
 			Fib2mribNode::incr_shutdown_requests_n();
-#endif
 		_is_rib_deregistering = true;
 	}
 
@@ -618,7 +608,6 @@ XrlFib2mribNode::send_fea_add_fib_client()
 		goto start_timer_label;
 	}
 
-#ifdef HAVE_IPV6
 	//
 	// Test whether the underlying system supports IPv6
 	//
@@ -634,7 +623,6 @@ XrlFib2mribNode::send_fea_add_fib_client()
 				"Will try again.");
 		goto start_timer_label;
 	}
-#endif
 
 	if (_fea_have_ipv4 && ! _is_fea_fib_client4_registered) 
 	{
@@ -651,7 +639,6 @@ XrlFib2mribNode::send_fea_add_fib_client()
 		goto start_timer_label;
 	}
 
-#ifdef HAVE_IPV6
 	if (_fea_have_ipv6 && ! _is_fea_fib_client6_registered) 
 	{
 		success = _xrl_fea_fib_client.send_add_fib_client6(
@@ -666,7 +653,6 @@ XrlFib2mribNode::send_fea_add_fib_client()
 				"Will try again.");
 		goto start_timer_label;
 	}
-#endif
 
 	if (! success) 
 	{
@@ -843,7 +829,6 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 		}
 	}
 
-#ifdef HAVE_IPV6
 	if (_is_fea_fib_client6_registered) 
 	{
 		bool success6;
@@ -858,7 +843,6 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 			success = false;
 		}
 	}
-#endif
 
 	if (! success) 
 	{
@@ -965,7 +949,6 @@ XrlFib2mribNode::send_rib_add_tables()
 		goto start_timer_label;
 	}
 
-#ifdef HAVE_IPV6
 	if (! _is_rib_igp_table6_registered) 
 	{
 		success = _xrl_rib_client.send_add_igp_table6(
@@ -982,7 +965,6 @@ XrlFib2mribNode::send_rib_add_tables()
 				"Will try again.");
 		goto start_timer_label;
 	}
-#endif
 
 	if (! success) 
 	{
@@ -1091,7 +1073,6 @@ XrlFib2mribNode::send_rib_delete_tables()
 		}
 	}
 
-#ifdef HAVE_IPV6
 	if (_is_rib_igp_table6_registered) 
 	{
 		bool success6;
@@ -1110,7 +1091,6 @@ XrlFib2mribNode::send_rib_delete_tables()
 			success = false;
 		}
 	}
-#endif
 
 	if (! success) 
 	{
@@ -1629,13 +1609,11 @@ XrlFib2mribNode::send_rib_route_change()
 		goto start_timer_label;
 	}
 
-#ifdef HAVE_IPV6
 	if (fib2mrib_route.is_ipv6() && (! _is_rib_igp_table6_registered)) 
 	{
 		success = false;
 		goto start_timer_label;
 	}
-#endif
 
 	//
 	// Send the appropriate XRL
@@ -1677,7 +1655,6 @@ XrlFib2mribNode::send_rib_route_change()
 			}
 		}
 
-#ifdef HAVE_IPV6
 		if (fib2mrib_route.is_ipv6()) 
 		{
 			if (fib2mrib_route.is_interface_route()) 
@@ -1712,7 +1689,6 @@ XrlFib2mribNode::send_rib_route_change()
 					return;
 			}
 		}
-#endif
 	}
 
 	if (fib2mrib_route.is_replace_route()) 
@@ -1752,7 +1728,6 @@ XrlFib2mribNode::send_rib_route_change()
 			}
 		}
 
-#ifdef HAVE_IPV6
 		if (fib2mrib_route.is_ipv6()) 
 		{
 			if (fib2mrib_route.is_interface_route()) 
@@ -1787,7 +1762,6 @@ XrlFib2mribNode::send_rib_route_change()
 					return;
 			}
 		}
-#endif
 	}
 
 	if (fib2mrib_route.is_delete_route()) 
@@ -1805,7 +1779,6 @@ XrlFib2mribNode::send_rib_route_change()
 				return;
 		}
 
-#ifdef HAVE_IPV6
 		if (fib2mrib_route.is_ipv6()) 
 		{
 			success = _xrl_rib_client.send_delete_route6(
@@ -1818,7 +1791,6 @@ XrlFib2mribNode::send_rib_route_change()
 			if (success)
 				return;
 		}
-#endif
 	}
 
 	if (! success) 
@@ -1957,7 +1929,6 @@ XrlFib2mribNode::policy_backend_0_1_push_routes()
 
 /** IPv6 stuff */
 
-#ifdef HAVE_IPV6
 
 XrlCmdError
 XrlFib2mribNode::fea_fib_client_0_1_add_route6(
@@ -2411,4 +2382,3 @@ XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
 	}
 }
 
-#endif // ipv6

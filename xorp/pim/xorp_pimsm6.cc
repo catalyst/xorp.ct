@@ -92,7 +92,6 @@ usage(const char *argv0, int exit_value)
 	static void
 pim_main(const string& finder_hostname, uint16_t finder_port) 
 {
-#ifdef HAVE_IPV6
 
 	setup_dflt_sighandlers();
 
@@ -154,7 +153,6 @@ pim_main(const string& finder_hostname, uint16_t finder_port)
 	xrl_pimsm_node6.shutdown();
 	xrl_pimsm_node6.destruct_me();
 
-#endif // HAVE_IPV6
 
 	UNUSED(finder_hostname);
 	UNUSED(finder_port);

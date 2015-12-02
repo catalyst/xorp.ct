@@ -746,9 +746,7 @@ class RIB :
 };
 
 typedef RIB<IPv4> IPv4RIB;
-#ifdef HAVE_IPV6
 typedef RIB<IPv6> IPv6RIB;
-#endif
 
 template<class A>
 class RibVif : public Vif 

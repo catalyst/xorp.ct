@@ -188,7 +188,6 @@ RegisterServer::flush()
 
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 template <>
 	void
@@ -244,4 +243,3 @@ RegisterServer::send_invalidate(const string& module_name,
 }
 
 
-#endif // ipv6

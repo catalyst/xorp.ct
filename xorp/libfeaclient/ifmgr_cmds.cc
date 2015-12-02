@@ -86,7 +86,6 @@ ipv4_str_end()
     return ")";
 }
 
-#ifdef HAVE_IPV6
 /*
  * Makes string starting: IfMgrIPv6XXX("if0", "vif32"
  */
@@ -105,7 +104,6 @@ ipv6_str_end()
 {
     return ")";
 }
-#endif
 
 
 // ----------------------------------------------------------------------------
@@ -1168,7 +1166,6 @@ IfMgrIPv4SetEndpoint::str() const
 	endpoint_addr().str() + ipv4_str_end();
 }
 
-#ifdef HAVE_IPV6
 // ----------------------------------------------------------------------------
 //
 //     I P 6   A D D R E S S   C O N F I G U R A T I O N   C O M M A N D S
@@ -1401,7 +1398,6 @@ IfMgrIPv6SetEndpoint::str() const
     return ipv6_str_begin(this, "SetEndpoint") + ", " +
 	endpoint_addr().str() + ipv6_str_end();
 }
-#endif
 
 
 // ----------------------------------------------------------------------------

@@ -53,15 +53,11 @@ class XrlRibTarget : public XrlRibTargetBase
 	 */
 	XrlRibTarget(XrlRouter* xrl_router,
 		RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
-#ifdef HAVE_IPV6
 		RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
-#endif
 		VifManager& vif_manager, RibManager* rib_manager)
 	    : XrlRibTargetBase(xrl_router),
 	    _urib4(urib4), _mrib4(mrib4),
-#ifdef HAVE_IPV6
 	    _urib6(urib6), _mrib6(mrib6),
-#endif
 	    _vif_manager(vif_manager), _rib_manager(rib_manager) {}
 	/**
 	 * XrlRibTarget destructor
@@ -71,10 +67,8 @@ class XrlRibTarget : public XrlRibTargetBase
     protected:
 	RIB<IPv4>&	_urib4;
 	RIB<IPv4>&	_mrib4;
-#ifdef HAVE_IPV6
 	RIB<IPv6>&	_urib6;
 	RIB<IPv6>&	_mrib6;
-#endif
 	VifManager& _vif_manager;
 	RibManager*	_rib_manager;
 
@@ -668,7 +662,6 @@ class XrlRibTarget : public XrlRibTargetBase
 	 */
 	XrlCmdError rib_0_1_reset_policy_redist_tags();
 
-#ifdef HAVE_IPV6
 
 	XrlCmdError rib_0_1_add_igp_table6(
 		// Input values,
@@ -943,7 +936,6 @@ class XrlRibTarget : public XrlRibTargetBase
 		const IPv6&	addr,
 		const uint32_t&	prefix_len);
 
-#endif //ipv6
 
 #ifndef XORP_DISABLE_PROFILE
 	/**

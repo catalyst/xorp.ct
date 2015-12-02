@@ -875,7 +875,6 @@ class IfMgrIPv4SetEndpoint : public IfMgrIPv4CommandBase
 
 
 
-#ifdef HAVE_IPV6
 
 /**
  * @short Base class for interface IPv6 address data manipulation.
@@ -1079,7 +1078,6 @@ class IfMgrIPv6SetEndpoint : public IfMgrIPv6CommandBase
 	protected:
 		IPv6	_endpoint_addr;
 };
-#endif
 
 
 /**

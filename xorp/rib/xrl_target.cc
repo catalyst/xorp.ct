@@ -147,7 +147,6 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 	}
     }
 
-#ifdef HAVE_IPV6
     if (ipv6) 
     {
 	if (unicast) 
@@ -163,11 +162,6 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 		ipv6_multicast_protocols.append(XrlAtom(*iter));
 	}
     }
-#else
-    UNUSED(ipv6);
-    UNUSED(ipv6_multicast_protocols);
-    UNUSED(ipv6_unicast_protocols);
-#endif
 
     return XrlCmdError::OKAY();
 }
@@ -686,7 +680,6 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
-#ifdef HAVE_IPV6
     if (_urib6.new_vif(name, v) != XORP_OK) 
     {
 	string err = c_format("Failed to add vif \"%s\" to unicast IPv6 rib",
@@ -700,7 +693,6 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 		name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-#endif
 
     return XrlCmdError::OKAY();
 }
@@ -906,7 +898,6 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
-#ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) 
     {
 	// ipv6 unicast
@@ -927,7 +918,6 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
-#endif
     }
 
     return XrlCmdError::OKAY();
@@ -949,14 +939,12 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distance(
     } else if (ipv4 && !unicast) 
     {
 	admin_distance = _mrib4.get_protocol_admin_distance(protocol);
-#ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) 
     {
 	admin_distance = _urib6.get_protocol_admin_distance(protocol);
     } else if (!ipv4 && !unicast) 
     {
 	admin_distance = _mrib6.get_protocol_admin_distance(protocol);
-#endif
     }
 
     return XrlCmdError::OKAY();
@@ -1007,7 +995,6 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
-#ifdef HAVE_IPV6
     if (ipv6 && unicast &&
 	    _urib6.set_protocol_admin_distance(protocol, admin_distance)
 	    != XORP_OK) 
@@ -1027,9 +1014,6 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 		"IPv6", "multicast", protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-#else
-    UNUSED(ipv6);
-#endif
 
     return XrlCmdError::OKAY();
 }
@@ -1238,7 +1222,6 @@ XrlRibTarget::profile_0_1_list(string& info)
 
 
 /** IPv6 stuff */
-#ifdef HAVE_IPV6
 
 
     XrlCmdError
@@ -1816,4 +1799,3 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
     return XrlCmdError::OKAY();
 }
 
-#endif //ipv6

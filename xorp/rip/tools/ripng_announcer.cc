@@ -155,7 +155,6 @@ originate_routes_from_file(const char* 			file,
 	static XorpFd
 init_rip_socket(int if_num)
 {
-#ifdef HAVE_IPV6
 	in6_addr grp_addr;
 	IPv6::RIP2_ROUTERS().copy_out(grp_addr);
 	XorpFd fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521),
@@ -187,12 +186,6 @@ init_rip_socket(int if_num)
 		return fd;
 	}
 	return fd;
-#else
-	cerr << "IPv6 support not found during build." << endl;
-	XorpFd fd;
-	return fd;
-	UNUSED(if_num);
-#endif
 }
 
 	static void
