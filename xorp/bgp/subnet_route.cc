@@ -209,10 +209,6 @@ SubnetRoute<A>::set_in_use(bool used) const
 	_parent_route->set_in_use(used);
     }
 
-#ifdef DEBUG_FLAGS
-    printf("set_in_use: %p = %s", this, bool_c_str(used));
-    printf("\n%s\n", str().c_str());
-#endif
 }
 
 template<class A>
@@ -225,10 +221,6 @@ SubnetRoute<A>::set_nexthop_resolved(bool resolvable) const
 	_parent_route->set_nexthop_resolved(resolvable);
     }
 
-#ifdef DEBUG_FLAGS
-    printf("set_nexthop_resolved: %p = %s", this, bool_c_str(resolvable));
-    printf("\n%s\n", str().c_str());
-#endif
 }
 
 template<class A>
@@ -236,10 +228,6 @@ void
 SubnetRoute<A>::set_filtered(bool filtered) const 
 {
     _metadata.set_filtered(filtered);
-#ifdef DEBUG_FLAGS
-    printf("set_filtered: %p = %s", this, bool_c_str(filtered));
-    printf("\n%s\n", str().c_str());
-#endif
 }
 
 template<class A>
@@ -250,38 +238,6 @@ SubnetRoute<A>::str() const
     s = "SubnetRoute:\n";
     s += "  Net: " + _net.str() + "\n";
     s += "  PAList: " + _attributes->str();
-#ifdef DEBUG_FLAGS
-    s += "\n";
-    s += "  Policytags: " + _policytags.str() + "\n";
-    if (is_winner()) 
-    {
-	s += "  route is winner\n";
-    } else 
-    {
-	s += "  route is not winner\n";
-    }
-    if (is_filtered()) 
-    {
-	s += "  route is filtered";
-    } else 
-    {
-	s += "  route is not filtered";
-    }
-    if (in_use()) 
-    {
-	s += "  route is in use";
-    } else 
-    {
-	s += "  route is not in use";
-    }
-    if (nexthop_resolved()) 
-    {
-	s += "  route's nexthop resolved";
-    } else 
-    {
-	s += "  route's nexthop did not resolve";
-    }
-#endif
     return s;
 }
 

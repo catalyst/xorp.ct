@@ -633,11 +633,6 @@ class Trie
 
 	iterator lower_bound(const Key &k) const 
 	{
-#ifdef NOTDEF
-	    iterator i = lookup_node(k);
-	    if (i != end())
-		return i;
-#endif
 	    return iterator(_root->lower_bound(k));
 	}
 

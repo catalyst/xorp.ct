@@ -28,11 +28,7 @@
 #include "internal_message.hh"
 
 //#define DEBUG_CODEPATH
-#ifdef DEBUG_CODEPATH
-#define cp(x) printf("DumpItCodePath: %2d\n", x)
-#else
 #define cp(x) {}
-#endif
 
 	template <class A>
 PeerDumpState<A>::PeerDumpState(const PeerHandler* peer,
@@ -47,15 +43,6 @@ PeerDumpState<A>::PeerDumpState(const PeerHandler* peer,
 	debug_msg("%s", str().c_str());
 }
 
-#ifdef NOTDEF
-	template <class A>
-PeerDumpState<A>::PeerDumpState(const PeerHandler* peer, uint32_t genid) 
-{
-	_peer = peer;
-	_routes_dumped = false;
-	_genid = genid;
-}
-#endif
 
 template <class A>
 string

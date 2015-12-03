@@ -991,11 +991,6 @@ class RefTrie
 
 	iterator lower_bound(const Key &k) const 
 	{
-#ifdef NOTDEF
-	    iterator i = lookup_node(k);
-	    if (i != end())
-		return i;
-#endif
 	    return iterator(this, _root->lower_bound(k));
 	}
 
