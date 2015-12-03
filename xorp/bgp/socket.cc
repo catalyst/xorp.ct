@@ -19,8 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING 
-// #define DEBUG_PRINT_FUNCTION_NAME 
 
 #include "bgp_module.h"
 
@@ -411,13 +409,8 @@ SocketClient::send_message(const uint8_t* buf,
 
 	if(!is_connected()) 
 	{
-#ifdef	DEBUG_LOGGING
-		XLOG_WARNING("sending message to %s, not connected!!!",
-				get_remote_host());
-#else
 		XLOG_WARNING("sending message to %s, not connected!!!",
 				get_remote_addr().c_str());
-#endif
 		return false;
 	}
 

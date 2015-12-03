@@ -19,8 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rib_module.h"
 
@@ -349,9 +347,6 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 	if (iter == _ipregistry.end()) 
 	{
 		// No existing registry for this subnet
-#ifdef DEBUG_LOGGING
-		print();
-#endif
 		if (route != NULL) 
 		{
 			debug_msg("[REGT] Add registration for net %s "
@@ -390,18 +385,12 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 
 		rr = new RouteRegister<A>(net, route, module);
 		_ipregistry.insert(net, rr);
-#ifdef DEBUG_LOGGING
-		print();
-#endif
 	} else 
 	{
 		rr = *iter;
 		rr->add_registrant(module);
 	}
 	debug_msg("added registration: to %p\n%s", rr, rr->str().c_str());
-#ifdef DEBUG_LOGGING
-	_ipregistry.print();
-#endif
 	debug_msg("\n");
 	return rr;
 }
@@ -446,18 +435,12 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
 	if (rr->size() > 0) 
 	{
 		debug_msg("retaining RouteRegister %p\n", rr);
-#ifdef DEBUG_LOGGING
-		_ipregistry.print();
-#endif
 		return XORP_OK;
 	}
 
 	_ipregistry.erase(net);
 	debug_msg("deleting RouteRegister %p\n", rr);
 	delete rr;
-#ifdef DEBUG_LOGGING
-	_ipregistry.print();
-#endif
 	return XORP_OK;
 }
 
@@ -518,20 +501,6 @@ RegisterTable<A>::str() const
 	return oss.str();
 }
 
-#ifdef DEBUG_LOGGING
-template<class A>
-	inline void
-RegisterTable<A>::print()
-{
-	debug_msg("%s\n", str().c_str());
-	typename Trie<A, RouteRegister<A>* >::iterator iter;
-	for (iter = _ipregistry.begin(); iter != _ipregistry.end(); ++iter) 
-	{
-		debug_msg("----\n");
-		debug_msg("%s\n", (*iter)->str().c_str());
-	}
-}
-#endif
 
 template<class A>
 	void

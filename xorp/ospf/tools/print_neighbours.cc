@@ -22,8 +22,6 @@
 
 // Print information about OSPF neighbours
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf/ospf_module.h"
 

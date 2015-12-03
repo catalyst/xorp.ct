@@ -32,8 +32,6 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_FUNCTION_NAME
 
 #include "olsr.hh"
 #include "external.hh"

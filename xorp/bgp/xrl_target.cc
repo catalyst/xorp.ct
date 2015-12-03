@@ -20,8 +20,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 #define PROFILE_UTILS_REQUIRED
 
 #include "bgp_module.h"

@@ -22,8 +22,6 @@
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf/ospf_module.h"
 

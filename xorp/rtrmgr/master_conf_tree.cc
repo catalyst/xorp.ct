@@ -18,7 +18,6 @@
 // http://xorp.net
 
 
-//#define DEBUG_LOGGING
 
 
 #include "rtrmgr_module.h"

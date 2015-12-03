@@ -124,15 +124,6 @@ class FinderTarget
 
 	bool has_class_watch(const string& class_name) const 
 	{
-#ifdef DEBUG_LOGGING
-	    debug_msg("tgt %s has watches on:\n", _name.c_str());
-	    set<string>::const_iterator wi = _classwatches.begin();
-	    while (wi != _classwatches.end()) 
-	    {
-		debug_msg("-> %s\n", wi->c_str());
-		++wi;
-	    }
-#endif
 	    return _classwatches.find(class_name) != _classwatches.end();
 	}
 
@@ -153,15 +144,6 @@ class FinderTarget
 
 	bool has_instance_watch(const string& instance_name) const 
 	{
-#ifdef DEBUG_LOGGING
-	    debug_msg("tgt %s has watches on:\n", _name.c_str());
-	    set<string>::const_iterator wi = _instancewatches.begin();
-	    while (wi != _instancewatches.end()) 
-	    {
-		debug_msg("-> %s\n", wi->c_str());
-		++wi;
-	    }
-#endif
 	    return _instancewatches.find(instance_name) != _instancewatches.end();
 	}
 

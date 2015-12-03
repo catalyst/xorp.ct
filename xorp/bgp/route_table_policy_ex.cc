@@ -20,8 +20,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "route_table_policy_ex.hh"

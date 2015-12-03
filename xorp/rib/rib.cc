@@ -1369,59 +1369,11 @@ RIB<A>::target_death(const string& target_class,
     }
 }
 
-#ifdef DEBUG_LOGGING
-template <class A>
-struct print_from_pair 
-{
-    print_from_pair(string s = "###"): _separator(s) {}
-    void operator() (const pair<const string, A*>& table_pair) const 
-    {
-	cout << table_pair.second->str() << _separator << endl;
-    }
-    protected:
-    string _separator;
-};
-#endif
 
 template <typename A>
 void
 RIB<A>::print_rib() const
 {
-#ifdef DEBUG_LOGGING
-    cout << "**************************************************************" << endl;
-    cout << "Redist table count " << _redist_tables.size() << endl;
-    for_each(_redist_tables.begin(), _redist_tables.end(),
-	    print_from_pair<RouteTable<A> >());
-
-    cout << "==============================================================" << endl;
-    cout << "IGP table count " << _igp_origin_tables.size() << endl;
-    for_each(_igp_origin_tables.begin(), _igp_origin_tables.end(),
-	    print_from_pair<RouteTable<A> >());
-
-    cout << "==============================================================" << endl;
-    cout << "EGP table count " << _egp_origin_tables.size() << endl;
-    for_each(_egp_origin_tables.begin(), _egp_origin_tables.end(),
-	    print_from_pair<RouteTable<A> >());
-
-    cout << "==============================================================" << endl;
-    if (_policy_connected_table)
-	cout << _policy_connected_table->str() << "###" << endl;
-
-    cout << "==============================================================" << endl;
-    if (_ext_int_table)
-	cout << _ext_int_table->str() << "###" << endl;
-
-    cout << "==============================================================" << endl;
-    if (_policy_redist_table)
-	cout << _policy_redist_table->str() << "###" << endl;
-
-    cout << "==============================================================" << endl;
-    if (_register_table)
-	cout << _register_table->str() << "###" << endl;
-
-    cout << "==============================================================" << endl;
-
-#endif // DEBUG_LOGGING
 }
 
 template <typename A>

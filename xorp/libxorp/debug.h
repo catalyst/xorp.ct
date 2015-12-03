@@ -103,34 +103,6 @@ class EnvTrace
 /*
  * `configure' defines DEBUG_LOGGING_GLOBAL, user may define DEBUG_LOGGING.
  */
-#if defined(DEBUG_LOGGING) || defined(DEBUG_LOGGING_GLOBAL)
-#   if !defined(DEBUG_LOGGING)
-#       define DEBUG_LOGGING
-#   elif !defined(DEBUG_LOGGING_GLOBAL)
-#       define DEBUG_LOGGING_GLOBAL
-#   endif /* DEBUG_LOGGING */
-#   ifdef CPP_SUPPORTS_GNU_VA_ARGS
-#	ifdef DEBUG_PRINT_FUNCTION_NAME
-#	    define debug_msg(args...)					\
-    _xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
-#	else
-#	    define debug_msg(args...)     				\
-    _xdebug_msg_long(__FILE__,__LINE__,0,args)
-#	endif
-#   else
-#	ifdef DEBUG_PRINT_FUNCTION_NAME
-#	    define debug_msg						\
-    _xdebug_entry(__FILE__,__LINE__,__FUNCTION__),		\
-_xdebug_msg_short
-#	else
-#		define debug_msg					\
-    _xdebug_entry(__FILE__,__LINE__,0), _xdebug_msg_short
-#	endif
-#   endif
-#
-#   define debug_msg_indent(n) _xdebug_set_indent(n)
-#
-#else
 #    ifdef __cplusplus
 
 /* This cruft and the ensuing version of debug_msg mean that the debug enabled
@@ -202,7 +174,6 @@ check_args(const char*, ...) {}
 #
 #    define debug_msg_indent(x)
 #
-#endif
 
 #ifdef __cplusplus
 extern "C" 

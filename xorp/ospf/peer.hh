@@ -1508,11 +1508,7 @@ class Neighbour
 	EventLoop::instance().current_time(t);
 	// If we are debugging numbers starting from 0 are easier to
 	// deal with.
-#ifdef	DEBUG_LOGGING
-	_data_description_packet.set_dd_seqno(0);
-#else
 	_data_description_packet.set_dd_seqno(t.sec());
-#endif
 	_creation_time = t;
     }
 

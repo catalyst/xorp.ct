@@ -23,8 +23,6 @@
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"

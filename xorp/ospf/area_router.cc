@@ -20,8 +20,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
@@ -2572,24 +2570,6 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	size_t index;
 	LsaSearch search = compare_lsa(lsah, index);
 
-#ifdef	DEBUG_LOGGING
-	debug_msg("Searching for %s\n", cstring(*(*i)));
-	switch(search) 
-	{
-	    case NOMATCH:
-		debug_msg("No match\n");
-		break;
-	    case NEWER:
-		debug_msg("is newer than \n%s\n", cstring(*_db[index]));
-		break;
-	    case OLDER:
-		debug_msg("is older than \n%s\n", cstring(*_db[index]));
-		break;
-	    case EQUIVALENT:
-		debug_msg("is equivalent to \n%s\n", cstring(*_db[index]));
-		break;
-	}
-#endif
 	// (4) MaxAge
 	if (OspfTypes::MaxAge == lsah.get_ls_age()) 
 	{
@@ -4144,9 +4124,6 @@ template <>
     void 
 AreaRouter<IPv4>::routing_total_recomputeV2()
 {
-#ifdef	DEBUG_LOGGING
-    //testing_print_link_state_database();
-#endif
 
     // RFC 2328 16.1.  Calculating the shortest-path tree for an area
 
@@ -4356,9 +4333,6 @@ template <>
     void 
 AreaRouter<IPv6>::routing_total_recomputeV3()
 {
-#ifdef	DEBUG_LOGGING
-    //testing_print_link_state_database();
-#endif
 
     // RFC 2328 16.1.  Calculating the shortest-path tree for an area
 

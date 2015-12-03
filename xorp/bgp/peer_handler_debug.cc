@@ -19,7 +19,6 @@
 
 
 
-//#define DEBUG_LOGGING
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "peer_handler_debug.hh"

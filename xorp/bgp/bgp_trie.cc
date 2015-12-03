@@ -19,7 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
 
 #include "bgp_module.h"
 #include "bgp_trie.hh"

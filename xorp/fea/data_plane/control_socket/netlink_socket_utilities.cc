@@ -21,7 +21,6 @@
 #ifdef HAVE_NETLINK_SOCKETS
 
 // Uncomment this to have debug_msg() active in this file.
-//#define DEBUG_LOGGING
 
 #include "fea/fea_module.h"
 #include "fea/fibconfig.hh"

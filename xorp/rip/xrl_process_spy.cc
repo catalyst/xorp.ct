@@ -19,7 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
 
 #include "rip_module.h"
 

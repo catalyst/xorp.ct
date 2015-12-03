@@ -19,8 +19,6 @@
 
 
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 

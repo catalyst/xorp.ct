@@ -20,10 +20,6 @@
 
 
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
-
-// #define DEBUG_QUEUE
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"

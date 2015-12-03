@@ -321,9 +321,6 @@ class RegisterTable : public RouteTable<A>
 		 * Print the contents of this RegisterTable as a string for
 		 * debugging purposes.
 		 */
-#ifdef DEBUG_LOGGING
-		void print();
-#endif
 
 		// Stuff specific to a Register Table
 

@@ -19,8 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "route_table_ribout.hh"
 #include "peer_handler.hh"
@@ -56,38 +54,6 @@ template<class A>
 RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) 
 	const 
 {
-#ifdef DEBUG_LOGGING
-	debug_msg("Output Queue:\n");
-	typename list<const RouteQueueEntry<A>*>::const_iterator i;
-	i = queue.begin();
-	while (i != queue.end()) 
-	{
-		string s;
-		switch ((*i)->op()) 
-		{
-			case RTQUEUE_OP_ADD:
-				s = "ADD";
-				break;
-			case RTQUEUE_OP_DELETE:
-				s = "DEL";
-				break;
-			case RTQUEUE_OP_REPLACE_OLD:
-				s = "R_O";
-				break;
-			case RTQUEUE_OP_REPLACE_NEW:
-				s = "R_N";
-				break;
-			case RTQUEUE_OP_PUSH:
-				break;
-		}
-		debug_msg("  Entry: %s (%s)\n", (*i)->net().str().c_str(),
-				s.c_str());
-		++i;
-	}
-	debug_msg("<<<<<< end of queue\n");
-#else
-	UNUSED(queue);
-#endif
 }
 
 template<class A>

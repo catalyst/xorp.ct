@@ -20,7 +20,6 @@
 
 
 
-//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"

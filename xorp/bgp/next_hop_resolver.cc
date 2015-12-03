@@ -19,8 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -629,12 +627,6 @@ NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix_l
 
 	typename RealPrefixEntry::const_iterator si;
 
-#ifdef	DEBUG_LOGGING
-	for (si = rpe.begin(); si != rpe.end(); si++)
-		debug_msg("addr %s prefix_len %d real prefix_len %d\n",
-				(*si)->_address.str().c_str(), (*si)->_prefix_len,
-				(*si)->_real_prefix_len);
-#endif
 
 	for (si = rpe.begin(); si != rpe.end(); si++)
 		if ((*si)->_real_prefix_len == real_prefix_len && (*si)->_address == addr)
@@ -653,12 +645,6 @@ NextHopCache<A>::rpe_to_pe_delete(RealPrefixEntry& rpe, A addr,
 
 	typename RealPrefixEntry::iterator si;
 
-#ifdef	DEBUG_LOGGING
-	for (si = rpe.begin(); si != rpe.end(); si++)
-		debug_msg("addr %s prefix_len %d real prefix_len %d\n",
-				(*si)->_address.str().c_str(), (*si)->_prefix_len,
-				(*si)->_real_prefix_len);
-#endif
 
 	for (si = rpe.begin(); si != rpe.end(); si++)
 		if ((*si)->_real_prefix_len == real_prefix_len && (*si)->_address == addr) 

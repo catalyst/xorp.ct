@@ -20,8 +20,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
@@ -329,18 +327,6 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 	}
     }
 
-#ifdef	DEBUG_LOGGING
-    try 
-    {
-	// Decode the packet in order to pretty print it.
-	Packet *packet = _packet_decoder.decode(data, len);
-	debug_msg("Transmit: %s\n", cstring(*packet));
-	delete packet;
-    } catch(InvalidPacket& e) 
-    {
-	debug_msg("Unable to decode packet\n");
-    }
-#endif
 
     return _io->send(interface, vif, dst, src, ttl, data, len);
 }

@@ -19,7 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"

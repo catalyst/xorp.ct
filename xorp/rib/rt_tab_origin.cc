@@ -86,9 +86,6 @@ OriginTable<A>::delete_route(const IPNet<A>& net, bool b)
 {
 	debug_msg("OT[%s]: Deleting route %s\n", this->tablename().c_str(),
 			net.str().c_str());
-#ifdef DEBUG_LOGGING
-	_ip_route_table->print();
-#endif
 
 	typename RouteTrie::iterator iter;
 	iter = _ip_route_table->lookup_node(net);

@@ -36,9 +36,6 @@
 #include "face_manager.hh"
 #include "face.hh"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_FUNCTION_NAME
-// #define DETAILED_DEBUG
 
     FaceManager::FaceManager(Olsr& olsr)
 : _olsr(olsr),

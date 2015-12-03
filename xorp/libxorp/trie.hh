@@ -28,7 +28,6 @@
 
 // Macros
 //#define VALIDATE_XORP_TRIE
-//#define DEBUG_LOGGING
 
 #include "xlog.h"
 #include "debug.h"
@@ -572,12 +571,6 @@ class Trie
 	    {
 		_payload_count++;
 	    }
-#ifdef DEBUG_LOGGING
-	    else 
-	    {
-		fprintf(stderr, "overwriting a full node"); //XXX
-	    }
-#endif
 	    return iterator(out);
 	}
 
@@ -1000,23 +993,6 @@ template <class A, class Payload>
 void
 TrieNode<A,Payload>::print(int indent, const char *msg) const
 {
-#ifdef DEBUG_LOGGING
-    trie_debug_msg_indent(indent);
-
-    if (this == NULL) 
-    {
-	trie_debug_msg("%sNULL\n", msg);
-	return;
-    }
-    trie_debug_msg("%skey: %s %s\n",
-	    msg, _k.str().c_str(), _p ? "PL" : "[]");
-    trie_debug_msg("    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
-    _left->print(indent+4, "L: ");
-    _right->print(indent+4, "R: ");
-    trie_debug_msg_indent(0);
-#endif /* DEBUG_LOGGING */
-    UNUSED(indent);
-    UNUSED(msg);
 }
 
 template <class A, class Payload>

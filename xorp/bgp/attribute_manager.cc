@@ -19,7 +19,6 @@
 
 
 
-//#define DEBUG_LOGGING
 #include "bgp_module.h"
 #include "attribute_manager.hh"
 

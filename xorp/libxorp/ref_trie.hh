@@ -27,8 +27,6 @@
 #include "ipnet.hh"
 
 // Macros
-//#define VALIDATE_XORP_TRIE
-//#define DEBUG_LOGGING
 
 #include "xlog.h"
 #include "debug.h"
@@ -1371,23 +1369,6 @@ template <class A, class Payload>
 void
 RefTrieNode<A, Payload>::print(int indent, const char *msg) const
 {
-#ifdef DEBUG_LOGGING
-    debug_msg_indent(indent);
-
-    if (this == NULL) 
-    {
-	debug_msg("%sNULL\n", msg);
-	return;
-    }
-    debug_msg("%skey: %s %s\n",
-	    msg, _k.str().c_str(), _p ? "PL" : "[]");
-    debug_msg("    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
-    _left->print(indent+4, "L: ");
-    _right->print(indent+4, "R: ");
-    debug_msg_indent(0);
-#endif /* DEBUG_LOGGING */
-    UNUSED(indent);
-    UNUSED(msg);
 }
 
 template <class A, class Payload>

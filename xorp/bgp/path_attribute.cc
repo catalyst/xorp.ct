@@ -20,8 +20,6 @@
 
 
 
-//#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -45,18 +43,7 @@
 
 template<class A> AttributeManager<A>* PAListRef<A>::_att_mgr = 0;
 
-#ifdef DEBUG_LOGGING
-    inline static void
-dump_bytes(const uint8_t* d, uint8_t l)
-{
-    for (uint16_t i = 0; i < l; i++) 
-    {
-	debug_msg("%3u 0x%02x\n", i, d[i]);
-    }
-}
-#else
 inline static void dump_bytes(const uint8_t*, uint8_t) {}
-#endif /* DEBUG_LOGGING */
 
 /*
  * Flags values crib:
@@ -2309,8 +2296,6 @@ PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
  **** 
  **************************************************************************/ 
 
-//#define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"

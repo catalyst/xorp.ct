@@ -19,8 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 // All routes hold some internal state for example: is this route
 // resolvable? This internal state is required because the state of

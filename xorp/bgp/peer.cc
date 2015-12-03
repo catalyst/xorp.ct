@@ -19,9 +19,6 @@
 
 
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
-// #define SAVE_PACKETS
 #define CHECK_TIME
 
 #include "bgp_module.h"

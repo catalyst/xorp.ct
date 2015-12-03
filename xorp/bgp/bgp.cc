@@ -20,9 +20,6 @@
 
 
 
-// #define DEBUG_MAXIMUM_DELAY
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -767,10 +764,6 @@ BGPMain::interface_address_prefix_len4(const IPv4& address,
     return (true);
 }
 
-#ifdef	DEBUG_MAXIMUM_DELAY
-#ifndef DEBUG_LOGGING
-#error "Must use DEBUG_LOGGING in conjunction with DEBUG_MAXIMUM_DELAY"
-#endif /* DEBUG_LOGGING */
 inline
     bool
 check_callback_duration()
@@ -786,7 +779,6 @@ check_callback_duration()
 
     return true;
 }
-#endif
 
     void
 BGPMain::main_loop()
