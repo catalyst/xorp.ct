@@ -56,11 +56,9 @@ DumpTable<A>::DumpTable(string table_name,
 	_waiting_for_deletion_completion = false;
 	_completed = false;
 	_triggered_event = false;
-#ifdef AUDIT_ENABLE
 	_audit_entries = 0;
 	_first_audit = 0;
 	_last_audit = 0;
-#endif
 }
 
 template<class A>
@@ -86,25 +84,21 @@ DumpTable<A>::add_route(InternalMessage<A> &rtmsg,
 				RTQUEUE_OP_ADD)) 
 	{
 		cp(2);
-#ifdef AUDIT_ENABLE
 		add_audit(c_format("%s::add_route peer:%p/%u net:%s valid",
 					this->tablename().c_str(),
 					rtmsg.origin_peer(),
 					XORP_UINT_CAST(rtmsg.genid()),
 					rtmsg.net().str().c_str()));
-#endif
 		return this->_next_table->add_route(rtmsg,
 				static_cast<BGPRouteTable<A>*>(this));
 	} else 
 	{
 		cp(3);
-#ifdef AUDIT_ENABLE
 		add_audit(c_format("%s::add_route peer:%p/%u net:%s not valid",
 					this->tablename().c_str(),
 					rtmsg.origin_peer(),
 					XORP_UINT_CAST(rtmsg.genid()),
 					rtmsg.net().str().c_str()));
-#endif
 		return ADD_UNUSED;
 	}
 }
@@ -138,7 +132,6 @@ DumpTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 				new_rtmsg.genid(),
 				RTQUEUE_OP_REPLACE_NEW);
 
-#ifdef AUDIT_ENABLE
 	add_audit(c_format("%s::replace_route old_peer:%p/%u new_peer:%p/%u net:%s ov:%d nv:%d",
 				this->tablename().c_str(),
 				old_rtmsg.origin_peer(),
@@ -146,7 +139,6 @@ DumpTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
 				new_rtmsg.origin_peer(),
 				XORP_UINT_CAST(new_rtmsg.genid()),
 				new_rtmsg.net().str().c_str(), old_is_valid, new_is_valid));
-#endif
 
 
 	/* I'm not sure that all these combinations can happen */
@@ -186,13 +178,11 @@ DumpTable<A>::route_dump(InternalMessage<A> &rtmsg,
 
 	debug_msg("Route_dump: %s %s\n", this->tablename().c_str(),
 			rtmsg.net().str().c_str());
-#ifdef AUDIT_ENABLE
 	add_audit(c_format("%s:route_dump peer:%p/%u net:%s valid",
 				this->tablename().c_str(),
 				rtmsg.origin_peer(),
 				XORP_UINT_CAST(rtmsg.genid()),
 				rtmsg.net().str().c_str()));
-#endif
 	/* turn the route_dump into a route_add */
 	_dump_iter.route_dump(rtmsg);
 	_dumped++;
@@ -221,24 +211,20 @@ DumpTable<A>::delete_route(InternalMessage<A> &rtmsg,
 				RTQUEUE_OP_DELETE)) 
 	{
 		cp(10);
-#ifdef AUDIT_ENABLE
 		add_audit(c_format("%s::delete_route peer:%p/%u net:%s valid",
 					this->tablename().c_str(),
 					rtmsg.origin_peer(),
 					XORP_UINT_CAST(rtmsg.genid()),
 					rtmsg.net().str().c_str()));
-#endif
 		return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	} else 
 	{
 		cp(11);
-#ifdef AUDIT_ENABLE
 		add_audit(c_format("%s::delete_route peer:%p/%u net:%s not valid",
 					this->tablename().c_str(),
 					rtmsg.origin_peer(),
 					XORP_UINT_CAST(rtmsg.genid()),
 					rtmsg.net().str().c_str()));
-#endif
 		return 0;
 	}
 }
@@ -615,7 +601,6 @@ DumpTable<A>::unplumb_self()
 	delete this;
 }
 
-#ifdef AUDIT_ENABLE
 template<class A>
 	void 
 DumpTable<A>::add_audit(const string& log_entry) 
@@ -651,7 +636,6 @@ DumpTable<A>::print_and_clear_audit()
 	_first_audit = 0;
 	_last_audit = 0;
 }
-#endif
 
 
 template class DumpTable<IPv4>;
