@@ -54,6 +54,7 @@ template<class A>
 RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) 
 	const 
 {
+	UNUSED( queue );
 }
 
 template<class A>

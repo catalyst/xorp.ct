@@ -42,31 +42,6 @@
 // Enable this macro to enable Xrl callback checker that checks each Xrl
 // callback is dispatched just once.
 //
-// #define USE_XRL_CALLBACK_CHECKER
-
-
-// ----------------------------------------------------------------------------
-// Xrl Tracing central
-
-static class TraceXrl 
-{
-    public:
-	TraceXrl() 
-	{
-	    _do_trace = !(getenv("XRLTRACE") == 0);
-	}
-	bool on() const { return _do_trace; }
-	operator bool() { return _do_trace; }
-
-    protected:
-	bool _do_trace;
-} xrl_trace;
-
-#define trace_xrl(p, x) 						      \
-    do {									      \
-	if (xrl_trace.on()) XLOG_INFO("%s", string(string(p) + (x).str()).c_str());     \
-    } while (0)
-
 
 /**
  * Slow-path dispatch state.  Contains information that needs to be held
@@ -94,8 +69,7 @@ class XrlRouterDispatchState
 //
 // This is scatty and temporary
 //
-    static IPv4
-    finder_host(const char* host)
+    static IPv4 finder_host(const char* host)
 throw (InvalidAddress)
 {
     in_addr ia;
@@ -107,8 +81,7 @@ throw (InvalidAddress)
     return IPv4(ia);
 }
 
-    static string
-mk_instance_name( const char* classname)
+static string mk_instance_name( const char* classname)
 {
     static uint32_t sp = (uint32_t)getpid();
     static uint32_t sa = get_preferred_ipv4_addr().s_addr;
@@ -155,82 +128,9 @@ XrlRouter::initialize(const char* class_name,
 	IPv4	  finder_addr,
 	uint16_t	  finder_port)
 {
-    char* value;
-
-    // Set the finder client address from the environment variable if it is set
-    value = getenv("XORP_FINDER_CLIENT_ADDRESS");
-    if (value != NULL) 
-    {
-	try 
-	{
-	    struct in_addr addr;
-	    IPv4 ipv4(value);
-	    ipv4.copy_out(addr);
-	    if (set_preferred_ipv4_addr(addr) != true) 
-	    {
-		XLOG_ERROR("Failed to change the Finder client address to %s",
-			ipv4.str().c_str());
-	    }
-	} catch (const InvalidString& e) 
-	{
-	    UNUSED(e);
-	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_ADDRESS\": %s",
-		    e.str().c_str());
-	}
-    }
-
-    // Set the finder server address from the environment variable if it is set
-    value = getenv("XORP_FINDER_SERVER_ADDRESS");
-    if (value != NULL) 
-    {
-	try 
-	{
-	    IPv4 ipv4(value);
-	    if (! ipv4.is_unicast()) 
-	    {
-		XLOG_ERROR("Failed to change the Finder server address to %s",
-			ipv4.str().c_str());
-	    } else 
-	    {
-		finder_addr = ipv4;
-	    }
-	} catch (const InvalidString& e) 
-	{
-	    UNUSED(e);
-	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
-		    e.str().c_str());
-	}
-    }
-
-    // Set the finder server port from the environment variable if it is set
-    value = getenv("XORP_FINDER_SERVER_PORT");
-    if (value != NULL) 
-    {
-	int port = atoi(value);
-	if (port <= 0 || port > 65535) 
-	{
-	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_PORT\": %s", value);
-	} else 
-	{
-	    finder_port = port;
-	}
-    }
 
     // Set the finder connect timeout from environment variable if it is set.
     uint32_t timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
-    value = getenv("XORP_FINDER_CONNECT_TIMEOUT_MS");
-    if (value != NULL) 
-    {
-	char *ep = NULL;
-	timeout_ms = strtoul(value, &ep, 10);
-	if ( !(*value != '\0' && *ep == '\0') &&
-		(timeout_ms <= 0 || timeout_ms > 120000)) 
-	{
-	    XLOG_ERROR("Out of bounds \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s (must be 0..120000",
-		    value);
-	    timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
-	}
-    }
 
     _fc = new FinderClient();
 
@@ -249,7 +149,9 @@ XrlRouter::initialize(const char* class_name,
     }
 
     if (_icnt == 0)
+    {
 	XrlPFSenderFactory::startup();
+    }
     _icnt++;
 }
 
@@ -440,7 +342,6 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	const Xrl& x = dbe->xrls().front();
 	x.set_args(xrl);
 
-	trace_xrl("Sending ", x);
 	// NOTE:  using s.get below breaks ref counting, but can't figure out WTF the
 	// callback template magic is to make it work with a ref-ptr.  Either way, it appears
 	// the ptr may not be used anyway (it's not in send_callback, for instance)
@@ -566,58 +467,10 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     return;
 }
 
-#ifdef USE_XRL_CALLBACK_CHECKER
-
-/**
- * @short Class to maonitor Xrl callbacks.
- *
- * At present this class just checks that each XrlCallback is executed
- * just once.
- */
-static class
-XrlCallbackChecker
-{
-    public:
-	typedef XrlRouter::XrlCallback XrlCallback;
-
-    public:
-	XrlCallbackChecker()
-	    : _seqno(0)
-	{}
-
-	void process_callback(const XrlError& e, XrlArgs* a, uint32_t seqno)
-	{
-	    map<uint32_t, XrlCallback>::iterator i = _cbs.find(seqno);
-	    XLOG_ASSERT(i != _cbs.end());
-	    XrlCallback ucb = i->second;
-	    _cbs.erase(i);
-	    if (e != XrlError::OKAY()) 
-	    {
-		fprintf(stderr, "Seqno %u Failed %s\n",
-			seqno, e.str().c_str());
-	    }
-	    ucb->dispatch(e, a);
-	}
-
-	XrlCallback add_callback(const XrlCallback& ucb)
-	{
-	    _cbs[_seqno] = ucb;
-	    return callback(this, &XrlCallbackChecker::process_callback, _seqno++);
-	}
-
-	uint32_t last_seqno() const { return _seqno - 1; }
-
-    protected:
-	map<uint32_t, XrlCallback> _cbs;
-	uint32_t _seqno;
-} cb_checker;
-
-#endif
 
     bool
 XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 {
-    trace_xrl("Resolving xrl:", xrl);
 
     if (_fc->connected() == false) 
     {
@@ -625,14 +478,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 	return false;
     }
 
-#ifdef USE_XRL_CALLBACK_CHECKER
-    // Callback checker wrappers user callback with callback that
-    // performs completion checking operation and then dispatches the
-    // users callback.
-    XrlCallback xcb = cb_checker.add_callback(user_cb);
-#else
     const XrlCallback& xcb = user_cb;
-#endif
 
     //
     // Finder directed Xrl - takes custom path through FinderClient.
