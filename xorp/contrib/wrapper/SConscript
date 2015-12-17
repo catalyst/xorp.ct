@@ -140,8 +140,8 @@ wrapper4srcs = [
 wrapper4 = env.Program(target = 'xorp_wrapper4', source = wrapper4srcs)
 
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], wrapper4))
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], 'xorp_wrapper_launch'))
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], 'xorp_wrapper_shutdown'))
+env.Alias('install', env.InstallScript(env['xorp_moduledir'], 'xorp_wrapper_launch'))
+env.Alias('install', env.InstallScript(env['xorp_moduledir'], 'xorp_wrapper_shutdown'))
 
 
 Default(libwrapper, libwrapperxrl, wrapper4)
